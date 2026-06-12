@@ -1,0 +1,825 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Angels Camp, CA — Legacy Properties</title>
+<link rel="stylesheet" href="legacy.css">
+<link rel="stylesheet" href="town.css">
+<style>
+/* Twain timeline */
+.twain-strip {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 1px;
+  background: rgba(250,246,236,0.10);
+  border: 1px solid rgba(250,246,236,0.10);
+  margin-top: 28px;
+}
+.twain-tile {
+  background: var(--ink);
+  padding: 28px 22px 22px;
+  position: relative;
+}
+.twain-yr {
+  font-family: var(--serif); font-style: italic; font-weight: 300;
+  font-size: 38px; color: var(--brass-bright); line-height: 1;
+  margin-bottom: 14px;
+}
+.twain-h {
+  font-family: var(--serif); font-style: italic; font-weight: 400;
+  font-size: 18px; color: var(--shell); line-height: 1.2;
+  margin-bottom: 10px;
+}
+.twain-b {
+  font-family: var(--sans); font-size: 12.5px; line-height: 1.55;
+  color: rgba(250,246,236,0.6);
+}
+.twain-tile::before {
+  content: ''; position: absolute; top: 28px; right: 22px;
+  width: 8px; height: 8px; border-radius: 50%;
+  background: var(--brass-bright); opacity: 0.55;
+}
+@media (max-width: 900px) {
+  .twain-strip { grid-template-columns: 1fr 1fr; }
+}
+</style>
+</head>
+<body class="paper" data-screen-label="Town · Angels Camp">
+
+<header class="topnav">
+  <div class="topnav-bar1">
+    <span>Boutique luxury real estate · Calaveras · Amador · Tuolumne</span>
+    <span><a href="tel:2095594966">(209) 559-4966</a> · <a href="mailto:SaraSellsCalifornia@gmail.com">SaraSellsCalifornia@gmail.com</a></span>
+  </div>
+  <nav class="topnav-bar2">
+    <div class="topnav-links">
+      <a href="listings.html">Listings</a>
+      <a href="towns.html" class="active">Communities</a>
+      <a href="relocate.html">Relocate</a>
+      <a href="seller.html">Sellers</a>
+    </div>
+    <a href="index.html" class="wordmark">
+      <span class="wordmark-word">Legacy</span>
+      <span class="wordmark-sub">Properties · Angels Camp CA</span>
+    </a>
+    <div class="topnav-links right">
+      <a href="index.html#ledger">The Ledger</a>
+      <a href="dashboard.html">Sign In</a>
+      <a href="platform.html" class="btn btn-ink btn-sm" style="padding:10px 18px;">Find My Match</a>
+    </div>
+  </nav>
+</header>
+
+<div class="town-breadcrumb">
+  <div class="town-breadcrumb-inner">
+    <a href="index.html">Legacy</a>
+    <span class="sep">→</span>
+    <a href="towns.html">Communities</a>
+    <span class="sep">→</span>
+    <span class="cur">Angels Camp</span>
+    <span class="spacer"></span>
+    <span class="mono small">Vol. XXII · Plate V — Gold Country Survey · Legacy hometown</span>
+  </div>
+</div>
+
+<!-- HERO -->
+<section class="town-hero" data-season="spring">
+  <div class="th-frame th-frame-spring" style="background-image:url('https://images.unsplash.com/photo-1448375240586-882707db888b?w=1800&q=85');"></div>
+  <div class="th-frame th-frame-summer" style="background-image:url('https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=1800&q=85');"></div>
+  <div class="th-frame th-frame-fall"   style="background-image:url('https://images.unsplash.com/photo-1507371341162-763b5e419408?w=1800&q=85');"></div>
+  <div class="th-frame th-frame-winter" style="background-image:url('https://images.unsplash.com/photo-1517825738774-7de9363ef735?w=1800&q=85');"></div>
+  <div class="th-veil"></div>
+
+  <div class="th-inner">
+    <div class="th-eyebrow">
+      <span class="tick"></span>
+      <span class="eyebrow">Calaveras County · Elevation 1,378 ft · Established 1848 · Legacy HQ</span>
+    </div>
+    <h1 class="th-title">
+      Angels
+      <span class="it">Camp.</span>
+    </h1>
+    <p class="th-tag">— The town where Mark Twain heard a story about a frog, wrote it down, and changed his life. Also: where Sara has lived for the past eight years</p>
+
+    <div class="th-meta">
+      <div class="th-meta-row"><span class="label-cap">Population</span><span class="num">3,836</span></div>
+      <div class="th-meta-row"><span class="label-cap">Frog Jubilee</span><span class="num">Since 1928</span></div>
+      <div class="th-meta-row"><span class="label-cap">Murphys</span><span class="num">12 min north</span></div>
+      <div class="th-meta-row"><span class="label-cap">San Francisco</span><span class="num">2 hr 25</span></div>
+    </div>
+  </div>
+
+  <div class="th-season">
+    <span class="label-cap" style="color:rgba(250,246,236,0.6);">A year in Angels Camp —</span>
+    <div class="th-season-track" role="tablist">
+      <button class="th-sn th-sn-on" data-s="spring" data-quote="<em>Jubilee weekend.</em> The fairgrounds open, the frogs jump, the town doubles in three days — then quietly returns to itself.">Spring</button>
+      <button class="th-sn" data-s="summer" data-quote="<em>Hot afternoons.</em> The town pool fills by ten. New Melones runs warm by July. Main Street pavement holds heat till midnight.">Summer</button>
+      <button class="th-sn" data-s="fall" data-quote="<em>The hills go golden.</em> The pace eases. Sara hosts an open house on the second Saturday of October. Bring a sweater.">Autumn</button>
+      <button class="th-sn" data-s="winter" data-quote="<em>Mild winters.</em> Light frost on the fairgrounds, the museum gets quiet, the Mine Shaft has the only fire going on Main most nights.">Winter</button>
+    </div>
+    <span class="th-season-quote" id="seasonQuote">
+      <em>Jubilee weekend.</em> The fairgrounds open, the frogs jump, the town doubles in three days — then quietly returns to itself.
+    </span>
+  </div>
+</section>
+
+<!-- JUMP -->
+<nav class="town-jump" id="jumpRail">
+  <div class="town-jump-inner">
+    <a href="#story" class="jump-on">The story</a>
+    <a href="#vitals">Market vitals</a>
+    <a href="#twain">Twain &amp; the frog</a>
+    <a href="#mainst">Main Street</a>
+    <a href="#picks">Sara's picks</a>
+    <a href="#listings">Listings</a>
+    <a href="#letter">A letter</a>
+  </div>
+</nav>
+
+<!-- STORY -->
+<section class="section town-story" id="story" style="background:var(--parchment);">
+  <div class="section-inner">
+    <div class="story-grid">
+      <div class="story-side">
+        <span class="hairline-brass"></span>
+        <span class="eyebrow">Field notes · § I</span>
+        <h2 class="h-section" style="margin-top:14px;">The town that<br><em>launched a literature.</em></h2>
+      </div>
+      <div class="story-body">
+        <p class="lede">In the winter of 1865 an unknown young writer named Samuel Clemens sat down at the Angels Hotel bar and listened to a man named Ben Coon tell a yarn about a man, a frog, and a wager. Two weeks later the story was in a New York paper. Mark Twain was born.</p>
+        <p>The same hotel bar is still there, on the same block, on the same Main Street. The frog is still mythic. And every May, on the third weekend, the Calaveras County Fair &amp; Jumping Frog Jubilee — running since 1928 — fills the fairgrounds with hundreds of frogs and the families that hand-raise them.</p>
+        <p>Angels Camp is also the operating address of Legacy Properties. Sara lives a mile from the fairgrounds. Most of her closings happen within a thirty-minute radius of her front porch.</p>
+      </div>
+    </div>
+
+    <div class="fit-strip">
+      <div class="fit-h"><span class="label-cap">Who Angels Camp is for —</span></div>
+      <div class="fit-cards">
+        <article class="fit-card">
+          <div class="fit-num">01</div>
+          <h4>The value buyer</h4>
+          <p>Most-affordable town in the survey. A real porch, a real yard, a real garage — at a number that looks like a typo to Bay Area eyes.</p>
+        </article>
+        <article class="fit-card">
+          <div class="fit-num">02</div>
+          <h4>The first-time buyer</h4>
+          <p>An hour-and-change from Stockton, two from the Bay. Inventory exists. Move-in dates are real. Offer terms are reasonable.</p>
+        </article>
+        <article class="fit-card">
+          <div class="fit-num">03</div>
+          <h4>The history buyer</h4>
+          <p>A 1900 cottage with the original windows. Walk to the museum, the saloon, the spot where Twain heard the story.</p>
+        </article>
+        <article class="fit-card">
+          <div class="fit-num">04</div>
+          <h4>The full-timer</h4>
+          <p>Hospitals fifteen minutes away in Mark Twain Medical Center. Schools, parks, the lifeguard at the city pool who's been there since 1991.</p>
+        </article>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- VITALS -->
+<section class="section town-vitals" id="vitals" style="background:var(--vellum);">
+  <div class="section-inner">
+    <div class="section-h">
+      <div>
+        <span class="hairline-brass"></span>
+        <span class="eyebrow">Market intelligence · § II</span>
+        <h2 class="h-section" style="margin-top:10px;">The Angels Camp<br>market<em>, at a glance.</em></h2>
+      </div>
+      <p class="lede right">The most-affordable town in the survey and one of the fastest-moving on inventory. Sara's home market.</p>
+    </div>
+
+    <div class="vitals-grid">
+      <div class="vitals-card vitals-card-wide">
+        <div class="vc-head">
+          <span class="label-cap">Median sale price</span>
+          <span class="vc-trend up">+3.7% YoY</span>
+        </div>
+        <div class="vc-num">$415,000</div>
+        <div class="vc-sub">12-month rolling · sourced 12 May 2026</div>
+        <svg class="vc-spark" viewBox="0 0 600 120" preserveAspectRatio="none">
+          <defs>
+            <linearGradient id="vcFillAc" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#C99E5A" stop-opacity="0.30"/>
+              <stop offset="100%" stop-color="#C99E5A" stop-opacity="0"/>
+            </linearGradient>
+          </defs>
+          <g stroke="rgba(27,24,19,0.06)">
+            <line x1="0" y1="30" x2="600" y2="30"/>
+            <line x1="0" y1="60" x2="600" y2="60"/>
+            <line x1="0" y1="90" x2="600" y2="90"/>
+          </g>
+          <path d="M0,84 L50,80 L100,76 L150,72 L200,68 L250,62 L300,58 L350,54 L400,50 L450,44 L500,42 L550,38 L600,34 L600,120 L0,120 Z" fill="url(#vcFillAc)"/>
+          <path d="M0,84 L50,80 L100,76 L150,72 L200,68 L250,62 L300,58 L350,54 L400,50 L450,44 L500,42 L550,38 L600,34" fill="none" stroke="#8C6E3D" stroke-width="2"/>
+          <g fill="#8C6E3D">
+            <circle cx="0" cy="84" r="2.5"/><circle cx="100" cy="76" r="2.5"/><circle cx="200" cy="68" r="2.5"/><circle cx="300" cy="58" r="2.5"/><circle cx="400" cy="50" r="2.5"/><circle cx="500" cy="42" r="2.5"/>
+            <circle cx="600" cy="34" r="3.5" stroke="#1B1813" stroke-width="1.5" fill="#C99E5A"/>
+          </g>
+        </svg>
+        <div class="vc-axis"><span>Jun '25</span><span>Sep</span><span>Dec</span><span>Mar '26</span><span>May '26</span></div>
+      </div>
+
+      <div class="vitals-card">
+        <span class="label-cap">Days on market</span>
+        <div class="vc-num small">24</div>
+        <div class="vc-sub"><span class="chg dn">−3 days</span> vs. last year</div>
+        <div class="dot-rule">
+          <span style="left:0%"></span><span style="left:20%"></span><span style="left:40%; background:var(--brass);"></span><span style="left:60%"></span><span style="left:80%"></span>
+        </div>
+        <div class="vc-axis"><span>fast</span><span></span><span>slow</span></div>
+      </div>
+
+      <div class="vitals-card">
+        <span class="label-cap">Active listings</span>
+        <div class="vc-num small">29</div>
+        <div class="vc-sub"><span class="chg up">+4</span> since last month</div>
+        <div class="bar-rule"><div class="bar-fill" style="width:52%"></div></div>
+        <div class="vc-axis"><span>tight</span><span></span><span>loose</span></div>
+      </div>
+
+      <div class="vitals-card">
+        <span class="label-cap">Sale-to-list ratio</span>
+        <div class="vc-num small">99.8<span class="suffix">%</span></div>
+        <div class="vc-sub"><span class="chg up">+1.2 pts</span> vs. county</div>
+        <div class="dial">
+          <svg viewBox="0 0 100 60">
+            <path d="M10,55 A40,40 0 0,1 90,55" fill="none" stroke="rgba(27,24,19,0.10)" stroke-width="5"/>
+            <path d="M10,55 A40,40 0 0,1 90,55" fill="none" stroke="#8C6E3D" stroke-width="5" stroke-linecap="round"/>
+          </svg>
+        </div>
+      </div>
+
+      <div class="vitals-card">
+        <span class="label-cap">Per sq. ft.</span>
+        <div class="vc-num small">$268</div>
+        <div class="vc-sub"><span class="chg up">+2.4%</span> trailing 12</div>
+        <div class="dot-rule">
+          <span style="left:10%; background:var(--brass);"></span><span style="left:30%"></span><span style="left:50%"></span><span style="left:70%"></span><span style="left:90%"></span>
+        </div>
+      </div>
+
+      <div class="vitals-card">
+        <span class="label-cap">Buyer origin</span>
+        <div class="origin">
+          <div class="origin-row"><span>Bay Area</span><span class="ob"><span style="width:38%"></span></span><span class="op">38%</span></div>
+          <div class="origin-row"><span>Central Valley</span><span class="ob"><span style="width:32%"></span></span><span class="op">32%</span></div>
+          <div class="origin-row"><span>Local upsize</span><span class="ob"><span style="width:18%"></span></span><span class="op">18%</span></div>
+          <div class="origin-row"><span>Out-of-state</span><span class="ob"><span style="width:12%"></span></span><span class="op">12%</span></div>
+        </div>
+      </div>
+
+      <div class="vitals-card vitals-card-meta">
+        <span class="label-cap">Liveability index</span>
+        <div class="live-row"><span>Affordability</span><span class="dots"><i></i><i></i><i></i><i></i><i></i></span></div>
+        <div class="live-row"><span>School rating</span><span class="dots"><i></i><i></i><i></i><i></i><i class="off"></i></span></div>
+        <div class="live-row"><span>Fire risk</span><span class="dots"><i></i><i></i><i></i><i class="off"></i><i class="off"></i></span></div>
+        <div class="live-row"><span>Broadband</span><span class="dots"><i></i><i></i><i></i><i></i><i class="off"></i></span></div>
+        <div class="live-row"><span>Healthcare</span><span class="dots"><i></i><i></i><i></i><i></i><i></i></span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TWAIN — signature feature -->
+<section class="section" id="twain" style="background:var(--ink); color:var(--shell);">
+  <div class="section-inner">
+    <div class="section-h" style="border-bottom-color: rgba(250,246,236,0.1);">
+      <div>
+        <span class="hairline-brass" style="background:var(--brass-bright);"></span>
+        <span class="eyebrow" style="color:var(--brass-bright);">Plate III · A short history of a tall tale</span>
+        <h2 class="h-section" style="color:var(--shell); margin-top:10px;">The frog that<br><em style="color:var(--brass-bright);">made the writer.</em></h2>
+      </div>
+      <p class="lede right" style="color:rgba(250,246,236,0.7);">A hundred and sixty years of one story, lived on six city blocks.</p>
+    </div>
+
+    <div class="twain-strip">
+      <article class="twain-tile">
+        <div class="twain-yr">1865</div>
+        <div class="twain-h">A bar, a yarn, a notebook</div>
+        <div class="twain-b">Samuel Clemens, broke and unknown, hears Ben Coon tell a frog story at the Angels Hotel. He writes it down on the back of a letter.</div>
+      </article>
+      <article class="twain-tile">
+        <div class="twain-yr">1865</div>
+        <div class="twain-h">Published in New York</div>
+        <div class="twain-b">"The Celebrated Jumping Frog of Calaveras County" runs in the New York Saturday Press. Reprinted everywhere within weeks. Twain is on the map.</div>
+      </article>
+      <article class="twain-tile">
+        <div class="twain-yr">1928</div>
+        <div class="twain-h">The Jubilee begins</div>
+        <div class="twain-b">Angels Camp celebrates the paving of Main Street with the first Jumping Frog Jubilee. It is never not held again — even in 1944.</div>
+      </article>
+      <article class="twain-tile">
+        <div class="twain-yr">1986</div>
+        <div class="twain-h">Brass plates on Main</div>
+        <div class="twain-b">The Hall of Fame Frogs project sets bronze frogs into the sidewalk, one per winning frog since 1928. Walk Main Street, count the names.</div>
+      </article>
+      <article class="twain-tile">
+        <div class="twain-yr">2018</div>
+        <div class="twain-h">Sara opens Legacy</div>
+        <div class="twain-b">After eight years working other people's brokerages, Sara opens Legacy Properties one block off Main. The address has not moved since.</div>
+      </article>
+    </div>
+
+    <div class="wine-foot-strip">
+      <div>
+        <span class="label-cap" style="color:var(--brass-bright);">Jubilee math —</span>
+        <span class="wf-stat">96 <em>annual jubilees, missed zero</em></span>
+        <span class="wf-stat">21<em>'5"</em><em>longest jump on record</em></span>
+        <span class="wf-stat">3 <em>days, 35,000 visitors</em></span>
+        <span class="wf-stat">May<em>third weekend, every year</em></span>
+      </div>
+      <a href="#" class="btn btn-brass btn-sm">Plan a Jubilee weekend</a>
+    </div>
+  </div>
+</section>
+
+<!-- MAIN STREET — Angels Camp version -->
+<section class="section" id="mainst" style="background:var(--parchment);">
+  <div class="section-inner">
+    <div class="section-h">
+      <div>
+        <span class="hairline-brass"></span>
+        <span class="eyebrow">Plate IV · A walking diagram</span>
+        <h2 class="h-section" style="margin-top:10px;">Main Street,<br><em>Frogtown.</em></h2>
+      </div>
+      <p class="lede right">Hover any pin. Sara's office is one of them.</p>
+    </div>
+
+    <div class="mainst-filters">
+      <button class="ms-filter ms-on" data-cat="all">All <span class="ct">16</span></button>
+      <button class="ms-filter" data-cat="wine">Eat &amp; drink <span class="ct">6</span></button>
+      <button class="ms-filter" data-cat="eat">Twain trail <span class="ct">4</span></button>
+      <button class="ms-filter" data-cat="stay">Stay <span class="ct">2</span></button>
+      <button class="ms-filter" data-cat="shop">Shop <span class="ct">2</span></button>
+      <button class="ms-filter" data-cat="do">Do <span class="ct">2</span></button>
+    </div>
+
+    <div class="mainst-board">
+      <div class="mainst-map" id="mainstMap">
+        <svg viewBox="0 0 1000 600" preserveAspectRatio="xMidYMid meet">
+          <defs>
+            <pattern id="grainAc" x="0" y="0" width="2" height="2" patternUnits="userSpaceOnUse">
+              <rect width="2" height="2" fill="#EFE7D6"/>
+              <rect width="1" height="1" fill="#E8DFCC" opacity="0.5"/>
+            </pattern>
+          </defs>
+          <rect width="1000" height="600" fill="url(#grainAc)"/>
+
+          <!-- Main Street (Hwy 49) -->
+          <rect x="0" y="220" width="1000" height="56" fill="#E0D5BB"/>
+          <line x1="0" y1="248" x2="1000" y2="248" stroke="#1B1813" stroke-opacity="0.35" stroke-dasharray="14 8"/>
+          <text x="500" y="264" text-anchor="middle" font-family="JetBrains Mono" font-size="11" letter-spacing="6" fill="rgba(27,24,19,0.55)" font-weight="500">— MAIN STREET · HWY 49 —</text>
+
+          <!-- Cross streets -->
+          <rect x="160" y="0"   width="22" height="220" fill="#E0D5BB"/>
+          <rect x="160" y="276" width="22" height="324" fill="#E0D5BB"/>
+          <rect x="420" y="0"   width="22" height="220" fill="#E0D5BB"/>
+          <rect x="420" y="276" width="22" height="324" fill="#E0D5BB"/>
+          <rect x="680" y="0"   width="22" height="220" fill="#E0D5BB"/>
+          <rect x="680" y="276" width="22" height="324" fill="#E0D5BB"/>
+
+          <text x="171" y="14" text-anchor="middle" font-family="JetBrains Mono" font-size="8" fill="rgba(27,24,19,0.45)" letter-spacing="1">FINNEGAN</text>
+          <text x="431" y="14" text-anchor="middle" font-family="JetBrains Mono" font-size="8" fill="rgba(27,24,19,0.45)" letter-spacing="1">RAGGIO</text>
+          <text x="691" y="14" text-anchor="middle" font-family="JetBrains Mono" font-size="8" fill="rgba(27,24,19,0.45)" letter-spacing="1">BIRD'S WAY</text>
+
+          <!-- Frog footprints down Main (the brass plates) -->
+          <g fill="#8C6E3D" opacity="0.55">
+            <circle cx="60" cy="240" r="3"/><circle cx="120" cy="240" r="3"/><circle cx="200" cy="240" r="3"/><circle cx="260" cy="240" r="3"/>
+            <circle cx="340" cy="240" r="3"/><circle cx="460" cy="240" r="3"/><circle cx="520" cy="240" r="3"/><circle cx="600" cy="240" r="3"/>
+            <circle cx="720" cy="240" r="3"/><circle cx="800" cy="240" r="3"/><circle cx="900" cy="240" r="3"/><circle cx="960" cy="240" r="3"/>
+          </g>
+          <text x="500" y="200" text-anchor="middle" font-family="Cormorant Garamond" font-style="italic" font-size="14" fill="rgba(140,110,61,0.7)">— brass frog plates set into the sidewalk —</text>
+
+          <!-- Fairgrounds -->
+          <rect x="660" y="380" width="280" height="160" fill="#D8CFB6" stroke="rgba(27,24,19,0.2)"/>
+          <text x="800" y="445" text-anchor="middle" font-family="Cormorant Garamond" font-style="italic" font-size="22" fill="rgba(27,24,19,0.55)">Calaveras Fairgrounds</text>
+          <text x="800" y="465" text-anchor="middle" font-family="JetBrains Mono" font-size="8" letter-spacing="2" fill="rgba(27,24,19,0.4)">— FROG JUBILEE · MAY —</text>
+
+          <!-- Compass -->
+          <g transform="translate(940,80)" font-family="JetBrains Mono" font-size="9" fill="rgba(27,24,19,0.55)">
+            <circle r="22" fill="none" stroke="rgba(27,24,19,0.25)"/>
+            <path d="M0,-20 L4,0 L0,4 L-4,0 Z" fill="#8C6E3D"/>
+            <text y="-26" text-anchor="middle">N</text>
+          </g>
+          <!-- Scale -->
+          <g transform="translate(40,560)" font-family="JetBrains Mono" font-size="8" fill="rgba(27,24,19,0.55)">
+            <line x1="0" y1="0" x2="100" y2="0" stroke="rgba(27,24,19,0.55)" stroke-width="1.5"/>
+            <line x1="0" y1="-4" x2="0" y2="4" stroke="rgba(27,24,19,0.55)"/>
+            <line x1="50" y1="-4" x2="50" y2="4" stroke="rgba(27,24,19,0.55)"/>
+            <line x1="100" y1="-4" x2="100" y2="4" stroke="rgba(27,24,19,0.55)"/>
+            <text x="0" y="18">0</text><text x="50" y="18">250 ft</text><text x="100" y="18">500 ft</text>
+          </g>
+        </svg>
+
+        <!-- Eat & Drink -->
+        <button class="ms-pin" data-cat="wine" style="left:14%; top:32%;" data-name="Crusco's" data-desc="Italian. Sara's anniversary spot. The veal piccata is the order.">
+          <span class="ms-pin-dot">E</span><span class="ms-pin-tip">Crusco's</span>
+        </button>
+        <button class="ms-pin" data-cat="wine" style="left:24%; top:50%;" data-name="Camps Restaurant" data-desc="Greenhorn Creek clubhouse, ten min south. Sunset golf views.">
+          <span class="ms-pin-dot">E</span><span class="ms-pin-tip">Camps</span>
+        </button>
+        <button class="ms-pin" data-cat="wine" style="left:38%; top:32%;" data-name="Pickle Patch Cafe" data-desc="Breakfast all day. The chilaquiles are local lore.">
+          <span class="ms-pin-dot">E</span><span class="ms-pin-tip">Pickle Patch</span>
+        </button>
+        <button class="ms-pin" data-cat="wine" style="left:50%; top:50%;" data-name="Bistro Espresso" data-desc="The coffee anchor. Pour-over morning, wine bar evening.">
+          <span class="ms-pin-dot">E</span><span class="ms-pin-tip">Bistro Espresso</span>
+        </button>
+        <button class="ms-pin" data-cat="wine" style="left:62%; top:32%;" data-name="The Mine Shaft" data-desc="The local. Burgers, pool table, the firefighters after shift.">
+          <span class="ms-pin-dot">E</span><span class="ms-pin-tip">Mine Shaft</span>
+        </button>
+        <button class="ms-pin" data-cat="wine" style="left:74%; top:50%;" data-name="Native Sons Hall" data-desc="The fraternal hall. Pancake breakfasts, taco Tuesdays.">
+          <span class="ms-pin-dot">E</span><span class="ms-pin-tip">Native Sons</span>
+        </button>
+
+        <!-- Twain trail -->
+        <button class="ms-pin" data-cat="eat" style="left:42%; top:18%;" data-name="Angels Hotel" data-desc="Where Twain heard the frog story in 1865. The bar is the bar.">
+          <span class="ms-pin-dot">T</span><span class="ms-pin-tip">Angels Hotel</span>
+        </button>
+        <button class="ms-pin" data-cat="eat" style="left:54%; top:14%;" data-name="Twain plaque" data-desc="Bronze sidewalk marker. The spot where the bar stool sat.">
+          <span class="ms-pin-dot">T</span><span class="ms-pin-tip">Twain plaque</span>
+        </button>
+        <button class="ms-pin" data-cat="eat" style="left:30%; top:74%;" data-name="Angels Camp Museum" data-desc="Mining gear, Twain ephemera, the frog hall of fame in the back.">
+          <span class="ms-pin-dot">T</span><span class="ms-pin-tip">Museum</span>
+        </button>
+        <button class="ms-pin" data-cat="eat" style="left:80%; top:68%;" data-name="Frog Jump Arena" data-desc="At the fairgrounds. The pad. The famous twenty-one-foot record.">
+          <span class="ms-pin-dot">T</span><span class="ms-pin-tip">Jump Arena</span>
+        </button>
+
+        <!-- Stay -->
+        <button class="ms-pin" data-cat="stay" style="left:18%; top:14%;" data-name="Cooper House Inn" data-desc="Six-room inn, walk to Main. Wisteria porch, the back garden.">
+          <span class="ms-pin-dot">S</span><span class="ms-pin-tip">Cooper House</span>
+        </button>
+        <button class="ms-pin" data-cat="stay" style="left:64%; top:80%;" data-name="Greenhorn Creek resort" data-desc="Townhomes around the golf course. Pool, restaurant, ten min south.">
+          <span class="ms-pin-dot">S</span><span class="ms-pin-tip">Greenhorn Creek</span>
+        </button>
+
+        <!-- Shop -->
+        <button class="ms-pin" data-cat="shop" style="left:48%; top:32%;" data-name="Legacy Properties — Sara's office" data-desc="Yes, this one. Block off Main. Stop in for coffee.">
+          <span class="ms-pin-dot">★</span><span class="ms-pin-tip">Legacy office</span>
+        </button>
+        <button class="ms-pin" data-cat="shop" style="left:36%; top:50%;" data-name="Tin Cup Trading" data-desc="Western boots, hats, the local saddle.">
+          <span class="ms-pin-dot">B</span><span class="ms-pin-tip">Tin Cup</span>
+        </button>
+
+        <!-- Do -->
+        <button class="ms-pin" data-cat="do" style="left:14%; top:74%;" data-name="Utica Park" data-desc="The town park. Playground, picnic tables, July 4 concerts.">
+          <span class="ms-pin-dot">D</span><span class="ms-pin-tip">Utica Park</span>
+        </button>
+        <button class="ms-pin" data-cat="do" style="left:88%; top:74%;" data-name="New Melones Lake" data-desc="Reservoir, 18 min west. Boat ramps, summer wakeboard culture.">
+          <span class="ms-pin-dot">D</span><span class="ms-pin-tip">New Melones</span>
+        </button>
+      </div>
+
+      <aside class="mainst-rail">
+        <div class="ms-rail-head">
+          <span class="label-cap">Detail</span>
+          <span class="mono" id="msCount" style="font-size:10px;color:var(--ink-faint);">16 places</span>
+        </div>
+        <div class="ms-rail-card" id="msRailCard">
+          <span class="ms-rail-tag" id="msTag">Hover the map</span>
+          <h3 class="ms-rail-name" id="msName">A real working town<br>— with a famous <em>frog.</em></h3>
+          <p class="ms-rail-desc" id="msDesc">Look for the gold star — that's the Legacy office, where every Angels Camp transaction starts (and most of them end).</p>
+          <ul class="ms-rail-list" id="msList"></ul>
+        </div>
+      </aside>
+    </div>
+  </div>
+</section>
+
+<!-- PICKS -->
+<section class="section town-picks" id="picks" style="background:var(--vellum);">
+  <div class="section-inner">
+    <div class="section-h">
+      <div>
+        <span class="hairline-brass"></span>
+        <span class="eyebrow">Plate V · The personal list</span>
+        <h2 class="h-section" style="margin-top:10px;">Sara's standing<br><em>recommendations.</em></h2>
+      </div>
+      <p class="lede right">This is Sara's hometown. The list is opinionated.</p>
+    </div>
+
+    <div class="picks-tabs">
+      <button class="pick-tab pick-tab-on" data-tab="eat">Eat <span class="ct">04</span></button>
+      <button class="pick-tab" data-tab="drink">Drink <span class="ct">03</span></button>
+      <button class="pick-tab" data-tab="stay">Stay <span class="ct">02</span></button>
+      <button class="pick-tab" data-tab="do">Do <span class="ct">04</span></button>
+    </div>
+
+    <div class="picks-board">
+      <div class="pick-pane pick-pane-on" data-pane="eat">
+        <article class="pick-row">
+          <span class="pick-num">01</span>
+          <div class="pick-body">
+            <h4>Crusco's</h4>
+            <p>Italian-American, white tablecloths, the dining room where my anniversaries happen. Order the veal piccata.</p>
+            <div class="pick-tags"><span>Date</span><span>$$$</span></div>
+          </div>
+          <div class="pick-cap"><span class="label-cap">When</span><span>Dinner Wed–Sun</span></div>
+        </article>
+        <article class="pick-row">
+          <span class="pick-num">02</span>
+          <div class="pick-body">
+            <h4>Pickle Patch Café</h4>
+            <p>Breakfast all day, the chilaquiles are house lore. Walk-in only. The local Sunday.</p>
+            <div class="pick-tags"><span>Breakfast</span><span>$</span></div>
+          </div>
+          <div class="pick-cap"><span class="label-cap">When</span><span>7–2 Wed–Sun</span></div>
+        </article>
+        <article class="pick-row">
+          <span class="pick-num">03</span>
+          <div class="pick-body">
+            <h4>Camps Restaurant</h4>
+            <p>Best sunset view in town, ten minutes south at Greenhorn Creek. The seared duck breast — every time.</p>
+            <div class="pick-tags"><span>View</span><span>$$$</span></div>
+          </div>
+          <div class="pick-cap"><span class="label-cap">When</span><span>5 pm – close</span></div>
+        </article>
+        <article class="pick-row">
+          <span class="pick-num">04</span>
+          <div class="pick-body">
+            <h4>Bistro Espresso</h4>
+            <p>The morning anchor. Pour-overs, the cinnamon roll, the regulars who'll wave you over to the corner table.</p>
+            <div class="pick-tags"><span>Coffee</span><span>$</span></div>
+          </div>
+          <div class="pick-cap"><span class="label-cap">When</span><span>6:30–3 daily</span></div>
+        </article>
+      </div>
+
+      <div class="pick-pane" data-pane="drink">
+        <article class="pick-row">
+          <span class="pick-num">01</span>
+          <div class="pick-body">
+            <h4>Angels Hotel bar</h4>
+            <p>1851. Twain sat here. The bar has been continuously open. Order a Manhattan, sit at the wood, look around.</p>
+            <div class="pick-tags"><span>History</span><span>$$</span></div>
+          </div>
+          <div class="pick-cap"><span class="label-cap">When</span><span>3 pm – close</span></div>
+        </article>
+        <article class="pick-row">
+          <span class="pick-num">02</span>
+          <div class="pick-body">
+            <h4>The Mine Shaft</h4>
+            <p>The proper local. Burgers, pool table, the volunteer firefighters after a shift. The town's living room.</p>
+            <div class="pick-tags"><span>Local</span><span>$$</span></div>
+          </div>
+          <div class="pick-cap"><span class="label-cap">When</span><span>11 am – close</span></div>
+        </article>
+        <article class="pick-row">
+          <span class="pick-num">03</span>
+          <div class="pick-body">
+            <h4>Camps bar at sunset</h4>
+            <p>If you've got one drink in Angels Camp, drink it here, with the eighteenth hole in front of you and the foothills behind it.</p>
+            <div class="pick-tags"><span>View</span><span>$$</span></div>
+          </div>
+          <div class="pick-cap"><span class="label-cap">When</span><span>4 pm – close</span></div>
+        </article>
+      </div>
+
+      <div class="pick-pane" data-pane="stay">
+        <article class="pick-row">
+          <span class="pick-num">01</span>
+          <div class="pick-body">
+            <h4>Cooper House Inn</h4>
+            <p>Six rooms, walk to Main. Wisteria porch, the back garden, the breakfast my mother-in-law still talks about.</p>
+            <div class="pick-tags"><span>B&B</span><span>$$$</span></div>
+          </div>
+          <div class="pick-cap"><span class="label-cap">From</span><span>$215 / nt</span></div>
+        </article>
+        <article class="pick-row">
+          <span class="pick-num">02</span>
+          <div class="pick-body">
+            <h4>Greenhorn Creek Resort</h4>
+            <p>Townhomes around the golf course, ten minutes south. The dependable group-trip option.</p>
+            <div class="pick-tags"><span>Resort</span><span>$$$</span></div>
+          </div>
+          <div class="pick-cap"><span class="label-cap">From</span><span>$285 / nt</span></div>
+        </article>
+      </div>
+
+      <div class="pick-pane" data-pane="do">
+        <article class="pick-row">
+          <span class="pick-num">01</span>
+          <div class="pick-body">
+            <h4>Calaveras Fair &amp; Frog Jubilee</h4>
+            <p>Third weekend in May. Bring kids, bring strangers, bring a folding chair. Sara hosts a porch party every year — ask.</p>
+            <div class="pick-tags"><span>Festival</span><span>May</span></div>
+          </div>
+          <div class="pick-cap"><span class="label-cap">When</span><span>May, 3rd wknd</span></div>
+        </article>
+        <article class="pick-row">
+          <span class="pick-num">02</span>
+          <div class="pick-body">
+            <h4>Angels Camp Museum</h4>
+            <p>Mining gear, period photos, and the original frog hall of fame. Free hour you didn't know you needed.</p>
+            <div class="pick-tags"><span>History</span><span>In town</span></div>
+          </div>
+          <div class="pick-cap"><span class="label-cap">When</span><span>10–4 daily</span></div>
+        </article>
+        <article class="pick-row">
+          <span class="pick-num">03</span>
+          <div class="pick-body">
+            <h4>New Melones Lake</h4>
+            <p>Eighteen minutes west. Wakeboarding, swimming, summer houseboats. A different California from up here.</p>
+            <div class="pick-tags"><span>Lake</span><span>18 min</span></div>
+          </div>
+          <div class="pick-cap"><span class="label-cap">When</span><span>May–Oct</span></div>
+        </article>
+        <article class="pick-row">
+          <span class="pick-num">04</span>
+          <div class="pick-body">
+            <h4>The frog trail on Main</h4>
+            <p>Walk Main from Finnegan to Bird's Way. Count the brass plates in the sidewalk. Eighty-seven champion frogs. Promise.</p>
+            <div class="pick-tags"><span>Free</span><span>Anytime</span></div>
+          </div>
+          <div class="pick-cap"><span class="label-cap">When</span><span>Daylight</span></div>
+        </article>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- LISTINGS -->
+<section class="section" id="listings" style="background:var(--parchment);">
+  <div class="section-inner">
+    <div class="section-h">
+      <div>
+        <span class="hairline-brass"></span>
+        <span class="eyebrow">Plate VI · Currently in the field</span>
+        <h2 class="h-section" style="margin-top:10px;">Homes for sale<br><em>in Angels Camp.</em></h2>
+      </div>
+      <p class="lede right">Three on the boards this morning. Sara walks these herself.</p>
+    </div>
+
+    <div class="list-grid">
+      <a href="listing.html" class="prop-card">
+        <div class="prop-photo">
+          <img src="https://images.unsplash.com/photo-1568605114967-8130f3a36994?w=800&q=85" alt="">
+          <div class="prop-tags"><span class="pill-status pill-new">Just listed</span></div>
+        </div>
+        <div class="prop-body">
+          <div class="prop-price">$399,000</div>
+          <div class="prop-address">2733 Emco Road<br>Mokelumne Hill, CA 95245</div>
+          <div class="prop-specs"><span>3 Bd</span><span>2 Ba</span><span>Single family</span></div>
+          <div class="prop-foot"><span class="prop-match">Listed by Sara</span><span class="label-cap" style="color:var(--ink-faint);">Plate I</span></div>
+        </div>
+      </a>
+      <a href="listing.html" class="prop-card">
+        <div class="prop-photo">
+          <img src="https://images.unsplash.com/photo-1600585154526-990dced4db0d?w=800&q=85" alt="">
+          <div class="prop-tags"><span class="pill-status pill-brass">Active</span></div>
+        </div>
+        <div class="prop-body">
+          <div class="prop-price">$529,000</div>
+          <div class="prop-address">214 Greenhorn Creek Way<br>Angels Camp, CA 95222</div>
+          <div class="prop-specs"><span>4 Bd</span><span>3 Ba</span><span>Golf community</span></div>
+          <div class="prop-foot"><span class="prop-match">Listed by Sara</span><span class="label-cap" style="color:var(--ink-faint);">Plate II</span></div>
+        </div>
+      </a>
+      <a href="listing.html" class="prop-card">
+        <div class="prop-photo">
+          <img src="https://images.unsplash.com/photo-1502082553048-f009c37129b9?w=800&q=85" alt="">
+          <div class="prop-tags"><span class="pill-status pill-warm">Land</span></div>
+        </div>
+        <div class="prop-body">
+          <div class="prop-price">$33,000</div>
+          <div class="prop-address">1350 Love Street<br>Angels Camp, CA 95222</div>
+          <div class="prop-specs"><span>Land</span><span>0.4 ac</span><span>In-town</span></div>
+          <div class="prop-foot"><span class="prop-match">Listed by Sara</span><span class="label-cap" style="color:var(--ink-faint);">Plate III</span></div>
+        </div>
+      </a>
+    </div>
+
+    <div style="text-align:center; margin-top:40px;">
+      <a href="listings.html" class="btn btn-ghost">See all Angels Camp listings</a>
+    </div>
+  </div>
+</section>
+
+<!-- LETTER -->
+<section class="section town-letter" id="letter" style="background:var(--vellum);">
+  <div class="section-inner">
+    <article class="letter-card">
+      <div class="letter-head">
+        <span class="hairline-brass"></span>
+        <span class="eyebrow">A note from your agent · § VII</span>
+      </div>
+      <div class="letter-grid">
+        <div class="letter-photo">
+          <img src="art/sara-headshot.png" alt="Sara Cooper">
+          <div class="letter-stamp">
+            <span class="ls-cir">SC</span>
+            <span class="ls-lbl">Sara Cooper · Owner-Broker · Lives here</span>
+          </div>
+        </div>
+        <div class="letter-body">
+          <p class="letter-open">A few words on Angels Camp —</p>
+          <p>I live here. My office is on Main Street, my mailbox is a mile from the fairgrounds, and my husband and I have rebuilt two homes within the city limits in the last eight years.</p>
+          <p>Angels Camp is the most-affordable town in the survey — by a margin that surprises Bay Area buyers when they first see the numbers. The trade-off is honest: it's a working town, not a tasting-room town. Murphys is twelve minutes north when you want that. Sonora is twenty-two minutes south when you need a hospital. Both are close enough to count as amenities.</p>
+          <p>If you're looking for the best dollar-per-square-foot in three counties, with a real Main Street, a real fair, and a real history — Angels Camp is the conversation. Come see me when you're in town. The office has coffee and Sara is usually there before nine.</p>
+          <p class="letter-sign">— Sara</p>
+        </div>
+      </div>
+      <div class="letter-contact">
+        <a href="tel:2095594966"><span class="glyph">◇</span> (209) 559-4966</a>
+        <a href="mailto:SaraSellsCalifornia@gmail.com"><span class="glyph">◇</span> SaraSellsCalifornia@gmail.com</a>
+        <a href="platform.html"><span class="glyph">◇</span> Coffee at the office</a>
+      </div>
+    </article>
+  </div>
+</section>
+
+<!-- NEARBY -->
+<section class="section" style="background:var(--parchment);">
+  <div class="section-inner">
+    <div class="section-h">
+      <div>
+        <span class="hairline-brass"></span>
+        <span class="eyebrow">Plate VIII · Adjacent</span>
+        <h2 class="h-section" style="margin-top:10px;">Towns nearby.</h2>
+      </div>
+      <p class="lede right">Five more characters in the same story.</p>
+    </div>
+
+    <div class="nearby-grid">
+      <a href="town-murphys.html" class="nearby-card">
+        <div class="nb-img" style="background-image:url('https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=600&q=80');"></div>
+        <div class="nb-body"><span class="nb-dist">12 min north</span><h4>Murphys</h4><p>Wine country, Main Street.</p></div>
+      </a>
+      <a href="town-arnold.html" class="nearby-card">
+        <div class="nb-img" style="background-image:url('https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=600&q=80');"></div>
+        <div class="nb-body"><span class="nb-dist">32 min northeast</span><h4>Arnold</h4><p>Pines &amp; cabins.</p></div>
+      </a>
+      <a href="town-copperopolis.html" class="nearby-card">
+        <div class="nb-img" style="background-image:url('https://images.unsplash.com/photo-1500534314209-a25ddb2bd429?w=600&q=80');"></div>
+        <div class="nb-body"><span class="nb-dist">14 min southwest</span><h4>Copperopolis</h4><p>Lake estates, golf.</p></div>
+      </a>
+      <a href="river-mountain.html" class="nearby-card">
+        <div class="nb-img" style="background-image:url('https://images.unsplash.com/photo-1483728642387-6c3bdd6c93e5?w=600&q=80');"></div>
+        <div class="nb-body"><span class="nb-dist">22 min south</span><h4>River &amp; Mountain</h4><p>Rural parcels &amp; lifestyle.</p></div>
+      </a>
+      <a href="town-sutter-creek.html" class="nearby-card">
+        <div class="nb-img" style="background-image:url('https://images.unsplash.com/photo-1475924156734-496f6cac6ec1?w=600&q=80');"></div>
+        <div class="nb-body"><span class="nb-dist">28 min northwest</span><h4>Sutter Creek</h4><p>Antiques, Amador wine.</p></div>
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="cta">
+  <span class="hairline-brass" style="margin: 0 auto 20px; background: var(--brass-bright);"></span>
+  <span class="eyebrow" style="color: var(--brass-bright);">Begin your Angels Camp chapter</span>
+  <h2 class="cta-h">Coffee on Main<br><em>with Sara.</em></h2>
+  <p class="cta-sub">A walk through Frogtown. Honest counsel from someone who lives a mile from the fairgrounds.</p>
+  <div class="cta-ctas">
+    <a href="platform.html" class="btn btn-ink">Find my Angels Camp match</a>
+    <a href="tel:2095594966" class="btn btn-ghost">Call (209) 559-4966</a>
+  </div>
+</section>
+
+<footer class="footer">
+  <div class="footer-inner">
+    <div class="footer-top">
+      <div>
+        <a href="index.html" class="wordmark" style="align-items: flex-start;">
+          <span class="wordmark-word">Legacy</span>
+          <span class="wordmark-sub">Properties · Angels Camp CA</span>
+        </a>
+        <p class="footer-tagline">Every home has a story. We help you find yours — or tell the one you've already lived.</p>
+      </div>
+      <div>
+        <h4>Communities</h4>
+        <a href="town-murphys.html">Murphys</a>
+        <a href="town-arnold.html">Arnold</a>
+        <a href="town-sutter-creek.html">Sutter Creek</a>
+        <a href="river-mountain.html">River &amp; Mountain</a>
+        <a href="town-angels-camp.html">Angels Camp</a>
+        <a href="town-copperopolis.html">Copperopolis</a>
+      </div>
+      <div>
+        <h4>Buy &amp; sell</h4>
+        <a href="listings.html">Search all listings</a>
+        <a href="seller.html">What's my home worth?</a>
+        <a href="platform.html">Request a tour</a>
+      </div>
+      <div>
+        <h4>Connect</h4>
+        <a href="tel:2095594966">(209) 559-4966</a>
+        <a href="mailto:SaraSellsCalifornia@gmail.com">SaraSellsCalifornia@gmail.com</a>
+        <a href="index.html#ledger">The Ledger</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <div>© 2026 Legacy Properties · All rights reserved</div>
+      <div>Sara Cooper, Broker · DRE #0214187 · Equal Housing Opportunity</div>
+    </div>
+  </div>
+</footer>
+
+<script src="town.js"></script>
+</body>
+</html>

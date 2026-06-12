@@ -1,0 +1,1132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bay Area to Foothills · Relocation — Legacy Properties</title>
+<link rel="stylesheet" href="legacy.css">
+<style>
+/* ============================================================
+   RELOCATE PAGE — concierge dual-transaction service
+   ============================================================ */
+
+/* ── Breadcrumb ── */
+.r-crumb {
+  background: var(--parchment); border-bottom: 1px solid var(--rule);
+}
+.r-crumb-inner {
+  max-width: var(--max); margin: 0 auto;
+  padding: 14px var(--gutter);
+  display: flex; align-items: center; gap: 12px;
+  font-family: var(--mono); font-size: 10px; letter-spacing: 0.14em;
+  text-transform: uppercase; color: var(--ink-mute);
+}
+.r-crumb-inner a { color: var(--ink-mute); text-decoration: none; transition: color .15s; }
+.r-crumb-inner a:hover { color: var(--brass); }
+.r-crumb-inner .sep { color: var(--ink-faint); }
+.r-crumb-inner .cur { color: var(--ink); }
+.r-crumb-inner .spacer { flex: 1; }
+.r-crumb-inner .small { font-size: 9.5px; color: var(--ink-faint); }
+
+/* ── Hero ── */
+.r-hero {
+  position: relative; background: var(--parchment);
+  padding: 100px var(--gutter) 80px;
+  border-bottom: 1px solid var(--rule);
+  overflow: hidden;
+}
+.r-hero-inner {
+  max-width: var(--max); margin: 0 auto;
+  display: grid; grid-template-columns: 1.3fr 1fr; gap: 80px;
+  align-items: center;
+  position: relative; z-index: 2;
+}
+.r-hero h1 {
+  font-family: var(--serif); font-style: italic; font-weight: 300;
+  font-size: clamp(64px, 8vw, 124px); line-height: 0.92;
+  color: var(--ink); margin: 18px 0 24px;
+  letter-spacing: -0.015em;
+}
+.r-hero h1 em { color: var(--brass); }
+.r-hero p.lede {
+  font-family: var(--serif); font-style: italic; font-weight: 300;
+  font-size: 22px; line-height: 1.45; color: var(--ink-soft);
+  max-width: 540px; margin-bottom: 32px;
+}
+.r-hero-ctas { display: flex; gap: 14px; flex-wrap: wrap; }
+
+/* The from→to plate */
+.from-to {
+  background: var(--shell); border: 1px solid var(--rule);
+  padding: 0;
+  position: relative;
+}
+.from-to::before {
+  content: ''; position: absolute; inset: 12px;
+  border: 1px solid var(--rule-soft); pointer-events: none;
+}
+.ft-stamp {
+  position: absolute; top: -18px; right: -18px; z-index: 2;
+  width: 72px; height: 72px;
+  border: 1.5px solid var(--brass);
+  border-radius: 50%;
+  background: var(--parchment);
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  font-family: var(--mono); font-size: 8px; letter-spacing: 0.18em;
+  text-transform: uppercase; color: var(--brass);
+  transform: rotate(-8deg);
+}
+.ft-stamp strong {
+  font-family: var(--serif); font-style: italic; font-weight: 400;
+  font-size: 22px; color: var(--ink); letter-spacing: 0;
+  text-transform: none; margin: 4px 0;
+}
+.ft-row {
+  padding: 28px 36px;
+  display: flex; flex-direction: column; gap: 4px;
+  border-bottom: 1px solid var(--rule-soft);
+}
+.ft-row:last-child { border-bottom: none; }
+.ft-label {
+  font-family: var(--mono); font-size: 9.5px; letter-spacing: 0.20em;
+  text-transform: uppercase; color: var(--ink-mute);
+}
+.ft-place {
+  font-family: var(--serif); font-style: italic; font-weight: 400;
+  font-size: 36px; line-height: 1; color: var(--ink);
+}
+.ft-sub {
+  font-size: 12px; color: var(--ink-soft); margin-top: 4px;
+}
+.ft-arrow {
+  display: flex; align-items: center; justify-content: center;
+  padding: 14px 0; background: var(--linen);
+  font-family: var(--mono); font-size: 10px; letter-spacing: 0.20em;
+  text-transform: uppercase; color: var(--brass);
+  border-top: 1px solid var(--rule-soft); border-bottom: 1px solid var(--rule-soft);
+  gap: 14px;
+}
+.ft-arrow .bar { display: block; width: 36px; height: 1px; background: var(--brass); }
+
+/* ── Pitch strip ── */
+.r-pitch {
+  background: var(--ink); color: var(--shell);
+  padding: 80px var(--gutter);
+  border-bottom: 1px solid var(--rule);
+}
+.r-pitch-inner {
+  max-width: var(--max); margin: 0 auto;
+  display: grid; grid-template-columns: 1fr 1.5fr; gap: 80px;
+  align-items: center;
+}
+.r-pitch h2 {
+  font-family: var(--serif); font-style: italic; font-weight: 300;
+  font-size: clamp(36px, 4vw, 56px); line-height: 1.05;
+  color: var(--shell); letter-spacing: -0.005em;
+}
+.r-pitch h2 em { color: var(--brass-bright); }
+.r-pitch .ed {
+  font-family: var(--mono); font-size: 10px; letter-spacing: 0.22em;
+  text-transform: uppercase; color: var(--brass-bright);
+  margin-bottom: 16px; display: block;
+}
+.r-pitch-points {
+  display: grid; grid-template-columns: 1fr; gap: 14px;
+}
+.r-pp {
+  display: grid; grid-template-columns: 56px 1fr;
+  gap: 22px; padding: 20px 0;
+  border-top: 1px solid rgba(250,246,236,0.10);
+}
+.r-pp:last-child { border-bottom: 1px solid rgba(250,246,236,0.10); }
+.r-pp-num {
+  font-family: var(--serif); font-style: italic; font-weight: 300;
+  font-size: 36px; color: var(--brass-bright); line-height: 1;
+}
+.r-pp h4 {
+  font-family: var(--serif); font-style: italic; font-weight: 400;
+  font-size: 22px; color: var(--shell); margin-bottom: 6px;
+}
+.r-pp p { font-size: 13.5px; line-height: 1.7; color: rgba(250,246,236,0.6); }
+
+/* ── Coordination calendar — the centerpiece ── */
+.calendar {
+  background: var(--vellum);
+  padding: 100px var(--gutter);
+  border-bottom: 1px solid var(--rule);
+}
+.cal-inner { max-width: var(--max); margin: 0 auto; }
+.cal-h {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 60px;
+  align-items: end; margin-bottom: 36px;
+  padding-bottom: 22px; border-bottom: 1px solid var(--rule);
+}
+.cal-h h2 {
+  font-family: var(--serif); font-style: italic; font-weight: 300;
+  font-size: clamp(36px, 4vw, 56px); line-height: 1.02;
+  color: var(--ink); letter-spacing: -0.005em;
+}
+.cal-h h2 em { color: var(--brass); }
+.cal-h .right {
+  font-family: var(--serif); font-style: italic; font-weight: 300;
+  font-size: 20px; line-height: 1.4; color: var(--ink-soft);
+}
+
+/* Scenario tabs */
+.scen-tabs {
+  display: flex; gap: 0;
+  border: 1px solid var(--rule);
+  background: var(--shell);
+  margin-bottom: 32px;
+  max-width: max-content;
+}
+.scen-tab {
+  padding: 16px 32px;
+  font-family: var(--mono); font-size: 10.5px; letter-spacing: 0.18em;
+  text-transform: uppercase;
+  background: none; border: none;
+  border-right: 1px solid var(--rule);
+  color: var(--ink-mute);
+  cursor: pointer; transition: all .15s;
+  display: inline-flex; align-items: center; gap: 12px;
+}
+.scen-tab:last-child { border-right: none; }
+.scen-tab .num {
+  font-family: var(--serif); font-style: italic; font-weight: 400;
+  font-size: 22px; line-height: 1;
+  letter-spacing: 0;
+  color: var(--ink-faint);
+}
+.scen-tab:hover { color: var(--ink); }
+.scen-tab.on { background: var(--ink); color: var(--shell); }
+.scen-tab.on .num { color: var(--brass-bright); }
+
+.scen-pane { display: none; }
+.scen-pane.on { display: block; }
+
+/* Gantt diagram */
+.gantt {
+  background: var(--shell); border: 1px solid var(--rule);
+  padding: 36px 40px 28px;
+  position: relative;
+}
+.gantt-axis {
+  display: grid;
+  grid-template-columns: 220px repeat(6, 1fr);
+  gap: 0;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--rule);
+  margin-bottom: 14px;
+}
+.gantt-axis-lbl { font-family: var(--mono); font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--ink-mute); }
+.gantt-axis-day {
+  font-family: var(--mono); font-size: 10px; letter-spacing: 0.12em;
+  color: var(--ink-mute);
+  text-align: left;
+  padding-left: 2px;
+  position: relative;
+}
+.gantt-axis-day::before {
+  content: ''; position: absolute;
+  left: 0; bottom: -10px; width: 1px; height: 8px;
+  background: var(--rule-strong);
+}
+
+.gantt-track {
+  display: grid;
+  grid-template-columns: 220px 1fr;
+  gap: 0;
+  padding: 18px 0;
+  border-bottom: 1px solid var(--rule-soft);
+  position: relative;
+}
+.gantt-track:last-of-type { border-bottom: none; }
+
+.gt-label {
+  display: flex; flex-direction: column; gap: 4px;
+  padding-right: 24px;
+}
+.gt-label strong {
+  font-family: var(--serif); font-style: italic; font-weight: 400;
+  font-size: 22px; color: var(--ink);
+}
+.gt-label-sub {
+  font-family: var(--mono); font-size: 10px; letter-spacing: 0.12em;
+  color: var(--ink-mute); text-transform: uppercase;
+}
+
+.gt-rail {
+  position: relative;
+  height: 56px;
+  background:
+    repeating-linear-gradient(to right,
+      transparent 0,
+      transparent calc(16.66% - 1px),
+      var(--rule-soft) calc(16.66% - 1px),
+      var(--rule-soft) 16.66%);
+}
+.gt-bar {
+  position: absolute; top: 50%; transform: translateY(-50%);
+  height: 28px;
+  background: var(--linen);
+  border: 1px solid var(--rule);
+  display: flex; align-items: center; padding: 0 14px;
+  font-family: var(--mono); font-size: 10px; letter-spacing: 0.12em;
+  color: var(--ink-soft); text-transform: uppercase;
+  transition: all .4s ease;
+}
+.gt-bar.bay { background: var(--shell); border-color: rgba(94,120,134,0.45); color: #4c6573; }
+.gt-bar.foot { background: var(--linen); border-color: rgba(140,110,61,0.45); color: #6e5732; }
+.gt-bar.bridge {
+  background: var(--brass); border-color: var(--brass);
+  color: var(--shell); font-weight: 600;
+}
+
+.gt-milestone {
+  position: absolute;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 12px; height: 12px; border-radius: 50%;
+  background: var(--ink);
+  border: 2px solid var(--shell);
+  box-shadow: 0 0 0 1px var(--ink);
+  z-index: 2;
+}
+.gt-milestone.brass { background: var(--brass); box-shadow: 0 0 0 1px var(--brass); }
+.gt-milestone-lbl {
+  position: absolute;
+  top: -22px;
+  transform: translateX(-50%);
+  font-family: var(--mono); font-size: 9px; letter-spacing: 0.12em;
+  text-transform: uppercase; color: var(--ink);
+  white-space: nowrap;
+}
+
+/* Scenario summary cards */
+.scen-summary {
+  display: grid; grid-template-columns: repeat(3, 1fr);
+  gap: 14px; margin-top: 24px;
+}
+.ss-card {
+  background: var(--shell); border: 1px solid var(--rule);
+  padding: 22px 24px;
+  display: flex; flex-direction: column; gap: 10px;
+}
+.ss-h {
+  font-family: var(--mono); font-size: 9.5px; letter-spacing: 0.16em;
+  text-transform: uppercase; color: var(--brass);
+}
+.ss-v {
+  font-family: var(--serif); font-style: italic; font-weight: 400;
+  font-size: 22px; color: var(--ink); line-height: 1.2;
+}
+.ss-d {
+  font-size: 13px; line-height: 1.6; color: var(--ink-soft);
+}
+
+/* ── Three-step ── */
+.steps {
+  padding: 100px var(--gutter); background: var(--parchment);
+}
+.steps-inner { max-width: var(--max); margin: 0 auto; }
+.steps-h { margin-bottom: 48px; }
+.steps-h h2 {
+  font-family: var(--serif); font-style: italic; font-weight: 300;
+  font-size: clamp(36px, 4vw, 56px); line-height: 1.02; color: var(--ink);
+  margin-top: 14px;
+}
+.steps-h h2 em { color: var(--brass); }
+
+.steps-grid {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px;
+  background: var(--rule); border: 1px solid var(--rule);
+}
+.step {
+  background: var(--shell);
+  padding: 40px 44px;
+  display: flex; flex-direction: column; gap: 18px;
+}
+.step-num {
+  font-family: var(--serif); font-style: italic; font-weight: 300;
+  font-size: 56px; color: var(--brass); line-height: 1;
+}
+.step h3 {
+  font-family: var(--serif); font-style: italic; font-weight: 400;
+  font-size: 32px; color: var(--ink); line-height: 1;
+}
+.step-tag {
+  font-family: var(--mono); font-size: 10px; letter-spacing: 0.16em;
+  text-transform: uppercase; color: var(--ink-mute);
+  margin-top: -8px;
+}
+.step-body { font-size: 14px; line-height: 1.7; color: var(--ink-soft); }
+.step-list {
+  list-style: none; padding: 0; margin: 0;
+  display: flex; flex-direction: column;
+  border-top: 1px solid var(--rule-soft);
+}
+.step-list li {
+  padding: 12px 0;
+  border-bottom: 1px solid var(--rule-soft);
+  display: grid; grid-template-columns: 18px 1fr; gap: 12px;
+  align-items: start;
+  font-size: 13px; color: var(--ink-soft); line-height: 1.5;
+}
+.step-list li::before {
+  content: '◇'; color: var(--brass); font-size: 10px;
+  padding-top: 2px;
+}
+
+/* ── Team duo ── */
+.duo {
+  background: var(--vellum); padding: 100px var(--gutter);
+}
+.duo-inner { max-width: var(--max); margin: 0 auto; }
+.duo-h h2 {
+  font-family: var(--serif); font-style: italic; font-weight: 300;
+  font-size: clamp(36px, 4vw, 56px); line-height: 1.02; color: var(--ink);
+  margin-top: 14px;
+}
+.duo-h h2 em { color: var(--brass); }
+
+.duo-grid {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 28px;
+  margin-top: 36px;
+}
+.duo-card {
+  background: var(--shell); border: 1px solid var(--rule);
+  padding: 36px 40px;
+  display: grid; grid-template-columns: 140px 1fr; gap: 28px;
+  align-items: start;
+}
+.duo-photo {
+  width: 140px; height: 180px;
+  overflow: hidden; background: var(--linen);
+}
+.duo-photo img { width: 100%; height: 100%; object-fit: cover; filter: sepia(0.08); }
+.duo-name {
+  font-family: var(--serif); font-style: italic; font-weight: 400;
+  font-size: 30px; color: var(--ink); margin-bottom: 4px;
+}
+.duo-title {
+  font-family: var(--mono); font-size: 10px; letter-spacing: 0.16em;
+  text-transform: uppercase; color: var(--brass);
+}
+.duo-role {
+  margin-top: 18px;
+  padding-top: 18px;
+  border-top: 1px solid var(--rule-soft);
+  font-size: 13px; line-height: 1.65; color: var(--ink-soft);
+}
+.duo-role strong {
+  display: block; font-family: var(--serif); font-style: italic; font-weight: 400;
+  font-size: 17px; color: var(--ink); margin-bottom: 8px;
+}
+.duo-spec {
+  margin-top: 14px;
+  display: flex; gap: 8px; flex-wrap: wrap;
+}
+.duo-spec span {
+  padding: 3px 10px;
+  font-family: var(--mono); font-size: 9px; letter-spacing: 0.14em;
+  text-transform: uppercase; color: var(--ink-mute);
+  background: var(--vellum); border: 1px solid var(--rule);
+}
+
+/* ── Recent moves ── */
+.moves {
+  padding: 100px var(--gutter); background: var(--parchment);
+}
+.moves-inner { max-width: var(--max); margin: 0 auto; }
+.moves-h h2 {
+  font-family: var(--serif); font-style: italic; font-weight: 300;
+  font-size: clamp(36px, 4vw, 56px); line-height: 1.02; color: var(--ink);
+  margin-top: 14px;
+}
+.moves-h h2 em { color: var(--brass); }
+
+.moves-grid {
+  display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px;
+  margin-top: 36px;
+}
+.move {
+  background: var(--shell); border: 1px solid var(--rule);
+  padding: 28px 32px;
+}
+.move-tag {
+  font-family: var(--mono); font-size: 9.5px; letter-spacing: 0.16em;
+  text-transform: uppercase; color: var(--brass);
+  margin-bottom: 14px;
+}
+.move-h {
+  font-family: var(--serif); font-style: italic; font-weight: 400;
+  font-size: 30px; color: var(--ink); line-height: 1.1;
+  margin-bottom: 16px;
+}
+.move-h .arrow { color: var(--brass-bright); font-style: italic; }
+.move-numbers {
+  display: grid; grid-template-columns: repeat(3, 1fr);
+  gap: 18px;
+  padding: 18px 0;
+  border-top: 1px solid var(--rule-soft);
+  border-bottom: 1px solid var(--rule-soft);
+  margin-bottom: 16px;
+}
+.mn-cell { display: flex; flex-direction: column; gap: 3px; }
+.mn-l {
+  font-family: var(--mono); font-size: 9px; letter-spacing: 0.16em;
+  text-transform: uppercase; color: var(--ink-mute);
+}
+.mn-v {
+  font-family: var(--serif); font-style: italic; font-weight: 400;
+  font-size: 22px; color: var(--ink); line-height: 1;
+}
+.move-q {
+  font-family: var(--serif); font-style: italic; font-weight: 300;
+  font-size: 15px; line-height: 1.5; color: var(--ink-soft);
+}
+.move-attr {
+  margin-top: 10px;
+  font-family: var(--mono); font-size: 10px; letter-spacing: 0.12em;
+  color: var(--ink-faint); text-transform: uppercase;
+}
+
+/* ── Discovery questions ── */
+.disco {
+  background: var(--ink); color: var(--shell);
+  padding: 100px var(--gutter);
+}
+.disco-inner { max-width: var(--max); margin: 0 auto; }
+.disco-h h2 {
+  font-family: var(--serif); font-style: italic; font-weight: 300;
+  font-size: clamp(36px, 4vw, 56px); line-height: 1.02; color: var(--shell);
+  margin-top: 14px;
+}
+.disco-h h2 em { color: var(--brass-bright); }
+.disco-h .ed {
+  font-family: var(--mono); font-size: 10px; letter-spacing: 0.22em;
+  text-transform: uppercase; color: var(--brass-bright);
+}
+
+.q-grid {
+  display: grid; grid-template-columns: repeat(2, 1fr); gap: 1px;
+  background: rgba(250,246,236,0.12);
+  border: 1px solid rgba(250,246,236,0.12);
+  margin-top: 36px;
+}
+.q-cell {
+  background: var(--ink);
+  padding: 28px 32px;
+  display: grid; grid-template-columns: 44px 1fr; gap: 18px;
+  align-items: start;
+}
+.q-num {
+  font-family: var(--serif); font-style: italic; font-weight: 300;
+  font-size: 28px; color: var(--brass-bright); line-height: 1;
+}
+.q-cell h4 {
+  font-family: var(--serif); font-style: italic; font-weight: 400;
+  font-size: 20px; color: var(--shell); margin-bottom: 6px;
+}
+.q-cell p { font-size: 13px; line-height: 1.65; color: rgba(250,246,236,0.6); }
+
+/* ── CTA ── */
+.r-cta {
+  background: var(--parchment);
+  text-align: center; padding: 130px var(--gutter);
+  border-top: 1px solid var(--rule); border-bottom: 1px solid var(--rule);
+}
+.r-cta h2 {
+  font-family: var(--serif); font-style: italic; font-weight: 300;
+  font-size: clamp(56px, 7vw, 96px); line-height: 0.96;
+  color: var(--ink); margin: 16px 0 24px;
+}
+.r-cta h2 em { color: var(--brass); }
+.r-cta p {
+  font-family: var(--serif); font-style: italic; font-weight: 300;
+  font-size: 22px; color: var(--ink-soft); margin-bottom: 40px;
+}
+.r-cta-ctas { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; }
+
+/* ── Responsive ── */
+@media (max-width: 1100px) {
+  .r-hero-inner, .r-pitch-inner, .cal-h { grid-template-columns: 1fr; gap: 36px; }
+  .steps-grid, .moves-grid, .duo-grid, .q-grid { grid-template-columns: 1fr; }
+  .scen-summary { grid-template-columns: 1fr; }
+  .gantt-axis { grid-template-columns: 140px repeat(6, 1fr); }
+  .gantt-track { grid-template-columns: 140px 1fr; }
+}
+@media (max-width: 700px) {
+  .duo-card { grid-template-columns: 1fr; }
+  .duo-photo { width: 100%; height: 220px; }
+  .gantt { padding: 22px; }
+  .gantt-axis, .gantt-track { grid-template-columns: 1fr; }
+  .gt-rail { margin-top: 8px; }
+}
+</style>
+</head>
+<body class="paper" data-screen-label="Relocate · Bay → Foothills">
+
+<header class="topnav">
+  <div class="topnav-bar1">
+    <span>Boutique luxury real estate · Calaveras · Amador · Tuolumne</span>
+    <span><a href="tel:2095594966">(209) 559-4966</a> · <a href="mailto:SaraSellsCalifornia@gmail.com">SaraSellsCalifornia@gmail.com</a></span>
+  </div>
+  <nav class="topnav-bar2">
+    <div class="topnav-links">
+      <a href="listings.html">Listings</a>
+      <a href="towns.html">Communities</a>
+      <a href="relocate.html" class="active">Relocate</a>
+      <a href="seller.html">Sellers</a>
+    </div>
+    <a href="index.html" class="wordmark">
+      <span class="wordmark-word">Legacy</span>
+      <span class="wordmark-sub">Properties · Angels Camp CA</span>
+    </a>
+    <div class="topnav-links right">
+      <a href="index.html#about">About</a>
+      <a href="dashboard.html">Sign In</a>
+      <a href="platform.html" class="btn btn-ink btn-sm" style="padding:10px 18px;">Find My Match</a>
+    </div>
+  </nav>
+</header>
+
+<!-- Breadcrumb -->
+<div class="r-crumb">
+  <div class="r-crumb-inner">
+    <a href="index.html">Legacy</a>
+    <span class="sep">→</span>
+    <span class="cur">Relocate · Bay Area to Foothills</span>
+    <span class="spacer"></span>
+    <span class="mono small">Vol. XXII · The Signature Service</span>
+  </div>
+</div>
+
+<!-- HERO -->
+<section class="r-hero">
+  <div class="r-hero-inner">
+    <div>
+      <span class="hairline-brass"></span>
+      <span class="eyebrow" style="display:block; margin-top:14px;">Bay Area → Sierra Foothills · The signature service</span>
+      <h1>We <em>move you,</em><br>end to end.</h1>
+      <p class="lede">Sara and James specialize in the one transaction most agents won't take on — selling your Bay Area home <em>and</em> finding your foothills one, on a single coordinated calendar.</p>
+      <div class="r-hero-ctas">
+        <a href="platform.html" class="btn btn-ink">Start the conversation</a>
+        <a href="#calendar" class="btn btn-ghost">See the calendar</a>
+      </div>
+    </div>
+
+    <div class="from-to">
+      <div class="ft-stamp">
+        <span>Sara &amp;<br>James</span>
+        <strong>↗</strong>
+        <span>Both<br>sides</span>
+      </div>
+
+      <div class="ft-row">
+        <span class="ft-label">From</span>
+        <span class="ft-place">The Bay</span>
+        <span class="ft-sub">We list, stage, and market your home across SF, the Peninsula, and the East Bay with a licensed referral network we've worked with since 2018.</span>
+      </div>
+      <div class="ft-arrow">
+        <span class="bar"></span><span>The bridge</span><span class="bar"></span>
+      </div>
+      <div class="ft-row">
+        <span class="ft-label">To</span>
+        <span class="ft-place">The Foothills</span>
+        <span class="ft-sub">We tour you, advise on schools and septic, write the offer, and hand you the keys — coordinated to your Bay close.</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PITCH -->
+<section class="r-pitch">
+  <div class="r-pitch-inner">
+    <div>
+      <span class="ed">Why this matters</span>
+      <h2>Most agents handle one side. We handle <em>both.</em></h2>
+    </div>
+    <div class="r-pitch-points">
+      <article class="r-pp">
+        <div class="r-pp-num">I</div>
+        <div>
+          <h4>One agent, one calendar.</h4>
+          <p>Two transactions, one timeline. No relay race between an out-of-area listing agent and an in-area buying agent who've never spoken. Every date moves together because one team owns both.</p>
+        </div>
+      </article>
+      <article class="r-pp">
+        <div class="r-pp-num">II</div>
+        <div>
+          <h4>Marketing built for Bay buyers — not foothills sellers.</h4>
+          <p>Your Bay home needs a different playbook than the cabin you're buying. Sara's eight years of PR work shows up here: pre-list strategy, photography that performs on Compass and Zillow, a deliberate sequence of open houses, and a written marketing plan with weekly numbers.</p>
+        </div>
+      </article>
+      <article class="r-pp">
+        <div class="r-pp-num">III</div>
+        <div>
+          <h4>Bridge math, before you need it.</h4>
+          <p>Three real ways to handle the gap between sale and purchase: concurrent close, bridge loan, or rent-back. We walk you through the math on each — what they cost, what they cover, what they break — before you have to choose.</p>
+        </div>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- COORDINATION CALENDAR — centerpiece -->
+<section class="calendar" id="calendar">
+  <div class="cal-inner">
+    <div class="cal-h">
+      <div>
+        <span class="hairline-brass"></span>
+        <span class="eyebrow" style="display:block; margin-top:14px;">Plate II · The 90-day coordination calendar</span>
+        <h2>Two transactions,<br><em>one timeline.</em></h2>
+      </div>
+      <p class="right">Most relocations fail one of three ways — and most agents only know one of them. Toggle scenarios to see how each plays out.</p>
+    </div>
+
+    <div class="scen-tabs" role="tablist">
+      <button class="scen-tab on" data-scen="concurrent"><span class="num">I</span> Concurrent close</button>
+      <button class="scen-tab" data-scen="bridge"><span class="num">II</span> Bridge loan</button>
+      <button class="scen-tab" data-scen="rentback"><span class="num">III</span> Rent-back</button>
+    </div>
+
+    <!-- CONCURRENT -->
+    <div class="scen-pane on" data-scen="concurrent">
+      <div class="gantt">
+        <div class="gantt-axis">
+          <div class="gantt-axis-lbl">Day</div>
+          <div class="gantt-axis-day">Day 0</div>
+          <div class="gantt-axis-day">15</div>
+          <div class="gantt-axis-day">30</div>
+          <div class="gantt-axis-day">45</div>
+          <div class="gantt-axis-day">60</div>
+          <div class="gantt-axis-day">90</div>
+        </div>
+
+        <div class="gantt-track">
+          <div class="gt-label">
+            <strong>Bay sale</strong>
+            <span class="gt-label-sub">Sara, with referral co-list</span>
+          </div>
+          <div class="gt-rail">
+            <div class="gt-bar bay" style="left:0%; width:14%;">Prep · stage</div>
+            <div class="gt-bar bay" style="left:14%; width:28%;">List · open houses</div>
+            <div class="gt-bar bay" style="left:42%; width:14%;">Under contract</div>
+            <div class="gt-bar bridge" style="left:56%; width:36%;">Escrow · disclosures · loans</div>
+            <div class="gt-milestone brass" style="left:92%;"><span class="gt-milestone-lbl">Close · Day 82</span></div>
+          </div>
+        </div>
+
+        <div class="gantt-track">
+          <div class="gt-label">
+            <strong>Foothills purchase</strong>
+            <span class="gt-label-sub">Sara &amp; James</span>
+          </div>
+          <div class="gt-rail">
+            <div class="gt-bar foot" style="left:8%; width:30%;">Tour · short list</div>
+            <div class="gt-bar foot" style="left:38%; width:14%;">Offer · accepted</div>
+            <div class="gt-bar bridge" style="left:52%; width:40%;">Escrow · contingency removal</div>
+            <div class="gt-milestone brass" style="left:92%;"><span class="gt-milestone-lbl">Close · Day 82</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="scen-summary">
+        <article class="ss-card">
+          <span class="ss-h">Cash flow</span>
+          <span class="ss-v">Tight but clean</span>
+          <p class="ss-d">No bridge financing. Bay sale proceeds wire directly into the foothills close on the same business day. Costs the least; works only when both contracts cooperate.</p>
+        </article>
+        <article class="ss-card">
+          <span class="ss-h">Stress profile</span>
+          <span class="ss-v">High coordination</span>
+          <p class="ss-d">Every contingency is leveraged. Inspection days have to line up. Sellers have to agree to a same-day close. We've done this 14 times — it can be done; it requires hands on every clock.</p>
+        </article>
+        <article class="ss-card">
+          <span class="ss-h">Best for</span>
+          <span class="ss-v">Sellers without bridge access</span>
+          <p class="ss-d">First-time sellers, sellers without significant cash reserves, sellers who can't carry two mortgages even for a week. The most common scenario we run.</p>
+        </article>
+      </div>
+    </div>
+
+    <!-- BRIDGE -->
+    <div class="scen-pane" data-scen="bridge">
+      <div class="gantt">
+        <div class="gantt-axis">
+          <div class="gantt-axis-lbl">Day</div>
+          <div class="gantt-axis-day">Day 0</div>
+          <div class="gantt-axis-day">15</div>
+          <div class="gantt-axis-day">30</div>
+          <div class="gantt-axis-day">45</div>
+          <div class="gantt-axis-day">60</div>
+          <div class="gantt-axis-day">90</div>
+        </div>
+
+        <div class="gantt-track">
+          <div class="gt-label">
+            <strong>Foothills purchase</strong>
+            <span class="gt-label-sub">Buy first, with bridge loan</span>
+          </div>
+          <div class="gt-rail">
+            <div class="gt-bar foot" style="left:0%; width:22%;">Tour · short list</div>
+            <div class="gt-bar foot" style="left:22%; width:10%;">Offer · accepted</div>
+            <div class="gt-bar bridge" style="left:32%; width:18%;">Bridge funded · close</div>
+            <div class="gt-milestone brass" style="left:50%;"><span class="gt-milestone-lbl">Move in · Day 45</span></div>
+          </div>
+        </div>
+
+        <div class="gantt-track">
+          <div class="gt-label">
+            <strong>Bay sale</strong>
+            <span class="gt-label-sub">Sell after, with staged-empty</span>
+          </div>
+          <div class="gt-rail">
+            <div class="gt-bar bay" style="left:30%; width:14%;">Prep · stage empty</div>
+            <div class="gt-bar bay" style="left:44%; width:24%;">List · open houses</div>
+            <div class="gt-bar bay" style="left:68%; width:10%;">Under contract</div>
+            <div class="gt-bar bridge" style="left:78%; width:14%;">Escrow · bridge retired</div>
+            <div class="gt-milestone brass" style="left:92%;"><span class="gt-milestone-lbl">Close · Day 82</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="scen-summary">
+        <article class="ss-card">
+          <span class="ss-h">Cash flow</span>
+          <span class="ss-v">~$3–6K / mo carrying</span>
+          <p class="ss-d">Bridge loan typically 8.5–10% APR for 6 months. We work with three Calaveras-area lenders who price competitively for cross-county relocations.</p>
+        </article>
+        <article class="ss-card">
+          <span class="ss-h">Stress profile</span>
+          <span class="ss-v">Move once. Sell empty.</span>
+          <p class="ss-d">You're already up here when the Bay home shows. Empty-staging photographs better, open houses are easier to schedule, and there's no choreography around your daily life.</p>
+        </article>
+        <article class="ss-card">
+          <span class="ss-h">Best for</span>
+          <span class="ss-v">Equity-rich sellers</span>
+          <p class="ss-d">Sellers with substantial home equity, retirees, anyone with strong reserves who would rather pay for breathing room than gain a few thousand on the sale price.</p>
+        </article>
+      </div>
+    </div>
+
+    <!-- RENT-BACK -->
+    <div class="scen-pane" data-scen="rentback">
+      <div class="gantt">
+        <div class="gantt-axis">
+          <div class="gantt-axis-lbl">Day</div>
+          <div class="gantt-axis-day">Day 0</div>
+          <div class="gantt-axis-day">15</div>
+          <div class="gantt-axis-day">30</div>
+          <div class="gantt-axis-day">45</div>
+          <div class="gantt-axis-day">60</div>
+          <div class="gantt-axis-day">90</div>
+        </div>
+
+        <div class="gantt-track">
+          <div class="gt-label">
+            <strong>Bay sale</strong>
+            <span class="gt-label-sub">Sell first, rent back</span>
+          </div>
+          <div class="gt-rail">
+            <div class="gt-bar bay" style="left:0%; width:14%;">Prep · stage</div>
+            <div class="gt-bar bay" style="left:14%; width:24%;">List · open houses</div>
+            <div class="gt-bar bay" style="left:38%; width:12%;">Under contract</div>
+            <div class="gt-bar bridge" style="left:50%; width:14%;">Close · rent-back negotiated</div>
+            <div class="gt-bar foot" style="left:64%; width:24%;">You rent your old home (60 days)</div>
+            <div class="gt-milestone" style="left:50%;"><span class="gt-milestone-lbl">Bay closes · Day 45</span></div>
+          </div>
+        </div>
+
+        <div class="gantt-track">
+          <div class="gt-label">
+            <strong>Foothills purchase</strong>
+            <span class="gt-label-sub">Patient buyer; pre-approved cash equiv.</span>
+          </div>
+          <div class="gt-rail">
+            <div class="gt-bar foot" style="left:14%; width:38%;">Tour · short list · find the right one</div>
+            <div class="gt-bar foot" style="left:52%; width:12%;">Offer · accepted</div>
+            <div class="gt-bar bridge" style="left:64%; width:24%;">Escrow</div>
+            <div class="gt-milestone brass" style="left:88%;"><span class="gt-milestone-lbl">Close · Day 80</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="scen-summary">
+        <article class="ss-card">
+          <span class="ss-h">Cash flow</span>
+          <span class="ss-v">Rent your old home</span>
+          <p class="ss-d">Buyer typically accepts a 30–60 day rent-back at market rate. You hold your equity in cash until the foothills purchase closes. Average net cost: $4–7K total.</p>
+        </article>
+        <article class="ss-card">
+          <span class="ss-h">Stress profile</span>
+          <span class="ss-v">Hardest negotiation</span>
+          <p class="ss-d">Bay buyer must agree to the rent-back upfront — strongest in a competitive seller's market, hardest when inventory is loose. We script this into the listing strategy from Day 0.</p>
+        </article>
+        <article class="ss-card">
+          <span class="ss-h">Best for</span>
+          <span class="ss-v">The patient picker</span>
+          <p class="ss-d">Buyers who know they want the foothills but don't yet know which town or which house. The rent-back gives you 30–60 days of cash-funded calendar to walk it correctly.</p>
+        </article>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- THREE STEPS -->
+<section class="steps">
+  <div class="steps-inner">
+    <div class="steps-h">
+      <span class="hairline-brass"></span>
+      <span class="eyebrow">Plate III · How it actually runs</span>
+      <h2>Three steps,<br>one team,<br><em>one calendar.</em></h2>
+    </div>
+
+    <div class="steps-grid">
+      <article class="step">
+        <div class="step-num">I</div>
+        <h3>Sell</h3>
+        <div class="step-tag">Your Bay Area home · weeks 0–8</div>
+        <p class="step-body">A written marketing plan customized to your home, your block, and your market. We co-list with a licensed Bay Area broker we've partnered with since 2019 — Sara remains your point of contact on both sides.</p>
+        <ul class="step-list">
+          <li>Pre-list strategy: improvements that matter, those that don't</li>
+          <li>Professional staging &amp; photography (in-budget)</li>
+          <li>Compass / Zillow / MLS narrative built for Bay buyers</li>
+          <li>Two-week open-house cadence with weekly numbers</li>
+          <li>Negotiation, contingency strategy, close coordination</li>
+        </ul>
+      </article>
+
+      <article class="step">
+        <div class="step-num">II</div>
+        <h3>Choose</h3>
+        <div class="step-tag">Your foothills town · weeks 1–10</div>
+        <p class="step-body">Most buyers think they know which town. Most are wrong on their first guess. We start with discovery — three half-day visits, six towns, the questions that distinguish lifestyle fit from spreadsheet fit.</p>
+        <ul class="step-list">
+          <li>Discovery weekend: tour up to six towns in two days</li>
+          <li>Town-by-town profile with school, water, fire data</li>
+          <li>Pre-tours of MLS &amp; off-market matches</li>
+          <li>James's deep dive on land parcels, water rights, fire zones</li>
+          <li>Shortlist of 4–6 properties; full-day showing schedule</li>
+        </ul>
+      </article>
+
+      <article class="step">
+        <div class="step-num">III</div>
+        <h3>Land</h3>
+        <div class="step-tag">Coordinated close · weeks 8–14</div>
+        <p class="step-body">Two escrows, one calendar, one Sara. We pick the timing scenario that fits your equity and your stress tolerance, then we run both transactions in lockstep through to the keys.</p>
+        <ul class="step-list">
+          <li>Bridge / rent-back / concurrent math, on paper</li>
+          <li>Lender, title, and inspector network already in place</li>
+          <li>Movers, utilities, change-of-address — all on a checklist</li>
+          <li>Local-onboarding briefing: doctors, mechanics, contractors</li>
+          <li>First-month check-in. We don't disappear at the close.</li>
+        </ul>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- DUO -->
+<section class="duo">
+  <div class="duo-inner">
+    <div class="duo-h">
+      <span class="hairline-brass"></span>
+      <span class="eyebrow">Plate IV · The team</span>
+      <h2>Two agents,<br><em>one operating system.</em></h2>
+    </div>
+
+    <div class="duo-grid">
+      <article class="duo-card">
+        <div class="duo-photo">
+          <img src="art/sara-headshot.png" alt="Sara Cooper">
+        </div>
+        <div>
+          <div class="duo-name">Sara Cooper</div>
+          <div class="duo-title">Owner-Broker · Lead on every relocation</div>
+          <div class="duo-role">
+            <strong>Marketing &amp; the Bay side.</strong>
+            Sara runs the Bay-Area listing strategy with our partner brokerage, writes the marketing plan, and stays on point through both closes. Buyer-side, she's your tour agent in Murphys, Sutter Creek, Angels Camp, and Copperopolis.
+          </div>
+          <div class="duo-spec">
+            <span>Listing strategy</span><span>Buyer tours</span><span>Negotiation</span><span>PR background</span>
+          </div>
+        </div>
+      </article>
+
+      <article class="duo-card">
+        <div class="duo-photo">
+          <img src="art/james-headshot.png" alt="James Beyersdorf">
+        </div>
+        <div>
+          <div class="duo-name">James Beyersdorf</div>
+          <div class="duo-title">Associate Agent · DRE #02122175</div>
+          <div class="duo-role">
+            <strong>Land, water, and the rural deep-dive.</strong>
+            For anyone moving onto a parcel — five acres, ten, forty — James is the technical second opinion. Water rights, well capacity, septic age, fire-zone status, road maintenance agreements. The questions that derail closings if no one asks.
+          </div>
+          <div class="duo-spec">
+            <span>Land</span><span>Acreage</span><span>Water rights</span><span>Fire-zone analysis</span>
+          </div>
+        </div>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- RECENT MOVES -->
+<section class="moves">
+  <div class="moves-inner">
+    <div class="moves-h">
+      <span class="hairline-brass"></span>
+      <span class="eyebrow">Plate V · Recent moves</span>
+      <h2>Four families,<br><em>twelve months.</em></h2>
+    </div>
+    <p class="lede" style="margin-top: 14px; max-width: 720px;">Names changed; numbers are real. These are typical of the trade we run — Bay equity translated into a foothills life.</p>
+
+    <div class="moves-grid">
+      <article class="move">
+        <span class="move-tag">2025 · Q4 · concurrent close</span>
+        <h3 class="move-h">Walnut Creek <span class="arrow">→</span> Murphys</h3>
+        <div class="move-numbers">
+          <div class="mn-cell"><span class="mn-l">Sold</span><span class="mn-v">$1.45M</span></div>
+          <div class="mn-cell"><span class="mn-l">Bought</span><span class="mn-v">$725K</span></div>
+          <div class="mn-cell"><span class="mn-l">Net unlocked</span><span class="mn-v">$612K</span></div>
+        </div>
+        <p class="move-q">"We thought we wanted Arnold. After the discovery weekend we offered on a Murphys cottage. Sara closed both inside the same afternoon. We moved once."</p>
+        <p class="move-attr">— The S. family · two kids · remote both</p>
+      </article>
+
+      <article class="move">
+        <span class="move-tag">2025 · Q3 · bridge loan</span>
+        <h3 class="move-h">Palo Alto <span class="arrow">→</span> Arnold</h3>
+        <div class="move-numbers">
+          <div class="mn-cell"><span class="mn-l">Sold</span><span class="mn-v">$2.10M</span></div>
+          <div class="mn-cell"><span class="mn-l">Bought</span><span class="mn-v">$585K</span></div>
+          <div class="mn-cell"><span class="mn-l">Net unlocked</span><span class="mn-v">$1.42M</span></div>
+        </div>
+        <p class="move-q">"We bought first with a bridge loan, moved up, then sold staged-empty. The Palo Alto listing showed better without us in it. James walked the cabin acreage before we made the offer."</p>
+        <p class="move-attr">— Retired couple · early sixties</p>
+      </article>
+
+      <article class="move">
+        <span class="move-tag">2025 · Q2 · rent-back</span>
+        <h3 class="move-h">San Francisco <span class="arrow">→</span> Sutter Creek</h3>
+        <div class="move-numbers">
+          <div class="mn-cell"><span class="mn-l">Sold</span><span class="mn-v">$1.78M</span></div>
+          <div class="mn-cell"><span class="mn-l">Bought</span><span class="mn-v">$695K</span></div>
+          <div class="mn-cell"><span class="mn-l">Net unlocked</span><span class="mn-v">$985K</span></div>
+        </div>
+        <p class="move-q">"We didn't know which town. The 60-day rent-back gave us a real calendar to walk the Shenandoah, see the Theatre on a Friday, and decide without a clock running."</p>
+        <p class="move-attr">— Couple, mid-forties · first-time foothills buyers</p>
+      </article>
+
+      <article class="move">
+        <span class="move-tag">2024 · Q4 · concurrent close</span>
+        <h3 class="move-h">Oakland <span class="arrow">→</span> Copperopolis</h3>
+        <div class="move-numbers">
+          <div class="mn-cell"><span class="mn-l">Sold</span><span class="mn-v">$1.15M</span></div>
+          <div class="mn-cell"><span class="mn-l">Bought</span><span class="mn-v">$895K</span></div>
+          <div class="mn-cell"><span class="mn-l">Net unlocked</span><span class="mn-v">$222K</span></div>
+        </div>
+        <p class="move-q">"We bought the dock-out. The math worked because Sara walked us through what a concurrent close actually requires — and the Oakland buyers agreed to it on Day 30 of escrow."</p>
+        <p class="move-attr">— Family · two boats · one teenager</p>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- DISCOVERY QUESTIONS -->
+<section class="disco">
+  <div class="disco-inner">
+    <div class="disco-h">
+      <span class="hairline-brass" style="background:var(--brass-bright);"></span>
+      <span class="ed" style="display:block; margin-top: 14px;">Plate VI · The first conversation</span>
+      <h2>Ten questions<br>before <em>any house.</em></h2>
+    </div>
+    <p class="lede" style="margin-top: 14px; max-width: 720px; color: rgba(250,246,236,0.7); font-family: var(--serif); font-style: italic; font-size: 22px; line-height: 1.45;">
+      A relocation conversation starts with these, not with listings. If you can answer most of them, we can model your timeline within a week.
+    </p>
+
+    <div class="q-grid">
+      <div class="q-cell"><div class="q-num">01</div><div><h4>What's the Bay home worth — honestly?</h4><p>Not Zillow. Our partner Bay broker pulls comps and walks the property in week one.</p></div></div>
+      <div class="q-cell"><div class="q-num">02</div><div><h4>Mortgage balance, second loans, HELOCs?</h4><p>This drives bridge eligibility and net-proceeds math.</p></div></div>
+      <div class="q-cell"><div class="q-num">03</div><div><h4>What's your cash floor after both transactions?</h4><p>Reserves matter more than purchase price. We model three scenarios.</p></div></div>
+      <div class="q-cell"><div class="q-num">04</div><div><h4>Hard move date — or flexible window?</h4><p>School year, lease end, retirement date — these shape the timeline.</p></div></div>
+      <div class="q-cell"><div class="q-num">05</div><div><h4>Remote-work fiber requirement?</h4><p>Most foothills towns now have it. A few addresses still don't.</p></div></div>
+      <div class="q-cell"><div class="q-num">06</div><div><h4>Primary, second home, or eventual primary?</h4><p>Tax, insurance, lender posture all shift on this answer.</p></div></div>
+      <div class="q-cell"><div class="q-num">07</div><div><h4>Land or in-town?</h4><p>If land, James starts; if in-town, Sara starts.</p></div></div>
+      <div class="q-cell"><div class="q-num">08</div><div><h4>Fire-zone tolerance?</h4><p>Insurance reality varies wildly. Some parcels can't be insured.</p></div></div>
+      <div class="q-cell"><div class="q-num">09</div><div><h4>Two cars or three? Boat? RV? Horses?</h4><p>Shapes lot size, garage spec, HOA fit.</p></div></div>
+      <div class="q-cell"><div class="q-num">10</div><div><h4>What does a perfect Saturday look like?</h4><p>This is the question that picks the town. Hardest to answer; most important.</p></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="r-cta">
+  <span class="hairline-brass" style="margin: 0 auto 18px;"></span>
+  <span class="eyebrow">Begin the conversation</span>
+  <h2>Start with a call<br>before <em>a calendar.</em></h2>
+  <p>Twenty minutes, no pressure, no commitment. We'll tell you whether what you're picturing is a six-month conversation or a six-week one.</p>
+  <div class="r-cta-ctas">
+    <a href="platform.html" class="btn btn-ink">Start the conversation</a>
+    <a href="tel:2095594966" class="btn btn-ghost">Call (209) 559-4966</a>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="footer">
+  <div class="footer-inner">
+    <div class="footer-top">
+      <div>
+        <a href="index.html" class="wordmark" style="align-items: flex-start;">
+          <span class="wordmark-word">Legacy</span>
+          <span class="wordmark-sub">Properties · Angels Camp CA</span>
+        </a>
+        <p class="footer-tagline">Every home has a story. We help you find yours — or tell the one you've already lived.</p>
+      </div>
+      <div>
+        <h4>Services</h4>
+        <a href="listings.html">Browse listings</a>
+        <a href="towns.html">Communities</a>
+        <a href="relocate.html">Bay → Foothills</a>
+        <a href="seller.html">Sellers</a>
+      </div>
+      <div>
+        <h4>Buy &amp; sell</h4>
+        <a href="listings.html">Search all listings</a>
+        <a href="seller.html">What's my home worth?</a>
+        <a href="platform.html">Request a tour</a>
+      </div>
+      <div>
+        <h4>Connect</h4>
+        <a href="tel:2095594966">(209) 559-4966</a>
+        <a href="mailto:SaraSellsCalifornia@gmail.com">SaraSellsCalifornia@gmail.com</a>
+        <a href="index.html#ledger">The Ledger</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <div>© 2026 Legacy Properties · All rights reserved</div>
+      <div>Sara Cooper, Broker · DRE #0214187 · Equal Housing Opportunity</div>
+    </div>
+  </div>
+</footer>
+
+<script>
+(function () {
+  const tabs = document.querySelectorAll('.scen-tab');
+  const panes = document.querySelectorAll('.scen-pane');
+  tabs.forEach(t => {
+    t.addEventListener('click', () => {
+      const s = t.dataset.scen;
+      tabs.forEach(x => x.classList.toggle('on', x === t));
+      panes.forEach(p => p.classList.toggle('on', p.dataset.scen === s));
+    });
+  });
+})();
+</script>
+</body>
+</html>

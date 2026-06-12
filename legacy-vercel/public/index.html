@@ -1,0 +1,1087 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Legacy Properties — Every Home Has a Story</title>
+<link rel="stylesheet" href="legacy.css">
+<style>
+/* ── HERO ── */
+.hero {
+  position: relative;
+  padding: 0;
+  background: var(--ink);
+  border-bottom: 1px solid var(--rule);
+  overflow: hidden;
+  isolation: isolate;
+}
+.hero-bg {
+  position: absolute; inset: 0; z-index: 0;
+  background: var(--ink);
+}
+.hero-video {
+  position: absolute; inset: 0; z-index: 1;
+  width: 100%; height: 100%; object-fit: cover;
+  opacity: 0;
+  transition: opacity 1.4s ease-in-out;
+  pointer-events: none;
+}
+.hero-veil {
+  position: absolute; inset: 0; z-index: 2;
+  pointer-events: none;
+  background:
+    linear-gradient(180deg,
+      rgba(27,24,19,0.45) 0%,
+      rgba(27,24,19,0.10) 28%,
+      rgba(27,24,19,0.20) 65%,
+      rgba(27,24,19,0.85) 100%),
+    linear-gradient(90deg,
+      rgba(27,24,19,0.45) 0%,
+      rgba(27,24,19,0.05) 45%,
+      rgba(27,24,19,0.05) 100%);
+}
+.hero-inner {
+  position: relative; z-index: 3;
+  max-width: var(--max);
+  margin: 0 auto;
+  padding: 140px var(--gutter) 200px;
+  min-height: 720px;
+  display: flex; align-items: center;
+}
+.hero-content {
+  max-width: 760px;
+}
+.hero-eyebrow {
+  display: flex; align-items: center; gap: 14px;
+  margin-bottom: 28px;
+}
+.hero-eyebrow .tick {
+  display: block; width: 32px; height: 1px; background: var(--brass-bright);
+}
+.hero-eyebrow .eyebrow { color: var(--brass-bright); }
+.hero-h1 {
+  font-family: var(--serif);
+  font-weight: 300;
+  font-size: clamp(64px, 9vw, 124px);
+  line-height: 0.92;
+  letter-spacing: -0.015em;
+  color: var(--shell);
+  margin-bottom: 0;
+  text-shadow: 0 2px 36px rgba(0,0,0,0.35);
+}
+.hero-h1 .it { font-style: italic; color: var(--brass-bright); }
+.hero-h1-tag {
+  display: block; margin-top: 28px;
+  font-family: var(--mono); font-weight: 400;
+  font-size: 12px; letter-spacing: 0.32em;
+  text-transform: uppercase; color: rgba(250,246,236,0.55);
+}
+.hero-sub {
+  font-family: var(--serif); font-style: italic; font-weight: 300;
+  font-size: 22px; line-height: 1.45; color: rgba(250,246,236,0.78);
+  margin-top: 32px; max-width: 520px;
+}
+.hero-ctas { display: flex; gap: 14px; margin-top: 36px; flex-wrap: wrap; }
+.hero .btn-ink {
+  background: var(--brass); color: var(--shell);
+}
+.hero .btn-ink:hover { background: var(--brass-bright); color: var(--ink); }
+.hero .btn-ghost {
+  border-color: rgba(250,246,236,0.40); color: var(--shell);
+}
+.hero .btn-ghost:hover { border-color: var(--shell); }
+
+/* Floating bottom-right plate caption */
+.hero-plate {
+  position: absolute; right: var(--gutter); bottom: 28px; z-index: 4;
+  display: flex; align-items: center; gap: 14px;
+  font-family: var(--mono); font-size: 10px; letter-spacing: 0.20em;
+  text-transform: uppercase; color: rgba(250,246,236,0.6);
+  pointer-events: none;
+}
+.hero-plate strong {
+  color: var(--brass-bright); font-weight: 500;
+  letter-spacing: 0.14em;
+}
+.hero-plate .bar { display: block; width: 28px; height: 1px; background: rgba(201,158,90,0.6); }
+
+/* Scroll cue */
+.hero-scroll {
+  position: absolute; left: 50%; bottom: 28px;
+  transform: translateX(-50%);
+  z-index: 4;
+  display: flex; flex-direction: column; align-items: center; gap: 8px;
+  font-family: var(--mono); font-size: 9px; letter-spacing: 0.26em;
+  text-transform: uppercase; color: rgba(250,246,236,0.45);
+  pointer-events: none;
+  animation: heroScrollBob 2.4s ease-in-out infinite;
+}
+.hero-scroll .line {
+  width: 1px; height: 40px;
+  background: linear-gradient(to bottom, transparent, rgba(201,158,90,0.7));
+}
+@keyframes heroScrollBob {
+  0%, 100% { transform: translateX(-50%) translateY(0); }
+  50%      { transform: translateX(-50%) translateY(8px); }
+}
+
+.hero-strip {
+  max-width: var(--max); margin: 0 auto;
+  display: grid; grid-template-columns: repeat(4, 1fr);
+  border-top: 1px solid var(--rule);
+  background: var(--parchment);
+  position: relative; z-index: 5;
+}
+.hero-strip-item {
+  padding: 28px 30px; border-right: 1px solid var(--rule);
+  display: flex; flex-direction: column; gap: 4px;
+}
+.hero-strip-item:last-child { border-right: none; }
+.hero-strip-value {
+  font-family: var(--serif); font-style: italic; font-weight: 400;
+  font-size: 38px; color: var(--ink); line-height: 1;
+}
+.hero-strip-label {
+  font-family: var(--mono); font-size: 10px; letter-spacing: 0.18em;
+  text-transform: uppercase; color: var(--ink-mute);
+}
+
+/* ── Journey strip ── */
+.journey {
+  background: var(--vellum);
+  border-bottom: 1px solid var(--rule);
+}
+.journey-inner {
+  max-width: var(--max); margin: 0 auto;
+  padding: 26px var(--gutter);
+  display: grid; grid-template-columns: 220px 1fr auto; gap: 32px; align-items: center;
+}
+.journey-q {
+  font-family: var(--serif); font-style: italic; font-weight: 400;
+  font-size: 20px; line-height: 1.2; color: var(--ink);
+}
+.journey-q .small { display: block; font-family: var(--mono); font-style: normal; font-size: 9px; letter-spacing: 0.22em; text-transform: uppercase; color: var(--ink-mute); margin-bottom: 4px; }
+.journey-steps {
+  display: flex; gap: 0; flex-wrap: wrap;
+  border: 1px solid var(--rule);
+  background: var(--shell);
+}
+.journey-step {
+  padding: 12px 24px; font-family: var(--mono); font-size: 10px; letter-spacing: 0.14em;
+  text-transform: uppercase; color: var(--ink-mute); cursor: pointer;
+  border-right: 1px solid var(--rule); transition: all .15s; background: none; border-top: none; border-bottom: none; border-left: none;
+}
+.journey-step:last-child { border-right: none; }
+.journey-step.active { background: var(--ink); color: var(--shell); }
+.journey-step:hover:not(.active) { color: var(--brass); }
+.journey-link {
+  font-family: var(--mono); font-size: 10px; letter-spacing: 0.18em;
+  color: var(--brass); text-transform: uppercase; text-decoration: none;
+  border-bottom: 1px solid var(--brass); padding-bottom: 2px;
+}
+
+/* ── Featured ── */
+.featured-card {
+  display: grid; grid-template-columns: 1.4fr 1fr;
+  border: 1px solid var(--rule); background: var(--shell);
+  min-height: 540px;
+}
+.featured-photo {
+  position: relative;
+  background:
+    linear-gradient(120deg, rgba(27,24,19,0.10) 0%, rgba(27,24,19,0) 60%),
+    url('https://images.unsplash.com/photo-1613977257363-707ba9348227?w=1200&q=85') center/cover no-repeat;
+}
+.featured-photo::after {
+  content: ''; position: absolute; inset: 14px;
+  border: 1px solid rgba(250,246,236,0.35);
+}
+.featured-badge {
+  position: absolute; top: 28px; left: 28px;
+  background: var(--brass); color: var(--shell);
+  font-family: var(--mono); font-size: 9px; letter-spacing: 0.2em;
+  padding: 7px 14px; text-transform: uppercase; z-index: 2;
+}
+.featured-meta {
+  position: absolute; bottom: 28px; left: 28px;
+  font-family: var(--mono); font-size: 10px; letter-spacing: 0.18em;
+  color: var(--shell); text-transform: uppercase; z-index: 2;
+}
+.featured-body {
+  padding: 56px 56px; display: flex; flex-direction: column; justify-content: center;
+  background: var(--shell);
+}
+.featured-price {
+  font-family: var(--serif); font-style: italic; font-weight: 300;
+  font-size: 56px; line-height: 1; color: var(--ink); margin-bottom: 14px;
+}
+.featured-address {
+  font-size: 14px; color: var(--ink-soft); margin-bottom: 22px; line-height: 1.6;
+}
+.featured-specs {
+  display: flex; gap: 22px; padding: 18px 0; margin-bottom: 22px;
+  border-top: 1px solid var(--rule); border-bottom: 1px solid var(--rule);
+  font-family: var(--mono); font-size: 10px; letter-spacing: 0.14em;
+  text-transform: uppercase; color: var(--ink-mute); flex-wrap: wrap;
+}
+.featured-specs strong { color: var(--ink); font-family: var(--serif); font-style: italic; font-weight: 400; font-size: 22px; letter-spacing: 0; text-transform: none; }
+.featured-spec { display: flex; flex-direction: column; gap: 2px; }
+.featured-desc {
+  font-family: var(--serif); font-style: italic; font-weight: 300;
+  font-size: 17px; line-height: 1.55; color: var(--ink-soft); margin-bottom: 32px;
+}
+.featured-ctas { display: flex; gap: 14px; flex-wrap: wrap; }
+
+/* ── Listings grid for marketing page ── */
+.list-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+
+/* ── Communities ── */
+.comm-grid {
+  display: grid; grid-template-columns: 2fr 1fr 1fr;
+  grid-template-rows: 1fr 1fr; gap: 1px;
+  background: var(--rule); border: 1px solid var(--rule);
+  min-height: 600px;
+}
+.comm-card {
+  position: relative; overflow: hidden; background: var(--ink);
+  text-decoration: none; color: inherit;
+}
+.comm-card-large { grid-row: 1 / 3; }
+.comm-bg {
+  position: absolute; inset: 0; background-size: cover; background-position: center;
+  transition: transform .6s ease;
+}
+.comm-card:hover .comm-bg { transform: scale(1.04); }
+.comm-overlay {
+  position: absolute; inset: 0;
+  background: linear-gradient(180deg, rgba(27,24,19,0.0) 30%, rgba(27,24,19,0.78) 100%);
+}
+.comm-content {
+  position: absolute; inset: 0; padding: 28px;
+  display: flex; flex-direction: column; justify-content: flex-end;
+  color: var(--shell);
+}
+.comm-name {
+  font-family: var(--serif); font-style: italic; font-weight: 400;
+  font-size: 28px; line-height: 1; margin-bottom: 6px;
+}
+.comm-card-large .comm-name { font-size: 48px; }
+.comm-meta {
+  font-family: var(--mono); font-size: 10px; letter-spacing: 0.16em;
+  text-transform: uppercase; color: rgba(250,246,236,0.7);
+}
+.comm-stat {
+  position: absolute; top: 22px; right: 22px;
+  font-family: var(--mono); font-size: 9px; letter-spacing: 0.16em;
+  text-transform: uppercase; color: var(--brass-bright);
+  text-align: right;
+}
+.comm-stat strong { display: block; font-family: var(--serif); font-style: italic; font-weight: 400; font-size: 22px; color: var(--shell); letter-spacing: 0; text-transform: none; }
+
+/* ── About / agents ── */
+.about-grid {
+  display: grid; grid-template-columns: 1fr 1.3fr; gap: 80px; align-items: center;
+}
+.agents-stack { display: flex; flex-direction: column; gap: 16px; }
+.agent-row {
+  display: grid; grid-template-columns: 120px 1fr; gap: 24px; align-items: center;
+  padding: 18px 22px; background: var(--shell); border: 1px solid var(--rule);
+}
+.agent-photo {
+  width: 120px; height: 144px; background: var(--vellum);
+  position: relative; overflow: hidden;
+}
+.agent-photo img { width: 100%; height: 100%; object-fit: cover; }
+.agent-photo-placeholder {
+  position: absolute; inset: 0;
+  background: repeating-linear-gradient(45deg, var(--vellum) 0 10px, var(--linen) 10px 20px);
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--mono); font-size: 9px; letter-spacing: 0.18em;
+  text-transform: uppercase; color: var(--ink-mute); text-align: center; padding: 8px;
+}
+.agent-name { font-family: var(--serif); font-style: italic; font-weight: 400; font-size: 26px; color: var(--ink); }
+.agent-title { font-family: var(--mono); font-size: 10px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--ink-mute); margin-top: 2px; }
+.agent-bio { font-size: 12.5px; color: var(--ink-soft); margin-top: 10px; line-height: 1.6; }
+.agent-spec {
+  display: flex; gap: 12px; margin-top: 10px;
+  font-family: var(--mono); font-size: 9px; letter-spacing: 0.14em;
+  text-transform: uppercase; color: var(--brass);
+}
+.agent-spec span:not(:last-child)::after { content: '·'; margin-left: 12px; color: var(--ink-faint); }
+
+.dre-card {
+  margin-top: 8px; padding: 22px 26px;
+  background: var(--ink); color: var(--shell);
+}
+.dre-card .label-cap { color: var(--brass-bright); }
+.dre-card-body { font-size: 12.5px; color: rgba(250,246,236,0.65); line-height: 1.7; margin-top: 8px; }
+
+.about-text .gold-rule { width: 36px; height: 1px; background: var(--brass); margin-bottom: 16px; }
+.about-quote {
+  font-family: var(--serif); font-style: italic; font-weight: 300;
+  font-size: clamp(32px, 3.6vw, 48px); line-height: 1.15; color: var(--ink);
+  margin: 14px 0 28px; letter-spacing: -0.005em;
+}
+.about-quote em { color: var(--brass); }
+.about-body { font-size: 14px; line-height: 1.85; color: var(--ink-soft); margin-bottom: 28px; }
+.about-contact { display: flex; flex-direction: column; gap: 10px; }
+.about-contact a { font-family: var(--mono); font-size: 11px; letter-spacing: 0.14em; color: var(--ink); text-decoration: none; padding: 4px 0; border-bottom: 1px solid var(--rule); transition: color .15s; display: inline-flex; align-items: center; gap: 12px; max-width: max-content; }
+.about-contact a:hover { color: var(--brass); border-color: var(--brass); }
+.about-contact .glyph { color: var(--brass); }
+
+/* ── AI / platform pitch ── */
+.platform {
+  background: var(--ink); color: var(--shell);
+}
+.platform-inner {
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 80px; align-items: stretch;
+}
+.platform-h .h-section { color: var(--shell); }
+.platform-h .h-section em { color: var(--brass-bright); }
+.platform-sub { color: rgba(250,246,236,0.65); margin-top: 18px; font-size: 14px; line-height: 1.8; max-width: 440px; }
+.platform-foot {
+  margin-top: 36px; display: flex; align-items: center; gap: 16px;
+  font-family: var(--mono); font-size: 11px; letter-spacing: 0.14em;
+  color: rgba(250,246,236,0.5);
+}
+.platform-features {
+  background: rgba(250,246,236,0.04);
+  border: 1px solid rgba(250,246,236,0.10);
+}
+.platform-feature {
+  padding: 28px 32px; border-bottom: 1px solid rgba(250,246,236,0.10);
+  display: grid; grid-template-columns: 48px 1fr auto; gap: 22px; align-items: start;
+}
+.platform-feature:last-child { border-bottom: none; }
+.platform-num {
+  font-family: var(--serif); font-style: italic; font-weight: 300;
+  font-size: 36px; color: var(--brass-bright); line-height: 1;
+}
+.platform-feat-h { font-family: var(--serif); font-style: italic; font-weight: 400; font-size: 22px; color: var(--shell); margin-bottom: 6px; }
+.platform-feat-s { font-size: 12.5px; color: rgba(250,246,236,0.6); line-height: 1.65; }
+.platform-tag {
+  font-family: var(--mono); font-size: 9px; letter-spacing: 0.18em;
+  text-transform: uppercase; padding: 4px 10px;
+  background: rgba(201,158,90,0.16); color: var(--brass-bright);
+}
+
+/* ── Ledger ── */
+.ledger-grid { display: grid; grid-template-columns: 1.5fr 1fr; gap: 56px; }
+.ledger-post { padding: 28px 0; border-top: 1px solid var(--rule); }
+.ledger-post:last-child { border-bottom: 1px solid var(--rule); }
+.ledger-meta {
+  display: flex; gap: 14px; align-items: center; margin-bottom: 12px;
+  font-family: var(--mono); font-size: 10px; letter-spacing: 0.16em;
+  text-transform: uppercase; color: var(--ink-mute);
+}
+.ledger-meta .dot { width: 4px; height: 4px; border-radius: 50%; background: var(--brass); }
+.ledger-title {
+  font-family: var(--serif); font-style: italic; font-weight: 400;
+  font-size: 28px; line-height: 1.2; color: var(--ink); margin-bottom: 10px;
+}
+.ledger-excerpt { font-size: 13.5px; color: var(--ink-soft); line-height: 1.7; margin-bottom: 14px; }
+
+.market-card {
+  background: var(--shell); border: 1px solid var(--rule); padding: 32px 32px 28px;
+  height: max-content; position: sticky; top: 100px;
+}
+.market-h {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 22px; padding-bottom: 12px; border-bottom: 1px solid var(--rule);
+}
+.market-h .label-cap { color: var(--brass); }
+.market-row {
+  display: grid; grid-template-columns: 1fr auto 60px; gap: 16px;
+  align-items: baseline; padding: 13px 0;
+  border-bottom: 1px solid var(--rule-soft);
+  font-size: 13.5px;
+}
+.market-row:last-of-type { border-bottom: none; }
+.market-row .town { color: var(--ink); font-weight: 500; }
+.market-row .price { font-family: var(--serif); font-style: italic; font-weight: 400; color: var(--ink); font-size: 17px; }
+.market-row .chg { font-family: var(--mono); font-size: 11px; letter-spacing: 0.04em; text-align: right; font-weight: 500; }
+.chg.up { color: var(--positive); }
+.chg.dn { color: var(--negative); }
+.market-note {
+  margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--rule-soft);
+  font-family: var(--mono); font-size: 9.5px; letter-spacing: 0.12em;
+  color: var(--ink-faint); line-height: 1.5;
+}
+
+/* ── Testimonials ── */
+.testi-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; background: var(--rule); border: 1px solid var(--rule); }
+.testi-card { background: var(--shell); padding: 44px 40px; }
+.testi-stars { color: var(--brass); font-family: var(--mono); letter-spacing: 0.3em; margin-bottom: 18px; font-size: 12px; }
+.testi-quote {
+  font-family: var(--serif); font-style: italic; font-weight: 300;
+  font-size: 19px; line-height: 1.5; color: var(--ink); margin-bottom: 28px;
+}
+.testi-author { font-size: 11.5px; color: var(--ink-soft); line-height: 1.5; }
+.testi-author strong { display: block; font-family: var(--mono); font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink); margin-bottom: 4px; }
+
+/* ── CTA ── */
+.cta {
+  text-align: center; padding: 130px var(--gutter);
+  background: var(--vellum); border-top: 1px solid var(--rule); border-bottom: 1px solid var(--rule);
+}
+.cta-h {
+  font-family: var(--serif); font-style: italic; font-weight: 300;
+  font-size: clamp(60px, 8vw, 112px); line-height: 0.96;
+  color: var(--ink); margin-bottom: 24px;
+}
+.cta-h em { color: var(--brass); }
+.cta-sub {
+  font-family: var(--serif); font-style: italic; font-weight: 300;
+  font-size: 22px; color: var(--ink-soft); margin-bottom: 40px;
+}
+.cta-ctas { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; }
+.cta-contact {
+  margin-top: 48px; padding-top: 28px;
+  border-top: 1px solid var(--rule);
+  max-width: 600px; margin-left: auto; margin-right: auto;
+  display: flex; gap: 20px; justify-content: center; flex-wrap: wrap;
+  font-family: var(--mono); font-size: 11px; letter-spacing: 0.14em;
+  color: var(--ink-soft);
+}
+.cta-contact a { text-decoration: none; color: var(--ink-soft); }
+.cta-contact a:hover { color: var(--brass); }
+.cta-sep { color: var(--ink-faint); }
+
+@media (max-width: 1000px) {
+  .hero-inner { padding: 100px var(--gutter) 160px; min-height: 600px; }
+  .hero-plate { display: none; }
+  .about-grid, .platform-inner, .ledger-grid, .comm-grid { grid-template-columns: 1fr; }
+  .hero-strip, .list-grid, .testi-grid, .grid-3, .grid-4 { grid-template-columns: 1fr 1fr; }
+  .featured-card { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body class="paper" data-screen-label="Marketing Home">
+
+<!-- ============ TOP NAV ============ -->
+<header class="topnav">
+  <div class="topnav-bar1">
+    <span>Boutique luxury real estate · Calaveras · Amador · Tuolumne</span>
+    <span>
+      <a href="tel:2095594966">(209) 559-4966</a>
+      &nbsp;·&nbsp;
+      <a href="mailto:SaraSellsCalifornia@gmail.com">SaraSellsCalifornia@gmail.com</a>
+    </span>
+  </div>
+  <nav class="topnav-bar2">
+    <div class="topnav-links">
+      <a href="listings.html">Listings</a>
+      <a href="towns.html">Communities</a>
+      <a href="relocate.html">Relocate</a>
+      <a href="seller.html">Sellers</a>
+    </div>
+    <a href="index.html" class="wordmark">
+      <span class="wordmark-word">Legacy</span>
+      <span class="wordmark-sub">Properties · Angels Camp CA</span>
+    </a>
+    <div class="topnav-links right">
+      <a href="ledger.html">The Ledger</a>
+      <a href="dashboard.html">Sign In</a>
+      <a href="platform.html" class="btn btn-ink btn-sm" style="padding:10px 18px;">Find My Match</a>
+    </div>
+  </nav>
+</header>
+
+<!-- ============ HERO ============ -->
+<section class="hero">
+  <div class="hero-bg" aria-hidden="true"></div>
+  <video class="hero-video" id="heroVidA" muted playsinline preload="auto" src="hero-video.mp4"></video>
+  <video class="hero-video" id="heroVidB" muted playsinline preload="auto" src="hero-video.mp4"></video>
+  <div class="hero-veil" aria-hidden="true"></div>
+
+  <div class="hero-inner">
+    <div class="hero-content">
+      <div class="hero-eyebrow">
+        <span class="tick"></span>
+        <span class="eyebrow">Vol. XXII · Spring 2026 · Angels Camp, California</span>
+      </div>
+      <h1 class="hero-h1">
+        Every home<br>
+        has a <span class="it">story.</span>
+        <span class="hero-h1-tag">— we help you write yours</span>
+      </h1>
+      <p class="hero-sub">Boutique real estate across Calaveras, Amador &amp; Tuolumne counties — where the Sierra foothills meet a life well-lived.</p>
+      <div class="hero-ctas">
+        <a href="listings.html" class="btn btn-ink">Browse properties</a>
+        <a href="platform.html" class="btn btn-ghost">Find my match</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="hero-scroll" aria-hidden="true">
+    <div class="line"></div>
+    <span>Scroll</span>
+  </div>
+
+  </div>
+</section>
+
+<!-- ============ JOURNEY ============ -->
+<section class="journey">
+  <div class="journey-inner">
+    <div class="journey-q">
+      <span class="small">A quiet question</span>
+      Where are you in the journey?
+    </div>
+    <div class="journey-steps">
+      <button class="journey-step active" onclick="setJourney(this)">Discovering</button>
+      <button class="journey-step" onclick="setJourney(this)">Narrowing</button>
+      <button class="journey-step" onclick="setJourney(this)">Touring</button>
+      <button class="journey-step" onclick="setJourney(this)">Ready to offer</button>
+    </div>
+    <a href="dashboard.html" class="journey-link">Save my place →</a>
+  </div>
+</section>
+
+<!-- ============ FEATURED RESIDENCE ============ -->
+<section class="section" style="background: var(--parchment);">
+  <div class="section-inner">
+    <div class="section-h">
+      <div>
+        <span class="hairline-brass" style="margin-bottom: 16px;"></span>
+        <span class="eyebrow">Featured residence · Vol. XXII</span>
+        <h2 class="h-section" style="margin-top: 10px;">Presented by Legacy.</h2>
+      </div>
+      <p class="lede right">Handpicked by Sara for exceptional value, character, or setting — properties worth a second look, and a longer conversation.</p>
+    </div>
+
+    <article class="featured-card">
+      <div class="featured-photo">
+        <span class="featured-badge">Just listed</span>
+        <div class="featured-meta">Plate I · Sutter Creek</div>
+      </div>
+      <div class="featured-body">
+        <span class="eyebrow">Estate property · Murphys</span>
+        <div class="featured-price">$1,399,000</div>
+        <div class="featured-address">433 E Highway 4 · Murphys, CA 95247</div>
+        <div class="featured-specs">
+          <div class="featured-spec"><strong>4</strong><span>Bedrooms</span></div>
+          <div class="featured-spec"><strong>3</strong><span>Bathrooms</span></div>
+          <div class="featured-spec"><strong>Active</strong><span>Status</span></div>
+          <div class="featured-spec"><strong>Sara</strong><span>Listed by</span></div>
+        </div>
+        <p class="featured-desc">Panoramic vineyard views, chef's kitchen, wine cellar, and terraced acreage ready for planting. A rare opportunity for those who want to live the Gold Country dream — not just visit it.</p>
+        <div class="featured-ctas">
+          <a href="listing.html" class="btn btn-ink">View residence</a>
+          <a href="platform.html" class="btn btn-ghost">Request a showing</a>
+        </div>
+      </div>
+    </article>
+  </div>
+</section>
+
+<!-- ============ RELOCATE — Bay to Foothills signature service ============ -->
+<section class="section relocate-promo" style="background: var(--ink); color: var(--shell); padding: 100px var(--gutter);">
+  <div class="section-inner">
+    <div style="display: grid; grid-template-columns: 1.1fr 1fr; gap: 80px; align-items: center;">
+      <div>
+        <span class="hairline-brass" style="background: var(--brass-bright);"></span>
+        <span class="eyebrow" style="color: var(--brass-bright); display: block; margin-top: 14px;">The signature service · Bay Area → Sierra Foothills</span>
+        <h2 class="h-section" style="color: var(--shell); margin-top: 12px;">We <em style="color: var(--brass-bright);">move you,</em><br>end to end.</h2>
+        <p style="font-family: var(--serif); font-style: italic; font-weight: 300; font-size: 20px; line-height: 1.5; color: rgba(250,246,236,0.78); margin-top: 24px; max-width: 540px;">Sara and James specialize in the one transaction most agents won't take on — selling your Bay Area home <em style="color: var(--brass-bright);">and</em> finding your foothills one, on a single coordinated calendar.</p>
+        <div style="display: flex; gap: 14px; margin-top: 32px; flex-wrap: wrap;">
+          <a href="relocate.html" class="btn btn-brass">How it works</a>
+          <a href="platform.html" class="btn btn-ghost" style="border-color: rgba(250,246,236,0.30); color: var(--shell);">Start the conversation</a>
+        </div>
+      </div>
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1px; background: rgba(250,246,236,0.12); border: 1px solid rgba(250,246,236,0.12);">
+        <div style="background: var(--ink); padding: 28px 28px;">
+          <span class="label-cap" style="color: rgba(250,246,236,0.5);">From</span>
+          <div style="font-family: var(--serif); font-style: italic; font-weight: 400; font-size: 36px; color: var(--shell); margin-top: 6px;">The Bay</div>
+          <div style="font-family: var(--mono); font-size: 10px; letter-spacing: 0.14em; color: rgba(250,246,236,0.5); text-transform: uppercase; margin-top: 6px;">SF · Peninsula · East Bay</div>
+        </div>
+        <div style="background: var(--ink); padding: 28px 28px;">
+          <span class="label-cap" style="color: rgba(250,246,236,0.5);">To</span>
+          <div style="font-family: var(--serif); font-style: italic; font-weight: 400; font-size: 36px; color: var(--shell); margin-top: 6px;">The Foothills</div>
+          <div style="font-family: var(--mono); font-size: 10px; letter-spacing: 0.14em; color: var(--brass-bright); text-transform: uppercase; margin-top: 6px;">Calaveras · Amador · Tuolumne</div>
+        </div>
+        <div style="background: var(--ink); padding: 28px 28px; grid-column: 1 / -1;">
+          <span class="label-cap" style="color: var(--brass-bright);">One coordinated calendar</span>
+          <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-top: 14px;">
+            <div>
+              <div style="font-family: var(--serif); font-style: italic; font-size: 22px; color: var(--shell);">I.</div>
+              <div style="font-family: var(--mono); font-size: 10px; letter-spacing: 0.14em; color: rgba(250,246,236,0.65); text-transform: uppercase; margin-top: 4px;">Sell</div>
+              <div style="font-size: 12px; color: rgba(250,246,236,0.55); margin-top: 4px; line-height: 1.5;">Bay Area marketing plan, co-listed with a partner brokerage</div>
+            </div>
+            <div>
+              <div style="font-family: var(--serif); font-style: italic; font-size: 22px; color: var(--shell);">II.</div>
+              <div style="font-family: var(--mono); font-size: 10px; letter-spacing: 0.14em; color: rgba(250,246,236,0.65); text-transform: uppercase; margin-top: 4px;">Choose</div>
+              <div style="font-size: 12px; color: rgba(250,246,236,0.55); margin-top: 4px; line-height: 1.5;">Discovery weekend across our six towns</div>
+            </div>
+            <div>
+              <div style="font-family: var(--serif); font-style: italic; font-size: 22px; color: var(--shell);">III.</div>
+              <div style="font-family: var(--mono); font-size: 10px; letter-spacing: 0.14em; color: rgba(250,246,236,0.65); text-transform: uppercase; margin-top: 4px;">Land</div>
+              <div style="font-size: 12px; color: rgba(250,246,236,0.55); margin-top: 4px; line-height: 1.5;">Concurrent close, bridge loan, or rent-back — your call, our math</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ MATCHED LISTINGS ============ -->
+<section class="section" style="background: var(--vellum); padding-top: 0;" id="listings">
+  <div class="section-inner" style="padding-top: 100px;">
+    <div class="section-h">
+      <div>
+        <span class="hairline-brass" style="margin-bottom: 16px;"></span>
+        <span class="eyebrow">Matched for you · Personalized feed</span>
+        <h2 class="h-section" style="margin-top: 10px;">Your property feed.</h2>
+      </div>
+      <p class="lede right">Based on what buyers like you save and skip, we surface the homes worth your attention first — quietly, never crowded.</p>
+    </div>
+
+    <div class="list-grid">
+      <a href="listing.html" class="prop-card">
+        <div class="prop-photo">
+          <img src="https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=800&q=85" alt="" onerror="this.style.display='none'">
+          <div class="prop-tags">
+            <span class="pill-status pill-new">Active</span>
+          </div>
+        </div>
+        <div class="prop-body">
+          <div class="prop-price">$1,399,000</div>
+          <div class="prop-address">433 E Highway 4<br>Murphys, CA 95247</div>
+          <div class="prop-specs">
+            <span>4 Bd</span><span>3 Ba</span><span>Estate</span>
+          </div>
+          <div class="prop-foot">
+            <span class="prop-match">Listed by Sara</span>
+            <span class="label-cap" style="color: var(--ink-faint);">Plate II</span>
+          </div>
+        </div>
+      </a>
+
+      <a href="listing.html" class="prop-card">
+        <div class="prop-photo">
+          <img src="https://images.unsplash.com/photo-1568605114967-8130f3a36994?w=800&q=85" alt="" onerror="this.style.display='none'">
+          <div class="prop-tags">
+            <span class="pill-status pill-brass">Active</span>
+          </div>
+        </div>
+        <div class="prop-body">
+          <div class="prop-price">$399,000</div>
+          <div class="prop-address">2733 Emco Road<br>Mokelumne Hill, CA 95245</div>
+          <div class="prop-specs">
+            <span>3 Bd</span><span>2 Ba</span><span>Single family</span>
+          </div>
+          <div class="prop-foot">
+            <span class="prop-match">Listed by Sara</span>
+            <span class="label-cap" style="color: var(--ink-faint);">Plate III</span>
+          </div>
+        </div>
+      </a>
+
+      <a href="listing.html" class="prop-card">
+        <div class="prop-photo">
+          <img src="https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?w=800&q=85" alt="" onerror="this.style.display='none'">
+        </div>
+        <div class="prop-body">
+          <div class="prop-price">$1,200,000</div>
+          <div class="prop-address">7094 Heaton Moor Dr<br>San Jose, CA 95119</div>
+          <div class="prop-specs">
+            <span>3 Bd</span><span>1 Ba</span><span>Single family</span>
+          </div>
+          <div class="prop-foot">
+            <span class="prop-match">Listed by Sara</span>
+            <span class="label-cap" style="color: var(--ink-faint);">Plate IV</span>
+          </div>
+        </div>
+      </a>
+    </div>
+    <div style="text-align: center; margin-top: 48px;">
+      <a href="listings.html" class="btn btn-ghost">View all properties</a>
+    </div>
+  </div>
+</section>
+
+<!-- ============ COMMUNITIES ============ -->
+<section class="section" style="background: var(--parchment);" id="communities">
+  <div class="section-inner">
+    <div class="section-h">
+      <div>
+        <span class="hairline-brass" style="margin-bottom: 16px;"></span>
+        <span class="eyebrow">Explore the region</span>
+        <h2 class="h-section" style="margin-top: 10px;">Gold Country.</h2>
+      </div>
+      <p class="lede right">Each town has its own character — and its own market. Find the one that fits yours.</p>
+    </div>
+
+    <div class="comm-grid">
+      <a href="town-murphys.html" class="comm-card comm-card-large">
+        <div class="comm-bg" style="background-image: url('https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1400&q=85');"></div>
+        <div class="comm-overlay"></div>
+        <div class="comm-stat">Median<strong>$685K</strong></div>
+        <div class="comm-content">
+          <span class="comm-name">Murphys</span>
+          <span class="comm-meta">Boutique wine town · Historic Main · Legacy HQ</span>
+        </div>
+      </a>
+      <a href="town-arnold.html" class="comm-card">
+        <div class="comm-bg" style="background-image: url('https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=900&q=85');"></div>
+        <div class="comm-overlay"></div>
+        <div class="comm-stat">Median<strong>$520K</strong></div>
+        <div class="comm-content">
+          <span class="comm-name">Arnold</span>
+          <span class="comm-meta">Mountain living · Pines</span>
+        </div>
+      </a>
+      <a href="town-sutter-creek.html" class="comm-card">
+        <div class="comm-bg" style="background-image: url('https://images.unsplash.com/photo-1500534314209-a25ddb2bd429?w=900&q=85');"></div>
+        <div class="comm-overlay"></div>
+        <div class="comm-stat">Median<strong>$598K</strong></div>
+        <div class="comm-content">
+          <span class="comm-name">Sutter Creek</span>
+          <span class="comm-meta">Gold Rush · Vineyards</span>
+        </div>
+      </a>
+      <a href="river-mountain.html" class="comm-card">
+        <div class="comm-bg" style="background-image: url('https://images.unsplash.com/photo-1483728642387-6c3bdd6c93e5?w=900&q=85');"></div>
+        <div class="comm-overlay"></div>
+        <div class="comm-stat">Parcels<strong>5–40 ac</strong></div>
+        <div class="comm-content">
+          <span class="comm-name">River &amp; Mountain</span>
+          <span class="comm-meta">Lifestyle category · rural parcels · our specialty</span>
+        </div>
+      </a>
+      <a href="town-copperopolis.html" class="comm-card">
+        <div class="comm-bg" style="background-image: url('https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=900&q=85');"></div>
+        <div class="comm-overlay"></div>
+        <div class="comm-stat">Median<strong>$562K</strong></div>
+        <div class="comm-content">
+          <span class="comm-name">Copperopolis</span>
+          <span class="comm-meta">Lake-view estates · Golf</span>
+        </div>
+      </a>
+    </div>
+
+    <div style="text-align: center; margin-top: 48px;">
+      <a href="towns.html" class="btn btn-ghost">All six communities →</a>
+    </div>
+  </div>
+</section>
+
+<!-- ============ ABOUT ============ -->
+<section class="section" style="background: var(--vellum);" id="about">
+  <div class="section-inner">
+    <div class="about-grid">
+      <div class="agents-stack">
+        <div class="agent-row">
+          <div class="agent-photo">
+            <img src="art/sara-headshot.png" alt="Sara Cooper">
+          </div>
+          <div>
+            <div class="agent-name">Sara Cooper</div>
+            <div class="agent-title">Owner / Broker · She/Her</div>
+            <div class="agent-bio">Top producer across the Sierra foothills. 98 closings to date, 21 in the last twelve months. 5.0 ★ on Zillow.</div>
+            <div class="agent-spec"><span>Listing agent</span><span>Buyer's agent</span><span>Relocation</span></div>
+          </div>
+        </div>
+        <div class="agent-row">
+          <div class="agent-photo">
+            <img src="art/james-headshot.png" alt="James Beyersdorf">
+          </div>
+          <div>
+            <div class="agent-name">James Beyersdorf</div>
+            <div class="agent-title">Associate Agent · DRE #02122175</div>
+            <div class="agent-bio">Specialist in rural parcels, water rights, road access, and fire-zone analysis across Calaveras and Tuolumne.</div>
+            <div class="agent-spec"><span>Land</span><span>Acreage</span><span>Ranches</span></div>
+          </div>
+        </div>
+        <div class="dre-card">
+          <span class="label-cap">DRE Licensed</span>
+          <div class="dre-card-body">Serving Calaveras, Amador &amp; Tuolumne counties · California Bureau of Real Estate</div>
+        </div>
+      </div>
+      <div class="about-text">
+        <span class="hairline-brass"></span>
+        <span class="eyebrow">Your Legacy team</span>
+        <p class="about-quote">"Every transaction is a relationship. Every home <em>has a story.</em>"</p>
+        <p class="about-body">As Owner-Broker of Legacy Properties, Sara brings a rare blend of global perspective and hyper-local expertise. Internationally recognized for her public relations work — helping brands and individuals elevate their visibility and results — she applies that same next-level thinking to real estate.<br><br>An entrepreneur at heart, Sara has built and transformed businesses across the foothills, from reimagining a creek-side cottage to negotiating seven-figure ranch sales. Joined by James Beyersdorf, who specializes in land, acreage, and rural properties throughout the Sierra foothills, the Legacy team offers deep local knowledge that no algorithm or out-of-market firm can replicate.</p>
+        <div class="about-contact">
+          <a href="tel:2095594966"><span class="glyph">◇</span> (209) 559-4966</a>
+          <a href="mailto:SaraSellsCalifornia@gmail.com"><span class="glyph">◇</span> SaraSellsCalifornia@gmail.com</a>
+          <a href="platform.html"><span class="glyph">◇</span> Start a conversation</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ PLATFORM / AI ============ -->
+<section class="section platform">
+  <div class="section-inner">
+    <div class="platform-inner">
+      <div class="platform-h">
+        <span class="hairline-brass" style="background: var(--brass-bright);"></span>
+        <span class="eyebrow" style="color: var(--brass-bright); margin-top: 16px; display: block;">Quietly attentive</span>
+        <h2 class="h-section">A platform that <em>remembers</em><br>what you love.</h2>
+        <p class="platform-sub">Sara has always known what her clients want before they ask. The Legacy platform extends that instinct — tracking what you save, skip, and revisit, so the right listing finds you, not the other way around.</p>
+        <div class="platform-foot">
+          <span>—</span><span>Built in-house. No third-party CRM. No noise.</span>
+        </div>
+        <div style="margin-top: 28px;">
+          <a href="platform.html" class="btn btn-brass">Begin a profile</a>
+        </div>
+      </div>
+      <div class="platform-features">
+        <div class="platform-feature">
+          <div class="platform-num">I</div>
+          <div>
+            <div class="platform-feat-h">Behavioral matching</div>
+            <div class="platform-feat-s">Your feed learns from how you browse. The more you explore, the sharper it becomes — without ever surfacing a property outside your range.</div>
+          </div>
+          <span class="platform-tag">Quiet</span>
+        </div>
+        <div class="platform-feature">
+          <div class="platform-num">II</div>
+          <div>
+            <div class="platform-feat-h">Real-time agent alerts</div>
+            <div class="platform-feat-s">Sara is notified the moment a saved home drops in price, accepts an offer, or schedules an open house — so you're never a step behind.</div>
+          </div>
+          <span class="platform-tag">Live</span>
+        </div>
+        <div class="platform-feature">
+          <div class="platform-num">III</div>
+          <div>
+            <div class="platform-feat-h">Personal, not automated</div>
+            <div class="platform-feat-s">Every message you receive is from Sara — never a generic drip. Outreach is triggered by something specific to you, or it doesn't go out.</div>
+          </div>
+          <span class="platform-tag">Human</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ LEDGER ============ -->
+<section class="section" style="background: var(--parchment);" id="ledger">
+  <div class="section-inner">
+    <div class="section-h">
+      <div>
+        <span class="hairline-brass" style="margin-bottom: 16px;"></span>
+        <span class="eyebrow">Market intelligence · Monthly</span>
+        <h2 class="h-section" style="margin-top: 10px;">The Legacy Ledger.</h2>
+      </div>
+      <p class="lede right">Straight talk about what's moving, what's stalling, and what it means for you — right now.</p>
+    </div>
+
+    <div class="ledger-grid">
+      <div>
+        <article class="ledger-post">
+          <div class="ledger-meta">
+            <span>May 2026</span><span class="dot"></span><span>Market Brief</span>
+          </div>
+          <h3 class="ledger-title">Spring inventory is ticking up — but demand still outpaces supply.</h3>
+          <p class="ledger-excerpt">Calaveras County saw 12% more new listings this April vs. the same period last year — but well-priced homes in the $500K–$750K range are still going under contract within 18 days.</p>
+          <a href="#" class="btn-link">Read full analysis</a>
+        </article>
+        <article class="ledger-post">
+          <div class="ledger-meta">
+            <span>April 2026</span><span class="dot"></span><span>Seller's Letter</span>
+          </div>
+          <h3 class="ledger-title">Is this the year to list? Three signs the market is ready.</h3>
+          <p class="ledger-excerpt">Interest rates have settled into a range buyers have accepted as the new normal. Combined with low inventory and Bay Area in-migration, sellers who price right are winning.</p>
+          <a href="#" class="btn-link">Read full analysis</a>
+        </article>
+        <article class="ledger-post">
+          <div class="ledger-meta">
+            <span>March 2026</span><span class="dot"></span><span>Land Report</span>
+          </div>
+          <h3 class="ledger-title">Land is back: rural acreage sales up 28% year-over-year.</h3>
+          <p class="ledger-excerpt">Remote work turned five acres with a well and septic into a serious lifestyle upgrade. Multiple-offer situations on bare land that would have sat for months two years ago.</p>
+          <a href="#" class="btn-link">Read full analysis</a>
+        </article>
+      </div>
+      <aside class="market-card">
+        <div class="market-h">
+          <span class="label-cap">Market snapshot</span>
+          <span class="mono" style="font-size: 10px; color: var(--ink-faint);">May 2026</span>
+        </div>
+        <div class="market-row"><span class="town">Murphys</span><span class="price">$685,000</span><span class="chg up">+4.2%</span></div>
+        <div class="market-row"><span class="town">Arnold</span><span class="price">$520,000</span><span class="chg up">+2.8%</span></div>
+        <div class="market-row"><span class="town">Sutter Creek</span><span class="price">$598,000</span><span class="chg up">+5.1%</span></div>
+        <div class="market-row"><span class="town">Wilseyville</span><span class="price">$485,000</span><span class="chg up">+4.8%</span></div>
+        <div class="market-row"><span class="town">Angels Camp</span><span class="price">$415,000</span><span class="chg up">+3.7%</span></div>
+        <div class="market-row"><span class="town">Copperopolis</span><span class="price">$562,000</span><span class="chg up">+6.3%</span></div>
+        <p class="market-note">Calaveras, Amador &amp; Tuolumne County MLS. Median sale price, trailing 90 days.</p>
+      </aside>
+    </div>
+  </div>
+</section>
+
+<!-- ============ TESTIMONIALS ============ -->
+<section class="section" style="background: var(--vellum);">
+  <div class="section-inner">
+    <div class="section-h">
+      <div>
+        <span class="hairline-brass" style="margin-bottom: 16px;"></span>
+        <span class="eyebrow">Reviews · 5.0 ★ on Zillow</span>
+        <h2 class="h-section" style="margin-top: 10px;">In their own words.</h2>
+      </div>
+    </div>
+    <div class="testi-grid">
+      <div class="testi-card">
+        <div class="testi-stars">★★★★★</div>
+        <p class="testi-quote">"I cannot express how amazing Sara Cooper is. She was able to do what no other realtor could."</p>
+        <div class="testi-author"><strong>Laura</strong>Wilseyville, CA · Bought &amp; sold, 2022</div>
+      </div>
+      <div class="testi-card">
+        <div class="testi-stars">★★★★★</div>
+        <p class="testi-quote">"I highly recommend Sara Cooper. She did an exceptional job working as a buyer's agent on a property I recently purchased."</p>
+        <div class="testi-author"><strong>Teri D.</strong>Railroad Flat, CA · Bought, 2021</div>
+      </div>
+      <div class="testi-card">
+        <div class="testi-stars">★★★★★</div>
+        <p class="testi-quote">"Sara is a wonderful realtor! She had a great attitude and super knowledgeable about the area."</p>
+        <div class="testi-author"><strong>marissaevanstar</strong>Arnold, CA · Bought, 2021</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ CTA ============ -->
+<section class="cta">
+  <span class="hairline-brass" style="margin: 0 auto 20px;"></span>
+  <span class="eyebrow">Begin your next chapter</span>
+  <h2 class="cta-h">Your story<br>starts <em>here.</em></h2>
+  <p class="cta-sub">Let's find the home — or the buyer — that changes everything.</p>
+  <div class="cta-ctas">
+    <a href="platform.html" class="btn btn-ink">Find my match</a>
+    <a href="tel:2095594966" class="btn btn-ghost">Call (209) 559-4966</a>
+  </div>
+  <div class="cta-contact">
+    <a href="tel:2095594966">(209) 559-4966</a>
+    <span class="cta-sep">·</span>
+    <a href="mailto:SaraSellsCalifornia@gmail.com">SaraSellsCalifornia@gmail.com</a>
+    <span class="cta-sep">·</span>
+    <span>4149 Cedar Cir · Angels Camp, CA 95222</span>
+  </div>
+</section>
+
+<!-- ============ FOOTER ============ -->
+<footer class="footer">
+  <div class="footer-inner">
+    <div class="footer-top">
+      <div>
+        <a href="index.html" class="wordmark" style="align-items: flex-start;">
+          <span class="wordmark-word">Legacy</span>
+          <span class="wordmark-sub">Properties · Angels Camp CA</span>
+        </a>
+        <p class="footer-tagline">Every home has a story. We help you find yours — or tell the one you've already lived.</p>
+      </div>
+      <div>
+        <h4>Services</h4>
+        <a href="relocate.html">Bay → Foothills relocation</a>
+        <a href="towns.html">Communities</a>
+        <a href="seller.html">Sellers</a>
+        <a href="listings.html">Browse listings</a>
+        <a href="platform.html">Request a tour</a>
+      </div>
+      <div>
+        <h4>Buy</h4>
+        <a href="listings.html">Search all listings</a>
+        <a href="fire-zone.html">Fire-zone &amp; insurance tool</a>
+        <a href="commute.html">Commute calculator</a>
+        <a href="relocate.html">Bay → Foothills relocation</a>
+        <a href="platform.html">Request a tour</a>
+      </div>
+      <div>
+        <h4>Sell</h4>
+        <a href="seller.html">What's my home worth?</a>
+        <a href="seller.html">Listing process</a>
+        <a href="how-we-work.html">How we work</a>
+        <a href="about.html">About Sara &amp; James</a>
+        <a href="seller.html">Request a CMA</a>
+      </div>
+      <div>
+        <h4>Connect</h4>
+        <a href="tel:2095594966">(209) 559-4966</a>
+        <a href="mailto:SaraSellsCalifornia@gmail.com">SaraSellsCalifornia@gmail.com</a>
+        <a href="https://www.instagram.com/legacypropertiesig/">Instagram</a>
+        <a href="https://www.facebook.com/legacypropertiesfb/">Facebook</a>
+        <a href="https://www.youtube.com/LegacyPropertiesTV">YouTube</a>
+        <a href="ledger.html">The Ledger</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <div>© 2026 Legacy Properties · All rights reserved</div>
+      <div>Sara Cooper, Broker · DRE #0214187 · Equal Housing Opportunity</div>
+    </div>
+  </div>
+</footer>
+
+<script>
+function setJourney(el) {
+  document.querySelectorAll('.journey-step').forEach(s => s.classList.remove('active'));
+  el.classList.add('active');
+}
+
+/* ── Hero video: seamless dual-buffer crossfade loop ──
+   Two videos stacked. While A plays, B silently pre-buffers at t=0.
+   1.6s before A ends, B fades in over 1.4s and A pauses behind it.
+   They alternate — no seek-flash, no playback gap. */
+(function () {
+  const FADE_MS      = 1400;
+  const FADE_TRIGGER = 1.6;
+  const OPACITY_ON   = 1;
+
+  const vidA = document.getElementById('heroVidA');
+  const vidB = document.getElementById('heroVidB');
+  if (!vidA || !vidB) return;
+
+  let swapping = false;
+  let cleanup  = null;
+
+  function crossfade(from, to) {
+    if (swapping) return;
+    swapping = true;
+    try { to.currentTime = 0; } catch (e) {}
+    const p = to.play(); if (p && p.catch) p.catch(() => {});
+    from.style.opacity = '0';
+    to.style.opacity   = String(OPACITY_ON);
+    setTimeout(() => {
+      try { from.pause(); from.currentTime = 0; } catch (e) {}
+      swapping = false;
+      watchEnd(to, from);
+    }, FADE_MS + 200);
+  }
+
+  function watchEnd(playing, waiting) {
+    if (cleanup) cleanup();
+    function check() {
+      if (swapping || !playing.duration || !isFinite(playing.duration)) return;
+      if (playing.currentTime >= playing.duration - FADE_TRIGGER) {
+        playing.removeEventListener('timeupdate', check);
+        crossfade(playing, waiting);
+      }
+    }
+    playing.addEventListener('timeupdate', check);
+    cleanup = () => playing.removeEventListener('timeupdate', check);
+  }
+
+  function start() {
+    vidA.style.opacity = String(OPACITY_ON);
+    vidB.style.opacity = '0';
+    const p = vidA.play();
+    if (p && p.catch) p.catch(() => {
+      document.addEventListener('click',
+        () => vidA.play().catch(() => {}), { once: true });
+    });
+    watchEnd(vidA, vidB);
+  }
+
+  if (vidA.readyState >= 1) start();
+  else vidA.addEventListener('loadedmetadata', start, { once: true });
+})();
+</script>
+</body>
+</html>

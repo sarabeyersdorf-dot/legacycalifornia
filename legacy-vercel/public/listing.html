@@ -1,0 +1,821 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>8001 Vineyard Ridge Drive — Legacy Properties</title>
+<link rel="stylesheet" href="legacy.css">
+<style>
+.crumbs {
+  padding: 18px var(--gutter);
+  font-family: var(--mono); font-size: 10px; letter-spacing: 0.16em;
+  text-transform: uppercase; color: var(--ink-mute);
+  border-bottom: 1px solid var(--rule);
+  background: var(--vellum);
+}
+.crumbs a { color: var(--ink-mute); text-decoration: none; }
+.crumbs a:hover { color: var(--brass); }
+.crumbs .sep { margin: 0 10px; color: var(--ink-faint); }
+
+/* GALLERY */
+.gallery {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr;
+  grid-template-rows: 1fr 1fr;
+  gap: 6px;
+  padding: 6px;
+  background: var(--parchment);
+  max-width: 1480px; margin: 0 auto;
+  height: 600px;
+}
+.g-cell {
+  position: relative; overflow: hidden; cursor: pointer;
+}
+.g-cell.main { grid-row: 1 / 3; }
+.g-cell img { width: 100%; height: 100%; object-fit: cover; transition: transform .5s; }
+.g-cell:hover img { transform: scale(1.02); }
+.g-cell-frame {
+  position: absolute; inset: 0;
+  background: repeating-linear-gradient(45deg, var(--vellum) 0 14px, var(--linen) 14px 28px);
+  display: flex; align-items: center; justify-content: center;
+  color: var(--ink-mute); font-family: var(--mono); font-size: 10px;
+  letter-spacing: 0.18em; text-transform: uppercase;
+}
+.g-more {
+  position: absolute; bottom: 14px; right: 14px;
+  background: rgba(27,24,19,0.75); color: var(--shell);
+  font-family: var(--mono); font-size: 10px; letter-spacing: 0.14em;
+  padding: 8px 14px; text-transform: uppercase;
+  backdrop-filter: blur(8px);
+}
+.g-toolbar {
+  position: absolute; top: 14px; right: 14px;
+  display: flex; gap: 6px;
+}
+.g-tool {
+  background: rgba(250,246,236,0.95); border: 1px solid var(--rule);
+  padding: 8px 14px; font-family: var(--mono); font-size: 10px;
+  letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink);
+  cursor: pointer; backdrop-filter: blur(6px);
+}
+.g-tool:hover { background: var(--ink); color: var(--shell); }
+
+/* CONTENT */
+.detail {
+  display: grid; grid-template-columns: 1fr 380px;
+  gap: 64px;
+  max-width: var(--max); margin: 0 auto;
+  padding: 60px var(--gutter) 100px;
+}
+
+.det-head { padding-bottom: 32px; border-bottom: 1px solid var(--rule); margin-bottom: 32px; }
+.det-eyebrow {
+  display: flex; gap: 12px; align-items: center; margin-bottom: 14px;
+}
+.det-h1 {
+  font-family: var(--serif); font-style: italic; font-weight: 300;
+  font-size: clamp(48px, 6vw, 88px); line-height: 0.96;
+  color: var(--ink); margin-bottom: 18px; letter-spacing: -0.01em;
+}
+.det-addr {
+  font-size: 16px; color: var(--ink-soft); font-family: var(--serif); font-style: italic; font-weight: 400;
+}
+.det-price-row {
+  display: flex; justify-content: space-between; align-items: flex-end;
+  margin-top: 30px; gap: 24px; flex-wrap: wrap;
+}
+.det-price {
+  font-family: var(--serif); font-style: italic; font-weight: 300;
+  font-size: 56px; line-height: 1; color: var(--ink);
+}
+.det-price .ppsf {
+  display: block; margin-top: 8px; font-family: var(--mono); font-size: 11px;
+  font-style: normal; letter-spacing: 0.18em; text-transform: uppercase; color: var(--ink-mute);
+}
+
+.det-specs {
+  display: grid; grid-template-columns: repeat(5, 1fr); gap: 0;
+  margin: 32px 0; border: 1px solid var(--rule); background: var(--shell);
+}
+.spec {
+  padding: 22px 24px; border-right: 1px solid var(--rule);
+  display: flex; flex-direction: column; gap: 6px;
+}
+.spec:last-child { border-right: none; }
+.spec-val { font-family: var(--serif); font-style: italic; font-weight: 400; font-size: 28px; color: var(--ink); line-height: 1; }
+.spec-label { font-family: var(--mono); font-size: 9.5px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--ink-mute); }
+
+/* OVERVIEW */
+.det-section { padding: 40px 0; border-bottom: 1px solid var(--rule); }
+.det-section:last-child { border-bottom: none; }
+.det-h2 {
+  font-family: var(--serif); font-style: italic; font-weight: 400;
+  font-size: 32px; line-height: 1.1; color: var(--ink); margin-bottom: 24px;
+}
+.det-h2 em { color: var(--brass); }
+.det-prose {
+  font-family: var(--serif); font-weight: 400;
+  font-size: 17px; line-height: 1.65; color: var(--ink-soft);
+  max-width: 680px;
+}
+.det-prose p { margin-bottom: 18px; }
+.det-prose p:last-child { margin-bottom: 0; }
+.det-prose-lede {
+  font-family: var(--serif); font-style: italic; font-weight: 300;
+  font-size: 22px; line-height: 1.45; color: var(--ink);
+  padding-bottom: 22px; border-bottom: 1px solid var(--rule); margin-bottom: 26px;
+  max-width: 680px;
+}
+.det-prose-byline {
+  margin-top: 22px;
+  font-family: var(--mono); font-size: 10px; letter-spacing: 0.18em;
+  text-transform: uppercase; color: var(--ink-mute);
+}
+
+/* FEATURES */
+.feat-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0; border: 1px solid var(--rule); }
+.feat-col { padding: 24px 28px; border-right: 1px solid var(--rule); background: var(--shell); }
+.feat-col:last-child { border-right: none; }
+.feat-col h4 { font-family: var(--mono); font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--brass); font-weight: 500; margin-bottom: 16px; }
+.feat-col ul { list-style: none; }
+.feat-col li { font-size: 13px; color: var(--ink-soft); padding: 8px 0; border-bottom: 1px solid var(--rule-soft); display: flex; gap: 10px; align-items: baseline; }
+.feat-col li:last-child { border-bottom: none; }
+.feat-col li::before { content: '◇'; color: var(--brass); font-size: 8px; flex-shrink: 0; }
+
+/* FACTS TABLE */
+.facts {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 0;
+  background: var(--shell); border: 1px solid var(--rule);
+}
+.fact {
+  display: grid; grid-template-columns: 180px 1fr; gap: 16px;
+  padding: 14px 24px; border-bottom: 1px solid var(--rule-soft);
+}
+.fact:nth-last-child(-n+2) { border-bottom: none; }
+.fact:nth-child(odd) { border-right: 1px solid var(--rule-soft); }
+.fact dt {
+  font-family: var(--mono); font-size: 10px; letter-spacing: 0.14em;
+  text-transform: uppercase; color: var(--ink-mute);
+}
+.fact dd { font-size: 14px; color: var(--ink); font-weight: 500; }
+
+/* MAP MINI */
+.mini-map {
+  position: relative;
+  aspect-ratio: 16/8; background: var(--vellum); border: 1px solid var(--rule);
+  overflow: hidden;
+}
+.mini-map svg { width: 100%; height: 100%; display: block; }
+.mini-map .pin-here {
+  position: absolute; left: 50%; top: 50%;
+  transform: translate(-50%, -100%);
+  background: var(--brass); color: var(--shell);
+  padding: 8px 14px; font-family: var(--mono); font-size: 11px;
+  letter-spacing: 0.06em; font-weight: 600;
+}
+.mini-map .pin-here::after {
+  content: ''; position: absolute; left: 50%; bottom: -6px;
+  transform: translateX(-50%);
+  border-left: 6px solid transparent; border-right: 6px solid transparent;
+  border-top: 7px solid var(--brass);
+}
+.mini-map-meta {
+  display: grid; grid-template-columns: repeat(4, 1fr); gap: 0;
+  margin-top: -1px; border: 1px solid var(--rule); background: var(--shell);
+}
+.mm-cell { padding: 18px 22px; border-right: 1px solid var(--rule); }
+.mm-cell:last-child { border-right: none; }
+.mm-cell .label-cap { display: block; margin-bottom: 6px; }
+.mm-cell .v { font-family: var(--serif); font-style: italic; font-weight: 400; font-size: 22px; color: var(--ink); line-height: 1; }
+
+/* HISTORY */
+.hist {
+  background: var(--shell); border: 1px solid var(--rule);
+}
+.hist-row {
+  display: grid; grid-template-columns: 140px 1fr 140px 100px;
+  gap: 18px; padding: 14px 24px;
+  border-bottom: 1px solid var(--rule-soft);
+  align-items: center;
+  font-size: 13.5px;
+}
+.hist-row:last-child { border-bottom: none; }
+.hist-date { font-family: var(--mono); font-size: 11px; letter-spacing: 0.12em; color: var(--ink-mute); }
+.hist-event { color: var(--ink); }
+.hist-price { font-family: var(--serif); font-style: italic; font-size: 18px; color: var(--ink); }
+.hist-chg { font-family: var(--mono); font-size: 11px; text-align: right; font-weight: 500; }
+.hist-chg.up { color: var(--positive); }
+.hist-chg.dn { color: var(--negative); }
+.hist-chg.zero { color: var(--ink-mute); }
+
+/* SIDEBAR */
+.side {
+  position: sticky; top: 24px; align-self: start;
+  display: flex; flex-direction: column; gap: 18px;
+}
+
+.side-card { background: var(--shell); border: 1px solid var(--rule); padding: 28px; }
+.side-card h3 { font-family: var(--serif); font-style: italic; font-weight: 400; font-size: 22px; color: var(--ink); margin-bottom: 6px; }
+.side-card .sub { font-size: 13px; color: var(--ink-soft); margin-bottom: 22px; line-height: 1.6; }
+
+/* Tour scheduler */
+.tour-tabs { display: flex; border: 1px solid var(--rule); margin-bottom: 18px; }
+.tour-tab {
+  flex: 1; padding: 10px; background: none; border: none; border-right: 1px solid var(--rule);
+  font-family: var(--mono); font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase;
+  cursor: pointer; color: var(--ink-mute); transition: all .15s;
+}
+.tour-tab:last-child { border-right: none; }
+.tour-tab.on { background: var(--ink); color: var(--shell); }
+.tour-days {
+  display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; margin-bottom: 16px;
+}
+.tour-day {
+  background: var(--linen); border: 1px solid transparent; padding: 8px 0;
+  text-align: center; cursor: pointer; transition: all .15s;
+}
+.tour-day:hover { border-color: var(--ink); }
+.tour-day.on { background: var(--ink); color: var(--shell); }
+.tour-day .dow { font-family: var(--mono); font-size: 9px; letter-spacing: 0.14em; text-transform: uppercase; opacity: 0.6; }
+.tour-day .num { font-family: var(--serif); font-style: italic; font-size: 20px; line-height: 1; margin-top: 4px; }
+.tour-day.disabled { opacity: 0.3; cursor: not-allowed; }
+.tour-slots {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-bottom: 18px;
+}
+.tour-slot {
+  background: var(--linen); border: 1px solid transparent;
+  padding: 9px; font-family: var(--mono); font-size: 11px;
+  text-align: center; cursor: pointer; transition: all .15s; color: var(--ink);
+}
+.tour-slot:hover { border-color: var(--ink); }
+.tour-slot.on { background: var(--brass); color: var(--shell); }
+
+/* Agent card */
+.agent-mini { display: grid; grid-template-columns: 56px 1fr; gap: 14px; align-items: center; }
+.agent-mini .avatar { background: var(--brass); color: var(--shell); font-size: 22px; }
+.agent-mini-name { font-family: var(--serif); font-style: italic; font-size: 22px; color: var(--ink); }
+.agent-mini-title { font-family: var(--mono); font-size: 9.5px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--ink-mute); margin-top: 2px; }
+.agent-mini-stats { display: flex; gap: 18px; margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--rule); }
+.agent-mini-stats div { flex: 1; }
+.agent-mini-stats .v { font-family: var(--serif); font-style: italic; font-weight: 400; font-size: 18px; color: var(--ink); }
+.agent-mini-stats .l { font-family: var(--mono); font-size: 9px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--ink-mute); margin-top: 2px; }
+
+.contact-form { display: flex; flex-direction: column; gap: 10px; margin-top: 18px; }
+.contact-form textarea {
+  background: var(--linen); border: 1px solid var(--rule); padding: 10px 12px;
+  font-family: var(--sans); font-size: 13px; color: var(--ink); resize: vertical;
+  min-height: 80px; outline: none; transition: border-color .15s;
+}
+.contact-form textarea:focus { border-color: var(--brass); }
+
+/* Mortgage */
+.mort-summary {
+  background: var(--ink); color: var(--shell);
+  padding: 22px 24px; margin: -28px -28px 22px; border-bottom: 1px solid var(--ink);
+}
+.mort-summary .v { font-family: var(--serif); font-style: italic; font-weight: 300; font-size: 36px; color: var(--brass-bright); line-height: 1; }
+.mort-summary .l { font-family: var(--mono); font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase; color: rgba(250,246,236,0.5); margin-top: 6px; }
+.mort-row {
+  display: grid; grid-template-columns: 1fr auto; gap: 8px; align-items: center;
+  padding: 9px 0;
+  font-size: 13px; color: var(--ink-soft);
+  border-bottom: 1px solid var(--rule-soft);
+}
+.mort-row:last-of-type { border-bottom: none; }
+.mort-row .l { font-family: var(--mono); font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-mute); }
+.mort-row .v { font-family: var(--serif); font-style: italic; font-weight: 400; font-size: 16px; color: var(--ink); }
+.mort-slider {
+  -webkit-appearance: none; appearance: none; width: 100%; height: 2px; background: var(--rule-strong);
+  margin-top: 10px;
+}
+.mort-slider::-webkit-slider-thumb {
+  -webkit-appearance: none; appearance: none;
+  width: 14px; height: 14px; background: var(--brass);
+}
+.mort-disclaimer {
+  margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--rule);
+  font-family: var(--mono); font-size: 9.5px; letter-spacing: 0.12em; color: var(--ink-faint);
+  line-height: 1.5;
+}
+
+/* Similar */
+.similar-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 18px; }
+
+@media (max-width: 1000px) {
+  .gallery { grid-template-columns: 1fr 1fr; height: auto; }
+  .gallery .g-cell.main { grid-column: 1 / 3; grid-row: auto; height: 360px; }
+  .detail { grid-template-columns: 1fr; }
+  .side { position: relative; top: 0; }
+  .det-specs { grid-template-columns: 1fr 1fr; }
+  .feat-grid, .similar-grid { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body class="paper" data-screen-label="Listing Detail">
+
+<header class="topnav">
+  <div class="topnav-bar1">
+    <span>Boutique luxury real estate · Calaveras · Amador · Tuolumne</span>
+    <span><a href="tel:2095594966">(209) 559-4966</a> · <a href="mailto:SaraSellsCalifornia@gmail.com">SaraSellsCalifornia@gmail.com</a></span>
+  </div>
+  <nav class="topnav-bar2">
+    <div class="topnav-links">
+      <a href="listings.html" class="active">Listings</a>
+      <a href="index.html#communities">Communities</a>
+      <a href="relocate.html">Relocate</a>
+      <a href="seller.html">Sellers</a>
+    </div>
+    <a href="index.html" class="wordmark">
+      <span class="wordmark-word">Legacy</span>
+      <span class="wordmark-sub">Properties · Angels Camp CA</span>
+    </a>
+    <div class="topnav-links right">
+      <a href="index.html#ledger">The Ledger</a>
+      <a href="dashboard.html">Sign In</a>
+      <a href="platform.html" class="btn btn-ink btn-sm" style="padding:10px 18px;">Find My Match</a>
+    </div>
+  </nav>
+</header>
+
+<nav class="crumbs">
+  <a href="listings.html">Properties</a>
+  <span class="sep">›</span>
+  <a href="listings.html">Sutter Creek</a>
+  <span class="sep">›</span>
+  <span>8001 Vineyard Ridge Drive</span>
+</nav>
+
+<!-- ============ GALLERY ============ -->
+<section class="gallery">
+  <div class="g-cell main">
+    <img src="https://images.unsplash.com/photo-1613977257363-707ba9348227?w=1400&q=85" alt="">
+    <div class="g-toolbar">
+      <button class="g-tool">◇ Save</button>
+      <button class="g-tool">⇪ Share</button>
+      <button class="g-tool">⊞ All photos · 47</button>
+    </div>
+  </div>
+  <div class="g-cell">
+    <img src="https://images.unsplash.com/photo-1600210491892-03d54c0aaf87?w=900&q=85" alt="">
+  </div>
+  <div class="g-cell">
+    <img src="https://images.unsplash.com/photo-1600566753190-17f0baa2a6c3?w=900&q=85" alt="">
+  </div>
+  <div class="g-cell">
+    <img src="https://images.unsplash.com/photo-1600585154526-990dced4db0d?w=900&q=85" alt="">
+  </div>
+  <div class="g-cell">
+    <img src="https://images.unsplash.com/photo-1564540586988-aa4e53c3d799?w=900&q=85" alt="">
+    <div class="g-more">+42 more</div>
+  </div>
+</section>
+
+<!-- ============ DETAIL ============ -->
+<main class="detail">
+  <article>
+    <!-- HEAD -->
+    <header class="det-head">
+      <div class="det-eyebrow">
+        <span class="pill-status pill-new">Just listed</span>
+        <span class="pill-status">MLS #224018712</span>
+        <span class="pill-status">21 days on market</span>
+      </div>
+      <h1 class="det-h1">Vineyard Ridge.</h1>
+      <p class="det-addr">8001 Vineyard Ridge Drive · Sutter Creek, CA 95685</p>
+      <div class="det-price-row">
+        <div class="det-price">
+          $1,195,000
+          <span class="ppsf">$302 / sq ft · ↓ −$30,000 since Apr 2</span>
+        </div>
+        <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+          <button class="btn btn-ghost btn-sm">◇ Save</button>
+          <button class="btn btn-ghost btn-sm">⇪ Share</button>
+          <button class="btn btn-ghost btn-sm">⊞ Print</button>
+        </div>
+      </div>
+
+      <div class="det-specs">
+        <div class="spec">
+          <span class="spec-val">5</span>
+          <span class="spec-label">Bedrooms</span>
+        </div>
+        <div class="spec">
+          <span class="spec-val">4</span>
+          <span class="spec-label">Bathrooms</span>
+        </div>
+        <div class="spec">
+          <span class="spec-val">3,960</span>
+          <span class="spec-label">Square feet</span>
+        </div>
+        <div class="spec">
+          <span class="spec-val">4.5</span>
+          <span class="spec-label">Acres</span>
+        </div>
+        <div class="spec">
+          <span class="spec-val">1998</span>
+          <span class="spec-label">Year built</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- OVERVIEW -->
+    <section class="det-section">
+      <span class="eyebrow">Overview · Written by Sara</span>
+      <h2 class="det-h2">A property for people who came up <em>for the weekend</em><br>and never quite left.</h2>
+      <div class="det-prose">
+        <p class="det-prose-lede">Vineyard Ridge sits high on a sun-soft southwestern slope above Sutter Creek — four and a half acres of decomposed granite and old oak, ready to be planted, and a 1998 estate home built when local craftsmen still finished trim by hand.</p>
+        <p>The house is generous but unfussy. A chef's kitchen with two ovens and a six-burner range opens onto a great room anchored by a Roman-clay fireplace and a wall of glass that takes the valley straight through to the foothills. The primary suite occupies its own wing — French doors to a private courtyard, a stone-tiled walk-in shower, and a soaking tub set under a north-facing clerestory.</p>
+        <p>Downstairs: a wine cellar cut into the hill, a tasting room with original beadboard, and a fifth bedroom set up as a guest suite. A detached studio above the three-car garage would make a graceful office, an in-law unit, or — as the current owners use it — a painter's room.</p>
+        <p>The land is the rare thing. The bench above the home is terraced and irrigated, ready for syrah, viognier, or a small orchard. Eight zoned irrigation circuits. Two seasonal creeks. And the kind of view — vineyards in three directions, the Sierra on the fourth — that doesn't come on the market often.</p>
+        <p class="det-prose-byline">— Sara Cooper, Broker. Visited the property May 4.</p>
+      </div>
+    </section>
+
+    <!-- FEATURES -->
+    <section class="det-section">
+      <span class="eyebrow">Features</span>
+      <h2 class="det-h2">What you'll find inside.</h2>
+      <div class="feat-grid">
+        <div class="feat-col">
+          <h4>Interior</h4>
+          <ul>
+            <li>Chef's kitchen · Wolf 6-burner</li>
+            <li>Two ovens, Sub-Zero refrigerator</li>
+            <li>Roman-clay fireplace</li>
+            <li>White oak flooring throughout</li>
+            <li>Primary suite with courtyard</li>
+            <li>Stone-tiled walk-in shower</li>
+            <li>Wine cellar (capacity 2,400)</li>
+            <li>Tasting room with original beadboard</li>
+          </ul>
+        </div>
+        <div class="feat-col">
+          <h4>Land &amp; outdoor</h4>
+          <ul>
+            <li>4.5 acres · terraced</li>
+            <li>Eight-zone drip irrigation</li>
+            <li>Two seasonal creeks</li>
+            <li>Detached studio (640 sf)</li>
+            <li>Three-car garage</li>
+            <li>Mature oak canopy</li>
+            <li>Private gated entry</li>
+            <li>Fully fenced perimeter</li>
+          </ul>
+        </div>
+        <div class="feat-col">
+          <h4>Systems</h4>
+          <ul>
+            <li>Whole-house generator (Generac 22kW)</li>
+            <li>Solar PV (16 panels) — owned</li>
+            <li>Tesla wall battery</li>
+            <li>Newer dual-zone HVAC (2022)</li>
+            <li>Private well · 12 gpm</li>
+            <li>Septic — 3yr inspection on file</li>
+            <li>High-speed fiber (Frontier)</li>
+            <li>Roof — composition · 2017</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- FACTS -->
+    <section class="det-section">
+      <span class="eyebrow">Property facts</span>
+      <h2 class="det-h2">By the numbers.</h2>
+      <dl class="facts">
+        <div class="fact"><dt>Property type</dt><dd>Single-family · Estate</dd></div>
+        <div class="fact"><dt>MLS #</dt><dd>224018712</dd></div>
+        <div class="fact"><dt>County</dt><dd>Amador</dd></div>
+        <div class="fact"><dt>APN</dt><dd>038-410-021</dd></div>
+        <div class="fact"><dt>Zoning</dt><dd>RA-5 · Residential / Agricultural</dd></div>
+        <div class="fact"><dt>Lot size</dt><dd>4.50 acres (196,020 sf)</dd></div>
+        <div class="fact"><dt>Year built</dt><dd>1998 · renovated 2022</dd></div>
+        <div class="fact"><dt>Stories</dt><dd>2</dd></div>
+        <div class="fact"><dt>Garage</dt><dd>3-car detached + studio above</dd></div>
+        <div class="fact"><dt>Parking</dt><dd>Private gated drive · 6+</dd></div>
+        <div class="fact"><dt>Water</dt><dd>Private well · 12 gpm</dd></div>
+        <div class="fact"><dt>Sewer</dt><dd>Septic · serviced 2024</dd></div>
+        <div class="fact"><dt>HOA</dt><dd>None</dd></div>
+        <div class="fact"><dt>Property tax (2025)</dt><dd>$12,840 / yr</dd></div>
+        <div class="fact"><dt>Fire zone</dt><dd>Moderate · defensible space cleared</dd></div>
+        <div class="fact"><dt>School district</dt><dd>Amador County Unified</dd></div>
+      </dl>
+    </section>
+
+    <!-- LOCATION -->
+    <section class="det-section">
+      <span class="eyebrow">Location</span>
+      <h2 class="det-h2">Where it sits.</h2>
+      <div class="mini-map">
+        <svg viewBox="0 0 1000 500" preserveAspectRatio="xMidYMid slice">
+          <defs>
+            <radialGradient id="terrain2" cx="50%" cy="50%" r="65%">
+              <stop offset="0%" stop-color="#E8DFCC"/>
+              <stop offset="60%" stop-color="#DDD0B3"/>
+              <stop offset="100%" stop-color="#C7B58F"/>
+            </radialGradient>
+          </defs>
+          <rect width="1000" height="500" fill="url(#terrain2)"/>
+          <g fill="none" stroke="rgba(27,24,19,0.10)" stroke-width="0.8">
+            <path d="M0,100 Q250,80 500,120 T1000,100"/>
+            <path d="M0,180 Q250,160 500,200 T1000,180"/>
+            <path d="M0,260 Q250,240 500,280 T1000,260"/>
+            <path d="M0,340 Q250,320 500,360 T1000,340"/>
+          </g>
+          <path d="M-20,400 Q200,360 400,380 T1000,340" fill="none" stroke="#9DB5C2" stroke-width="3" opacity="0.7"/>
+          <g fill="none" stroke="rgba(27,24,19,0.35)" stroke-width="1.5" stroke-dasharray="6 4">
+            <path d="M-20,250 Q250,220 500,260 T1020,240"/>
+          </g>
+          <g font-family="JetBrains Mono, monospace" font-size="10" fill="rgba(27,24,19,0.6)" letter-spacing="2">
+            <text x="200" y="280">SUTTER CREEK</text>
+            <text x="700" y="200">PLYMOUTH</text>
+          </g>
+        </svg>
+        <div class="pin-here">$1.195M</div>
+      </div>
+      <div class="mini-map-meta">
+        <div class="mm-cell">
+          <span class="label-cap">Downtown Sutter Creek</span>
+          <span class="v">8 min</span>
+        </div>
+        <div class="mm-cell">
+          <span class="label-cap">Murphys</span>
+          <span class="v">32 min</span>
+        </div>
+        <div class="mm-cell">
+          <span class="label-cap">Sacramento Airport</span>
+          <span class="v">1 hr 14</span>
+        </div>
+        <div class="mm-cell">
+          <span class="label-cap">Walk score</span>
+          <span class="v">28 / 100</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- HISTORY -->
+    <section class="det-section">
+      <span class="eyebrow">Price &amp; sale history</span>
+      <h2 class="det-h2">The paper trail.</h2>
+      <div class="hist">
+        <div class="hist-row">
+          <span class="hist-date">May 12, 2026</span>
+          <span class="hist-event">Price reduced by Legacy Properties</span>
+          <span class="hist-price">$1,195,000</span>
+          <span class="hist-chg dn">−$30,000</span>
+        </div>
+        <div class="hist-row">
+          <span class="hist-date">Apr 2, 2026</span>
+          <span class="hist-event">Listed for sale · Legacy Properties</span>
+          <span class="hist-price">$1,225,000</span>
+          <span class="hist-chg zero">—</span>
+        </div>
+        <div class="hist-row">
+          <span class="hist-date">Sep 8, 2014</span>
+          <span class="hist-event">Sold · Coldwell Banker</span>
+          <span class="hist-price">$685,000</span>
+          <span class="hist-chg up">+$235,000 vs '06</span>
+        </div>
+        <div class="hist-row">
+          <span class="hist-date">Mar 11, 2006</span>
+          <span class="hist-event">Sold · Century 21</span>
+          <span class="hist-price">$450,000</span>
+          <span class="hist-chg zero">—</span>
+        </div>
+        <div class="hist-row">
+          <span class="hist-date">Aug 1998</span>
+          <span class="hist-event">Built · Original construction</span>
+          <span class="hist-price">—</span>
+          <span class="hist-chg zero">—</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- SIMILAR -->
+    <section class="det-section">
+      <span class="eyebrow">Similar residences</span>
+      <h2 class="det-h2">Worth a second look.</h2>
+      <div class="similar-grid">
+        <a href="listing.html" class="prop-card">
+          <div class="prop-photo"><img src="https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=800&q=85" alt=""></div>
+          <div class="prop-body">
+            <div class="prop-price">$1,450,000</div>
+            <div class="prop-address">4127 Pine Crest · Arnold</div>
+            <div class="prop-specs"><span>4 Bd</span><span>3.5 Ba</span><span>3.1 ac</span></div>
+          </div>
+        </a>
+        <a href="listing.html" class="prop-card">
+          <div class="prop-photo"><img src="https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=800&q=85" alt=""></div>
+          <div class="prop-body">
+            <div class="prop-price">$875,000</div>
+            <div class="prop-address">4182 Oak Hollow · Murphys</div>
+            <div class="prop-specs"><span>4 Bd</span><span>3 Ba</span><span>1.2 ac</span></div>
+          </div>
+        </a>
+        <a href="listing.html" class="prop-card">
+          <div class="prop-photo"><img src="https://images.unsplash.com/photo-1568605114967-8130f3a36994?w=800&q=85" alt=""></div>
+          <div class="prop-body">
+            <div class="prop-price">$2,100,000</div>
+            <div class="prop-address">191 High Trail · Murphys</div>
+            <div class="prop-specs"><span>5 Bd</span><span>4 Ba</span><span>8.3 ac</span></div>
+          </div>
+        </a>
+      </div>
+    </section>
+  </article>
+
+  <!-- SIDEBAR -->
+  <aside class="side">
+    <!-- Tour scheduler -->
+    <div class="side-card">
+      <span class="eyebrow">Schedule</span>
+      <h3>See it in person.</h3>
+      <p class="sub">Tours led by Sara or James, usually within 24 hours of request.</p>
+      <div class="tour-tabs">
+        <button class="tour-tab on">In person</button>
+        <button class="tour-tab">Video tour</button>
+      </div>
+      <div class="tour-days">
+        <div class="tour-day"><div class="dow">Tue</div><div class="num">13</div></div>
+        <div class="tour-day on"><div class="dow">Wed</div><div class="num">14</div></div>
+        <div class="tour-day"><div class="dow">Thu</div><div class="num">15</div></div>
+        <div class="tour-day"><div class="dow">Fri</div><div class="num">16</div></div>
+        <div class="tour-day"><div class="dow">Sat</div><div class="num">17</div></div>
+        <div class="tour-day disabled"><div class="dow">Sun</div><div class="num">18</div></div>
+        <div class="tour-day"><div class="dow">Mon</div><div class="num">19</div></div>
+      </div>
+      <div class="tour-slots">
+        <div class="tour-slot">10:00 AM</div>
+        <div class="tour-slot on">11:30 AM</div>
+        <div class="tour-slot">1:00 PM</div>
+        <div class="tour-slot">2:30 PM</div>
+        <div class="tour-slot">4:00 PM</div>
+        <div class="tour-slot">5:30 PM</div>
+      </div>
+      <button class="btn btn-ink" style="width: 100%;">Request tour · Wed 11:30</button>
+    </div>
+
+    <!-- Agent -->
+    <div class="side-card">
+      <span class="eyebrow">Your agent</span>
+      <div class="agent-mini" style="margin-top: 12px;">
+        <div class="avatar avatar-lg"><img src="art/sara-headshot.png" alt="Sara Cooper"></div>
+        <div>
+          <div class="agent-mini-name">Sara Cooper</div>
+          <div class="agent-mini-title">Owner / Broker · DRE #0214187</div>
+        </div>
+      </div>
+      <div class="agent-mini-stats">
+        <div><div class="v">98</div><div class="l">Closings</div></div>
+        <div><div class="v">21</div><div class="l">Past 12 mo</div></div>
+        <div><div class="v">★ 5.0</div><div class="l">Zillow</div></div>
+      </div>
+      <form class="contact-form">
+        <textarea placeholder="I'd love to know more about the wine cellar and well capacity. Also — is the studio permitted as an ADU?"></textarea>
+        <input class="field-input" placeholder="Your name">
+        <input class="field-input" placeholder="Email">
+        <button class="btn btn-brass" type="button" style="margin-top: 4px;">Send to Sara</button>
+      </form>
+    </div>
+
+    <!-- Mortgage -->
+    <div class="side-card">
+      <span class="eyebrow">Affordability</span>
+      <h3 style="margin-bottom: 18px;">Monthly estimate.</h3>
+      <div class="mort-summary">
+        <div class="v">$6,892<span style="font-size: 16px;"> / mo</span></div>
+        <div class="l">Principal + interest + tax + insurance</div>
+      </div>
+      <div class="mort-row">
+        <div><div class="l">Home price</div></div>
+        <span class="v">$1,195,000</span>
+      </div>
+      <input type="range" class="mort-slider" min="500000" max="2000000" value="1195000">
+      <div class="mort-row">
+        <div><div class="l">Down payment (20%)</div></div>
+        <span class="v">$239,000</span>
+      </div>
+      <input type="range" class="mort-slider" min="5" max="50" value="20">
+      <div class="mort-row">
+        <div><div class="l">Rate (30yr fixed)</div></div>
+        <span class="v">6.875%</span>
+      </div>
+      <input type="range" class="mort-slider" min="3" max="9" step="0.125" value="6.875">
+      <p class="mort-disclaimer">Estimate only · Includes prop. tax $1,070/mo + insurance $185/mo. Actual rates require pre-qualification.</p>
+    </div>
+  </aside>
+</main>
+
+<!-- Footer (minimal) -->
+<footer class="footer">
+  <div class="footer-inner">
+    <div class="footer-bottom" style="border: none; padding: 0;">
+      <div>© 2026 Legacy Properties · DRE #0214187</div>
+      <div><a href="index.html" style="display: inline; color: var(--brass-bright);">← Back to Legacy</a></div>
+    </div>
+  </div>
+</footer>
+
+<script src="idx-client.js"></script>
+<script>
+document.querySelectorAll('.tour-day, .tour-slot, .tour-tab').forEach(el => {
+  el.addEventListener('click', () => {
+    const group = el.classList.contains('tour-day') ? '.tour-day'
+                : el.classList.contains('tour-slot') ? '.tour-slot' : '.tour-tab';
+    document.querySelectorAll(group).forEach(x => x.classList.remove('on'));
+    el.classList.add('on');
+  });
+});
+
+/* ── Hydrate single-listing detail from MetroList ──
+   Looks for ?id= in the URL and replaces the static placeholder
+   content with the live record. If no id, or the fetch fails,
+   we keep the static Vineyard Ridge sample as preview. */
+(async function () {
+  if (location.protocol === 'file:') return;
+  const id = new URLSearchParams(location.search).get('id');
+  if (!id) return;
+
+  function $(sel) { return document.querySelector(sel); }
+  function priceFmt(n) {
+    if (n == null) return '—';
+    return '$' + Number(n).toLocaleString('en-US');
+  }
+
+  try {
+    const { listing: l, source } = await LegacyIDX.fetchListing(id);
+    if (!l) return;
+    LegacyIDX.showSourceBadge(source);
+
+    // ── Header ──
+    const h1 = $('.det-h1');
+    if (h1) {
+      // Use the property's city as a poetic title; fall back to address
+      h1.textContent = (l.city || l.address || 'Residence') + '.';
+    }
+    const addr = $('.det-addr');
+    if (addr) addr.textContent = `${l.address} · ${l.city}, ${l.state} ${l.zip || ''}`.trim();
+
+    // ── Price ──
+    const priceEl = $('.det-price');
+    if (priceEl) {
+      const ppsf = (l.price && l.sqft) ? `$${Math.round(l.price / l.sqft)} / sq ft` : '';
+      const status = l.status === 'Active' ? 'Active listing' : l.status || '';
+      priceEl.innerHTML = `${priceFmt(l.price)}<span class="ppsf">${ppsf}${ppsf && status ? ' · ' : ''}${status}</span>`;
+    }
+
+    // ── MLS pill in the eyebrow ──
+    const eyebrow = $('.det-eyebrow');
+    if (eyebrow) {
+      eyebrow.innerHTML =
+        `<span class="pill-status pill-new">${l.status || 'Active'}</span>` +
+        `<span class="pill-status">MLS #${l.id}</span>` +
+        (l.type ? `<span class="pill-status">${l.type}</span>` : '');
+    }
+
+    // ── Specs strip ──
+    const specs = document.querySelectorAll('.det-specs .spec');
+    const sv = [
+      [l.beds,      'Bedrooms'],
+      [l.baths,     'Bathrooms'],
+      [l.sqft && l.sqft.toLocaleString(), 'Square feet'],
+      [l.lotAcres,  'Acres'],
+      [l.yearBuilt, 'Year built'],
+    ];
+    sv.forEach(([val, lbl], i) => {
+      const s = specs[i];
+      if (!s) return;
+      s.querySelector('.spec-val').textContent   = val ?? '—';
+      s.querySelector('.spec-label').textContent = lbl;
+    });
+
+    // ── Public remarks (overview prose) ──
+    if (l.remarks) {
+      const prose = $('.det-prose');
+      if (prose) {
+        const lede   = prose.querySelector('.det-prose-lede');
+        const byline = prose.querySelector('.det-prose-byline');
+        const paragraphs = String(l.remarks)
+          .split(/\n\s*\n+/)
+          .map(p => `<p>${p.replace(/\n/g, '<br>')}</p>`)
+          .join('');
+        prose.innerHTML = (lede ? lede.outerHTML : '') + paragraphs + (byline ? byline.outerHTML : '');
+      }
+    }
+
+    // ── Gallery ──
+    if (l.photos && l.photos.length) {
+      const cells = document.querySelectorAll('.gallery .g-cell img');
+      l.photos.slice(0, cells.length).forEach((url, i) => {
+        cells[i].src = LegacyIDX.photoUrl(url);
+      });
+      const more = document.querySelector('.g-more');
+      if (more && l.photoCount > 5) more.textContent = `+${l.photoCount - 5} more`;
+    }
+  } catch (e) {
+    console.warn('Listing detail fetch failed; showing sample.', e);
+  }
+})();
+</script>
+</body>
+</html>

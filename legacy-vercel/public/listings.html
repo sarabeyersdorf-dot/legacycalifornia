@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Properties — Legacy Properties</title>
+<link rel="stylesheet" href="legacy.css">
+<link rel="stylesheet" href="listings.css">
+</head>
+<body class="paper" data-screen-label="IDX Listings">
+
+<header class="topnav">
+  <div class="topnav-bar1">
+    <span>Boutique luxury real estate · Calaveras · Amador · Tuolumne</span>
+    <span><a href="tel:2095594966">(209) 559-4966</a> · <a href="mailto:SaraSellsCalifornia@gmail.com">SaraSellsCalifornia@gmail.com</a></span>
+  </div>
+  <nav class="topnav-bar2">
+    <div class="topnav-links">
+      <a href="listings.html" class="active">Listings</a>
+      <a href="index.html#communities">Communities</a>
+      <a href="relocate.html">Relocate</a>
+      <a href="seller.html">Sellers</a>
+    </div>
+    <a href="index.html" class="wordmark">
+      <span class="wordmark-word">Legacy</span>
+      <span class="wordmark-sub">Properties · Angels Camp CA</span>
+    </a>
+    <div class="topnav-links right">
+      <a href="index.html#ledger">The Ledger</a>
+      <a href="dashboard.html">Sign In</a>
+      <a href="platform.html" class="btn btn-ink btn-sm" style="padding:10px 18px;">Find My Match</a>
+    </div>
+  </nav>
+</header>
+
+<!-- ============ SEARCH BAR ============ -->
+<section class="search-bar">
+  <div class="search-inner">
+    <div class="search-h">
+      <div>
+        <span class="eyebrow">Properties · Calaveras · Amador · Tuolumne</span>
+        <h1 class="search-title">Five residences <em>presently in the field.</em></h1>
+      </div>
+      <div class="search-meta">
+        <span class="label-cap">Updated</span>
+        <span class="mono">May 12, 2026 · 09:14 PT</span>
+      </div>
+    </div>
+
+    <div class="search-card">
+      <div class="search-field">
+        <label class="field-label">Where</label>
+        <input class="search-input" value="Calaveras, Amador &amp; Tuolumne" />
+      </div>
+      <div class="search-field">
+        <label class="field-label">Price</label>
+        <select class="search-input">
+          <option>$400K – $1.5M</option>
+          <option>Under $500K</option>
+          <option>$500K – $750K</option>
+          <option>$750K – $1M</option>
+          <option>$1M – $2M</option>
+          <option>$2M+</option>
+        </select>
+      </div>
+      <div class="search-field">
+        <label class="field-label">Type</label>
+        <select class="search-input">
+          <option>Any</option>
+          <option>Single Family</option>
+          <option>Land &amp; Acreage</option>
+          <option>Vineyard</option>
+          <option>Ranch</option>
+          <option>Condo / Townhome</option>
+        </select>
+      </div>
+      <div class="search-field">
+        <label class="field-label">Beds</label>
+        <select class="search-input">
+          <option>3+</option>
+          <option>Any</option>
+          <option>2+</option>
+          <option>4+</option>
+          <option>5+</option>
+        </select>
+      </div>
+      <div class="search-field">
+        <label class="field-label">Acres</label>
+        <select class="search-input">
+          <option>Any</option>
+          <option>1+ acre</option>
+          <option>5+ acres</option>
+          <option>10+ acres</option>
+          <option>40+ acres</option>
+        </select>
+      </div>
+      <button class="btn btn-ink">Search</button>
+    </div>
+
+    <div class="filters">
+      <div class="filter-chips">
+        <button class="chip chip-on">All <span class="ct">5</span></button>
+        <button class="chip">Single family <span class="ct">3</span></button>
+        <button class="chip">Manufactured <span class="ct">1</span></button>
+        <button class="chip">Land <span class="ct">1</span></button>
+        <button class="chip">Calaveras Co. <span class="ct">3</span></button>
+        <button class="chip">Bay Area <span class="ct">1</span></button>
+      </div>
+      <div class="filter-right">
+        <span class="label-cap">View</span>
+        <div class="view-toggle">
+          <button class="vt-btn vt-active">Split</button>
+          <button class="vt-btn">Map</button>
+          <button class="vt-btn">List</button>
+        </div>
+        <span class="label-cap" style="margin-left: 18px;">Sort</span>
+        <select class="search-input" style="min-width: 180px;">
+          <option>Newest</option>
+          <option>Price: Low → High</option>
+          <option>Price: High → Low</option>
+        </select>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ SPLIT VIEW ============ -->
+<section class="split">
+  <!-- MAP PANE -->
+  <aside class="map-pane">
+    <div class="map-canvas" id="mapCanvas">
+      <!-- Topo placeholder map -->
+      <svg width="100%" height="100%" viewBox="0 0 800 900" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <pattern id="topo" x="0" y="0" width="60" height="60" patternUnits="userSpaceOnUse">
+            <circle cx="30" cy="30" r="0.5" fill="rgba(27,24,19,0.18)"/>
+          </pattern>
+          <radialGradient id="terrain" cx="50%" cy="50%" r="65%">
+            <stop offset="0%" stop-color="#E8DFCC"/>
+            <stop offset="60%" stop-color="#DDD0B3"/>
+            <stop offset="100%" stop-color="#C7B58F"/>
+          </radialGradient>
+        </defs>
+        <rect width="800" height="900" fill="url(#terrain)"/>
+        <rect width="800" height="900" fill="url(#topo)"/>
+        <!-- Contour lines -->
+        <g fill="none" stroke="rgba(27,24,19,0.10)" stroke-width="0.8">
+          <path d="M0,180 Q200,140 400,200 T800,170"/>
+          <path d="M0,260 Q220,230 420,290 T800,255"/>
+          <path d="M0,340 Q240,310 440,370 T800,340"/>
+          <path d="M0,440 Q260,400 460,450 T800,420"/>
+          <path d="M0,540 Q280,500 480,550 T800,520"/>
+          <path d="M0,640 Q300,600 500,650 T800,620"/>
+          <path d="M0,740 Q320,700 520,740 T800,720"/>
+        </g>
+        <!-- River -->
+        <path d="M-20,720 Q120,640 240,660 T520,580 Q620,560 820,600" fill="none" stroke="#9DB5C2" stroke-width="3" opacity="0.7"/>
+        <!-- Roads -->
+        <g fill="none" stroke="rgba(27,24,19,0.35)" stroke-width="1.5" stroke-dasharray="6 4">
+          <path d="M-20,420 Q180,380 380,440 T780,400"/>
+          <path d="M400,-20 Q420,200 380,400 T420,920"/>
+        </g>
+        <!-- Town label -->
+        <g font-family="JetBrains Mono, monospace" font-size="9" fill="rgba(27,24,19,0.55)" letter-spacing="2">
+          <text x="220" y="380" text-anchor="middle">MURPHYS</text>
+          <text x="220" y="395" text-anchor="middle" font-size="7" fill="rgba(27,24,19,0.4)">— pop. 2,213 —</text>
+          <text x="580" y="220" text-anchor="middle">ARNOLD</text>
+          <text x="620" y="640" text-anchor="middle">ANGELS CAMP</text>
+          <text x="160" y="700" text-anchor="middle">SUTTER CREEK</text>
+        </g>
+        <!-- Highway shield -->
+        <g transform="translate(395,440)">
+          <rect x="-12" y="-10" width="24" height="20" fill="var(--shell)" stroke="rgba(27,24,19,0.4)"/>
+          <text x="0" y="4" text-anchor="middle" font-family="JetBrains Mono" font-size="10" font-weight="700" fill="rgba(27,24,19,0.7)">4</text>
+        </g>
+      </svg>
+
+      <!-- Pins -->
+      <button class="pin pin-active" style="left: 36%; top: 28%;" data-id="1">
+        <span class="pin-price">$1.39M</span>
+      </button>
+      <button class="pin" style="left: 28%; top: 44%;" data-id="2">
+        <span class="pin-price">$399K</span>
+      </button>
+      <button class="pin" style="left: 54%; top: 38%;" data-id="3">
+        <span class="pin-price">$1.2M</span>
+      </button>
+      <button class="pin" style="left: 42%; top: 56%;" data-id="4">
+        <span class="pin-price">$199K</span>
+      </button>
+      <button class="pin" style="left: 32%; top: 68%;" data-id="5">
+        <span class="pin-price">$33K</span>
+      </button>
+    </div>
+
+    <!-- Map controls -->
+    <div class="map-ctrl map-ctrl-tl">
+      <button class="map-chip">Save this search</button>
+      <button class="map-chip map-chip-ghost">Draw boundary</button>
+    </div>
+    <div class="map-ctrl map-ctrl-tr">
+      <button class="map-zoom">+</button>
+      <button class="map-zoom">−</button>
+      <button class="map-zoom" title="Locate me">◎</button>
+    </div>
+    <div class="map-ctrl map-ctrl-bl">
+      <div class="map-legend">
+        <span class="dot dot-active"></span><span>Match</span>
+        <span class="dot dot-saved"></span><span>Saved</span>
+        <span class="dot dot-cluster"></span><span>Cluster</span>
+      </div>
+    </div>
+    <div class="map-attribution">Calaveras County MLS · Hill-shaded relief</div>
+  </aside>
+
+  <!-- LIST PANE -->
+  <div class="list-pane">
+    <div class="list-pane-head">
+      <span class="mono" style="font-size: 11px; letter-spacing: 0.14em; color: var(--ink-mute);">Showing all 5 active listings</span>
+      <a href="dashboard.html" class="btn-link" style="border: none; color: var(--brass);">Save this search →</a>
+    </div>
+
+    <div class="list-pane-grid" id="idxResults">
+      <a href="listing.html" class="prop-card prop-active">
+        <div class="prop-photo">
+          <img src="https://images.unsplash.com/photo-1613977257363-707ba9348227?w=900&q=85" alt="">
+          <div class="prop-tags">
+            <span class="pill-status pill-new">Active</span>
+            <span class="pill-status pill-brass">Featured</span>
+          </div>
+        </div>
+        <div class="prop-body">
+          <div class="prop-price">$1,399,000</div>
+          <div class="prop-address">433 E Highway 4 · Murphys</div>
+          <div class="prop-specs">
+            <span>4 Bd</span><span>3 Ba</span><span>Estate</span>
+          </div>
+          <div class="prop-foot">
+            <span class="label-cap">Listed by Sara</span>
+            <span class="prop-bookmark" onclick="event.preventDefault();this.classList.toggle('on');">♡</span>
+          </div>
+        </div>
+      </a>
+
+      <a href="listing.html" class="prop-card">
+        <div class="prop-photo">
+          <img src="https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=900&q=85" alt="">
+          <div class="prop-tags">
+            <span class="pill-status pill-new">Active</span>
+          </div>
+        </div>
+        <div class="prop-body">
+          <div class="prop-price">$1,200,000</div>
+          <div class="prop-address">7094 Heaton Moor Drive · San Jose</div>
+          <div class="prop-specs">
+            <span>3 Bd</span><span>1 Ba</span><span>Single family</span>
+          </div>
+          <div class="prop-foot">
+            <span class="label-cap">Listed by Sara</span>
+            <span class="prop-bookmark" onclick="event.preventDefault();this.classList.toggle('on');">♡</span>
+          </div>
+        </div>
+      </a>
+
+      <a href="listing.html" class="prop-card">
+        <div class="prop-photo">
+          <img src="https://images.unsplash.com/photo-1568605114967-8130f3a36994?w=900&q=85" alt="">
+          <div class="prop-tags">
+            <span class="pill-status">Active</span>
+          </div>
+        </div>
+        <div class="prop-body">
+          <div class="prop-price">$399,000</div>
+          <div class="prop-address">2733 Emco Road · Mokelumne Hill</div>
+          <div class="prop-specs">
+            <span>3 Bd</span><span>2 Ba</span><span>Single family</span>
+          </div>
+          <div class="prop-foot">
+            <span class="label-cap">Listed by Sara</span>
+            <span class="prop-bookmark" onclick="event.preventDefault();this.classList.toggle('on');">♡</span>
+          </div>
+        </div>
+      </a>
+
+      <a href="listing.html" class="prop-card">
+        <div class="prop-photo">
+          <img src="https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=900&q=85" alt="">
+          <div class="prop-tags">
+            <span class="pill-status">Active</span>
+          </div>
+        </div>
+        <div class="prop-body">
+          <div class="prop-price">$199,000</div>
+          <div class="prop-address">2841 Fowler Road, Space 144 · Ceres</div>
+          <div class="prop-specs">
+            <span>3 Bd</span><span>2 Ba</span><span>Manufactured</span>
+          </div>
+          <div class="prop-foot">
+            <span class="label-cap">Listed by Sara</span>
+            <span class="prop-bookmark" onclick="event.preventDefault();this.classList.toggle('on');">♡</span>
+          </div>
+        </div>
+      </a>
+
+      <a href="listing.html" class="prop-card">
+        <div class="prop-photo">
+          <img src="https://images.unsplash.com/photo-1500382017468-9049fed747ef?w=900&q=85" alt="">
+          <div class="prop-tags">
+            <span class="pill-status pill-warm">Land</span>
+          </div>
+        </div>
+        <div class="prop-body">
+          <div class="prop-price">$33,000</div>
+          <div class="prop-address">1350 Love Street · Angels Camp</div>
+          <div class="prop-specs">
+            <span>Vacant land</span><span>Calaveras Co.</span>
+          </div>
+          <div class="prop-foot">
+            <span class="label-cap">Listed by Sara</span>
+            <span class="prop-bookmark" onclick="event.preventDefault();this.classList.toggle('on');">♡</span>
+          </div>
+        </div>
+      </a>
+    </div>
+
+    <!-- Sara strip -->
+    <div class="sara-strip">
+        <div class="sara-avatar"><img src="art/sara-headshot.png" alt="Sara Cooper" style="width:100%;height:100%;object-fit:cover;"></div>
+      <div class="sara-msg">
+        <div class="sara-name">Sara Cooper · <span class="mono" style="color:var(--brass-bright);font-size:10px;letter-spacing:.16em;">YOUR AGENT</span></div>
+        <div class="sara-q">Five listings in the field right now, from Angels Camp land to a Murphys estate. Happy to talk through what fits.</div>
+      </div>
+      <div class="sara-actions">
+        <button class="btn btn-ghost btn-sm">Message Sara</button>
+        <button class="btn btn-ink btn-sm">Book a tour</button>
+      </div>
+    </div>
+
+    <div class="list-pane-foot" style="display:none">
+      <button class="btn btn-ghost">Load 30 more</button>
+    </div>
+  </div>
+</section>
+
+<script src="idx-client.js"></script>
+<script>
+document.querySelectorAll('.pin').forEach(p => {
+  p.addEventListener('click', () => {
+    document.querySelectorAll('.pin').forEach(x => x.classList.remove('pin-active'));
+    p.classList.add('pin-active');
+  });
+});
+document.querySelectorAll('.chip').forEach(c => {
+  c.addEventListener('click', () => c.classList.toggle('chip-on'));
+});
+document.querySelectorAll('.vt-btn').forEach(v => {
+  v.addEventListener('click', () => {
+    document.querySelectorAll('.vt-btn').forEach(x => x.classList.remove('vt-active'));
+    v.classList.add('vt-active');
+  });
+});
+
+/* ── Live IDX loader ──
+   Tries to fetch from /api/listings. If that succeeds (the site is
+   deployed to Vercel with the IDX scaffold), the static cards get
+   replaced with live ones. If it fails — because the file is open
+   directly (file://) or the API hasn't been deployed yet — we keep
+   the static cards already in the DOM. */
+(async function () {
+  if (location.protocol === 'file:') return; // static preview
+  try {
+    const data = await LegacyIDX.fetchListings();
+    const el   = document.getElementById('idxResults');
+    if (el && data.listings && data.listings.length) {
+      LegacyIDX.renderInto(el, data.listings);
+      LegacyIDX.showSourceBadge(data.source);
+      // Update the counter line
+      const counter = document.querySelector('.list-pane-head .mono');
+      if (counter) counter.textContent = `Showing all ${data.listings.length} active listings`;
+    }
+  } catch (e) {
+    /* Fall back silently to the static cards. */
+    console.warn('IDX fetch failed; using static cards.', e);
+  }
+})();
+</script>
+</body>
+</html>
