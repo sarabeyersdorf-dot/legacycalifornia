@@ -1,0 +1,787 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>How we work · Legacy Properties</title>
+<meta name="description" content="A plain-language manifesto for how Legacy Properties represents buyers and sellers in the Sierra foothills.">
+<link rel="stylesheet" href="legacy.css">
+<style>
+  /* ── MANIFESTO HERO ───────────────────────────────────── */
+  .hw-hero {
+    padding: 100px var(--gutter) 80px;
+    border-bottom: 1px solid var(--rule);
+    background: var(--parchment);
+  }
+  .hw-hero-inner {
+    max-width: 1120px; margin: 0 auto;
+    display: grid; grid-template-columns: 1fr 1.4fr; gap: 80px;
+    align-items: end;
+  }
+  .hw-hero h1 {
+    font-family: var(--serif); font-style: italic; font-weight: 300;
+    font-size: clamp(56px, 6.5vw, 96px); line-height: 0.95;
+    letter-spacing: -0.015em; color: var(--ink); margin-top: 18px;
+  }
+  .hw-hero h1 em { color: var(--brass); }
+  .hw-hero .dek {
+    font-family: var(--serif); font-style: italic; font-weight: 300;
+    font-size: 24px; line-height: 1.45; color: var(--ink-soft);
+    max-width: 580px;
+  }
+  .hw-hero .dek strong { color: var(--ink); font-weight: 500; font-style: normal; }
+
+  /* ── ONE PROMISE ──────────────────────────────────────── */
+  .hw-promise {
+    background: var(--ink); color: var(--shell);
+    padding: 100px var(--gutter);
+  }
+  .hw-promise-inner {
+    max-width: 1100px; margin: 0 auto;
+    display: grid; grid-template-columns: auto 1fr; gap: 60px;
+    align-items: start;
+  }
+  .hw-promise-mark {
+    font-family: var(--serif); font-style: italic; font-weight: 300;
+    font-size: 200px; line-height: 0.8; color: var(--brass-bright);
+  }
+  .hw-promise h2 {
+    font-family: var(--serif); font-style: italic; font-weight: 300;
+    font-size: 44px; line-height: 1.15; color: var(--shell);
+  }
+  .hw-promise h2 em { color: var(--brass-bright); }
+  .hw-promise p {
+    margin-top: 24px;
+    font-family: var(--serif); font-weight: 400;
+    font-size: 19px; line-height: 1.65; color: rgba(250,246,236,0.78);
+    max-width: 680px;
+  }
+  .hw-promise-sig {
+    margin-top: 36px; padding-top: 24px;
+    border-top: 1px solid rgba(250,246,236,0.20);
+    display: flex; gap: 18px; align-items: center;
+    font-family: var(--mono); font-size: 10px; letter-spacing: 0.18em;
+    text-transform: uppercase; color: rgba(250,246,236,0.55);
+  }
+  .hw-promise-sig strong { color: var(--brass-bright); font-weight: 500; }
+
+  /* ── TENETS ──────────────────────────────────────────── */
+  .hw-tenets { padding: 100px var(--gutter); }
+  .hw-tenets-inner { max-width: var(--max); margin: 0 auto; }
+  .hw-tenets-list {
+    margin-top: 36px;
+    border-top: 1px solid var(--ink);
+  }
+  .hw-tenet {
+    display: grid; grid-template-columns: 100px 1fr 1.4fr 80px;
+    gap: 40px;
+    padding: 36px 0;
+    border-bottom: 1px solid var(--rule);
+    align-items: start;
+  }
+  .hw-tenet-num {
+    font-family: var(--serif); font-style: italic; font-weight: 300;
+    font-size: 56px; line-height: 0.9; color: var(--brass);
+  }
+  .hw-tenet h3 {
+    font-family: var(--serif); font-style: italic; font-weight: 400;
+    font-size: 28px; line-height: 1.1; color: var(--ink);
+  }
+  .hw-tenet h3 em { color: var(--brass); }
+  .hw-tenet p {
+    font-family: var(--serif); font-size: 17px; line-height: 1.6;
+    color: var(--ink-soft); text-wrap: pretty;
+  }
+  .hw-tenet p strong { color: var(--ink); font-weight: 500; }
+  .hw-tenet-foot {
+    font-family: var(--mono); font-size: 10px; letter-spacing: 0.16em;
+    text-transform: uppercase; color: var(--brass);
+    text-align: right;
+    align-self: end;
+  }
+
+  /* ── NEVERS ──────────────────────────────────────────── */
+  .hw-nevers {
+    background: var(--vellum);
+    padding: 100px var(--gutter);
+    border-top: 1px solid var(--rule); border-bottom: 1px solid var(--rule);
+  }
+  .hw-nevers-inner { max-width: var(--max); margin: 0 auto; }
+  .hw-nevers-grid {
+    display: grid; grid-template-columns: repeat(3, 1fr);
+    gap: 1px; background: var(--rule); border: 1px solid var(--rule);
+    margin-top: 48px;
+  }
+  .hw-never {
+    background: var(--shell); padding: 32px 32px 36px;
+    position: relative;
+  }
+  .hw-never::before {
+    content: ''; position: absolute; top: 32px; right: 32px;
+    width: 18px; height: 1px; background: var(--brass);
+    transform: rotate(-45deg);
+    box-shadow: 0 0 0 0 var(--brass);
+  }
+  .hw-never::after {
+    content: ''; position: absolute; top: 32px; right: 32px;
+    width: 18px; height: 1px; background: var(--brass);
+    transform: rotate(45deg);
+  }
+  .hw-never-lbl {
+    font-family: var(--mono); font-size: 9px; letter-spacing: 0.20em;
+    text-transform: uppercase; color: var(--brass); margin-bottom: 14px;
+  }
+  .hw-never h4 {
+    font-family: var(--serif); font-style: italic; font-weight: 400;
+    font-size: 22px; line-height: 1.15; color: var(--ink);
+    margin-bottom: 12px;
+  }
+  .hw-never p {
+    font-family: var(--sans); font-size: 13.5px; line-height: 1.6;
+    color: var(--ink-soft);
+  }
+
+  /* ── PROCESS · BUYER + SELLER ────────────────────────── */
+  .hw-proc { padding: 100px var(--gutter); }
+  .hw-proc-inner { max-width: var(--max); margin: 0 auto; }
+  .hw-proc-tabs {
+    display: flex; gap: 4px; border-bottom: 1px solid var(--rule);
+    margin: 48px 0 0;
+  }
+  .hw-proc-tab {
+    background: none; border: 1px solid var(--rule); border-bottom: none;
+    padding: 14px 28px;
+    font-family: var(--mono); font-size: 11px; letter-spacing: 0.18em;
+    text-transform: uppercase; color: var(--ink-mute);
+    cursor: pointer; transition: all .15s;
+    margin-bottom: -1px;
+  }
+  .hw-proc-tab.on {
+    background: var(--shell); color: var(--ink);
+    border-color: var(--ink); border-bottom: 1px solid var(--shell);
+  }
+  .hw-proc-tab:hover { color: var(--ink); }
+  .hw-proc-panel { display: none; padding: 48px 0 0; }
+  .hw-proc-panel.on { display: block; }
+  .hw-proc-steps {
+    display: grid; grid-template-columns: repeat(6, 1fr);
+    gap: 1px; background: var(--rule); border: 1px solid var(--rule);
+  }
+  .hw-step {
+    background: var(--shell); padding: 28px 24px 32px;
+    display: flex; flex-direction: column; gap: 12px;
+    min-height: 280px;
+  }
+  .hw-step-top {
+    display: flex; align-items: baseline; justify-content: space-between;
+    padding-bottom: 12px; border-bottom: 1px solid var(--rule);
+  }
+  .hw-step-n {
+    font-family: var(--serif); font-style: italic; font-weight: 300;
+    font-size: 32px; line-height: 1; color: var(--brass);
+  }
+  .hw-step-time {
+    font-family: var(--mono); font-size: 9px; letter-spacing: 0.14em;
+    text-transform: uppercase; color: var(--ink-mute);
+  }
+  .hw-step h4 {
+    font-family: var(--serif); font-style: italic; font-weight: 400;
+    font-size: 20px; line-height: 1.15; color: var(--ink);
+  }
+  .hw-step p {
+    font-family: var(--sans); font-size: 13px; line-height: 1.55;
+    color: var(--ink-soft);
+  }
+  .hw-step-who {
+    margin-top: auto; padding-top: 12px;
+    border-top: 1px solid var(--rule-soft);
+    font-family: var(--mono); font-size: 9px; letter-spacing: 0.16em;
+    text-transform: uppercase; color: var(--brass);
+  }
+
+  /* ── FEE TRANSPARENCY ────────────────────────────────── */
+  .hw-fees {
+    background: var(--vellum);
+    padding: 100px var(--gutter);
+    border-top: 1px solid var(--rule); border-bottom: 1px solid var(--rule);
+  }
+  .hw-fees-inner {
+    max-width: 1100px; margin: 0 auto;
+    display: grid; grid-template-columns: 1fr 1.2fr; gap: 80px;
+    align-items: start;
+  }
+  .hw-fees-tbl {
+    border-top: 1px solid var(--ink);
+    background: var(--shell);
+  }
+  .hw-fees-row {
+    display: grid; grid-template-columns: 1fr auto; align-items: baseline;
+    padding: 22px 28px; border-bottom: 1px solid var(--rule);
+    gap: 24px;
+  }
+  .hw-fees-row.head {
+    background: var(--ink); color: var(--shell);
+    font-family: var(--mono); font-size: 10px; letter-spacing: 0.18em;
+    text-transform: uppercase;
+  }
+  .hw-fees-row .l {
+    font-family: var(--serif); font-style: italic; font-weight: 400;
+    font-size: 19px; color: var(--ink);
+  }
+  .hw-fees-row .l .sub {
+    display: block; font-family: var(--sans); font-style: normal;
+    font-weight: 400; font-size: 13px; color: var(--ink-mute);
+    margin-top: 4px; max-width: 340px;
+  }
+  .hw-fees-row .r {
+    font-family: var(--serif); font-style: italic; font-weight: 400;
+    font-size: 22px; color: var(--brass); white-space: nowrap;
+  }
+  .hw-fees-row .r.line { text-decoration: line-through; color: var(--ink-faint); font-size: 17px; }
+  .hw-fees-foot {
+    padding: 22px 28px; background: var(--linen);
+    font-family: var(--mono); font-size: 11px; letter-spacing: 0.10em;
+    color: var(--ink-soft); line-height: 1.6;
+  }
+
+  /* ── FAQ ─────────────────────────────────────────────── */
+  .hw-faq { padding: 100px var(--gutter); }
+  .hw-faq-inner {
+    max-width: 940px; margin: 0 auto;
+  }
+  .hw-faq-list { margin-top: 48px; border-top: 1px solid var(--ink); }
+  .hw-faq-item {
+    border-bottom: 1px solid var(--rule);
+  }
+  .hw-faq-q {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 26px 0; cursor: pointer;
+    font-family: var(--serif); font-style: italic; font-weight: 400;
+    font-size: 24px; color: var(--ink); line-height: 1.2;
+    list-style: none;
+  }
+  .hw-faq-q::-webkit-details-marker { display: none; }
+  .hw-faq-q::after {
+    content: '+'; font-family: var(--serif); font-style: italic;
+    font-size: 32px; color: var(--brass); font-weight: 300;
+    transition: transform .2s;
+  }
+  details[open] .hw-faq-q::after { content: '–'; }
+  .hw-faq-a {
+    padding: 0 0 28px;
+    font-family: var(--serif); font-size: 18px; line-height: 1.65;
+    color: var(--ink-soft); max-width: 720px; text-wrap: pretty;
+  }
+  .hw-faq-a strong { color: var(--ink); font-weight: 500; }
+
+  /* ── CTA ─────────────────────────────────────────────── */
+  .hw-cta {
+    background: var(--parchment); padding: 100px var(--gutter); text-align: center;
+    border-top: 1px solid var(--rule);
+  }
+  .hw-cta h2 {
+    font-family: var(--serif); font-style: italic; font-weight: 300;
+    font-size: clamp(44px, 5vw, 64px); line-height: 1.0;
+    color: var(--ink); margin-top: 14px;
+  }
+  .hw-cta h2 em { color: var(--brass); }
+  .hw-cta p {
+    margin-top: 24px; max-width: 580px; margin-left: auto; margin-right: auto;
+    font-family: var(--serif); font-style: italic; font-weight: 300;
+    font-size: 20px; line-height: 1.5; color: var(--ink-soft);
+  }
+  .hw-cta-ctas {
+    display: flex; gap: 14px; justify-content: center; flex-wrap: wrap;
+    margin-top: 36px;
+  }
+
+  @media (max-width: 1100px) {
+    .hw-proc-steps { grid-template-columns: repeat(3, 1fr); }
+    .hw-nevers-grid { grid-template-columns: 1fr 1fr; }
+  }
+  @media (max-width: 900px) {
+    .hw-hero-inner { grid-template-columns: 1fr; gap: 36px; }
+    .hw-promise-inner { grid-template-columns: 1fr; gap: 24px; }
+    .hw-promise-mark { font-size: 120px; }
+    .hw-tenet { grid-template-columns: 60px 1fr; }
+    .hw-tenet > p, .hw-tenet-foot { grid-column: 2; }
+    .hw-fees-inner { grid-template-columns: 1fr; gap: 36px; }
+    .hw-proc-steps { grid-template-columns: 1fr 1fr; }
+  }
+  @media (max-width: 600px) {
+    .hw-nevers-grid { grid-template-columns: 1fr; }
+    .hw-proc-steps { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body class="paper" data-screen-label="How we work">
+
+<!-- ============ TOP NAV ============ -->
+<header class="topnav">
+  <div class="topnav-bar1">
+    <span>Boutique luxury real estate · Calaveras · Amador · Tuolumne</span>
+    <span>
+      <a href="tel:2095594966">(209) 559-4966</a>
+      &nbsp;·&nbsp;
+      <a href="mailto:SaraSellsCalifornia@gmail.com">SaraSellsCalifornia@gmail.com</a>
+    </span>
+  </div>
+  <nav class="topnav-bar2">
+    <div class="topnav-links">
+      <a href="listings.html">Listings</a>
+      <a href="towns.html">Communities</a>
+      <a href="relocate.html">Relocate</a>
+      <a href="seller.html">Sellers</a>
+    </div>
+    <a href="index.html" class="wordmark">
+      <span class="wordmark-word">Legacy</span>
+      <span class="wordmark-sub">Properties · Angels Camp CA</span>
+    </a>
+    <div class="topnav-links right">
+      <a href="ledger.html">The Ledger</a>
+      <a href="dashboard.html">Sign In</a>
+      <a href="platform.html" class="btn btn-ink btn-sm" style="padding:10px 18px;">Find My Match</a>
+    </div>
+  </nav>
+</header>
+
+<!-- ============ HERO ============ -->
+<section class="hw-hero">
+  <div class="hw-hero-inner">
+    <div>
+      <span class="hairline-brass" style="margin-bottom: 18px;"></span>
+      <span class="eyebrow">A manifesto · plainly stated</span>
+      <h1>How we<br><em>work.</em></h1>
+    </div>
+    <div>
+      <p class="dek">Real estate is a transactional industry that pretends to be a relational one. We've tried to make it the other way around — <strong>relational on purpose, transactional only at the end</strong>, and never apologetic about taking longer than the brokerage chains.</p>
+      <p class="dek" style="margin-top: 18px; font-size: 18px;">Below: the one promise, ten tenets, the things we don't do, the process we do follow, and what it costs. In writing, so you can hold us to it.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ THE ONE PROMISE ============ -->
+<section class="hw-promise">
+  <div class="hw-promise-inner">
+    <span class="hw-promise-mark">"</span>
+    <div>
+      <span class="eyebrow" style="color: var(--brass-bright);">The one promise</span>
+      <h2 style="margin-top: 12px;">You will always work with<br>Sara or James. <em>Never anyone else.</em></h2>
+      <p>That is the entire promise. Every text, every email, every showing, every offer drafted, every inspection walked, every closing letter — comes from one of the two people whose names are on the door. We do not have a team. We do not have junior agents. We do not hand you off to a "transaction coordinator." If you reach us, you reach <em>us</em>. If you write a reply at 9 p.m. on a Tuesday, Sara reads it that night.</p>
+      <p>The math of this is uncomfortable on purpose. It caps how many clients we can take in a year, which caps how much we make, which caps how big we'll ever grow. We've decided that's the right trade. The boutique remains boutique because we keep choosing it to be.</p>
+      <div class="hw-promise-sig">
+        <span><strong>— Sara &amp; James Cooper</strong></span>
+        <span>·</span>
+        <span>Signed, 2018 · Re-signed every January</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ TENETS ============ -->
+<section class="hw-tenets">
+  <div class="hw-tenets-inner">
+    <div class="section-h">
+      <div>
+        <span class="hairline-brass" style="margin-bottom: 16px;"></span>
+        <span class="eyebrow">§ I · Ten tenets</span>
+        <h2 class="h-section" style="margin-top: 10px;">What we believe<br><em>about this work.</em></h2>
+      </div>
+      <p class="lede right">The ten things we keep going back to. The order matters; the first one is doing more work than the others.</p>
+    </div>
+
+    <div class="hw-tenets-list">
+      <article class="hw-tenet">
+        <div class="hw-tenet-num">I.</div>
+        <h3>The right home is rarely the <em>first</em> home.</h3>
+        <p>The home people end up loving is almost never the one they wrote in about. Good representation means widening the aperture before narrowing it — and being patient enough to do that without selling something prematurely.</p>
+        <div class="hw-tenet-foot">→ See § Process<br>Step 02 · Discovery</div>
+      </article>
+
+      <article class="hw-tenet">
+        <div class="hw-tenet-num">II.</div>
+        <h3>Volume is the <em>enemy</em> of care.</h3>
+        <p>We do roughly forty closings a year, between us, on purpose. Any more and we'd be doing the math instead of doing the work. Any less and we couldn't sustainably run the brokerage. The number is calibrated, not aspirational.</p>
+        <div class="hw-tenet-foot">→ See § Nevers<br>"Junior agents"</div>
+      </article>
+
+      <article class="hw-tenet">
+        <div class="hw-tenet-num">III.</div>
+        <h3>The hard thing should be said <em>first.</em></h3>
+        <p>Septic, well, snow access, fire zone, the neighbor's dog, the foundation crack, the seller's expectations. Anything we know that would matter to you, you hear in the first conversation, before you're emotionally committed. Surprises are bad form.</p>
+        <div class="hw-tenet-foot">→ See § Process<br>Step 03 · Walk</div>
+      </article>
+
+      <article class="hw-tenet">
+        <div class="hw-tenet-num">IV.</div>
+        <h3>The fee is the fee, <em>once.</em></h3>
+        <p>Standard rate, paid at closing by one side only. No tiered service levels, no premium listings, no "we'll waive that for you" theater. The transparency on this is on purpose — see § Fees.</p>
+        <div class="hw-tenet-foot">→ See § Fees</div>
+      </article>
+
+      <article class="hw-tenet">
+        <div class="hw-tenet-num">V.</div>
+        <h3>We don't <em>chase</em> you.</h3>
+        <p>No drip campaigns. No "just checking in" emails on a 14-day cadence. If we follow up, we have something to say. If we don't, your inbox stays quiet. Subscribing to the Ledger is the closest thing we have to a marketing funnel, and it's a monthly newsletter you can unsubscribe from in one click.</p>
+        <div class="hw-tenet-foot">→ <a href="ledger.html" style="color:var(--brass);">The Ledger</a></div>
+      </article>
+
+      <article class="hw-tenet">
+        <div class="hw-tenet-num">VI.</div>
+        <h3>Local <em>actually means</em> local.</h3>
+        <p>We've lived here twelve years. We know which contractor to call. We know which house went through a divorce. We know which road washes out in February. "Local agent" is a phrase brokerages buy on Google; we mean the thing.</p>
+        <div class="hw-tenet-foot">→ <a href="about.html" style="color:var(--brass);">About us</a></div>
+      </article>
+
+      <article class="hw-tenet">
+        <div class="hw-tenet-num">VII.</div>
+        <h3>The market is <em>not</em> always your friend.</h3>
+        <p>Sometimes the honest advice is "don't buy this." Sometimes it's "wait three months." Sometimes it's "your house isn't worth what you think it is." We say it. If you wanted the answer you'd already decided on, you'd have hired the cheaper agent.</p>
+        <div class="hw-tenet-foot">→ See § Ledger<br>Vol. XXI · No. 9</div>
+      </article>
+
+      <article class="hw-tenet">
+        <div class="hw-tenet-num">VIII.</div>
+        <h3>Photography is <em>not</em> a line item.</h3>
+        <p>Drone, twilight, walkthrough video, professional editor — included on every listing, regardless of price point. The $400k cabin gets the same treatment as the $2.4M vineyard. The house deserves to be seen well.</p>
+        <div class="hw-tenet-foot">→ See § Process<br>Step S4 · Stage</div>
+      </article>
+
+      <article class="hw-tenet">
+        <div class="hw-tenet-num">IX.</div>
+        <h3>Your <em>data</em> is yours.</h3>
+        <p>We don't sell leads. We don't share your search history with the brokerage chain. Your saved homes, your messages with Sara, your CMA report — all yours, exportable, deleteable. If you leave, you take everything with you.</p>
+        <div class="hw-tenet-foot">→ See § FAQ<br>"What happens to my data?"</div>
+      </article>
+
+      <article class="hw-tenet">
+        <div class="hw-tenet-num">X.</div>
+        <h3>The relationship <em>doesn't end</em> at closing.</h3>
+        <p>Most agents fall off the map the day after the keys change hands. We send a card on the one-year anniversary, check in at the five, and answer the question about your contractor referral in 2032 the same way we answered the first one. The book of business is, in the end, just the names we've kept up with.</p>
+        <div class="hw-tenet-foot">→ See § Process<br>Step 06 · After</div>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- ============ THINGS WE DON'T DO ============ -->
+<section class="hw-nevers">
+  <div class="hw-nevers-inner">
+    <div class="section-h" style="border-color: var(--rule-strong);">
+      <div>
+        <span class="hairline-brass" style="margin-bottom: 16px;"></span>
+        <span class="eyebrow">§ II · Six nevers</span>
+        <h2 class="h-section" style="margin-top: 10px;">Things we<br><em>do not do.</em></h2>
+      </div>
+      <p class="lede right">A profession this old accumulates a lot of conventions. These are the ones we've quietly retired.</p>
+    </div>
+
+    <div class="hw-nevers-grid">
+      <div class="hw-never">
+        <div class="hw-never-lbl">Never · I</div>
+        <h4>Dual agency.</h4>
+        <p>If we represent the seller, we don't also represent the buyer. The conflict of interest is real, the savings are an illusion, and one side always feels short-changed by the end.</p>
+      </div>
+      <div class="hw-never">
+        <div class="hw-never-lbl">Never · II</div>
+        <h4>Pocket listings without your consent.</h4>
+        <p>Off-market deals happen — sometimes they're the right call. But your listing goes off-market only if you sign the line that says so, in writing, after we've explained the trade-off.</p>
+      </div>
+      <div class="hw-never">
+        <div class="hw-never-lbl">Never · III</div>
+        <h4>Lead generation services.</h4>
+        <p>We don't pay Zillow for your search history. We don't buy you as a lead from a national matching service. If you found us, you found us — and the introduction wasn't a transaction.</p>
+      </div>
+      <div class="hw-never">
+        <div class="hw-never-lbl">Never · IV</div>
+        <h4>Cookie-cutter staging.</h4>
+        <p>We won't rent the same gray sofa and the same brass-arc lamp that's in every flip in the county. Stage to the house, not the trend. Most listings we don't stage at all — they're already lovely.</p>
+      </div>
+      <div class="hw-never">
+        <div class="hw-never-lbl">Never · V</div>
+        <h4>Pressure to "act fast."</h4>
+        <p>If a property is the right one, it's right at the right pace. If we're saying "you'll lose it if you don't decide tonight," we're not advising — we're closing. We don't close.</p>
+      </div>
+      <div class="hw-never">
+        <div class="hw-never-lbl">Never · VI</div>
+        <h4>Hand off to junior agents.</h4>
+        <p>There are no junior agents. There is Sara, and there is James. The work either has our names on it or it isn't ours.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ PROCESS ============ -->
+<section class="hw-proc">
+  <div class="hw-proc-inner">
+    <div class="section-h">
+      <div>
+        <span class="hairline-brass" style="margin-bottom: 16px;"></span>
+        <span class="eyebrow">§ III · The process</span>
+        <h2 class="h-section" style="margin-top: 10px;">Six steps,<br><em>in order.</em></h2>
+      </div>
+      <p class="lede right">The work we do, from first call to twelve months after closing. The same shape for every client.</p>
+    </div>
+
+    <div class="hw-proc-tabs">
+      <button class="hw-proc-tab on" onclick="hwTab(event,'buy')">If you're buying</button>
+      <button class="hw-proc-tab" onclick="hwTab(event,'sell')">If you're selling</button>
+    </div>
+
+    <div class="hw-proc-panel on" id="hw-buy">
+      <div class="hw-proc-steps">
+        <div class="hw-step">
+          <div class="hw-step-top"><span class="hw-step-n">01</span><span class="hw-step-time">Day 1</span></div>
+          <h4>Coffee.</h4>
+          <p>An hour, in person if possible, on the phone if not. No pitch deck, no spreadsheets. We ask about the version of life you're trying to build, not just the bed count.</p>
+          <div class="hw-step-who">Sara · in person</div>
+        </div>
+        <div class="hw-step">
+          <div class="hw-step-top"><span class="hw-step-n">02</span><span class="hw-step-time">Week 1–2</span></div>
+          <h4>Discovery.</h4>
+          <p>We map the constraints — budget, schools, drive time, fire zone, climate, deal-breakers. Then we widen the aperture and propose two or three sub-markets you might not have considered.</p>
+          <div class="hw-step-who">Sara · written brief</div>
+        </div>
+        <div class="hw-step">
+          <div class="hw-step-top"><span class="hw-step-n">03</span><span class="hw-step-time">Months 1–6</span></div>
+          <h4>The Walk.</h4>
+          <p>We tour together — 3–5 houses a day at most, never a parade. After each, we talk through what worked, what didn't, and recalibrate. Slow on purpose.</p>
+          <div class="hw-step-who">Sara · every showing</div>
+        </div>
+        <div class="hw-step">
+          <div class="hw-step-top"><span class="hw-step-n">04</span><span class="hw-step-time">When it's right</span></div>
+          <h4>Write.</h4>
+          <p>Offer drafted by Sara, reviewed with you line by line. Strategy on price, contingencies, the personal letter — every clause has a reason.</p>
+          <div class="hw-step-who">Sara · drafted, you sign</div>
+        </div>
+        <div class="hw-step">
+          <div class="hw-step-top"><span class="hw-step-n">05</span><span class="hw-step-time">30 days</span></div>
+          <h4>Close.</h4>
+          <p>Inspections, appraisal, escrow, signatures. James walks the inspection with you and the inspector. Sara handles every contingency negotiation personally.</p>
+          <div class="hw-step-who">Sara &amp; James · together</div>
+        </div>
+        <div class="hw-step">
+          <div class="hw-step-top"><span class="hw-step-n">06</span><span class="hw-step-time">After</span></div>
+          <h4>Stay.</h4>
+          <p>We send a card on the one-year anniversary. We answer your contractor question in 2031. The relationship doesn't expire when the commission clears.</p>
+          <div class="hw-step-who">Both of us · forever</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="hw-proc-panel" id="hw-sell">
+      <div class="hw-proc-steps">
+        <div class="hw-step">
+          <div class="hw-step-top"><span class="hw-step-n">S1</span><span class="hw-step-time">Day 1</span></div>
+          <h4>The walk-through.</h4>
+          <p>James does the first visit — clipboard, flashlight, ninety minutes. Honest read on what's needed, what's optional, what would hurt the listing if we didn't address it.</p>
+          <div class="hw-step-who">James · in person</div>
+        </div>
+        <div class="hw-step">
+          <div class="hw-step-top"><span class="hw-step-n">S2</span><span class="hw-step-time">Week 1</span></div>
+          <h4>The CMA.</h4>
+          <p>Sara writes a 4–6 page CMA you can read — not a 60-page printout. A clear range, the comps that matter, the comps that don't, and what we recommend you list at.</p>
+          <div class="hw-step-who">Sara · written</div>
+        </div>
+        <div class="hw-step">
+          <div class="hw-step-top"><span class="hw-step-n">S3</span><span class="hw-step-time">Weeks 2–4</span></div>
+          <h4>Prep.</h4>
+          <p>Contractor referrals, light staging where useful, paint, garden, the things that move the appraisal. James coordinates every vendor. No surprise invoices.</p>
+          <div class="hw-step-who">James · coordinated</div>
+        </div>
+        <div class="hw-step">
+          <div class="hw-step-top"><span class="hw-step-n">S4</span><span class="hw-step-time">Week 4</span></div>
+          <h4>Photograph.</h4>
+          <p>Professional photographer, drone, twilight shoot, walkthrough video — same standard whether you're listing at $400k or $4M. Included.</p>
+          <div class="hw-step-who">James · directed</div>
+        </div>
+        <div class="hw-step">
+          <div class="hw-step-top"><span class="hw-step-n">S5</span><span class="hw-step-time">Live</span></div>
+          <h4>List &amp; show.</h4>
+          <p>Strategic launch — MLS, our list, Bay Area network. Sara personally hosts the first weekend's showings. We send you a weekly written report on activity, not a portal link.</p>
+          <div class="hw-step-who">Sara · live</div>
+        </div>
+        <div class="hw-step">
+          <div class="hw-step-top"><span class="hw-step-n">S6</span><span class="hw-step-time">Offer → close</span></div>
+          <h4>Negotiate &amp; close.</h4>
+          <p>Every offer reviewed with you in person. Counter-strategy is Sara's call, but your decision. Inspections, escrow, signatures — all handled, all by us.</p>
+          <div class="hw-step-who">Sara · negotiated</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ FEES ============ -->
+<section class="hw-fees">
+  <div class="hw-fees-inner">
+    <div>
+      <span class="hairline-brass" style="margin-bottom: 16px;"></span>
+      <span class="eyebrow">§ IV · The fee</span>
+      <h2 class="h-section" style="margin-top: 10px;">What it<br><em>costs.</em></h2>
+      <p class="lede" style="margin-top: 24px;">No tiered service. No premium add-ons. One number, written down, the same for everyone.</p>
+      <p style="margin-top: 18px; font-family: var(--serif); font-size: 17px; line-height: 1.6; color: var(--ink-soft);">If a seller's brokerage offers a smaller buyer-side fee than the standard rate, we tell you immediately and you decide how to proceed. We never inflate our take by routing you toward a higher-paying listing.</p>
+    </div>
+
+    <div class="hw-fees-tbl">
+      <div class="hw-fees-row head">
+        <span class="l">Service</span>
+        <span class="r">Fee</span>
+      </div>
+      <div class="hw-fees-row">
+        <span class="l">Buyer representation
+          <span class="sub">Tours, search, offer, negotiation, close. Paid by seller at closing — costs you nothing direct.</span>
+        </span>
+        <span class="r">2.5%</span>
+      </div>
+      <div class="hw-fees-row">
+        <span class="l">Listing representation
+          <span class="sub">CMA, prep, photography, listing, showings, negotiation, close. Paid at closing.</span>
+        </span>
+        <span class="r">2.5%</span>
+      </div>
+      <div class="hw-fees-row">
+        <span class="l">Professional photography &amp; drone
+          <span class="sub">Every listing, every price point. Always included.</span>
+        </span>
+        <span class="r line">$1,800</span>
+      </div>
+      <div class="hw-fees-row">
+        <span class="l">"Premium" listing services
+          <span class="sub">We do not offer them. Every client gets the full package.</span>
+        </span>
+        <span class="r line">—</span>
+      </div>
+      <div class="hw-fees-row">
+        <span class="l">Marketing add-ons, video, social
+          <span class="sub">All included. No menu pricing.</span>
+        </span>
+        <span class="r line">$0</span>
+      </div>
+      <div class="hw-fees-row">
+        <span class="l">Transaction coordinator fee
+          <span class="sub">There is no transaction coordinator. James is the transaction coordinator.</span>
+        </span>
+        <span class="r line">$495</span>
+      </div>
+      <div class="hw-fees-foot">
+        Total <strong>buyer-side cost to you · $0</strong> &nbsp;·&nbsp;
+        Total <strong>seller-side rate · 2.5% to Legacy</strong> (plus buyer's brokerage, by separate agreement).
+        <br>Written into every representation agreement, in plain English, before you sign.
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ FAQ ============ -->
+<section class="hw-faq">
+  <div class="hw-faq-inner">
+    <div class="section-h">
+      <div>
+        <span class="hairline-brass" style="margin-bottom: 16px;"></span>
+        <span class="eyebrow">§ V · The honest questions</span>
+        <h2 class="h-section" style="margin-top: 10px;">What people<br><em>actually ask.</em></h2>
+      </div>
+      <p class="lede right">Plain answers to the questions clients ask in the first or second meeting. If yours isn't here, send it.</p>
+    </div>
+
+    <div class="hw-faq-list">
+      <details class="hw-faq-item" open>
+        <summary class="hw-faq-q">Will Sara <em>actually</em> be at every showing?</summary>
+        <div class="hw-faq-a">Yes. Every one. If she physically can't be there for a scheduled tour — vacation, family emergency, the one week a year she's at the Calaveras Pie Auction — we reschedule. <strong>You will not be shown houses by anyone else.</strong> If that ever changes, we'll have stopped being us.</div>
+      </details>
+      <details class="hw-faq-item">
+        <summary class="hw-faq-q">What if you're already representing someone <em>else</em> on a house I love?</summary>
+        <div class="hw-faq-a">We tell you, immediately. If we're representing the seller and you want to make an offer, we refer you to one of two agents we trust in the region — by name, with their direct line — so you get real representation. We never run dual agency.</div>
+      </details>
+      <details class="hw-faq-item">
+        <summary class="hw-faq-q">How long does it usually take to find a home?</summary>
+        <div class="hw-faq-a">The honest median, looking at the last three years of our buyer-side work: <strong>four months from first call to keys.</strong> Some have been six weeks; one was nineteen months. We don't speed it up artificially. The right home is rarely the first home; it's also rarely the seventeenth.</div>
+      </details>
+      <details class="hw-faq-item">
+        <summary class="hw-faq-q">What happens to my data and search history?</summary>
+        <div class="hw-faq-a">It lives in our system. It's yours. You can export it, delete it, or ask us to delete it on your behalf with one email. We never sell leads, never share with the brokerage chain (we aren't part of one), and the only ad-tracker on this site is one we use to know how many people read the Ledger. See our <a href="#" style="color: var(--brass); border-bottom: 1px solid;">privacy policy</a> for the full picture.</div>
+      </details>
+      <details class="hw-faq-item">
+        <summary class="hw-faq-q">Do you work with first-time buyers?</summary>
+        <div class="hw-faq-a">Yes — when the math works. We're upfront: in the foothills, the median first-time-buyer entry point is around $450k, and we want to make sure the loan, the down payment, and the carrying costs are realistic before we start. If the budget's tight, we'll tell you what's possible and what isn't, in writing, before you fall in love with anything.</div>
+      </details>
+      <details class="hw-faq-item">
+        <summary class="hw-faq-q">Can I work with you if I'm <em>not</em> in the Bay Area?</summary>
+        <div class="hw-faq-a">Most of our clients aren't — they're in Sacramento, Reno, LA, Seattle, Austin. We do plenty of "video tour first, in person later" representation. The trick is doing the video tours <strong>honestly</strong> — showing you the kitchen drainage and the back-fence line, not the curated Instagram angles.</div>
+      </details>
+      <details class="hw-faq-item">
+        <summary class="hw-faq-q">What if I decide not to buy or sell anything?</summary>
+        <div class="hw-faq-a">That's an entirely fine outcome. We don't bill for hours or "consultation time." If the right thing for you is to wait, we'll tell you that, and we'll be here when the right thing changes. About one in five conversations we have ends with "not yet" — and they're often the ones that come back as long-term clients.</div>
+      </details>
+      <details class="hw-faq-item">
+        <summary class="hw-faq-q">Are you ever going to sell the brokerage?</summary>
+        <div class="hw-faq-a">No. Asked and answered, in writing, since 2020. We've turned down three acquisition offers from regional brokerages. Legacy is the two of us, and it will stay that way until we retire or step back voluntarily — at which point we'll either close it cleanly or hand it to someone whose values we know in our bones. We will not sell to a chain.</div>
+      </details>
+    </div>
+  </div>
+</section>
+
+<!-- ============ CTA ============ -->
+<section class="hw-cta">
+  <span class="hairline-brass" style="margin: 0 auto 20px;"></span>
+  <span class="eyebrow">Still reading?</span>
+  <h2>Then we're probably<br>a <em>good fit.</em></h2>
+  <p>The first conversation is on us — no pitch, no follow-up sequence. Just a real exchange about the version of foothills life you're picturing, and whether we can help you find it.</p>
+  <div class="hw-cta-ctas">
+    <a href="platform.html" class="btn btn-ink">Start the conversation</a>
+    <a href="about.html" class="btn btn-ghost">More about Sara &amp; James</a>
+    <a href="ledger.html" class="btn btn-ghost">Read the Ledger first</a>
+  </div>
+</section>
+
+<!-- ============ FOOTER ============ -->
+<footer class="footer">
+  <div class="footer-inner">
+    <div class="footer-top">
+      <div>
+        <a href="index.html" class="wordmark" style="align-items: flex-start;">
+          <span class="wordmark-word">Legacy</span>
+          <span class="wordmark-sub">Properties · Angels Camp CA</span>
+        </a>
+        <p class="footer-tagline">Every home has a story. We help you find yours — or tell the one you've already lived.</p>
+      </div>
+      <div>
+        <h4>Services</h4>
+        <a href="relocate.html">Bay → Foothills relocation</a>
+        <a href="towns.html">Communities</a>
+        <a href="seller.html">Sellers</a>
+        <a href="listings.html">Browse listings</a>
+      </div>
+      <div>
+        <h4>The Ledger</h4>
+        <a href="ledger.html">Latest issue</a>
+        <a href="ledger.html#subscribe">Subscribe</a>
+        <a href="about.html">About Sara &amp; James</a>
+        <a href="how-we-work.html">How we work</a>
+      </div>
+      <div>
+        <h4>Connect</h4>
+        <a href="tel:2095594966">(209) 559-4966</a>
+        <a href="mailto:SaraSellsCalifornia@gmail.com">SaraSellsCalifornia@gmail.com</a>
+        <a href="https://www.instagram.com/legacypropertiesig/">Instagram</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <div>© 2026 Legacy Properties · All rights reserved</div>
+      <div>Sara Cooper, Broker · DRE #0214187 · Equal Housing Opportunity</div>
+    </div>
+  </div>
+</footer>
+
+<script>
+  function hwTab(e, id) {
+    document.querySelectorAll('.hw-proc-tab').forEach(t => t.classList.remove('on'));
+    document.querySelectorAll('.hw-proc-panel').forEach(p => p.classList.remove('on'));
+    e.currentTarget.classList.add('on');
+    document.getElementById('hw-' + id).classList.add('on');
+  }
+</script>
+
+</body>
+</html>

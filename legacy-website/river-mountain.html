@@ -1,0 +1,892 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>River & Mountain Lifestyle — Legacy Properties</title>
+<link rel="stylesheet" href="legacy.css">
+<link rel="stylesheet" href="town.css">
+<style>
+/* ============================================================
+   RIVER & MOUNTAIN LIFESTYLE — lifestyle category page
+   ============================================================ */
+
+/* Archetype cards */
+.archetypes {
+  display: grid; grid-template-columns: repeat(2, 1fr);
+  gap: 1px; background: var(--rule); border: 1px solid var(--rule);
+}
+.arch {
+  background: var(--shell);
+  padding: 40px 44px;
+  display: flex; flex-direction: column; gap: 16px;
+  position: relative;
+  transition: background .2s;
+}
+.arch:hover { background: var(--linen); }
+.arch-head {
+  display: flex; justify-content: space-between; align-items: baseline;
+  border-bottom: 1px solid var(--rule-soft);
+  padding-bottom: 14px; margin-bottom: 4px;
+}
+.arch-num {
+  font-family: var(--serif); font-style: italic; font-weight: 300;
+  font-size: 44px; color: var(--brass); line-height: 1;
+}
+.arch-tag {
+  font-family: var(--mono); font-size: 10px; letter-spacing: 0.16em;
+  text-transform: uppercase; color: var(--ink-mute);
+}
+.arch h3 {
+  font-family: var(--serif); font-style: italic; font-weight: 400;
+  font-size: 32px; color: var(--ink); line-height: 1.05;
+}
+.arch p { font-size: 14px; line-height: 1.7; color: var(--ink-soft); }
+.arch-stats {
+  display: grid; grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+  padding-top: 14px;
+  border-top: 1px solid var(--rule-soft);
+  margin-top: auto;
+}
+.arch-stat { display: flex; flex-direction: column; gap: 4px; }
+.as-l {
+  font-family: var(--mono); font-size: 9px; letter-spacing: 0.14em;
+  text-transform: uppercase; color: var(--ink-mute);
+}
+.as-v {
+  font-family: var(--serif); font-style: italic; font-weight: 400;
+  font-size: 18px; color: var(--ink);
+}
+
+/* Constellation — map of unincorporated places */
+.constellation-board {
+  background: var(--shell); border: 1px solid var(--rule);
+  display: grid; grid-template-columns: 1.7fr 1fr;
+  min-height: 560px;
+}
+.constellation-map {
+  position: relative;
+  border-right: 1px solid var(--rule);
+  overflow: hidden;
+}
+.constellation-map svg { display: block; width: 100%; height: 100%; }
+.cm-pin {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  background: none; border: none; padding: 0; cursor: pointer;
+  display: flex; align-items: center; gap: 10px;
+}
+.cm-pin-dot {
+  width: 14px; height: 14px; border-radius: 50%;
+  background: var(--brass);
+  border: 2px solid var(--shell);
+  box-shadow: 0 0 0 1px var(--brass), 0 4px 10px -4px rgba(27,24,19,0.4);
+  transition: transform .18s;
+}
+.cm-pin-lbl {
+  font-family: var(--mono); font-size: 10px; letter-spacing: 0.14em;
+  text-transform: uppercase; color: var(--ink);
+  background: var(--shell);
+  padding: 4px 9px;
+  border: 1px solid var(--rule);
+  white-space: nowrap;
+}
+.cm-pin:hover .cm-pin-dot,
+.cm-pin.on .cm-pin-dot { transform: scale(1.6); background: var(--ink); }
+
+.cm-rail {
+  padding: 32px 36px;
+  display: flex; flex-direction: column;
+}
+.cm-rail-head {
+  display: flex; justify-content: space-between; align-items: center;
+  padding-bottom: 14px; border-bottom: 1px solid var(--rule);
+  margin-bottom: 22px;
+}
+.cm-rail-head .label-cap { color: var(--brass); }
+.cm-place-name {
+  font-family: var(--serif); font-style: italic; font-weight: 400;
+  font-size: 36px; line-height: 1.05; color: var(--ink);
+  margin-bottom: 6px;
+}
+.cm-place-meta {
+  font-family: var(--mono); font-size: 10px; letter-spacing: 0.14em;
+  text-transform: uppercase; color: var(--brass);
+  margin-bottom: 18px;
+}
+.cm-place-desc {
+  font-size: 14px; line-height: 1.7; color: var(--ink-soft);
+  margin-bottom: 18px;
+}
+.cm-place-stats {
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  padding-top: 16px;
+  border-top: 1px solid var(--rule-soft);
+}
+.cm-place-stats .arch-stat { gap: 3px; }
+
+/* Considerations */
+.considers {
+  background: var(--ink); color: var(--shell);
+  padding: 100px var(--gutter);
+}
+.considers-inner { max-width: var(--max); margin: 0 auto; }
+.considers-h h2 {
+  font-family: var(--serif); font-style: italic; font-weight: 300;
+  font-size: clamp(36px, 4vw, 56px); line-height: 1.02; color: var(--shell);
+  margin-top: 14px;
+}
+.considers-h h2 em { color: var(--brass-bright); }
+.considers-h .ed {
+  font-family: var(--mono); font-size: 10px; letter-spacing: 0.22em;
+  text-transform: uppercase; color: var(--brass-bright);
+}
+.consider-grid {
+  display: grid; grid-template-columns: repeat(3, 1fr);
+  gap: 1px; background: rgba(250,246,236,0.10);
+  border: 1px solid rgba(250,246,236,0.10);
+  margin-top: 36px;
+}
+.consider {
+  background: var(--ink);
+  padding: 28px 32px;
+  display: flex; flex-direction: column; gap: 10px;
+}
+.consider-num {
+  font-family: var(--mono); font-size: 10px; letter-spacing: 0.18em;
+  color: var(--brass-bright);
+}
+.consider h4 {
+  font-family: var(--serif); font-style: italic; font-weight: 400;
+  font-size: 22px; color: var(--shell);
+}
+.consider p { font-size: 13px; line-height: 1.65; color: rgba(250,246,236,0.62); }
+.consider strong { color: var(--brass-bright); }
+
+/* Lifestyle scene strip */
+.scenes {
+  display: grid; grid-template-columns: repeat(4, 1fr);
+  gap: 1px; background: var(--rule); border: 1px solid var(--rule);
+  margin-top: 36px;
+}
+.scene {
+  position: relative; aspect-ratio: 3/4; overflow: hidden;
+  background: var(--ink);
+}
+.scene::before {
+  content: ''; position: absolute; inset: 0;
+  background-image: var(--bg); background-size: cover; background-position: center;
+  transition: transform .5s;
+}
+.scene:hover::before { transform: scale(1.05); }
+.scene::after {
+  content: ''; position: absolute; inset: 0;
+  background: linear-gradient(180deg, rgba(27,24,19,0.0) 40%, rgba(27,24,19,0.85) 100%);
+}
+.scene-cap {
+  position: absolute; inset: 0;
+  display: flex; flex-direction: column; justify-content: flex-end;
+  padding: 22px;
+  z-index: 2;
+}
+.scene-cap .lbl {
+  font-family: var(--mono); font-size: 10px; letter-spacing: 0.18em;
+  text-transform: uppercase; color: var(--brass-bright);
+  margin-bottom: 6px;
+}
+.scene-cap h4 {
+  font-family: var(--serif); font-style: italic; font-weight: 400;
+  font-size: 22px; color: var(--shell); line-height: 1.1;
+}
+
+/* Responsive */
+@media (max-width: 1000px) {
+  .archetypes, .consider-grid { grid-template-columns: 1fr; }
+  .constellation-board { grid-template-columns: 1fr; }
+  .scenes { grid-template-columns: 1fr 1fr; }
+}
+</style>
+</head>
+<body class="paper" data-screen-label="River &amp; Mountain Lifestyle">
+
+<header class="topnav">
+  <div class="topnav-bar1">
+    <span>Boutique luxury real estate · Calaveras · Amador · Tuolumne</span>
+    <span><a href="tel:2095594966">(209) 559-4966</a> · <a href="mailto:SaraSellsCalifornia@gmail.com">SaraSellsCalifornia@gmail.com</a></span>
+  </div>
+  <nav class="topnav-bar2">
+    <div class="topnav-links">
+      <a href="listings.html">Listings</a>
+      <a href="towns.html" class="active">Communities</a>
+      <a href="relocate.html">Relocate</a>
+      <a href="seller.html">Sellers</a>
+    </div>
+    <a href="index.html" class="wordmark">
+      <span class="wordmark-word">Legacy</span>
+      <span class="wordmark-sub">Properties · Angels Camp CA</span>
+    </a>
+    <div class="topnav-links right">
+      <a href="index.html#ledger">The Ledger</a>
+      <a href="dashboard.html">Sign In</a>
+      <a href="platform.html" class="btn btn-ink btn-sm" style="padding:10px 18px;">Find My Match</a>
+    </div>
+  </nav>
+</header>
+
+<div class="town-breadcrumb">
+  <div class="town-breadcrumb-inner">
+    <a href="index.html">Legacy</a>
+    <span class="sep">→</span>
+    <a href="towns.html">Communities</a>
+    <span class="sep">→</span>
+    <span class="cur">River &amp; Mountain Lifestyle</span>
+    <span class="spacer"></span>
+    <span class="mono small">Vol. XXII · Plate VII — Lifestyle Category</span>
+  </div>
+</div>
+
+<!-- HERO -->
+<section class="town-hero" data-season="summer">
+  <div class="th-frame th-frame-summer" style="background-image:url('https://images.unsplash.com/photo-1483728642387-6c3bdd6c93e5?w=1800&q=85'); opacity: 1;"></div>
+  <div class="th-veil"></div>
+
+  <div class="th-inner">
+    <div class="th-eyebrow">
+      <span class="tick"></span>
+      <span class="eyebrow">A lifestyle, not a town · Calaveras · Amador · El Dorado outliers</span>
+    </div>
+    <h1 class="th-title">
+      River &amp; mountain,
+      <span class="it">year-round.</span>
+    </h1>
+    <p class="th-tag">— For the buyers who chose the creek over the town. Wilseyville. Mountain Ranch. West Point. Placerville. Glencoe. Sheep Ranch. Anywhere a year-round watercourse marks the property line.</p>
+
+    <div class="th-meta">
+      <div class="th-meta-row"><span class="label-cap">Style</span><span class="num">Rural</span></div>
+      <div class="th-meta-row"><span class="label-cap">Typical parcel</span><span class="num">5 – 40 ac</span></div>
+      <div class="th-meta-row"><span class="label-cap">What you're buying</span><span class="num">A way of life</span></div>
+      <div class="th-meta-row"><span class="label-cap">Sara &amp; James</span><span class="num">Our specialty</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- JUMP RAIL -->
+<nav class="town-jump">
+  <div class="town-jump-inner">
+    <a href="#thesis" class="jump-on">The thesis</a>
+    <a href="#archetypes">Four archetypes</a>
+    <a href="#map">The constellation</a>
+    <a href="#considers">What to know</a>
+    <a href="#scenes">A typical week</a>
+    <a href="#listings">Listings</a>
+    <a href="#letter">A letter</a>
+  </div>
+</nav>
+
+<!-- THESIS -->
+<section class="section" id="thesis" style="background: var(--parchment);">
+  <div class="section-inner">
+    <div class="story-grid">
+      <div class="story-side">
+        <span class="hairline-brass"></span>
+        <span class="eyebrow">Field notes · § I</span>
+        <h2 class="h-section" style="margin-top:14px;">Some buyers choose<br>a town. <em>You're</em><br>choosing a creek.</h2>
+      </div>
+      <div class="story-body">
+        <p class="lede">There's a kind of buyer the Mother Lode quietly attracts. They don't want walkable Main Street. They want a quarter-mile of frontage on a year-round creek, a well that ran through the 2014 drought, and a road that ends at their gate.</p>
+        <p>This is who we cater to in Wilseyville, Mountain Ranch, West Point, Glencoe, Sheep Ranch, Mokelumne Hill, and across the county line into Placerville and Pollock Pines. None of these are towns the way Murphys is a town. They're constellations of parcels strung along the Mokelumne, the Cosumnes, the South Fork, the North Fork, Licking Fork, San Antonio Creek.</p>
+        <p>The transactions look different. The questions look different. The buyers look different. We've been writing this kind of contract since 2018 — and James was buying water-rights opinions on rural parcels for a decade before that.</p>
+      </div>
+    </div>
+
+    <div class="fit-strip">
+      <div class="fit-h"><span class="label-cap">Who this is for —</span></div>
+      <div class="fit-cards">
+        <article class="fit-card">
+          <div class="fit-num">01</div>
+          <h4>The homesteader</h4>
+          <p>Ten acres, a well, a barn, garden rows. Maybe chickens, maybe goats, maybe just a freezer full of venison and a smoker that gets used every Sunday.</p>
+        </article>
+        <article class="fit-card">
+          <div class="fit-num">02</div>
+          <h4>The water buyer</h4>
+          <p>Senior water right. A creek that runs in August. A pond that holds. The buyer who understands that California real estate is, fundamentally, water rights with a house on it.</p>
+        </article>
+        <article class="fit-card">
+          <div class="fit-num">03</div>
+          <h4>The privacy seeker</h4>
+          <p>No neighbors in sight. A gate at the road. The kind of buyer who reads the parcel map before they read the listing description.</p>
+        </article>
+        <article class="fit-card">
+          <div class="fit-num">04</div>
+          <h4>The legacy parcel buyer</h4>
+          <p>Forty acres or more. The kind of land you don't ever sell — you pass it. Often a buyer in their fifties who's been thinking about this since their thirties.</p>
+        </article>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOUR ARCHETYPES -->
+<section class="section" id="archetypes" style="background: var(--vellum);">
+  <div class="section-inner">
+    <div class="section-h">
+      <div>
+        <span class="hairline-brass"></span>
+        <span class="eyebrow">Plate II · The properties we sell here</span>
+        <h2 class="h-section" style="margin-top:10px;">Four archetypes.<br><em>One sensibility.</em></h2>
+      </div>
+      <p class="lede right">After eight years of writing rural contracts, the parcels start to sort themselves into four shapes. Yours is almost certainly one of them.</p>
+    </div>
+
+    <div class="archetypes">
+      <article class="arch">
+        <div class="arch-head">
+          <div class="arch-num">I</div>
+          <div class="arch-tag">~5 ac · cabin + creek</div>
+        </div>
+        <h3>The creekside cabin</h3>
+        <p>A small structure — 1,200 to 1,800 square feet — on five-ish acres with a year-round watercourse along one boundary. The lifestyle starter parcel. Frequent in Wilseyville and Glencoe.</p>
+        <div class="arch-stats">
+          <div class="arch-stat"><span class="as-l">Typical price</span><span class="as-v">$385 – 525K</span></div>
+          <div class="arch-stat"><span class="as-l">Water</span><span class="as-v">Well + creek</span></div>
+          <div class="arch-stat"><span class="as-l">Common find</span><span class="as-v">3 / mo</span></div>
+        </div>
+      </article>
+
+      <article class="arch">
+        <div class="arch-head">
+          <div class="arch-num">II</div>
+          <div class="arch-tag">10 – 20 ac · main + outbuildings</div>
+        </div>
+        <h3>The river homestead</h3>
+        <p>Main house, shop, garden, fenced pasture, chicken setup, sometimes a guest cabin. The full lifestyle parcel — usable land, real frontage, an honest well. Mountain Ranch, West Point, the upper Calaveras River.</p>
+        <div class="arch-stats">
+          <div class="arch-stat"><span class="as-l">Typical price</span><span class="as-v">$650 – 950K</span></div>
+          <div class="arch-stat"><span class="as-l">Water</span><span class="as-v">Senior right + well</span></div>
+          <div class="arch-stat"><span class="as-l">Common find</span><span class="as-v">2 / mo</span></div>
+        </div>
+      </article>
+
+      <article class="arch">
+        <div class="arch-head">
+          <div class="arch-num">III</div>
+          <div class="arch-tag">2 – 5 ac · ridge view</div>
+        </div>
+        <h3>The ridge parcel</h3>
+        <p>Smaller acreage, but the view is the asset. Higher elevation (3,500 ft+), often without creek frontage but with seasonal drainage and big horizons. West Point ridge, the upper benches above Mokelumne Hill.</p>
+        <div class="arch-stats">
+          <div class="arch-stat"><span class="as-l">Typical price</span><span class="as-v">$295 – 495K</span></div>
+          <div class="arch-stat"><span class="as-l">Water</span><span class="as-v">Well · check yield</span></div>
+          <div class="arch-stat"><span class="as-l">Common find</span><span class="as-v">4 / mo</span></div>
+        </div>
+      </article>
+
+      <article class="arch">
+        <div class="arch-head">
+          <div class="arch-num">IV</div>
+          <div class="arch-tag">40 ac+ · ranch / legacy</div>
+        </div>
+        <h3>The legacy ranch</h3>
+        <p>Forty to a hundred acres. A working setup or the bones of one — barns, fencing, a road system, a stocked pond. The parcel you build a family compound on. Sheep Ranch, Glencoe, the back side of West Point.</p>
+        <div class="arch-stats">
+          <div class="arch-stat"><span class="as-l">Typical price</span><span class="as-v">$1.1 – 2.4M</span></div>
+          <div class="arch-stat"><span class="as-l">Water</span><span class="as-v">Multi-source</span></div>
+          <div class="arch-stat"><span class="as-l">Common find</span><span class="as-v">1 / quarter</span></div>
+        </div>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- CONSTELLATION MAP -->
+<section class="section" id="map" style="background: var(--parchment);">
+  <div class="section-inner">
+    <div class="section-h">
+      <div>
+        <span class="hairline-brass"></span>
+        <span class="eyebrow">Plate III · The constellation</span>
+        <h2 class="h-section" style="margin-top:10px;">Not a town.<br>A <em>scattering.</em></h2>
+      </div>
+      <p class="lede right">Hover any place. None of these will show up on a tourist map. All of them have year-round water and a community that gathers at the post office.</p>
+    </div>
+
+    <div class="constellation-board">
+      <div class="constellation-map" id="cMap">
+        <svg viewBox="0 0 1000 600" preserveAspectRatio="xMidYMid meet">
+          <defs>
+            <radialGradient id="terrainCM" cx="50%" cy="50%" r="80%">
+              <stop offset="0%" stop-color="#E8DFCC"/>
+              <stop offset="60%" stop-color="#D8CBA8"/>
+              <stop offset="100%" stop-color="#B8A580"/>
+            </radialGradient>
+            <pattern id="topoCM" x="0" y="0" width="80" height="80" patternUnits="userSpaceOnUse">
+              <circle cx="40" cy="40" r="0.5" fill="rgba(27,24,19,0.18)"/>
+            </pattern>
+          </defs>
+          <rect width="1000" height="600" fill="url(#terrainCM)"/>
+          <rect width="1000" height="600" fill="url(#topoCM)"/>
+
+          <!-- Contour ridges -->
+          <g fill="none" stroke="rgba(27,24,19,0.12)" stroke-width="0.8">
+            <path d="M0,120 Q220,80 440,140 T1020,110"/>
+            <path d="M0,200 Q240,160 460,220 T1020,190"/>
+            <path d="M0,300 Q260,260 480,320 T1020,290"/>
+            <path d="M0,420 Q280,380 500,440 T1020,410"/>
+            <path d="M0,520 Q300,480 520,540 T1020,510"/>
+          </g>
+
+          <!-- Rivers (the spine of the page) -->
+          <path d="M-20,180 Q200,200 380,160 T720,140 T1020,170" fill="none" stroke="#7E9AAA" stroke-width="6" opacity="0.6"/>
+          <text x="500" y="135" font-family="Cormorant Garamond" font-style="italic" font-size="14" fill="#5E7886">Mokelumne River — North Fork</text>
+
+          <path d="M-20,320 Q200,300 400,340 T780,330 T1020,310" fill="none" stroke="#7E9AAA" stroke-width="5" opacity="0.55"/>
+          <text x="500" y="365" font-family="Cormorant Garamond" font-style="italic" font-size="14" fill="#5E7886">Mokelumne — Middle Fork</text>
+
+          <path d="M-20,470 Q200,440 380,490 T720,470 T1020,460" fill="none" stroke="#7E9AAA" stroke-width="5" opacity="0.55"/>
+          <text x="500" y="495" font-family="Cormorant Garamond" font-style="italic" font-size="14" fill="#5E7886">Calaveras River</text>
+
+          <!-- Cross creek -->
+          <path d="M460,0 Q470,200 440,400 T420,620" fill="none" stroke="#9DB5C2" stroke-width="3" opacity="0.5"/>
+          <text x="438" y="270" font-family="Cormorant Garamond" font-style="italic" font-size="11" fill="#5E7886" transform="rotate(80,438,270)">Licking Fork</text>
+
+          <!-- Compass -->
+          <g transform="translate(940,80)" font-family="JetBrains Mono" font-size="9" fill="rgba(27,24,19,0.55)">
+            <circle r="22" fill="none" stroke="rgba(27,24,19,0.25)"/>
+            <path d="M0,-20 L4,0 L0,4 L-4,0 Z" fill="#8C6E3D"/>
+            <text y="-26" text-anchor="middle">N</text>
+          </g>
+
+          <!-- Scale -->
+          <g transform="translate(40,560)" font-family="JetBrains Mono" font-size="8" fill="rgba(27,24,19,0.55)">
+            <line x1="0" y1="0" x2="100" y2="0" stroke="rgba(27,24,19,0.55)" stroke-width="1.5"/>
+            <line x1="0" y1="-4" x2="0" y2="4" stroke="rgba(27,24,19,0.55)"/>
+            <line x1="50" y1="-4" x2="50" y2="4" stroke="rgba(27,24,19,0.55)"/>
+            <line x1="100" y1="-4" x2="100" y2="4" stroke="rgba(27,24,19,0.55)"/>
+            <text x="0" y="18">0</text><text x="50" y="18">5 mi</text><text x="100" y="18">10 mi</text>
+          </g>
+        </svg>
+
+        <!-- Pins -->
+        <button class="cm-pin on" style="left: 18%; top: 26%;"
+          data-name="Wilseyville"
+          data-meta="Calaveras Co. · 2,200 ft · West Point area"
+          data-desc="Unincorporated community along the Mokelumne North Fork. Year-round creeks, working ranches, a general store, and a community hall that hosts the Saturday breakfast everyone knows about. Sara has closed seven parcels here since 2022."
+          data-pop="~280"
+          data-water="Senior rights · year-round"
+          data-elev="2,200 ft"
+          data-typical="$485K parcel">
+          <span class="cm-pin-dot"></span><span class="cm-pin-lbl">Wilseyville</span>
+        </button>
+
+        <button class="cm-pin" style="left: 38%; top: 38%;"
+          data-name="West Point"
+          data-meta="Calaveras Co. · 2,860 ft"
+          data-desc="The big town in the constellation. A school district, a post office, a hardware store, a saloon, and the only stoplight in twelve miles. Centers a forty-mile rural service area."
+          data-pop="~700"
+          data-water="District + well"
+          data-elev="2,860 ft"
+          data-typical="$525K parcel">
+          <span class="cm-pin-dot"></span><span class="cm-pin-lbl">West Point</span>
+        </button>
+
+        <button class="cm-pin" style="left: 30%; top: 56%;"
+          data-name="Mountain Ranch"
+          data-meta="Calaveras Co. · 2,400 ft · San Antonio Creek"
+          data-desc="Forty minutes from Murphys, but it might as well be forty years. Working ranches, gravel roads, year-round San Antonio Creek through most parcels. Annual rodeo, May."
+          data-pop="~1,580"
+          data-water="Wells + creek"
+          data-elev="2,400 ft"
+          data-typical="$565K parcel">
+          <span class="cm-pin-dot"></span><span class="cm-pin-lbl">Mountain Ranch</span>
+        </button>
+
+        <button class="cm-pin" style="left: 48%; top: 22%;"
+          data-name="Glencoe"
+          data-meta="Calaveras Co. · 2,700 ft"
+          data-desc="A handful of parcels along Hwy 26 above the Mokelumne. Almost no buyers know about it. The reason is the reason it's good."
+          data-pop="~150"
+          data-water="Wells primarily"
+          data-elev="2,700 ft"
+          data-typical="$425K parcel">
+          <span class="cm-pin-dot"></span><span class="cm-pin-lbl">Glencoe</span>
+        </button>
+
+        <button class="cm-pin" style="left: 58%; top: 48%;"
+          data-name="Sheep Ranch"
+          data-meta="Calaveras Co. · 2,100 ft"
+          data-desc="A ghost-town-turned-ranch-community ten miles east of Murphys. The legacy-ranch buyers' first stop. Forty-plus-acre parcels dominate."
+          data-pop="~60"
+          data-water="Wells + seasonal"
+          data-elev="2,100 ft"
+          data-typical="$1.4M parcel">
+          <span class="cm-pin-dot"></span><span class="cm-pin-lbl">Sheep Ranch</span>
+        </button>
+
+        <button class="cm-pin" style="left: 26%; top: 76%;"
+          data-name="Mokelumne Hill"
+          data-meta="Calaveras Co. · 1,470 ft · Hwy 49"
+          data-desc="The bridge town between Sutter Creek and the back country. Historic-but-rural, a six-block grid surrounded by lifestyle parcels. The classic 5–10 acre cabin terrain."
+          data-pop="~770"
+          data-water="District + wells"
+          data-elev="1,470 ft"
+          data-typical="$450K parcel">
+          <span class="cm-pin-dot"></span><span class="cm-pin-lbl">Mokelumne Hill</span>
+        </button>
+
+        <button class="cm-pin" style="left: 72%; top: 30%;"
+          data-name="Pollock Pines"
+          data-meta="El Dorado Co. · 4,000 ft (referral)"
+          data-desc="Outside our usual coverage but inside our lifestyle range. We refer to a trusted El Dorado broker and stay on as your buyer's advocate. Higher elevation, snow-typical, deep pines."
+          data-pop="~6,800"
+          data-water="District water"
+          data-elev="4,000 ft"
+          data-typical="$595K parcel">
+          <span class="cm-pin-dot"></span><span class="cm-pin-lbl">Pollock Pines</span>
+        </button>
+
+        <button class="cm-pin" style="left: 84%; top: 50%;"
+          data-name="Placerville"
+          data-meta="El Dorado Co. · 1,866 ft (referral)"
+          data-desc="Old Hangtown. Outside our county but inside our world — we partner with an El Dorado broker for these and stay in the deal as buyer's advocate. Apple Hill country."
+          data-pop="~10,750"
+          data-water="District water"
+          data-elev="1,866 ft"
+          data-typical="$485K cottage">
+          <span class="cm-pin-dot"></span><span class="cm-pin-lbl">Placerville</span>
+        </button>
+      </div>
+
+      <aside class="cm-rail">
+        <div class="cm-rail-head">
+          <span class="label-cap">Detail</span>
+          <span class="mono" id="cmCounter" style="font-size:10px;color:var(--ink-faint);">8 places</span>
+        </div>
+        <div id="cmDetail">
+          <h3 class="cm-place-name" id="cmName">Wilseyville</h3>
+          <div class="cm-place-meta" id="cmMeta">Calaveras Co. · 2,200 ft · West Point area</div>
+          <p class="cm-place-desc" id="cmDesc">Unincorporated community along the Mokelumne North Fork. Year-round creeks, working ranches, a general store, and a community hall that hosts the Saturday breakfast everyone knows about. Sara has closed seven parcels here since 2022.</p>
+          <div class="cm-place-stats">
+            <div class="arch-stat"><span class="as-l">Population</span><span class="as-v" id="cmPop">~280</span></div>
+            <div class="arch-stat"><span class="as-l">Elevation</span><span class="as-v" id="cmElev">2,200 ft</span></div>
+            <div class="arch-stat"><span class="as-l">Water</span><span class="as-v" id="cmWater">Senior rights · year-round</span></div>
+            <div class="arch-stat"><span class="as-l">Typical</span><span class="as-v" id="cmTypical">$485K parcel</span></div>
+          </div>
+        </div>
+      </aside>
+    </div>
+  </div>
+</section>
+
+<!-- CONSIDERATIONS -->
+<section class="considers" id="considers">
+  <div class="considers-inner">
+    <div class="considers-h">
+      <span class="hairline-brass" style="background: var(--brass-bright);"></span>
+      <span class="ed" style="display: block; margin-top: 14px;">Plate IV · What we'll ask before any offer</span>
+      <h2>Nine questions<br><em>before</em> the listing photos.</h2>
+    </div>
+
+    <div class="consider-grid">
+      <article class="consider">
+        <span class="consider-num">01</span>
+        <h4>Water right status</h4>
+        <p>Senior, junior, riparian, appropriative, district. Which one you hold determines what happens in the next drought. <strong>Non-negotiable diligence.</strong></p>
+      </article>
+      <article class="consider">
+        <span class="consider-num">02</span>
+        <h4>Well yield &amp; recovery</h4>
+        <p>Gallons per minute, drawdown rate, last test date. Anything below 5 gpm with poor recovery is an irrigation-only well. We pull the records before we walk the property.</p>
+      </article>
+      <article class="consider">
+        <span class="consider-num">03</span>
+        <h4>Septic age &amp; type</h4>
+        <p>Conventional, mound, sand-filter. Calaveras Environmental requires inspection on transfer. Age over 25 years = budget for replacement. <strong>$18–35K typical.</strong></p>
+      </article>
+      <article class="consider">
+        <span class="consider-num">04</span>
+        <h4>Fire zone designation</h4>
+        <p>State Responsibility Area, Local Responsibility Area, Very-High Severity. Insurance reality varies wildly. <strong>Some parcels are non-insurable</strong> through standard carriers.</p>
+      </article>
+      <article class="consider">
+        <span class="consider-num">05</span>
+        <h4>Road access &amp; maintenance</h4>
+        <p>Public, private, shared. If shared, is there a maintenance agreement recorded? Without one, you may inherit road grading disputes for the next decade.</p>
+      </article>
+      <article class="consider">
+        <span class="consider-num">06</span>
+        <h4>Snow load &amp; winter access</h4>
+        <p>Above 3,500 ft, plan on snow. Above 4,500 ft, plan on chains. We pull historical NWS snowfall and ask the seller about Februaries.</p>
+      </article>
+      <article class="consider">
+        <span class="consider-num">07</span>
+        <h4>Broadband &amp; cell</h4>
+        <p>Fiber is in most of West Point and Mountain Ranch. Starlink covers the rest. Cell varies by ridge. We test from the property before you write the offer.</p>
+      </article>
+      <article class="consider">
+        <span class="consider-num">08</span>
+        <h4>Easements &amp; setbacks</h4>
+        <p>PG&amp;E, neighbor access, mineral rights, BLM-adjacent. Title commitment review with you, line by line. Half the rural surprises live here.</p>
+      </article>
+      <article class="consider">
+        <span class="consider-num">09</span>
+        <h4>What your insurance actually costs</h4>
+        <p>Quote from the carrier <em>before</em> contingency removal. Premiums on Cal Fair Plan + DIC have tripled in five years. Best to know the number.</p>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- LIFESTYLE SCENES -->
+<section class="section" id="scenes" style="background: var(--parchment);">
+  <div class="section-inner">
+    <div class="section-h">
+      <div>
+        <span class="hairline-brass"></span>
+        <span class="eyebrow">Plate V · A typical week</span>
+        <h2 class="h-section" style="margin-top:10px;">What the life<br><em>actually looks like.</em></h2>
+      </div>
+      <p class="lede right">Not the postcard. The Tuesday morning. The Sunday after dinner.</p>
+    </div>
+
+    <div class="scenes">
+      <article class="scene" style="--bg: url('https://images.unsplash.com/photo-1448375240586-882707db888b?w=600&q=80');">
+        <div class="scene-cap">
+          <span class="lbl">Tuesday · 6:42 AM</span>
+          <h4>Coffee on the creek before the light.</h4>
+        </div>
+      </article>
+      <article class="scene" style="--bg: url('https://images.unsplash.com/photo-1441260038675-7329ab4cc264?w=600&q=80');">
+        <div class="scene-cap">
+          <span class="lbl">Thursday · 11 AM</span>
+          <h4>The neighbor with the tractor. A pot of beans.</h4>
+        </div>
+      </article>
+      <article class="scene" style="--bg: url('https://images.unsplash.com/photo-1518780664697-55e3ad937233?w=600&q=80');">
+        <div class="scene-cap">
+          <span class="lbl">Saturday · sundown</span>
+          <h4>Fire pit. Bottle. Nothing on the calendar Sunday.</h4>
+        </div>
+      </article>
+      <article class="scene" style="--bg: url('https://images.unsplash.com/photo-1476611317561-60117649dd94?w=600&q=80');">
+        <div class="scene-cap">
+          <span class="lbl">November · first snow</span>
+          <h4>Wood split, generator tested, the road clear.</h4>
+        </div>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- LISTINGS -->
+<section class="section" id="listings" style="background: var(--vellum);">
+  <div class="section-inner">
+    <div class="section-h">
+      <div>
+        <span class="hairline-brass"></span>
+        <span class="eyebrow">Plate VI · Currently in the field</span>
+        <h2 class="h-section" style="margin-top:10px;">Rural parcels<br><em>on the boards.</em></h2>
+      </div>
+      <p class="lede right">Three lifestyle properties this week. James has walked each one.</p>
+    </div>
+
+    <div class="list-grid">
+      <a href="listing.html" class="prop-card">
+        <div class="prop-photo">
+          <img src="https://images.unsplash.com/photo-1542718610-a1d656d1884c?w=800&q=85" alt="">
+          <div class="prop-tags"><span class="pill-status pill-new">Just listed</span></div>
+        </div>
+        <div class="prop-body">
+          <div class="prop-price">$895,000</div>
+          <div class="prop-address">14 ac · Pony Express Rd<br>Wilseyville, CA 95257</div>
+          <div class="prop-specs"><span>3 Bd</span><span>2 Ba</span><span>Creek frontage</span></div>
+          <div class="prop-foot"><span class="prop-match">Listed by Sara &amp; James</span><span class="label-cap" style="color:var(--ink-faint);">Plate I</span></div>
+        </div>
+      </a>
+      <a href="listing.html" class="prop-card">
+        <div class="prop-photo">
+          <img src="https://images.unsplash.com/photo-1502082553048-f009c37129b9?w=800&q=85" alt="">
+          <div class="prop-tags"><span class="pill-status pill-brass">Active</span></div>
+        </div>
+        <div class="prop-body">
+          <div class="prop-price">$549,000</div>
+          <div class="prop-address">8 ac · Old Gulch Rd<br>Mountain Ranch, CA 95246</div>
+          <div class="prop-specs"><span>2 Bd</span><span>1 Ba</span><span>San Antonio Crk</span></div>
+          <div class="prop-foot"><span class="prop-match">Listed by James</span><span class="label-cap" style="color:var(--ink-faint);">Plate II</span></div>
+        </div>
+      </a>
+      <a href="listing.html" class="prop-card">
+        <div class="prop-photo">
+          <img src="https://images.unsplash.com/photo-1448375240586-882707db888b?w=800&q=85" alt="">
+          <div class="prop-tags"><span class="pill-status pill-warm">Land</span></div>
+        </div>
+        <div class="prop-body">
+          <div class="prop-price">$1,675,000</div>
+          <div class="prop-address">42 ac · Mt. Ranch Rd<br>Sheep Ranch, CA 95250</div>
+          <div class="prop-specs"><span>Land</span><span>42 ac</span><span>Senior water right</span></div>
+          <div class="prop-foot"><span class="prop-match">Listed by James</span><span class="label-cap" style="color:var(--ink-faint);">Plate III</span></div>
+        </div>
+      </a>
+    </div>
+
+    <div style="text-align:center; margin-top:40px;">
+      <a href="listings.html" class="btn btn-ghost">See all rural listings</a>
+    </div>
+  </div>
+</section>
+
+<!-- LETTER -->
+<section class="section town-letter" id="letter" style="background: var(--parchment);">
+  <div class="section-inner">
+    <article class="letter-card">
+      <div class="letter-head">
+        <span class="hairline-brass"></span>
+        <span class="eyebrow">A note from your agents · § VII</span>
+      </div>
+      <div class="letter-grid">
+        <div class="letter-photo">
+          <img src="art/james-headshot.png" alt="James Beyersdorf">
+          <div class="letter-stamp">
+            <span class="ls-cir">JB</span>
+            <span class="ls-lbl">James Beyersdorf · Associate · Land specialist</span>
+          </div>
+        </div>
+        <div class="letter-body">
+          <p class="letter-open">A few words on rural buying —</p>
+          <p>I came to Calaveras for a five-acre parcel in 2014 and never left. Most of my buyers since have been chasing the same thing — water, privacy, a road that ends at your gate. Some find it in Wilseyville, some in Mountain Ranch, some out past West Point. A handful have ended up across the line in Placerville. The shape of the parcel matters more than the postal address.</p>
+          <p>What I tell every rural buyer the first time we sit down: this is not the kind of transaction you rush. <em>The questions matter more than the listing.</em> A well report. A senior water right. A road maintenance agreement. A fire-zone designation. A working septic. None of these show up in the photos. All of them determine whether the next ten years are the life you pictured or a five-year correction.</p>
+          <p>Sara and I work these deals together. She runs marketing, negotiation, and the buyer-side of the close. I do the technical walk — the parcel pins, the well, the septic, the road. The combination is why we win these. The combination is also why we say no to some of them.</p>
+          <p class="letter-sign">— James</p>
+        </div>
+      </div>
+      <div class="letter-contact">
+        <a href="tel:2095594966"><span class="glyph">◇</span> (209) 559-4966</a>
+        <a href="mailto:SaraSellsCalifornia@gmail.com"><span class="glyph">◇</span> SaraSellsCalifornia@gmail.com</a>
+        <a href="platform.html"><span class="glyph">◇</span> Walk a parcel with James</a>
+      </div>
+    </article>
+  </div>
+</section>
+
+<!-- NEARBY (other communities) -->
+<section class="section" style="background: var(--vellum);">
+  <div class="section-inner">
+    <div class="section-h">
+      <div>
+        <span class="hairline-brass"></span>
+        <span class="eyebrow">Plate VIII · Adjacent</span>
+        <h2 class="h-section" style="margin-top:10px;">Towns nearby.</h2>
+      </div>
+      <p class="lede right">When the parcel isn't quite the answer, the town might be.</p>
+    </div>
+
+    <div class="nearby-grid">
+      <a href="town-murphys.html" class="nearby-card">
+        <div class="nb-img" style="background-image:url('https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=600&q=80');"></div>
+        <div class="nb-body"><span class="nb-dist">~30 min south</span><h4>Murphys</h4><p>Wine country, Main Street.</p></div>
+      </a>
+      <a href="town-arnold.html" class="nearby-card">
+        <div class="nb-img" style="background-image:url('https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=600&q=80');"></div>
+        <div class="nb-body"><span class="nb-dist">~40 min east</span><h4>Arnold</h4><p>Pines &amp; cabins.</p></div>
+      </a>
+      <a href="town-sutter-creek.html" class="nearby-card">
+        <div class="nb-img" style="background-image:url('https://images.unsplash.com/photo-1475924156734-496f6cac6ec1?w=600&q=80');"></div>
+        <div class="nb-body"><span class="nb-dist">~35 min northwest</span><h4>Sutter Creek</h4><p>Antiques, Amador wine.</p></div>
+      </a>
+      <a href="town-angels-camp.html" class="nearby-card">
+        <div class="nb-img" style="background-image:url('https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=600&q=80');"></div>
+        <div class="nb-body"><span class="nb-dist">~32 min west</span><h4>Angels Camp</h4><p>Frog Jubilee, Twain country.</p></div>
+      </a>
+      <a href="town-copperopolis.html" class="nearby-card">
+        <div class="nb-img" style="background-image:url('https://images.unsplash.com/photo-1500534314209-a25ddb2bd429?w=600&q=80');"></div>
+        <div class="nb-body"><span class="nb-dist">~45 min southwest</span><h4>Copperopolis</h4><p>Lake estates, golf.</p></div>
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="cta">
+  <span class="hairline-brass" style="margin: 0 auto 20px; background: var(--brass-bright);"></span>
+  <span class="eyebrow" style="color: var(--brass-bright);">Begin your river chapter</span>
+  <h2 class="cta-h">Walk a parcel<br><em>with us.</em></h2>
+  <p class="cta-sub">Half a day, three or four properties, a candid read on the water, the well, the road, and the life.</p>
+  <div class="cta-ctas">
+    <a href="platform.html" class="btn btn-ink">Start the conversation</a>
+    <a href="tel:2095594966" class="btn btn-ghost">Call (209) 559-4966</a>
+  </div>
+</section>
+
+<footer class="footer">
+  <div class="footer-inner">
+    <div class="footer-top">
+      <div>
+        <a href="index.html" class="wordmark" style="align-items: flex-start;">
+          <span class="wordmark-word">Legacy</span>
+          <span class="wordmark-sub">Properties · Angels Camp CA</span>
+        </a>
+        <p class="footer-tagline">Every home has a story. We help you find yours — or tell the one you've already lived.</p>
+      </div>
+      <div>
+        <h4>Communities</h4>
+        <a href="town-murphys.html">Murphys</a>
+        <a href="town-arnold.html">Arnold</a>
+        <a href="town-sutter-creek.html">Sutter Creek</a>
+        <a href="town-angels-camp.html">Angels Camp</a>
+        <a href="town-copperopolis.html">Copperopolis</a>
+        <a href="river-mountain.html">River &amp; Mountain</a>
+      </div>
+      <div>
+        <h4>Services</h4>
+        <a href="relocate.html">Bay → Foothills</a>
+        <a href="listings.html">Search listings</a>
+        <a href="seller.html">Sellers</a>
+        <a href="platform.html">Request a tour</a>
+      </div>
+      <div>
+        <h4>Connect</h4>
+        <a href="tel:2095594966">(209) 559-4966</a>
+        <a href="mailto:SaraSellsCalifornia@gmail.com">SaraSellsCalifornia@gmail.com</a>
+        <a href="index.html#ledger">The Ledger</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <div>© 2026 Legacy Properties · All rights reserved</div>
+      <div>Sara Cooper, Broker · DRE #0214187 · Equal Housing Opportunity</div>
+    </div>
+  </div>
+</footer>
+
+<script>
+(function () {
+  const pins = document.querySelectorAll('.cm-pin');
+  const out = {
+    name: document.getElementById('cmName'),
+    meta: document.getElementById('cmMeta'),
+    desc: document.getElementById('cmDesc'),
+    pop:  document.getElementById('cmPop'),
+    elev: document.getElementById('cmElev'),
+    water:document.getElementById('cmWater'),
+    typical: document.getElementById('cmTypical'),
+  };
+  function show(p) {
+    pins.forEach(x => x.classList.toggle('on', x === p));
+    out.name.textContent = p.dataset.name;
+    out.meta.textContent = p.dataset.meta;
+    out.desc.textContent = p.dataset.desc;
+    out.pop.textContent = p.dataset.pop;
+    out.elev.textContent = p.dataset.elev;
+    out.water.textContent = p.dataset.water;
+    out.typical.textContent = p.dataset.typical;
+  }
+  pins.forEach(p => {
+    p.addEventListener('mouseenter', () => show(p));
+    p.addEventListener('focus', () => show(p));
+    p.addEventListener('click', () => show(p));
+  });
+})();
+</script>
+</body>
+</html>

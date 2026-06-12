@@ -1,0 +1,14 @@
+{
+  "name": "legacy-properties",
+  "version": "1.0.0",
+  "description": "Legacy Properties — boutique real estate platform · MetroList RESO Web API integration",
+  "private": true,
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "dev": "vercel dev",
+    "deploy": "vercel --prod"
+  },
+  "dependencies": {}
+}

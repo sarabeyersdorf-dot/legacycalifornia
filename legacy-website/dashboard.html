@@ -1,0 +1,588 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Your Legacy · Dashboard</title>
+<link rel="stylesheet" href="legacy.css">
+<style>
+/* Consumer dashboard */
+.dash-hero {
+  padding: 36px 36px 28px;
+  border-bottom: 1px solid var(--rule);
+  display: grid; grid-template-columns: 1fr auto; gap: 32px; align-items: end;
+}
+.dash-greet .eyebrow { display: block; margin-bottom: 10px; }
+.dash-greet h1 {
+  font-family: var(--serif); font-style: italic; font-weight: 300;
+  font-size: clamp(40px, 5vw, 64px); line-height: 0.98; color: var(--ink); letter-spacing: -0.005em;
+}
+.dash-greet h1 em { color: var(--brass); }
+.dash-greet p { font-family: var(--serif); font-style: italic; font-weight: 300; font-size: 18px; color: var(--ink-soft); margin-top: 14px; max-width: 520px; line-height: 1.4; }
+
+.dash-summary {
+  display: grid; grid-template-columns: repeat(4, 1fr); gap: 1px;
+  background: var(--rule); border: 1px solid var(--rule); min-width: 580px;
+}
+.dash-sum {
+  padding: 18px 22px; background: var(--shell);
+  display: flex; flex-direction: column; gap: 4px;
+}
+.dash-sum .v { font-family: var(--serif); font-style: italic; font-weight: 400; font-size: 32px; color: var(--ink); line-height: 1; }
+.dash-sum .l { font-family: var(--mono); font-size: 9px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--ink-mute); }
+.dash-sum .accent { color: var(--brass); }
+
+/* Quick layout */
+.dash-grid {
+  display: grid; grid-template-columns: 2fr 1fr; gap: 28px;
+  padding: 28px 36px 60px;
+}
+
+/* Saved board */
+.dash-card {
+  background: var(--shell); border: 1px solid var(--rule); padding: 26px 28px;
+}
+.dash-card-h {
+  display: flex; justify-content: space-between; align-items: baseline;
+  padding-bottom: 14px; border-bottom: 1px solid var(--rule); margin-bottom: 20px;
+}
+.dash-card-h h2 { font-family: var(--serif); font-style: italic; font-weight: 400; font-size: 26px; color: var(--ink); }
+.dash-card-h .meta { font-family: var(--mono); font-size: 10px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--ink-mute); }
+.dash-card-h .meta a { color: var(--brass); text-decoration: none; }
+
+/* Saved list as cards w/ notes */
+.saved-row {
+  display: grid;
+  grid-template-columns: 144px 1fr 200px;
+  gap: 22px; padding: 18px 0;
+  border-bottom: 1px solid var(--rule-soft);
+  align-items: stretch;
+}
+.saved-row:first-child { padding-top: 6px; }
+.saved-row:last-child { border-bottom: none; padding-bottom: 0; }
+.saved-photo { width: 144px; height: 108px; position: relative; overflow: hidden; background: var(--vellum); }
+.saved-photo img { width: 100%; height: 100%; object-fit: cover; }
+.saved-photo .badge {
+  position: absolute; top: 6px; left: 6px;
+  font-family: var(--mono); font-size: 9px; letter-spacing: 0.12em;
+  padding: 3px 8px; background: var(--brass); color: var(--shell);
+  text-transform: uppercase;
+}
+.saved-info {
+  display: flex; flex-direction: column; gap: 6px;
+}
+.saved-price { font-family: var(--serif); font-style: italic; font-size: 22px; color: var(--ink); line-height: 1; }
+.saved-addr { font-size: 13px; color: var(--ink-soft); }
+.saved-meta { font-family: var(--mono); font-size: 10px; letter-spacing: 0.12em; color: var(--ink-mute); text-transform: uppercase; }
+.saved-note {
+  margin-top: 6px; padding: 8px 12px; background: var(--linen);
+  font-family: var(--serif); font-style: italic; font-size: 14px; color: var(--ink-soft);
+  border-left: 2px solid var(--brass);
+}
+.saved-tags { display: flex; gap: 5px; margin-top: 4px; flex-wrap: wrap; }
+.tag-mini {
+  font-family: var(--mono); font-size: 9px; letter-spacing: 0.12em;
+  padding: 3px 8px; background: var(--vellum); color: var(--ink-soft);
+  text-transform: uppercase; border: 1px solid var(--rule);
+}
+.saved-actions {
+  display: flex; flex-direction: column; justify-content: center; gap: 8px; align-items: stretch;
+}
+.saved-actions .btn { font-size: 10px; padding: 9px 12px; }
+
+/* Tour list */
+.tour-block {
+  display: grid; grid-template-columns: 80px 1fr auto; gap: 18px;
+  padding: 18px 0; border-bottom: 1px solid var(--rule-soft);
+  align-items: center;
+}
+.tour-block:last-child { border-bottom: none; padding-bottom: 0; }
+.tour-date {
+  text-align: center; padding: 12px 0;
+  background: var(--ink); color: var(--shell);
+}
+.tour-date .dow { font-family: var(--mono); font-size: 10px; letter-spacing: 0.16em; color: var(--brass-bright); }
+.tour-date .num { font-family: var(--serif); font-style: italic; font-size: 32px; line-height: 1; margin-top: 4px; }
+.tour-date .mo { font-family: var(--mono); font-size: 9px; letter-spacing: 0.16em; color: rgba(250,246,236,0.5); margin-top: 4px; text-transform: uppercase; }
+.tour-info { display: flex; flex-direction: column; gap: 4px; }
+.tour-time { font-family: var(--mono); font-size: 10px; letter-spacing: 0.16em; color: var(--brass); text-transform: uppercase; }
+.tour-prop { font-family: var(--serif); font-style: italic; font-size: 20px; color: var(--ink); line-height: 1.1; }
+.tour-with { font-size: 12px; color: var(--ink-soft); }
+.tour-actions { display: flex; gap: 6px; }
+
+/* Messages */
+.msg-thread {
+  display: grid; grid-template-columns: 40px 1fr; gap: 12px; align-items: start;
+  padding: 14px 0; border-bottom: 1px solid var(--rule-soft);
+}
+.msg-thread:last-child { border-bottom: none; }
+.msg-from .avatar-sm { width: 36px; height: 36px; font-size: 13px; }
+.msg-content { display: flex; flex-direction: column; gap: 4px; }
+.msg-name { font-family: var(--mono); font-size: 11px; letter-spacing: 0.06em; color: var(--ink); font-weight: 600; }
+.msg-time { font-family: var(--mono); font-size: 9px; letter-spacing: 0.12em; color: var(--ink-faint); margin-left: 8px; }
+.msg-text { font-size: 13px; color: var(--ink-soft); line-height: 1.5; }
+.msg-text strong { color: var(--ink); font-weight: 500; }
+
+/* Digest preview */
+.digest {
+  background: var(--shell); border: 1px solid var(--rule);
+}
+.digest-h {
+  padding: 16px 22px; background: var(--ink); color: var(--shell);
+  display: flex; justify-content: space-between; align-items: center;
+}
+.digest-h .label-cap { color: var(--brass-bright); }
+.digest-h .when { font-family: var(--mono); font-size: 9px; letter-spacing: 0.16em; color: rgba(250,246,236,0.5); }
+.digest-body { padding: 22px 24px; }
+.digest-letter {
+  font-family: var(--serif); font-style: italic; font-weight: 300;
+  font-size: 17px; line-height: 1.55; color: var(--ink-soft); margin-bottom: 18px;
+}
+.digest-letter strong { color: var(--ink); font-weight: 500; font-style: normal; }
+.digest-mini {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 14px;
+}
+.digest-mini a {
+  text-decoration: none; color: inherit;
+  border: 1px solid var(--rule); padding: 10px 12px;
+  display: flex; flex-direction: column; gap: 2px; transition: all .15s;
+}
+.digest-mini a:hover { border-color: var(--brass); }
+.digest-mini .p { font-family: var(--serif); font-style: italic; font-size: 17px; color: var(--ink); }
+.digest-mini .a { font-size: 11px; color: var(--ink-soft); }
+.digest-sign {
+  margin-top: 18px; padding-top: 16px; border-top: 1px solid var(--rule);
+  display: flex; gap: 12px; align-items: center;
+}
+.digest-sign .avatar-sm { width: 32px; height: 32px; font-size: 12px; }
+.digest-sign .name { font-family: var(--serif); font-style: italic; font-size: 16px; color: var(--ink); }
+.digest-sign .ti { font-family: var(--mono); font-size: 9px; letter-spacing: 0.16em; color: var(--ink-mute); }
+
+/* Market mini */
+.market-mini-row {
+  display: grid; grid-template-columns: 1fr auto 60px; gap: 12px;
+  padding: 11px 0; border-bottom: 1px solid var(--rule-soft);
+  font-size: 13px; align-items: baseline;
+}
+.market-mini-row:last-child { border-bottom: none; }
+.market-mini-row .town { color: var(--ink); }
+.market-mini-row .pr { font-family: var(--serif); font-style: italic; font-size: 16px; }
+.market-mini-row .ch { font-family: var(--mono); font-size: 10px; text-align: right; font-weight: 500; }
+.ch.up { color: var(--positive); }
+.ch.dn { color: var(--negative); }
+
+/* Pref / preference editing */
+.prefs { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.pref-card {
+  padding: 14px 16px; background: var(--linen); border: 1px solid var(--rule);
+}
+.pref-card .label-cap { display: block; margin-bottom: 6px; }
+.pref-card .v { font-family: var(--serif); font-style: italic; font-size: 17px; color: var(--ink); }
+
+.alerts-list .alert-row {
+  display: grid; grid-template-columns: 1fr auto; gap: 16px;
+  padding: 14px 0; border-bottom: 1px solid var(--rule-soft);
+  align-items: center;
+}
+.alerts-list .alert-row:last-child { border-bottom: none; }
+.alert-title { font-size: 13.5px; color: var(--ink); font-weight: 500; }
+.alert-rule { font-family: var(--mono); font-size: 10px; letter-spacing: 0.12em; color: var(--ink-mute); margin-top: 4px; }
+.toggle {
+  width: 36px; height: 20px; background: var(--rule-strong); border-radius: 12px;
+  position: relative; cursor: pointer; transition: background .15s;
+}
+.toggle::after {
+  content: ''; position: absolute; top: 2px; left: 2px;
+  width: 16px; height: 16px; border-radius: 50%; background: var(--shell);
+  transition: transform .15s; box-shadow: 0 1px 2px rgba(0,0,0,0.15);
+}
+.toggle.on { background: var(--brass); }
+.toggle.on::after { transform: translateX(16px); }
+</style>
+</head>
+<body data-screen-label="Consumer Dashboard">
+
+<div class="app">
+  <!-- ============ SIDEBAR ============ -->
+  <aside class="app-side">
+    <div class="app-side-brand">
+      <a href="index.html" class="wordmark">
+        <span class="wordmark-word">Legacy</span>
+        <span class="wordmark-sub">Properties</span>
+      </a>
+    </div>
+
+    <div class="app-side-section">Your search</div>
+    <nav class="app-side-nav">
+      <a href="dashboard.html" class="active">Home <span class="pill">3</span></a>
+      <a href="listings.html">Browse properties</a>
+      <a href="#">Saved homes <span class="pill">12</span></a>
+      <a href="#">Saved searches</a>
+      <a href="#">Notes &amp; tags</a>
+    </nav>
+
+    <div class="app-side-section">Activity</div>
+    <nav class="app-side-nav">
+      <a href="#">Tours <span class="pill">2</span></a>
+      <a href="#">Messages <span class="pill">1</span></a>
+      <a href="#">Documents</a>
+      <a href="#">Offers</a>
+    </nav>
+
+    <div class="app-side-section">Insight</div>
+    <nav class="app-side-nav">
+      <a href="#">Neighborhoods</a>
+      <a href="#">Market reports</a>
+      <a href="#">The Ledger</a>
+      <a href="#">Mortgage calc</a>
+    </nav>
+
+    <div class="app-side-foot">
+      <div class="avatar avatar-sm">RD</div>
+      <div style="flex:1;min-width:0;">
+        <div style="font-size:13px;color:var(--ink);font-weight:500;">Renee Dawson</div>
+        <div class="mono" style="font-size:9px;letter-spacing:.16em;color:var(--ink-mute);">BUYER · MURPHYS</div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ============ MAIN ============ -->
+  <main class="app-main">
+    <div class="app-topbar">
+      <div class="app-search">
+        <span style="font-family:var(--mono);font-size:11px;">⌕</span>
+        <input placeholder="Search listings, neighborhoods, MLS#…">
+        <span class="mono" style="font-size:10px;color:var(--ink-faint);">⌘K</span>
+      </div>
+      <div class="app-actions">
+        <button class="icon-btn">◇<span class="dot"></span></button>
+        <button class="icon-btn">✉</button>
+        <a href="platform.html" class="btn btn-ink btn-sm">Find my match</a>
+      </div>
+    </div>
+
+    <!-- HERO GREETING -->
+    <section class="dash-hero">
+      <div class="dash-greet">
+        <span class="eyebrow">Tuesday · May 12 · A good morning to look</span>
+        <h1>Welcome back, <em>Renee.</em></h1>
+        <p>Three new homes in your range came on the market overnight — and Sara left you a note about the Ironstone property.</p>
+      </div>
+      <div class="dash-summary">
+        <div class="dash-sum"><span class="v">12</span><span class="l">Saved homes</span></div>
+        <div class="dash-sum"><span class="v accent">3</span><span class="l">New matches</span></div>
+        <div class="dash-sum"><span class="v">2</span><span class="l">Tours upcoming</span></div>
+        <div class="dash-sum"><span class="v">87<span style="font-size:18px;">%</span></span><span class="l">Profile match strength</span></div>
+      </div>
+    </section>
+
+    <!-- GRID -->
+    <div class="dash-grid">
+      <!-- LEFT COLUMN -->
+      <div style="display: flex; flex-direction: column; gap: 28px; min-width: 0;">
+
+        <!-- New matches -->
+        <section class="dash-card">
+          <div class="dash-card-h">
+            <h2>New for you, this morning.</h2>
+            <span class="meta"><a href="listings.html">All 12 →</a></span>
+          </div>
+
+          <div class="saved-row">
+            <div class="saved-photo">
+              <img src="https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=400&q=85" alt="">
+              <span class="badge">94%</span>
+            </div>
+            <div class="saved-info">
+              <span class="saved-meta">New · Just listed · 4 hrs ago</span>
+              <span class="saved-price">$875,000 · 4Bd 3Ba · 2,840 sf</span>
+              <span class="saved-addr">4182 Oak Hollow Road · Murphys</span>
+              <div class="saved-note">"Single-level, generator, walk-up forest views — this is exactly your brief, Renee." — Sara</div>
+            </div>
+            <div class="saved-actions">
+              <a href="listing.html" class="btn btn-ink btn-sm">View residence</a>
+              <button class="btn btn-ghost btn-sm">Book tour</button>
+            </div>
+          </div>
+
+          <div class="saved-row">
+            <div class="saved-photo">
+              <img src="https://images.unsplash.com/photo-1568605114967-8130f3a36994?w=400&q=85" alt="">
+              <span class="badge">87%</span>
+            </div>
+            <div class="saved-info">
+              <span class="saved-meta">Price drop · −$25,000 · 2 hrs ago</span>
+              <span class="saved-price">$649,000 · 3Bd 2.5Ba · 2,210 sf</span>
+              <span class="saved-addr">217 Ironstone Lane · Murphys</span>
+              <div class="saved-tags">
+                <span class="tag-mini">Walk to Main</span>
+                <span class="tag-mini">Renovated</span>
+                <span class="tag-mini">Oak canopy</span>
+              </div>
+            </div>
+            <div class="saved-actions">
+              <a href="listing.html" class="btn btn-ink btn-sm">View residence</a>
+              <button class="btn btn-ghost btn-sm">Compare</button>
+            </div>
+          </div>
+
+          <div class="saved-row">
+            <div class="saved-photo">
+              <img src="https://images.unsplash.com/photo-1605276374104-dee2a0ed3cd6?w=400&q=85" alt="">
+              <span class="badge">81%</span>
+            </div>
+            <div class="saved-info">
+              <span class="saved-meta">New · 9 hrs ago</span>
+              <span class="saved-price">$549,000 · 3Bd 2Ba · 1,640 sf</span>
+              <span class="saved-addr">512 Spring Street · Sutter Creek</span>
+              <div class="saved-tags">
+                <span class="tag-mini">Historic district</span>
+                <span class="tag-mini">Garden</span>
+              </div>
+            </div>
+            <div class="saved-actions">
+              <a href="listing.html" class="btn btn-ghost btn-sm">View residence</a>
+              <button class="btn btn-ghost btn-sm">Not for me</button>
+            </div>
+          </div>
+        </section>
+
+        <!-- Saved + tours row -->
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 28px; min-width: 0;">
+          <section class="dash-card">
+            <div class="dash-card-h">
+              <h2>Saved.</h2>
+              <span class="meta">12 properties</span>
+            </div>
+            <div class="saved-row" style="grid-template-columns: 96px 1fr; gap: 14px; padding: 12px 0;">
+              <div class="saved-photo" style="width: 96px; height: 72px;">
+                <img src="https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?w=300&q=85" alt="">
+              </div>
+              <div class="saved-info">
+                <span class="saved-price" style="font-size: 18px;">$1,195,000</span>
+                <span class="saved-addr" style="font-size: 12px;">8001 Vineyard Ridge · Sutter Creek</span>
+                <div class="saved-tags"><span class="tag-mini">Favorite</span><span class="tag-mini">Stretch</span></div>
+              </div>
+            </div>
+            <div class="saved-row" style="grid-template-columns: 96px 1fr; gap: 14px; padding: 12px 0;">
+              <div class="saved-photo" style="width: 96px; height: 72px;">
+                <img src="https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=300&q=85" alt="">
+              </div>
+              <div class="saved-info">
+                <span class="saved-price" style="font-size: 18px;">$725,000</span>
+                <span class="saved-addr" style="font-size: 12px;">8910 Foothill Rd · Angels Camp</span>
+                <div class="saved-tags"><span class="tag-mini">For James</span></div>
+              </div>
+            </div>
+            <div class="saved-row" style="grid-template-columns: 96px 1fr; gap: 14px; padding: 12px 0;">
+              <div class="saved-photo" style="width: 96px; height: 72px;">
+                <img src="https://images.unsplash.com/photo-1613490493576-7fde63acd811?w=300&q=85" alt="">
+              </div>
+              <div class="saved-info">
+                <span class="saved-price" style="font-size: 18px;">$1,450,000</span>
+                <span class="saved-addr" style="font-size: 12px;">4127 Pine Crest Trail · Arnold</span>
+                <div class="saved-tags"><span class="tag-mini">Too pricey?</span></div>
+              </div>
+            </div>
+            <div style="text-align: center; margin-top: 18px;">
+              <a href="#" class="btn-link" style="border: none; color: var(--brass);">Open saved board →</a>
+            </div>
+          </section>
+
+          <section class="dash-card">
+            <div class="dash-card-h">
+              <h2>Tours.</h2>
+              <span class="meta">2 upcoming</span>
+            </div>
+            <div class="tour-block">
+              <div class="tour-date">
+                <div class="dow">Wed</div>
+                <div class="num">14</div>
+                <div class="mo">May</div>
+              </div>
+              <div class="tour-info">
+                <span class="tour-time">11:30 AM · in person</span>
+                <span class="tour-prop">8001 Vineyard Ridge</span>
+                <span class="tour-with">With Sara · Sutter Creek</span>
+              </div>
+              <div class="tour-actions">
+                <button class="btn btn-ghost btn-xs">Reschedule</button>
+              </div>
+            </div>
+            <div class="tour-block">
+              <div class="tour-date">
+                <div class="dow">Sat</div>
+                <div class="num">17</div>
+                <div class="mo">May</div>
+              </div>
+              <div class="tour-info">
+                <span class="tour-time">2:00 PM · open house</span>
+                <span class="tour-prop">217 Ironstone Lane</span>
+                <span class="tour-with">Open · 2–4 PM</span>
+              </div>
+              <div class="tour-actions">
+                <button class="btn btn-ghost btn-xs">Directions</button>
+              </div>
+            </div>
+            <div style="text-align: center; margin-top: 18px;">
+              <a href="listing.html" class="btn btn-ink btn-sm">Book another tour</a>
+            </div>
+          </section>
+        </div>
+
+        <!-- Messages -->
+        <section class="dash-card">
+          <div class="dash-card-h">
+            <h2>From Sara.</h2>
+            <span class="meta"><a href="#">Open inbox →</a></span>
+          </div>
+          <div class="msg-thread">
+            <div class="msg-from"><div class="avatar avatar-sm"><img src="art/sara-headshot.png" alt="Sara"></div></div>
+            <div class="msg-content">
+              <div><span class="msg-name">Sara Cooper</span><span class="msg-time">Today · 9:14 AM</span></div>
+              <p class="msg-text">Morning Renee — quick note on <strong>217 Ironstone Lane</strong>. The sellers dropped $25K this morning, and I've spoken to the listing agent: they had an offer fall through last week (financing). They are quietly motivated. If you'd like, we could walk it this Saturday before the open. ☕</p>
+              <div style="margin-top: 8px; display: flex; gap: 6px;">
+                <button class="btn btn-ink btn-xs">Reply</button>
+                <button class="btn btn-ghost btn-xs">Book private tour</button>
+              </div>
+            </div>
+          </div>
+          <div class="msg-thread">
+            <div class="msg-from"><div class="avatar avatar-sm"><img src="art/sara-headshot.png" alt="Sara"></div></div>
+            <div class="msg-content">
+              <div><span class="msg-name">Sara Cooper</span><span class="msg-time">Yesterday · 4:42 PM</span></div>
+              <p class="msg-text">The Pine Crest listing you favorited went pending today. There's a near-twin coming on Friday I've been tracking off-MLS — I'll send specs tonight.</p>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <!-- RIGHT COLUMN -->
+      <div style="display: flex; flex-direction: column; gap: 28px;">
+
+        <!-- Digest preview -->
+        <section class="digest">
+          <div class="digest-h">
+            <span class="label-cap">Tomorrow's digest</span>
+            <span class="when">Delivers 7:30 AM</span>
+          </div>
+          <div class="digest-body">
+            <p class="digest-letter">"Renee — three properties to keep an eye on tomorrow. The <strong>Oak Hollow</strong> generator is the same Generac on your shortlist. <strong>Spring Street</strong> won't last past the weekend at that price. And the Sutter Creek property added a video tour overnight."</p>
+            <div class="digest-mini">
+              <a href="listing.html">
+                <span class="p">$875,000</span>
+                <span class="a">Oak Hollow · Murphys</span>
+              </a>
+              <a href="listing.html">
+                <span class="p">$549,000</span>
+                <span class="a">Spring St · Sutter Creek</span>
+              </a>
+            </div>
+            <div class="digest-sign">
+              <div class="avatar avatar-sm"><img src="art/sara-headshot.png" alt="Sara"></div>
+              <div>
+                <div class="name">Sara Cooper</div>
+                <div class="ti">Your agent · Legacy</div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Search profile -->
+        <section class="dash-card">
+          <div class="dash-card-h">
+            <h2>Your brief.</h2>
+            <span class="meta"><a href="#">Edit →</a></span>
+          </div>
+          <div class="prefs">
+            <div class="pref-card">
+              <span class="label-cap">Price</span>
+              <span class="v">$650K – $900K</span>
+            </div>
+            <div class="pref-card">
+              <span class="label-cap">Beds / baths</span>
+              <span class="v">3+ Bd / 2+ Ba</span>
+            </div>
+            <div class="pref-card">
+              <span class="label-cap">Lot</span>
+              <span class="v">1+ acre</span>
+            </div>
+            <div class="pref-card">
+              <span class="label-cap">Areas</span>
+              <span class="v">Murphys, Arnold</span>
+            </div>
+            <div class="pref-card" style="grid-column: 1/-1;">
+              <span class="label-cap">Must-haves</span>
+              <span class="v" style="font-size: 14px;">Single-level · Generator · Views · No HOA</span>
+            </div>
+            <div class="pref-card" style="grid-column: 1/-1;">
+              <span class="label-cap">Lovely-to-haves</span>
+              <span class="v" style="font-size: 14px;">Detached studio · Wine room · Walk to town</span>
+            </div>
+          </div>
+        </section>
+
+        <!-- Alerts -->
+        <section class="dash-card">
+          <div class="dash-card-h">
+            <h2>Alerts.</h2>
+            <span class="meta"><a href="#">Manage →</a></span>
+          </div>
+          <div class="alerts-list">
+            <div class="alert-row">
+              <div>
+                <div class="alert-title">New homes in Murphys</div>
+                <div class="alert-rule">$650K – $900K · 3+ Bd · 1+ acre</div>
+              </div>
+              <div class="toggle on" onclick="this.classList.toggle('on')"></div>
+            </div>
+            <div class="alert-row">
+              <div>
+                <div class="alert-title">Price drops on saved homes</div>
+                <div class="alert-rule">Any drop ≥ 1.5%</div>
+              </div>
+              <div class="toggle on" onclick="this.classList.toggle('on')"></div>
+            </div>
+            <div class="alert-row">
+              <div>
+                <div class="alert-title">Sutter Creek vineyard properties</div>
+                <div class="alert-rule">Stretch budget · 4+ acres</div>
+              </div>
+              <div class="toggle on" onclick="this.classList.toggle('on')"></div>
+            </div>
+            <div class="alert-row">
+              <div>
+                <div class="alert-title">Open houses this weekend</div>
+                <div class="alert-rule">Within 30 mi of Murphys</div>
+              </div>
+              <div class="toggle" onclick="this.classList.toggle('on')"></div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Market mini -->
+        <section class="dash-card">
+          <div class="dash-card-h">
+            <h2>Local market.</h2>
+            <span class="meta">May 2026</span>
+          </div>
+          <div class="market-mini-row"><span class="town">Murphys</span><span class="pr">$685,000</span><span class="ch up">+4.2%</span></div>
+          <div class="market-mini-row"><span class="town">Arnold</span><span class="pr">$520,000</span><span class="ch up">+2.8%</span></div>
+          <div class="market-mini-row"><span class="town">Sutter Creek</span><span class="pr">$598,000</span><span class="ch up">+5.1%</span></div>
+          <div class="market-mini-row"><span class="town">Angels Camp</span><span class="pr">$415,000</span><span class="ch up">+3.7%</span></div>
+          <div style="margin-top: 14px;">
+            <a href="index.html#ledger" class="btn-link" style="border: none; color: var(--brass);">Read the Ledger →</a>
+          </div>
+        </section>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script>
+document.querySelectorAll('.toggle').forEach(t => {
+  // already wired inline
+});
+</script>
+</body>
+</html>
