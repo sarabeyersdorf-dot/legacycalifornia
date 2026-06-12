@@ -6,7 +6,7 @@
 // ─────────────────────────────────────────────────────────────
 
 import { isConfigured, apiGet, shape, setCors } from './_metrolist.js';
-import sampleListings from './_sample-listings.json' assert { type: 'json' };
+import sampleListings from './_sample-listings.js';
 
 export default async function handler(req, res) {
   setCors(req, res);
