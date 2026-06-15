@@ -397,6 +397,189 @@
   }
 
   // ---------------------------------------------------------------------------
+  // Phase 1D — CRM live data wiring
+  // ---------------------------------------------------------------------------
+  function fmtUSD(n) {
+    if (!n) return '$0';
+    if (n >= 1_000_000) return `$${(n/1_000_000).toFixed(1)}M`;
+    if (n >= 1_000)     return `$${Math.round(n/1_000)}K`;
+    return `$${n}`;
+  }
+
+  function fmtRelative(iso) {
+    if (!iso) return '';
+    const diffMin = (Date.now() - new Date(iso).getTime()) / 60000;
+    if (diffMin < 1)   return 'just now';
+    if (diffMin < 60)  return `${Math.round(diffMin)} min ago`;
+    if (diffMin < 1440) return `${Math.round(diffMin/60)}h ago`;
+    return `${Math.round(diffMin/1440)}d ago`;
+  }
+
+  function escapeHtml(s) {
+    return (s || '').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+  }
+
+  async function wireCrmPage(session) {
+    // Run all three loaders in parallel
+    const [briefRes, inboxRes, pipelineRes] = await Promise.all([
+      api('/api/crm/morning-brief', { method: 'GET' }),
+      api('/api/crm/inbox?filter=awaiting_reply&limit=20', { method: 'GET' }),
+      api('/api/crm/pipeline', { method: 'GET' })
+    ]);
+
+    if (briefRes.ok)    paintMorningBrief(briefRes.json, session);
+    if (inboxRes.ok)    paintQuietAsks(inboxRes.json.messages || []);
+    if (pipelineRes.ok) paintPipelineStats(pipelineRes.json);
+  }
+
+  function paintMorningBrief(data, session) {
+    // 1. Date label
+    const now = new Date();
+    const dateLabel = now.toLocaleString(undefined, {
+      weekday:'long', month:'long', day:'numeric', hour:'numeric', minute:'2-digit'
+    });
+    const labelEl = $('.today-brief .label-cap');
+    if (labelEl) labelEl.textContent = `${dateLabel} brief`;
+
+    // 2. Greeting — personalise to the signed-in agent
+    const name = (session?.profile?.display_name || '').split(' ')[0] || 'Sara';
+    const greet = $('.tb-greet');
+    if (greet) greet.innerHTML = `Good morning, <em>${escapeHtml(name)}.</em>`;
+
+    // 3. Narrative
+    const line = $('.tb-line');
+    if (line) {
+      if (data.narrative) {
+        line.textContent = data.narrative;
+      } else {
+        const n = data.drafts?.length || 0;
+        line.textContent = n
+          ? `${n} draft${n === 1 ? '' : 's'} want your eyes before they go out.`
+          : 'No drafts in the queue. Quiet morning.';
+      }
+    }
+  }
+
+  function paintQuietAsks(drafts) {
+    const needs = $('.needs');
+    if (!needs) return;
+
+    // Update section header label + heading
+    const eyebrow = needs.querySelector('.eyebrow');
+    if (eyebrow) eyebrow.textContent = drafts.length
+      ? `Needs you · ${drafts.length} draft${drafts.length === 1 ? '' : 's'} awaiting approval`
+      : 'Needs you · inbox at zero';
+    const h2 = needs.querySelector('.h-section');
+    if (h2) h2.textContent = drafts.length
+      ? (drafts.length === 1 ? 'One quiet ask.' : `${drafts.length} quiet ask${drafts.length === 1 ? '' : 's'}.`)
+      : 'Nothing pending.';
+
+    // Remove all existing .need-card elements (prototype data)
+    needs.querySelectorAll('.need-card').forEach(el => el.remove());
+
+    if (drafts.length === 0) {
+      const empty = document.createElement('article');
+      empty.className = 'need-card';
+      empty.innerHTML = `<div class="nc-body"><p style="opacity:.7;font-style:italic;">All drafts approved. Sara, take the morning off.</p></div>`;
+      needs.appendChild(empty);
+      return;
+    }
+
+    // Render one .need-card per draft, preserving existing CSS classes
+    drafts.forEach((m, idx) => {
+      const lead = m.leads || {};
+      const rank = String(idx + 1).padStart(2, '0');
+      const fullName = [lead.first_name, lead.last_name].filter(Boolean).join(' ') || lead.email || 'Lead';
+      const tempPill = ({
+        hot:  '<span class="pill-status pill-hot">Hot</span>',
+        warm: '<span class="pill-status pill-warm">Warm</span>',
+        cold: '<span class="pill-status pill-brass">Cold</span>',
+        new:  '<span class="pill-status pill-brass">New</span>'
+      })[lead.temperature] || '';
+
+      const subjectLine = m.channel === 'email' && m.subject
+        ? `<h3>${escapeHtml(fullName)} — ${escapeHtml(m.subject)}</h3>`
+        : `<h3>${escapeHtml(fullName)} — ${m.channel === 'sms' ? 'SMS draft' : 'Email draft'}</h3>`;
+
+      const card = document.createElement('article');
+      card.className = idx === 0 && lead.temperature === 'hot' ? 'need-card need-card-hot' : 'need-card';
+      card.setAttribute('data-message-id', m.id);
+      card.innerHTML = `
+        <div class="nc-rank">${rank}</div>
+        <div class="nc-body">
+          <div class="nc-meta">
+            ${tempPill}
+            <span class="nc-tag">${m.channel === 'sms' ? 'SMS' : 'Email'} draft · awaiting your approval · ${escapeHtml(fmtRelative(m.created_at))}</span>
+          </div>
+          ${subjectLine}
+          <p data-draft-body style="white-space:pre-wrap;">${escapeHtml(m.body || '')}</p>
+          ${m.ai_draft_reasoning ? `<p style="font-size:12px;color:var(--ink-mute,#7C6A4D);font-style:italic;margin-top:6px;">AI angle: ${escapeHtml(m.ai_draft_reasoning)}</p>` : ''}
+          <div class="nc-foot">
+            <div class="nc-foot-l"><span>${escapeHtml(lead.email || '')} · ${(lead.lead_type || 'buyer')} · score ${lead.score ?? 0}</span></div>
+            <div class="nc-foot-r">
+              <button class="btn btn-ghost btn-sm" data-action="edit">Edit</button>
+              <button class="btn btn-ink btn-sm" data-action="approve">Approve &amp; send</button>
+            </div>
+          </div>
+          <div data-result style="font-size:13px;margin-top:8px;min-height:18px;"></div>
+        </div>`;
+      needs.appendChild(card);
+
+      // Wire buttons
+      const editBtn    = card.querySelector('[data-action="edit"]');
+      const approveBtn = card.querySelector('[data-action="approve"]');
+      const bodyEl     = card.querySelector('[data-draft-body]');
+      const resultEl   = card.querySelector('[data-result]');
+
+      let editedBody = null;
+      editBtn.addEventListener('click', () => {
+        if (bodyEl.querySelector('textarea')) return; // already editing
+        const ta = document.createElement('textarea');
+        ta.value = m.body || '';
+        ta.style.cssText = 'width:100%;min-height:120px;padding:10px;border:1px solid #D9CFB7;background:#fff;font:inherit;font-size:14px;line-height:1.55;';
+        bodyEl.innerHTML = '';
+        bodyEl.appendChild(ta);
+        editedBody = ta;
+        editBtn.textContent = 'Done editing';
+      });
+
+      approveBtn.addEventListener('click', async () => {
+        approveBtn.disabled = true;
+        approveBtn.textContent = 'Sending…';
+        resultEl.textContent = '';
+        const body = {
+          message_id:    m.id,
+          edited_body:   editedBody ? editedBody.value : undefined,
+          edited_subject: undefined
+        };
+        const r = await api('/api/crm/approve', { body });
+        if (r.ok && r.json?.status === 'sent') {
+          resultEl.style.color = '#2E5C3D';
+          resultEl.textContent = `✓ Sent via ${m.channel === 'sms' ? 'Twilio' : 'MailerLite'}.`;
+          approveBtn.textContent = 'Sent';
+          card.style.opacity = '0.55';
+        } else {
+          resultEl.style.color = '#9B2C2C';
+          resultEl.textContent = r.json?.error || 'Send failed.';
+          approveBtn.disabled = false;
+          approveBtn.textContent = 'Approve & send';
+        }
+      });
+    });
+  }
+
+  function paintPipelineStats(data) {
+    // Total pipeline value shown if there's an obvious target element.
+    // The prototype uses .ds-num for big numbers — we update the second one
+    // (which displays "$X.XM in pipeline" in the prototype) if present.
+    const valueNodes = $$('.ds-num');
+    const target = valueNodes.find(n => /\$[\d.]+M/.test(n.textContent || ''));
+    if (target && data.total_estimated_value) {
+      target.textContent = fmtUSD(data.total_estimated_value);
+    }
+  }
+
+  // ---------------------------------------------------------------------------
   // Init
   // ---------------------------------------------------------------------------
   document.addEventListener('DOMContentLoaded', async () => {
@@ -407,7 +590,10 @@
     wireListingsPage();
     wireListingDetailPage();
 
-    if (/\/crm\.html$/.test(path))       await gate(['agent_sara','agent_james','admin']);
+    if (/\/crm\.html$/.test(path)) {
+      const session = await gate(['agent_sara','agent_james','admin']);
+      if (session) await wireCrmPage(session);
+    }
     if (/\/dashboard\.html$/.test(path)) await gate(['buyer','agent_sara','agent_james','admin']);
     if (/\/seller\.html$/.test(path))    await gate(['seller','agent_sara','agent_james','admin']);
   });
