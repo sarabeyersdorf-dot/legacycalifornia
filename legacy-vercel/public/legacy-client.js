@@ -160,9 +160,13 @@
           { name: 'phone',      label: 'Mobile (optional)' }
         ],
         submitLabel: 'Save my place',
-        onSubmit: (data) => submitLead({ ...data, journey_stage, lead_type: 'buyer' })
+        onSubmit: async (data) => {
+          const r = await submitLead({ ...data, journey_stage, lead_type: 'buyer' });
+          return { ...r, email: data.email };
+        }
       });
-      if (result) location.href = 'dashboard.html';
+      if (result?.email) location.href = `dashboard.html?email=${encodeURIComponent(result.email)}`;
+      else if (result)   location.href = 'dashboard.html';
     });
   }
 
@@ -344,15 +348,20 @@
     document.body.innerHTML = '';
     document.body.style.cssText = 'background:#1A1714;color:#FAF6EC;font-family:Manrope,system-ui,sans-serif;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;';
     const card = document.createElement('div');
-    card.style.cssText = 'max-width:420px;width:100%;background:#FAF6EC;color:#1A1714;padding:36px 32px;';
-    const isAgent = requiredRoles && requiredRoles.some(r => r.startsWith('agent_'));
+    card.style.cssText = 'max-width:460px;width:100%;background:#FAF6EC;color:#1A1714;padding:36px 32px;';
+    // Mode is determined by the PRIMARY (first) required role, not whether
+    // agents are also allowed. CRM = password. Buyer/seller dashboards = magic link.
+    const primaryRole = (requiredRoles || [])[0] || '';
+    const isAgent = primaryRole.startsWith('agent_') || primaryRole === 'admin';
+    const prefillEmail = new URLSearchParams(location.search).get('email') || '';
     card.innerHTML = `
       <div style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.22em;text-transform:uppercase;color:#7C6A4D;margin-bottom:10px;">Legacy Properties</div>
-      <h2 style="font-family:'Cormorant Garamond',serif;font-style:italic;font-weight:500;font-size:30px;margin:0 0 18px;">${isAgent ? 'Open the desk.' : 'Sign in.'}</h2>
+      <h2 style="font-family:'Cormorant Garamond',serif;font-style:italic;font-weight:500;font-size:30px;margin:0 0 14px;">${isAgent ? 'Open the desk.' : 'See your dashboard.'}</h2>
+      ${isAgent ? '' : '<p style="font-size:14px;line-height:1.55;color:#3A332B;margin:0 0 18px;">Enter your email and we will send you a one-click link. No password to remember.</p>'}
       <form id="leg-auth" style="display:flex;flex-direction:column;gap:10px;">
-        <input name="email"    type="email"    placeholder="Email"    required style="font-size:15px;padding:10px 12px;border:1px solid #D9CFB7;background:#fff;">
+        <input name="email" type="email" placeholder="Email" required value="${prefillEmail.replace(/"/g,'')}" style="font-size:15px;padding:10px 12px;border:1px solid #D9CFB7;background:#fff;">
         ${isAgent ? '<input name="password" type="password" placeholder="Password" required style="font-size:15px;padding:10px 12px;border:1px solid #D9CFB7;background:#fff;">' : ''}
-        <button type="submit" style="background:#1A1714;color:#FAF6EC;border:none;padding:14px;font-family:JetBrains Mono,monospace;font-size:11px;letter-spacing:.22em;text-transform:uppercase;cursor:pointer;">${isAgent ? 'Sign in' : 'Send magic link'}</button>
+        <button type="submit" style="background:#1A1714;color:#FAF6EC;border:none;padding:14px;font-family:JetBrains Mono,monospace;font-size:11px;letter-spacing:.22em;text-transform:uppercase;cursor:pointer;">${isAgent ? 'Sign in' : 'Email me the link'}</button>
         <div id="leg-auth-msg" style="font-size:13px;min-height:18px;color:#7C6A4D;"></div>
       </form>`;
     document.body.appendChild(card);
@@ -373,7 +382,15 @@
         location.reload();
       } else {
         const r = await api('/api/auth/magic-link', { body: { email: data.email } });
-        msg.textContent = r.ok ? 'Check your email for the link.' : (r.json?.error || 'Could not send link.');
+        if (r.ok) {
+          // Replace the form with a confirmation panel
+          form.innerHTML = `
+            <div style="font-family:'Cormorant Garamond',serif;font-style:italic;font-size:22px;line-height:1.3;color:#1A1714;margin-bottom:10px;">Check your email.</div>
+            <p style="font-size:14px;line-height:1.55;color:#3A332B;margin:0 0 8px;">We just sent a one-click sign-in link to <strong>${data.email.replace(/</g,'')}</strong>.</p>
+            <p style="font-size:13px;line-height:1.5;color:#7C6A4D;margin:0;">It can take up to a minute. Look in spam if you do not see it.</p>`;
+        } else {
+          msg.textContent = r.json?.error || 'Could not send link.';
+        }
       }
     });
     return null;
