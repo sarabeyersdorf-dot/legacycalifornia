@@ -8,12 +8,19 @@
 
 import { createClient } from '@supabase/supabase-js';
 
-const SUPABASE_URL          = process.env.SUPABASE_URL;
-const SUPABASE_ANON_KEY     = process.env.SUPABASE_ANON_KEY;
-// Accept either SUPABASE_SERVICE_KEY (our spec) or SUPABASE_SERVICE_ROLE_KEY
-// (Supabase's own docs name) so neither typo blocks deploys.
+const SUPABASE_URL          = process.env.SUPABASE_URL
+                           || process.env.NEXT_PUBLIC_SUPABASE_URL;
+
+// Anon / publishable key (safe for browser use)
+const SUPABASE_ANON_KEY     = process.env.SUPABASE_ANON_KEY
+                           || process.env.SUPABASE_PUBLISHABLE_KEY
+                           || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+                           || process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
+
+// Service role / secret key (server only — bypasses RLS)
 const SUPABASE_SERVICE_KEY  = process.env.SUPABASE_SERVICE_KEY
-                           || process.env.SUPABASE_SERVICE_ROLE_KEY;
+                           || process.env.SUPABASE_SERVICE_ROLE_KEY
+                           || process.env.SUPABASE_SECRET_KEY;
 
 function assertEnv() {
   if (!SUPABASE_URL || !SUPABASE_ANON_KEY || !SUPABASE_SERVICE_KEY) {
