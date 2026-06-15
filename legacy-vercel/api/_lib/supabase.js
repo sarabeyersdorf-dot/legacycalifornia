@@ -10,7 +10,10 @@ import { createClient } from '@supabase/supabase-js';
 
 const SUPABASE_URL          = process.env.SUPABASE_URL;
 const SUPABASE_ANON_KEY     = process.env.SUPABASE_ANON_KEY;
-const SUPABASE_SERVICE_KEY  = process.env.SUPABASE_SERVICE_KEY;
+// Accept either SUPABASE_SERVICE_KEY (our spec) or SUPABASE_SERVICE_ROLE_KEY
+// (Supabase's own docs name) so neither typo blocks deploys.
+const SUPABASE_SERVICE_KEY  = process.env.SUPABASE_SERVICE_KEY
+                           || process.env.SUPABASE_SERVICE_ROLE_KEY;
 
 function assertEnv() {
   if (!SUPABASE_URL || !SUPABASE_ANON_KEY || !SUPABASE_SERVICE_KEY) {
