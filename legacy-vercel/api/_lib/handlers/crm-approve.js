@@ -16,17 +16,18 @@
 import { adminClient } from '../supabase.js';
 import { getCallerProfile, isAgent } from '../auth.js';
 import { sendSMS } from '../twilio.js';
-import { sendEmail as sendEmailSendgrid,  sendgridConfigured }  from '../sendgrid.js';
-import { sendEmail as sendEmailMailerlite, mailerliteConfigured } from '../mailerlite.js';
+import { sendEmail as sendEmailResend,   resendConfigured }   from '../resend.js';
+import { sendEmail as sendEmailSendgrid, sendgridConfigured } from '../sendgrid.js';
 import { handleOptions, readJson, ok, fail } from '../cors.js';
 
 /**
- * Picks the configured email provider. SendGrid wins if both are set,
- * because it has the broadest free tier and the most stable transactional API.
+ * Picks the configured email provider. Resend wins — it has the simplest
+ * deliverability story and the cleanest API. SendGrid kept as a fallback for
+ * accounts that have it already wired (e.g. shared with other properties).
  */
 function pickEmailProvider() {
-  if (sendgridConfigured())   return { name: 'sendgrid',   send: sendEmailSendgrid };
-  if (mailerliteConfigured()) return { name: 'mailerlite', send: sendEmailMailerlite };
+  if (resendConfigured())   return { name: 'resend',   send: sendEmailResend };
+  if (sendgridConfigured()) return { name: 'sendgrid', send: sendEmailSendgrid };
   return null;
 }
 
@@ -76,7 +77,7 @@ export default async function handler(req, res) {
       } else if (msg.channel === 'email') {
         if (!lead.email) throw new Error('lead has no email address');
         const provider = pickEmailProvider();
-        if (!provider) throw new Error('no email provider configured — set SENDGRID_API_KEY or MAILERLITE_API_KEY');
+        if (!provider) throw new Error('no email provider configured — set RESEND_API_KEY or SENDGRID_API_KEY');
         providerResult = await provider.send({
           to:      lead.email,
           toName:  [lead.first_name, lead.last_name].filter(Boolean).join(' ') || null,
