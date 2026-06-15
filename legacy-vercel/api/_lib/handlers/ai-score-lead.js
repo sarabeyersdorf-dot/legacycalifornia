@@ -18,8 +18,8 @@
 //   14+ days no contact: −10
 //   30+ days no contact: −20
 
-import { adminClient } from '../_lib/supabase.js';
-import { handleOptions, readJson, ok, fail } from '../_lib/cors.js';
+import { adminClient } from '../supabase.js';
+import { handleOptions, readJson, ok, fail } from '../cors.js';
 
 function temperatureFor(score) {
   if (score >= 75) return 'hot';

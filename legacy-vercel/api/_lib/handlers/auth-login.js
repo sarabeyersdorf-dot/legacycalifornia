@@ -5,8 +5,8 @@
 //
 // Buyers/sellers use the magic-link flow at /api/auth/magic-link instead.
 
-import { adminClient, userClient } from '../_lib/supabase.js';
-import { handleOptions, readJson, ok, fail } from '../_lib/cors.js';
+import { adminClient, userClient } from '../supabase.js';
+import { handleOptions, readJson, ok, fail } from '../cors.js';
 
 export default async function handler(req, res) {
   if (handleOptions(req, res)) return;

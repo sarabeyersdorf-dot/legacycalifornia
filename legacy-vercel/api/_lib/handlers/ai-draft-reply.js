@@ -9,9 +9,9 @@
 //
 // Returns the inserted draft row.
 
-import { adminClient } from '../_lib/supabase.js';
-import { anthropicJSON } from '../_lib/anthropic.js';
-import { handleOptions, readJson, ok, fail } from '../_lib/cors.js';
+import { adminClient } from '../supabase.js';
+import { anthropicJSON } from '../anthropic.js';
+import { handleOptions, readJson, ok, fail } from '../cors.js';
 
 const SARA_SYSTEM = `You are drafting messages on behalf of Sara Cooper, Broker-Owner of Legacy Properties in Angels Camp, CA.
 Sara's voice is: warm, direct, knowledgeable, never corporate, never salesy.

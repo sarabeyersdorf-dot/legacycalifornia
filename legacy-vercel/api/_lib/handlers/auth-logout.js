@@ -3,7 +3,7 @@
 // (Functionally identical to DELETE /api/auth/session but easier to wire from
 // a simple <form> or a fetch() call.)
 
-import { handleOptions, ok, fail } from '../_lib/cors.js';
+import { handleOptions, ok, fail } from '../cors.js';
 
 export default async function handler(req, res) {
   if (handleOptions(req, res)) return;

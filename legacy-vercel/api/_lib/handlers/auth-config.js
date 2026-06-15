@@ -3,8 +3,8 @@
 // Supabase JS client. These values are public by design — never the service
 // role key.
 
-import { publicEnv } from '../_lib/supabase.js';
-import { handleOptions, ok, fail } from '../_lib/cors.js';
+import { publicEnv } from '../supabase.js';
+import { handleOptions, ok, fail } from '../cors.js';
 
 export default async function handler(req, res) {
   if (handleOptions(req, res)) return;

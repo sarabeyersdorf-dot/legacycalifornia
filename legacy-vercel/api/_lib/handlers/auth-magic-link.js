@@ -3,8 +3,8 @@
 // Body: { email, redirect?: string }
 // Returns: { success: true }
 
-import { userClient } from '../_lib/supabase.js';
-import { handleOptions, readJson, ok, fail } from '../_lib/cors.js';
+import { userClient } from '../supabase.js';
+import { handleOptions, readJson, ok, fail } from '../cors.js';
 
 export default async function handler(req, res) {
   if (handleOptions(req, res)) return;

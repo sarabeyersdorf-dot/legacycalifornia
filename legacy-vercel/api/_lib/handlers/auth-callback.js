@@ -7,7 +7,7 @@
 // redirect to /dashboard.html. For the fragment branch we serve a tiny HTML
 // shim that posts the tokens back to /api/auth/session, then redirects.
 
-import { userClient } from '../_lib/supabase.js';
+import { userClient } from '../supabase.js';
 
 const COOKIE_OPTS = 'Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=3600';
 

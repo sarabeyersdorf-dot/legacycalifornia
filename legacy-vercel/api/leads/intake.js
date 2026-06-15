@@ -25,8 +25,8 @@
 
 import { adminClient } from '../_lib/supabase.js';
 import { handleOptions, readJson, ok, fail } from '../_lib/cors.js';
-import { draftWelcome } from '../ai/welcome.js';
-import { scoreLead }    from '../ai/score-lead.js';
+import { draftWelcome } from '../_lib/handlers/ai-welcome.js';
+import { scoreLead }    from '../_lib/handlers/ai-score-lead.js';
 import { syncLeadToFUB } from '../fub/sync.js';
 
 const ALLOWED_SOURCE  = new Set(['website_form','open_house','referral','ihomefinder_idx','manual']);

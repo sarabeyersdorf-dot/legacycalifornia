@@ -4,9 +4,9 @@
 //        (used by the fragment-flow magic-link shim)
 // DELETE → clears the cookies
 
-import { adminClient } from '../_lib/supabase.js';
-import { getCallerProfile } from '../_lib/auth.js';
-import { handleOptions, readJson, ok, fail } from '../_lib/cors.js';
+import { adminClient } from '../supabase.js';
+import { getCallerProfile } from '../auth.js';
+import { handleOptions, readJson, ok, fail } from '../cors.js';
 
 const COOKIE_OPTS = 'Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=3600';
 
