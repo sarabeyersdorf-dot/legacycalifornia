@@ -16,8 +16,19 @@
 import { adminClient } from '../supabase.js';
 import { getCallerProfile, isAgent } from '../auth.js';
 import { sendSMS } from '../twilio.js';
-import { sendEmail } from '../mailerlite.js';
+import { sendEmail as sendEmailSendgrid,  sendgridConfigured }  from '../sendgrid.js';
+import { sendEmail as sendEmailMailerlite, mailerliteConfigured } from '../mailerlite.js';
 import { handleOptions, readJson, ok, fail } from '../cors.js';
+
+/**
+ * Picks the configured email provider. SendGrid wins if both are set,
+ * because it has the broadest free tier and the most stable transactional API.
+ */
+function pickEmailProvider() {
+  if (sendgridConfigured())   return { name: 'sendgrid',   send: sendEmailSendgrid };
+  if (mailerliteConfigured()) return { name: 'mailerlite', send: sendEmailMailerlite };
+  return null;
+}
 
 export default async function handler(req, res) {
   if (handleOptions(req, res)) return;
@@ -64,14 +75,20 @@ export default async function handler(req, res) {
         sentPatch = { status: providerResult.skipped ? 'failed' : 'sent', twilio_sid: providerResult.sid || null };
       } else if (msg.channel === 'email') {
         if (!lead.email) throw new Error('lead has no email address');
-        providerResult = await sendEmail({
+        const provider = pickEmailProvider();
+        if (!provider) throw new Error('no email provider configured — set SENDGRID_API_KEY or MAILERLITE_API_KEY');
+        providerResult = await provider.send({
           to:      lead.email,
           toName:  [lead.first_name, lead.last_name].filter(Boolean).join(' ') || null,
           subject: updated.subject || '(no subject)',
           text:    updated.body,
           html:    bodyToHtml(updated.body)
         });
-        sentPatch = { status: providerResult.skipped ? 'failed' : 'sent', mailerlite_id: providerResult.id || null };
+        sentPatch = {
+          status: providerResult.skipped ? 'failed' : 'sent',
+          mailerlite_id: providerResult.id || null  // reuse column for any provider's id
+        };
+        providerResult.via = provider.name;
       } else {
         throw new Error(`unsupported channel: ${msg.channel}`);
       }

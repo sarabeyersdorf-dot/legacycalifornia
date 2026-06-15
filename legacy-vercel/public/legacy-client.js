@@ -554,8 +554,11 @@
         };
         const r = await api('/api/crm/approve', { body });
         if (r.ok && r.json?.status === 'sent') {
+          const via = r.json.provider?.via
+            ? r.json.provider.via.replace(/^(.)/, c => c.toUpperCase())
+            : (m.channel === 'sms' ? 'Twilio' : 'email');
           resultEl.style.color = '#2E5C3D';
-          resultEl.textContent = `✓ Sent via ${m.channel === 'sms' ? 'Twilio' : 'MailerLite'}.`;
+          resultEl.textContent = `✓ Sent via ${via}.`;
           approveBtn.textContent = 'Sent';
           card.style.opacity = '0.55';
         } else {
