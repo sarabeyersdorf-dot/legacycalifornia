@@ -604,3 +604,206 @@
   // expose for debugging
   window.Legacy = { api, openModal, submitLead };
 })();
+
+/* ===========================================================================
+ * Phase 1E — Buyer dashboard live data (APPEND-ONLY)
+ * ---------------------------------------------------------------------------
+ * Self-contained module. Does NOT touch the IIFE above, its auth logic, or any
+ * CRM paint function. It runs only on dashboard.html, fetches the buyer's own
+ * dashboard payload, and paints it over the existing markup using the
+ * data-* hook contract added to dashboard.html.
+ *
+ * Endpoint expected (to be built by the backend team): GET /api/me/dashboard
+ * Returns the signed-in buyer's own data only (server derives identity from
+ * the session cookie — no id is sent from the client).
+ *
+ * Hook contract (see dashboard.html):
+ *   [data-bind="path"]        textContent (or <img> src) from dotted path
+ *   [data-bind-href="path"]   sets href
+ *   [data-toggle="path"]      toggles `.on` class from a boolean
+ *   [data-sign]               on a [data-bind] cell: adds .up / .dn by +/- sign
+ *   [data-optional]           hides the element when its value is empty
+ *   [data-list="key"]         array container; clones its [data-row] per item
+ *   [data-row]                the template row inside a list
+ *   [data-after-rows]         rows are inserted before this element (footers)
+ *   [data-state="loading"|"empty"]  placeholder shown by the painter
+ * ======================================================================== */
+(function () {
+  'use strict';
+  if (!/\/dashboard\.html$/.test(location.pathname)) return;
+
+  const tplStore = new WeakMap();
+
+  const dget = (obj, path) =>
+    String(path).split('.').reduce((o, k) => (o == null ? undefined : o[k]), obj);
+
+  const isEmpty = (v) =>
+    v == null || v === '' || (Array.isArray(v) && v.length === 0);
+
+  function bindEl(el, val) {
+    if (el.hasAttribute('data-optional')) {
+      if (isEmpty(val)) { el.style.display = 'none'; return; }
+      el.style.display = '';
+    }
+    if (el.tagName === 'IMG') { if (val != null) el.src = val; return; }
+    if (val != null) el.textContent = val;
+    if (el.hasAttribute('data-sign')) {
+      const neg = String(val).trim().charAt(0) === '-';
+      el.classList.toggle('up', !neg);
+      el.classList.toggle('dn', neg);
+    }
+  }
+
+  function setState(container, name, show) {
+    const el = container.querySelector(':scope > [data-state="' + name + '"]');
+    if (el) el.style.display = show ? '' : 'none';
+  }
+
+  // Fill one cloned row from a single item (also handles nested tag lists).
+  function fillRow(row, item) {
+    row.querySelectorAll('[data-bind]').forEach((el) => {
+      if (el.closest('[data-list]')) return;        // nested list handled below
+      bindEl(el, dget(item, el.getAttribute('data-bind')));
+    });
+    row.querySelectorAll('[data-bind-href]').forEach((el) => {
+      if (el.closest('[data-list]')) return;
+      const v = dget(item, el.getAttribute('data-bind-href'));
+      if (v != null) el.setAttribute('href', v);
+    });
+    row.querySelectorAll('[data-toggle]').forEach((el) => {
+      if (el.closest('[data-list]')) return;
+      el.classList.toggle('on', !!dget(item, el.getAttribute('data-toggle')));
+    });
+    row.querySelectorAll('[data-list]').forEach((c) => {
+      const sub = dget(item, c.getAttribute('data-list'));
+      if (isEmpty(sub) && c.hasAttribute('data-optional')) { c.style.display = 'none'; return; }
+      c.style.display = '';
+      paintList(c, sub || []);
+    });
+  }
+
+  // Replace a list container's rows with one cloned [data-row] per array item.
+  function paintList(container, arr) {
+    if (!container) return;
+    let tpl = tplStore.get(container);
+    if (!tpl) {
+      const orig = container.querySelector(':scope > [data-row]');
+      if (!orig) return;
+      tpl = orig.cloneNode(true);
+      tpl.removeAttribute('data-row');
+      tplStore.set(container, tpl);
+    }
+    const tag = tpl.tagName;
+    const cls = tpl.classList[0] || null;
+    // Remove existing rows (prototype mock rows + previously painted clones),
+    // but keep the header, state placeholders and the [data-after-rows] footer.
+    Array.from(container.children).forEach((ch) => {
+      if (ch.hasAttribute('data-state')) return;
+      if (ch.hasAttribute('data-after-rows')) return;
+      if (ch.classList && ch.classList.contains('dash-card-h')) return;
+      const isRow = ch.tagName === tag && (cls ? ch.classList.contains(cls) : ch.className === tpl.className);
+      if (isRow || ch.hasAttribute('data-row') || ch.hasAttribute('data-painted')) ch.remove();
+    });
+
+    setState(container, 'loading', false);
+    if (isEmpty(arr)) { setState(container, 'empty', true); return; }
+    setState(container, 'empty', false);
+
+    const anchor = container.querySelector(':scope > [data-after-rows]');
+    arr.forEach((item) => {
+      const row = tpl.cloneNode(true);
+      row.setAttribute('data-painted', '');
+      row.style.display = '';
+      fillRow(row, item);
+      if (anchor) container.insertBefore(row, anchor);
+      else container.appendChild(row);
+    });
+  }
+
+  // Top-level scalar binds (identity, greeting, stats, brief, digest, nav).
+  function paintScalars(data) {
+    document.querySelectorAll('[data-bind]').forEach((el) => {
+      if (el.closest('[data-row]') || el.closest('[data-painted]') || el.closest('[data-list]')) return;
+      bindEl(el, dget(data, el.getAttribute('data-bind')));
+    });
+    document.querySelectorAll('[data-bind-href]').forEach((el) => {
+      if (el.closest('[data-row]') || el.closest('[data-painted]') || el.closest('[data-list]')) return;
+      const v = dget(data, el.getAttribute('data-bind-href'));
+      if (v != null) el.setAttribute('href', v);
+    });
+  }
+
+  function topLevelLists() {
+    return Array.from(document.querySelectorAll('[data-list]')).filter(
+      (c) => !c.closest('[data-row]') && !c.closest('[data-painted]') &&
+             !(c.parentElement && c.parentElement.closest('[data-list]'))
+    );
+  }
+
+  function rowSig(tpl) {
+    return { tag: tpl.tagName, cls: tpl.classList[0] || null, className: tpl.className };
+  }
+
+  // Hide mock rows + show spinners while the request is in flight.
+  function enterLoading(lists) {
+    lists.forEach((c) => {
+      const orig = c.querySelector(':scope > [data-row]');
+      if (!orig) return;
+      const sig = rowSig(orig);
+      Array.from(c.children).forEach((ch) => {
+        const isRow = ch.tagName === sig.tag && (sig.cls ? ch.classList.contains(sig.cls) : ch.className === sig.className);
+        if (isRow || ch.hasAttribute('data-row')) ch.style.display = 'none';
+      });
+      setState(c, 'loading', true);
+    });
+  }
+
+  // Restore the prototype view if the request fails (e.g. offline preview).
+  function exitLoading(lists) {
+    lists.forEach((c) => {
+      const orig = c.querySelector(':scope > [data-row]');
+      if (orig) {
+        const sig = rowSig(orig);
+        Array.from(c.children).forEach((ch) => {
+          const isRow = ch.tagName === sig.tag && (sig.cls ? ch.classList.contains(sig.cls) : ch.className === sig.className);
+          if (isRow || ch.hasAttribute('data-row')) ch.style.display = '';
+        });
+      }
+      setState(c, 'loading', false);
+    });
+  }
+
+  function paintDashboard(data) {
+    if (!data || typeof data !== 'object') return;
+    paintScalars(data);
+    topLevelLists().forEach((c) => {
+      const arr = dget(data, c.getAttribute('data-list'));
+      if (arr === undefined) { exitLoading([c]); return; } // section not supplied → keep mock
+      paintList(c, arr);
+    });
+  }
+
+  async function loadDashboard() {
+    const lists = topLevelLists();
+    // Only show spinners if the request is slow; a fast failure (static preview)
+    // never hides the prototype.
+    const slow = setTimeout(() => enterLoading(lists), 220);
+    let res;
+    try {
+      res = await fetch('/api/me/dashboard', {
+        method: 'GET',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include'
+      });
+    } catch (_) {
+      clearTimeout(slow); exitLoading(lists); return;
+    }
+    clearTimeout(slow);
+    if (!res.ok) { exitLoading(lists); return; }   // 401 (gate handles sign-in) / 404
+    let json = null;
+    try { json = await res.json(); } catch (_) { exitLoading(lists); return; }
+    paintDashboard(json && json.dashboard ? json.dashboard : json);
+  }
+
+  document.addEventListener('DOMContentLoaded', loadDashboard);
+})();
