@@ -198,6 +198,13 @@
 }
 .toggle.on { background: var(--brass); }
 .toggle.on::after { transform: translateX(16px); }
+
+/* Phase 1E — buyer dashboard wiring states */
+.dash-state { padding: 16px 0; }
+.dash-state.dash-loading { font-family: var(--mono); font-size: 10px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--ink-mute); display: flex; align-items: center; gap: 10px; }
+.dash-state.dash-empty { font-family: var(--serif); font-style: italic; font-size: 16px; color: var(--ink-soft); }
+.dash-spinner { width: 12px; height: 12px; border: 2px solid var(--rule-strong); border-top-color: var(--brass); border-radius: 50%; animation: dashspin 0.7s linear infinite; flex: none; }
+@keyframes dashspin { to { transform: rotate(360deg); } }
 </style>
 </head>
 <body data-screen-label="Consumer Dashboard">
@@ -214,17 +221,17 @@
 
     <div class="app-side-section">Your search</div>
     <nav class="app-side-nav">
-      <a href="dashboard.html" class="active">Home <span class="pill">3</span></a>
+      <a href="dashboard.html" class="active">Home <span class="pill" data-bind="nav.new_matches">3</span></a>
       <a href="listings.html">Browse properties</a>
-      <a href="#">Saved homes <span class="pill">12</span></a>
+      <a href="#">Saved homes <span class="pill" data-bind="nav.saved">12</span></a>
       <a href="#">Saved searches</a>
       <a href="#">Notes &amp; tags</a>
     </nav>
 
     <div class="app-side-section">Activity</div>
     <nav class="app-side-nav">
-      <a href="#">Tours <span class="pill">2</span></a>
-      <a href="#">Messages <span class="pill">1</span></a>
+      <a href="#">Tours <span class="pill" data-bind="nav.tours">2</span></a>
+      <a href="#">Messages <span class="pill" data-bind="nav.messages">1</span></a>
       <a href="#">Documents</a>
       <a href="#">Offers</a>
     </nav>
@@ -238,10 +245,10 @@
     </nav>
 
     <div class="app-side-foot">
-      <div class="avatar avatar-sm">RD</div>
+      <div class="avatar avatar-sm" data-bind="buyer.initials">RD</div>
       <div style="flex:1;min-width:0;">
-        <div style="font-size:13px;color:var(--ink);font-weight:500;">Renee Dawson</div>
-        <div class="mono" style="font-size:9px;letter-spacing:.16em;color:var(--ink-mute);">BUYER · MURPHYS</div>
+        <div style="font-size:13px;color:var(--ink);font-weight:500;" data-bind="buyer.name">Renee Dawson</div>
+        <div class="mono" style="font-size:9px;letter-spacing:.16em;color:var(--ink-mute);" data-bind="buyer.meta">BUYER · MURPHYS</div>
       </div>
     </div>
   </aside>
@@ -264,15 +271,15 @@
     <!-- HERO GREETING -->
     <section class="dash-hero">
       <div class="dash-greet">
-        <span class="eyebrow">Tuesday · May 12 · A good morning to look</span>
-        <h1>Welcome back, <em>Renee.</em></h1>
-        <p>Three new homes in your range came on the market overnight — and Sara left you a note about the Ironstone property.</p>
+        <span class="eyebrow" data-bind="greeting.eyebrow">Tuesday · May 12 · A good morning to look</span>
+        <h1>Welcome back, <em data-bind="greeting.first_name">Renee.</em></h1>
+        <p data-bind="greeting.narrative">Three new homes in your range came on the market overnight — and Sara left you a note about the Ironstone property.</p>
       </div>
       <div class="dash-summary">
-        <div class="dash-sum"><span class="v">12</span><span class="l">Saved homes</span></div>
-        <div class="dash-sum"><span class="v accent">3</span><span class="l">New matches</span></div>
-        <div class="dash-sum"><span class="v">2</span><span class="l">Tours upcoming</span></div>
-        <div class="dash-sum"><span class="v">87<span style="font-size:18px;">%</span></span><span class="l">Profile match strength</span></div>
+        <div class="dash-sum"><span class="v" data-bind="stats.saved_homes">12</span><span class="l">Saved homes</span></div>
+        <div class="dash-sum"><span class="v accent" data-bind="stats.new_matches">3</span><span class="l">New matches</span></div>
+        <div class="dash-sum"><span class="v" data-bind="stats.tours_upcoming">2</span><span class="l">Tours upcoming</span></div>
+        <div class="dash-sum"><span class="v"><span data-bind="stats.match_strength">87</span><span style="font-size:18px;">%</span></span><span class="l">Profile match strength</span></div>
       </div>
     </section>
 
@@ -282,25 +289,31 @@
       <div style="display: flex; flex-direction: column; gap: 28px; min-width: 0;">
 
         <!-- New matches -->
-        <section class="dash-card">
+        <section class="dash-card" data-list="new_matches">
           <div class="dash-card-h">
             <h2>New for you, this morning.</h2>
             <span class="meta"><a href="listings.html">All 12 →</a></span>
           </div>
 
-          <div class="saved-row">
+          <div class="dash-state dash-loading" data-state="loading" style="display:none;"><span class="dash-spinner"></span> Finding your matches…</div>
+          <div class="dash-state dash-empty" data-state="empty" style="display:none;">No new matches overnight — Sara is still hunting.</div>
+
+          <div class="saved-row" data-row>
             <div class="saved-photo">
-              <img src="https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=400&q=85" alt="">
-              <span class="badge">94%</span>
+              <img src="https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=400&q=85" alt="" data-bind="photo">
+              <span class="badge" data-bind="score" data-optional>94%</span>
             </div>
             <div class="saved-info">
-              <span class="saved-meta">New · Just listed · 4 hrs ago</span>
-              <span class="saved-price">$875,000 · 4Bd 3Ba · 2,840 sf</span>
-              <span class="saved-addr">4182 Oak Hollow Road · Murphys</span>
-              <div class="saved-note">"Single-level, generator, walk-up forest views — this is exactly your brief, Renee." — Sara</div>
+              <span class="saved-meta" data-bind="status">New · Just listed · 4 hrs ago</span>
+              <span class="saved-price" data-bind="specs">$875,000 · 4Bd 3Ba · 2,840 sf</span>
+              <span class="saved-addr" data-bind="address">4182 Oak Hollow Road · Murphys</span>
+              <div class="saved-note" data-bind="note" data-optional>"Single-level, generator, walk-up forest views — this is exactly your brief, Renee." — Sara</div>
+              <div class="saved-tags" data-list="tags" data-optional style="display:none;">
+                <span class="tag-mini" data-row data-bind="label">Tag</span>
+              </div>
             </div>
             <div class="saved-actions">
-              <a href="listing.html" class="btn btn-ink btn-sm">View residence</a>
+              <a href="listing.html" class="btn btn-ink btn-sm" data-bind-href="listing_url">View residence</a>
               <button class="btn btn-ghost btn-sm">Book tour</button>
             </div>
           </div>
@@ -349,19 +362,21 @@
 
         <!-- Saved + tours row -->
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 28px; min-width: 0;">
-          <section class="dash-card">
+          <section class="dash-card" data-list="saved">
             <div class="dash-card-h">
               <h2>Saved.</h2>
               <span class="meta">12 properties</span>
             </div>
-            <div class="saved-row" style="grid-template-columns: 96px 1fr; gap: 14px; padding: 12px 0;">
+            <div class="dash-state dash-loading" data-state="loading" style="display:none;"><span class="dash-spinner"></span> Loading…</div>
+            <div class="dash-state dash-empty" data-state="empty" style="display:none;">Nothing saved yet — tap the heart on any listing.</div>
+            <div class="saved-row" data-row style="grid-template-columns: 96px 1fr; gap: 14px; padding: 12px 0;">
               <div class="saved-photo" style="width: 96px; height: 72px;">
-                <img src="https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?w=300&q=85" alt="">
+                <img src="https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?w=300&q=85" alt="" data-bind="photo">
               </div>
               <div class="saved-info">
-                <span class="saved-price" style="font-size: 18px;">$1,195,000</span>
-                <span class="saved-addr" style="font-size: 12px;">8001 Vineyard Ridge · Sutter Creek</span>
-                <div class="saved-tags"><span class="tag-mini">Favorite</span><span class="tag-mini">Stretch</span></div>
+                <span class="saved-price" style="font-size: 18px;" data-bind="price">$1,195,000</span>
+                <span class="saved-addr" style="font-size: 12px;" data-bind="address">8001 Vineyard Ridge · Sutter Creek</span>
+                <div class="saved-tags" data-list="tags" data-optional><span class="tag-mini" data-row data-bind="label">Favorite</span></div>
               </div>
             </div>
             <div class="saved-row" style="grid-template-columns: 96px 1fr; gap: 14px; padding: 12px 0;">
@@ -384,26 +399,28 @@
                 <div class="saved-tags"><span class="tag-mini">Too pricey?</span></div>
               </div>
             </div>
-            <div style="text-align: center; margin-top: 18px;">
+            <div style="text-align: center; margin-top: 18px;" data-after-rows>
               <a href="#" class="btn-link" style="border: none; color: var(--brass);">Open saved board →</a>
             </div>
           </section>
 
-          <section class="dash-card">
+          <section class="dash-card" data-list="tours">
             <div class="dash-card-h">
               <h2>Tours.</h2>
               <span class="meta">2 upcoming</span>
             </div>
-            <div class="tour-block">
+            <div class="dash-state dash-loading" data-state="loading" style="display:none;"><span class="dash-spinner"></span> Loading…</div>
+            <div class="dash-state dash-empty" data-state="empty" style="display:none;">No tours booked yet.</div>
+            <div class="tour-block" data-row>
               <div class="tour-date">
-                <div class="dow">Wed</div>
-                <div class="num">14</div>
-                <div class="mo">May</div>
+                <div class="dow" data-bind="dow">Wed</div>
+                <div class="num" data-bind="day">14</div>
+                <div class="mo" data-bind="month">May</div>
               </div>
               <div class="tour-info">
-                <span class="tour-time">11:30 AM · in person</span>
-                <span class="tour-prop">8001 Vineyard Ridge</span>
-                <span class="tour-with">With Sara · Sutter Creek</span>
+                <span class="tour-time" data-bind="time">11:30 AM · in person</span>
+                <span class="tour-prop" data-bind="property">8001 Vineyard Ridge</span>
+                <span class="tour-with" data-bind="location">With Sara · Sutter Creek</span>
               </div>
               <div class="tour-actions">
                 <button class="btn btn-ghost btn-xs">Reschedule</button>
@@ -424,23 +441,25 @@
                 <button class="btn btn-ghost btn-xs">Directions</button>
               </div>
             </div>
-            <div style="text-align: center; margin-top: 18px;">
+            <div style="text-align: center; margin-top: 18px;" data-after-rows>
               <a href="listing.html" class="btn btn-ink btn-sm">Book another tour</a>
             </div>
           </section>
         </div>
 
         <!-- Messages -->
-        <section class="dash-card">
+        <section class="dash-card" data-list="messages">
           <div class="dash-card-h">
             <h2>From Sara.</h2>
             <span class="meta"><a href="#">Open inbox →</a></span>
           </div>
-          <div class="msg-thread">
-            <div class="msg-from"><div class="avatar avatar-sm"><img src="art/sara-headshot.png" alt="Sara"></div></div>
+          <div class="dash-state dash-loading" data-state="loading" style="display:none;"><span class="dash-spinner"></span> Loading…</div>
+          <div class="dash-state dash-empty" data-state="empty" style="display:none;">No messages yet.</div>
+          <div class="msg-thread" data-row>
+            <div class="msg-from"><div class="avatar avatar-sm"><img src="art/sara-headshot.png" alt="Sara" data-bind="avatar"></div></div>
             <div class="msg-content">
-              <div><span class="msg-name">Sara Cooper</span><span class="msg-time">Today · 9:14 AM</span></div>
-              <p class="msg-text">Morning Renee — quick note on <strong>217 Ironstone Lane</strong>. The sellers dropped $25K this morning, and I've spoken to the listing agent: they had an offer fall through last week (financing). They are quietly motivated. If you'd like, we could walk it this Saturday before the open. ☕</p>
+              <div><span class="msg-name" data-bind="from">Sara Cooper</span><span class="msg-time" data-bind="time">Today · 9:14 AM</span></div>
+              <p class="msg-text" data-bind="body">Morning Renee — quick note on <strong>217 Ironstone Lane</strong>. The sellers dropped $25K this morning, and I've spoken to the listing agent: they had an offer fall through last week (financing). They are quietly motivated. If you'd like, we could walk it this Saturday before the open. ☕</p>
               <div style="margin-top: 8px; display: flex; gap: 6px;">
                 <button class="btn btn-ink btn-xs">Reply</button>
                 <button class="btn btn-ghost btn-xs">Book private tour</button>
@@ -467,11 +486,11 @@
             <span class="when">Delivers 7:30 AM</span>
           </div>
           <div class="digest-body">
-            <p class="digest-letter">"Renee — three properties to keep an eye on tomorrow. The <strong>Oak Hollow</strong> generator is the same Generac on your shortlist. <strong>Spring Street</strong> won't last past the weekend at that price. And the Sutter Creek property added a video tour overnight."</p>
-            <div class="digest-mini">
-              <a href="listing.html">
-                <span class="p">$875,000</span>
-                <span class="a">Oak Hollow · Murphys</span>
+            <p class="digest-letter" data-bind="digest.letter">"Renee — three properties to keep an eye on tomorrow. The <strong>Oak Hollow</strong> generator is the same Generac on your shortlist. <strong>Spring Street</strong> won't last past the weekend at that price. And the Sutter Creek property added a video tour overnight."</p>
+            <div class="digest-mini" data-list="digest.items">
+              <a href="listing.html" data-row data-bind-href="listing_url">
+                <span class="p" data-bind="price">$875,000</span>
+                <span class="a" data-bind="address">Oak Hollow · Murphys</span>
               </a>
               <a href="listing.html">
                 <span class="p">$549,000</span>
@@ -479,10 +498,10 @@
               </a>
             </div>
             <div class="digest-sign">
-              <div class="avatar avatar-sm"><img src="art/sara-headshot.png" alt="Sara"></div>
+              <div class="avatar avatar-sm"><img src="art/sara-headshot.png" alt="Sara" data-bind="digest.agent_avatar"></div>
               <div>
-                <div class="name">Sara Cooper</div>
-                <div class="ti">Your agent · Legacy</div>
+                <div class="name" data-bind="digest.agent_name">Sara Cooper</div>
+                <div class="ti" data-bind="digest.agent_title">Your agent · Legacy</div>
               </div>
             </div>
           </div>
@@ -497,27 +516,27 @@
           <div class="prefs">
             <div class="pref-card">
               <span class="label-cap">Price</span>
-              <span class="v">$650K – $900K</span>
+              <span class="v" data-bind="brief.price">$650K – $900K</span>
             </div>
             <div class="pref-card">
               <span class="label-cap">Beds / baths</span>
-              <span class="v">3+ Bd / 2+ Ba</span>
+              <span class="v" data-bind="brief.beds_baths">3+ Bd / 2+ Ba</span>
             </div>
             <div class="pref-card">
               <span class="label-cap">Lot</span>
-              <span class="v">1+ acre</span>
+              <span class="v" data-bind="brief.lot">1+ acre</span>
             </div>
             <div class="pref-card">
               <span class="label-cap">Areas</span>
-              <span class="v">Murphys, Arnold</span>
+              <span class="v" data-bind="brief.areas">Murphys, Arnold</span>
             </div>
             <div class="pref-card" style="grid-column: 1/-1;">
               <span class="label-cap">Must-haves</span>
-              <span class="v" style="font-size: 14px;">Single-level · Generator · Views · No HOA</span>
+              <span class="v" style="font-size: 14px;" data-bind="brief.must_haves">Single-level · Generator · Views · No HOA</span>
             </div>
             <div class="pref-card" style="grid-column: 1/-1;">
               <span class="label-cap">Lovely-to-haves</span>
-              <span class="v" style="font-size: 14px;">Detached studio · Wine room · Walk to town</span>
+              <span class="v" style="font-size: 14px;" data-bind="brief.nice_to_haves">Detached studio · Wine room · Walk to town</span>
             </div>
           </div>
         </section>
@@ -528,13 +547,14 @@
             <h2>Alerts.</h2>
             <span class="meta"><a href="#">Manage →</a></span>
           </div>
-          <div class="alerts-list">
-            <div class="alert-row">
+          <div class="alerts-list" data-list="alerts">
+            <div class="dash-state dash-empty" data-state="empty" style="display:none;">No alerts set.</div>
+            <div class="alert-row" data-row>
               <div>
-                <div class="alert-title">New homes in Murphys</div>
-                <div class="alert-rule">$650K – $900K · 3+ Bd · 1+ acre</div>
+                <div class="alert-title" data-bind="title">New homes in Murphys</div>
+                <div class="alert-rule" data-bind="rule">$650K – $900K · 3+ Bd · 1+ acre</div>
               </div>
-              <div class="toggle on" onclick="this.classList.toggle('on')"></div>
+              <div class="toggle on" data-toggle="enabled" onclick="this.classList.toggle('on')"></div>
             </div>
             <div class="alert-row">
               <div>
@@ -561,16 +581,16 @@
         </section>
 
         <!-- Market mini -->
-        <section class="dash-card">
+        <section class="dash-card" data-list="market">
           <div class="dash-card-h">
             <h2>Local market.</h2>
             <span class="meta">May 2026</span>
           </div>
-          <div class="market-mini-row"><span class="town">Murphys</span><span class="pr">$685,000</span><span class="ch up">+4.2%</span></div>
+          <div class="market-mini-row" data-row><span class="town" data-bind="town">Murphys</span><span class="pr" data-bind="price">$685,000</span><span class="ch up" data-bind="change" data-sign>+4.2%</span></div>
           <div class="market-mini-row"><span class="town">Arnold</span><span class="pr">$520,000</span><span class="ch up">+2.8%</span></div>
           <div class="market-mini-row"><span class="town">Sutter Creek</span><span class="pr">$598,000</span><span class="ch up">+5.1%</span></div>
           <div class="market-mini-row"><span class="town">Angels Camp</span><span class="pr">$415,000</span><span class="ch up">+3.7%</span></div>
-          <div style="margin-top: 14px;">
+          <div style="margin-top: 14px;" data-after-rows>
             <a href="index.html#ledger" class="btn-link" style="border: none; color: var(--brass);">Read the Ledger →</a>
           </div>
         </section>
