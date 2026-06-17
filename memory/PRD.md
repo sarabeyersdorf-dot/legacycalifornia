@@ -40,16 +40,19 @@ Never modify HTML/CSS — add backend functionality only.
 - Schema field names — match spec exactly
 - Direct Anthropic API only
 
-## Backlog (priority order)
-- **P0 — Phase 1D**: live CRM data (`/api/crm/{morning-brief, inbox, pipeline, approve-message, leads/[id]}.js`)
-- **P0 — Phase 1E**: buyer dashboard (`/api/buyer/{dashboard, save-property, book-tour}.js`)
-- **P1 — Phase 1F**: seller portal (`/api/seller/portal.js`)
-- **P1 — Phase 1G**: sequences cron engine (`/api/cron/sequences.js`, `/api/sequences/enroll.js`)
-- **P1 — Phase 1I**: MetroListPRO Optima IDX embed + `/api/idx/{sync, behavioral-webhook}.js`
-- **P2 — Phase 2**: delete `/api/fub/sync.js` in January when FUB contract ends
+## What's been implemented (Phase 1D + 1E + 1F — 2026-02)
+- **Phase 1D — CRM live data**: `/api/crm/[action].js` dispatcher routes `morning-brief`, `inbox`, `pipeline`, `lead`, `approve`. AI morning-brief narrative cached in `briefs` table (4h TTL). `legacy-client.js` paints the desk.
+- **Phase 1E — Buyer dashboard**: `/api/me/dashboard.js` returns paint-ready buyer payload (greeting, brief, stats, new_matches, saved, tours, messages, digest letter via Anthropic, market snapshot). `dashboard.html` wired through `data-bind` / `data-list`.
+- **Phase 1F — Seller portal** (2026-02): `/api/seller/[action].js` → `portal` returns listing hero, KPI strip (page views/uniques/saves/showings/offers), 21-day trend bars, AI seller note (Claude), offers, showings, comp set (same city, sq_ft ±20%, last 90 days), pre-listing checklist, documents from Supabase Storage bucket `seller-docs/<property_id>/`, recent activity, sharing. `db/003_seller_portal.sql` adds `properties.seller_lead_id`, `listing_stats` (manual entry stub), `listing_checklist`. Seller painter appended to `legacy-client.js` (no HTML changes).
+- **Tech stack adjustment**: Resend (replaces MailerLite/SendGrid) for transactional email via `_lib/resend.js`.
 
-## Next action items (for user)
-1. Create the Supabase project; run the three SQL files in order.
-2. Add all env vars in Vercel (see `.env.example`).
-3. Deploy. Submit a test lead via the homepage to verify the full intake → AI draft → CRM-inbox loop.
-4. Confirm Phase 1A/1B/1C work end-to-end, then unblock Phase 1D.
+## Backlog (priority order)
+- **P1 — Phase 1G**: sequences cron engine (`/api/sequences/enroll.js`, `/api/cron/sequences.js`)
+- **P1 — Phase 1I**: iHomefinder IDX embed in `listings.html`, `/api/idx/{sync, behavioral-webhook}.js`
+- **P2 — Phase 2**: delete `/api/fub/sync.js` + `fub_id` logic in January when FUB contract ends
+
+## Next action items
+1. **Seller portal setup**: Run `db/003_seller_portal.sql` in Supabase. Create Storage bucket `seller-docs` (private; signed URLs). Set `seller_lead_id` on the seller's property row. Seed `listing_stats` with manual daily numbers (or wire the IDX webhook later) and `listing_checklist` rows.
+2. **Phase 1G — Sequences**: build `/api/sequences/enroll.js` (POST: enroll lead in a sequence by trigger_type) + `/api/cron/sequences.js` (GET: tick due steps, draft via AI, write to `messages` as `pending_approval`). Add Vercel cron to vercel.json.
+3. **Phase 1I — IDX**: drop iHomefinder embed into `listings.html`, build `/api/idx/sync.js` cron + `/api/idx/behavioral-webhook.js` to write into `properties` and `lead_events`.
+4. **Phase 2**: remove FUB sync once contract ends.
