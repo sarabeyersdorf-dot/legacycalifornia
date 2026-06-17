@@ -219,18 +219,19 @@ export default async function handler(req, res) {
       specs:        fmtSpecs(p),
       address:      sanitize(`${p.address || ''}${p.city ? `, ${p.city}` : ''}`),
       note:         pct >= 85 ? 'Hits your brief on price, area, and size.' : undefined,
-      tags:         (p.features?.tags || []).slice(0, 3),
-      listing_url:  p.mls_number ? `/listing.html?mls=${encodeURIComponent(p.mls_number)}` : '/listing.html'
+      tags:         (p.features?.tags || []).slice(0, 3).map((label) => ({ label })),
+      listing_url:  p.mls_number ? `/listing.html?mls=${encodeURIComponent(p.mls_number)}` : '/listing.html',
+      _price:       p.price  // kept for digest.items lookup; painter ignores _-prefixed keys
     }));
 
     // 4. Build saved list with the tags the buyer assigned in CRM
     const savedArr = saved.slice(0, 8).map((s) => {
       const p = s.properties;
       const tagPills = [];
-      if (s.tag === 'favorite')   tagPills.push('Favorite');
-      if (s.tag === 'maybe')      tagPills.push('Maybe');
-      if (s.tag === 'too_pricey') tagPills.push('Too pricey');
-      if (s.tag === 'for_james')  tagPills.push('For James');
+      if (s.tag === 'favorite')   tagPills.push({ label: 'Favorite' });
+      if (s.tag === 'maybe')      tagPills.push({ label: 'Maybe' });
+      if (s.tag === 'too_pricey') tagPills.push({ label: 'Too pricey' });
+      if (s.tag === 'for_james')  tagPills.push({ label: 'For James' });
       return {
         photo:       (p.photos && p.photos[0]) || null,
         price:       fmtUSD(p.price),
@@ -321,7 +322,7 @@ export default async function handler(req, res) {
         agent_title:  'Broker · Legacy Properties',
         agent_avatar: 'sara-headshot.png',
         items:        newMatchesArr.slice(0, 3).map((m) => ({
-          price:       (m.specs.match(/\$[\d,KM.]+/) || [''])[0] || '',
+          price:       fmtUSD(m._price),
           address:     m.address,
           listing_url: m.listing_url
         }))
