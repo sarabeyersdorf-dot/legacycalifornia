@@ -71,6 +71,25 @@ export default async function handler(req, res) {
       open_offers:   openOffers.data    || []
     };
 
+    // Look for today's cached brief first. Refresh narrative if older than 4h.
+    const agent = profile.role === 'agent_james' ? 'james' : 'sara';
+    const today = new Date().toISOString().slice(0, 10);
+    const { data: cached } = await supa
+      .from('briefs')
+      .select('*')
+      .eq('agent', agent)
+      .eq('brief_date', today)
+      .maybeSingle();
+
+    const cacheFresh = cached && cached.narrative &&
+      (Date.now() - new Date(cached.updated_at).getTime()) < 4 * 3600 * 1000;
+
+    if (cacheFresh) {
+      result.narrative      = cached.narrative;
+      result.narrative_from = 'cache';
+      return ok(res, result);
+    }
+
     // Generate the narrative — fail soft so the panel still works if Anthropic is down.
     try {
       const ctx = {
@@ -83,7 +102,7 @@ export default async function handler(req, res) {
         sample_radio_lead:  result.radio_silence[0]?.first_name || null
       };
       const userPrompt = `Today is ${now.toLocaleDateString(undefined, { weekday:'long', month:'long', day:'numeric' })}.
-Snapshot for Sara:
+Snapshot for ${agent === 'sara' ? 'Sara' : 'James'}:
   ${ctx.draft_count} draft message(s) awaiting your approval
   ${ctx.tours_today_count} tour(s) on today's calendar
   ${ctx.new_today_count} new lead(s) in the past 24 hours${ctx.sample_new_lead ? ' (latest: ' + ctx.sample_new_lead + ')' : ''}
@@ -96,10 +115,21 @@ Write the brief paragraph now. Lead with the most important signal.`;
         max_tokens: 400,
         temperature: 0.6
       });
-      result.narrative = text.trim();
+      result.narrative      = text.trim();
+      result.narrative_from = 'fresh';
+
+      // Persist (upsert) so subsequent reloads hit the cache
+      await supa.from('briefs').upsert({
+        agent,
+        brief_date: today,
+        narrative:  result.narrative,
+        snapshot:   ctx,
+        updated_at: new Date().toISOString()
+      }, { onConflict: 'agent,brief_date' });
     } catch (e) {
-      result.narrative = null;
+      result.narrative = cached?.narrative || null;
       result.narrative_error = e.message;
+      result.narrative_from = cached?.narrative ? 'stale_cache' : 'none';
     }
 
     return ok(res, result);
