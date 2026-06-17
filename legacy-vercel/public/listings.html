@@ -6,6 +6,14 @@
 <title>Properties — Legacy Properties</title>
 <link rel="stylesheet" href="legacy.css">
 <link rel="stylesheet" href="listings.css">
+<script src="https://kestrel.idxhome.com/ihf-kestrel.js"></script>
+<script>
+  window.ihfKestrel = window.ihfKestrel || {};
+  ihfKestrel.config = {
+    platform: "custom",
+    activationToken: "d77ab7ae-7afe-403d-89cf-61bd60bbf806",
+  };
+</script>
 </head>
 <body class="paper" data-screen-label="IDX Listings">
 
@@ -220,108 +228,7 @@
       <a href="dashboard.html" class="btn-link" style="border: none; color: var(--brass);">Save this search →</a>
     </div>
 
-    <div class="list-pane-grid" id="idxResults">
-      <a href="listing.html" class="prop-card prop-active">
-        <div class="prop-photo">
-          <img src="https://images.unsplash.com/photo-1613977257363-707ba9348227?w=900&q=85" alt="">
-          <div class="prop-tags">
-            <span class="pill-status pill-new">Active</span>
-            <span class="pill-status pill-brass">Featured</span>
-          </div>
-        </div>
-        <div class="prop-body">
-          <div class="prop-price">$1,399,000</div>
-          <div class="prop-address">433 E Highway 4 · Murphys</div>
-          <div class="prop-specs">
-            <span>4 Bd</span><span>3 Ba</span><span>Estate</span>
-          </div>
-          <div class="prop-foot">
-            <span class="label-cap">Listed by Sara</span>
-            <span class="prop-bookmark" onclick="event.preventDefault();this.classList.toggle('on');">♡</span>
-          </div>
-        </div>
-      </a>
-
-      <a href="listing.html" class="prop-card">
-        <div class="prop-photo">
-          <img src="https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=900&q=85" alt="">
-          <div class="prop-tags">
-            <span class="pill-status pill-new">Active</span>
-          </div>
-        </div>
-        <div class="prop-body">
-          <div class="prop-price">$1,200,000</div>
-          <div class="prop-address">7094 Heaton Moor Drive · San Jose</div>
-          <div class="prop-specs">
-            <span>3 Bd</span><span>1 Ba</span><span>Single family</span>
-          </div>
-          <div class="prop-foot">
-            <span class="label-cap">Listed by Sara</span>
-            <span class="prop-bookmark" onclick="event.preventDefault();this.classList.toggle('on');">♡</span>
-          </div>
-        </div>
-      </a>
-
-      <a href="listing.html" class="prop-card">
-        <div class="prop-photo">
-          <img src="https://images.unsplash.com/photo-1568605114967-8130f3a36994?w=900&q=85" alt="">
-          <div class="prop-tags">
-            <span class="pill-status">Active</span>
-          </div>
-        </div>
-        <div class="prop-body">
-          <div class="prop-price">$399,000</div>
-          <div class="prop-address">2733 Emco Road · Mokelumne Hill</div>
-          <div class="prop-specs">
-            <span>3 Bd</span><span>2 Ba</span><span>Single family</span>
-          </div>
-          <div class="prop-foot">
-            <span class="label-cap">Listed by Sara</span>
-            <span class="prop-bookmark" onclick="event.preventDefault();this.classList.toggle('on');">♡</span>
-          </div>
-        </div>
-      </a>
-
-      <a href="listing.html" class="prop-card">
-        <div class="prop-photo">
-          <img src="https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=900&q=85" alt="">
-          <div class="prop-tags">
-            <span class="pill-status">Active</span>
-          </div>
-        </div>
-        <div class="prop-body">
-          <div class="prop-price">$199,000</div>
-          <div class="prop-address">2841 Fowler Road, Space 144 · Ceres</div>
-          <div class="prop-specs">
-            <span>3 Bd</span><span>2 Ba</span><span>Manufactured</span>
-          </div>
-          <div class="prop-foot">
-            <span class="label-cap">Listed by Sara</span>
-            <span class="prop-bookmark" onclick="event.preventDefault();this.classList.toggle('on');">♡</span>
-          </div>
-        </div>
-      </a>
-
-      <a href="listing.html" class="prop-card">
-        <div class="prop-photo">
-          <img src="https://images.unsplash.com/photo-1500382017468-9049fed747ef?w=900&q=85" alt="">
-          <div class="prop-tags">
-            <span class="pill-status pill-warm">Land</span>
-          </div>
-        </div>
-        <div class="prop-body">
-          <div class="prop-price">$33,000</div>
-          <div class="prop-address">1350 Love Street · Angels Camp</div>
-          <div class="prop-specs">
-            <span>Vacant land</span><span>Calaveras Co.</span>
-          </div>
-          <div class="prop-foot">
-            <span class="label-cap">Listed by Sara</span>
-            <span class="prop-bookmark" onclick="event.preventDefault();this.classList.toggle('on');">♡</span>
-          </div>
-        </div>
-      </a>
-    </div>
+    <div data-ihf-component="searchResults"></div>
 
     <!-- Sara strip -->
     <div class="sara-strip">
@@ -384,6 +291,5 @@ document.querySelectorAll('.vt-btn').forEach(v => {
   }
 })();
 </script>
-<script src="/legacy-client.js" defer></script>
 </body>
 </html>
