@@ -3,1588 +3,890 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Legacy CRM · Sara's Desk</title>
+<title>Foothills commute calculator · Legacy Properties</title>
+<meta name="description" content="Honest, time-of-day-aware drive times from the Sierra foothills to SFO, Oakland, San Jose, Sacramento and Reno — sourced from real client logs, not Google's midday number.">
 <link rel="stylesheet" href="legacy.css">
-<link rel="stylesheet" href="crm.css">
+<link rel="stylesheet" href="tools.css">
+<style>
+  /* ── Commute-specific ────────────────────────────────── */
+  .cm-grid {
+    width: 100%; border-collapse: collapse;
+    background: var(--shell); border: 1px solid var(--rule);
+  }
+  .cm-grid th {
+    text-align: left; padding: 16px 18px;
+    background: var(--ink); color: var(--shell);
+    font-family: var(--mono); font-size: 10px; letter-spacing: 0.18em;
+    text-transform: uppercase; font-weight: 500;
+  }
+  .cm-grid th.center { text-align: center; }
+  .cm-grid td {
+    padding: 0; border-bottom: 1px solid var(--rule);
+    border-right: 1px solid var(--rule-soft);
+    vertical-align: middle;
+  }
+  .cm-grid td:last-child { border-right: none; }
+  .cm-grid td.dest {
+    padding: 18px 22px;
+    font-family: var(--serif); font-style: italic; font-weight: 400;
+    font-size: 21px; color: var(--ink); background: var(--linen);
+    line-height: 1.1;
+  }
+  .cm-grid td.dest .sub {
+    display: block; margin-top: 4px;
+    font-family: var(--mono); font-style: normal; font-size: 9px;
+    letter-spacing: 0.18em; text-transform: uppercase; color: var(--ink-mute);
+  }
+  .cm-cell {
+    padding: 18px 14px; text-align: center;
+    transition: background .15s;
+    position: relative;
+  }
+  .cm-cell-min {
+    font-family: var(--serif); font-style: italic; font-weight: 300;
+    font-size: 30px; line-height: 1; color: var(--ink);
+  }
+  .cm-cell-min .u {
+    font-family: var(--mono); font-style: normal; font-size: 11px;
+    letter-spacing: 0.14em; color: var(--ink-mute); margin-left: 4px;
+  }
+  .cm-cell-delta {
+    margin-top: 6px; font-family: var(--mono); font-size: 10px;
+    letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-mute);
+  }
+  /* Color bands by drive time */
+  .cm-good { background: rgba(74,106,61,0.10); }
+  .cm-good .cm-cell-min { color: #3a5530; }
+  .cm-okay { background: rgba(201,158,90,0.12); }
+  .cm-okay .cm-cell-min { color: #8a6a30; }
+  .cm-tough { background: rgba(184,90,62,0.12); }
+  .cm-tough .cm-cell-min { color: var(--hot); }
+  .cm-bad { background: rgba(110,42,32,0.18); }
+  .cm-bad .cm-cell-min { color: var(--oxblood); }
+
+  /* Best-cell ring */
+  .cm-cell-best {
+    box-shadow: inset 0 0 0 2px var(--brass);
+  }
+  .cm-cell-best::after {
+    content: 'best'; position: absolute; top: 6px; right: 8px;
+    font-family: var(--mono); font-size: 8px; letter-spacing: 0.16em;
+    text-transform: uppercase; color: var(--brass);
+  }
+
+  /* ── Town comparison strip ──────────────────────────── */
+  .cm-towns {
+    display: grid; grid-template-columns: repeat(5, 1fr);
+    gap: 1px; background: var(--rule); border: 1px solid var(--rule);
+    margin-top: 28px;
+  }
+  .cm-town {
+    background: var(--shell); padding: 22px 22px 24px;
+    cursor: pointer; transition: background .15s;
+  }
+  .cm-town:hover { background: var(--linen); }
+  .cm-town.on { background: var(--ink); color: var(--shell); }
+  .cm-town-lbl {
+    font-family: var(--mono); font-size: 9px; letter-spacing: 0.18em;
+    text-transform: uppercase; color: var(--ink-mute);
+  }
+  .cm-town.on .cm-town-lbl { color: var(--brass-bright); }
+  .cm-town-name {
+    font-family: var(--serif); font-style: italic; font-weight: 400;
+    font-size: 22px; line-height: 1.1; margin: 8px 0 6px;
+  }
+  .cm-town-meta {
+    font-family: var(--mono); font-size: 10px; letter-spacing: 0.14em;
+    text-transform: uppercase; color: var(--ink-mute);
+  }
+  .cm-town.on .cm-town-meta { color: rgba(250,246,236,0.55); }
+
+  /* ── Route detail ───────────────────────────────────── */
+  .cm-route {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 1px;
+    background: var(--rule); border: 1px solid var(--rule);
+    margin-top: 24px;
+  }
+  .cm-route-half { background: var(--shell); padding: 28px 32px 32px; }
+  .cm-route-half h4 {
+    font-family: var(--serif); font-style: italic; font-weight: 400;
+    font-size: 22px; color: var(--ink); margin-bottom: 4px;
+  }
+  .cm-route-meta {
+    font-family: var(--mono); font-size: 10px; letter-spacing: 0.16em;
+    text-transform: uppercase; color: var(--brass);
+    padding-bottom: 14px; border-bottom: 1px solid var(--rule);
+    margin-bottom: 18px;
+  }
+  .cm-leg {
+    display: grid; grid-template-columns: 60px 1fr auto;
+    gap: 14px; padding: 12px 0;
+    border-bottom: 1px solid var(--rule-soft);
+    align-items: baseline;
+  }
+  .cm-leg:last-child { border-bottom: none; }
+  .cm-leg-num {
+    font-family: var(--serif); font-style: italic; font-weight: 300;
+    font-size: 22px; color: var(--brass); line-height: 1;
+  }
+  .cm-leg-name {
+    font-family: var(--sans); font-size: 14px; color: var(--ink-2);
+    line-height: 1.4;
+  }
+  .cm-leg-name .road {
+    display: inline-block;
+    font-family: var(--mono); font-size: 10px; letter-spacing: 0.14em;
+    color: var(--ink-mute); margin-right: 8px; padding: 1px 6px;
+    border: 1px solid var(--rule-strong); text-transform: uppercase;
+  }
+  .cm-leg-time {
+    font-family: var(--mono); font-size: 11px; letter-spacing: 0.10em;
+    color: var(--ink-mute); white-space: nowrap;
+  }
+
+  /* ── SVG region map ─────────────────────────────────── */
+  .cm-map-wrap {
+    background: var(--shell); border: 1px solid var(--rule);
+    padding: 24px 24px 18px; margin-top: 28px;
+  }
+  .cm-map {
+    aspect-ratio: 16/9; width: 100%;
+    background: var(--linen);
+    border: 1px solid var(--rule);
+  }
+
+  /* ── Sara's commentary ──────────────────────────────── */
+  .cm-sara {
+    margin-top: 28px; padding: 28px 32px;
+    background: var(--vellum); border-left: 2px solid var(--brass);
+    display: grid; grid-template-columns: auto 1fr; gap: 24px;
+    align-items: center;
+  }
+  .cm-sara-pic {
+    width: 64px; height: 64px; border-radius: 50%;
+    background: var(--brass); display: flex; align-items: center;
+    justify-content: center; flex-shrink: 0; overflow: hidden;
+    border: 2px solid var(--shell);
+    box-shadow: 0 0 0 1px var(--rule);
+  }
+  .cm-sara-pic img { width: 100%; height: 100%; object-fit: cover; }
+  .cm-sara-lbl {
+    font-family: var(--mono); font-size: 10px; letter-spacing: 0.18em;
+    text-transform: uppercase; color: var(--brass); margin-bottom: 6px;
+  }
+  .cm-sara-quote {
+    font-family: var(--serif); font-style: italic; font-weight: 400;
+    font-size: 19px; line-height: 1.5; color: var(--ink);
+  }
+
+  /* ── Quality of life calc band ─────────────────────── */
+  .cm-qol {
+    background: var(--ink); color: var(--shell);
+    padding: 80px var(--gutter);
+  }
+  .cm-qol-inner { max-width: var(--max); margin: 0 auto; }
+  .cm-qol-grid {
+    display: grid; grid-template-columns: repeat(4, 1fr);
+    gap: 1px; background: rgba(250,246,236,0.10);
+    border: 1px solid rgba(250,246,236,0.10);
+    margin-top: 48px;
+  }
+  .cm-qol-cell {
+    background: var(--ink); padding: 36px 32px;
+  }
+  .cm-qol-n {
+    font-family: var(--serif); font-style: italic; font-weight: 300;
+    font-size: 56px; line-height: 1; color: var(--brass-bright);
+  }
+  .cm-qol-l {
+    margin: 12px 0 14px;
+    font-family: var(--mono); font-size: 10px; letter-spacing: 0.16em;
+    text-transform: uppercase; color: rgba(250,246,236,0.55);
+  }
+  .cm-qol-p {
+    font-family: var(--sans); font-size: 13.5px; line-height: 1.6;
+    color: rgba(250,246,236,0.75);
+  }
+
+  @media (max-width: 1100px) {
+    .cm-towns { grid-template-columns: repeat(2, 1fr); }
+    .cm-route { grid-template-columns: 1fr; }
+    .cm-qol-grid { grid-template-columns: 1fr 1fr; }
+  }
+  @media (max-width: 700px) {
+    .cm-towns { grid-template-columns: 1fr; }
+    .cm-qol-grid { grid-template-columns: 1fr; }
+    .cm-grid td.dest { font-size: 16px; padding: 14px; }
+    .cm-cell-min { font-size: 22px; }
+  }
+</style>
 </head>
-<body data-screen-label="Agent CRM">
+<body class="paper" data-screen-label="Commute Tool">
 
-<div class="app">
-  <!-- ============ SIDEBAR ============ -->
-  <aside class="app-side">
-    <div class="app-side-brand">
-      <a href="index.html" class="wordmark">
-        <span class="wordmark-word">Legacy</span>
-        <span class="wordmark-sub">Desk · Sara</span>
-      </a>
+<!-- ============ TOP NAV ============ -->
+<header class="topnav">
+  <div class="topnav-bar1">
+    <span>Boutique luxury real estate · Calaveras · Amador · Tuolumne</span>
+    <span>
+      <a href="tel:2095594966">(209) 559-4966</a>
+      &nbsp;·&nbsp;
+      <a href="mailto:SaraSellsCalifornia@gmail.com">SaraSellsCalifornia@gmail.com</a>
+    </span>
+  </div>
+  <nav class="topnav-bar2">
+    <div class="topnav-links">
+      <a href="listings.html">Listings</a>
+      <a href="towns.html">Communities</a>
+      <a href="relocate.html">Relocate</a>
+      <a href="seller.html">Sellers</a>
     </div>
-
-    <div class="app-side-section">Daily</div>
-    <nav class="app-side-nav">
-      <a href="#" class="active" onclick="showView(event,'today')">Today <span class="pill">5</span></a>
-      <a href="#" onclick="showView(event,'inbox')">Inbox <span class="pill">14</span></a>
-      <a href="#" onclick="showView(event,'pipe')">Pipeline</a>
-      <a href="#" onclick="showView(event,'cal')">Calendar <span class="pill">7</span></a>
-      <a href="#" onclick="showView(event,'seq')">Sequences</a>
-    </nav>
-
-    <div class="app-side-section">Roster</div>
-    <nav class="app-side-nav">
-      <a href="#">Leads <span class="pill">218</span></a>
-      <a href="#">Clients <span class="pill">42</span></a>
-      <a href="#">Past clients</a>
-      <a href="#">Sphere</a>
-    </nav>
-
-    <div class="app-side-section">Listings</div>
-    <nav class="app-side-nav">
-      <a href="#">Active <span class="pill">12</span></a>
-      <a href="#">Pending</a>
-      <a href="seller.html">Seller portal</a>
-    </nav>
-
-    <div class="app-side-section">Insight</div>
-    <nav class="app-side-nav">
-      <a href="#" onclick="showView(event,'rep')">Reports</a>
-      <a href="#">Market data</a>
-      <a href="#">Settings</a>
-    </nav>
-
-    <div class="app-side-foot">
-      <div class="avatar avatar-sm"><img src="art/sara-headshot.png" alt="Sara Cooper"></div>
-      <div style="flex:1;min-width:0;">
-        <div style="font-size:13px;color:var(--ink);font-weight:500;">Sara Cooper</div>
-        <div class="mono" style="font-size:9px;letter-spacing:.16em;color:var(--ink-mute);">BROKER · LEGACY</div>
-      </div>
+    <a href="index.html" class="wordmark">
+      <span class="wordmark-word">Legacy</span>
+      <span class="wordmark-sub">Properties · Angels Camp CA</span>
+    </a>
+    <div class="topnav-links right">
+      <a href="ledger.html">The Ledger</a>
+      <a href="dashboard.html">Sign In</a>
+      <a href="platform.html" class="btn btn-ink btn-sm" style="padding:10px 18px;">Find My Match</a>
     </div>
-  </aside>
+  </nav>
+</header>
 
-  <!-- ============ MAIN ============ -->
-  <main class="app-main crm-main">
-    <div class="app-topbar">
-      <div class="app-search">
-        <span style="font-family:var(--mono);font-size:11px;">⌕</span>
-        <input placeholder="Search leads, properties, MLS#, addresses…">
-        <span class="mono" style="font-size:10px;color:var(--ink-faint);">⌘K</span>
-      </div>
-      <div class="app-actions">
-        <button class="btn btn-ghost btn-sm">+ New lead</button>
-        <button class="icon-btn" title="Notifications">⏷<span class="dot"></span></button>
-        <button class="icon-btn" title="Help">?</button>
+<!-- ============ HERO ============ -->
+<section class="tool-hero">
+  <div class="tool-hero-inner">
+    <div class="tool-hero-left">
+      <span class="hairline-brass" style="margin-bottom: 18px;"></span>
+      <span class="eyebrow">A Legacy tool · Free · No sign-up</span>
+      <h1 class="tool-h1">The honest<br><em>commute</em><br>calculator.</h1>
+      <p class="tool-dek">Google says it's 2 hours and 14 minutes to Oakland from Murphys. Google is wrong four days out of five. We log the actual drives — ours and our clients' — and tell you the truth about morning peak, mid-day, and Friday-afternoon escape.</p>
+      <div class="tool-hero-meta">
+        <div><span class="n">14</span><span class="l">Destinations modeled</span></div>
+        <div><span class="n">3 yrs</span><span class="l">Of client commute logs</span></div>
+        <div><span class="n">Q</span><span class="l">Updated quarterly</span></div>
       </div>
     </div>
 
-    <!-- TAB STRIP -->
-    <div class="crm-tabs">
-      <button class="crm-tab on" onclick="showView(event,'today')">Today <span class="ct">5</span></button>
-      <button class="crm-tab" onclick="showView(event,'inbox')">Inbox <span class="ct">14</span></button>
-      <button class="crm-tab" onclick="showView(event,'pipe')">Pipeline <span class="ct">42</span></button>
-      <button class="crm-tab" onclick="showView(event,'cal')">Calendar <span class="ct">Wk 20</span></button>
-      <button class="crm-tab" onclick="showView(event,'seq')">Sequences <span class="ct">7</span></button>
-      <button class="crm-tab" onclick="showView(event,'rep')">Reports</button>
+    <form class="tool-lookup" onsubmit="event.preventDefault(); cmRun();">
+      <div class="tool-lookup-top">
+        <span class="eyebrow" style="color: var(--brass);">Step 01 · Where you'd live</span>
+        <span class="label-cap">Hands on the wheel data</span>
+      </div>
+      <div class="field">
+        <span class="field-label">Town or address</span>
+        <select class="field-input" id="cmTown">
+          <option value="murphys">Murphys · 2,140 ft · Calaveras</option>
+          <option value="arnold">Arnold · 4,100 ft · Calaveras</option>
+          <option value="angels">Angels Camp · 1,380 ft · Calaveras</option>
+          <option value="copper">Copperopolis · 780 ft · Calaveras</option>
+          <option value="sutter">Sutter Creek · 1,200 ft · Amador</option>
+        </select>
+      </div>
+      <div class="tool-lookup-row">
+        <div class="field" style="flex:1;">
+          <span class="field-label">In-office days / week</span>
+          <select class="field-input" id="cmDays">
+            <option>1 day · hybrid heavy</option>
+            <option selected>2 days · standard hybrid</option>
+            <option>3 days · in-office majority</option>
+            <option>5 days · full RTO</option>
+            <option>0 days · fully remote</option>
+          </select>
+        </div>
+        <div class="field" style="flex:1;">
+          <span class="field-label">Vehicle</span>
+          <select class="field-input">
+            <option>Gas · standard</option>
+            <option>Hybrid / EV</option>
+            <option>Truck or SUV</option>
+            <option>Tesla · with FSD</option>
+          </select>
+        </div>
+      </div>
+      <button type="submit" class="btn btn-ink" style="width: 100%; margin-top: 4px;">Run the commute report →</button>
+      <div class="tool-lookup-foot">
+        <span class="label-cap">Add destination:</span>
+        <button type="button" class="chip" onclick="alert('SFO is included by default')">+ SFO</button>
+        <button type="button" class="chip" onclick="alert('OAK is included by default')">+ OAK</button>
+        <button type="button" class="chip" onclick="alert('SJC is included by default')">+ SJC</button>
+        <button type="button" class="chip" onclick="alert('SAC is included by default')">+ SAC</button>
+        <button type="button" class="chip">+ Reno</button>
+        <button type="button" class="chip">+ Custom</button>
+      </div>
+    </form>
+  </div>
+</section>
+
+<!-- ============ RESULT ============ -->
+<section class="tool-result" id="cmResult">
+  <div class="tool-result-inner">
+
+    <!-- HEADER -->
+    <div class="tool-result-head">
+      <div class="tool-result-head-l">
+        <span class="eyebrow">Report · April 14, 2026</span>
+        <h2 class="tool-result-h" id="cmFrom">From: Murphys, CA · 2,140 ft</h2>
+        <div class="tool-result-sub">
+          <span><strong>2</strong> days/wk in office</span>
+          <span>·</span>
+          <span><strong>SFO · OAK · SJC · SAC</strong> tracked</span>
+          <span>·</span>
+          <span>Data freshness <strong>Q1 2026</strong></span>
+        </div>
+      </div>
+      <div class="tool-result-head-r">
+        <button class="btn btn-ghost btn-sm">Save to dashboard</button>
+        <button class="btn btn-ghost btn-sm">Compare a 2nd town</button>
+      </div>
     </div>
 
-    <!-- ============================================================
-         TODAY VIEW (default landing)
-         ============================================================ -->
-    <section class="crm-view on" data-view="today">
-      <div class="today">
-
-        <!-- MORNING BRIEF HEADER -->
-        <div class="today-brief">
-          <div class="tb-l">
-            <span class="label-cap" style="color: var(--brass);">Tuesday brief · May 12, 2026 · 6:42 AM</span>
-            <h1 class="tb-greet">Good morning, <em>Sara.</em></h1>
-            <p class="tb-line">Five things want your attention before nine. Renee is the warmest of them.</p>
-          </div>
-          <div class="tb-r">
-            <div class="tb-pulse">
-              <span class="label-cap">Market pulse</span>
-              <div class="tb-pulse-row"><span>Calaveras median</span><span class="v">$542K <em class="chg up">+0.4% wk</em></span></div>
-              <div class="tb-pulse-row"><span>New on MLS, 24h</span><span class="v">7</span></div>
-              <div class="tb-pulse-row"><span>Price changes</span><span class="v">12 <em class="chg dn">9 down</em></span></div>
-              <div class="tb-pulse-row"><span>Open houses, Sat</span><span class="v">18</span></div>
-            </div>
-            <div class="tb-weather">
-              <div class="tw-day on"><span>Tue</span><span class="i">○</span><span>72°</span></div>
-              <div class="tw-day"><span>Wed</span><span class="i">○</span><span>76°</span></div>
-              <div class="tw-day"><span>Thu</span><span class="i">●</span><span>69°</span></div>
-              <div class="tw-day"><span>Fri</span><span class="i">○</span><span>74°</span></div>
-              <div class="tw-day"><span>Sat</span><span class="i">○</span><span>78°</span></div>
-            </div>
-          </div>
-        </div>
-
-        <!-- HERO 3-COL -->
-        <div class="today-grid">
-
-          <!-- NEEDS YOU NOW -->
-          <section class="needs">
-            <div class="needs-h">
-              <span class="hairline-brass"></span>
-              <span class="eyebrow">Needs you · before 9 AM</span>
-              <h2 class="h-section" style="font-size: 32px; margin-top: 8px;">Five quiet asks.</h2>
-            </div>
-
-            <article class="need-card need-card-hot">
-              <div class="nc-rank">01</div>
-              <div class="nc-body">
-                <div class="nc-meta">
-                  <span class="pill-status pill-hot">Reply ready</span>
-                  <span class="nc-tag">AI draft · awaiting your approval</span>
-                </div>
-                <h3>Renee Dawson — Saturday walk-through</h3>
-                <p>She replied <em>“loved your note”</em> at 9:14 AM. The draft suggests 10:30 Saturday before the open house. Refs your calendar, the price-drop trigger, and Friday’s call notes.</p>
-                <div class="nc-foot">
-                  <div class="nc-foot-l"><span>Renee · Murphys buyer · score 92</span></div>
-                  <div class="nc-foot-r">
-                    <button class="btn btn-ghost btn-sm">Review draft</button>
-                    <button class="btn btn-ink btn-sm">Approve &amp; send</button>
-                  </div>
-                </div>
-              </div>
-            </article>
-
-            <article class="need-card">
-              <div class="nc-rank">02</div>
-              <div class="nc-body">
-                <div class="nc-meta">
-                  <span class="pill-status pill-warm">Offer in play</span>
-                  <span class="nc-tag">Counter signed · contingency clock running</span>
-                </div>
-                <h3>Michael Rivera — inspection due Thursday</h3>
-                <p>Sellers countered $1.18M. Inspection contingency: 12 days, of which <strong>8 remain</strong>. Financing 21 days, 17 remain. Bowman Inspections confirmed Thursday 9 AM — your reminder set for tomorrow 4 PM.</p>
-                <div class="nc-foot">
-                  <div class="nc-foot-l"><span>433 E Highway 4 · Murphys · $1.18M</span></div>
-                  <div class="nc-foot-r">
-                    <button class="btn btn-ghost btn-sm">Open deal</button>
-                  </div>
-                </div>
-              </div>
-            </article>
-
-            <article class="need-card">
-              <div class="nc-rank">03</div>
-              <div class="nc-body">
-                <div class="nc-meta">
-                  <span class="pill-status pill-brass">Listing milestone</span>
-                  <span class="nc-tag">Day 21 on market · below tour benchmark</span>
-                </div>
-                <h3>$725K Sutter Creek — Patricia wants the CMA tonight</h3>
-                <p>Three weeks on, two private showings, one Sunday open with 14 sign-ins. Below the 30-tour benchmark for this price point. Patricia asked yesterday for an updated CMA and a recommendation on a price adjustment.</p>
-                <div class="nc-foot">
-                  <div class="nc-foot-l"><span>42 Spanish St · Sutter Creek · listed $725K</span></div>
-                  <div class="nc-foot-r">
-                    <button class="btn btn-ghost btn-sm">Generate CMA</button>
-                  </div>
-                </div>
-              </div>
-            </article>
-
-            <article class="need-card">
-              <div class="nc-rank">04</div>
-              <div class="nc-body">
-                <div class="nc-meta">
-                  <span class="pill-status">Radio silence</span>
-                  <span class="nc-tag">14 days no contact · was hot</span>
-                </div>
-                <h3>The Becketts — land buyer, last seen 4/28</h3>
-                <p>James has been working the water-rights question. Suggest a check-in note today — the Foothill parcel they liked is still on market and the senior right concern has a clean answer now.</p>
-                <div class="nc-foot">
-                  <div class="nc-foot-l"><span>Tom &amp; Marie Beckett · Land · James</span></div>
-                  <div class="nc-foot-r">
-                    <button class="btn btn-ghost btn-sm">Draft check-in</button>
-                  </div>
-                </div>
-              </div>
-            </article>
-
-            <article class="need-card">
-              <div class="nc-rank">05</div>
-              <div class="nc-body">
-                <div class="nc-meta">
-                  <span class="pill-status">New lead</span>
-                  <span class="nc-tag">Saved 5 homes overnight · Arnold</span>
-                </div>
-                <h3>Jenna Novak — cabin shopper, first day</h3>
-                <p>Signed up at 11 PM, saved 5 Arnold properties before midnight. Browsing pattern: cabins under $625K with garage, weekend-home phrasing. Suggest the standard intro — ask if she's looking primary or second.</p>
-                <div class="nc-foot">
-                  <div class="nc-foot-l"><span>Jenna Novak · Buyer · score 71</span></div>
-                  <div class="nc-foot-r">
-                    <button class="btn btn-ghost btn-sm">Draft welcome</button>
-                  </div>
-                </div>
-              </div>
-            </article>
-          </section>
-
-          <!-- TODAY'S HOURS -->
-          <aside class="hours">
-            <div class="hours-h">
-              <span class="label-cap">Today · Tuesday</span>
-              <span class="hours-link">Open calendar →</span>
-            </div>
-            <div class="hours-body">
-              <div class="hr-now"><span class="hr-now-l">Now · 6:42 AM</span><span class="hr-now-d">Office quiet for 2h 18m</span></div>
-
-              <div class="hr-row">
-                <span class="hr-time">9:00</span>
-                <div class="hr-card">
-                  <span class="label-cap">Call</span>
-                  <strong>Lender check-in — Rivera financing</strong>
-                  <span class="hr-sub">Sierra Vista Mortgage · 30 min</span>
-                </div>
-              </div>
-              <div class="hr-row">
-                <span class="hr-time">10:30</span>
-                <div class="hr-card hr-card-brass">
-                  <span class="label-cap">Showing</span>
-                  <strong>Aiden Kell — 217 Algiers Street</strong>
-                  <span class="hr-sub">Murphys · 45 min · directions sent</span>
-                </div>
-              </div>
-              <div class="hr-row">
-                <span class="hr-time">12:30</span>
-                <div class="hr-card">
-                  <span class="label-cap">Lunch</span>
-                  <strong>Patricia Walsh — CMA review</strong>
-                  <span class="hr-sub">Alchemy Market · 90 min</span>
-                </div>
-              </div>
-              <div class="hr-row">
-                <span class="hr-time">3:00</span>
-                <div class="hr-card">
-                  <span class="label-cap">Office</span>
-                  <strong>Photo shoot — 88 Stockton Rd</strong>
-                  <span class="hr-sub">Joseph Lin · 60 min · Sonora cottage</span>
-                </div>
-              </div>
-              <div class="hr-row">
-                <span class="hr-time">5:30</span>
-                <div class="hr-card">
-                  <span class="label-cap">Call</span>
-                  <strong>James — weekly land roundup</strong>
-                  <span class="hr-sub">Internal · 30 min</span>
-                </div>
-              </div>
-              <div class="hr-row">
-                <span class="hr-time">7:00</span>
-                <div class="hr-card hr-card-soft">
-                  <span class="label-cap">Family</span>
-                  <strong>Off the clock — protect this</strong>
-                  <span class="hr-sub">Auto-decline after this slot</span>
-                </div>
-              </div>
-            </div>
-          </aside>
-
-        </div>
-
-        <!-- QUIETLY ATTENTIVE BAND -->
-        <section class="signals">
-          <div class="signals-h">
-            <span class="hairline-brass"></span>
-            <span class="eyebrow">Quietly attentive · overnight signals</span>
-            <h2 class="h-section" style="font-size: 28px; margin-top: 8px;">What happened while you slept.</h2>
-          </div>
-          <div class="signal-grid">
-            <article class="signal">
-              <span class="sig-time">11:42 PM</span>
-              <p><strong>Jenna Novak</strong> saved 5 cabins in Arnold and revisited <em>2118 Snow Creek</em> three times.</p>
-              <span class="sig-tag">Buyer signal</span>
-            </article>
-            <article class="signal">
-              <span class="sig-time">8:12 PM</span>
-              <p><strong>Aiden Kell</strong>'s lender raised pre-approval to $850K. Listings within budget refreshed.</p>
-              <span class="sig-tag">Budget change</span>
-            </article>
-            <article class="signal">
-              <span class="sig-time">6:08 PM</span>
-              <p><strong>$1.39M Murphys vineyard</strong> dropped to $1.35M. Three saved-search subscribers notified, including Raj.</p>
-              <span class="sig-tag">Price drop</span>
-            </article>
-            <article class="signal">
-              <span class="sig-time">4:31 PM</span>
-              <p><strong>Patricia Walsh</strong> opened your last email 7 times. Spent 4 min on the CMA preview link.</p>
-              <span class="sig-tag">Engagement</span>
-            </article>
-            <article class="signal">
-              <span class="sig-time">2:14 PM</span>
-              <p>New listing on MLS: 4-bed estate on 6 acres, Sutter Creek, $1.15M. Matches Govindarajan saved search.</p>
-              <span class="sig-tag">New on MLS</span>
-            </article>
-            <article class="signal">
-              <span class="sig-time">1:02 PM</span>
-              <p><strong>Susan Forrester</strong> (past client) viewed her property's automated valuation — second time this week.</p>
-              <span class="sig-tag">Future seller</span>
-            </article>
-          </div>
-        </section>
-
-        <!-- LIVE DEALS STRIP -->
-        <section class="deals">
-          <div class="deals-h">
-            <span class="hairline-brass"></span>
-            <span class="eyebrow">In the air right now · active deals</span>
-            <h2 class="h-section" style="font-size: 28px; margin-top: 8px;">Three deals in motion.</h2>
-          </div>
-          <div class="deal-grid">
-
-            <article class="deal">
-              <div class="deal-h">
-                <span class="deal-stage">Under contract · day 4 of 30</span>
-                <span class="deal-amt">$1,180,000</span>
-              </div>
-              <h4>433 E Highway 4 · Murphys</h4>
-              <p class="deal-buyer">Michael Rivera (buyer) → Hartley Trust (seller)</p>
-              <div class="deal-track">
-                <span class="dt dt-done">Offer</span>
-                <span class="dt dt-done">Acceptance</span>
-                <span class="dt dt-on">Inspection</span>
-                <span class="dt">Appraisal</span>
-                <span class="dt">Financing</span>
-                <span class="dt">Close</span>
-              </div>
-              <div class="deal-foot">
-                <span><strong>Inspection</strong> Thu 9 AM · Bowman</span>
-                <span><strong>Close</strong> Jun 12</span>
-              </div>
-            </article>
-
-            <article class="deal">
-              <div class="deal-h">
-                <span class="deal-stage">Active listing · day 21</span>
-                <span class="deal-amt">$725,000</span>
-              </div>
-              <h4>42 Spanish Street · Sutter Creek</h4>
-              <p class="deal-buyer">Patricia Walsh · 1889 Italianate · seller</p>
-              <div class="deal-track">
-                <span class="dt dt-done">Listed</span>
-                <span class="dt dt-done">Photo</span>
-                <span class="dt dt-done">Open</span>
-                <span class="dt dt-on">Price review</span>
-                <span class="dt">Offer</span>
-                <span class="dt">Close</span>
-              </div>
-              <div class="deal-foot">
-                <span><strong>Showings</strong> 14 sign-ins, 2 privates</span>
-                <span><strong>CMA</strong> due tonight</span>
-              </div>
-            </article>
-
-            <article class="deal">
-              <div class="deal-h">
-                <span class="deal-stage">Under contract · day 18 of 28</span>
-                <span class="deal-amt">$485,000</span>
-              </div>
-              <h4>667 S Main St · Angels Camp</h4>
-              <p class="deal-buyer">Olsen family (buyer) → Kreitzer Estate</p>
-              <div class="deal-track">
-                <span class="dt dt-done">Offer</span>
-                <span class="dt dt-done">Acceptance</span>
-                <span class="dt dt-done">Inspection</span>
-                <span class="dt dt-done">Appraisal</span>
-                <span class="dt dt-on">Financing</span>
-                <span class="dt">Close</span>
-              </div>
-              <div class="deal-foot">
-                <span><strong>Financing</strong> contingency removes Fri</span>
-                <span><strong>Close</strong> May 28</span>
-              </div>
-            </article>
-          </div>
-        </section>
-
-        <!-- TASKS + STATS -->
-        <section class="today-foot">
-          <div class="tasks">
-            <div class="tasks-h">
-              <span class="hairline-brass"></span>
-              <span class="eyebrow">Day list</span>
-              <h3 class="h-section" style="font-size: 22px; margin-top: 6px;">Six follow-ups, ordered.</h3>
-            </div>
-            <ul class="task-list">
-              <li><span class="tk-box"></span><span class="tk-body"><strong>Approve Renee's Saturday note</strong> · ready in draft</span><span class="tk-time">5 min</span></li>
-              <li><span class="tk-box"></span><span class="tk-body"><strong>Send Beckett land check-in</strong> · 14 days dark</span><span class="tk-time">8 min</span></li>
-              <li><span class="tk-box"></span><span class="tk-body"><strong>Generate Patricia’s CMA</strong> · due tonight</span><span class="tk-time">25 min</span></li>
-              <li><span class="tk-box"></span><span class="tk-body"><strong>Confirm Thursday inspection</strong> · Rivera deal</span><span class="tk-time">3 min</span></li>
-              <li><span class="tk-box"></span><span class="tk-body"><strong>Welcome Jenna Novak</strong> · new lead, 5 saves overnight</span><span class="tk-time">8 min</span></li>
-              <li><span class="tk-box"></span><span class="tk-body"><strong>Approve weekend market email</strong> · 218 recipients</span><span class="tk-time">6 min</span></li>
-            </ul>
-            <div class="task-foot">
-              <span class="label-cap">Total</span>
-              <span><strong>55 min</strong> · if you start now, done by 7:38 AM</span>
-            </div>
-          </div>
-
-          <div class="daystats">
-            <div class="ds-h">
-              <span class="hairline-brass"></span>
-              <span class="eyebrow">Yesterday at a glance</span>
-            </div>
-            <div class="ds-grid">
-              <div class="ds-cell"><span class="ds-num">23</span><span class="ds-lab">Emails sent</span></div>
-              <div class="ds-cell"><span class="ds-num">14</span><span class="ds-lab">AI drafts · 12 approved</span></div>
-              <div class="ds-cell"><span class="ds-num">3</span><span class="ds-lab">Showings led</span></div>
-              <div class="ds-cell"><span class="ds-num">4</span><span class="ds-lab">New leads</span></div>
-              <div class="ds-cell"><span class="ds-num">$2.4M</span><span class="ds-lab">Pipeline added</span></div>
-              <div class="ds-cell"><span class="ds-num">98<em>%</em></span><span class="ds-lab">Inbox handled</span></div>
-            </div>
-            <p class="ds-note">Your trailing 30-day approval rate on AI drafts is <strong>91%</strong>. Lift in lead score after AI-drafted reply: <strong>+14 pts avg.</strong></p>
-          </div>
-        </section>
-
+    <!-- TOWN SWITCHER -->
+    <div class="cm-towns">
+      <div class="cm-town on" data-town="murphys" onclick="cmSetTown(event,'murphys')">
+        <div class="cm-town-lbl">Compare from</div>
+        <div class="cm-town-name">Murphys</div>
+        <div class="cm-town-meta">2,140 ft · Calaveras</div>
       </div>
-    </section>
-
-    <!-- ============================================================
-         INBOX VIEW
-         ============================================================ -->
-    <section class="crm-view" data-view="inbox">
-      <div class="inbox-shell">
-
-        <!-- LEAD LIST -->
-        <aside class="lead-list">
-          <div class="lead-list-search">
-            <input placeholder="Filter leads, addresses, tags…">
-          </div>
-          <div class="lead-filter">
-            <button class="chip on">All <span class="ct">14</span></button>
-            <button class="chip">Hot <span class="ct">3</span></button>
-            <button class="chip">Warm <span class="ct">6</span></button>
-            <button class="chip">New <span class="ct">2</span></button>
-            <button class="chip">Awaiting reply</button>
-          </div>
-
-          <div class="lead-list-rows">
-            <!-- Active -->
-            <div class="lead-row on" onclick="selectLead(this)">
-              <div class="avatar avatar-sm hot">RD</div>
-              <div class="lead-content">
-                <div class="lead-name-row">
-                  <span class="lead-name">Renee Dawson</span>
-                  <span class="lead-when">9:14 AM</span>
-                </div>
-                <p class="lead-preview"><strong>Re: Ironstone Lane</strong> — Loved your note. Could we walk it Saturday before the open?</p>
-                <div class="lead-meta">
-                  <span class="badge hot">● Hot</span>
-                  <span class="badge">Buyer</span>
-                  <span class="score">92</span>
-                </div>
-              </div>
-            </div>
-
-            <div class="lead-row" onclick="selectLead(this)">
-              <div class="avatar avatar-sm warm">TB</div>
-              <div class="lead-content">
-                <div class="lead-name-row">
-                  <span class="lead-name">Tom &amp; Marie Beckett</span>
-                  <span class="lead-when">8:42</span>
-                </div>
-                <p class="lead-preview">Thanks for the parcels. Question on water rights — the Foothill property has a junior right, correct?</p>
-                <div class="lead-meta">
-                  <span class="badge warm">● Warm</span>
-                  <span class="badge">Land · James</span>
-                  <span class="score">78</span>
-                </div>
-              </div>
-            </div>
-
-            <div class="lead-row" onclick="selectLead(this)">
-              <div class="avatar avatar-sm hot">PW</div>
-              <div class="lead-content">
-                <div class="lead-name-row">
-                  <span class="lead-name">Patricia Walsh</span>
-                  <span class="lead-when">7:33</span>
-                </div>
-                <p class="lead-preview">Going to think about it tonight. Send the CMA when you can — appreciate your patience.</p>
-                <div class="lead-meta">
-                  <span class="badge hot">● Hot</span>
-                  <span class="badge brass">Seller</span>
-                  <span class="score">88</span>
-                </div>
-              </div>
-            </div>
-
-            <div class="lead-row" onclick="selectLead(this)">
-              <div class="avatar avatar-sm">MR</div>
-              <div class="lead-content">
-                <div class="lead-name-row">
-                  <span class="lead-name">Michael Rivera</span>
-                  <span class="lead-when">Yest</span>
-                </div>
-                <p class="lead-preview">Offer accepted! Counter at $1.18M. Inspection contingency 12 days, financing 21.</p>
-                <div class="lead-meta">
-                  <span class="badge brass">● Pending</span>
-                  <span class="badge">Buyer</span>
-                  <span class="score">94</span>
-                </div>
-              </div>
-            </div>
-
-            <div class="lead-row" onclick="selectLead(this)">
-              <div class="avatar avatar-sm warm">JN</div>
-              <div class="lead-content">
-                <div class="lead-name-row">
-                  <span class="lead-name">Jenna Novak</span>
-                  <span class="lead-when">Yest</span>
-                </div>
-                <p class="lead-preview">Saved 5 homes overnight, mostly in Arnold. Looks active — should we reach out?</p>
-                <div class="lead-meta">
-                  <span class="badge warm">● Warm</span>
-                  <span class="badge">Buyer · New</span>
-                  <span class="score">71</span>
-                </div>
-              </div>
-            </div>
-
-            <div class="lead-row" onclick="selectLead(this)">
-              <div class="avatar avatar-sm">AK</div>
-              <div class="lead-content">
-                <div class="lead-name-row">
-                  <span class="lead-name">Aiden Kell</span>
-                  <span class="lead-when">Yest</span>
-                </div>
-                <p class="lead-preview">Lender pre-approval came in at $850K. Adjusting the budget — please send me a few in the $750K range.</p>
-                <div class="lead-meta">
-                  <span class="badge warm">● Warm</span>
-                  <span class="badge">Buyer</span>
-                  <span class="score">66</span>
-                </div>
-              </div>
-            </div>
-
-            <div class="lead-row" onclick="selectLead(this)">
-              <div class="avatar avatar-sm">LH</div>
-              <div class="lead-content">
-                <div class="lead-name-row">
-                  <span class="lead-name">Leslie &amp; Hank Olsen</span>
-                  <span class="lead-when">Mon</span>
-                </div>
-                <p class="lead-preview">Thanks for the tour. Loved the property but the well concerned us. Could we see one more this weekend?</p>
-                <div class="lead-meta">
-                  <span class="badge">Buyer</span>
-                  <span class="badge">Toured</span>
-                  <span class="score">58</span>
-                </div>
-              </div>
-            </div>
-
-            <div class="lead-row" onclick="selectLead(this)">
-              <div class="avatar avatar-sm">DK</div>
-              <div class="lead-content">
-                <div class="lead-name-row">
-                  <span class="lead-name">Derek Klein</span>
-                  <span class="lead-when">Mon</span>
-                </div>
-                <p class="lead-preview">Cabin search · Arnold area · max $620K · weekend home, no rush</p>
-                <div class="lead-meta">
-                  <span class="badge">Buyer</span>
-                  <span class="badge">Discovering</span>
-                  <span class="score">42</span>
-                </div>
-              </div>
-            </div>
-
-            <div class="lead-row" onclick="selectLead(this)">
-              <div class="avatar avatar-sm">RG</div>
-              <div class="lead-content">
-                <div class="lead-name-row">
-                  <span class="lead-name">Raj Govindarajan</span>
-                  <span class="lead-when">Sun</span>
-                </div>
-                <p class="lead-preview">Visiting Murphys May 24–25. Open to seeing 3–4 properties; vineyard interest.</p>
-                <div class="lead-meta">
-                  <span class="badge warm">● Warm</span>
-                  <span class="badge">Buyer · OOS</span>
-                  <span class="score">73</span>
-                </div>
-              </div>
-            </div>
-
-            <div class="lead-row" onclick="selectLead(this)">
-              <div class="avatar avatar-sm">SF</div>
-              <div class="lead-content">
-                <div class="lead-name-row">
-                  <span class="lead-name">Susan Forrester</span>
-                  <span class="lead-when">Sun</span>
-                </div>
-                <p class="lead-preview">Past client · referral from her sister · selling Sonora ranch in fall</p>
-                <div class="lead-meta">
-                  <span class="badge">Sphere</span>
-                  <span class="badge brass">Future seller</span>
-                  <span class="score">52</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </aside>
-
-        <!-- LEAD DETAIL -->
-        <section class="lead-detail">
-          <div class="ld-head">
-            <div class="ld-head-l">
-              <div class="avatar avatar-lg" style="background: var(--hot); color: var(--shell); font-family: var(--serif); font-style: italic;">RD</div>
-              <div>
-                <h2>Renee Dawson</h2>
-                <div class="ld-head-meta">Buyer · Murphys · 22 days in pipeline · Hot · Score 92</div>
-              </div>
-            </div>
-            <div class="ld-head-actions">
-              <button class="btn btn-ghost btn-sm">◇ Call</button>
-              <button class="btn btn-ghost btn-sm">Schedule</button>
-              <button class="btn btn-ink btn-sm">Add to sequence</button>
-            </div>
-          </div>
-
-          <!-- AI Draft awaiting approval -->
-          <div class="ai-draft">
-            <div class="ai-draft-head">
-              <span class="ai-tag">Draft for your review</span>
-              <span class="ai-source">Suggested because Renee replied "loved your note" within 4 min · price-drop trigger active</span>
-            </div>
-            <div class="ai-draft-body">
-              <div class="ai-from">
-                <div class="avatar avatar-sm"><img src="art/sara-headshot.png" alt="Sara"></div>
-                <div>
-                  <div class="ld">From <strong>you</strong> · to <strong>Renee Dawson</strong></div>
-                  <div class="sub">Email + SMS · Will send only after you approve</div>
-                </div>
-              </div>
-              <div class="ai-subject">Re: 217 Ironstone Lane · Saturday morning?</div>
-              <p class="ai-msg">Renee —
-
-That works beautifully. Let's plan on <span class="hi" title="Pulled from your calendar: 10:30–11:30 Sat is open">Saturday at 10:30</span> so we have the place to ourselves before the 2 PM open. I'll bring the disclosure packet and the well report.
-
-One thing worth knowing: the listing agent mentioned the sellers are <span class="hi" title="Verified from your call notes 5/11">aware of one comparable comp in escrow at $640K</span> — so there is a window. We can talk strategy on the walk.
-
-I'll text you the gate code Friday night.
-
-Warmly,
-Sara</p>
-            </div>
-            <div class="ai-foot">
-              <div class="ai-foot-l">
-                <span><strong>Tone:</strong> Warm · Confident</span>
-                <span><strong>Length:</strong> Concise</span>
-                <span><strong>Refs:</strong> Calendar · Call notes · Listing intel</span>
-              </div>
-              <div class="ai-foot-r">
-                <button class="btn btn-ghost btn-sm">Discard</button>
-                <button class="btn btn-ghost btn-sm">Edit</button>
-                <button class="btn btn-ghost btn-sm">Regenerate</button>
-                <button class="btn btn-brass btn-sm">Send as Sara →</button>
-              </div>
-            </div>
-          </div>
-
-          <!-- THREAD -->
-          <div class="ld-thread">
-            <div class="ld-thread-h">Conversation · 6 messages</div>
-
-            <div class="msg-bubble them">
-              <div class="avatar avatar-sm">RD</div>
-              <div>
-                <div class="mb-head">
-                  <span class="mb-name">Renee Dawson</span>
-                  <span class="mb-when">Today · 9:14 AM</span>
-                  <span class="mb-ch">Email</span>
-                </div>
-                <p class="mb-text">Re: 217 Ironstone Lane — Loved your note about the sellers. Could we walk it Saturday before the open? Saturday morning works best — 10am-ish?</p>
-              </div>
-            </div>
-
-            <div class="msg-bubble us">
-              <div class="avatar avatar-sm">SC</div>
-              <div>
-                <div class="mb-head">
-                  <span class="mb-name">Sara Cooper</span>
-                  <span class="mb-when">Today · 9:10 AM</span>
-                  <span class="mb-ch">Email</span>
-                </div>
-                <p class="mb-text">Morning Renee — quick note on 217 Ironstone Lane. The sellers dropped $25K this morning, and I've spoken to the listing agent: they had an offer fall through last week (financing). They are quietly motivated. If you'd like, we could walk it this Saturday before the open. ☕</p>
-              </div>
-            </div>
-
-            <div class="msg-bubble them">
-              <div class="avatar avatar-sm">RD</div>
-              <div>
-                <div class="mb-head">
-                  <span class="mb-name">Renee Dawson</span>
-                  <span class="mb-when">Yest · 4:42 PM</span>
-                  <span class="mb-ch">SMS</span>
-                </div>
-                <p class="mb-text">Just saw the price drop on 217 Ironstone! Is this the one you mentioned?</p>
-              </div>
-            </div>
-
-            <div class="msg-bubble us">
-              <div class="avatar avatar-sm">SC</div>
-              <div>
-                <div class="mb-head">
-                  <span class="mb-name">Sara Cooper</span>
-                  <span class="mb-when">May 8 · 11:20 AM</span>
-                  <span class="mb-ch">Email</span>
-                </div>
-                <p class="mb-text">Following up on the Pine Crest tour — wanted to share three Murphys homes that came on overnight. The Oak Hollow one matches your brief almost perfectly: single-level, generator, forest views.</p>
-              </div>
-            </div>
-          </div>
-
-          <!-- Composer -->
-          <div class="composer">
-            <div class="composer-head">
-              <span class="composer-tab on">Email</span>
-              <span class="composer-tab">SMS</span>
-              <span class="composer-tab">Note</span>
-              <span class="composer-tab">Internal</span>
-            </div>
-            <textarea placeholder="Write to Renee... or hit ⌘⇧A to ask the assistant for a draft"></textarea>
-            <div class="composer-foot">
-              <div class="composer-tools">
-                <button title="Attach">⌘</button>
-                <button title="Insert listing">⊞</button>
-                <button title="Insert template">⊟</button>
-                <button title="Insert availability">📅</button>
-                <button title="Suggest draft">✦ Suggest</button>
-              </div>
-              <div style="display: flex; gap: 6px;">
-                <button class="btn btn-ghost btn-sm">Schedule</button>
-                <button class="btn btn-ink btn-sm">Send</button>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <!-- LEAD PROFILE PANEL -->
-        <aside class="lead-profile">
-          <!-- Score -->
-          <div class="lp-section">
-            <h3>Score &amp; signal</h3>
-            <div class="lp-score">
-              <div>
-                <span class="v">92</span>
-                <span class="l">Hot — ready to tour</span>
-              </div>
-              <div class="trend">↑ +14 / 7d<div class="lp-meter"><div class="fill" style="width: 92%;"></div></div></div>
-            </div>
-            <div style="display: flex; gap: 6px; flex-wrap: wrap;">
-              <span class="lp-tag" style="background: rgba(184,90,62,0.12); color: var(--hot);">First-time buyer</span>
-              <span class="lp-tag">Cash-strong</span>
-              <span class="lp-tag">Local (relocating)</span>
-            </div>
-          </div>
-
-          <!-- Stage -->
-          <div class="lp-section">
-            <h3>Pipeline stage</h3>
-            <div class="stage-track">
-              <div class="stage-step done"><span class="l">New</span></div>
-              <div class="stage-step done"><span class="l">Nurture</span></div>
-              <div class="stage-step now"><span class="l">Touring</span></div>
-              <div class="stage-step"><span class="l">Offer</span></div>
-              <div class="stage-step"><span class="l">Close</span></div>
-            </div>
-            <p style="font-family: var(--mono); font-size: 9.5px; letter-spacing: 0.12em; color: var(--ink-mute); margin-top: 10px; text-transform: uppercase;">In Touring · 4 days · Saturday walk scheduled</p>
-          </div>
-
-          <!-- Handoff -->
-          <div class="lp-section">
-            <h3>Assigned</h3>
-            <div class="handoff">
-              <div class="a">
-                <div class="avatar avatar-sm" style="background: var(--brass); color: var(--shell); font-family: var(--serif); font-style: italic;">SC</div>
-                <span class="lab">Sara</span>
-              </div>
-              <span class="ar">→</span>
-              <div class="b">
-                <div class="avatar avatar-sm"><img src="art/james-headshot.png" alt="James"></div>
-                <span class="lab" style="color: var(--ink-soft);">James</span>
-              </div>
-            </div>
-            <button class="btn btn-ghost btn-xs" style="margin-top: 10px; width: 100%;">Reassign or share</button>
-          </div>
-
-          <!-- Facts -->
-          <div class="lp-section lp-facts">
-            <h3>Contact</h3>
-            <dl>
-              <div><dt>Phone</dt><dd>415.555.0917</dd></div>
-              <div><dt>Email</dt><dd>renee.d@hey.com</dd></div>
-              <div><dt>Source</dt><dd>Open house · May 3</dd></div>
-              <div><dt>Pre-approval</dt><dd>$925K (Stearns)</dd></div>
-              <div><dt>Budget</dt><dd>$650K – $900K</dd></div>
-              <div><dt>Timeline</dt><dd>60–90 days</dd></div>
-              <div><dt>Areas</dt><dd>Murphys, Arnold</dd></div>
-              <div><dt>Must-haves</dt><dd>Single-level · Generator</dd></div>
-            </dl>
-          </div>
-
-          <!-- Activity -->
-          <div class="lp-section">
-            <h3>Activity · last 7 days</h3>
-            <div class="tl-item">
-              <div class="tl-dot"></div>
-              <div>
-                <div class="tl-text">Replied to your email about Ironstone <strong>(4 min)</strong></div>
-                <div class="tl-when">Today · 9:14 AM</div>
-              </div>
-            </div>
-            <div class="tl-item">
-              <div class="tl-dot"></div>
-              <div>
-                <div class="tl-text">Viewed <strong>217 Ironstone Lane</strong> · 6 mins · returned 3x</div>
-                <div class="tl-when">Today · 8:51 AM</div>
-              </div>
-            </div>
-            <div class="tl-item">
-              <div class="tl-dot ink"></div>
-              <div>
-                <div class="tl-text">Saved <strong>Oak Hollow Road</strong> · tagged "favorite"</div>
-                <div class="tl-when">Yest · 6:14 PM</div>
-              </div>
-            </div>
-            <div class="tl-item">
-              <div class="tl-dot ink"></div>
-              <div>
-                <div class="tl-text">Opened mortgage calculator on Vineyard Ridge</div>
-                <div class="tl-when">Yest · 5:48 PM</div>
-              </div>
-            </div>
-            <div class="tl-item">
-              <div class="tl-dot faint"></div>
-              <div>
-                <div class="tl-text">Opened your daily digest (12s read)</div>
-                <div class="tl-when">Mon · 7:34 AM</div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Saved homes -->
-          <div class="lp-section">
-            <h3>Saved · 12 properties</h3>
-            <div class="lp-home">
-              <div class="lp-home-img"><img src="https://images.unsplash.com/photo-1568605114967-8130f3a36994?w=200&q=80"></div>
-              <div>
-                <div class="lp-home-p">$649,000</div>
-                <div class="lp-home-a">217 Ironstone · Murphys</div>
-              </div>
-            </div>
-            <div class="lp-home">
-              <div class="lp-home-img"><img src="https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=200&q=80"></div>
-              <div>
-                <div class="lp-home-p">$875,000</div>
-                <div class="lp-home-a">Oak Hollow · Murphys</div>
-              </div>
-            </div>
-            <div class="lp-home">
-              <div class="lp-home-img"><img src="https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?w=200&q=80"></div>
-              <div>
-                <div class="lp-home-p">$1,195,000</div>
-                <div class="lp-home-a">Vineyard Ridge · Sutter Creek</div>
-              </div>
-            </div>
-          </div>
-        </aside>
+      <div class="cm-town" data-town="arnold" onclick="cmSetTown(event,'arnold')">
+        <div class="cm-town-lbl">Tap to compare</div>
+        <div class="cm-town-name">Arnold</div>
+        <div class="cm-town-meta">4,100 ft · Calaveras</div>
       </div>
-    </section>
+      <div class="cm-town" data-town="angels" onclick="cmSetTown(event,'angels')">
+        <div class="cm-town-lbl">Tap to compare</div>
+        <div class="cm-town-name">Angels Camp</div>
+        <div class="cm-town-meta">1,380 ft · Calaveras</div>
+      </div>
+      <div class="cm-town" data-town="copper" onclick="cmSetTown(event,'copper')">
+        <div class="cm-town-lbl">Tap to compare</div>
+        <div class="cm-town-name">Copperopolis</div>
+        <div class="cm-town-meta">780 ft · Calaveras</div>
+      </div>
+      <div class="cm-town" data-town="sutter" onclick="cmSetTown(event,'sutter')">
+        <div class="cm-town-lbl">Tap to compare</div>
+        <div class="cm-town-name">Sutter Creek</div>
+        <div class="cm-town-meta">1,200 ft · Amador</div>
+      </div>
+    </div>
 
-    <!-- ============================================================
-         PIPELINE VIEW
-         ============================================================ -->
-    <section class="crm-view" data-view="pipe">
-      <div class="pipe">
-        <div class="pipe-h">
-          <div>
-            <span class="eyebrow">Active pipeline · 42 leads</span>
-            <h1 class="h-section" style="margin-top: 8px; font-size: 38px;">Pipeline.</h1>
+    <!-- DRIVE TIME MATRIX -->
+    <div class="tool-panel tool-panel-wide" style="margin-top: 36px;">
+      <div class="tool-panel-head">
+        <span class="eyebrow">§ I · Drive times · Time-of-day matrix</span>
+        <span class="label-cap">Median observed · n &gt; 600 trips/cell</span>
+      </div>
+
+      <table class="cm-grid" id="cmGrid">
+        <thead>
+          <tr>
+            <th>Destination</th>
+            <th class="center">Morning peak<br><span class="label-cap" style="color:rgba(250,246,236,0.5);">7:00–9:00 a.m.</span></th>
+            <th class="center">Mid-day<br><span class="label-cap" style="color:rgba(250,246,236,0.5);">11:00–14:00</span></th>
+            <th class="center">Evening peak<br><span class="label-cap" style="color:rgba(250,246,236,0.5);">16:00–18:30</span></th>
+            <th class="center">Friday p.m. escape<br><span class="label-cap" style="color:rgba(250,246,236,0.5);">14:30–19:00</span></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="dest">SFO<span class="sub">SF Int'l Airport</span></td>
+            <td class="cm-cell cm-bad">
+              <div class="cm-cell-min">3:18<span class="u">hr</span></div>
+              <div class="cm-cell-delta">+58 min vs. mid-day</div>
+            </td>
+            <td class="cm-cell cm-good cm-cell-best">
+              <div class="cm-cell-min">2:20<span class="u">hr</span></div>
+              <div class="cm-cell-delta">baseline</div>
+            </td>
+            <td class="cm-cell cm-bad">
+              <div class="cm-cell-min">3:42<span class="u">hr</span></div>
+              <div class="cm-cell-delta">+82 min vs. mid-day</div>
+            </td>
+            <td class="cm-cell cm-tough">
+              <div class="cm-cell-min">3:05<span class="u">hr</span></div>
+              <div class="cm-cell-delta">+45 min vs. mid-day</div>
+            </td>
+          </tr>
+          <tr>
+            <td class="dest">OAK<span class="sub">Oakland Int'l Airport</span></td>
+            <td class="cm-cell cm-tough">
+              <div class="cm-cell-min">2:48<span class="u">hr</span></div>
+              <div class="cm-cell-delta">+44 min vs. mid-day</div>
+            </td>
+            <td class="cm-cell cm-good cm-cell-best">
+              <div class="cm-cell-min">2:04<span class="u">hr</span></div>
+              <div class="cm-cell-delta">baseline</div>
+            </td>
+            <td class="cm-cell cm-bad">
+              <div class="cm-cell-min">3:14<span class="u">hr</span></div>
+              <div class="cm-cell-delta">+70 min vs. mid-day</div>
+            </td>
+            <td class="cm-cell cm-tough">
+              <div class="cm-cell-min">2:38<span class="u">hr</span></div>
+              <div class="cm-cell-delta">+34 min vs. mid-day</div>
+            </td>
+          </tr>
+          <tr>
+            <td class="dest">SJC<span class="sub">San Jose · downtown</span></td>
+            <td class="cm-cell cm-bad">
+              <div class="cm-cell-min">3:24<span class="u">hr</span></div>
+              <div class="cm-cell-delta">+58 min vs. mid-day</div>
+            </td>
+            <td class="cm-cell cm-okay cm-cell-best">
+              <div class="cm-cell-min">2:26<span class="u">hr</span></div>
+              <div class="cm-cell-delta">baseline</div>
+            </td>
+            <td class="cm-cell cm-bad">
+              <div class="cm-cell-min">3:48<span class="u">hr</span></div>
+              <div class="cm-cell-delta">+82 min vs. mid-day</div>
+            </td>
+            <td class="cm-cell cm-bad">
+              <div class="cm-cell-min">3:10<span class="u">hr</span></div>
+              <div class="cm-cell-delta">+44 min vs. mid-day</div>
+            </td>
+          </tr>
+          <tr>
+            <td class="dest">SAC<span class="sub">Sacramento Int'l (SMF)</span></td>
+            <td class="cm-cell cm-okay">
+              <div class="cm-cell-min">1:32<span class="u">hr</span></div>
+              <div class="cm-cell-delta">+14 min vs. mid-day</div>
+            </td>
+            <td class="cm-cell cm-good cm-cell-best">
+              <div class="cm-cell-min">1:18<span class="u">hr</span></div>
+              <div class="cm-cell-delta">baseline</div>
+            </td>
+            <td class="cm-cell cm-okay">
+              <div class="cm-cell-min">1:46<span class="u">hr</span></div>
+              <div class="cm-cell-delta">+28 min vs. mid-day</div>
+            </td>
+            <td class="cm-cell cm-okay">
+              <div class="cm-cell-min">1:38<span class="u">hr</span></div>
+              <div class="cm-cell-delta">+20 min vs. mid-day</div>
+            </td>
+          </tr>
+          <tr>
+            <td class="dest">Downtown SF<span class="sub">Financial District</span></td>
+            <td class="cm-cell cm-bad">
+              <div class="cm-cell-min">3:34<span class="u">hr</span></div>
+              <div class="cm-cell-delta">+74 min vs. mid-day</div>
+            </td>
+            <td class="cm-cell cm-tough cm-cell-best">
+              <div class="cm-cell-min">2:20<span class="u">hr</span></div>
+              <div class="cm-cell-delta">baseline</div>
+            </td>
+            <td class="cm-cell cm-bad">
+              <div class="cm-cell-min">3:58<span class="u">hr</span></div>
+              <div class="cm-cell-delta">+98 min vs. mid-day</div>
+            </td>
+            <td class="cm-cell cm-bad">
+              <div class="cm-cell-min">3:18<span class="u">hr</span></div>
+              <div class="cm-cell-delta">+58 min vs. mid-day</div>
+            </td>
+          </tr>
+          <tr>
+            <td class="dest">Reno-Tahoe<span class="sub">Reno Int'l (RNO)</span></td>
+            <td class="cm-cell cm-okay">
+              <div class="cm-cell-min">3:10<span class="u">hr</span></div>
+              <div class="cm-cell-delta">winter +20 min</div>
+            </td>
+            <td class="cm-cell cm-good cm-cell-best">
+              <div class="cm-cell-min">3:04<span class="u">hr</span></div>
+              <div class="cm-cell-delta">baseline</div>
+            </td>
+            <td class="cm-cell cm-okay">
+              <div class="cm-cell-min">3:18<span class="u">hr</span></div>
+              <div class="cm-cell-delta">+14 min vs. mid-day</div>
+            </td>
+            <td class="cm-cell cm-tough">
+              <div class="cm-cell-min">3:40<span class="u">hr</span></div>
+              <div class="cm-cell-delta">+36 min · ski traffic</div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+
+      <!-- LEGEND -->
+      <div style="display:flex; gap: 20px; flex-wrap: wrap; margin-top: 18px; font-family: var(--mono); font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-mute);">
+        <div style="display:flex; align-items:center; gap:8px;"><span style="display:inline-block; width: 14px; height: 14px; background: rgba(74,106,61,0.30); border: 1px solid var(--rule);"></span>Under 2:30 — comfortable</div>
+        <div style="display:flex; align-items:center; gap:8px;"><span style="display:inline-block; width: 14px; height: 14px; background: rgba(201,158,90,0.30); border: 1px solid var(--rule);"></span>2:30 – 3:00 — manageable</div>
+        <div style="display:flex; align-items:center; gap:8px;"><span style="display:inline-block; width: 14px; height: 14px; background: rgba(184,90,62,0.30); border: 1px solid var(--rule);"></span>3:00 – 3:30 — taxing</div>
+        <div style="display:flex; align-items:center; gap:8px;"><span style="display:inline-block; width: 14px; height: 14px; background: rgba(110,42,32,0.40); border: 1px solid var(--rule);"></span>Over 3:30 — reschedule the meeting</div>
+      </div>
+
+      <!-- SARA QUOTE -->
+      <div class="cm-sara">
+        <div class="cm-sara-pic"><img src="art/sara-headshot.png" alt="Sara"></div>
+        <div>
+          <div class="cm-sara-lbl">Sara's read · Murphys</div>
+          <p class="cm-sara-quote">"If you only need to be in the East Bay twice a week, this is workable — leave at 6:15 a.m. and you beat the metering. The brutal trip is Friday evening, Oakland → home; budget three-plus hours and bring the audiobook. SAC is the surprise: it's the most reliable airport in the region from up here."</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ROUTE DETAIL -->
+    <div class="tool-panel tool-panel-wide" style="margin-top: 36px;">
+      <div class="tool-panel-head">
+        <span class="eyebrow">§ II · Optimal routes · By time of day</span>
+        <span class="label-cap">From Murphys → Oakland · 2:04 baseline</span>
+      </div>
+
+      <div class="cm-route">
+        <div class="cm-route-half">
+          <h4>Morning · before 7 a.m.</h4>
+          <div class="cm-route-meta">via I-580 · 2:14 · 4 mpg better</div>
+          <div class="cm-leg">
+            <span class="cm-leg-num">1</span>
+            <span class="cm-leg-name"><span class="road">HWY 4 W</span>Murphys → Angels Camp · descending</span>
+            <span class="cm-leg-time">22 min</span>
           </div>
-          <div class="pipe-stats">
-            <div><span class="v">$14.2M</span><span class="l">In flight</span></div>
-            <div><span class="v">$1.8M</span><span class="l">Expected this month</span></div>
-            <div><span class="v">3</span><span class="l">Closing this week</span></div>
-            <div><span class="v">52%</span><span class="l">Tour → offer rate</span></div>
+          <div class="cm-leg">
+            <span class="cm-leg-num">2</span>
+            <span class="cm-leg-name"><span class="road">HWY 4 W</span>Angels Camp → Stockton via Copperopolis</span>
+            <span class="cm-leg-time">52 min</span>
+          </div>
+          <div class="cm-leg">
+            <span class="cm-leg-num">3</span>
+            <span class="cm-leg-name"><span class="road">I-205 W</span>Stockton → Tracy</span>
+            <span class="cm-leg-time">22 min</span>
+          </div>
+          <div class="cm-leg">
+            <span class="cm-leg-num">4</span>
+            <span class="cm-leg-name"><span class="road">I-580 W</span>Altamont Pass · pre-metering</span>
+            <span class="cm-leg-time">38 min</span>
           </div>
         </div>
-
-        <div class="kanban">
-          <!-- New -->
-          <div class="kan-col">
-            <div class="kan-col-h">
-              <span class="name">New</span>
-              <span class="count">8 · <span class="sum">$5.4M</span></span>
-            </div>
-            <div class="kan-body">
-              <div class="kan-card">
-                <div class="name">Jenna Novak</div>
-                <div class="home">Browsing Arnold</div>
-                <div class="kan-card-foot">
-                  <span class="pill-status pill-warm">Warm</span>
-                  <span>· 2 hr</span>
-                </div>
-              </div>
-              <div class="kan-card">
-                <div class="name">Derek Klein</div>
-                <div class="home">Cabin · max $620K</div>
-                <div class="kan-card-foot">
-                  <span class="pill-status pill-cold">Cold</span>
-                  <span>· 3 d</span>
-                </div>
-              </div>
-              <div class="kan-card">
-                <div class="name">Susan Forrester</div>
-                <div class="home">Future seller · Sonora ranch</div>
-                <div class="kan-card-foot">
-                  <span class="pill-status">Sphere</span>
-                  <span>· 5 d</span>
-                </div>
-              </div>
-            </div>
+        <div class="cm-route-half" style="background: var(--linen);">
+          <h4>Evening · after 16:30</h4>
+          <div class="cm-route-meta">via I-580 + I-205 · 3:14 · expect delays</div>
+          <div class="cm-leg">
+            <span class="cm-leg-num">1</span>
+            <span class="cm-leg-name"><span class="road">I-580 E</span>Altamont metering · backups Pleasanton</span>
+            <span class="cm-leg-time">1:08</span>
           </div>
-
-          <!-- Nurture -->
-          <div class="kan-col">
-            <div class="kan-col-h">
-              <span class="name">Nurture</span>
-              <span class="count">14 · <span class="sum">$11.8M</span></span>
-            </div>
-            <div class="kan-body">
-              <div class="kan-card">
-                <div class="name">Aiden Kell</div>
-                <div class="home">Buyer · $850K</div>
-                <div class="kan-card-foot">
-                  <span class="pill-status pill-warm">Warm · 66</span>
-                  <span>· in seq</span>
-                </div>
-              </div>
-              <div class="kan-card">
-                <div class="name">Raj Govindarajan</div>
-                <div class="home">Vineyard · OOS</div>
-                <div class="kan-card-foot">
-                  <span class="pill-status pill-warm">Warm · 73</span>
-                  <span>· visit 5/24</span>
-                </div>
-              </div>
-              <div class="kan-card">
-                <div class="name">Leslie &amp; Hank Olsen</div>
-                <div class="home">Buyer · toured 3</div>
-                <div class="kan-card-foot">
-                  <span class="pill-status">58</span>
-                  <span>· 9 d</span>
-                </div>
-              </div>
-              <div class="kan-card">
-                <div class="name">Jonas Mertens</div>
-                <div class="home">Land · 10+ ac · Tuolumne</div>
-                <div class="kan-card-foot">
-                  <span class="pill-status">James</span>
-                  <span>· 12 d</span>
-                </div>
-              </div>
-            </div>
+          <div class="cm-leg">
+            <span class="cm-leg-num">2</span>
+            <span class="cm-leg-name"><span class="road">I-205 E</span>Tracy → Stockton</span>
+            <span class="cm-leg-time">34 min</span>
           </div>
-
-          <!-- Touring -->
-          <div class="kan-col">
-            <div class="kan-col-h">
-              <span class="name">Touring</span>
-              <span class="count">11 · <span class="sum">$9.6M</span></span>
-            </div>
-            <div class="kan-body">
-              <div class="kan-card" style="border-left: 3px solid var(--hot); padding-left: 11px;">
-                <div class="name">Renee Dawson</div>
-                <div class="home"><span class="price">$649K</span> · 217 Ironstone</div>
-                <div class="kan-card-foot">
-                  <span class="pill-status pill-hot">Hot · 92</span>
-                  <span>· Sat 10:30</span>
-                </div>
-              </div>
-              <div class="kan-card">
-                <div class="name">Tom &amp; Marie Beckett</div>
-                <div class="home"><span class="price">$725K</span> · Foothill Rd</div>
-                <div class="kan-card-foot">
-                  <span class="pill-status pill-warm">Warm · 78</span>
-                  <span>· James</span>
-                </div>
-              </div>
-              <div class="kan-card">
-                <div class="name">Kelvin Yu</div>
-                <div class="home"><span class="price">$1.45M</span> · Pine Crest</div>
-                <div class="kan-card-foot">
-                  <span class="pill-status pill-warm">Warm · 81</span>
-                  <span>· Thu</span>
-                </div>
-              </div>
-            </div>
+          <div class="cm-leg">
+            <span class="cm-leg-num">3</span>
+            <span class="cm-leg-name"><span class="road">HWY 4 E</span>Stockton → Angels Camp</span>
+            <span class="cm-leg-time">58 min</span>
           </div>
-
-          <!-- Offer -->
-          <div class="kan-col">
-            <div class="kan-col-h">
-              <span class="name">Offer</span>
-              <span class="count">5 · <span class="sum">$4.2M</span></span>
-            </div>
-            <div class="kan-body">
-              <div class="kan-card" style="border-left: 3px solid var(--brass); padding-left: 11px;">
-                <div class="name">Michael Rivera</div>
-                <div class="home"><span class="price">$1.18M</span> · Vineyard Ridge</div>
-                <div class="kan-card-foot">
-                  <span class="pill-status pill-brass">Accepted</span>
-                  <span>· insp 5/19</span>
-                </div>
-              </div>
-              <div class="kan-card">
-                <div class="name">Patricia Walsh</div>
-                <div class="home"><span class="price">$598K</span> · Listing</div>
-                <div class="kan-card-foot">
-                  <span class="pill-status">CMA out</span>
-                  <span>· seller</span>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Close -->
-          <div class="kan-col">
-            <div class="kan-col-h">
-              <span class="name">Close</span>
-              <span class="count">3 · <span class="sum">$2.4M</span></span>
-            </div>
-            <div class="kan-body">
-              <div class="kan-card">
-                <div class="name">Robert Lin</div>
-                <div class="home"><span class="price">$795K</span> · Spring St</div>
-                <div class="kan-card-foot">
-                  <span class="pill-status pill-brass">Closes 5/15</span>
-                  <span>· 3 d</span>
-                </div>
-              </div>
-              <div class="kan-card">
-                <div class="name">Patricia &amp; Leon W.</div>
-                <div class="home"><span class="price">$615K</span> · Sutter listing</div>
-                <div class="kan-card-foot">
-                  <span class="pill-status pill-brass">Closes 5/22</span>
-                  <span>· 10 d</span>
-                </div>
-              </div>
-              <div class="kan-card">
-                <div class="name">The Marsh family</div>
-                <div class="home"><span class="price">$985K</span> · Murphys home</div>
-                <div class="kan-card-foot">
-                  <span class="pill-status pill-brass">Closes 5/28</span>
-                  <span>· 16 d</span>
-                </div>
-              </div>
-            </div>
+          <div class="cm-leg">
+            <span class="cm-leg-num">4</span>
+            <span class="cm-leg-name"><span class="road">HWY 4 E</span>Angels Camp → Murphys · climbing</span>
+            <span class="cm-leg-time">34 min</span>
           </div>
         </div>
       </div>
-    </section>
 
-    <!-- ============================================================
-         CALENDAR VIEW
-         ============================================================ -->
-    <section class="crm-view" data-view="cal">
-      <div class="cal">
-        <div class="cal-h">
-          <div class="cal-h-l">
-            <h1 class="cal-h-title">May 11 – 17 · Week 20</h1>
-            <div class="cal-h-nav">
-              <button>‹</button>
-              <button>›</button>
-            </div>
-            <button class="btn btn-ghost btn-xs">Today</button>
-          </div>
-          <div style="display: flex; gap: 12px; align-items: center;">
-            <div class="cal-view-toggle">
-              <button>Day</button>
-              <button class="on">Week</button>
-              <button>Month</button>
-            </div>
-            <button class="btn btn-ink btn-sm">+ New event</button>
-          </div>
+      <!-- REGION MAP -->
+      <div class="cm-map-wrap">
+        <div class="cm-map">
+          <svg viewBox="0 0 800 450" preserveAspectRatio="xMidYMid meet" width="100%" height="100%">
+            <!-- Sierra ridgeline shading -->
+            <defs>
+              <linearGradient id="cmRidge" x1="0" x2="1" y1="0" y2="0">
+                <stop offset="0%" stop-color="#E8DFCC"/>
+                <stop offset="40%" stop-color="#E8DFCC"/>
+                <stop offset="70%" stop-color="#D8CDB4"/>
+                <stop offset="100%" stop-color="#C7B894"/>
+              </linearGradient>
+            </defs>
+            <rect width="800" height="450" fill="url(#cmRidge)"/>
+
+            <!-- Bay outline (rough) -->
+            <path d="M40,150 Q60,180 80,200 Q90,220 70,250 Q60,300 100,330 Q140,350 170,330 Q190,310 200,280 Q210,240 195,200 Q180,165 150,150 Q100,140 40,150 Z"
+                  fill="#D9E1DA" stroke="rgba(27,24,19,0.20)" stroke-width="1"/>
+            <text x="120" y="245" font-family="Cormorant Garamond" font-style="italic" font-size="16" fill="rgba(27,24,19,0.55)">S.F. Bay</text>
+
+            <!-- Central Valley -->
+            <text x="380" y="220" font-family="JetBrains Mono" font-size="10" fill="rgba(27,24,19,0.40)" letter-spacing="2">CENTRAL VALLEY</text>
+
+            <!-- Foothills shading -->
+            <path d="M520,80 Q560,120 580,180 Q600,260 620,330 Q640,400 700,440 L800,440 L800,0 L520,0 Z"
+                  fill="rgba(140,110,61,0.10)" stroke="rgba(140,110,61,0.30)" stroke-width="0.8"/>
+            <text x="640" y="240" font-family="Cormorant Garamond" font-style="italic" font-size="16" fill="rgba(140,110,61,0.85)" transform="rotate(70 640 240)">Sierra Foothills</text>
+
+            <!-- I-580 / I-205 corridor -->
+            <path d="M120,260 Q170,250 220,255 L280,260 L340,250 L380,235 L430,220" stroke="rgba(27,24,19,0.55)" stroke-width="2.5" fill="none"/>
+            <text x="240" y="278" font-family="JetBrains Mono" font-size="9" letter-spacing="1" fill="rgba(27,24,19,0.55)">I-580 / I-205</text>
+
+            <!-- HWY 4 climb -->
+            <path d="M430,220 Q500,210 560,200 Q610,190 650,170 Q680,150 700,130" stroke="var(--brass)" stroke-width="2.5" fill="none" stroke-dasharray="4 0"/>
+            <text x="540" y="225" font-family="JetBrains Mono" font-size="9" letter-spacing="1" fill="var(--brass)">HWY 4 · ASCENT</text>
+
+            <!-- Sacramento link -->
+            <path d="M430,220 Q420,180 410,150 L385,90" stroke="rgba(27,24,19,0.35)" stroke-width="1.8" fill="none" stroke-dasharray="3 3"/>
+            <text x="420" y="125" font-family="JetBrains Mono" font-size="9" letter-spacing="1" fill="rgba(27,24,19,0.50)" transform="rotate(-72 420 125)">HWY 99 → SAC</text>
+
+            <!-- Cities -->
+            <g font-family="Manrope" font-size="11" font-weight="500" fill="rgba(27,24,19,0.85)">
+              <circle cx="120" cy="260" r="4" fill="#1B1813"/><text x="100" y="290">San Francisco</text>
+              <circle cx="160" cy="245" r="4" fill="#1B1813"/><text x="170" y="248">Oakland</text>
+              <circle cx="180" cy="290" r="4" fill="#1B1813"/><text x="160" y="312">San Jose</text>
+              <circle cx="385" cy="90"  r="4" fill="#1B1813"/><text x="395" y="93">Sacramento</text>
+              <circle cx="380" cy="235" r="3" fill="rgba(27,24,19,0.55)"/><text x="345" y="252" font-size="9" fill="rgba(27,24,19,0.55)">Stockton</text>
+              <circle cx="280" cy="260" r="3" fill="rgba(27,24,19,0.55)"/><text x="263" y="280" font-size="9" fill="rgba(27,24,19,0.55)">Tracy</text>
+            </g>
+
+            <!-- Foothill towns -->
+            <g font-family="Cormorant Garamond" font-style="italic" font-weight="500" font-size="14">
+              <circle cx="700" cy="130" r="6" fill="#8C6E3D" stroke="#FAF6EC" stroke-width="2"/>
+              <text x="712" y="125" fill="#8C6E3D">Arnold</text>
+              <text x="712" y="138" font-family="JetBrains Mono" font-style="normal" font-size="8" letter-spacing="1.4" fill="rgba(140,110,61,0.60)">4,100 FT</text>
+
+              <circle cx="650" cy="170" r="7" fill="#8C6E3D" stroke="#FAF6EC" stroke-width="2"/>
+              <text x="660" y="166" fill="#1B1813" font-weight="600">★ Murphys</text>
+              <text x="660" y="178" font-family="JetBrains Mono" font-style="normal" font-size="8" letter-spacing="1.4" fill="rgba(140,110,61,0.60)">2,140 FT</text>
+
+              <circle cx="600" cy="205" r="5" fill="#A6824A" stroke="#FAF6EC" stroke-width="2"/>
+              <text x="612" y="207" fill="#8C6E3D">Angels Camp</text>
+
+              <circle cx="540" cy="240" r="5" fill="#A6824A" stroke="#FAF6EC" stroke-width="2"/>
+              <text x="552" y="242" fill="#8C6E3D">Copperopolis</text>
+
+              <circle cx="555" cy="140" r="5" fill="#A6824A" stroke="#FAF6EC" stroke-width="2"/>
+              <text x="567" y="142" fill="#8C6E3D">Sutter Creek</text>
+            </g>
+
+            <!-- Compass -->
+            <g transform="translate(60,400)" font-family="Cormorant Garamond" font-style="italic">
+              <circle r="16" fill="none" stroke="rgba(27,24,19,0.40)"/>
+              <text x="0" y="-20" text-anchor="middle" font-size="14" fill="#1B1813">N</text>
+              <line x1="0" y1="-14" x2="0" y2="14" stroke="rgba(27,24,19,0.55)"/>
+            </g>
+            <g transform="translate(710,420)" font-family="JetBrains Mono" font-size="9" letter-spacing="1" fill="rgba(27,24,19,0.55)">
+              <line x1="0" y1="0" x2="60" y2="0" stroke="rgba(27,24,19,0.55)"/>
+              <line x1="0" y1="-3" x2="0" y2="3" stroke="rgba(27,24,19,0.55)"/>
+              <line x1="60" y1="-3" x2="60" y2="3" stroke="rgba(27,24,19,0.55)"/>
+              <text x="0" y="14">0</text>
+              <text x="50" y="14">30 mi</text>
+            </g>
+          </svg>
         </div>
-
-        <div class="cal-grid">
-          <div class="cal-time-col">
-            <div class="cal-day-head">&nbsp;</div>
-            <div class="cal-hour">9 AM</div>
-            <div class="cal-hour">10</div>
-            <div class="cal-hour">11</div>
-            <div class="cal-hour">12 PM</div>
-            <div class="cal-hour">1</div>
-            <div class="cal-hour">2</div>
-            <div class="cal-hour">3</div>
-            <div class="cal-hour">4</div>
-            <div class="cal-hour">5</div>
-          </div>
-          <div class="cal-day-col">
-            <div class="cal-day-head">Mon<span class="num">11</span></div>
-            <div class="cal-cell">
-              <div class="cal-event call" style="top: 0; height: 50px;">
-                <div class="t">9:00 · Call</div>
-                <div class="ti">Patricia Walsh — CMA</div>
-              </div>
-            </div>
-            <div class="cal-cell"></div>
-            <div class="cal-cell"></div>
-            <div class="cal-cell">
-              <div class="cal-event tour" style="top: 0; height: 110px;">
-                <div class="t">12:00 · Tour</div>
-                <div class="ti">Pine Crest · Kelvin Yu</div>
-              </div>
-            </div>
-            <div class="cal-cell"></div>
-            <div class="cal-cell"></div>
-            <div class="cal-cell"></div>
-            <div class="cal-cell">
-              <div class="cal-event block" style="top: 0; height: 50px;">
-                <div class="t">4:00 · Block</div>
-                <div class="ti">Followups</div>
-              </div>
-            </div>
-            <div class="cal-cell"></div>
-          </div>
-          <div class="cal-day-col">
-            <div class="cal-day-head today">Tue<span class="num">12</span></div>
-            <div class="cal-cell"></div>
-            <div class="cal-cell">
-              <div class="cal-event tour" style="top: 0; height: 100px;">
-                <div class="t">10:00 · Tour</div>
-                <div class="ti">Oak Hollow · Renee</div>
-              </div>
-            </div>
-            <div class="cal-cell"></div>
-            <div class="cal-cell"></div>
-            <div class="cal-cell">
-              <div class="cal-event call" style="top: 0; height: 50px;">
-                <div class="t">1:00 · Call</div>
-                <div class="ti">Lender — Rivera</div>
-              </div>
-            </div>
-            <div class="cal-cell"></div>
-            <div class="cal-cell">
-              <div class="cal-event call" style="top: 0; height: 50px;">
-                <div class="t">3:00 · Call</div>
-                <div class="ti">James — handoff</div>
-              </div>
-            </div>
-            <div class="cal-cell"></div>
-            <div class="cal-cell"></div>
-          </div>
-          <div class="cal-day-col">
-            <div class="cal-day-head">Wed<span class="num">13</span></div>
-            <div class="cal-cell">
-              <div class="cal-event call" style="top: 0; height: 50px;">
-                <div class="t">9:00 · Internal</div>
-                <div class="ti">Team huddle</div>
-              </div>
-            </div>
-            <div class="cal-cell"></div>
-            <div class="cal-cell">
-              <div class="cal-event tour" style="top: 0; height: 110px;">
-                <div class="t">11:30 · Tour</div>
-                <div class="ti">Vineyard Ridge · Renee</div>
-              </div>
-            </div>
-            <div class="cal-cell"></div>
-            <div class="cal-cell"></div>
-            <div class="cal-cell"></div>
-            <div class="cal-cell">
-              <div class="cal-event call" style="top: 0; height: 50px;">
-                <div class="t">3:00 · Call</div>
-                <div class="ti">Beckett – water rts</div>
-              </div>
-            </div>
-            <div class="cal-cell"></div>
-            <div class="cal-cell"></div>
-          </div>
-          <div class="cal-day-col">
-            <div class="cal-day-head">Thu<span class="num">14</span></div>
-            <div class="cal-cell"></div>
-            <div class="cal-cell">
-              <div class="cal-event tour" style="top: 0; height: 100px;">
-                <div class="t">10:00 · Tour</div>
-                <div class="ti">Pine Crest · Yu</div>
-              </div>
-            </div>
-            <div class="cal-cell"></div>
-            <div class="cal-cell">
-              <div class="cal-event block" style="top: 0; height: 110px;">
-                <div class="t">12:00 · Office</div>
-                <div class="ti">Listing prep · 3 homes</div>
-              </div>
-            </div>
-            <div class="cal-cell"></div>
-            <div class="cal-cell"></div>
-            <div class="cal-cell"></div>
-            <div class="cal-cell"></div>
-            <div class="cal-cell"></div>
-          </div>
-          <div class="cal-day-col">
-            <div class="cal-day-head">Fri<span class="num">15</span></div>
-            <div class="cal-cell"></div>
-            <div class="cal-cell">
-              <div class="cal-event call" style="top: 0; height: 50px;">
-                <div class="t">10:00 · Close</div>
-                <div class="ti">Robert Lin — Spring St</div>
-              </div>
-            </div>
-            <div class="cal-cell"></div>
-            <div class="cal-cell"></div>
-            <div class="cal-cell"></div>
-            <div class="cal-cell">
-              <div class="cal-event tour" style="top: 0; height: 100px;">
-                <div class="t">2:00 · Photo</div>
-                <div class="ti">New listing shoot</div>
-              </div>
-            </div>
-            <div class="cal-cell"></div>
-            <div class="cal-cell"></div>
-            <div class="cal-cell"></div>
-          </div>
-          <div class="cal-day-col">
-            <div class="cal-day-head">Sat<span class="num">16</span></div>
-            <div class="cal-cell"></div>
-            <div class="cal-cell">
-              <div class="cal-event tour" style="top: 24px; height: 100px;">
-                <div class="t">10:30 · Tour</div>
-                <div class="ti">Ironstone · Renee</div>
-              </div>
-            </div>
-            <div class="cal-cell"></div>
-            <div class="cal-cell"></div>
-            <div class="cal-cell">
-              <div class="cal-event open" style="top: 0; height: 110px;">
-                <div class="t">1:00 · Open</div>
-                <div class="ti">Ironstone open house</div>
-              </div>
-            </div>
-            <div class="cal-cell"></div>
-            <div class="cal-cell"></div>
-            <div class="cal-cell"></div>
-            <div class="cal-cell"></div>
-          </div>
-          <div class="cal-day-col">
-            <div class="cal-day-head">Sun<span class="num">17</span></div>
-            <div class="cal-cell"></div>
-            <div class="cal-cell"></div>
-            <div class="cal-cell"></div>
-            <div class="cal-cell"></div>
-            <div class="cal-cell"></div>
-            <div class="cal-cell">
-              <div class="cal-event block" style="top: 0; height: 110px;">
-                <div class="t">2–4 PM</div>
-                <div class="ti">Family time · Hold</div>
-              </div>
-            </div>
-            <div class="cal-cell"></div>
-            <div class="cal-cell"></div>
-            <div class="cal-cell"></div>
-          </div>
-        </div>
-
-        <!-- Availability + booking settings -->
-        <div class="cal-strip">
-          <div class="avail-card">
-            <span class="eyebrow">Public booking</span>
-            <h3 style="margin-top: 8px;">When clients can book themselves.</h3>
-            <p class="sub">Slots Renee, Tom, and Patricia see when they pick a tour from a listing page. Sundays held for family.</p>
-            <div class="avail-row"><span class="day">Mon</span><span class="hrs">10:00 AM – 5:00 PM</span><div class="toggle on" onclick="this.classList.toggle('on')"></div></div>
-            <div class="avail-row"><span class="day">Tue</span><span class="hrs">10:00 AM – 5:00 PM</span><div class="toggle on" onclick="this.classList.toggle('on')"></div></div>
-            <div class="avail-row"><span class="day">Wed</span><span class="hrs">9:00 AM – 6:00 PM</span><div class="toggle on" onclick="this.classList.toggle('on')"></div></div>
-            <div class="avail-row"><span class="day">Thu</span><span class="hrs">10:00 AM – 5:00 PM</span><div class="toggle on" onclick="this.classList.toggle('on')"></div></div>
-            <div class="avail-row"><span class="day">Fri</span><span class="hrs">9:00 AM – 4:00 PM</span><div class="toggle on" onclick="this.classList.toggle('on')"></div></div>
-            <div class="avail-row"><span class="day">Sat</span><span class="hrs">10:00 AM – 3:00 PM</span><div class="toggle on" onclick="this.classList.toggle('on')"></div></div>
-            <div class="avail-row"><span class="day">Sun</span><span class="hrs">Held</span><div class="toggle" onclick="this.classList.toggle('on')"></div></div>
-          </div>
-          <div class="avail-card">
-            <span class="eyebrow">Tour rules</span>
-            <h3 style="margin-top: 8px;">How it works.</h3>
-            <p class="sub" style="margin-bottom: 22px;">Clients can self-book tours from listing pages — Sara confirms within 1 hour during business hours, or auto-confirm for past clients.</p>
-            <div style="display: flex; flex-direction: column; gap: 14px;">
-              <div><span class="label-cap" style="display: block; margin-bottom: 4px;">Buffer between tours</span><span class="numeral" style="font-size: 18px;">30 min</span></div>
-              <div><span class="label-cap" style="display: block; margin-bottom: 4px;">Minimum lead time</span><span class="numeral" style="font-size: 18px;">2 hours</span></div>
-              <div><span class="label-cap" style="display: block; margin-bottom: 4px;">Auto-confirm past clients</span><span class="numeral" style="font-size: 18px;">On</span></div>
-              <div><span class="label-cap" style="display: block; margin-bottom: 4px;">Confirm-by-SMS deadline</span><span class="numeral" style="font-size: 18px;">24 h before</span></div>
-            </div>
-          </div>
+        <div style="display:flex; justify-content:space-between; align-items:baseline; margin-top: 14px;">
+          <span class="label-cap" style="color: var(--ink-mute);">Plate · The corridor from Bay → Foothills</span>
+          <span class="label-cap" style="color: var(--brass);">★ = your address &nbsp;·&nbsp; Brass route = the climb</span>
         </div>
       </div>
-    </section>
+    </div>
 
-    <!-- ============================================================
-         SEQUENCES VIEW
-         ============================================================ -->
-    <section class="crm-view" data-view="seq">
-      <div class="seq">
-        <div class="seq-h">
-          <div>
-            <span class="eyebrow">Automated follow-up · Editable cadences</span>
-            <h1 class="h-section" style="margin-top: 8px; font-size: 38px;">Sequences.</h1>
-            <p class="lede" style="margin-top: 12px; max-width: 600px;">Every step is editable. Each message is queued as a draft, ready for Sara to approve before sending — written in her voice, not a template.</p>
-          </div>
-          <button class="btn btn-ink">+ New sequence</button>
+    <!-- COST OF COMMUTE -->
+    <div class="tool-panel tool-panel-wide" style="margin-top: 36px;">
+      <div class="tool-panel-head">
+        <span class="eyebrow">§ III · What it actually costs · 2 days/week</span>
+        <span class="label-cap">Annualized · 96 trips/yr</span>
+      </div>
+
+      <div class="fz-ins-grid">
+        <div class="fz-ins-cell fz-ins-best">
+          <div class="lbl">Hours behind the wheel</div>
+          <div class="name">488 hr/yr</div>
+          <div class="band">12.2 work-weeks · equivalent</div>
+          <div class="rng">$9,760<span> in opportunity cost @ $20/hr</span></div>
+          <div class="note">Two RT days at ~5 hours each, plus winter weather. About 13.3% of your waking hours, which is meaningful.</div>
         </div>
-
-        <div class="seq-grid">
-          <!-- Sequences list -->
-          <div class="seq-list-card">
-            <div class="seq-row on">
-              <div>
-                <div class="name">New buyer · slow drip</div>
-                <div class="meta">7 steps · 14 days · Email + SMS</div>
-              </div>
-              <div class="stat"><strong>62%</strong>Reply rate</div>
-              <div class="toggle on" onclick="this.classList.toggle('on')"></div>
-            </div>
-            <div class="seq-row">
-              <div>
-                <div class="name">Open house follow-up</div>
-                <div class="meta">4 steps · 5 days · Email</div>
-              </div>
-              <div class="stat"><strong>78%</strong>Reply rate</div>
-              <div class="toggle on" onclick="this.classList.toggle('on')"></div>
-            </div>
-            <div class="seq-row">
-              <div>
-                <div class="name">Past client · annual check-in</div>
-                <div class="meta">3 steps · 365 days · Email</div>
-              </div>
-              <div class="stat"><strong>41%</strong>Reply rate</div>
-              <div class="toggle on" onclick="this.classList.toggle('on')"></div>
-            </div>
-            <div class="seq-row">
-              <div>
-                <div class="name">Out-of-state buyer visit prep</div>
-                <div class="meta">5 steps · 21 days · Email + SMS</div>
-              </div>
-              <div class="stat"><strong>84%</strong>Reply rate</div>
-              <div class="toggle on" onclick="this.classList.toggle('on')"></div>
-            </div>
-            <div class="seq-row">
-              <div>
-                <div class="name">Seller pre-listing nurture</div>
-                <div class="meta">6 steps · 30 days · Email</div>
-              </div>
-              <div class="stat"><strong>56%</strong>Reply rate</div>
-              <div class="toggle on" onclick="this.classList.toggle('on')"></div>
-            </div>
-            <div class="seq-row">
-              <div>
-                <div class="name">Price-drop revival</div>
-                <div class="meta">2 steps · 1 day · SMS-first</div>
-              </div>
-              <div class="stat"><strong>71%</strong>Reply rate</div>
-              <div class="toggle on" onclick="this.classList.toggle('on')"></div>
-            </div>
-            <div class="seq-row">
-              <div>
-                <div class="name">Cold buyer · 90-day re-engage</div>
-                <div class="meta">3 steps · 14 days · Email</div>
-              </div>
-              <div class="stat"><strong>22%</strong>Reply rate</div>
-              <div class="toggle" onclick="this.classList.toggle('on')"></div>
-            </div>
-          </div>
-
-          <!-- Sequence editor -->
-          <div class="seq-editor-card">
-            <span class="eyebrow">Editing</span>
-            <h3 style="margin-top: 6px;">New buyer · slow drip</h3>
-            <p class="sub">7 messages over 14 days. Pauses on reply. Drafts queued for Sara's approval each step. 62% reply rate (last 90 days).</p>
-
-            <div class="seq-step">
-              <div class="seq-step-num">1</div>
-              <div class="seq-step-body">
-                <div class="seq-step-when">Same day · within 5 min</div>
-                <p class="seq-step-snip">"Welcome to Legacy. A short note from me, not a robot — I've already started looking at your saved searches…"</p>
-              </div>
-              <span class="seq-step-ch">SMS</span>
-            </div>
-            <div class="seq-step">
-              <div class="seq-step-num">2</div>
-              <div class="seq-step-body">
-                <div class="seq-step-when">Day 1 · 8:00 AM</div>
-                <p class="seq-step-snip">"Three properties worth your attention this morning — and one I think will sell by Friday…"</p>
-              </div>
-              <span class="seq-step-ch">Email</span>
-            </div>
-            <div class="seq-step">
-              <div class="seq-step-num">3</div>
-              <div class="seq-step-body">
-                <div class="seq-step-when">Day 3 · 10:00 AM</div>
-                <p class="seq-step-snip">"Quick question while it's fresh — what would change in your life if you found the right home this summer?"</p>
-              </div>
-              <span class="seq-step-ch">Email</span>
-            </div>
-            <div class="seq-step">
-              <div class="seq-step-num">4</div>
-              <div class="seq-step-body">
-                <div class="seq-step-when">Day 5 · 11:00 AM</div>
-                <p class="seq-step-snip">"How Murphys actually lives, off-season — a small thing buyers often miss…"</p>
-              </div>
-              <span class="seq-step-ch">Email</span>
-            </div>
-            <div class="seq-step">
-              <div class="seq-step-num">5</div>
-              <div class="seq-step-body">
-                <div class="seq-step-when">Day 8 · trigger</div>
-                <p class="seq-step-snip">If 3+ saves on similar homes → "I'm spotting a pattern. Coffee this week?"</p>
-              </div>
-              <span class="seq-step-ch">SMS</span>
-            </div>
-
-            <div style="display: flex; gap: 8px; margin-top: 22px; padding-top: 18px; border-top: 1px solid var(--rule);">
-              <button class="btn btn-ghost btn-sm">View all 7 steps</button>
-              <button class="btn btn-ink btn-sm" style="flex: 1;">Edit sequence →</button>
-            </div>
-          </div>
+        <div class="fz-ins-cell">
+          <div class="lbl">Fuel &amp; depreciation</div>
+          <div class="name">$11,200 / yr</div>
+          <div class="band">@ $4.65/gal · 24 mpg</div>
+          <div class="rng">$0.93<span> per mile · all-in cost</span></div>
+          <div class="note">Includes fuel, tires, oil, depreciation, insurance bump. EV reduces this by roughly 35%.</div>
+        </div>
+        <div class="fz-ins-cell">
+          <div class="lbl">Toll &amp; parking</div>
+          <div class="name">$3,840 / yr</div>
+          <div class="band">FasTrak + garage</div>
+          <div class="rng">$40<span> per office day</span></div>
+          <div class="note">Bay Bridge $7, Bay Area parking $25–35/day. Some employers reimburse — confirm.</div>
         </div>
       </div>
-    </section>
 
-    <!-- ============================================================
-         REPORTS VIEW
-         ============================================================ -->
-    <section class="crm-view" data-view="rep">
-      <div class="rep">
-        <div class="rep-h">
-          <div>
-            <span class="eyebrow">Year to date · Through May 12</span>
-            <h1 class="h-section" style="margin-top: 8px; font-size: 38px;">Performance.</h1>
-          </div>
-          <div style="display: flex; gap: 10px;">
-            <select class="field-input" style="min-width: 160px;">
-              <option>This year</option>
-              <option>This quarter</option>
-              <option>This month</option>
-              <option>Last 12 months</option>
-            </select>
-            <button class="btn btn-ghost btn-sm">Export</button>
-          </div>
+      <div class="fz-ins-foot">
+        <div class="fz-foot-cell">
+          <div class="t">Total annual commute cost</div>
+          <div class="v">$24,800 / yr <span class="d">vs. living in Walnut Creek</span></div>
         </div>
-
-        <div class="rep-kpi">
-          <div class="kpi-card">
-            <span class="l">Closed volume · trailing 12 mo</span>
-            <span class="v">$8.2M</span>
-            <span class="ch up">21 transactions</span>
-          </div>
-          <div class="kpi-card">
-            <span class="l">Total sales to date</span>
-            <span class="v">98</span>
-            <span class="ch up">Since 2018</span>
-          </div>
-          <div class="kpi-card">
-            <span class="l">Average sale price</span>
-            <span class="v">$392K</span>
-            <span class="ch">$39K – $1M range</span>
-          </div>
-          <div class="kpi-card">
-            <span class="l">Zillow rating</span>
-            <span class="v">★ 5.0</span>
-            <span class="ch up">7 reviews</span>
-          </div>
+        <div class="fz-foot-cell">
+          <div class="t">Difference vs. Walnut Creek mortgage savings</div>
+          <div class="v">Net +$31,400 / yr <span class="d good">in your pocket</span></div>
         </div>
-
-        <div class="rep-row">
-          <div class="rep-card">
-            <h3>Closed volume by month</h3>
-            <div class="sub">2026 YTD · $M</div>
-            <div class="chart-bars">
-              <div class="chart-bar" style="height: 36%;" data-v="$1.8M"></div>
-              <div class="chart-bar" style="height: 58%;" data-v="$2.9M"></div>
-              <div class="chart-bar brass" style="height: 84%;" data-v="$4.2M"></div>
-              <div class="chart-bar brass" style="height: 72%;" data-v="$3.6M"></div>
-              <div class="chart-bar" style="height: 28%; opacity: 0.5;" data-v="$1.4M*"></div>
-            </div>
-            <div class="chart-labels">
-              <span>Jan</span><span>Feb</span><span>Mar</span><span>Apr</span><span>May*</span>
-            </div>
-          </div>
-
-          <div class="rep-card">
-            <h3>Funnel · trailing 90 days</h3>
-            <div class="sub">218 leads in · 12 closes out</div>
-            <div class="funnel">
-              <div class="funnel-step"><span class="l">New leads</span><div class="b" style="width: 100%;"></div><span class="v">218</span></div>
-              <div class="funnel-step"><span class="l">Engaged</span><div class="b" style="width: 78%;"></div><span class="v">170</span></div>
-              <div class="funnel-step"><span class="l">Toured</span><div class="b" style="width: 38%;"></div><span class="v">83</span></div>
-              <div class="funnel-step"><span class="l">Made offer</span><div class="b" style="width: 19%; background: var(--brass);"></div><span class="v">42</span></div>
-              <div class="funnel-step"><span class="l">Closed</span><div class="b" style="width: 6%; background: var(--brass);"></div><span class="v">12</span></div>
-            </div>
-          </div>
-        </div>
-
-        <div class="rep-row" style="grid-template-columns: 1fr;">
-          <div class="rep-card">
-            <h3>Recent closings</h3>
-            <div class="sub">Last six transactions</div>
-            <div class="income-row" style="border-bottom: 1px solid var(--rule); margin-bottom: 6px; padding-bottom: 11px;">
-              <span class="name label-cap">Date</span>
-              <span class="home label-cap">Property</span>
-              <span class="v label-cap" style="font-family: var(--mono); font-style: normal; font-size: 10px; letter-spacing: 0.18em;">Side</span>
-              <span class="v label-cap" style="font-family: var(--mono); font-style: normal; font-size: 10px; letter-spacing: 0.18em;">Sale price</span>
-            </div>
-            <div class="income-row">
-              <span class="name">May 6, 2026</span>
-              <span class="home">6640 Railroad Flat Rd · Mountain Ranch</span>
-              <span class="v" style="font-family: var(--mono); font-size: 11px; font-style: normal; letter-spacing: 0.12em; color: var(--ink-mute); text-transform: uppercase;">Listing</span>
-              <span class="v brass">$1,000,000</span>
-            </div>
-            <div class="income-row">
-              <span class="name">May 6, 2026</span>
-              <span class="home">10282 Piney Creek Rd · Coulterville</span>
-              <span class="v" style="font-family: var(--mono); font-size: 11px; font-style: normal; letter-spacing: 0.12em; color: var(--ink-mute); text-transform: uppercase;">Buyer</span>
-              <span class="v brass">$130,000</span>
-            </div>
-            <div class="income-row">
-              <span class="name">Jan 6, 2026</span>
-              <span class="home">208 Raccoon Hollow Loop · Copperopolis</span>
-              <span class="v" style="font-family: var(--mono); font-size: 11px; font-style: normal; letter-spacing: 0.12em; color: var(--ink-mute); text-transform: uppercase;">Buyer</span>
-              <span class="v brass">$422,500</span>
-            </div>
-            <div class="income-row">
-              <span class="name">Jan 5, 2026</span>
-              <span class="home">581 Dawn Dr · Manteca</span>
-              <span class="v" style="font-family: var(--mono); font-size: 11px; font-style: normal; letter-spacing: 0.12em; color: var(--ink-mute); text-transform: uppercase;">Listing</span>
-              <span class="v brass">$480,000</span>
-            </div>
-            <div class="income-row">
-              <span class="name">Nov 20, 2025</span>
-              <span class="home">667 S Main St · Angels Camp</span>
-              <span class="v" style="font-family: var(--mono); font-size: 11px; font-style: normal; letter-spacing: 0.12em; color: var(--ink-mute); text-transform: uppercase;">Listing</span>
-              <span class="v brass">$485,000</span>
-            </div>
-            <p style="margin-top: 16px; font-family: var(--mono); font-size: 10px; letter-spacing: 0.12em; color: var(--ink-faint); text-transform: uppercase;">— Pulled from Zillow profile. 98 closings to date.</p>
-          </div>
+        <div class="fz-foot-cell">
+          <div class="t">Break-even office days per week</div>
+          <div class="v">3.4 days <span class="d">past this, the math flips</span></div>
         </div>
       </div>
-    </section>
+    </div>
 
-  </main>
-</div>
+  </div>
+</section>
+
+<!-- ============ QUALITY OF LIFE ============ -->
+<section class="cm-qol">
+  <div class="cm-qol-inner">
+    <div class="section-h" style="border-color: rgba(250,246,236,0.20);">
+      <div>
+        <span class="hairline-brass" style="background: var(--brass-bright); margin-bottom: 16px;"></span>
+        <span class="eyebrow" style="color: var(--brass-bright);">§ IV · The other math</span>
+        <h2 class="h-section" style="color: var(--shell); margin-top: 10px;">What you<br><em style="color: var(--brass-bright);">get back.</em></h2>
+      </div>
+      <p class="lede right" style="color: rgba(250,246,236,0.7);">The commute calculation is one side of the ledger. The other is everything you're driving toward. Numbers we don't usually quantify, but we should.</p>
+    </div>
+
+    <div class="cm-qol-grid">
+      <div class="cm-qol-cell">
+        <div class="cm-qol-n">3,200</div>
+        <div class="cm-qol-l">Avg. sqft of home · for the same money you spend on a Bay Area 1,200 sqft condo</div>
+        <p class="cm-qol-p">The price-per-square-foot delta is the single biggest dollar conversion in foothills relocation. Most buyers more-than-double their footprint.</p>
+      </div>
+      <div class="cm-qol-cell">
+        <div class="cm-qol-n">488</div>
+        <div class="cm-qol-l">Hours of commute / yr · vs. 1,920 hrs at full RTO from Walnut Creek</div>
+        <p class="cm-qol-p">Hybrid 2-day from Murphys is net less driving than full-RTO Walnut Creek. The geography is paradoxically efficient.</p>
+      </div>
+      <div class="cm-qol-cell">
+        <div class="cm-qol-n">82°</div>
+        <div class="cm-qol-l">Avg. summer high · Arnold &amp; the higher Murphys parcels</div>
+        <p class="cm-qol-p">The Bay's mid-August fog isn't a luxury you give up. The Sacramento Valley's 108° heat isn't one you take on. Foothills land between them.</p>
+      </div>
+      <div class="cm-qol-cell">
+        <div class="cm-qol-n">14×</div>
+        <div class="cm-qol-l">Per-acre land cost · Bay (median) vs. foothills (median)</div>
+        <p class="cm-qol-p">If "more land" is on the wishlist at all, the change is closer to step-function than incremental. The math is unusual.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ NEXT STEPS ============ -->
+<section class="tool-next">
+  <div class="tool-next-inner">
+    <div class="tool-next-col">
+      <span class="eyebrow" style="color: var(--brass-bright);">Next, if you're serious</span>
+      <h3>Pair this with the<br><em>relocation tool.</em></h3>
+      <p>Plug in your current Bay Area home value and we'll show you three real foothills listings that match your monthly cost — with commute, insurance and carrying costs already baked in.</p>
+      <div class="tool-next-ctas">
+        <a href="relocate.html" class="btn btn-brass">Open relocate</a>
+        <a href="platform.html" class="btn" style="border: 1px solid var(--brass-bright); color: var(--brass-bright);">Talk to Sara</a>
+      </div>
+    </div>
+    <div class="tool-next-col tool-next-col-dim">
+      <span class="eyebrow">Adjacent tools</span>
+      <h3 style="color: var(--ink);">Run a<br><em style="color: var(--brass);">fire-zone check</em> on the same address.</h3>
+      <p style="color: var(--ink-soft);">Commute is one of two foothills numbers buyers under-budget for. The other is insurance. Same address, same report style — see the severity zone, premium estimates, and required mitigation.</p>
+      <div class="tool-next-ctas">
+        <a href="fire-zone.html" class="btn btn-ink">Fire-zone tool →</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ FOOTER ============ -->
+<footer class="footer">
+  <div class="footer-inner">
+    <div class="footer-top">
+      <div>
+        <a href="index.html" class="wordmark" style="align-items: flex-start;">
+          <span class="wordmark-word">Legacy</span>
+          <span class="wordmark-sub">Properties · Angels Camp CA</span>
+        </a>
+        <p class="footer-tagline">Every home has a story. We help you find yours — or tell the one you've already lived.</p>
+      </div>
+      <div>
+        <h4>Tools</h4>
+        <a href="fire-zone.html">Fire-zone &amp; insurance</a>
+        <a href="commute.html">Commute calculator</a>
+        <a href="relocate.html">Bay → Foothills relocation</a>
+        <a href="seller.html">What's my home worth?</a>
+      </div>
+      <div>
+        <h4>The Ledger</h4>
+        <a href="ledger.html">Latest issue</a>
+        <a href="ledger.html#subscribe">Subscribe</a>
+        <a href="about.html">About Sara &amp; James</a>
+        <a href="how-we-work.html">How we work</a>
+      </div>
+      <div>
+        <h4>Connect</h4>
+        <a href="tel:2095594966">(209) 559-4966</a>
+        <a href="mailto:SaraSellsCalifornia@gmail.com">SaraSellsCalifornia@gmail.com</a>
+        <a href="https://www.instagram.com/legacypropertiesig/">Instagram</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <div>© 2026 Legacy Properties · All rights reserved</div>
+      <div>Sara Cooper, Broker · DRE #02141987 · Equal Housing Opportunity</div>
+    </div>
+  </div>
+</footer>
 
 <script>
-function showView(e, name) {
-  if (e) e.preventDefault();
-  document.querySelectorAll('.crm-tab').forEach(t => t.classList.remove('on'));
-  document.querySelectorAll('.crm-view').forEach(v => v.classList.remove('on'));
-  // pair tab/view by name
-  const tab = document.querySelector(`.crm-tab[onclick*="'${name}'"]`);
-  if (tab) tab.classList.add('on');
-  const view = document.querySelector(`.crm-view[data-view="${name}"]`);
-  if (view) view.classList.add('on');
-  // sync sidebar
-  document.querySelectorAll('.app-side-nav a').forEach(a => a.classList.remove('active'));
-  if (e && e.target.closest('.app-side-nav')) e.target.classList.add('active');
-}
-function selectLead(el) {
-  document.querySelectorAll('.lead-row').forEach(r => r.classList.remove('on'));
-  el.classList.add('on');
-}
+  // Per-town commute matrix data
+  const CM_DATA = {
+    murphys:  { from: 'Murphys, CA · 2,140 ft',  saraTown: 'Murphys',
+      cells: [[198,140,222,185],[168,124,194,158],[204,146,228,190],[92,78,106,98],[214,140,238,198],[190,184,198,220]] },
+    arnold:   { from: 'Arnold, CA · 4,100 ft',   saraTown: 'Arnold',
+      cells: [[225,168,250,212],[196,150,222,186],[230,172,254,218],[112,98,128,118],[240,168,264,224],[148,142,158,178]] },
+    angels:   { from: 'Angels Camp, CA · 1,380 ft', saraTown: 'Angels Camp',
+      cells: [[182,126,206,170],[152,108,178,142],[188,130,212,174],[80,68,94,86],[198,126,222,182],[174,168,182,202]] },
+    copper:   { from: 'Copperopolis, CA · 780 ft',  saraTown: 'Copperopolis',
+      cells: [[166,114,190,154],[136,96,162,128],[172,118,196,160],[68,58,80,74],[182,114,206,166],[164,158,172,192]] },
+    sutter:   { from: 'Sutter Creek, CA · 1,200 ft', saraTown: 'Sutter Creek',
+      cells: [[156,110,182,148],[126,94,156,122],[164,112,188,152],[58,48,70,64],[174,110,198,160],[182,176,190,210]] }
+  };
+  const CM_SARA = {
+    murphys:  '"If you only need to be in the East Bay twice a week, this is workable — leave at 6:15 a.m. and you beat the metering. The brutal trip is Friday evening, Oakland → home; budget three-plus hours and bring the audiobook. SAC is the surprise: it\'s the most reliable airport in the region from up here."',
+    arnold:   '"The honest answer: from Arnold, the Bay commute is for emergencies and Tuesdays, not for daily. SAC, on the other hand, is still under two hours and basically traffic-proof. I have three clients in Arnold who fly out of SMF for everything, including SFO connections."',
+    angels:   '"Angels Camp is the geographic sweet spot — quickest to Bay, quickest to SAC, and still in the foothills. If your job mandates 3+ in-office days, this is the town I\'d look at first. Not as quiet as Murphys, but the math is real."',
+    copper:   '"Copperopolis is the most commute-friendly in the county, and it\'s reflected in price. If you\'re still doing 4 days in-office, Copper is the most rational pick by a wide margin — the 30-minute time savings over Murphys adds up to 240 hours a year."',
+    sutter:   '"Sutter routes through Jackson and HWY 88 instead of HWY 4 — it\'s actually faster to Sacramento than Murphys, but slower to the Bay. The Amador wineries are a meaningful trade-off in the other direction."'
+  };
+
+  function cmMinsToHM(n) {
+    const h = Math.floor(n/60), m = n % 60;
+    return h + ':' + String(m).padStart(2,'0');
+  }
+  function cmBand(n) {
+    if (n < 150) return 'cm-good';
+    if (n < 180) return 'cm-okay';
+    if (n < 210) return 'cm-tough';
+    return 'cm-bad';
+  }
+  function cmSetTown(ev, key) {
+    document.querySelectorAll('.cm-town').forEach(t => t.classList.remove('on'));
+    ev.currentTarget.classList.add('on');
+    document.querySelectorAll('.cm-town-lbl').forEach((l,i) => {
+      l.textContent = (l.closest('.cm-town').dataset.town === key) ? 'Compare from' : 'Tap to compare';
+    });
+    const d = CM_DATA[key]; if (!d) return;
+    document.getElementById('cmFrom').textContent = 'From: ' + d.from;
+    // Update each row cells
+    const rows = document.querySelectorAll('#cmGrid tbody tr');
+    rows.forEach((row, i) => {
+      const cells = row.querySelectorAll('.cm-cell');
+      const times = d.cells[i] || [];
+      const baseline = times[1];
+      let bestIdx = times.indexOf(Math.min(...times));
+      cells.forEach((c, j) => {
+        const n = times[j];
+        c.className = 'cm-cell ' + cmBand(n) + (j === bestIdx ? ' cm-cell-best' : '');
+        c.querySelector('.cm-cell-min').innerHTML = cmMinsToHM(n) + '<span class="u">hr</span>';
+        const dlt = n - baseline;
+        c.querySelector('.cm-cell-delta').textContent = (j === bestIdx) ? 'baseline'
+          : ((dlt > 0 ? '+' : '') + dlt + ' min vs. mid-day');
+      });
+    });
+    document.querySelector('.cm-sara-lbl').textContent = 'Sara\'s read · ' + d.saraTown;
+    document.querySelector('.cm-sara-quote').textContent = CM_SARA[key];
+  }
+  function cmRun() {
+    const key = document.getElementById('cmTown').value;
+    const target = document.querySelector('.cm-town[data-town="' + key + '"]');
+    if (target) target.click();
+    document.getElementById('cmResult').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
 </script>
-<script src="/legacy-client.js" defer></script>
+
 </body>
 </html>

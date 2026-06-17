@@ -1,0 +1,148 @@
+/* ============================================================
+   idx-theme.css
+   Legacy Properties skin for the iHomeFinder (Kestrel) IDX widget.
+   Load AFTER legacy.css + listings.css so the design tokens exist.
+
+   iHomeFinder generates its own class names, so targets are
+   intentionally broad ([class*="..."]) and use !important to beat
+   the widget's shipped stylesheet. Everything is scoped to the
+   .idx-embed wrapper that contains the rendered widget.
+   ============================================================ */
+
+.idx-embed {
+  color: var(--ink);
+  background: var(--parchment);
+  font-family: var(--sans);
+  margin-top: 8px;
+}
+.idx-embed * { box-sizing: border-box; font-family: var(--sans); }
+
+/* ── Headings → Cormorant serif ── */
+.idx-embed h1, .idx-embed h2, .idx-embed h3, .idx-embed h4,
+.idx-embed [class*="title"], .idx-embed [class*="heading"] {
+  font-family: var(--serif) !important;
+  font-weight: 400 !important;
+  color: var(--ink) !important;
+  letter-spacing: -0.005em;
+}
+
+/* ── Links → brass ── */
+.idx-embed a { color: var(--brass) !important; text-decoration: none; }
+.idx-embed a:hover { color: var(--ink) !important; }
+
+/* ── Prices → brass serif (the signature accent) ── */
+.idx-embed [class*="price"], .idx-embed [class*="Price"] {
+  font-family: var(--serif) !important;
+  color: var(--brass) !important;
+  font-weight: 500 !important;
+}
+
+/* ── Buttons → Legacy ink button, brass on hover ── */
+.idx-embed button,
+.idx-embed [class*="button"], .idx-embed [class*="btn"],
+.idx-embed input[type="submit"], .idx-embed input[type="button"],
+.idx-embed a[role="button"] {
+  font-family: var(--sans) !important;
+  font-size: 11px !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.14em !important;
+  text-transform: uppercase !important;
+  background: var(--ink) !important;
+  color: var(--shell) !important;
+  border: 1px solid var(--ink) !important;
+  border-radius: 0 !important;
+  padding: 12px 20px !important;
+  cursor: pointer;
+  transition: background .15s, color .15s, border-color .15s;
+}
+.idx-embed button:hover,
+.idx-embed [class*="button"]:hover, .idx-embed [class*="btn"]:hover,
+.idx-embed a[role="button"]:hover {
+  background: var(--brass) !important;
+  border-color: var(--brass) !important;
+  color: var(--shell) !important;
+}
+
+/* Secondary / ghost-style controls + pager links */
+.idx-embed [class*="secondary"], .idx-embed [class*="ghost"],
+.idx-embed [class*="outline"] {
+  background: transparent !important;
+  color: var(--ink) !important;
+  border: 1px solid var(--rule-strong) !important;
+}
+.idx-embed [class*="secondary"]:hover, .idx-embed [class*="ghost"]:hover {
+  border-color: var(--ink) !important;
+  color: var(--ink) !important;
+  background: transparent !important;
+}
+
+/* ── Inputs / selects → Legacy field ── */
+.idx-embed input, .idx-embed select, .idx-embed textarea {
+  font-family: var(--sans) !important;
+  font-size: 13px !important;
+  color: var(--ink) !important;
+  background: var(--shell) !important;
+  border: 1px solid var(--rule) !important;
+  border-radius: 0 !important;
+  padding: 10px 12px !important;
+}
+.idx-embed input:focus, .idx-embed select:focus, .idx-embed textarea:focus {
+  outline: none !important;
+  border-color: var(--brass) !important;
+}
+.idx-embed label, .idx-embed [class*="label"] {
+  font-family: var(--mono) !important;
+  font-size: 10px !important;
+  letter-spacing: 0.16em !important;
+  text-transform: uppercase !important;
+  color: var(--ink-mute) !important;
+}
+
+/* ── Result cards / panels → shell with hairline border ── */
+.idx-embed [class*="result"], .idx-embed [class*="card"],
+.idx-embed [class*="listing"], .idx-embed [class*="panel"] {
+  background: var(--shell) !important;
+  border: 1px solid var(--rule) !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+}
+
+/* ── Status pills / badges → brass on linen ── */
+.idx-embed [class*="badge"], .idx-embed [class*="status"],
+.idx-embed [class*="tag"] {
+  font-family: var(--mono) !important;
+  font-size: 9px !important;
+  letter-spacing: 0.14em !important;
+  text-transform: uppercase !important;
+  color: var(--brass) !important;
+  background: var(--linen) !important;
+  border-radius: 0 !important;
+}
+
+/* ── Pagination / toolbars / counts / sort → mono caption ── */
+.idx-embed [class*="pagination"], .idx-embed [class*="pager"],
+.idx-embed [class*="toolbar"], .idx-embed [class*="count"],
+.idx-embed [class*="sort"], .idx-embed [class*="breadcrumb"] {
+  font-family: var(--mono) !important;
+  letter-spacing: 0.08em;
+  color: var(--ink-mute) !important;
+}
+
+/* ── Detail / feature tables ── */
+.idx-embed table { border-color: var(--rule) !important; border-collapse: collapse; }
+.idx-embed th {
+  font-family: var(--mono) !important;
+  text-transform: uppercase; letter-spacing: 0.12em;
+  font-size: 10px !important; color: var(--ink-mute) !important;
+}
+.idx-embed td { color: var(--ink-soft) !important; }
+.idx-embed table, .idx-embed th, .idx-embed td { border-color: var(--rule) !important; }
+
+/* ── Kill rounded corners / heavy shadows the widget ships with ── */
+.idx-embed [class*="rounded"] { border-radius: 0 !important; }
+.idx-embed [class*="shadow"]  { box-shadow: none !important; }
+
+/* ── Legacy (pre-Kestrel) iHomeFinder class names, just in case ── */
+.idx-embed .ihf-price        { font-family: var(--serif) !important; color: var(--brass) !important; }
+.idx-embed .ihf-grid-result,
+.idx-embed .ihf-results-container { background: var(--parchment) !important; }

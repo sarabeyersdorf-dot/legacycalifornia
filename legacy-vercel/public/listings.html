@@ -6,6 +6,7 @@
 <title>Properties — Legacy Properties</title>
 <link rel="stylesheet" href="legacy.css">
 <link rel="stylesheet" href="listings.css">
+<link rel="stylesheet" href="idx-theme.css">
 <script src="https://kestrel.idxhome.com/ihf-kestrel.js"></script>
 <script>
   window.ihfKestrel = window.ihfKestrel || {};
@@ -47,188 +48,20 @@
     <div class="search-h">
       <div>
         <span class="eyebrow">Properties · Calaveras · Amador · Tuolumne</span>
-        <h1 class="search-title">Five residences <em>presently in the field.</em></h1>
-      </div>
-      <div class="search-meta">
-        <span class="label-cap">Updated</span>
-        <span class="mono">May 12, 2026 · 09:14 PT</span>
-      </div>
-    </div>
-
-    <div class="search-card">
-      <div class="search-field">
-        <label class="field-label">Where</label>
-        <input class="search-input" value="Calaveras, Amador &amp; Tuolumne" />
-      </div>
-      <div class="search-field">
-        <label class="field-label">Price</label>
-        <select class="search-input">
-          <option>$400K – $1.5M</option>
-          <option>Under $500K</option>
-          <option>$500K – $750K</option>
-          <option>$750K – $1M</option>
-          <option>$1M – $2M</option>
-          <option>$2M+</option>
-        </select>
-      </div>
-      <div class="search-field">
-        <label class="field-label">Type</label>
-        <select class="search-input">
-          <option>Any</option>
-          <option>Single Family</option>
-          <option>Land &amp; Acreage</option>
-          <option>Vineyard</option>
-          <option>Ranch</option>
-          <option>Condo / Townhome</option>
-        </select>
-      </div>
-      <div class="search-field">
-        <label class="field-label">Beds</label>
-        <select class="search-input">
-          <option>3+</option>
-          <option>Any</option>
-          <option>2+</option>
-          <option>4+</option>
-          <option>5+</option>
-        </select>
-      </div>
-      <div class="search-field">
-        <label class="field-label">Acres</label>
-        <select class="search-input">
-          <option>Any</option>
-          <option>1+ acre</option>
-          <option>5+ acres</option>
-          <option>10+ acres</option>
-          <option>40+ acres</option>
-        </select>
-      </div>
-      <button class="btn btn-ink">Search</button>
-    </div>
-
-    <div class="filters">
-      <div class="filter-chips">
-        <button class="chip chip-on">All <span class="ct">5</span></button>
-        <button class="chip">Single family <span class="ct">3</span></button>
-        <button class="chip">Manufactured <span class="ct">1</span></button>
-        <button class="chip">Land <span class="ct">1</span></button>
-        <button class="chip">Calaveras Co. <span class="ct">3</span></button>
-        <button class="chip">Bay Area <span class="ct">1</span></button>
-      </div>
-      <div class="filter-right">
-        <span class="label-cap">View</span>
-        <div class="view-toggle">
-          <button class="vt-btn vt-active">Split</button>
-          <button class="vt-btn">Map</button>
-          <button class="vt-btn">List</button>
-        </div>
-        <span class="label-cap" style="margin-left: 18px;">Sort</span>
-        <select class="search-input" style="min-width: 180px;">
-          <option>Newest</option>
-          <option>Price: Low → High</option>
-          <option>Price: High → Low</option>
-        </select>
+        <h1 class="search-title">Search every listing <em>across the Gold Country.</em></h1>
       </div>
     </div>
   </div>
 </section>
 
-<!-- ============ SPLIT VIEW ============ -->
+<!-- ============ IDX RESULTS ============ -->
 <section class="split">
-  <!-- MAP PANE -->
-  <aside class="map-pane">
-    <div class="map-canvas" id="mapCanvas">
-      <!-- Topo placeholder map -->
-      <svg width="100%" height="100%" viewBox="0 0 800 900" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
-        <defs>
-          <pattern id="topo" x="0" y="0" width="60" height="60" patternUnits="userSpaceOnUse">
-            <circle cx="30" cy="30" r="0.5" fill="rgba(27,24,19,0.18)"/>
-          </pattern>
-          <radialGradient id="terrain" cx="50%" cy="50%" r="65%">
-            <stop offset="0%" stop-color="#E8DFCC"/>
-            <stop offset="60%" stop-color="#DDD0B3"/>
-            <stop offset="100%" stop-color="#C7B58F"/>
-          </radialGradient>
-        </defs>
-        <rect width="800" height="900" fill="url(#terrain)"/>
-        <rect width="800" height="900" fill="url(#topo)"/>
-        <!-- Contour lines -->
-        <g fill="none" stroke="rgba(27,24,19,0.10)" stroke-width="0.8">
-          <path d="M0,180 Q200,140 400,200 T800,170"/>
-          <path d="M0,260 Q220,230 420,290 T800,255"/>
-          <path d="M0,340 Q240,310 440,370 T800,340"/>
-          <path d="M0,440 Q260,400 460,450 T800,420"/>
-          <path d="M0,540 Q280,500 480,550 T800,520"/>
-          <path d="M0,640 Q300,600 500,650 T800,620"/>
-          <path d="M0,740 Q320,700 520,740 T800,720"/>
-        </g>
-        <!-- River -->
-        <path d="M-20,720 Q120,640 240,660 T520,580 Q620,560 820,600" fill="none" stroke="#9DB5C2" stroke-width="3" opacity="0.7"/>
-        <!-- Roads -->
-        <g fill="none" stroke="rgba(27,24,19,0.35)" stroke-width="1.5" stroke-dasharray="6 4">
-          <path d="M-20,420 Q180,380 380,440 T780,400"/>
-          <path d="M400,-20 Q420,200 380,400 T420,920"/>
-        </g>
-        <!-- Town label -->
-        <g font-family="JetBrains Mono, monospace" font-size="9" fill="rgba(27,24,19,0.55)" letter-spacing="2">
-          <text x="220" y="380" text-anchor="middle">MURPHYS</text>
-          <text x="220" y="395" text-anchor="middle" font-size="7" fill="rgba(27,24,19,0.4)">— pop. 2,213 —</text>
-          <text x="580" y="220" text-anchor="middle">ARNOLD</text>
-          <text x="620" y="640" text-anchor="middle">ANGELS CAMP</text>
-          <text x="160" y="700" text-anchor="middle">SUTTER CREEK</text>
-        </g>
-        <!-- Highway shield -->
-        <g transform="translate(395,440)">
-          <rect x="-12" y="-10" width="24" height="20" fill="var(--shell)" stroke="rgba(27,24,19,0.4)"/>
-          <text x="0" y="4" text-anchor="middle" font-family="JetBrains Mono" font-size="10" font-weight="700" fill="rgba(27,24,19,0.7)">4</text>
-        </g>
-      </svg>
-
-      <!-- Pins -->
-      <button class="pin pin-active" style="left: 36%; top: 28%;" data-id="1">
-        <span class="pin-price">$1.39M</span>
-      </button>
-      <button class="pin" style="left: 28%; top: 44%;" data-id="2">
-        <span class="pin-price">$399K</span>
-      </button>
-      <button class="pin" style="left: 54%; top: 38%;" data-id="3">
-        <span class="pin-price">$1.2M</span>
-      </button>
-      <button class="pin" style="left: 42%; top: 56%;" data-id="4">
-        <span class="pin-price">$199K</span>
-      </button>
-      <button class="pin" style="left: 32%; top: 68%;" data-id="5">
-        <span class="pin-price">$33K</span>
-      </button>
+  <div class="list-pane" style="width:100%;">
+    <div class="idx-embed">
+      <script>
+  document.currentScript.replaceWith(ihfKestrel.render());
+</script>
     </div>
-
-    <!-- Map controls -->
-    <div class="map-ctrl map-ctrl-tl">
-      <button class="map-chip">Save this search</button>
-      <button class="map-chip map-chip-ghost">Draw boundary</button>
-    </div>
-    <div class="map-ctrl map-ctrl-tr">
-      <button class="map-zoom">+</button>
-      <button class="map-zoom">−</button>
-      <button class="map-zoom" title="Locate me">◎</button>
-    </div>
-    <div class="map-ctrl map-ctrl-bl">
-      <div class="map-legend">
-        <span class="dot dot-active"></span><span>Match</span>
-        <span class="dot dot-saved"></span><span>Saved</span>
-        <span class="dot dot-cluster"></span><span>Cluster</span>
-      </div>
-    </div>
-    <div class="map-attribution">Calaveras County MLS · Hill-shaded relief</div>
-  </aside>
-
-  <!-- LIST PANE -->
-  <div class="list-pane">
-    <div class="list-pane-head">
-      <span class="mono" style="font-size: 11px; letter-spacing: 0.14em; color: var(--ink-mute);">Showing all 5 active listings</span>
-      <a href="dashboard.html" class="btn-link" style="border: none; color: var(--brass);">Save this search →</a>
-    </div>
-
-    <div data-ihf-component="searchResults"></div>
 
     <!-- Sara strip -->
     <div class="sara-strip">
@@ -242,54 +75,8 @@
         <button class="btn btn-ink btn-sm">Book a tour</button>
       </div>
     </div>
-
-    <div class="list-pane-foot" style="display:none">
-      <button class="btn btn-ghost">Load 30 more</button>
-    </div>
   </div>
 </section>
 
-<script src="idx-client.js"></script>
-<script>
-document.querySelectorAll('.pin').forEach(p => {
-  p.addEventListener('click', () => {
-    document.querySelectorAll('.pin').forEach(x => x.classList.remove('pin-active'));
-    p.classList.add('pin-active');
-  });
-});
-document.querySelectorAll('.chip').forEach(c => {
-  c.addEventListener('click', () => c.classList.toggle('chip-on'));
-});
-document.querySelectorAll('.vt-btn').forEach(v => {
-  v.addEventListener('click', () => {
-    document.querySelectorAll('.vt-btn').forEach(x => x.classList.remove('vt-active'));
-    v.classList.add('vt-active');
-  });
-});
-
-/* ── Live IDX loader ──
-   Tries to fetch from /api/listings. If that succeeds (the site is
-   deployed to Vercel with the IDX scaffold), the static cards get
-   replaced with live ones. If it fails — because the file is open
-   directly (file://) or the API hasn't been deployed yet — we keep
-   the static cards already in the DOM. */
-(async function () {
-  if (location.protocol === 'file:') return; // static preview
-  try {
-    const data = await LegacyIDX.fetchListings();
-    const el   = document.getElementById('idxResults');
-    if (el && data.listings && data.listings.length) {
-      LegacyIDX.renderInto(el, data.listings);
-      LegacyIDX.showSourceBadge(data.source);
-      // Update the counter line
-      const counter = document.querySelector('.list-pane-head .mono');
-      if (counter) counter.textContent = `Showing all ${data.listings.length} active listings`;
-    }
-  } catch (e) {
-    /* Fall back silently to the static cards. */
-    console.warn('IDX fetch failed; using static cards.', e);
-  }
-})();
-</script>
 </body>
 </html>
