@@ -40,3 +40,7 @@ export async function getCallerProfile(req) {
 export function isAgent(profile) {
   return !!profile && ['agent_sara', 'agent_james', 'admin'].includes(profile.role);
 }
+
+export function isSeller(profile) {
+  return !!profile && profile.role === 'seller';
+}

@@ -807,3 +807,173 @@
 
   document.addEventListener('DOMContentLoaded', loadDashboard);
 })();
+
+
+/* ===========================================================================
+ * Phase 1F — Seller portal live data (APPEND-ONLY)
+ * ---------------------------------------------------------------------------
+ * Self-contained module. Runs only on seller.html. Fetches the signed-in
+ * seller's portal payload from GET /api/seller/portal and paints it over
+ * the existing markup using the same data-* hook contract as the buyer
+ * dashboard. If the current seller.html has no data-bind attributes yet,
+ * the payload is still fetched and exposed on window.__legacySellerPortal
+ * for debugging — the painter is a safe no-op until Claude Design adds
+ * the data-* hooks to the page.
+ *
+ * Hook contract (identical to the buyer dashboard module):
+ *   [data-bind="path"]        textContent (or <img> src) from dotted path
+ *   [data-bind-href="path"]   sets href
+ *   [data-bind-class="path"]  sets className (replaces, useful for status pills)
+ *   [data-add-class="path"]   appends classes from a string value
+ *   [data-bind-style="prop:path"]   sets a CSS style property
+ *   [data-toggle="path"]      toggles `.on` class from a boolean
+ *   [data-optional]           hides the element when its value is empty
+ *   [data-list="key"]         array container; clones its [data-row] per item
+ *   [data-row]                the template row inside a list
+ *   [data-html="path"]        innerHTML from dotted path (escaped server-side)
+ * ======================================================================== */
+(function () {
+  'use strict';
+  if (!/\/seller\.html$/.test(location.pathname)) return;
+
+  const tplStore = new WeakMap();
+
+  const dget = (obj, path) =>
+    String(path).split('.').reduce((o, k) => (o == null ? undefined : o[k]), obj);
+
+  const isEmpty = (v) =>
+    v == null || v === '' || (Array.isArray(v) && v.length === 0);
+
+  function bindEl(el, val) {
+    if (el.hasAttribute('data-optional')) {
+      if (isEmpty(val)) { el.style.display = 'none'; return; }
+      el.style.display = '';
+    }
+    if (el.tagName === 'IMG') { if (val != null) el.src = val; return; }
+    if (val != null) el.textContent = val;
+  }
+
+  function applyExtraBindings(root, item) {
+    root.querySelectorAll('[data-html]').forEach((el) => {
+      if (el.closest('[data-list]') && el !== root) return;
+      const v = dget(item, el.getAttribute('data-html'));
+      if (v != null) el.innerHTML = String(v);
+    });
+    root.querySelectorAll('[data-bind-class]').forEach((el) => {
+      if (el.closest('[data-list]') && el !== root) return;
+      const v = dget(item, el.getAttribute('data-bind-class'));
+      if (v != null) el.className = String(v);
+    });
+    root.querySelectorAll('[data-add-class]').forEach((el) => {
+      if (el.closest('[data-list]') && el !== root) return;
+      const v = dget(item, el.getAttribute('data-add-class'));
+      if (v) String(v).split(/\s+/).forEach((c) => c && el.classList.add(c));
+    });
+    root.querySelectorAll('[data-bind-style]').forEach((el) => {
+      if (el.closest('[data-list]') && el !== root) return;
+      const spec = el.getAttribute('data-bind-style') || '';
+      const [prop, path] = spec.split(':').map((s) => s.trim());
+      if (!prop || !path) return;
+      const v = dget(item, path);
+      if (v != null) el.style.setProperty(prop, String(v));
+    });
+  }
+
+  function fillRow(row, item) {
+    row.querySelectorAll('[data-bind]').forEach((el) => {
+      if (el.closest('[data-list]')) return;
+      bindEl(el, dget(item, el.getAttribute('data-bind')));
+    });
+    row.querySelectorAll('[data-bind-href]').forEach((el) => {
+      if (el.closest('[data-list]')) return;
+      const v = dget(item, el.getAttribute('data-bind-href'));
+      if (v != null) el.setAttribute('href', v);
+    });
+    row.querySelectorAll('[data-toggle]').forEach((el) => {
+      if (el.closest('[data-list]')) return;
+      el.classList.toggle('on', !!dget(item, el.getAttribute('data-toggle')));
+    });
+    applyExtraBindings(row, item);
+    row.querySelectorAll('[data-list]').forEach((c) => {
+      const sub = dget(item, c.getAttribute('data-list'));
+      if (isEmpty(sub) && c.hasAttribute('data-optional')) { c.style.display = 'none'; return; }
+      c.style.display = '';
+      paintList(c, sub || []);
+    });
+  }
+
+  function paintList(container, arr) {
+    if (!container) return;
+    let tpl = tplStore.get(container);
+    if (!tpl) {
+      const orig = container.querySelector(':scope > [data-row]');
+      if (!orig) return;
+      tpl = orig.cloneNode(true);
+      tpl.removeAttribute('data-row');
+      tplStore.set(container, tpl);
+    }
+    const tag = tpl.tagName;
+    const cls = tpl.classList[0] || null;
+    Array.from(container.children).forEach((ch) => {
+      const isRow = ch.tagName === tag && (cls ? ch.classList.contains(cls) : ch.className === tpl.className);
+      if (isRow || ch.hasAttribute('data-row') || ch.hasAttribute('data-painted')) ch.remove();
+    });
+    if (isEmpty(arr)) return;
+    arr.forEach((item) => {
+      const row = tpl.cloneNode(true);
+      row.setAttribute('data-painted', '');
+      row.style.display = '';
+      fillRow(row, item);
+      container.appendChild(row);
+    });
+  }
+
+  function paintScalars(data) {
+    document.querySelectorAll('[data-bind]').forEach((el) => {
+      if (el.closest('[data-row]') || el.closest('[data-painted]') || el.closest('[data-list]')) return;
+      bindEl(el, dget(data, el.getAttribute('data-bind')));
+    });
+    document.querySelectorAll('[data-bind-href]').forEach((el) => {
+      if (el.closest('[data-row]') || el.closest('[data-painted]') || el.closest('[data-list]')) return;
+      const v = dget(data, el.getAttribute('data-bind-href'));
+      if (v != null) el.setAttribute('href', v);
+    });
+    applyExtraBindings(document, data);
+  }
+
+  function topLevelLists() {
+    return Array.from(document.querySelectorAll('[data-list]')).filter(
+      (c) => !c.closest('[data-row]') && !c.closest('[data-painted]') &&
+             !(c.parentElement && c.parentElement.closest('[data-list]'))
+    );
+  }
+
+  function paintPortal(data) {
+    if (!data || typeof data !== 'object') return;
+    paintScalars(data);
+    topLevelLists().forEach((c) => {
+      const arr = dget(data, c.getAttribute('data-list'));
+      if (arr === undefined) return;
+      paintList(c, arr);
+    });
+  }
+
+  async function loadSeller() {
+    let res;
+    try {
+      res = await fetch('/api/seller/portal', {
+        method: 'GET',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include'
+      });
+    } catch (_) { return; }
+    if (!res.ok) return;            // 401 → gate handles sign-in
+    let json = null;
+    try { json = await res.json(); } catch (_) { return; }
+    const portal = json && json.portal ? json.portal : json;
+    window.__legacySellerPortal = portal;
+    paintPortal(portal);
+  }
+
+  document.addEventListener('DOMContentLoaded', loadSeller);
+})();
