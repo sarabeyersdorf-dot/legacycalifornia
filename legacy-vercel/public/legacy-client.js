@@ -341,22 +341,44 @@
   }
 
   async function gate(requiredRoles) {
-    const session = await ensureSession(requiredRoles);
-    if (session) return session;
+    // Inject an immediate full-screen dimmer so the prototype mock can never
+    // flash before we know who the visitor is. The overlay is created
+    // synchronously on the documentElement so it shows even before <body>
+    // has finished parsing.
+    let overlay = document.getElementById('leg-auth-overlay');
+    if (!overlay) {
+      overlay = document.createElement('div');
+      overlay.id = 'leg-auth-overlay';
+      overlay.style.cssText = [
+        'position:fixed', 'inset:0', 'z-index:99998',
+        'background:rgba(20,18,15,0.94)',
+        'display:flex', 'align-items:center', 'justify-content:center',
+        'padding:24px',
+        'font-family:Manrope,system-ui,sans-serif',
+        'color:#FAF6EC'
+      ].join(';');
+      overlay.innerHTML = '<div style="font-family:\'JetBrains Mono\',monospace;font-size:10.5px;letter-spacing:.22em;text-transform:uppercase;opacity:.7;">Checking session…</div>';
+      (document.body || document.documentElement).appendChild(overlay);
+    }
 
-    // Replace the page with an inline sign-in card (no HTML edits needed).
-    document.body.innerHTML = '';
-    document.body.style.cssText = 'background:#1A1714;color:#FAF6EC;font-family:Manrope,system-ui,sans-serif;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;';
-    const card = document.createElement('div');
-    card.style.cssText = 'max-width:460px;width:100%;background:#FAF6EC;color:#1A1714;padding:36px 32px;';
-    // Mode is determined by the PRIMARY (first) required role, not whether
-    // agents are also allowed. CRM = password. Buyer/seller dashboards = magic link.
+    const session = await ensureSession(requiredRoles);
+    if (session) {
+      overlay.remove();
+      return session;
+    }
+
+    // Not signed in (or wrong role) — turn the overlay into a sign-in card.
+    // CRM uses password; buyer/seller dashboards use magic link.
     const primaryRole = (requiredRoles || [])[0] || '';
     const isAgent = primaryRole.startsWith('agent_') || primaryRole === 'admin';
     const prefillEmail = new URLSearchParams(location.search).get('email') || '';
+
+    overlay.innerHTML = '';
+    const card = document.createElement('div');
+    card.style.cssText = 'max-width:460px;width:100%;background:#FAF6EC;color:#1A1714;padding:36px 32px;box-shadow:0 30px 80px rgba(0,0,0,0.5);';
     card.innerHTML = `
       <div style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.22em;text-transform:uppercase;color:#7C6A4D;margin-bottom:10px;">Legacy Properties</div>
-      <h2 style="font-family:'Cormorant Garamond',serif;font-style:italic;font-weight:500;font-size:30px;margin:0 0 14px;">${isAgent ? 'Open the desk.' : 'See your dashboard.'}</h2>
+      <h2 style="font-family:'Cormorant Garamond',serif;font-style:italic;font-weight:500;font-size:30px;margin:0 0 14px;line-height:1.1;">${isAgent ? 'Open the desk.' : 'See your dashboard.'}</h2>
       ${isAgent ? '' : '<p style="font-size:14px;line-height:1.55;color:#3A332B;margin:0 0 18px;">Enter your email and we will send you a one-click link. No password to remember.</p>'}
       <form id="leg-auth" style="display:flex;flex-direction:column;gap:10px;">
         <input name="email" type="email" placeholder="Email" required value="${prefillEmail.replace(/"/g,'')}" style="font-size:15px;padding:10px 12px;border:1px solid #D9CFB7;background:#fff;">
@@ -364,7 +386,7 @@
         <button type="submit" style="background:#1A1714;color:#FAF6EC;border:none;padding:14px;font-family:JetBrains Mono,monospace;font-size:11px;letter-spacing:.22em;text-transform:uppercase;cursor:pointer;">${isAgent ? 'Sign in' : 'Email me the link'}</button>
         <div id="leg-auth-msg" style="font-size:13px;min-height:18px;color:#7C6A4D;"></div>
       </form>`;
-    document.body.appendChild(card);
+    overlay.appendChild(card);
 
     const form = card.querySelector('#leg-auth');
     const msg  = card.querySelector('#leg-auth-msg');
@@ -375,7 +397,6 @@
       if (isAgent) {
         const r = await api('/api/auth/login', { body: data });
         if (!r.ok) { msg.textContent = r.json?.error || 'Sign-in failed.'; return; }
-        // Persist session via cookies for subsequent requests
         await api('/api/auth/session', {
           body: { access_token: r.json.session.access_token, refresh_token: r.json.session.refresh_token }
         });
@@ -383,7 +404,6 @@
       } else {
         const r = await api('/api/auth/magic-link', { body: { email: data.email } });
         if (r.ok) {
-          // Replace the form with a confirmation panel
           form.innerHTML = `
             <div style="font-family:'Cormorant Garamond',serif;font-style:italic;font-size:22px;line-height:1.3;color:#1A1714;margin-bottom:10px;">Check your email.</div>
             <p style="font-size:14px;line-height:1.55;color:#3A332B;margin:0 0 8px;">We just sent a one-click sign-in link to <strong>${data.email.replace(/</g,'')}</strong>.</p>
@@ -783,11 +803,23 @@
     });
   }
 
+  // Clear scalar [data-bind] text so prototype copy (e.g. "Renee Dawson") is
+  // never visible before the real payload arrives. Lists are hidden by
+  // enterLoading(), which swaps in the [data-state="loading"] placeholders.
+  function clearScalars() {
+    document.querySelectorAll('[data-bind]').forEach((el) => {
+      if (el.closest('[data-row]') || el.closest('[data-painted]') || el.closest('[data-list]')) return;
+      if (el.tagName === 'IMG') return;
+      el.textContent = '';
+    });
+  }
+
   async function loadDashboard() {
     const lists = topLevelLists();
-    // Only show spinners if the request is slow; a fast failure (static preview)
-    // never hides the prototype.
-    const slow = setTimeout(() => enterLoading(lists), 220);
+    // Hide the prototype mock immediately and show the [data-state="loading"]
+    // placeholders so the buyer never sees "Renee" before her own data arrives.
+    enterLoading(lists);
+    clearScalars();
     let res;
     try {
       res = await fetch('/api/me/dashboard', {
@@ -796,9 +828,8 @@
         credentials: 'include'
       });
     } catch (_) {
-      clearTimeout(slow); exitLoading(lists); return;
+      exitLoading(lists); return;
     }
-    clearTimeout(slow);
     if (!res.ok) { exitLoading(lists); return; }   // 401 (gate handles sign-in) / 404
     let json = null;
     try { json = await res.json(); } catch (_) { exitLoading(lists); return; }

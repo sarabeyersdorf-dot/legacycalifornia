@@ -257,7 +257,7 @@ export default async function handler(req, res) {
 
     // 6. Messages — surface outbound (Sara → buyer) recent notes
     const messagesArr = messages.map((m) => ({
-      avatar: 'sara-headshot.png',
+      avatar: 'art/sara-headshot.png',
       from:   'Sara Cooper',
       time:   fmtRelative(m.created_at),
       body:   sanitize(m.subject ? `${m.subject} — ${m.body.slice(0, 220)}` : m.body.slice(0, 240))
@@ -320,7 +320,7 @@ export default async function handler(req, res) {
         letter:       digestLetter,
         agent_name:   'Sara Cooper',
         agent_title:  'Broker · Legacy Properties',
-        agent_avatar: 'sara-headshot.png',
+        agent_avatar: 'art/sara-headshot.png',
         items:        newMatchesArr.slice(0, 3).map((m) => ({
           price:       fmtUSD(m._price),
           address:     m.address,
@@ -364,7 +364,7 @@ function emptyDashboard(user, profile) {
       letter:       'Welcome in. Tell me what you are picturing — town, price, must-haves — and I will start sending the matches.',
       agent_name:   'Sara Cooper',
       agent_title:  'Broker · Legacy Properties',
-      agent_avatar: 'sara-headshot.png',
+      agent_avatar: 'art/sara-headshot.png',
       items:        []
     },
     alerts: [],
