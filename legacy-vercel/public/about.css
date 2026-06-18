@@ -1,307 +1,297 @@
-/* ============================================================
-   ABOUT — editorial profile · Sara Cooper, Legacy Properties
-   Builds on legacy.css primitives. All tokens inherited.
-   ============================================================ */
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>About Sara — Legacy Properties</title>
+<link rel="stylesheet" href="legacy.css">
+<link rel="stylesheet" href="about.css">
+</head>
+<body class="paper" data-screen-label="About Sara">
 
-/* ── Page rhythm ── */
-.ab-wrap { position: relative; z-index: 1; }
+<!-- ============ TOP NAV ============ -->
+<header class="topnav">
+  <div class="topnav-bar1">
+    <span>Boutique luxury real estate · Calaveras · Amador · Tuolumne</span>
+    <span><a href="tel:2095594966">(209) 559-4966</a> · <a href="mailto:SaraSellsCalifornia@gmail.com">SaraSellsCalifornia@gmail.com</a></span>
+  </div>
+  <nav class="topnav-bar2">
+    <div class="topnav-links">
+      <a href="listings.html">Listings</a>
+      <a href="index.html#communities">Communities</a>
+      <a href="relocate.html">Relocate</a>
+      <a href="seller.html">Sellers</a>
+    </div>
+    <a href="index.html" class="wordmark">
+      <span class="wordmark-word">Legacy</span>
+      <span class="wordmark-sub">Properties · Angels Camp CA</span>
+    </a>
+    <div class="topnav-links right">
+      <a href="index.html#ledger">The Ledger</a>
+      <a href="dashboard.html">Sign In</a>
+      <a href="platform.html" class="btn btn-ink btn-sm" style="padding:10px 18px;">Find My Match</a>
+    </div>
+  </nav>
+</header>
 
-/* ============================================================
-   HERO — editorial split
-   ============================================================ */
-.ab-hero {
-  max-width: var(--max);
-  margin: 0 auto;
-  padding: 72px var(--gutter) 0;
-  display: grid;
-  grid-template-columns: 1.05fr 0.95fr;
-  gap: 64px;
-  align-items: center;
-}
-.ab-hero-copy { padding-bottom: 40px; }
-.ab-hero-eyebrow {
-  display: flex; align-items: center; gap: 14px; margin-bottom: 30px;
-}
-.ab-hero-eyebrow .rule { flex: 0 0 48px; height: 1px; background: var(--brass); opacity: .7; }
-.ab-hero h1 {
-  font-family: var(--serif);
-  font-weight: 300;
-  font-size: clamp(44px, 5.4vw, 82px);
-  line-height: 0.98;
-  letter-spacing: -0.015em;
-  color: var(--ink);
-}
-.ab-hero h1 em { font-style: italic; color: var(--brass); }
-.ab-hero-lede {
-  font-family: var(--serif);
-  font-style: italic;
-  font-weight: 300;
-  font-size: clamp(19px, 1.6vw, 23px);
-  line-height: 1.5;
-  color: var(--ink-soft);
-  margin-top: 32px;
-  max-width: 30em;
-}
-.ab-hero-meta {
-  display: flex; flex-wrap: wrap; gap: 28px; margin-top: 40px;
-  padding-top: 26px; border-top: 1px solid var(--rule);
-  font-family: var(--mono); font-size: 10px; letter-spacing: 0.16em;
-  text-transform: uppercase; color: var(--ink-mute);
-}
-.ab-hero-meta b { color: var(--ink); font-weight: 500; }
+<main class="ab-wrap">
 
-/* Portrait */
-.ab-portrait { position: relative; }
-.ab-portrait-img {
-  position: relative; aspect-ratio: 4/5; overflow: hidden;
-  background: var(--vellum); border: 1px solid var(--rule);
-}
-.ab-portrait-img img { width: 100%; height: 100%; object-fit: cover; }
-.ab-portrait-cap {
-  position: absolute; left: -1px; bottom: 28px;
-  background: var(--ink); color: var(--shell);
-  padding: 12px 20px;
-  font-family: var(--mono); font-size: 10px; letter-spacing: 0.18em;
-  text-transform: uppercase;
-}
-.ab-portrait-cap em { color: var(--brass-bright); font-style: normal; }
-.ab-portrait-vert {
-  position: absolute; top: 0; right: -34px;
-  writing-mode: vertical-rl;
-  font-family: var(--mono); font-size: 10px; letter-spacing: 0.42em;
-  text-transform: uppercase; color: var(--ink-faint);
-}
+  <!-- ============ HERO ============ -->
+  <section class="ab-hero">
+    <div class="ab-hero-copy">
+      <div class="ab-hero-eyebrow">
+        <span class="rule"></span>
+        <span class="eyebrow">Profile · Broker-Owner</span>
+      </div>
+      <h1>She spent thirty years<br>telling other people's stories.<br><em>Now she tells yours.</em></h1>
+      <p class="ab-hero-lede">Before Sara sold a single home in the Gold Country, she spent three decades as a global publicist in electronic and dance music — shaping how artists were seen and heard, and learning the craft that turns out to matter most in real estate: how to tell a true story so well that the right people lean in.</p>
+      <div class="ab-hero-meta">
+        <span><b>Legacy Properties</b> · Broker-Owner</span>
+        <span>Calaveras · Amador · El Dorado</span>
+        <span>DRE <b>#02141987</b></span>
+      </div>
+    </div>
+    <div class="ab-portrait">
+      <div class="ab-portrait-img">
+        <img src="art/sara-headshot.png" alt="Sara, Broker-Owner of Legacy Properties">
+      </div>
+      <div class="ab-portrait-cap">Sara · <em>Broker-Owner</em></div>
+      <div class="ab-portrait-vert">Every home has a story</div>
+    </div>
+  </section>
 
-/* ============================================================
-   STORY — magazine body
-   ============================================================ */
-.ab-story {
-  max-width: 1180px; margin: 0 auto;
-  padding: 110px var(--gutter) 90px;
-}
-.ab-story-grid {
-  display: grid; grid-template-columns: 0.34fr 0.66fr; gap: 64px;
-  align-items: start;
-}
-.ab-story-aside { position: sticky; top: 120px; }
-.ab-story-aside .eyebrow { display: block; margin-bottom: 18px; }
-.ab-kicker {
-  font-family: var(--serif); font-style: italic; font-weight: 300;
-  font-size: 30px; line-height: 1.15; color: var(--ink);
-}
-.ab-kicker em { color: var(--brass); }
-.ab-mic { margin-top: 36px; width: 92px; height: auto; opacity: .9; }
+  <!-- ============ STORY ============ -->
+  <section class="ab-story">
+    <div class="ab-story-grid">
+      <aside class="ab-story-aside">
+        <span class="eyebrow">The Long Version</span>
+        <p class="ab-kicker">From the <em>press room</em><br>to the <em>foothills.</em></p>
+        <!-- vintage microphone motif -->
+        <svg class="ab-mic" viewBox="0 0 100 168" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <ellipse cx="50" cy="44" rx="30" ry="40" stroke="#8C6E3D" stroke-width="2"/>
+          <path d="M28 30 H72 M26 40 H74 M26 50 H74 M28 60 H72" stroke="#8C6E3D" stroke-width="1.4"/>
+          <rect x="44" y="84" width="12" height="6" stroke="#8C6E3D" stroke-width="1.6"/>
+          <path d="M34 90 Q34 104 50 104 Q66 104 66 90" stroke="#8C6E3D" stroke-width="1.6"/>
+          <path d="M50 104 V134" stroke="#8C6E3D" stroke-width="1.6"/>
+          <path d="M30 134 H70" stroke="#8C6E3D" stroke-width="1.6"/>
+          <path d="M22 150 Q50 138 78 150" stroke="#8C6E3D" stroke-width="1.6"/>
+        </svg>
+      </aside>
 
-.ab-prose { max-width: 38em; }
-.ab-prose p {
-  font-size: 16.5px; line-height: 1.78; color: var(--ink-soft);
-  margin-bottom: 24px;
-}
-.ab-prose p.lead { color: var(--ink); }
-.ab-prose p.drop::first-letter {
-  font-family: var(--serif); font-style: italic; font-weight: 400;
-  float: left; font-size: 78px; line-height: 0.74;
-  padding: 8px 14px 0 0; color: var(--brass);
-}
-.ab-prose strong { color: var(--ink); font-weight: 600; }
+      <div class="ab-prose">
+        <p class="lead drop">Sara's first career had nothing to do with square footage and everything to do with narrative. For more than thirty years she worked as a global publicist in electronic and dance music — the person who built an artist's reputation, shaped how the world saw them, and earned the trust of people who had every reason to be guarded. You learn things there that no licensing exam covers.</p>
 
-.ab-pull {
-  margin: 44px 0; padding: 8px 0 8px 28px;
-  border-left: 2px solid var(--brass);
-  font-family: var(--serif); font-style: italic; font-weight: 300;
-  font-size: clamp(24px, 2.4vw, 32px); line-height: 1.28; color: var(--ink);
-}
+        <p>You learn that nothing sells itself — and that the truth, told with care, always lands harder than hype. You learn to find the real story underneath the noise, to earn trust before you ask for it, and to represent someone so faithfully that they recognize themselves in the result. Thirty years of that doesn't leave you — it becomes how you see everything.</p>
 
-/* ============================================================
-   PHILOSOPHY BAND — ink
-   ============================================================ */
-.ab-band {
-  background: var(--ink); color: var(--shell);
-  padding: 110px var(--gutter);
-  position: relative; overflow: hidden;
-}
-.ab-band-inner {
-  max-width: 1040px; margin: 0 auto; text-align: center;
-  position: relative; z-index: 1;
-}
-.ab-band .eyebrow { color: var(--brass-bright); }
-.ab-band-quote {
-  font-family: var(--serif); font-weight: 300; font-style: italic;
-  font-size: clamp(34px, 4.6vw, 62px); line-height: 1.08;
-  letter-spacing: -0.01em; margin-top: 26px; color: var(--shell);
-}
-.ab-band-quote em { color: var(--brass-bright); }
-.ab-band-sub {
-  font-family: var(--serif); font-style: italic; font-weight: 300;
-  font-size: 19px; line-height: 1.5; color: rgba(255,255,255,0.62);
-  max-width: 42em; margin: 30px auto 0;
-}
-.ab-band-mic {
-  position: absolute; right: -40px; bottom: -50px;
-  width: 260px; height: auto; opacity: 0.07;
-  transform: rotate(-8deg);
-}
+        <div class="ab-pull">"Publicity and real estate are the same craft. You're never selling the thing. You're telling its story honestly enough that the right person feels it."</div>
 
-/* ============================================================
-   FACTS — brokerage credentials
-   ============================================================ */
-.ab-facts {
-  max-width: var(--max); margin: 0 auto;
-  padding: 100px var(--gutter);
-}
-.ab-facts-h {
-  display: grid; grid-template-columns: 1fr 1fr; gap: 60px;
-  align-items: end; margin-bottom: 50px;
-  padding-bottom: 24px; border-bottom: 1px solid var(--rule);
-}
-.ab-facts-h p {
-  font-family: var(--serif); font-style: italic; font-weight: 300;
-  font-size: 20px; line-height: 1.45; color: var(--ink-soft);
-}
-.ab-facts-grid {
-  display: grid; grid-template-columns: repeat(4, 1fr);
-  gap: 1px; background: var(--rule); border: 1px solid var(--rule);
-}
-.ab-fact { background: var(--shell); padding: 36px 32px; }
-.ab-fact-num {
-  font-family: var(--serif); font-style: italic; font-weight: 300;
-  font-size: 52px; line-height: 0.9; color: var(--ink);
-}
-.ab-fact-num em { color: var(--brass); }
-.ab-fact-label {
-  font-family: var(--mono); font-size: 10px; letter-spacing: 0.16em;
-  text-transform: uppercase; color: var(--ink-mute); margin-top: 16px;
-  line-height: 1.5;
-}
+        <p>So when Sara turned that sensibility toward real estate, she didn't arrive as a typical agent with a typical pitch. She arrived as someone who already knew how to represent people well — how to hear what a buyer is really after underneath the bed-and-bath count, and how to present a seller's home so its story lands the moment you walk in.</p>
 
-/* ============================================================
-   COVERAGE — towns
-   ============================================================ */
-.ab-coverage {
-  background: var(--linen);
-  padding: 100px var(--gutter);
-  border-top: 1px solid var(--rule); border-bottom: 1px solid var(--rule);
-}
-.ab-coverage-inner { max-width: var(--max); margin: 0 auto; }
-.ab-coverage-h {
-  display: grid; grid-template-columns: 1fr 1fr; gap: 60px;
-  align-items: end; margin-bottom: 48px;
-}
-.ab-coverage-h p {
-  font-family: var(--serif); font-style: italic; font-weight: 300;
-  font-size: 19px; line-height: 1.5; color: var(--ink-soft); max-width: 34em;
-}
-.ab-towns {
-  display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px;
-}
-.ab-town {
-  position: relative; aspect-ratio: 5/6; overflow: hidden;
-  background: var(--vellum); border: 1px solid var(--rule);
-  display: block; text-decoration: none; color: inherit;
-}
-.ab-town img {
-  width: 100%; height: 100%; object-fit: cover;
-  transition: transform .6s ease; filter: saturate(0.92);
-}
-.ab-town:hover img { transform: scale(1.05); }
-.ab-town-frame {
-  position: absolute; inset: 0;
-  background: repeating-linear-gradient(45deg, var(--vellum) 0 14px, var(--linen) 14px 28px);
-}
-.ab-town-grad {
-  position: absolute; inset: 0;
-  background: linear-gradient(to top, rgba(27,24,19,0.78) 0%, rgba(27,24,19,0.10) 46%, transparent 70%);
-}
-.ab-town-label {
-  position: absolute; left: 22px; bottom: 20px; right: 22px;
-}
-.ab-town-name {
-  font-family: var(--serif); font-style: italic; font-weight: 400;
-  font-size: 27px; line-height: 1; color: var(--shell);
-}
-.ab-town-county {
-  font-family: var(--mono); font-size: 9px; letter-spacing: 0.18em;
-  text-transform: uppercase; color: var(--brass-bright); margin-top: 8px;
-}
+        <p>That's the whole idea behind <strong>Legacy Properties</strong>, the boutique Gold Country brokerage she owns and runs. Small on purpose. Personal by design. A brokerage where every listing gets the attention of the person whose name is on the door — not a handoff to a junior whose name you'll never learn.</p>
 
-/* ============================================================
-   JAMES — affiliated agent
-   ============================================================ */
-.ab-james {
-  max-width: var(--max); margin: 0 auto;
-  padding: 100px var(--gutter);
-  display: grid; grid-template-columns: 0.42fr 0.58fr; gap: 64px;
-  align-items: center;
-}
-.ab-james-img {
-  position: relative; aspect-ratio: 4/5; overflow: hidden;
-  background: var(--vellum); border: 1px solid var(--rule);
-}
-.ab-james-img img { width: 100%; height: 100%; object-fit: cover; }
-.ab-james h2 {
-  font-family: var(--serif); font-weight: 300; font-style: italic;
-  font-size: clamp(36px, 4vw, 54px); line-height: 1.02; color: var(--ink);
-  margin-top: 18px;
-}
-.ab-james-role {
-  font-family: var(--mono); font-size: 10px; letter-spacing: 0.18em;
-  text-transform: uppercase; color: var(--ink-mute); margin-top: 16px;
-}
-.ab-james p {
-  font-size: 16px; line-height: 1.75; color: var(--ink-soft);
-  margin-top: 24px; max-width: 36em;
-}
+        <p>The brand carries the look of the life that built it: the warm, analog romance of a <strong>vintage microphone</strong> — chrome and ribbon and stage light — because the through-line of Sara's whole career has been the same. Give people a voice. Help them tell the story they came to tell. <strong>Every home has a story</strong> isn't a tagline she focus-grouped. It's the only way she's ever known how to work.</p>
+      </div>
+    </div>
+  </section>
 
-/* ============================================================
-   CONTACT STRIP
-   ============================================================ */
-.ab-contact {
-  background: var(--shell);
-  border-top: 1px solid var(--rule);
-  padding: 90px var(--gutter);
-}
-.ab-contact-inner {
-  max-width: var(--max); margin: 0 auto;
-  display: grid; grid-template-columns: 1fr auto; gap: 56px; align-items: center;
-}
-.ab-contact h2 {
-  font-family: var(--serif); font-weight: 300; font-style: italic;
-  font-size: clamp(34px, 4vw, 52px); line-height: 1.02; color: var(--ink);
-}
-.ab-contact h2 em { color: var(--brass); }
-.ab-contact-rows {
-  display: flex; flex-wrap: wrap; gap: 12px 40px; margin-top: 28px;
-}
-.ab-contact-row {
-  display: flex; flex-direction: column; gap: 6px;
-}
-.ab-contact-row .k {
-  font-family: var(--mono); font-size: 9px; letter-spacing: 0.18em;
-  text-transform: uppercase; color: var(--ink-faint);
-}
-.ab-contact-row .v {
-  font-size: 16px; color: var(--ink); text-decoration: none;
-  border-bottom: 1px solid transparent; transition: border-color .15s;
-}
-.ab-contact-row a.v:hover { border-color: var(--brass); }
-.ab-contact-cta { display: flex; flex-direction: column; gap: 12px; min-width: 220px; }
+  <!-- ============ PHILOSOPHY BAND ============ -->
+  <section class="ab-band">
+    <div class="ab-band-inner">
+      <span class="eyebrow">The Philosophy</span>
+      <p class="ab-band-quote">Story-driven luxury.<br><em>Every home has a story.</em></p>
+      <p class="ab-band-sub">Luxury, to Sara, was never about the highest price per square foot. It's about the homes that hold a narrative — the 1880s cottage with a hundred winters in its beams, the lake place where three generations learned to swim, the vineyard estate waiting for its next chapter. Her job is to find the buyer who deserves that story, and to tell it well enough that they recognize it as theirs.</p>
+    </div>
+    <svg class="ab-band-mic" viewBox="0 0 100 168" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <ellipse cx="50" cy="44" rx="30" ry="40" stroke="#C99E5A" stroke-width="3"/>
+      <path d="M28 30 H72 M26 40 H74 M26 50 H74 M28 60 H72" stroke="#C99E5A" stroke-width="2.4"/>
+      <rect x="44" y="84" width="12" height="6" stroke="#C99E5A" stroke-width="2.6"/>
+      <path d="M34 90 Q34 104 50 104 Q66 104 66 90" stroke="#C99E5A" stroke-width="2.6"/>
+      <path d="M50 104 V134" stroke="#C99E5A" stroke-width="2.6"/>
+      <path d="M30 134 H70" stroke="#C99E5A" stroke-width="2.6"/>
+      <path d="M22 150 Q50 138 78 150" stroke="#C99E5A" stroke-width="2.6"/>
+    </svg>
+  </section>
 
-/* ============================================================
-   RESPONSIVE
-   ============================================================ */
-@media (max-width: 980px) {
-  .ab-hero { grid-template-columns: 1fr; gap: 40px; padding-top: 48px; }
-  .ab-portrait { max-width: 420px; }
-  .ab-portrait-vert { display: none; }
-  .ab-story-grid { grid-template-columns: 1fr; gap: 36px; }
-  .ab-story-aside { position: static; }
-  .ab-facts-grid { grid-template-columns: repeat(2, 1fr); }
-  .ab-facts-h, .ab-coverage-h { grid-template-columns: 1fr; gap: 22px; }
-  .ab-james { grid-template-columns: 1fr; gap: 36px; }
-  .ab-james-img { max-width: 360px; }
-  .ab-contact-inner { grid-template-columns: 1fr; gap: 32px; }
-}
-@media (max-width: 620px) {
-  .ab-towns { grid-template-columns: 1fr 1fr; }
-  .ab-facts-grid { grid-template-columns: 1fr 1fr; }
-}
+  <!-- ============ FACTS ============ -->
+  <section class="ab-facts">
+    <div class="ab-facts-h">
+      <h2 class="h-section">The <em>brokerage.</em></h2>
+      <p>Boutique by definition, not by accident. Legacy Properties is built to give Gold Country sellers and relocating buyers the kind of attention a volume shop structurally can't.</p>
+    </div>
+    <div class="ab-facts-grid">
+      <div class="ab-fact">
+        <div class="ab-fact-num">30<em>+</em></div>
+        <div class="ab-fact-label">Years as a global publicist in electronic &amp; dance music</div>
+      </div>
+      <div class="ab-fact">
+        <div class="ab-fact-num">3</div>
+        <div class="ab-fact-label">Counties covered — Calaveras, Amador, El Dorado</div>
+      </div>
+      <div class="ab-fact">
+        <div class="ab-fact-num">1</div>
+        <div class="ab-fact-label">Broker-Owner on every listing, start to close</div>
+      </div>
+      <div class="ab-fact">
+        <div class="ab-fact-num">&infin;</div>
+        <div class="ab-fact-label">Stories told — every home, every seller, every chapter</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ COVERAGE ============ -->
+  <section class="ab-coverage">
+    <div class="ab-coverage-inner">
+      <div class="ab-coverage-h">
+        <h2 class="h-section">Where she <em>works.</em></h2>
+        <p>From the Calaveras foothills to the Amador wine country and up into El Dorado — the historic Gold Country towns Sara knows street by street.</p>
+      </div>
+      <div class="ab-towns">
+        <a href="index.html#communities" class="ab-town">
+          <img src="art/towns/angels-camp-mainst-fall.jpg" alt="Angels Camp">
+          <div class="ab-town-grad"></div>
+          <div class="ab-town-label">
+            <div class="ab-town-name">Angels Camp</div>
+            <div class="ab-town-county">Calaveras County</div>
+          </div>
+        </a>
+        <a href="index.html#communities" class="ab-town">
+          <img src="art/towns/murphys-mainst-summer.jpg" alt="Murphys">
+          <div class="ab-town-grad"></div>
+          <div class="ab-town-label">
+            <div class="ab-town-name">Murphys</div>
+            <div class="ab-town-county">Calaveras County</div>
+          </div>
+        </a>
+        <a href="index.html#communities" class="ab-town">
+          <div class="ab-town-frame"></div>
+          <div class="ab-town-grad"></div>
+          <div class="ab-town-label">
+            <div class="ab-town-name">San Andreas</div>
+            <div class="ab-town-county">Calaveras County</div>
+          </div>
+        </a>
+        <a href="index.html#communities" class="ab-town">
+          <img src="art/towns/copperopolis-lake-tulloch.jpg" alt="Copperopolis">
+          <div class="ab-town-grad"></div>
+          <div class="ab-town-label">
+            <div class="ab-town-name">Copperopolis</div>
+            <div class="ab-town-county">Calaveras County</div>
+          </div>
+        </a>
+        <a href="index.html#communities" class="ab-town">
+          <img src="art/towns/sutter-creek-mainst.jpg" alt="Sutter Creek">
+          <div class="ab-town-grad"></div>
+          <div class="ab-town-label">
+            <div class="ab-town-name">Sutter Creek</div>
+            <div class="ab-town-county">Amador County</div>
+          </div>
+        </a>
+        <a href="index.html#communities" class="ab-town">
+          <img src="art/towns/arnold-winter-mainst.jpg" alt="Arnold">
+          <div class="ab-town-grad"></div>
+          <div class="ab-town-label">
+            <div class="ab-town-name">Arnold</div>
+            <div class="ab-town-county">Calaveras County</div>
+          </div>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ JAMES ============ -->
+  <section class="ab-james">
+    <div class="ab-james-img">
+      <img src="art/james-headshot.png" alt="James Beyersdorf, affiliated agent">
+    </div>
+    <div>
+      <span class="eyebrow">Partner · In Work &amp; Life</span>
+      <h2>James Beyersdorf</h2>
+      <div class="ab-james-role">Affiliated Agent · Legacy Properties</div>
+      <p>James is Sara's husband and her partner on the ground — the second set of eyes at every showing, the steady hand on logistics, and the person who makes a boutique brokerage feel like it has the bandwidth of a much larger one. Buyers and sellers get two committed people on their side, who share a home and a standard.</p>
+      <p>Together they've built Legacy Properties around a simple promise: you'll always be working with one of them, never around them.</p>
+    </div>
+  </section>
+
+  <!-- ============ CONTACT ============ -->
+  <section class="ab-contact">
+    <div class="ab-contact-inner">
+      <div>
+        <h2 class="h-section">Let's tell <em>your story.</em></h2>
+        <div class="ab-contact-rows">
+          <div class="ab-contact-row">
+            <span class="k">Phone</span>
+            <a class="v" href="tel:2095594966">(209) 559-4966</a>
+          </div>
+          <div class="ab-contact-row">
+            <span class="k">Email</span>
+            <a class="v" href="mailto:SaraSellsCalifornia@gmail.com">SaraSellsCalifornia@gmail.com</a>
+          </div>
+          <div class="ab-contact-row">
+            <span class="k">License</span>
+            <span class="v">DRE #02141987</span>
+          </div>
+        </div>
+      </div>
+      <div class="ab-contact-cta">
+        <a href="platform.html" class="btn btn-ink">Find my match</a>
+        <a href="seller.html" class="btn btn-ghost">What's my home worth?</a>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<!-- ============ FOOTER ============ -->
+<footer class="footer">
+  <div class="footer-inner">
+    <div class="footer-top">
+      <div>
+        <a href="index.html" class="wordmark" style="align-items: flex-start;">
+          <span class="wordmark-word">Legacy</span>
+          <span class="wordmark-sub">Properties · Angels Camp CA</span>
+        </a>
+        <p class="footer-tagline">Every home has a story. We help you find yours — or tell the one you've already lived.</p>
+      </div>
+      <div>
+        <h4>Services</h4>
+        <a href="relocate.html">Bay → Foothills relocation</a>
+        <a href="towns.html">Communities</a>
+        <a href="seller.html">Sellers</a>
+        <a href="listings.html">Browse listings</a>
+        <a href="platform.html">Request a tour</a>
+      </div>
+      <div>
+        <h4>Buy</h4>
+        <a href="listings.html">Search all listings</a>
+        <a href="fire-zone.html">Fire-zone &amp; insurance tool</a>
+        <a href="commute.html">Commute calculator</a>
+        <a href="relocate.html">Bay → Foothills relocation</a>
+        <a href="platform.html">Request a tour</a>
+      </div>
+      <div>
+        <h4>Sell</h4>
+        <a href="seller.html">What's my home worth?</a>
+        <a href="seller.html">Listing process</a>
+        <a href="how-we-work.html">How we work</a>
+        <a href="about.html">About Sara &amp; James</a>
+        <a href="seller.html">Request a CMA</a>
+      </div>
+      <div>
+        <h4>Connect</h4>
+        <a href="tel:2095594966">(209) 559-4966</a>
+        <a href="mailto:SaraSellsCalifornia@gmail.com">SaraSellsCalifornia@gmail.com</a>
+        <a href="https://www.instagram.com/legacypropertiesig/">Instagram</a>
+        <a href="https://www.facebook.com/legacypropertiesfb/">Facebook</a>
+        <a href="https://www.youtube.com/LegacyPropertiesTV">YouTube</a>
+        <a href="ledger.html">The Ledger</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <div>© 2026 Legacy Properties · All rights reserved</div>
+      <div>Sara Cooper, Broker · DRE #02141987 · Equal Housing Opportunity</div>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>
