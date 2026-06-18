@@ -40,19 +40,25 @@ Never modify HTML/CSS — add backend functionality only.
 - Schema field names — match spec exactly
 - Direct Anthropic API only
 
-## What's been implemented (Phase 1D + 1E + 1F — 2026-02)
+## What's been implemented (Phase 1D–1I — 2026-02)
 - **Phase 1D — CRM live data**: `/api/crm/[action].js` dispatcher routes `morning-brief`, `inbox`, `pipeline`, `lead`, `approve`. AI morning-brief narrative cached in `briefs` table (4h TTL). `legacy-client.js` paints the desk.
-- **Phase 1E — Buyer dashboard**: `/api/me/dashboard.js` returns paint-ready buyer payload (greeting, brief, stats, new_matches, saved, tours, messages, digest letter via Anthropic, market snapshot). `dashboard.html` wired through `data-bind` / `data-list`.
-- **Phase 1F — Seller portal** (2026-02): `/api/seller/[action].js` → `portal` returns listing hero, KPI strip (page views/uniques/saves/showings/offers), 21-day trend bars, AI seller note (Claude), offers, showings, comp set (same city, sq_ft ±20%, last 90 days), pre-listing checklist, documents from Supabase Storage bucket `seller-docs/<property_id>/`, recent activity, sharing. `db/003_seller_portal.sql` adds `properties.seller_lead_id`, `listing_stats` (manual entry stub), `listing_checklist`. Seller painter appended to `legacy-client.js` (no HTML changes).
+- **Phase 1E — Buyer dashboard**: `/api/me/dashboard.js` returns paint-ready buyer payload (greeting, brief, stats, new_matches, saved, tours, messages, digest letter via Anthropic, market snapshot). `dashboard.html` wired through `data-bind` / `data-list`. Fixed Sara headshot path (was returning bare filename, now `art/sara-headshot.png`). Mock-flash eliminated: painter calls `enterLoading()` + `clearScalars()` synchronously on DOMContentLoaded.
+- **Phase 1F — Seller portal**: `/api/seller/[action].js` → `portal` returns listing hero, KPI strip, 21-day trend bars, AI seller note (Claude), offers, showings, comp set (same city, sq_ft ±20%, last 90 days), pre-listing checklist, documents from Supabase Storage bucket `seller-docs/<property_id>/`, recent activity, sharing. `db/003_seller_portal.sql` adds `properties.seller_lead_id`, `listing_stats`, `listing_checklist`. Seller painter in `legacy-client.js`.
+- **Phase 1G — Sequences engine**: `/api/sequences/[action].js` → `enroll` (agents-only POST) + `cron` (hourly Vercel cron). Ticker auto-pauses on inbound replies, drafts next step via direct Anthropic (`claude-sonnet-4-6`) → `messages.status='pending_approval'`. Never auto-sends. Tuesday 14:00 UTC seller digest via Resend (de-duped per 6-day window). `db/004_sequence_pacing.sql` adds `leads.sequence_next_due_at`.
+- **Phase 1I — iHomefinder IDX**: `/api/idx/[action].js` → `behavioral-webhook` (POST: normalises events, finds/creates lead by email, writes `lead_events`, re-scores, drafts hot-lead SMS when score crosses 75 → `messages.pending_approval`) + `sync` (4h Vercel cron: HTTP Basic, configurable base/path/agent scope, tolerant field mapping, upserts `properties` by `mls_number`).
+- **Auth UX**: `gate()` rewritten as a synchronously-injected full-screen overlay (no mock flash). Sign-in card morphs in for unauthed sessions; dismisses for authed.
+- **Vercel function count: 12/12** (Hobby tier ceiling reached). All future endpoints must go through the existing `[action].js` dispatchers.
 - **Tech stack adjustment**: Resend (replaces MailerLite/SendGrid) for transactional email via `_lib/resend.js`.
 
 ## Backlog (priority order)
-- **P1 — Phase 1G**: sequences cron engine (`/api/sequences/enroll.js`, `/api/cron/sequences.js`)
-- **P1 — Phase 1I**: iHomefinder IDX embed in `listings.html`, `/api/idx/{sync, behavioral-webhook}.js`
-- **P2 — Phase 2**: delete `/api/fub/sync.js` + `fub_id` logic in January when FUB contract ends
+- **P2 — Phase 2**: delete `/api/fub/sync.js` + `fub_id` column when FUB contract ends.
+- **P2 — Enrichment**: deeper iHomefinder feed mapping once we see real payloads (only the common aliases are wired today).
 
 ## Next action items
-1. **Seller portal setup**: Run `db/003_seller_portal.sql` in Supabase. Create Storage bucket `seller-docs` (private; signed URLs). Set `seller_lead_id` on the seller's property row. Seed `listing_stats` with manual daily numbers (or wire the IDX webhook later) and `listing_checklist` rows.
-2. **Phase 1G — Sequences**: build `/api/sequences/enroll.js` (POST: enroll lead in a sequence by trigger_type) + `/api/cron/sequences.js` (GET: tick due steps, draft via AI, write to `messages` as `pending_approval`). Add Vercel cron to vercel.json.
-3. **Phase 1I — IDX**: drop iHomefinder embed into `listings.html`, build `/api/idx/sync.js` cron + `/api/idx/behavioral-webhook.js` to write into `properties` and `lead_events`.
-4. **Phase 2**: remove FUB sync once contract ends.
+1. **Run pending SQL migrations in Supabase** (in order): `db/003_seller_portal.sql`, `db/004_sequence_pacing.sql`.
+2. **Set Vercel env vars** for Phase 1I:
+   - `IHOMEFINDER_API_USER` + `IHOMEFINDER_API_PASS` (or `IHOMEFINDER_API_KEY` as basic-user fallback)
+   - Optional: `IHOMEFINDER_API_BASE`, `IHOMEFINDER_LISTINGS_PATH`, `IHOMEFINDER_AGENT_ID`, `IHOMEFINDER_OFFICE_ID`, `IHOMEFINDER_WEBHOOK_SECRET`
+   - Optional: `CRON_SECRET` (gates `/api/sequences/cron` + `/api/idx/sync`)
+3. **Configure iHomefinder webhook** to POST to `https://<domain>/api/idx/behavioral-webhook?secret=<CRON_SECRET_OR_WEBHOOK_SECRET>`.
+4. **Smoke test**: deploy → trigger `/api/idx/sync` manually (or wait 4h) → confirm a few properties land in Supabase → POST a sample webhook payload and verify a `lead_events` row + score change appear.
