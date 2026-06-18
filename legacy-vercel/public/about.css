@@ -1,0 +1,307 @@
+/* ============================================================
+   ABOUT — editorial profile · Sara Cooper, Legacy Properties
+   Builds on legacy.css primitives. All tokens inherited.
+   ============================================================ */
+
+/* ── Page rhythm ── */
+.ab-wrap { position: relative; z-index: 1; }
+
+/* ============================================================
+   HERO — editorial split
+   ============================================================ */
+.ab-hero {
+  max-width: var(--max);
+  margin: 0 auto;
+  padding: 72px var(--gutter) 0;
+  display: grid;
+  grid-template-columns: 1.05fr 0.95fr;
+  gap: 64px;
+  align-items: center;
+}
+.ab-hero-copy { padding-bottom: 40px; }
+.ab-hero-eyebrow {
+  display: flex; align-items: center; gap: 14px; margin-bottom: 30px;
+}
+.ab-hero-eyebrow .rule { flex: 0 0 48px; height: 1px; background: var(--brass); opacity: .7; }
+.ab-hero h1 {
+  font-family: var(--serif);
+  font-weight: 300;
+  font-size: clamp(44px, 5.4vw, 82px);
+  line-height: 0.98;
+  letter-spacing: -0.015em;
+  color: var(--ink);
+}
+.ab-hero h1 em { font-style: italic; color: var(--brass); }
+.ab-hero-lede {
+  font-family: var(--serif);
+  font-style: italic;
+  font-weight: 300;
+  font-size: clamp(19px, 1.6vw, 23px);
+  line-height: 1.5;
+  color: var(--ink-soft);
+  margin-top: 32px;
+  max-width: 30em;
+}
+.ab-hero-meta {
+  display: flex; flex-wrap: wrap; gap: 28px; margin-top: 40px;
+  padding-top: 26px; border-top: 1px solid var(--rule);
+  font-family: var(--mono); font-size: 10px; letter-spacing: 0.16em;
+  text-transform: uppercase; color: var(--ink-mute);
+}
+.ab-hero-meta b { color: var(--ink); font-weight: 500; }
+
+/* Portrait */
+.ab-portrait { position: relative; }
+.ab-portrait-img {
+  position: relative; aspect-ratio: 4/5; overflow: hidden;
+  background: var(--vellum); border: 1px solid var(--rule);
+}
+.ab-portrait-img img { width: 100%; height: 100%; object-fit: cover; }
+.ab-portrait-cap {
+  position: absolute; left: -1px; bottom: 28px;
+  background: var(--ink); color: var(--shell);
+  padding: 12px 20px;
+  font-family: var(--mono); font-size: 10px; letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+.ab-portrait-cap em { color: var(--brass-bright); font-style: normal; }
+.ab-portrait-vert {
+  position: absolute; top: 0; right: -34px;
+  writing-mode: vertical-rl;
+  font-family: var(--mono); font-size: 10px; letter-spacing: 0.42em;
+  text-transform: uppercase; color: var(--ink-faint);
+}
+
+/* ============================================================
+   STORY — magazine body
+   ============================================================ */
+.ab-story {
+  max-width: 1180px; margin: 0 auto;
+  padding: 110px var(--gutter) 90px;
+}
+.ab-story-grid {
+  display: grid; grid-template-columns: 0.34fr 0.66fr; gap: 64px;
+  align-items: start;
+}
+.ab-story-aside { position: sticky; top: 120px; }
+.ab-story-aside .eyebrow { display: block; margin-bottom: 18px; }
+.ab-kicker {
+  font-family: var(--serif); font-style: italic; font-weight: 300;
+  font-size: 30px; line-height: 1.15; color: var(--ink);
+}
+.ab-kicker em { color: var(--brass); }
+.ab-mic { margin-top: 36px; width: 92px; height: auto; opacity: .9; }
+
+.ab-prose { max-width: 38em; }
+.ab-prose p {
+  font-size: 16.5px; line-height: 1.78; color: var(--ink-soft);
+  margin-bottom: 24px;
+}
+.ab-prose p.lead { color: var(--ink); }
+.ab-prose p.drop::first-letter {
+  font-family: var(--serif); font-style: italic; font-weight: 400;
+  float: left; font-size: 78px; line-height: 0.74;
+  padding: 8px 14px 0 0; color: var(--brass);
+}
+.ab-prose strong { color: var(--ink); font-weight: 600; }
+
+.ab-pull {
+  margin: 44px 0; padding: 8px 0 8px 28px;
+  border-left: 2px solid var(--brass);
+  font-family: var(--serif); font-style: italic; font-weight: 300;
+  font-size: clamp(24px, 2.4vw, 32px); line-height: 1.28; color: var(--ink);
+}
+
+/* ============================================================
+   PHILOSOPHY BAND — ink
+   ============================================================ */
+.ab-band {
+  background: var(--ink); color: var(--shell);
+  padding: 110px var(--gutter);
+  position: relative; overflow: hidden;
+}
+.ab-band-inner {
+  max-width: 1040px; margin: 0 auto; text-align: center;
+  position: relative; z-index: 1;
+}
+.ab-band .eyebrow { color: var(--brass-bright); }
+.ab-band-quote {
+  font-family: var(--serif); font-weight: 300; font-style: italic;
+  font-size: clamp(34px, 4.6vw, 62px); line-height: 1.08;
+  letter-spacing: -0.01em; margin-top: 26px; color: var(--shell);
+}
+.ab-band-quote em { color: var(--brass-bright); }
+.ab-band-sub {
+  font-family: var(--serif); font-style: italic; font-weight: 300;
+  font-size: 19px; line-height: 1.5; color: rgba(255,255,255,0.62);
+  max-width: 42em; margin: 30px auto 0;
+}
+.ab-band-mic {
+  position: absolute; right: -40px; bottom: -50px;
+  width: 260px; height: auto; opacity: 0.07;
+  transform: rotate(-8deg);
+}
+
+/* ============================================================
+   FACTS — brokerage credentials
+   ============================================================ */
+.ab-facts {
+  max-width: var(--max); margin: 0 auto;
+  padding: 100px var(--gutter);
+}
+.ab-facts-h {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 60px;
+  align-items: end; margin-bottom: 50px;
+  padding-bottom: 24px; border-bottom: 1px solid var(--rule);
+}
+.ab-facts-h p {
+  font-family: var(--serif); font-style: italic; font-weight: 300;
+  font-size: 20px; line-height: 1.45; color: var(--ink-soft);
+}
+.ab-facts-grid {
+  display: grid; grid-template-columns: repeat(4, 1fr);
+  gap: 1px; background: var(--rule); border: 1px solid var(--rule);
+}
+.ab-fact { background: var(--shell); padding: 36px 32px; }
+.ab-fact-num {
+  font-family: var(--serif); font-style: italic; font-weight: 300;
+  font-size: 52px; line-height: 0.9; color: var(--ink);
+}
+.ab-fact-num em { color: var(--brass); }
+.ab-fact-label {
+  font-family: var(--mono); font-size: 10px; letter-spacing: 0.16em;
+  text-transform: uppercase; color: var(--ink-mute); margin-top: 16px;
+  line-height: 1.5;
+}
+
+/* ============================================================
+   COVERAGE — towns
+   ============================================================ */
+.ab-coverage {
+  background: var(--linen);
+  padding: 100px var(--gutter);
+  border-top: 1px solid var(--rule); border-bottom: 1px solid var(--rule);
+}
+.ab-coverage-inner { max-width: var(--max); margin: 0 auto; }
+.ab-coverage-h {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 60px;
+  align-items: end; margin-bottom: 48px;
+}
+.ab-coverage-h p {
+  font-family: var(--serif); font-style: italic; font-weight: 300;
+  font-size: 19px; line-height: 1.5; color: var(--ink-soft); max-width: 34em;
+}
+.ab-towns {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px;
+}
+.ab-town {
+  position: relative; aspect-ratio: 5/6; overflow: hidden;
+  background: var(--vellum); border: 1px solid var(--rule);
+  display: block; text-decoration: none; color: inherit;
+}
+.ab-town img {
+  width: 100%; height: 100%; object-fit: cover;
+  transition: transform .6s ease; filter: saturate(0.92);
+}
+.ab-town:hover img { transform: scale(1.05); }
+.ab-town-frame {
+  position: absolute; inset: 0;
+  background: repeating-linear-gradient(45deg, var(--vellum) 0 14px, var(--linen) 14px 28px);
+}
+.ab-town-grad {
+  position: absolute; inset: 0;
+  background: linear-gradient(to top, rgba(27,24,19,0.78) 0%, rgba(27,24,19,0.10) 46%, transparent 70%);
+}
+.ab-town-label {
+  position: absolute; left: 22px; bottom: 20px; right: 22px;
+}
+.ab-town-name {
+  font-family: var(--serif); font-style: italic; font-weight: 400;
+  font-size: 27px; line-height: 1; color: var(--shell);
+}
+.ab-town-county {
+  font-family: var(--mono); font-size: 9px; letter-spacing: 0.18em;
+  text-transform: uppercase; color: var(--brass-bright); margin-top: 8px;
+}
+
+/* ============================================================
+   JAMES — affiliated agent
+   ============================================================ */
+.ab-james {
+  max-width: var(--max); margin: 0 auto;
+  padding: 100px var(--gutter);
+  display: grid; grid-template-columns: 0.42fr 0.58fr; gap: 64px;
+  align-items: center;
+}
+.ab-james-img {
+  position: relative; aspect-ratio: 4/5; overflow: hidden;
+  background: var(--vellum); border: 1px solid var(--rule);
+}
+.ab-james-img img { width: 100%; height: 100%; object-fit: cover; }
+.ab-james h2 {
+  font-family: var(--serif); font-weight: 300; font-style: italic;
+  font-size: clamp(36px, 4vw, 54px); line-height: 1.02; color: var(--ink);
+  margin-top: 18px;
+}
+.ab-james-role {
+  font-family: var(--mono); font-size: 10px; letter-spacing: 0.18em;
+  text-transform: uppercase; color: var(--ink-mute); margin-top: 16px;
+}
+.ab-james p {
+  font-size: 16px; line-height: 1.75; color: var(--ink-soft);
+  margin-top: 24px; max-width: 36em;
+}
+
+/* ============================================================
+   CONTACT STRIP
+   ============================================================ */
+.ab-contact {
+  background: var(--shell);
+  border-top: 1px solid var(--rule);
+  padding: 90px var(--gutter);
+}
+.ab-contact-inner {
+  max-width: var(--max); margin: 0 auto;
+  display: grid; grid-template-columns: 1fr auto; gap: 56px; align-items: center;
+}
+.ab-contact h2 {
+  font-family: var(--serif); font-weight: 300; font-style: italic;
+  font-size: clamp(34px, 4vw, 52px); line-height: 1.02; color: var(--ink);
+}
+.ab-contact h2 em { color: var(--brass); }
+.ab-contact-rows {
+  display: flex; flex-wrap: wrap; gap: 12px 40px; margin-top: 28px;
+}
+.ab-contact-row {
+  display: flex; flex-direction: column; gap: 6px;
+}
+.ab-contact-row .k {
+  font-family: var(--mono); font-size: 9px; letter-spacing: 0.18em;
+  text-transform: uppercase; color: var(--ink-faint);
+}
+.ab-contact-row .v {
+  font-size: 16px; color: var(--ink); text-decoration: none;
+  border-bottom: 1px solid transparent; transition: border-color .15s;
+}
+.ab-contact-row a.v:hover { border-color: var(--brass); }
+.ab-contact-cta { display: flex; flex-direction: column; gap: 12px; min-width: 220px; }
+
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
+@media (max-width: 980px) {
+  .ab-hero { grid-template-columns: 1fr; gap: 40px; padding-top: 48px; }
+  .ab-portrait { max-width: 420px; }
+  .ab-portrait-vert { display: none; }
+  .ab-story-grid { grid-template-columns: 1fr; gap: 36px; }
+  .ab-story-aside { position: static; }
+  .ab-facts-grid { grid-template-columns: repeat(2, 1fr); }
+  .ab-facts-h, .ab-coverage-h { grid-template-columns: 1fr; gap: 22px; }
+  .ab-james { grid-template-columns: 1fr; gap: 36px; }
+  .ab-james-img { max-width: 360px; }
+  .ab-contact-inner { grid-template-columns: 1fr; gap: 32px; }
+}
+@media (max-width: 620px) {
+  .ab-towns { grid-template-columns: 1fr 1fr; }
+  .ab-facts-grid { grid-template-columns: 1fr 1fr; }
+}
