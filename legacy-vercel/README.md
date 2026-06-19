@@ -104,3 +104,4 @@ vercel dev      # serves public/ + api/ at http://localhost:3000
 - **1G** — Sequences cron engine
 - **1H** — FUB sync (already stubbed in `api/fub/sync.js`; remove in January)
 - **1I** — MetroListPRO Optima IDX behavioral webhook
+
