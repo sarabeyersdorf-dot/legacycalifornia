@@ -32,7 +32,7 @@
     }
   },
   "crons": [
-    { "path": "/api/sequences/cron", "schedule": "0 * * * *" },
-    { "path": "/api/idx/sync",       "schedule": "0 */4 * * *" }
+    { "path": "/api/sequences/cron", "schedule": "0 14 * * *" },
+    { "path": "/api/idx/sync",       "schedule": "0 9 * * *"  }
   ]
 }
