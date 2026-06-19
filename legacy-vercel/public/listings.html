@@ -3,10 +3,28 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Open Houses — Legacy Properties</title>
+<title>Properties — Legacy Properties</title>
 <link rel="stylesheet" href="legacy.css">
 <link rel="stylesheet" href="listings.css">
 <link rel="stylesheet" href="idx-theme.css">
+<style>
+  .idx-subnav { border-bottom: 1px solid var(--rule); background: var(--shell); }
+  .idx-subnav-inner {
+    max-width: var(--max); margin: 0 auto; padding: 16px var(--gutter);
+    display: flex; flex-direction: column; gap: 10px;
+  }
+  .idx-subnav-group { display: flex; flex-wrap: wrap; gap: 8px 18px; align-items: baseline; }
+  .idx-subnav-label {
+    font-family: var(--mono); font-size: 9px; letter-spacing: 0.2em;
+    text-transform: uppercase; color: var(--ink-faint);
+    flex: 0 0 70px;
+  }
+  .idx-subnav-group a {
+    font-size: 13.5px; color: var(--ink-soft); text-decoration: none;
+    border-bottom: 1px solid transparent; padding-bottom: 1px; transition: color .15s, border-color .15s;
+  }
+  .idx-subnav-group a:hover { color: var(--ink); border-color: var(--brass); }
+</style>
 <script src="https://kestrel.idxhome.com/ihf-kestrel.js"></script>
 <script>
   window.ihfKestrel = window.ihfKestrel || {};
@@ -16,7 +34,7 @@
   };
 </script>
 </head>
-<body class="paper" data-screen-label="Open Houses">
+<body class="paper" data-screen-label="IDX Listings">
 
 <header class="topnav">
   <div class="topnav-bar1">
@@ -42,62 +60,69 @@
   </nav>
 </header>
 
-<div class="idx-embed">
-<script>
-  document.currentScript.replaceWith(ihfKestrel.render());
-</script>
-</div>
-
-<footer class="footer">
-  <div class="footer-inner">
-    <div class="footer-top">
+<!-- ============ SEARCH BAR ============ -->
+<section class="search-bar">
+  <div class="search-inner">
+    <div class="search-h">
       <div>
-        <a href="index.html" class="wordmark" style="align-items: flex-start;">
-          <span class="wordmark-word">Legacy</span>
-          <span class="wordmark-sub">Properties · Angels Camp CA</span>
-        </a>
-        <p class="footer-tagline">Every home has a story. We help you find yours — or tell the one you've already lived.</p>
+        <span class="eyebrow">Properties · Calaveras · Amador · Tuolumne</span>
+        <h1 class="search-title">Search every listing <em>across the Gold Country.</em></h1>
       </div>
-      <div>
-        <h4>Services</h4>
-        <a href="relocate.html">Bay → Foothills relocation</a>
-        <a href="towns.html">Communities</a>
-        <a href="seller.html">Sellers</a>
-        <a href="listings.html">Browse listings</a>
-        <a href="platform.html">Request a tour</a>
-      </div>
-      <div>
-        <h4>Buy</h4>
-        <a href="listings.html">Search all listings</a>
-        <a href="fire-zone.html">Fire-zone &amp; insurance tool</a>
-        <a href="commute.html">Commute calculator</a>
-        <a href="relocate.html">Bay → Foothills relocation</a>
-        <a href="platform.html">Request a tour</a>
-      </div>
-      <div>
-        <h4>Sell</h4>
-        <a href="seller.html">What's my home worth?</a>
-        <a href="seller.html">Listing process</a>
-        <a href="how-we-work.html">How we work</a>
-        <a href="about.html">About Sara &amp; James</a>
-        <a href="seller.html">Request a CMA</a>
-      </div>
-      <div>
-        <h4>Connect</h4>
-        <a href="tel:2095594966">(209) 559-4966</a>
-        <a href="mailto:SaraSellsCalifornia@gmail.com">SaraSellsCalifornia@gmail.com</a>
-        <a href="https://www.instagram.com/legacypropertiesig/">Instagram</a>
-        <a href="https://www.facebook.com/legacypropertiesfb/">Facebook</a>
-        <a href="https://www.youtube.com/LegacyPropertiesTV">YouTube</a>
-        <a href="ledger.html">The Ledger</a>
-      </div>
-    </div>
-    <div class="footer-bottom">
-      <div>© 2026 Legacy Properties · All rights reserved</div>
-      <div>Sara Cooper, Broker · DRE #02141987 · Equal Housing Opportunity</div>
     </div>
   </div>
-</footer>
+</section>
+
+<!-- ============ IDX SUB-NAV ============ -->
+<nav class="idx-subnav" aria-label="Property search tools">
+  <div class="idx-subnav-inner">
+    <div class="idx-subnav-group">
+      <span class="idx-subnav-label">Browse</span>
+      <a href="featured-listings.html">Featured</a>
+      <a href="open-houses.html">Open Houses</a>
+      <a href="pending-featured-listings.html">Pending</a>
+      <a href="sold-featured-listings.html">Sold</a>
+      <a href="listing-map.html">Map Search</a>
+      <a href="communities.html">Communities</a>
+    </div>
+    <div class="idx-subnav-group">
+      <span class="idx-subnav-label">Tools</span>
+      <a href="market-report.html">Market Report</a>
+      <a href="mortgage-calculator.html">Mortgage Calculator</a>
+      <a href="property-organizer.html">Saved Searches</a>
+      <a href="favorites.html">Favorites</a>
+    </div>
+    <div class="idx-subnav-group">
+      <span class="idx-subnav-label">Team</span>
+      <a href="agents.html">Agents</a>
+      <a href="offices.html">Offices</a>
+      <a href="agent-profile.html">Agent Profile</a>
+    </div>
+  </div>
+</nav>
+
+<!-- ============ IDX RESULTS ============ -->
+<section class="split">
+  <div class="list-pane" style="width:100%;">
+    <div class="idx-embed">
+      <script>
+  document.currentScript.replaceWith(ihfKestrel.render());
+</script>
+    </div>
+
+    <!-- Sara strip -->
+    <div class="sara-strip">
+        <div class="sara-avatar"><img src="art/sara-headshot.png" alt="Sara Cooper" style="width:100%;height:100%;object-fit:cover;"></div>
+      <div class="sara-msg">
+        <div class="sara-name">Sara Cooper · <span class="mono" style="color:var(--brass-bright);font-size:10px;letter-spacing:.16em;">YOUR AGENT</span></div>
+        <div class="sara-q">Five listings in the field right now, from Angels Camp land to a Murphys estate. Happy to talk through what fits.</div>
+      </div>
+      <div class="sara-actions">
+        <button class="btn btn-ghost btn-sm">Message Sara</button>
+        <button class="btn btn-ink btn-sm">Book a tour</button>
+      </div>
+    </div>
+  </div>
+</section>
 
 </body>
 </html>
