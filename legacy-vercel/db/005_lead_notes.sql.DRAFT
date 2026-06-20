@@ -38,34 +38,22 @@ create index if not exists lead_notes_author_idx   on public.lead_notes (created
 -- 2. Row-Level Security ----------------------------------------------------
 alter table public.lead_notes enable row level security;
 
--- Helper predicate — true when the caller is an agent.
--- Matches the convention used by the existing leads/messages policies:
--- `auth.uid()` resolves through public.users.role.
-create or replace function public.caller_is_agent()
-returns boolean
-language sql
-stable
-security definer
-as $$
-  select exists (
-    select 1 from public.users u
-    where u.id = auth.uid()
-      and u.role in ('agent_sara', 'agent_james', 'admin')
-  )
-$$;
+-- Reuses the existing public.current_role_is_agent() helper defined in
+-- db/rls_policies.sql and db/supabase_bootstrap.sql. Every other policy
+-- in the database uses the same helper; keeping notes on the same one
+-- means a future tweak (e.g. adding 'agent_third' to the allowed roles)
+-- applies to lead_notes automatically.
 
--- Agents-only: full read/write on every note. There is no second policy.
--- Any other authenticated caller (a buyer logged into dashboard.html, a
--- seller in seller.html) gets zero rows — both for SELECT and any write
--- verb — because no policy grants them access.
+-- Agents-only: full read/write. NO second policy. Any non-agent
+-- authenticated caller hitting the table through RLS gets zero rows
+-- for any verb because no policy grants them access.
 drop policy if exists lead_notes_agent_all on public.lead_notes;
 create policy lead_notes_agent_all on public.lead_notes
   for all
-  using   (public.caller_is_agent())
-  with check (public.caller_is_agent());
+  using   (public.current_role_is_agent())
+  with check (public.current_role_is_agent());
 
--- Service role (the Vercel functions calling adminClient()) bypasses RLS by
--- default — no extra policy needed for the backend.
+-- Service role (adminClient() in Vercel functions) bypasses RLS as usual.
 
 -- =============================================================================
 -- Endpoint design (for reference — not part of this migration)
