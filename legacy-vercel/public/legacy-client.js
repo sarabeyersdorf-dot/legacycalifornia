@@ -1264,18 +1264,19 @@
         <div class="ld-thread-h">Conversation · ${messages.length} message${messages.length === 1 ? '' : 's'}</div>
         ${threadHtml}
       </div>
-      <div class="composer">
+      <div class="composer" data-composer>
         <div class="composer-head">
-          <span class="composer-tab on">Email</span>
-          <span class="composer-tab">SMS</span>
-          <span class="composer-tab">Note</span>
-          <span class="composer-tab">Internal</span>
+          <span class="composer-tab on" data-composer-tab="email">Email</span>
+          <span class="composer-tab" data-composer-tab="sms">SMS</span>
+          <span class="composer-tab" data-composer-tab="note" title="Internal notes need a new lead_notes table — not wired yet">Note</span>
+          <span class="composer-tab" data-composer-tab="internal" title="Internal notes need a new lead_notes table — not wired yet">Internal</span>
         </div>
-        <textarea placeholder="Manual outbound is read-only until /api/crm/message ships." disabled style="opacity:.55;"></textarea>
+        <input data-composer-subject placeholder="Subject" style="width:100%;border:1px solid #D9CFB7;padding:8px 10px;background:#fff;font:inherit;font-size:14px;margin-bottom:6px;">
+        <textarea data-composer-body placeholder="Write to ${escHtml(fullName(lead))}…"></textarea>
         <div class="composer-foot">
-          <div class="composer-tools"><span style="font-size:11px;opacity:.55;font-family:var(--mono);letter-spacing:.12em;text-transform:uppercase;">Manual send endpoint pending</span></div>
+          <div class="composer-tools"><span data-composer-status style="font-size:11px;opacity:.7;font-family:var(--mono);letter-spacing:.12em;text-transform:uppercase;"></span></div>
           <div style="display: flex; gap: 6px;">
-            <button class="btn btn-ink btn-sm" disabled>Send</button>
+            <button class="btn btn-ink btn-sm" data-detail-action="send">Send</button>
           </div>
         </div>
       </div>`;
@@ -1284,6 +1285,9 @@
     if (draftEl && pendingDraft) wireDraftActions(draftEl, pendingDraft, lead);
     const enrollBtn = detailEl.querySelector('[data-detail-action="enroll"]');
     if (enrollBtn) enrollBtn.addEventListener('click', () => promptEnrollSequence(lead));
+
+    // Wire the composer (channel toggle, Note/Internal placeholders, Send).
+    wireComposer(detailEl, lead);
 
     const stages = ['new', 'nurture', 'touring', 'offer', 'close'];
     const stageIdx = Math.max(0, stages.indexOf(lead.pipeline_stage || 'new'));
@@ -1539,6 +1543,96 @@
         moveLeadToStage(leadId, newStage);
       });
     });
+  }
+
+  // ---- Composer (manual outbound via POST /api/crm/message) --------------
+  function wireComposer(detailEl, lead) {
+    const composer  = detailEl.querySelector('[data-composer]');
+    if (!composer) return;
+    const subjectEl = composer.querySelector('[data-composer-subject]');
+    const bodyEl    = composer.querySelector('[data-composer-body]');
+    const statusEl  = composer.querySelector('[data-composer-status]');
+    const sendBtn   = composer.querySelector('[data-detail-action="send"]');
+    const tabs      = Array.from(composer.querySelectorAll('[data-composer-tab]'));
+
+    let channel = 'email';
+
+    function setChannel(next) {
+      channel = next;
+      tabs.forEach((t) => t.classList.toggle('on', t.getAttribute('data-composer-tab') === next));
+      const isNote = next === 'note' || next === 'internal';
+      const isSms  = next === 'sms';
+      if (isNote) {
+        subjectEl.style.display = 'none';
+        bodyEl.placeholder = 'Internal notes need a new lead_notes table — coordinate with backend before wiring.';
+        bodyEl.disabled = true;
+        bodyEl.style.opacity = '0.55';
+        sendBtn.disabled = true;
+        sendBtn.title    = 'Internal note endpoint pending';
+        statusEl.textContent = 'NOTES NOT WIRED';
+      } else {
+        subjectEl.style.display = isSms ? 'none' : '';
+        bodyEl.disabled = false;
+        bodyEl.style.opacity = '';
+        sendBtn.disabled = false;
+        sendBtn.title = '';
+        if (isSms) {
+          if (!lead.phone) { sendBtn.disabled = true; statusEl.textContent = 'Lead has no phone'; bodyEl.placeholder = `No phone on file for ${fullName(lead)}.`; }
+          else             { statusEl.textContent = '';                 bodyEl.placeholder = `Text ${fullName(lead)} (max 320 chars)`; }
+        } else {
+          if (!lead.email) { sendBtn.disabled = true; statusEl.textContent = 'Lead has no email'; bodyEl.placeholder = `No email on file for ${fullName(lead)}.`; }
+          else             { statusEl.textContent = '';                 bodyEl.placeholder = `Email ${fullName(lead)}…`; }
+        }
+      }
+    }
+    tabs.forEach((t) => t.addEventListener('click', () => setChannel(t.getAttribute('data-composer-tab'))));
+    setChannel('email');
+
+    sendBtn.addEventListener('click', async () => {
+      const text    = (bodyEl.value || '').trim();
+      const subject = (subjectEl.value || '').trim();
+      if (!text) { statusEl.textContent = 'Body is empty'; return; }
+      if (channel === 'email' && !subject) { statusEl.textContent = 'Subject is required for email'; return; }
+
+      sendBtn.disabled = true;
+      sendBtn.textContent = 'Sending…';
+      statusEl.style.color = '';
+      statusEl.textContent = 'Sending…';
+
+      const r = await window.Legacy.api('/api/crm/message', {
+        body: {
+          lead_id: lead.id,
+          channel,
+          body:    text,
+          subject: channel === 'email' ? subject : undefined
+        }
+      });
+
+      if (r.ok && r.json && r.json.status === 'sent') {
+        statusEl.style.color = '#2E5C3D';
+        statusEl.textContent = `Sent via ${(r.json.provider && r.json.provider.via) || channel}`;
+        bodyEl.value = '';
+        if (subjectEl) subjectEl.value = '';
+        sendBtn.textContent = 'Sent';
+        // Refresh thread + the lead-list preview
+        setTimeout(() => { loadLead(lead.id); refreshLeadListPreview(lead.id); }, 600);
+        setTimeout(() => { sendBtn.textContent = 'Send'; sendBtn.disabled = false; }, 1800);
+      } else {
+        statusEl.style.color = '#9B2C2C';
+        statusEl.textContent = (r.json && r.json.error) || 'Send failed.';
+        sendBtn.textContent = 'Send';
+        sendBtn.disabled = false;
+      }
+    });
+  }
+
+  // After a successful send, refresh just this lead's preview text in the rail.
+  async function refreshLeadListPreview(leadId) {
+    const r = await window.Legacy.api('/api/crm/inbox?filter=all&limit=10', { method: 'GET' });
+    if (!r.ok) return;
+    const msg = (r.json.messages || []).find((m) => m.lead_id === leadId);
+    if (msg) state.messageByLead.set(leadId, msg);
+    paintLeadList();
   }
 
   async function promptEnrollSequence(lead) {
