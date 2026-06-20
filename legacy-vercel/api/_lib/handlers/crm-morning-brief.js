@@ -37,9 +37,19 @@ export default async function handler(req, res) {
     const twoWk   = new Date(now.getTime() - 14 * 86400 * 1000).toISOString();
     const tomorrow = new Date(now.getTime() + 24 * 3600 * 1000).toISOString();
     const weekAhead = new Date(now.getTime() + 7 * 86400 * 1000).toISOString();
+    const ninetyAgo = new Date(now.getTime() - 90 * 86400 * 1000).toISOString();
+    const endOfDay  = new Date(now.toISOString().slice(0, 10) + 'T23:59:59Z').toISOString();
+    const startOfDay = new Date(now.toISOString().slice(0, 10) + 'T00:00:00Z').toISOString();
+
+    const SIGNAL_EVENT_TYPES = [
+      'property_saved','property_viewed','search_run',
+      'form_submitted','email_opened','sms_replied','score_change'
+    ];
 
     const [drafts, toursToday, radioSilence, newToday, openOffers,
-           leadsTotal, clientsCount, pastClientsCount, activeListings, calendarWeek] = await Promise.all([
+           leadsTotal, clientsCount, pastClientsCount, activeListings, calendarWeek,
+           overnightEvents, activeDealsLeads, hoursTours,
+           funnelNew, funnelEngaged, funnelToured, funnelOffered, funnelClosed] = await Promise.all([
       supa.from('messages')
           .select('id, lead_id, channel, subject, body, ai_draft_reasoning, created_at, leads(first_name,last_name,email,temperature,score)')
           .eq('status', 'pending_approval')
@@ -61,14 +71,40 @@ export default async function handler(req, res) {
           .gte('created_at', dayAgo)
           .order('created_at', { ascending: false }),
       supa.from('offers')
-          .select('id, status, amount, property_id, properties(address,city), buyer_lead_id, leads(first_name,last_name)')
+          .select('id, status, amount, property_id, properties(address,city), buyer_lead_id, leads(first_name,last_name), created_at')
           .in('status', ['received','countered']),
-      // Roster counts — head:true returns count only, no rows
+      // Roster counts
       supa.from('leads')     .select('id', { count: 'exact', head: true }).eq('status', 'active'),
       supa.from('leads')     .select('id', { count: 'exact', head: true }).eq('status', 'active').eq('pipeline_stage', 'close'),
       supa.from('leads')     .select('id', { count: 'exact', head: true }).eq('status', 'archived'),
       supa.from('properties').select('id', { count: 'exact', head: true }).eq('status', 'active'),
-      supa.from('tours')     .select('id', { count: 'exact', head: true }).gte('scheduled_at', now.toISOString()).lte('scheduled_at', weekAhead)
+      supa.from('tours')     .select('id', { count: 'exact', head: true }).gte('scheduled_at', now.toISOString()).lte('scheduled_at', weekAhead),
+      // Overnight signals — last 24h of high-signal events
+      supa.from('lead_events')
+          .select('id, event_type, event_data, created_at, leads(id,first_name,last_name)')
+          .in('event_type', SIGNAL_EVENT_TYPES)
+          .gte('created_at', dayAgo)
+          .order('created_at', { ascending: false })
+          .limit(20),
+      // Active deals — leads currently touring / under offer / about to close
+      supa.from('leads')
+          .select('id, first_name, last_name, pipeline_stage, price_min, price_max, score, temperature, updated_at')
+          .eq('status', 'active')
+          .in('pipeline_stage', ['touring', 'offer', 'close'])
+          .order('updated_at', { ascending: false })
+          .limit(6),
+      // Today's hours — all tours scheduled today, regardless of status
+      supa.from('tours')
+          .select('id, scheduled_at, duration_minutes, tour_type, status, notes, leads(first_name,last_name), properties(address,city)')
+          .gte('scheduled_at', startOfDay)
+          .lte('scheduled_at', endOfDay)
+          .order('scheduled_at'),
+      // 90-day funnel
+      supa.from('leads')      .select('id', { count: 'exact', head: true }).gte('created_at',  ninetyAgo),
+      supa.from('lead_events').select('lead_id', { count: 'exact', head: true }).gte('created_at',  ninetyAgo).in('event_type', ['email_opened','sms_replied','property_viewed','property_saved']),
+      supa.from('tours')      .select('lead_id', { count: 'exact', head: true }).gte('scheduled_at', ninetyAgo),
+      supa.from('offers')     .select('buyer_lead_id', { count: 'exact', head: true }).gte('created_at', ninetyAgo),
+      supa.from('leads')      .select('id', { count: 'exact', head: true }).eq('pipeline_stage', 'close').gte('updated_at', ninetyAgo)
     ]);
 
     const result = {
@@ -86,6 +122,16 @@ export default async function handler(req, res) {
         inbox_count:     (drafts.data || []).length,
         calendar_week:   calendarWeek.count   || 0,
         pipeline_count:  leadsTotal.count     || 0
+      },
+      signals:      shapeSignals(overnightEvents.data || []),
+      active_deals: shapeActiveDeals(activeDealsLeads.data || [], openOffers.data || []),
+      hours:        shapeHours(hoursTours.data || [], now),
+      funnel: {
+        new_leads: funnelNew.count     || 0,
+        engaged:   funnelEngaged.count || 0,
+        toured:    funnelToured.count  || 0,
+        offered:   funnelOffered.count || 0,
+        closed:    funnelClosed.count  || 0
       }
     };
 
@@ -154,4 +200,118 @@ Write the brief paragraph now. Lead with the most important signal.`;
   } catch (e) {
     return fail(res, 500, e.message);
   }
+}
+
+
+// ---------------------------------------------------------------------------
+// Shape helpers — convert raw rows into paint-ready payloads
+// ---------------------------------------------------------------------------
+
+const EVENT_TAG = {
+  property_saved:  'Buyer signal',
+  property_viewed: 'Buyer signal',
+  search_run:      'Search activity',
+  form_submitted:  'New form',
+  email_opened:    'Engagement',
+  sms_replied:     'Engagement',
+  score_change:    'Score change'
+};
+
+function eventBody(event, leadName) {
+  const d = event.event_data || {};
+  const prop = d.property || {};
+  const addr = prop.address || prop.mls_number || '';
+  switch (event.event_type) {
+    case 'property_saved':  return `${leadName} saved ${addr || 'a property'}.`;
+    case 'property_viewed': return `${leadName} viewed ${addr || 'a property'}.`;
+    case 'search_run':      return `${leadName} ran a new search${d.search?.city ? ` in ${d.search.city}` : ''}.`;
+    case 'form_submitted':  return `${leadName} submitted a form${d.source ? ` (${d.source})` : ''}.`;
+    case 'email_opened':    return `${leadName} opened your last email${d.opens > 1 ? ` (${d.opens} times)` : ''}.`;
+    case 'sms_replied':     return `${leadName} replied to your text.`;
+    case 'score_change': {
+      if (d.change === 'stage_change') return `${leadName} moved to ${d.to}${d.from ? ` from ${d.from}` : ''}.`;
+      if (d.change === 'reassigned')   return `${leadName} reassigned to ${d.to}${d.from ? ` (was ${d.from})` : ''}.`;
+      if (d.sequence_enroll)           return `${leadName} enrolled in sequence "${d.sequence_name}".`;
+      if (d.sequence_paused)           return `${leadName} sequence auto-paused (replied).`;
+      return `${leadName} score updated.`;
+    }
+    default: return `${leadName} · ${event.event_type.replace(/_/g, ' ')}`;
+  }
+}
+
+function shapeSignals(rows) {
+  return rows.map((e) => {
+    const lead = e.leads || {};
+    const leadName = [lead.first_name, lead.last_name].filter(Boolean).join(' ') || 'A lead';
+    return {
+      id:        e.id,
+      lead_id:   lead.id || null,
+      time_iso:  e.created_at,
+      time:      formatClock(e.created_at),
+      body:      eventBody(e, leadName),
+      tag:       EVENT_TAG[e.event_type] || 'Signal'
+    };
+  });
+}
+
+function shapeActiveDeals(leads, offers) {
+  const STAGE_LABELS = {
+    touring: { label: 'Touring',         track_idx: 2 },
+    offer:   { label: 'Under contract',  track_idx: 4 },
+    close:   { label: 'Closing soon',    track_idx: 5 }
+  };
+  const TRACK = ['Offer', 'Acceptance', 'Inspection', 'Appraisal', 'Financing', 'Close'];
+
+  // Index offers by buyer_lead_id so we can attach property + amount per deal.
+  const offersByLead = new Map();
+  (offers || []).forEach((o) => {
+    if (o.buyer_lead_id && !offersByLead.has(o.buyer_lead_id)) offersByLead.set(o.buyer_lead_id, o);
+  });
+
+  return leads.map((l) => {
+    const stage = STAGE_LABELS[l.pipeline_stage] || { label: l.pipeline_stage, track_idx: 0 };
+    const offer = offersByLead.get(l.id) || null;
+    const property = offer?.properties || null;
+    const amount = offer?.amount || (l.price_min && l.price_max ? (l.price_min + l.price_max) / 2 : l.price_min || l.price_max);
+    const daysInStage = l.updated_at
+      ? Math.max(0, Math.floor((Date.now() - new Date(l.updated_at).getTime()) / 86400000))
+      : 0;
+    return {
+      lead_id:    l.id,
+      lead_name:  [l.first_name, l.last_name].filter(Boolean).join(' ') || 'Lead',
+      stage_label:`${stage.label} · day ${daysInStage}`,
+      amount:     amount || null,
+      address:    property?.address || null,
+      city:       property?.city    || null,
+      track:      TRACK.map((label, i) => ({
+        label,
+        done: i <  stage.track_idx,
+        on:   i === stage.track_idx
+      }))
+    };
+  });
+}
+
+function shapeHours(tours, now) {
+  return tours.map((t) => {
+    const lead = t.leads || {};
+    const prop = t.properties || {};
+    const leadName = [lead.first_name, lead.last_name].filter(Boolean).join(' ') || 'Buyer';
+    const addr = prop.address ? `${prop.address}${prop.city ? ' · ' + prop.city : ''}` : '';
+    const isPast = new Date(t.scheduled_at) < now;
+    return {
+      time:     formatClock(t.scheduled_at),
+      time_iso: t.scheduled_at,
+      kind:     'Showing',
+      title:    addr ? `${leadName} — ${addr}` : `${leadName} tour`,
+      sub:      `${t.duration_minutes || 45} min · ${t.tour_type || 'in_person'}${t.status ? ' · ' + t.status : ''}`,
+      past:     isPast,
+      brass:    !isPast && new Date(t.scheduled_at).toDateString() === now.toDateString()
+    };
+  });
+}
+
+function formatClock(iso) {
+  if (!iso) return '';
+  return new Date(iso).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
 }

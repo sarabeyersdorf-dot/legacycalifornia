@@ -447,9 +447,121 @@
       api('/api/crm/pipeline', { method: 'GET' })
     ]);
 
-    if (briefRes.ok)    paintMorningBrief(briefRes.json, session);
+    if (briefRes.ok) {
+      paintMorningBrief(briefRes.json, session);
+      paintSignals(briefRes.json.signals || []);
+      paintActiveDeals(briefRes.json.active_deals || []);
+      paintHours(briefRes.json.hours || []);
+      paintReportsFunnel(briefRes.json.funnel || null);
+    }
     if (inboxRes.ok)    paintQuietAsks(inboxRes.json.messages || []);
     if (pipelineRes.ok) paintPipelineStats(pipelineRes.json);
+  }
+
+  // ---------------------------------------------------------------------------
+  // Today-view panels (signals, active deals, hours, reports funnel)
+  // ---------------------------------------------------------------------------
+  function emptyPanel(msg) {
+    return `<div style="grid-column:1/-1;padding:24px;text-align:left;opacity:.55;font-style:italic;font-size:14px;">${escapeHtml(msg)}</div>`;
+  }
+
+  function paintSignals(signals) {
+    const grid = document.querySelector('[data-signal-grid]');
+    if (!grid) return;
+    if (!signals.length) {
+      grid.innerHTML = emptyPanel('Quiet overnight. No new signals in the last 24 hours.');
+      return;
+    }
+    grid.innerHTML = signals.slice(0, 8).map((s) => `
+      <article class="signal">
+        <span class="sig-time">${escapeHtml(s.time)}</span>
+        <p>${escapeHtml(s.body)}</p>
+        <span class="sig-tag">${escapeHtml(s.tag)}</span>
+      </article>`).join('');
+  }
+
+  function fmtUsdBrief(n) {
+    if (n == null) return '—';
+    const v = Math.abs(+n);
+    if (v >= 1_000_000) return `$${(+n / 1_000_000).toFixed(v >= 10_000_000 ? 0 : 2)}M`;
+    if (v >= 1_000)     return `$${Math.round(+n / 1_000)}K`;
+    return `$${Math.round(+n)}`;
+  }
+
+  function paintActiveDeals(deals) {
+    const grid = document.querySelector('[data-deal-grid]');
+    if (!grid) return;
+    if (!deals.length) {
+      grid.innerHTML = emptyPanel('No deals currently in motion. Leads at touring/offer/close will show up here.');
+      return;
+    }
+    grid.innerHTML = deals.map((d) => {
+      const track = (d.track || []).map((step) => {
+        const cls = step.done ? 'dt dt-done' : (step.on ? 'dt dt-on' : 'dt');
+        return `<span class="${cls}">${escapeHtml(step.label)}</span>`;
+      }).join('');
+      const addressLine = d.address ? `${escapeHtml(d.address)}${d.city ? ' · ' + escapeHtml(d.city) : ''}` : escapeHtml(d.lead_name);
+      return `
+        <article class="deal">
+          <div class="deal-h">
+            <span class="deal-stage">${escapeHtml(d.stage_label)}</span>
+            <span class="deal-amt">${escapeHtml(fmtUsdBrief(d.amount))}</span>
+          </div>
+          <h4>${addressLine}</h4>
+          <p class="deal-buyer">${escapeHtml(d.lead_name)}</p>
+          <div class="deal-track">${track}</div>
+        </article>`;
+    }).join('');
+  }
+
+  function paintHours(items) {
+    const body = document.querySelector('[data-hours-body]');
+    if (!body) return;
+    const now = new Date();
+    const nowEl = body.querySelector('[data-hours-now]');
+    if (nowEl) {
+      nowEl.innerHTML = `<span class="hr-now-l">Now · ${escapeHtml(now.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' }))}</span><span class="hr-now-d">${items.length ? items.length + ' scheduled today' : 'No tours on the calendar today'}</span>`;
+    }
+    // Clear all .hr-row siblings, keep .hr-now
+    Array.from(body.querySelectorAll('.hr-row')).forEach((r) => r.remove());
+    if (!items.length) return;
+    items.forEach((h) => {
+      const row = document.createElement('div');
+      row.className = 'hr-row';
+      row.innerHTML = `
+        <span class="hr-time">${escapeHtml(h.time)}</span>
+        <div class="hr-card${h.brass ? ' hr-card-brass' : ''}${h.past ? ' hr-card-soft' : ''}">
+          <span class="label-cap">${escapeHtml(h.kind)}</span>
+          <strong>${escapeHtml(h.title)}</strong>
+          <span class="hr-sub">${escapeHtml(h.sub)}</span>
+        </div>`;
+      body.appendChild(row);
+    });
+  }
+
+  function paintReportsFunnel(funnel) {
+    const container = document.querySelector('[data-funnel]');
+    const sub       = document.querySelector('[data-funnel-sub]');
+    if (!container) return;
+    if (!funnel) {
+      container.innerHTML = emptyPanel('Funnel will appear once 90 days of lead data have accumulated.');
+      if (sub) sub.textContent = '— leads in · — closes out';
+      return;
+    }
+    const steps = [
+      { key: 'new_leads', label: 'New leads',   brass: false },
+      { key: 'engaged',   label: 'Engaged',     brass: false },
+      { key: 'toured',    label: 'Toured',      brass: false },
+      { key: 'offered',   label: 'Made offer',  brass: true  },
+      { key: 'closed',    label: 'Closed',      brass: true  }
+    ];
+    const top = Math.max(1, funnel.new_leads || 0);
+    container.innerHTML = steps.map((s) => {
+      const v = funnel[s.key] || 0;
+      const pct = Math.max(0, Math.min(100, Math.round((v / top) * 100)));
+      return `<div class="funnel-step"><span class="l">${escapeHtml(s.label)}</span><div class="b" style="width:${pct}%;${s.brass ? 'background:var(--brass);' : ''}"></div><span class="v">${v}</span></div>`;
+    }).join('');
+    if (sub) sub.textContent = `${funnel.new_leads || 0} leads in · ${funnel.closed || 0} closes out`;
   }
 
   function paintMorningBrief(data, session) {
