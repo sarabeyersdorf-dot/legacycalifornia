@@ -1293,10 +1293,31 @@
     }).join('');
 
     const activityHtml = (events.slice(0, 8) || []).map((e) => {
+      const d = e.event_data || {};
+      // Stage move / reassignment (logged as score_change w/ event_data.change)
+      if (e.event_type === 'score_change' && d.change === 'stage_change') {
+        return `
+          <div class="tl-item">
+            <div class="tl-dot ink"></div>
+            <div>
+              <div class="tl-text"><strong>Moved to ${escHtml(d.to || '?')}</strong>${d.from ? ` <span style="opacity:.6;">(was ${escHtml(d.from)})</span>` : ''}</div>
+              <div class="tl-when">${escHtml(fmtRel(e.created_at))}${d.changed_by ? ' · ' + escHtml(d.changed_by.replace(/^agent_/, '')) : ''}</div>
+            </div>
+          </div>`;
+      }
+      if (e.event_type === 'score_change' && d.change === 'reassigned') {
+        return `
+          <div class="tl-item">
+            <div class="tl-dot ink"></div>
+            <div>
+              <div class="tl-text"><strong>Reassigned to ${escHtml(d.to || '?')}</strong>${d.from ? ` <span style="opacity:.6;">(was ${escHtml(d.from)})</span>` : ''}</div>
+              <div class="tl-when">${escHtml(fmtRel(e.created_at))}${d.changed_by ? ' · ' + escHtml(d.changed_by.replace(/^agent_/, '')) : ''}</div>
+            </div>
+          </div>`;
+      }
       const dotClass = e.event_type === 'property_saved' ? 'ink' : e.event_type === 'message_sent' ? '' : 'faint';
       const label    = (e.event_type || '').replace(/_/g, ' ').replace(/^./, (c) => c.toUpperCase());
-      const extra    = e.event_data && e.event_data.property && e.event_data.property.address
-                     ? ` · ${escHtml(e.event_data.property.address)}` : '';
+      const extra    = d.property && d.property.address ? ` · ${escHtml(d.property.address)}` : '';
       return `
         <div class="tl-item">
           <div class="tl-dot ${dotClass}"></div>
@@ -1345,7 +1366,7 @@
             <span class="lab">${escHtml(assigned.replace(/^./, (c) => c.toUpperCase()))}</span>
           </div>
         </div>
-        <button class="btn btn-ghost btn-xs" disabled style="margin-top: 10px; width: 100%;" title="Reassign endpoint pending">Reassign or share</button>
+        <button class="btn btn-ghost btn-xs" data-detail-action="reassign" style="margin-top: 10px; width: 100%;" title="Reassign to Sara, James, or unassigned">Reassign or share</button>
       </div>
       <div class="lp-section lp-facts">
         <h3>Contact</h3>
@@ -1370,6 +1391,10 @@
       ${tours.length ? `<div class="lp-section"><h3>Tours · ${tours.length}</h3>${tours.slice(0,3).map((t) => `<div class="tl-item"><div class="tl-dot"></div><div><div class="tl-text"><strong>${escHtml(t.properties && t.properties.address || 'Tour')}</strong></div><div class="tl-when">${escHtml(fmtRel(t.scheduled_at))} · ${escHtml(t.status || '')}</div></div></div>`).join('')}</div>` : ''}
       ${offers.length ? `<div class="lp-section"><h3>Offers · ${offers.length}</h3>${offers.slice(0,3).map((o) => `<div class="tl-item"><div class="tl-dot ink"></div><div><div class="tl-text"><strong>${escHtml(fmtUSD(o.amount))}</strong> · ${escHtml(o.status || '')}</div><div class="tl-when">${escHtml(o.properties && o.properties.address || '')}</div></div></div>`).join('')}</div>` : ''}
     `;
+
+    // Wire the Reassign button now that profileEl has the live markup.
+    const reassignBtn = profileEl.querySelector('[data-detail-action="reassign"]');
+    if (reassignBtn) reassignBtn.addEventListener('click', () => promptReassign(lead));
   }
 
   function wireDraftActions(card, message, lead) {
@@ -1409,6 +1434,110 @@
         approveBtn.disabled = false;
         approveBtn.textContent = 'Send as Sara →';
       }
+    });
+  }
+
+  // ---- Write helpers (PATCH /api/crm/lead) -------------------------------
+  async function patchLead(id, patch) {
+    return window.Legacy.api('/api/crm/lead', { method: 'PATCH', body: { id, ...patch } });
+  }
+
+  async function promptReassign(lead) {
+    const current = (lead.assigned_agent || 'sara').toLowerCase();
+    const next = prompt(
+      `Reassign ${fullName(lead)} (currently ${current}).\n\nType: sara, james, or unassigned`,
+      current
+    );
+    if (!next) return;
+    const cleaned = next.trim().toLowerCase();
+    if (!['sara', 'james', 'unassigned'].includes(cleaned)) {
+      alert(`Invalid agent: "${cleaned}". Must be sara, james, or unassigned.`);
+      return;
+    }
+    if (cleaned === current) return;
+
+    // Optimistic — flip the lead in module state so the UI feels instant.
+    const prev = lead.assigned_agent;
+    lead.assigned_agent = cleaned;
+    const stateLead = state.leadsById.get(lead.id);
+    if (stateLead) stateLead.assigned_agent = cleaned;
+    paintLeadList();
+
+    const r = await patchLead(lead.id, { assigned_agent: cleaned });
+    if (r.ok && r.json && r.json.lead) {
+      // Reconcile: refresh the detail panel with the server-truth row.
+      loadLead(lead.id);
+    } else {
+      // Roll back
+      lead.assigned_agent = prev;
+      if (stateLead) stateLead.assigned_agent = prev;
+      paintLeadList();
+      alert((r.json && r.json.error) || 'Reassign failed.');
+    }
+  }
+
+  async function moveLeadToStage(leadId, newStage) {
+    const stateLead = state.leadsById.get(leadId);
+    if (!stateLead) return;
+    const prevStage = stateLead.pipeline_stage;
+    if (prevStage === newStage) return;
+
+    // Optimistic
+    stateLead.pipeline_stage = newStage;
+
+    const r = await patchLead(leadId, { pipeline_stage: newStage });
+    if (r.ok && r.json && r.json.lead) {
+      // Server-truth — refresh kanban + (if this lead is open) the detail.
+      // Cheapest reconcile: refetch the pipeline to get fresh counts/values.
+      const pr = await window.Legacy.api('/api/crm/pipeline', { method: 'GET' });
+      if (pr.ok) paintKanban(pr.json);
+      if (state.selectedLeadId === leadId) loadLead(leadId);
+    } else {
+      // Roll back
+      stateLead.pipeline_stage = prevStage;
+      // Re-fetch to restore the column visually
+      const pr = await window.Legacy.api('/api/crm/pipeline', { method: 'GET' });
+      if (pr.ok) paintKanban(pr.json);
+      alert((r.json && r.json.error) || 'Stage move failed.');
+    }
+  }
+
+  // ---- Kanban drag-and-drop wiring ---------------------------------------
+  function wireKanbanDnd() {
+    const cards = document.querySelectorAll('[data-kanban] [data-lead-id]');
+    cards.forEach((card) => {
+      card.setAttribute('draggable', 'true');
+      card.style.cursor = 'grab';
+      card.addEventListener('dragstart', (ev) => {
+        ev.dataTransfer.setData('text/plain', card.getAttribute('data-lead-id'));
+        ev.dataTransfer.effectAllowed = 'move';
+        card.style.opacity = '0.45';
+      });
+      card.addEventListener('dragend', () => { card.style.opacity = ''; });
+    });
+
+    const bodies = document.querySelectorAll('[data-stage-body]');
+    bodies.forEach((body) => {
+      body.addEventListener('dragover', (ev) => {
+        ev.preventDefault();
+        ev.dataTransfer.dropEffect = 'move';
+        body.style.outline = '2px dashed var(--brass, #B89A5C)';
+        body.style.outlineOffset = '-4px';
+      });
+      body.addEventListener('dragleave', () => {
+        body.style.outline = '';
+        body.style.outlineOffset = '';
+      });
+      body.addEventListener('drop', (ev) => {
+        ev.preventDefault();
+        body.style.outline = '';
+        body.style.outlineOffset = '';
+        const leadId = ev.dataTransfer.getData('text/plain');
+        const targetCol = body.closest('[data-stage]');
+        if (!targetCol || !leadId) return;
+        const newStage = targetCol.getAttribute('data-stage');
+        moveLeadToStage(leadId, newStage);
+      });
     });
   }
 
@@ -1464,6 +1593,9 @@
     if (eyebrow) eyebrow.textContent = `Active pipeline · ${pipelineData.total_leads || 0} lead${pipelineData.total_leads === 1 ? '' : 's'}`;
     const inflight = document.querySelector('[data-bind-pipe-inflight]');
     if (inflight) inflight.textContent = fmtUSD(pipelineData.total_estimated_value || 0);
+
+    // Wire HTML5 drag-and-drop so cards can be moved across stage columns.
+    wireKanbanDnd();
   }
 
   async function loadLead(id) {
