@@ -1,11 +1,19 @@
 -- =============================================================================
--- Phase 1H (DRAFT — DO NOT RUN YET) — lead_notes table for the composer
+-- Phase 1H (DRAFT v2 — DO NOT RUN YET) — lead_notes table for the composer
 -- "Note" / "Internal" tabs on /api/crm/message.
 --
--- This file is a proposal awaiting sign-off. Do not execute against Supabase
--- until the agent has explicitly approved the schema, the index choices, and
--- the RLS policy. Once approved, this file will be renamed/numbered into the
--- migration sequence and applied.
+-- This file is awaiting final sign-off. Do not execute against Supabase
+-- until the agent has explicitly approved this revision. Once approved,
+-- this file will be renamed to 005_lead_notes.sql and applied.
+--
+-- v2 changes (per reviewer feedback):
+--   * REMOVED the lead/client SELECT policy entirely. Notes are agent-only
+--     in v1. Clients must never read any note — internal or not.
+--   * Kept the is_internal column for future filtering, but no policy
+--     grants any non-agent visibility.
+--   * Confirmed v1 notes are immutable (no updated_at, no revision log).
+--   * No is_pinned column — pinning deferred until Sara has used the
+--     feature for a week.
 -- =============================================================================
 
 -- 1. Table ------------------------------------------------------------------
@@ -14,6 +22,8 @@ create table if not exists public.lead_notes (
   created_at   timestamptz not null default now(),
   lead_id      uuid not null references public.leads(id) on delete cascade,
   body         text not null check (char_length(body) between 1 and 8000),
+  -- Reserved for future filtering / future "share this note with the lead"
+  -- workflow. NO policy grants non-agent visibility in v1.
   is_internal  boolean not null default false,
   -- created_by is the auth.users.id of the agent who wrote the note (NULL is
   -- allowed for system-generated notes — e.g. AI summaries — but normal
@@ -25,12 +35,7 @@ create index if not exists lead_notes_lead_idx     on public.lead_notes (lead_id
 create index if not exists lead_notes_internal_idx on public.lead_notes (is_internal);
 create index if not exists lead_notes_author_idx   on public.lead_notes (created_by);
 
--- 2. Updated-at trigger reuse (only if a generic moddatetime() already exists
---    in the project — schema.sql currently uses created_at only, so we skip
---    an updated_at column for now. If the note is edited later, we will add
---    `updated_at timestamptz` + a trigger in a follow-up migration.
-
--- 3. Row-Level Security ----------------------------------------------------
+-- 2. Row-Level Security ----------------------------------------------------
 alter table public.lead_notes enable row level security;
 
 -- Helper predicate — true when the caller is an agent.
@@ -49,23 +54,15 @@ as $$
   )
 $$;
 
--- Agents: full read/write on every note.
+-- Agents-only: full read/write on every note. There is no second policy.
+-- Any other authenticated caller (a buyer logged into dashboard.html, a
+-- seller in seller.html) gets zero rows — both for SELECT and any write
+-- verb — because no policy grants them access.
 drop policy if exists lead_notes_agent_all on public.lead_notes;
 create policy lead_notes_agent_all on public.lead_notes
   for all
   using   (public.caller_is_agent())
   with check (public.caller_is_agent());
-
--- The lead themselves (buyer/seller portal): may read only their own
--- NON-internal notes. They never see is_internal=true. They cannot insert
--- or update.
-drop policy if exists lead_notes_lead_read on public.lead_notes;
-create policy lead_notes_lead_read on public.lead_notes
-  for select
-  using (
-    is_internal = false
-    and lead_id = (select u.lead_id from public.users u where u.id = auth.uid())
-  );
 
 -- Service role (the Vercel functions calling adminClient()) bypasses RLS by
 -- default — no extra policy needed for the backend.
@@ -74,27 +71,17 @@ create policy lead_notes_lead_read on public.lead_notes
 -- Endpoint design (for reference — not part of this migration)
 -- =============================================================================
 -- POST /api/crm/note
---   Body: { lead_id, body, is_internal:boolean }
---   Auth: getCallerProfile + isAgent (server-side, same pattern as the rest
---         of the CRM dispatcher). created_by = profile.id (the auth.users id).
---   Effect: inserts a lead_notes row. Does NOT write to lead_events — notes
---           are their own stream surfaced in the right-sidebar activity feed.
+--   Body:    { lead_id, body, is_internal:boolean }
+--   Auth:    getCallerProfile + isAgent (server-side, same pattern as
+--            the rest of the CRM dispatcher). created_by = auth.users.id.
+--   Effect:  inserts a lead_notes row. Does NOT write to lead_events —
+--            notes are their own stream surfaced in the activity sidebar.
 --
 -- GET  /api/crm/lead?id=<uuid>
 --   Existing handler will be extended to also return notes:
 --     ...existing fields, plus
 --     notes: lead_notes rows ordered by created_at desc, limit 50
---   For non-agent callers (e.g. the buyer's own dashboard hitting the lead
---   detail), is_internal=true rows are stripped server-side (defence in
---   depth on top of the RLS policy).
--- =============================================================================
-
--- Open questions for the reviewer:
---   1. Edit history. Do we want to track edits to a note (updated_at +
---      revision log), or is "delete + re-create" sufficient? Recommend
---      keeping v1 immutable to keep the surface small.
---   2. Mentions. Should "@james" in a body trigger an email/sms to the
---      other agent? Out of scope for this migration but worth flagging.
---   3. Pinning. Worth a `is_pinned boolean` column for surfacing key
---      context at the top of the activity feed? Recommend deferring until
---      Sara has used the bare feature for a week.
+--   The handler is already agent-gated (getCallerProfile + isAgent), so
+--   the notes attachment automatically inherits the same agent-only rule.
+--   The buyer/seller portal endpoints (api/me/dashboard, api/seller/portal)
+--   do not — and will not — query lead_notes.
