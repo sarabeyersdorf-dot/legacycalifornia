@@ -21,24 +21,24 @@
 
     <div class="app-side-section">Daily</div>
     <nav class="app-side-nav">
-      <a href="#" class="active" onclick="showView(event,'today')">Today <span class="pill">5</span></a>
-      <a href="#" onclick="showView(event,'inbox')">Inbox <span class="pill">14</span></a>
+      <a href="#" class="active" onclick="showView(event,'today')">Today <span class="pill" data-roster-today>—</span></a>
+      <a href="#" onclick="showView(event,'inbox')">Inbox <span class="pill" data-roster-inbox>—</span></a>
       <a href="#" onclick="showView(event,'pipe')">Pipeline</a>
-      <a href="#" onclick="showView(event,'cal')">Calendar <span class="pill">7</span></a>
+      <a href="#" onclick="showView(event,'cal')">Calendar <span class="pill" data-roster-calendar>—</span></a>
       <a href="#" onclick="showView(event,'seq')">Sequences</a>
     </nav>
 
     <div class="app-side-section">Roster</div>
     <nav class="app-side-nav">
-      <a href="#">Leads <span class="pill">218</span></a>
-      <a href="#">Clients <span class="pill">42</span></a>
-      <a href="#">Past clients</a>
+      <a href="#">Leads <span class="pill" data-roster-leads>—</span></a>
+      <a href="#">Clients <span class="pill" data-roster-clients>—</span></a>
+      <a href="#">Past clients <span class="pill" data-roster-past>—</span></a>
       <a href="#">Sphere</a>
     </nav>
 
     <div class="app-side-section">Listings</div>
     <nav class="app-side-nav">
-      <a href="#">Active <span class="pill">12</span></a>
+      <a href="#">Active <span class="pill" data-roster-listings>—</span></a>
       <a href="#">Pending</a>
       <a href="seller.html">Seller portal</a>
     </nav>
@@ -76,11 +76,11 @@
 
     <!-- TAB STRIP -->
     <div class="crm-tabs">
-      <button class="crm-tab on" onclick="showView(event,'today')">Today <span class="ct">5</span></button>
-      <button class="crm-tab" onclick="showView(event,'inbox')">Inbox <span class="ct">14</span></button>
-      <button class="crm-tab" onclick="showView(event,'pipe')">Pipeline <span class="ct">42</span></button>
-      <button class="crm-tab" onclick="showView(event,'cal')">Calendar <span class="ct">Wk 20</span></button>
-      <button class="crm-tab" onclick="showView(event,'seq')">Sequences <span class="ct">7</span></button>
+      <button class="crm-tab on" onclick="showView(event,'today')">Today <span class="ct" data-roster-today>—</span></button>
+      <button class="crm-tab" onclick="showView(event,'inbox')">Inbox <span class="ct" data-roster-inbox>—</span></button>
+      <button class="crm-tab" onclick="showView(event,'pipe')">Pipeline <span class="ct" data-roster-pipeline>—</span></button>
+      <button class="crm-tab" onclick="showView(event,'cal')">Calendar <span class="ct" data-roster-calendar-week>—</span></button>
+      <button class="crm-tab" onclick="showView(event,'seq')">Sequences</button>
       <button class="crm-tab" onclick="showView(event,'rep')">Reports</button>
     </div>
 

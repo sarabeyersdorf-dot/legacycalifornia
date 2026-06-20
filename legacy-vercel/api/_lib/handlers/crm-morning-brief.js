@@ -36,8 +36,10 @@ export default async function handler(req, res) {
     const dayAgo  = new Date(now.getTime() - 24 * 3600 * 1000).toISOString();
     const twoWk   = new Date(now.getTime() - 14 * 86400 * 1000).toISOString();
     const tomorrow = new Date(now.getTime() + 24 * 3600 * 1000).toISOString();
+    const weekAhead = new Date(now.getTime() + 7 * 86400 * 1000).toISOString();
 
-    const [drafts, toursToday, radioSilence, newToday, openOffers] = await Promise.all([
+    const [drafts, toursToday, radioSilence, newToday, openOffers,
+           leadsTotal, clientsCount, pastClientsCount, activeListings, calendarWeek] = await Promise.all([
       supa.from('messages')
           .select('id, lead_id, channel, subject, body, ai_draft_reasoning, created_at, leads(first_name,last_name,email,temperature,score)')
           .eq('status', 'pending_approval')
@@ -60,7 +62,13 @@ export default async function handler(req, res) {
           .order('created_at', { ascending: false }),
       supa.from('offers')
           .select('id, status, amount, property_id, properties(address,city), buyer_lead_id, leads(first_name,last_name)')
-          .in('status', ['received','countered'])
+          .in('status', ['received','countered']),
+      // Roster counts — head:true returns count only, no rows
+      supa.from('leads')     .select('id', { count: 'exact', head: true }).eq('status', 'active'),
+      supa.from('leads')     .select('id', { count: 'exact', head: true }).eq('status', 'active').eq('pipeline_stage', 'close'),
+      supa.from('leads')     .select('id', { count: 'exact', head: true }).eq('status', 'archived'),
+      supa.from('properties').select('id', { count: 'exact', head: true }).eq('status', 'active'),
+      supa.from('tours')     .select('id', { count: 'exact', head: true }).gte('scheduled_at', now.toISOString()).lte('scheduled_at', weekAhead)
     ]);
 
     const result = {
@@ -68,7 +76,17 @@ export default async function handler(req, res) {
       tours_today:   toursToday.data    || [],
       radio_silence: radioSilence.data  || [],
       new_today:     newToday.data      || [],
-      open_offers:   openOffers.data    || []
+      open_offers:   openOffers.data    || [],
+      roster: {
+        leads_total:     leadsTotal.count     || 0,
+        clients:         clientsCount.count   || 0,
+        past_clients:    pastClientsCount.count || 0,
+        active_listings: activeListings.count || 0,
+        today_count:     (drafts.data || []).length + (toursToday.data || []).length,
+        inbox_count:     (drafts.data || []).length,
+        calendar_week:   calendarWeek.count   || 0,
+        pipeline_count:  leadsTotal.count     || 0
+      }
     };
 
     // Look for today's cached brief first. Refresh narrative if older than 4h.

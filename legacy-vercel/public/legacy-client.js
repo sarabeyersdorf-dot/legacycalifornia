@@ -480,6 +480,23 @@
           : 'No drafts in the queue. Quiet morning.';
       }
     }
+
+    // 4. Sidebar + tab badge counts (only present on crm.html)
+    if (data.roster) {
+      const r = data.roster;
+      const setAll = (selector, value) => {
+        document.querySelectorAll(selector).forEach((el) => { el.textContent = String(value); });
+      };
+      setAll('[data-roster-today]',        r.today_count);
+      setAll('[data-roster-inbox]',        r.inbox_count);
+      setAll('[data-roster-calendar]',     r.calendar_week);
+      setAll('[data-roster-calendar-week]', r.calendar_week);
+      setAll('[data-roster-pipeline]',     r.pipeline_count);
+      setAll('[data-roster-leads]',        r.leads_total);
+      setAll('[data-roster-clients]',      r.clients);
+      setAll('[data-roster-past]',         r.past_clients);
+      setAll('[data-roster-listings]',     r.active_listings);
+    }
   }
 
   function paintQuietAsks(drafts) {
