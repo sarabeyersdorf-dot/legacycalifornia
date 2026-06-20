@@ -93,9 +93,9 @@
         <!-- MORNING BRIEF HEADER -->
         <div class="today-brief">
           <div class="tb-l">
-            <span class="label-cap" style="color: var(--brass);">Tuesday brief · May 12, 2026 · 6:42 AM</span>
-            <h1 class="tb-greet">Good morning, <em>Sara.</em></h1>
-            <p class="tb-line">Five things want your attention before nine. Renee is the warmest of them.</p>
+            <span class="label-cap" style="color: var(--brass);" data-bind-brief-date>Loading brief…</span>
+            <h1 class="tb-greet">Good morning.</h1>
+            <p class="tb-line" data-bind-narrative></p>
           </div>
           <div class="tb-r">
             <div class="tb-pulse">
@@ -448,172 +448,20 @@
           <div class="lead-list-search">
             <input placeholder="Filter leads, addresses, tags…">
           </div>
-          <div class="lead-filter">
-            <button class="chip on">All <span class="ct">14</span></button>
-            <button class="chip">Hot <span class="ct">3</span></button>
-            <button class="chip">Warm <span class="ct">6</span></button>
-            <button class="chip">New <span class="ct">2</span></button>
-            <button class="chip">Awaiting reply</button>
+          <div class="lead-filter" data-lead-filters>
+            <button class="chip on" data-filter="all">All <span class="ct" data-count="all">—</span></button>
+            <button class="chip" data-filter="hot">Hot <span class="ct" data-count="hot">—</span></button>
+            <button class="chip" data-filter="warm">Warm <span class="ct" data-count="warm">—</span></button>
+            <button class="chip" data-filter="new">New <span class="ct" data-count="new">—</span></button>
+            <button class="chip" data-filter="awaiting_reply">Awaiting reply</button>
           </div>
 
-          <div class="lead-list-rows">
-            <!-- Active -->
-            <div class="lead-row on" onclick="selectLead(this)">
-              <div class="avatar avatar-sm hot">RD</div>
+          <div class="lead-list-rows" data-lead-list>
+            <div class="lead-row" data-loading-placeholder>
+              <div class="avatar avatar-sm" style="opacity:.25;">··</div>
               <div class="lead-content">
                 <div class="lead-name-row">
-                  <span class="lead-name">Renee Dawson</span>
-                  <span class="lead-when">9:14 AM</span>
-                </div>
-                <p class="lead-preview"><strong>Re: Ironstone Lane</strong> — Loved your note. Could we walk it Saturday before the open?</p>
-                <div class="lead-meta">
-                  <span class="badge hot">● Hot</span>
-                  <span class="badge">Buyer</span>
-                  <span class="score">92</span>
-                </div>
-              </div>
-            </div>
-
-            <div class="lead-row" onclick="selectLead(this)">
-              <div class="avatar avatar-sm warm">TB</div>
-              <div class="lead-content">
-                <div class="lead-name-row">
-                  <span class="lead-name">Tom &amp; Marie Beckett</span>
-                  <span class="lead-when">8:42</span>
-                </div>
-                <p class="lead-preview">Thanks for the parcels. Question on water rights — the Foothill property has a junior right, correct?</p>
-                <div class="lead-meta">
-                  <span class="badge warm">● Warm</span>
-                  <span class="badge">Land · James</span>
-                  <span class="score">78</span>
-                </div>
-              </div>
-            </div>
-
-            <div class="lead-row" onclick="selectLead(this)">
-              <div class="avatar avatar-sm hot">PW</div>
-              <div class="lead-content">
-                <div class="lead-name-row">
-                  <span class="lead-name">Patricia Walsh</span>
-                  <span class="lead-when">7:33</span>
-                </div>
-                <p class="lead-preview">Going to think about it tonight. Send the CMA when you can — appreciate your patience.</p>
-                <div class="lead-meta">
-                  <span class="badge hot">● Hot</span>
-                  <span class="badge brass">Seller</span>
-                  <span class="score">88</span>
-                </div>
-              </div>
-            </div>
-
-            <div class="lead-row" onclick="selectLead(this)">
-              <div class="avatar avatar-sm">MR</div>
-              <div class="lead-content">
-                <div class="lead-name-row">
-                  <span class="lead-name">Michael Rivera</span>
-                  <span class="lead-when">Yest</span>
-                </div>
-                <p class="lead-preview">Offer accepted! Counter at $1.18M. Inspection contingency 12 days, financing 21.</p>
-                <div class="lead-meta">
-                  <span class="badge brass">● Pending</span>
-                  <span class="badge">Buyer</span>
-                  <span class="score">94</span>
-                </div>
-              </div>
-            </div>
-
-            <div class="lead-row" onclick="selectLead(this)">
-              <div class="avatar avatar-sm warm">JN</div>
-              <div class="lead-content">
-                <div class="lead-name-row">
-                  <span class="lead-name">Jenna Novak</span>
-                  <span class="lead-when">Yest</span>
-                </div>
-                <p class="lead-preview">Saved 5 homes overnight, mostly in Arnold. Looks active — should we reach out?</p>
-                <div class="lead-meta">
-                  <span class="badge warm">● Warm</span>
-                  <span class="badge">Buyer · New</span>
-                  <span class="score">71</span>
-                </div>
-              </div>
-            </div>
-
-            <div class="lead-row" onclick="selectLead(this)">
-              <div class="avatar avatar-sm">AK</div>
-              <div class="lead-content">
-                <div class="lead-name-row">
-                  <span class="lead-name">Aiden Kell</span>
-                  <span class="lead-when">Yest</span>
-                </div>
-                <p class="lead-preview">Lender pre-approval came in at $850K. Adjusting the budget — please send me a few in the $750K range.</p>
-                <div class="lead-meta">
-                  <span class="badge warm">● Warm</span>
-                  <span class="badge">Buyer</span>
-                  <span class="score">66</span>
-                </div>
-              </div>
-            </div>
-
-            <div class="lead-row" onclick="selectLead(this)">
-              <div class="avatar avatar-sm">LH</div>
-              <div class="lead-content">
-                <div class="lead-name-row">
-                  <span class="lead-name">Leslie &amp; Hank Olsen</span>
-                  <span class="lead-when">Mon</span>
-                </div>
-                <p class="lead-preview">Thanks for the tour. Loved the property but the well concerned us. Could we see one more this weekend?</p>
-                <div class="lead-meta">
-                  <span class="badge">Buyer</span>
-                  <span class="badge">Toured</span>
-                  <span class="score">58</span>
-                </div>
-              </div>
-            </div>
-
-            <div class="lead-row" onclick="selectLead(this)">
-              <div class="avatar avatar-sm">DK</div>
-              <div class="lead-content">
-                <div class="lead-name-row">
-                  <span class="lead-name">Derek Klein</span>
-                  <span class="lead-when">Mon</span>
-                </div>
-                <p class="lead-preview">Cabin search · Arnold area · max $620K · weekend home, no rush</p>
-                <div class="lead-meta">
-                  <span class="badge">Buyer</span>
-                  <span class="badge">Discovering</span>
-                  <span class="score">42</span>
-                </div>
-              </div>
-            </div>
-
-            <div class="lead-row" onclick="selectLead(this)">
-              <div class="avatar avatar-sm">RG</div>
-              <div class="lead-content">
-                <div class="lead-name-row">
-                  <span class="lead-name">Raj Govindarajan</span>
-                  <span class="lead-when">Sun</span>
-                </div>
-                <p class="lead-preview">Visiting Murphys May 24–25. Open to seeing 3–4 properties; vineyard interest.</p>
-                <div class="lead-meta">
-                  <span class="badge warm">● Warm</span>
-                  <span class="badge">Buyer · OOS</span>
-                  <span class="score">73</span>
-                </div>
-              </div>
-            </div>
-
-            <div class="lead-row" onclick="selectLead(this)">
-              <div class="avatar avatar-sm">SF</div>
-              <div class="lead-content">
-                <div class="lead-name-row">
-                  <span class="lead-name">Susan Forrester</span>
-                  <span class="lead-when">Sun</span>
-                </div>
-                <p class="lead-preview">Past client · referral from her sister · selling Sonora ranch in fall</p>
-                <div class="lead-meta">
-                  <span class="badge">Sphere</span>
-                  <span class="badge brass">Future seller</span>
-                  <span class="score">52</span>
+                  <span class="lead-name" style="opacity:.4;">Loading your leads…</span>
                 </div>
               </div>
             </div>
@@ -621,270 +469,12 @@
         </aside>
 
         <!-- LEAD DETAIL -->
-        <section class="lead-detail">
-          <div class="ld-head">
-            <div class="ld-head-l">
-              <div class="avatar avatar-lg" style="background: var(--hot); color: var(--shell); font-family: var(--serif); font-style: italic;">RD</div>
-              <div>
-                <h2>Renee Dawson</h2>
-                <div class="ld-head-meta">Buyer · Murphys · 22 days in pipeline · Hot · Score 92</div>
-              </div>
-            </div>
-            <div class="ld-head-actions">
-              <button class="btn btn-ghost btn-sm">◇ Call</button>
-              <button class="btn btn-ghost btn-sm">Schedule</button>
-              <button class="btn btn-ink btn-sm">Add to sequence</button>
-            </div>
-          </div>
-
-          <!-- AI Draft awaiting approval -->
-          <div class="ai-draft">
-            <div class="ai-draft-head">
-              <span class="ai-tag">Draft for your review</span>
-              <span class="ai-source">Suggested because Renee replied "loved your note" within 4 min · price-drop trigger active</span>
-            </div>
-            <div class="ai-draft-body">
-              <div class="ai-from">
-                <div class="avatar avatar-sm"><img src="art/sara-headshot.png" alt="Sara"></div>
-                <div>
-                  <div class="ld">From <strong>you</strong> · to <strong>Renee Dawson</strong></div>
-                  <div class="sub">Email + SMS · Will send only after you approve</div>
-                </div>
-              </div>
-              <div class="ai-subject">Re: 217 Ironstone Lane · Saturday morning?</div>
-              <p class="ai-msg">Renee —
-
-That works beautifully. Let's plan on <span class="hi" title="Pulled from your calendar: 10:30–11:30 Sat is open">Saturday at 10:30</span> so we have the place to ourselves before the 2 PM open. I'll bring the disclosure packet and the well report.
-
-One thing worth knowing: the listing agent mentioned the sellers are <span class="hi" title="Verified from your call notes 5/11">aware of one comparable comp in escrow at $640K</span> — so there is a window. We can talk strategy on the walk.
-
-I'll text you the gate code Friday night.
-
-Warmly,
-Sara</p>
-            </div>
-            <div class="ai-foot">
-              <div class="ai-foot-l">
-                <span><strong>Tone:</strong> Warm · Confident</span>
-                <span><strong>Length:</strong> Concise</span>
-                <span><strong>Refs:</strong> Calendar · Call notes · Listing intel</span>
-              </div>
-              <div class="ai-foot-r">
-                <button class="btn btn-ghost btn-sm">Discard</button>
-                <button class="btn btn-ghost btn-sm">Edit</button>
-                <button class="btn btn-ghost btn-sm">Regenerate</button>
-                <button class="btn btn-brass btn-sm">Send as Sara →</button>
-              </div>
-            </div>
-          </div>
-
-          <!-- THREAD -->
-          <div class="ld-thread">
-            <div class="ld-thread-h">Conversation · 6 messages</div>
-
-            <div class="msg-bubble them">
-              <div class="avatar avatar-sm">RD</div>
-              <div>
-                <div class="mb-head">
-                  <span class="mb-name">Renee Dawson</span>
-                  <span class="mb-when">Today · 9:14 AM</span>
-                  <span class="mb-ch">Email</span>
-                </div>
-                <p class="mb-text">Re: 217 Ironstone Lane — Loved your note about the sellers. Could we walk it Saturday before the open? Saturday morning works best — 10am-ish?</p>
-              </div>
-            </div>
-
-            <div class="msg-bubble us">
-              <div class="avatar avatar-sm">SC</div>
-              <div>
-                <div class="mb-head">
-                  <span class="mb-name">Sara Cooper</span>
-                  <span class="mb-when">Today · 9:10 AM</span>
-                  <span class="mb-ch">Email</span>
-                </div>
-                <p class="mb-text">Morning Renee — quick note on 217 Ironstone Lane. The sellers dropped $25K this morning, and I've spoken to the listing agent: they had an offer fall through last week (financing). They are quietly motivated. If you'd like, we could walk it this Saturday before the open. ☕</p>
-              </div>
-            </div>
-
-            <div class="msg-bubble them">
-              <div class="avatar avatar-sm">RD</div>
-              <div>
-                <div class="mb-head">
-                  <span class="mb-name">Renee Dawson</span>
-                  <span class="mb-when">Yest · 4:42 PM</span>
-                  <span class="mb-ch">SMS</span>
-                </div>
-                <p class="mb-text">Just saw the price drop on 217 Ironstone! Is this the one you mentioned?</p>
-              </div>
-            </div>
-
-            <div class="msg-bubble us">
-              <div class="avatar avatar-sm">SC</div>
-              <div>
-                <div class="mb-head">
-                  <span class="mb-name">Sara Cooper</span>
-                  <span class="mb-when">May 8 · 11:20 AM</span>
-                  <span class="mb-ch">Email</span>
-                </div>
-                <p class="mb-text">Following up on the Pine Crest tour — wanted to share three Murphys homes that came on overnight. The Oak Hollow one matches your brief almost perfectly: single-level, generator, forest views.</p>
-              </div>
-            </div>
-          </div>
-
-          <!-- Composer -->
-          <div class="composer">
-            <div class="composer-head">
-              <span class="composer-tab on">Email</span>
-              <span class="composer-tab">SMS</span>
-              <span class="composer-tab">Note</span>
-              <span class="composer-tab">Internal</span>
-            </div>
-            <textarea placeholder="Write to Renee... or hit ⌘⇧A to ask the assistant for a draft"></textarea>
-            <div class="composer-foot">
-              <div class="composer-tools">
-                <button title="Attach">⌘</button>
-                <button title="Insert listing">⊞</button>
-                <button title="Insert template">⊟</button>
-                <button title="Insert availability">📅</button>
-                <button title="Suggest draft">✦ Suggest</button>
-              </div>
-              <div style="display: flex; gap: 6px;">
-                <button class="btn btn-ghost btn-sm">Schedule</button>
-                <button class="btn btn-ink btn-sm">Send</button>
-              </div>
-            </div>
-          </div>
+        <section class="lead-detail" data-lead-detail>
+          <div class="ld-head" data-lead-detail-loading style="opacity:.5;padding:24px;font-style:italic;">Select a lead from the left to see their conversation and history.</div>
         </section>
 
         <!-- LEAD PROFILE PANEL -->
-        <aside class="lead-profile">
-          <!-- Score -->
-          <div class="lp-section">
-            <h3>Score &amp; signal</h3>
-            <div class="lp-score">
-              <div>
-                <span class="v">92</span>
-                <span class="l">Hot — ready to tour</span>
-              </div>
-              <div class="trend">↑ +14 / 7d<div class="lp-meter"><div class="fill" style="width: 92%;"></div></div></div>
-            </div>
-            <div style="display: flex; gap: 6px; flex-wrap: wrap;">
-              <span class="lp-tag" style="background: rgba(184,90,62,0.12); color: var(--hot);">First-time buyer</span>
-              <span class="lp-tag">Cash-strong</span>
-              <span class="lp-tag">Local (relocating)</span>
-            </div>
-          </div>
-
-          <!-- Stage -->
-          <div class="lp-section">
-            <h3>Pipeline stage</h3>
-            <div class="stage-track">
-              <div class="stage-step done"><span class="l">New</span></div>
-              <div class="stage-step done"><span class="l">Nurture</span></div>
-              <div class="stage-step now"><span class="l">Touring</span></div>
-              <div class="stage-step"><span class="l">Offer</span></div>
-              <div class="stage-step"><span class="l">Close</span></div>
-            </div>
-            <p style="font-family: var(--mono); font-size: 9.5px; letter-spacing: 0.12em; color: var(--ink-mute); margin-top: 10px; text-transform: uppercase;">In Touring · 4 days · Saturday walk scheduled</p>
-          </div>
-
-          <!-- Handoff -->
-          <div class="lp-section">
-            <h3>Assigned</h3>
-            <div class="handoff">
-              <div class="a">
-                <div class="avatar avatar-sm" style="background: var(--brass); color: var(--shell); font-family: var(--serif); font-style: italic;">SC</div>
-                <span class="lab">Sara</span>
-              </div>
-              <span class="ar">→</span>
-              <div class="b">
-                <div class="avatar avatar-sm"><img src="art/james-headshot.png" alt="James"></div>
-                <span class="lab" style="color: var(--ink-soft);">James</span>
-              </div>
-            </div>
-            <button class="btn btn-ghost btn-xs" style="margin-top: 10px; width: 100%;">Reassign or share</button>
-          </div>
-
-          <!-- Facts -->
-          <div class="lp-section lp-facts">
-            <h3>Contact</h3>
-            <dl>
-              <div><dt>Phone</dt><dd>415.555.0917</dd></div>
-              <div><dt>Email</dt><dd>renee.d@hey.com</dd></div>
-              <div><dt>Source</dt><dd>Open house · May 3</dd></div>
-              <div><dt>Pre-approval</dt><dd>$925K (Stearns)</dd></div>
-              <div><dt>Budget</dt><dd>$650K – $900K</dd></div>
-              <div><dt>Timeline</dt><dd>60–90 days</dd></div>
-              <div><dt>Areas</dt><dd>Murphys, Arnold</dd></div>
-              <div><dt>Must-haves</dt><dd>Single-level · Generator</dd></div>
-            </dl>
-          </div>
-
-          <!-- Activity -->
-          <div class="lp-section">
-            <h3>Activity · last 7 days</h3>
-            <div class="tl-item">
-              <div class="tl-dot"></div>
-              <div>
-                <div class="tl-text">Replied to your email about Ironstone <strong>(4 min)</strong></div>
-                <div class="tl-when">Today · 9:14 AM</div>
-              </div>
-            </div>
-            <div class="tl-item">
-              <div class="tl-dot"></div>
-              <div>
-                <div class="tl-text">Viewed <strong>217 Ironstone Lane</strong> · 6 mins · returned 3x</div>
-                <div class="tl-when">Today · 8:51 AM</div>
-              </div>
-            </div>
-            <div class="tl-item">
-              <div class="tl-dot ink"></div>
-              <div>
-                <div class="tl-text">Saved <strong>Oak Hollow Road</strong> · tagged "favorite"</div>
-                <div class="tl-when">Yest · 6:14 PM</div>
-              </div>
-            </div>
-            <div class="tl-item">
-              <div class="tl-dot ink"></div>
-              <div>
-                <div class="tl-text">Opened mortgage calculator on Vineyard Ridge</div>
-                <div class="tl-when">Yest · 5:48 PM</div>
-              </div>
-            </div>
-            <div class="tl-item">
-              <div class="tl-dot faint"></div>
-              <div>
-                <div class="tl-text">Opened your daily digest (12s read)</div>
-                <div class="tl-when">Mon · 7:34 AM</div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Saved homes -->
-          <div class="lp-section">
-            <h3>Saved · 12 properties</h3>
-            <div class="lp-home">
-              <div class="lp-home-img"><img src="https://images.unsplash.com/photo-1568605114967-8130f3a36994?w=200&q=80"></div>
-              <div>
-                <div class="lp-home-p">$649,000</div>
-                <div class="lp-home-a">217 Ironstone · Murphys</div>
-              </div>
-            </div>
-            <div class="lp-home">
-              <div class="lp-home-img"><img src="https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=200&q=80"></div>
-              <div>
-                <div class="lp-home-p">$875,000</div>
-                <div class="lp-home-a">Oak Hollow · Murphys</div>
-              </div>
-            </div>
-            <div class="lp-home">
-              <div class="lp-home-img"><img src="https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?w=200&q=80"></div>
-              <div>
-                <div class="lp-home-p">$1,195,000</div>
-                <div class="lp-home-a">Vineyard Ridge · Sutter Creek</div>
-              </div>
-            </div>
-          </div>
+        <aside class="lead-profile" data-lead-profile>
         </aside>
       </div>
     </section>
@@ -896,186 +486,37 @@ Sara</p>
       <div class="pipe">
         <div class="pipe-h">
           <div>
-            <span class="eyebrow">Active pipeline · 42 leads</span>
+            <span class="eyebrow" data-bind-pipe-eyebrow>Active pipeline · — leads</span>
             <h1 class="h-section" style="margin-top: 8px; font-size: 38px;">Pipeline.</h1>
           </div>
           <div class="pipe-stats">
-            <div><span class="v">$14.2M</span><span class="l">In flight</span></div>
-            <div><span class="v">$1.8M</span><span class="l">Expected this month</span></div>
-            <div><span class="v">3</span><span class="l">Closing this week</span></div>
-            <div><span class="v">52%</span><span class="l">Tour → offer rate</span></div>
+            <div><span class="v" data-bind-pipe-inflight>—</span><span class="l">In flight</span></div>
+            <div><span class="v" data-bind-pipe-month>—</span><span class="l">Expected this month</span></div>
+            <div><span class="v" data-bind-pipe-week>—</span><span class="l">Closing this week</span></div>
+            <div><span class="v" data-bind-pipe-rate>—</span><span class="l">Tour → offer rate</span></div>
           </div>
         </div>
 
-        <div class="kanban">
-          <!-- New -->
-          <div class="kan-col">
-            <div class="kan-col-h">
-              <span class="name">New</span>
-              <span class="count">8 · <span class="sum">$5.4M</span></span>
-            </div>
-            <div class="kan-body">
-              <div class="kan-card">
-                <div class="name">Jenna Novak</div>
-                <div class="home">Browsing Arnold</div>
-                <div class="kan-card-foot">
-                  <span class="pill-status pill-warm">Warm</span>
-                  <span>· 2 hr</span>
-                </div>
-              </div>
-              <div class="kan-card">
-                <div class="name">Derek Klein</div>
-                <div class="home">Cabin · max $620K</div>
-                <div class="kan-card-foot">
-                  <span class="pill-status pill-cold">Cold</span>
-                  <span>· 3 d</span>
-                </div>
-              </div>
-              <div class="kan-card">
-                <div class="name">Susan Forrester</div>
-                <div class="home">Future seller · Sonora ranch</div>
-                <div class="kan-card-foot">
-                  <span class="pill-status">Sphere</span>
-                  <span>· 5 d</span>
-                </div>
-              </div>
-            </div>
+        <div class="kanban" data-kanban>
+          <div class="kan-col" data-stage="new">
+            <div class="kan-col-h"><span class="name">New</span><span class="count" data-stage-count>—</span></div>
+            <div class="kan-body" data-stage-body></div>
           </div>
-
-          <!-- Nurture -->
-          <div class="kan-col">
-            <div class="kan-col-h">
-              <span class="name">Nurture</span>
-              <span class="count">14 · <span class="sum">$11.8M</span></span>
-            </div>
-            <div class="kan-body">
-              <div class="kan-card">
-                <div class="name">Aiden Kell</div>
-                <div class="home">Buyer · $850K</div>
-                <div class="kan-card-foot">
-                  <span class="pill-status pill-warm">Warm · 66</span>
-                  <span>· in seq</span>
-                </div>
-              </div>
-              <div class="kan-card">
-                <div class="name">Raj Govindarajan</div>
-                <div class="home">Vineyard · OOS</div>
-                <div class="kan-card-foot">
-                  <span class="pill-status pill-warm">Warm · 73</span>
-                  <span>· visit 5/24</span>
-                </div>
-              </div>
-              <div class="kan-card">
-                <div class="name">Leslie &amp; Hank Olsen</div>
-                <div class="home">Buyer · toured 3</div>
-                <div class="kan-card-foot">
-                  <span class="pill-status">58</span>
-                  <span>· 9 d</span>
-                </div>
-              </div>
-              <div class="kan-card">
-                <div class="name">Jonas Mertens</div>
-                <div class="home">Land · 10+ ac · Tuolumne</div>
-                <div class="kan-card-foot">
-                  <span class="pill-status">James</span>
-                  <span>· 12 d</span>
-                </div>
-              </div>
-            </div>
+          <div class="kan-col" data-stage="nurture">
+            <div class="kan-col-h"><span class="name">Nurture</span><span class="count" data-stage-count>—</span></div>
+            <div class="kan-body" data-stage-body></div>
           </div>
-
-          <!-- Touring -->
-          <div class="kan-col">
-            <div class="kan-col-h">
-              <span class="name">Touring</span>
-              <span class="count">11 · <span class="sum">$9.6M</span></span>
-            </div>
-            <div class="kan-body">
-              <div class="kan-card" style="border-left: 3px solid var(--hot); padding-left: 11px;">
-                <div class="name">Renee Dawson</div>
-                <div class="home"><span class="price">$649K</span> · 217 Ironstone</div>
-                <div class="kan-card-foot">
-                  <span class="pill-status pill-hot">Hot · 92</span>
-                  <span>· Sat 10:30</span>
-                </div>
-              </div>
-              <div class="kan-card">
-                <div class="name">Tom &amp; Marie Beckett</div>
-                <div class="home"><span class="price">$725K</span> · Foothill Rd</div>
-                <div class="kan-card-foot">
-                  <span class="pill-status pill-warm">Warm · 78</span>
-                  <span>· James</span>
-                </div>
-              </div>
-              <div class="kan-card">
-                <div class="name">Kelvin Yu</div>
-                <div class="home"><span class="price">$1.45M</span> · Pine Crest</div>
-                <div class="kan-card-foot">
-                  <span class="pill-status pill-warm">Warm · 81</span>
-                  <span>· Thu</span>
-                </div>
-              </div>
-            </div>
+          <div class="kan-col" data-stage="touring">
+            <div class="kan-col-h"><span class="name">Touring</span><span class="count" data-stage-count>—</span></div>
+            <div class="kan-body" data-stage-body></div>
           </div>
-
-          <!-- Offer -->
-          <div class="kan-col">
-            <div class="kan-col-h">
-              <span class="name">Offer</span>
-              <span class="count">5 · <span class="sum">$4.2M</span></span>
-            </div>
-            <div class="kan-body">
-              <div class="kan-card" style="border-left: 3px solid var(--brass); padding-left: 11px;">
-                <div class="name">Michael Rivera</div>
-                <div class="home"><span class="price">$1.18M</span> · Vineyard Ridge</div>
-                <div class="kan-card-foot">
-                  <span class="pill-status pill-brass">Accepted</span>
-                  <span>· insp 5/19</span>
-                </div>
-              </div>
-              <div class="kan-card">
-                <div class="name">Patricia Walsh</div>
-                <div class="home"><span class="price">$598K</span> · Listing</div>
-                <div class="kan-card-foot">
-                  <span class="pill-status">CMA out</span>
-                  <span>· seller</span>
-                </div>
-              </div>
-            </div>
+          <div class="kan-col" data-stage="offer">
+            <div class="kan-col-h"><span class="name">Offer</span><span class="count" data-stage-count>—</span></div>
+            <div class="kan-body" data-stage-body></div>
           </div>
-
-          <!-- Close -->
-          <div class="kan-col">
-            <div class="kan-col-h">
-              <span class="name">Close</span>
-              <span class="count">3 · <span class="sum">$2.4M</span></span>
-            </div>
-            <div class="kan-body">
-              <div class="kan-card">
-                <div class="name">Robert Lin</div>
-                <div class="home"><span class="price">$795K</span> · Spring St</div>
-                <div class="kan-card-foot">
-                  <span class="pill-status pill-brass">Closes 5/15</span>
-                  <span>· 3 d</span>
-                </div>
-              </div>
-              <div class="kan-card">
-                <div class="name">Patricia &amp; Leon W.</div>
-                <div class="home"><span class="price">$615K</span> · Sutter listing</div>
-                <div class="kan-card-foot">
-                  <span class="pill-status pill-brass">Closes 5/22</span>
-                  <span>· 10 d</span>
-                </div>
-              </div>
-              <div class="kan-card">
-                <div class="name">The Marsh family</div>
-                <div class="home"><span class="price">$985K</span> · Murphys home</div>
-                <div class="kan-card-foot">
-                  <span class="pill-status pill-brass">Closes 5/28</span>
-                  <span>· 16 d</span>
-                </div>
-              </div>
-            </div>
+          <div class="kan-col" data-stage="close">
+            <div class="kan-col-h"><span class="name">Close</span><span class="count" data-stage-count>—</span></div>
+            <div class="kan-body" data-stage-body></div>
           </div>
         </div>
       </div>

@@ -460,6 +460,8 @@
     });
     const labelEl = $('.today-brief .label-cap');
     if (labelEl) labelEl.textContent = `${dateLabel} brief`;
+    const briefDateEl = document.querySelector('[data-bind-brief-date]');
+    if (briefDateEl) briefDateEl.textContent = `${dateLabel} brief`;
 
     // 2. Greeting — personalise to the signed-in agent
     const name = (session?.profile?.display_name || '').split(' ')[0] || 'Sara';
@@ -1008,3 +1010,515 @@
 
   document.addEventListener('DOMContentLoaded', loadSeller);
 })();
+
+/* ===========================================================================
+ * Phase 1D+ — CRM lead list, lead detail, lead profile, pipeline kanban
+ * ---------------------------------------------------------------------------
+ * Scoped to crm.html only. Sits next to the existing wireCrmPage() (which
+ * paints the Today view). This block paints the Inbox view (lead list +
+ * lead detail + lead profile) and the Pipeline view (kanban).
+ *
+ * READ endpoints used (all exist today):
+ *   GET /api/crm/pipeline             — every active lead grouped by stage
+ *   GET /api/crm/inbox?filter=all     — newest messages joined with leads
+ *                                       (used for lead-list preview text)
+ *   GET /api/crm/lead?id=<uuid>       — full picture for the selected lead
+ *
+ * WRITE endpoints intentionally NOT wired (no backend yet — reported to user):
+ *   - PATCH /api/crm/lead    (kanban drag, Reassign, pipeline-stage move)
+ *   - POST  /api/crm/message (composer Send button)
+ *   - POST  /api/crm/note    (Note tab, Internal tab)
+ *   - POST  /api/ai/regenerate (Regenerate AI draft)
+ *   - DELETE /api/crm/message/:id (Discard AI draft)
+ * ======================================================================== */
+(function () {
+  'use strict';
+  if (!/\/crm\.html$/.test(location.pathname)) return;
+
+  function escHtml(s) {
+    return (s == null ? '' : String(s)).replace(/[&<>"]/g, (c) =>
+      ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  }
+  function initialsOf(first, last, fallback) {
+    const a = (first || '').trim()[0] || '';
+    const b = (last  || '').trim()[0] || '';
+    return (a + b).toUpperCase() || (fallback || '?').trim()[0]?.toUpperCase() || '?';
+  }
+  function fullName(lead) {
+    return [lead && lead.first_name, lead && lead.last_name].filter(Boolean).join(' ')
+      || (lead && lead.email) || 'Lead';
+  }
+  function fmtUSD(n) {
+    if (n == null || !Number.isFinite(+n)) return '—';
+    const v = Math.abs(+n);
+    if (v >= 1_000_000) return `$${(+n / 1_000_000).toFixed(v >= 10_000_000 ? 0 : 1)}M`;
+    if (v >= 1_000)     return `$${Math.round(+n / 1_000)}K`;
+    return `$${Math.round(+n)}`;
+  }
+  function fmtRel(iso) {
+    if (!iso) return '';
+    const m = (Date.now() - new Date(iso).getTime()) / 60000;
+    if (m < 1)    return 'just now';
+    if (m < 60)   return `${Math.round(m)} min`;
+    if (m < 1440) return new Date(iso).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+    const d = Math.round(m / 1440);
+    if (d < 7)    return `${d}d`;
+    return new Date(iso).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+  }
+  function tempBadge(temperature) {
+    if (temperature === 'hot')  return '<span class="badge hot">● Hot</span>';
+    if (temperature === 'warm') return '<span class="badge warm">● Warm</span>';
+    if (temperature === 'cold') return '<span class="badge">● Cold</span>';
+    return '<span class="badge">● New</span>';
+  }
+  function tempPill(temperature) {
+    if (temperature === 'hot')  return 'pill-hot';
+    if (temperature === 'warm') return 'pill-warm';
+    if (temperature === 'cold') return 'pill-cold';
+    return '';
+  }
+  function leadTypeLabel(lead) {
+    if (lead.lead_type === 'seller') return 'Seller';
+    if (lead.lead_type === 'buyer')  return (lead.areas && lead.areas[0]) ? `${lead.areas[0]} buyer` : 'Buyer';
+    if (lead.lead_type === 'land')   return 'Land · James';
+    return (lead.lead_type || 'lead').replace(/^./, (c) => c.toUpperCase());
+  }
+  function avatarClassFor(temperature) {
+    if (temperature === 'hot')  return 'avatar avatar-sm hot';
+    if (temperature === 'warm') return 'avatar avatar-sm warm';
+    return 'avatar avatar-sm';
+  }
+
+  const state = {
+    leads: [],
+    leadsById: new Map(),
+    messageByLead: new Map(),
+    activeFilter: 'all',
+    selectedLeadId: null
+  };
+
+  function filterLeads() {
+    const f = state.activeFilter;
+    if (f === 'all') return state.leads;
+    if (f === 'awaiting_reply') {
+      return state.leads.filter((l) => {
+        const m = state.messageByLead.get(l.id);
+        return m && m.direction === 'inbound';
+      });
+    }
+    return state.leads.filter((l) => l.temperature === f);
+  }
+
+  function paintLeadCounts() {
+    const counts = { all: state.leads.length, hot: 0, warm: 0, new: 0, cold: 0 };
+    state.leads.forEach((l) => { if (counts[l.temperature] != null) counts[l.temperature]++; });
+    document.querySelectorAll('[data-count]').forEach((el) => {
+      const k = el.getAttribute('data-count');
+      if (counts[k] != null) el.textContent = String(counts[k]);
+    });
+  }
+
+  function paintLeadList() {
+    const container = document.querySelector('[data-lead-list]');
+    if (!container) return;
+    const leads = filterLeads();
+    if (!leads.length) {
+      container.innerHTML = `<div class="lead-row" style="opacity:.55;"><div class="lead-content"><div class="lead-name-row"><span class="lead-name" style="font-style:italic;">No leads in this filter yet.</span></div></div></div>`;
+      return;
+    }
+    container.innerHTML = leads.map((l) => {
+      const msg = state.messageByLead.get(l.id);
+      const preview = msg
+        ? (msg.subject ? `<strong>${escHtml(msg.subject)}</strong> — ` : '') + escHtml((msg.body || '').slice(0, 140))
+        : (l.areas && l.areas[0] ? `Browsing ${escHtml(l.areas[0])}` : '<em>No conversation yet</em>');
+      const when = msg ? fmtRel(msg.created_at) : fmtRel(l.updated_at);
+      const isActive = l.id === state.selectedLeadId;
+      const initials = initialsOf(l.first_name, l.last_name, l.email);
+      return `
+        <div class="lead-row ${isActive ? 'on' : ''}" data-lead-id="${escHtml(l.id)}">
+          <div class="${avatarClassFor(l.temperature)}">${escHtml(initials)}</div>
+          <div class="lead-content">
+            <div class="lead-name-row">
+              <span class="lead-name">${escHtml(fullName(l))}</span>
+              <span class="lead-when">${escHtml(when)}</span>
+            </div>
+            <p class="lead-preview">${preview}</p>
+            <div class="lead-meta">
+              ${tempBadge(l.temperature)}
+              <span class="badge">${escHtml(leadTypeLabel(l))}</span>
+              <span class="score">${l.score == null ? '—' : l.score}</span>
+            </div>
+          </div>
+        </div>`;
+    }).join('');
+    container.querySelectorAll('[data-lead-id]').forEach((row) => {
+      row.addEventListener('click', () => selectLeadId(row.getAttribute('data-lead-id')));
+    });
+  }
+
+  function paintFilters() {
+    document.querySelectorAll('[data-filter]').forEach((chip) => {
+      chip.addEventListener('click', () => {
+        state.activeFilter = chip.getAttribute('data-filter');
+        document.querySelectorAll('[data-filter]').forEach((c) => c.classList.toggle('on', c === chip));
+        paintLeadList();
+      });
+    });
+  }
+
+  function paintLeadDetail(payload) {
+    const detailEl  = document.querySelector('[data-lead-detail]');
+    const profileEl = document.querySelector('[data-lead-profile]');
+    if (!detailEl || !profileEl) return;
+    if (!payload || !payload.lead) {
+      detailEl.innerHTML = `<div style="padding:24px;opacity:.55;">Lead not found.</div>`;
+      profileEl.innerHTML = '';
+      return;
+    }
+    const lead = payload.lead;
+    const messages = payload.messages || [];
+    const events   = payload.events || [];
+    const saved    = payload.saved_properties || [];
+    const tours    = payload.tours || [];
+    const offers   = payload.offers || [];
+
+    const initials = initialsOf(lead.first_name, lead.last_name, lead.email);
+    const daysInPipeline = lead.created_at
+      ? Math.max(0, Math.floor((Date.now() - new Date(lead.created_at).getTime()) / 86400000))
+      : 0;
+    const metaBits = [
+      (lead.lead_type || 'lead').replace(/^./, (c) => c.toUpperCase()),
+      (lead.areas && lead.areas[0]) || null,
+      `${daysInPipeline} days in pipeline`,
+      lead.temperature ? lead.temperature.replace(/^./, (c) => c.toUpperCase()) : null,
+      `Score ${lead.score == null ? '—' : lead.score}`
+    ].filter(Boolean);
+
+    const pendingDraft = messages.find((m) => m.status === 'pending_approval' && m.ai_generated);
+    const otherMessages = messages.filter((m) => m !== pendingDraft).sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+
+    const draftHtml = pendingDraft ? `
+      <div class="ai-draft" data-message-id="${escHtml(pendingDraft.id)}">
+        <div class="ai-draft-head">
+          <span class="ai-tag">Draft for your review</span>
+          <span class="ai-source">${escHtml(pendingDraft.ai_draft_reasoning || 'AI-drafted reply awaiting approval')}</span>
+        </div>
+        <div class="ai-draft-body">
+          <div class="ai-from">
+            <div class="avatar avatar-sm"><img src="art/sara-headshot.png" alt="Sara"></div>
+            <div>
+              <div class="ld">From <strong>you</strong> · to <strong>${escHtml(fullName(lead))}</strong></div>
+              <div class="sub">${pendingDraft.channel === 'sms' ? 'SMS' : 'Email'} · Will send only after you approve</div>
+            </div>
+          </div>
+          ${pendingDraft.subject ? `<div class="ai-subject">${escHtml(pendingDraft.subject)}</div>` : ''}
+          <p class="ai-msg" style="white-space:pre-wrap;" data-draft-body>${escHtml(pendingDraft.body || '')}</p>
+        </div>
+        <div class="ai-foot">
+          <div class="ai-foot-l"><span><strong>Channel:</strong> ${pendingDraft.channel === 'sms' ? 'SMS' : 'Email'}</span></div>
+          <div class="ai-foot-r">
+            <button class="btn btn-ghost btn-sm" data-detail-action="edit">Edit</button>
+            <button class="btn btn-brass btn-sm" data-detail-action="approve">Send as Sara →</button>
+          </div>
+        </div>
+        <div data-detail-result style="font-size:13px;margin-top:8px;min-height:18px;"></div>
+      </div>` : '';
+
+    const threadHtml = otherMessages.length === 0
+      ? `<div style="padding:16px;opacity:.55;font-style:italic;">No conversation yet.</div>`
+      : otherMessages.map((m) => {
+          const them = m.direction === 'inbound';
+          const who  = them ? fullName(lead) : 'Sara Cooper';
+          const init = them ? initials : 'SC';
+          return `
+            <div class="msg-bubble ${them ? 'them' : 'us'}">
+              <div class="avatar avatar-sm">${escHtml(init)}</div>
+              <div>
+                <div class="mb-head">
+                  <span class="mb-name">${escHtml(who)}</span>
+                  <span class="mb-when">${escHtml(fmtRel(m.created_at))}</span>
+                  <span class="mb-ch">${m.channel === 'sms' ? 'SMS' : 'Email'}</span>
+                </div>
+                <p class="mb-text">${escHtml(m.body || '')}</p>
+              </div>
+            </div>`;
+        }).join('');
+
+    detailEl.innerHTML = `
+      <div class="ld-head">
+        <div class="ld-head-l">
+          <div class="avatar avatar-lg" style="background: var(--hot); color: var(--shell); font-family: var(--serif); font-style: italic;">${escHtml(initials)}</div>
+          <div>
+            <h2>${escHtml(fullName(lead))}</h2>
+            <div class="ld-head-meta">${escHtml(metaBits.join(' · '))}</div>
+          </div>
+        </div>
+        <div class="ld-head-actions">
+          <button class="btn btn-ghost btn-sm" disabled title="Click-to-call endpoint pending">◇ Call</button>
+          <button class="btn btn-ghost btn-sm" disabled title="Tour scheduler endpoint pending">Schedule</button>
+          <button class="btn btn-ink btn-sm" data-detail-action="enroll">Add to sequence</button>
+        </div>
+      </div>
+      ${draftHtml}
+      <div class="ld-thread">
+        <div class="ld-thread-h">Conversation · ${messages.length} message${messages.length === 1 ? '' : 's'}</div>
+        ${threadHtml}
+      </div>
+      <div class="composer">
+        <div class="composer-head">
+          <span class="composer-tab on">Email</span>
+          <span class="composer-tab">SMS</span>
+          <span class="composer-tab">Note</span>
+          <span class="composer-tab">Internal</span>
+        </div>
+        <textarea placeholder="Manual outbound is read-only until /api/crm/message ships." disabled style="opacity:.55;"></textarea>
+        <div class="composer-foot">
+          <div class="composer-tools"><span style="font-size:11px;opacity:.55;font-family:var(--mono);letter-spacing:.12em;text-transform:uppercase;">Manual send endpoint pending</span></div>
+          <div style="display: flex; gap: 6px;">
+            <button class="btn btn-ink btn-sm" disabled>Send</button>
+          </div>
+        </div>
+      </div>`;
+
+    const draftEl = detailEl.querySelector('.ai-draft');
+    if (draftEl && pendingDraft) wireDraftActions(draftEl, pendingDraft, lead);
+    const enrollBtn = detailEl.querySelector('[data-detail-action="enroll"]');
+    if (enrollBtn) enrollBtn.addEventListener('click', () => promptEnrollSequence(lead));
+
+    const stages = ['new', 'nurture', 'touring', 'offer', 'close'];
+    const stageIdx = Math.max(0, stages.indexOf(lead.pipeline_stage || 'new'));
+    const stageHtml = stages.map((s, i) => {
+      const cls = i < stageIdx ? 'done' : (i === stageIdx ? 'now' : '');
+      return `<div class="stage-step ${cls}"><span class="l">${s.replace(/^./, (c) => c.toUpperCase())}</span></div>`;
+    }).join('');
+
+    const activityHtml = (events.slice(0, 8) || []).map((e) => {
+      const dotClass = e.event_type === 'property_saved' ? 'ink' : e.event_type === 'message_sent' ? '' : 'faint';
+      const label    = (e.event_type || '').replace(/_/g, ' ').replace(/^./, (c) => c.toUpperCase());
+      const extra    = e.event_data && e.event_data.property && e.event_data.property.address
+                     ? ` · ${escHtml(e.event_data.property.address)}` : '';
+      return `
+        <div class="tl-item">
+          <div class="tl-dot ${dotClass}"></div>
+          <div>
+            <div class="tl-text"><strong>${escHtml(label)}</strong>${extra}</div>
+            <div class="tl-when">${escHtml(fmtRel(e.created_at))}</div>
+          </div>
+        </div>`;
+    }).join('') || `<div style="opacity:.5;font-style:italic;font-size:13px;">No recent activity.</div>`;
+
+    const savedHtml = saved.slice(0, 4).map((s) => {
+      const p = s.properties || {};
+      const img = (p.photos && p.photos[0]) || 'https://images.unsplash.com/photo-1568605114967-8130f3a36994?w=200&q=80';
+      return `
+        <div class="lp-home">
+          <div class="lp-home-img"><img src="${escHtml(img)}" alt=""></div>
+          <div>
+            <div class="lp-home-p">${escHtml(fmtUSD(p.price))}</div>
+            <div class="lp-home-a">${escHtml(p.address || '—')}${p.city ? ' · ' + escHtml(p.city) : ''}</div>
+          </div>
+        </div>`;
+    }).join('') || `<div style="opacity:.5;font-style:italic;font-size:13px;">No saved properties yet.</div>`;
+
+    const assigned = lead.assigned_agent || 'sara';
+    profileEl.innerHTML = `
+      <div class="lp-section">
+        <h3>Score &amp; signal</h3>
+        <div class="lp-score">
+          <div>
+            <span class="v">${lead.score == null ? '—' : lead.score}</span>
+            <span class="l">${escHtml((lead.temperature || 'new').replace(/^./, (c) => c.toUpperCase()))} — ${escHtml(lead.journey_stage || 'unknown')}</span>
+          </div>
+          <div class="trend"><div class="lp-meter"><div class="fill" style="width: ${Math.min(100, Math.max(0, lead.score || 0))}%;"></div></div></div>
+        </div>
+      </div>
+      <div class="lp-section">
+        <h3>Pipeline stage</h3>
+        <div class="stage-track">${stageHtml}</div>
+        <p style="font-family: var(--mono); font-size: 9.5px; letter-spacing: 0.12em; color: var(--ink-mute); margin-top: 10px; text-transform: uppercase;">In ${escHtml(lead.pipeline_stage || 'new')} · ${daysInPipeline}d</p>
+      </div>
+      <div class="lp-section">
+        <h3>Assigned</h3>
+        <div class="handoff">
+          <div class="a">
+            <div class="avatar avatar-sm" style="background: var(--brass); color: var(--shell); font-family: var(--serif); font-style: italic;">${assigned === 'james' ? 'JS' : 'SC'}</div>
+            <span class="lab">${escHtml(assigned.replace(/^./, (c) => c.toUpperCase()))}</span>
+          </div>
+        </div>
+        <button class="btn btn-ghost btn-xs" disabled style="margin-top: 10px; width: 100%;" title="Reassign endpoint pending">Reassign or share</button>
+      </div>
+      <div class="lp-section lp-facts">
+        <h3>Contact</h3>
+        <dl>
+          ${lead.phone     ? `<div><dt>Phone</dt><dd>${escHtml(lead.phone)}</dd></div>`         : ''}
+          ${lead.email     ? `<div><dt>Email</dt><dd>${escHtml(lead.email)}</dd></div>`         : ''}
+          ${lead.source    ? `<div><dt>Source</dt><dd>${escHtml(lead.source)}</dd></div>`       : ''}
+          ${(lead.price_min || lead.price_max) ? `<div><dt>Budget</dt><dd>${escHtml(fmtUSD(lead.price_min))} – ${escHtml(fmtUSD(lead.price_max))}</dd></div>` : ''}
+          ${lead.timeline  ? `<div><dt>Timeline</dt><dd>${escHtml(lead.timeline)}</dd></div>`   : ''}
+          ${(lead.areas && lead.areas.length) ? `<div><dt>Areas</dt><dd>${escHtml(lead.areas.join(', '))}</dd></div>` : ''}
+          ${(lead.must_haves && lead.must_haves.length) ? `<div><dt>Must-haves</dt><dd>${escHtml(lead.must_haves.join(' · '))}</dd></div>` : ''}
+        </dl>
+      </div>
+      <div class="lp-section">
+        <h3>Activity · last events</h3>
+        ${activityHtml}
+      </div>
+      <div class="lp-section">
+        <h3>Saved · ${saved.length} propert${saved.length === 1 ? 'y' : 'ies'}</h3>
+        ${savedHtml}
+      </div>
+      ${tours.length ? `<div class="lp-section"><h3>Tours · ${tours.length}</h3>${tours.slice(0,3).map((t) => `<div class="tl-item"><div class="tl-dot"></div><div><div class="tl-text"><strong>${escHtml(t.properties && t.properties.address || 'Tour')}</strong></div><div class="tl-when">${escHtml(fmtRel(t.scheduled_at))} · ${escHtml(t.status || '')}</div></div></div>`).join('')}</div>` : ''}
+      ${offers.length ? `<div class="lp-section"><h3>Offers · ${offers.length}</h3>${offers.slice(0,3).map((o) => `<div class="tl-item"><div class="tl-dot ink"></div><div><div class="tl-text"><strong>${escHtml(fmtUSD(o.amount))}</strong> · ${escHtml(o.status || '')}</div><div class="tl-when">${escHtml(o.properties && o.properties.address || '')}</div></div></div>`).join('')}</div>` : ''}
+    `;
+  }
+
+  function wireDraftActions(card, message, lead) {
+    const editBtn    = card.querySelector('[data-detail-action="edit"]');
+    const approveBtn = card.querySelector('[data-detail-action="approve"]');
+    const bodyEl     = card.querySelector('[data-draft-body]');
+    const resultEl   = card.querySelector('[data-detail-result]');
+    let editedTa = null;
+
+    if (editBtn) editBtn.addEventListener('click', () => {
+      if (bodyEl.querySelector('textarea')) return;
+      const ta = document.createElement('textarea');
+      ta.value = message.body || '';
+      ta.style.cssText = 'width:100%;min-height:120px;padding:10px;border:1px solid #D9CFB7;background:#fff;font:inherit;font-size:14px;line-height:1.55;';
+      bodyEl.innerHTML = '';
+      bodyEl.appendChild(ta);
+      editedTa = ta;
+      editBtn.textContent = 'Done editing';
+    });
+
+    if (approveBtn) approveBtn.addEventListener('click', async () => {
+      approveBtn.disabled = true;
+      approveBtn.textContent = 'Sending…';
+      resultEl.textContent = '';
+      const r = await window.Legacy.api('/api/crm/approve', {
+        body: { message_id: message.id, edited_body: editedTa ? editedTa.value : undefined }
+      });
+      if (r.ok && r.json && r.json.status === 'sent') {
+        resultEl.style.color = '#2E5C3D';
+        resultEl.textContent = `✓ Sent via ${(r.json.provider && r.json.provider.via) || 'provider'}.`;
+        approveBtn.textContent = 'Sent';
+        card.style.opacity = '0.55';
+        setTimeout(() => loadLead(lead.id), 800);
+      } else {
+        resultEl.style.color = '#9B2C2C';
+        resultEl.textContent = (r.json && r.json.error) || 'Send failed.';
+        approveBtn.disabled = false;
+        approveBtn.textContent = 'Send as Sara →';
+      }
+    });
+  }
+
+  async function promptEnrollSequence(lead) {
+    const name = prompt(`Enroll ${fullName(lead)} in which sequence?\n(Type the exact sequence name, e.g. "new_buyer_welcome", "hot_lead_nudge", "tour_followup")`);
+    if (!name) return;
+    const r = await window.Legacy.api('/api/sequences/enroll', {
+      body: { lead_id: lead.id, sequence_name: name.trim() }
+    });
+    if (r.ok && r.json && r.json.enrolled) {
+      alert(`Enrolled. ${r.json.sequence.total_steps} steps. First step due ${new Date(r.json.next_due_at).toLocaleString()}.`);
+    } else {
+      alert((r.json && r.json.error) || 'Enrollment failed.');
+    }
+  }
+
+  function paintKanban(pipelineData) {
+    const stages = (pipelineData && pipelineData.stages) || [];
+    stages.forEach((stage) => {
+      const col  = document.querySelector(`[data-stage="${stage.stage}"]`);
+      if (!col) return;
+      const head = col.querySelector('[data-stage-count]');
+      const body = col.querySelector('[data-stage-body]');
+      if (head) head.innerHTML = `${stage.count} · <span class="sum">${escHtml(fmtUSD(stage.estimated_value))}</span>`;
+      if (!body) return;
+      if (!stage.leads.length) {
+        body.innerHTML = `<div style="opacity:.4;font-style:italic;font-size:12px;padding:8px 4px;">Empty.</div>`;
+        return;
+      }
+      body.innerHTML = stage.leads.slice(0, 10).map((l) => {
+        const pill = tempPill(l.temperature);
+        const mid  = (l.price_min && l.price_max) ? (l.price_min + l.price_max) / 2 : (l.price_min || l.price_max || 0);
+        const home = (l.areas && l.areas[0]) || (l.journey_stage || '').replace(/_/g, ' ');
+        return `
+          <div class="kan-card" data-lead-id="${escHtml(l.id)}">
+            <div class="name">${escHtml(fullName(l))}</div>
+            <div class="home">${mid ? `<span class="price">${escHtml(fmtUSD(mid))}</span> · ` : ''}${escHtml(home || '—')}</div>
+            <div class="kan-card-foot">
+              <span class="pill-status ${pill}">${escHtml((l.temperature || 'new').replace(/^./, (c) => c.toUpperCase()))} · ${l.score == null ? '—' : l.score}</span>
+              <span>· ${escHtml(fmtRel(l.updated_at))}</span>
+            </div>
+          </div>`;
+      }).join('');
+      body.querySelectorAll('[data-lead-id]').forEach((card) => {
+        card.addEventListener('click', () => {
+          if (typeof window.selectView === 'function') window.selectView('inbox');
+          selectLeadId(card.getAttribute('data-lead-id'));
+        });
+      });
+    });
+
+    const eyebrow = document.querySelector('[data-bind-pipe-eyebrow]');
+    if (eyebrow) eyebrow.textContent = `Active pipeline · ${pipelineData.total_leads || 0} lead${pipelineData.total_leads === 1 ? '' : 's'}`;
+    const inflight = document.querySelector('[data-bind-pipe-inflight]');
+    if (inflight) inflight.textContent = fmtUSD(pipelineData.total_estimated_value || 0);
+  }
+
+  async function loadLead(id) {
+    const detailEl = document.querySelector('[data-lead-detail]');
+    if (detailEl) detailEl.innerHTML = `<div style="padding:24px;opacity:.55;font-style:italic;">Loading…</div>`;
+    const r = await window.Legacy.api(`/api/crm/lead?id=${encodeURIComponent(id)}`, { method: 'GET' });
+    if (r.ok) paintLeadDetail(r.json);
+    else if (detailEl) detailEl.innerHTML = `<div style="padding:24px;color:#9B2C2C;">${escHtml((r.json && r.json.error) || 'Could not load lead.')}</div>`;
+  }
+
+  function selectLeadId(id) {
+    if (state.selectedLeadId === id) return;
+    state.selectedLeadId = id;
+    document.querySelectorAll('[data-lead-list] [data-lead-id]').forEach((r) => {
+      r.classList.toggle('on', r.getAttribute('data-lead-id') === id);
+    });
+    loadLead(id);
+  }
+
+  async function bootCrmInbox() {
+    if (!window.Legacy || !window.Legacy.api) { setTimeout(bootCrmInbox, 50); return; }
+    paintFilters();
+
+    const [pipelineRes, inboxRes] = await Promise.all([
+      window.Legacy.api('/api/crm/pipeline', { method: 'GET' }),
+      window.Legacy.api('/api/crm/inbox?filter=all&limit=100', { method: 'GET' })
+    ]);
+    if (!pipelineRes.ok) return;
+
+    const allLeads = [];
+    (pipelineRes.json.stages || []).forEach((s) => s.leads.forEach((l) => allLeads.push(l)));
+    allLeads.sort((a, b) => new Date(b.updated_at || 0) - new Date(a.updated_at || 0));
+    state.leads = allLeads;
+    state.leadsById = new Map(allLeads.map((l) => [l.id, l]));
+
+    if (inboxRes.ok) {
+      const seen = new Set();
+      (inboxRes.json.messages || []).forEach((m) => {
+        if (!m.leads || seen.has(m.lead_id)) return;
+        seen.add(m.lead_id);
+        state.messageByLead.set(m.lead_id, m);
+      });
+    }
+
+    paintLeadCounts();
+    paintLeadList();
+    paintKanban(pipelineRes.json);
+
+    if (allLeads.length) selectLeadId(allLeads[0].id);
+    else {
+      const detailEl = document.querySelector('[data-lead-detail]');
+      if (detailEl) detailEl.innerHTML = `<div style="padding:32px;opacity:.55;font-style:italic;">No active leads yet. Submit a lead via the homepage to populate the CRM.</div>`;
+    }
+  }
+
+  document.addEventListener('DOMContentLoaded', bootCrmInbox);
+})();
+
