@@ -1323,6 +1323,19 @@
       `Score ${lead.score == null ? '—' : lead.score}`
     ].filter(Boolean);
 
+    // Consent badges — surface every active opt-out so an agent never sends
+    // through a channel the lead has blocked.
+    const consentChips = [];
+    if (lead.call_opt_out)   consentChips.push('Do not call');
+    if (lead.sms_opt_out)    consentChips.push('Do not text');
+    if (lead.email_opt_out)  consentChips.push('Do not email');
+    if (lead.not_interested) consentChips.push('Not interested');
+    if (lead.status === 'do_not_contact')      consentChips.push('Do not contact');
+    if (lead.pipeline_stage === 'sphere')      consentChips.push('Sphere · no auto outreach');
+    const consentChipHtml = consentChips.length
+      ? `<div style="margin-top:6px;display:flex;gap:6px;flex-wrap:wrap;">${consentChips.map((c) => `<span class="badge" style="background:#FBE3E0;color:#9B2C2C;border:1px solid #E8B0AA;font-weight:600;">${escHtml(c)}</span>`).join('')}</div>`
+      : '';
+
     const pendingDraft = messages.find((m) => m.status === 'pending_approval' && m.ai_generated);
     const otherMessages = messages.filter((m) => m !== pendingDraft).sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
 
@@ -1380,6 +1393,7 @@
           <div>
             <h2>${escHtml(fullName(lead))}</h2>
             <div class="ld-head-meta">${escHtml(metaBits.join(' · '))}</div>
+            ${consentChipHtml}
           </div>
         </div>
         <div class="ld-head-actions">
@@ -1725,11 +1739,13 @@
         statusEl.textContent = label;
         statusEl.style.color = '';
       } else if (isSms) {
-        if (!lead.phone) { sendBtn.disabled = true; statusEl.textContent = 'Lead has no phone'; bodyEl.placeholder = `No phone on file for ${fullName(lead)}.`; }
-        else             { statusEl.textContent = '';                                          bodyEl.placeholder = `Text ${fullName(lead)} (max 320 chars)`; }
+        if (!lead.phone)            { sendBtn.disabled = true; statusEl.textContent = 'Lead has no phone'; bodyEl.placeholder = `No phone on file for ${fullName(lead)}.`; }
+        else if (lead.sms_opt_out)  { sendBtn.disabled = true; statusEl.style.color = '#9B2C2C'; statusEl.textContent = `${fullName(lead)} has opted out of SMS — sending is blocked`; bodyEl.placeholder = 'Channel opted out.'; }
+        else                        { statusEl.textContent = '';                                          bodyEl.placeholder = `Text ${fullName(lead)} (max 320 chars)`; }
       } else {
-        if (!lead.email) { sendBtn.disabled = true; statusEl.textContent = 'Lead has no email'; bodyEl.placeholder = `No email on file for ${fullName(lead)}.`; }
-        else             { statusEl.textContent = '';                                          bodyEl.placeholder = `Email ${fullName(lead)}…`; }
+        if (!lead.email)            { sendBtn.disabled = true; statusEl.textContent = 'Lead has no email'; bodyEl.placeholder = `No email on file for ${fullName(lead)}.`; }
+        else if (lead.email_opt_out){ sendBtn.disabled = true; statusEl.style.color = '#9B2C2C'; statusEl.textContent = `${fullName(lead)} has opted out of email — sending is blocked`; bodyEl.placeholder = 'Channel opted out.'; }
+        else                        { statusEl.textContent = '';                                          bodyEl.placeholder = `Email ${fullName(lead)}…`; }
       }
     }
     tabs.forEach((t) => t.addEventListener('click', () => setChannel(t.getAttribute('data-composer-tab'))));
@@ -1906,5 +1922,87 @@
   }
 
   document.addEventListener('DOMContentLoaded', bootCrmInbox);
+
+  // ---------- Import Leads modal ------------------------------------------
+  const LEGACY_LEADS_URL   = 'https://customer-assets.emergentagent.com/job_crm-wire-live/artifacts/fvyf3ftm_legacy_leads_import.csv';
+  const LEGACY_CONSENT_URL = 'https://customer-assets.emergentagent.com/job_crm-wire-live/artifacts/ugrzaqww_lead_consent_flags.csv';
+
+  function openImporter() {
+    let m = document.getElementById('leg-import-modal');
+    if (m) { m.style.display = 'flex'; return; }
+    m = document.createElement('div');
+    m.id = 'leg-import-modal';
+    m.style.cssText = 'position:fixed;inset:0;z-index:99997;background:rgba(20,18,15,0.6);display:flex;align-items:center;justify-content:center;padding:24px;font-family:Manrope,system-ui,sans-serif;';
+    m.innerHTML = `
+      <div style="background:#FAF6EC;max-width:640px;width:100%;padding:28px 32px;color:#1A1714;max-height:88vh;overflow:auto;">
+        <div style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.22em;text-transform:uppercase;color:#7C6A4D;margin-bottom:8px;">Import</div>
+        <h2 style="font-family:'Cormorant Garamond',serif;font-style:italic;font-weight:500;font-size:28px;margin:0 0 14px;">Import leads from CSV.</h2>
+        <p style="font-size:14px;line-height:1.55;color:#3A332B;margin:0 0 18px;">Dedupes by <code>fub_id</code>, falls back to <code>email</code>. Existing rows are never touched. Preview before commit.</p>
+
+        <details style="margin-bottom:18px;border:1px solid #D9CFB7;padding:10px 14px;background:#fff;">
+          <summary style="cursor:pointer;font-weight:600;font-size:14px;">One-time legacy import (2,016 leads + 694 consent records)</summary>
+          <p style="font-size:13px;color:#3A332B;margin:10px 0;">Runs the full historical import in 3 steps: delete the 2 test rows, import every lead by <code>fub_id</code>, then apply every consent flag.</p>
+          <button id="leg-run-legacy" style="background:#1A1714;color:#FAF6EC;border:none;padding:10px 18px;font-family:JetBrains Mono,monospace;font-size:11px;letter-spacing:.22em;text-transform:uppercase;cursor:pointer;">Run legacy import</button>
+        </details>
+
+        <div style="font-weight:600;font-size:13px;margin-bottom:6px;text-transform:uppercase;letter-spacing:.14em;color:#7C6A4D;">Upload your own</div>
+        <input type="file" id="leg-csv-file" accept=".csv,text/csv" style="margin-bottom:10px;font-size:13px;">
+        <div style="display:flex;gap:8px;align-items:center;margin-bottom:14px;font-size:13px;">
+          <label><input type="radio" name="leg-kind" value="leads" checked> Leads</label>
+          <label><input type="radio" name="leg-kind" value="consent"> Consent flags</label>
+        </div>
+        <div style="display:flex;gap:10px;">
+          <button id="leg-preview" style="background:#fff;color:#1A1714;border:1px solid #1A1714;padding:10px 18px;font-family:JetBrains Mono,monospace;font-size:11px;letter-spacing:.22em;text-transform:uppercase;cursor:pointer;">Preview</button>
+          <button id="leg-commit" style="background:#1A1714;color:#FAF6EC;border:none;padding:10px 18px;font-family:JetBrains Mono,monospace;font-size:11px;letter-spacing:.22em;text-transform:uppercase;cursor:pointer;" disabled>Commit</button>
+          <button id="leg-import-close" style="margin-left:auto;background:transparent;border:none;color:#7C6A4D;cursor:pointer;font-size:13px;">Close</button>
+        </div>
+        <pre id="leg-import-log" style="margin-top:14px;background:#1A1714;color:#FAF6EC;padding:14px;font-family:'JetBrains Mono',monospace;font-size:12px;line-height:1.5;max-height:280px;overflow:auto;white-space:pre-wrap;">Awaiting action…</pre>
+      </div>`;
+    document.body.appendChild(m);
+
+    const log = (msg) => { const el = m.querySelector('#leg-import-log'); el.textContent = (typeof msg === 'string' ? msg : JSON.stringify(msg, null, 2)); el.scrollTop = el.scrollHeight; };
+    let stagedCsv = null;
+
+    m.querySelector('#leg-import-close').onclick = () => { m.style.display = 'none'; };
+    m.querySelector('#leg-csv-file').onchange = async (ev) => {
+      const f = ev.target.files[0]; if (!f) return;
+      stagedCsv = await f.text();
+      log(`Loaded ${f.name} (${stagedCsv.length.toLocaleString()} chars). Click Preview.`);
+      m.querySelector('#leg-commit').disabled = false;
+    };
+    m.querySelector('#leg-preview').onclick = async () => {
+      if (!stagedCsv) return log('Choose a file first.');
+      const kind = m.querySelector('input[name="leg-kind"]:checked').value;
+      log('Previewing…');
+      const r = await window.Legacy.api('/api/crm/import-leads', { body: { kind, csv: stagedCsv, dry_run: true } });
+      log(r.json);
+    };
+    m.querySelector('#leg-commit').onclick = async () => {
+      if (!stagedCsv) return;
+      const kind = m.querySelector('input[name="leg-kind"]:checked').value;
+      log('Committing…');
+      const r = await window.Legacy.api('/api/crm/import-leads', { body: { kind, csv: stagedCsv, dry_run: false } });
+      log(r.json);
+    };
+    m.querySelector('#leg-run-legacy').onclick = async () => {
+      log('Step 1/3 · Deleting test rows…');
+      const r1 = await window.Legacy.api('/api/crm/import-leads', { body: { kind: 'delete_test' } });
+      log({ step: '1/3 delete_test', ...r1.json });
+      await new Promise((res) => setTimeout(res, 400));
+      log('Step 2/3 · Importing 2,016 legacy leads from artifact URL…');
+      const r2 = await window.Legacy.api('/api/crm/import-leads', { body: { kind: 'leads', csv_url: LEGACY_LEADS_URL } });
+      log({ step: '2/3 import_leads', ...r2.json });
+      await new Promise((res) => setTimeout(res, 400));
+      log('Step 3/3 · Applying 694 consent flags…');
+      const r3 = await window.Legacy.api('/api/crm/import-leads', { body: { kind: 'consent', csv_url: LEGACY_CONSENT_URL } });
+      log({ step: '3/3 apply_consent', ...r3.json });
+      log({ done: true, summary: { delete_test: r1.json, import_leads: r2.json, apply_consent: r3.json } });
+    };
+  }
+
+  document.addEventListener('click', (e) => {
+    const trigger = e.target.closest('[data-open-importer]');
+    if (trigger) { e.preventDefault(); openImporter(); }
+  });
 })();
 

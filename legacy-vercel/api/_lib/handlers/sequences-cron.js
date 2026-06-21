@@ -63,7 +63,7 @@ async function tickSequences(supa) {
   // budget; the next cron tick picks up the remainder.
   const { data: dueLeads = [], error } = await supa
     .from('leads')
-    .select('id, first_name, last_name, email, phone, areas, price_min, price_max, journey_stage, lead_type, temperature, score, sequence_id, sequence_step, sequence_next_due_at')
+    .select('id, first_name, last_name, email, phone, areas, price_min, price_max, journey_stage, lead_type, temperature, score, sequence_id, sequence_step, sequence_next_due_at, call_opt_out, sms_opt_out, email_opt_out, not_interested, pipeline_stage')
     .eq('sequence_paused', false)
     .eq('status', 'active')
     .not('sequence_id', 'is', null)
@@ -80,10 +80,17 @@ async function tickSequences(supa) {
     .from('sequences').select('id, name, steps').in('id', seqIds);
   const seqMap = new Map(seqs.map((s) => [s.id, s]));
 
-  const counters = { drafted: 0, paused: 0, completed: 0, errors: [] };
+  const counters = { drafted: 0, paused: 0, completed: 0, skipped_consent: 0, errors: [] };
 
   for (const lead of dueLeads) {
     try {
+      // Hard-skip leads that should never receive automated outreach.
+      if (lead.pipeline_stage === 'sphere' || lead.not_interested) {
+        await supa.from('leads').update({ sequence_paused: true }).eq('id', lead.id);
+        counters.skipped_consent++;
+        continue;
+      }
+
       const seq = seqMap.get(lead.sequence_id);
       if (!seq) {
         await supa.from('leads').update({ sequence_id: null, sequence_next_due_at: null }).eq('id', lead.id);
@@ -96,6 +103,27 @@ async function tickSequences(supa) {
       if (!step) {
         await supa.from('leads').update({ sequence_id: null, sequence_next_due_at: null }).eq('id', lead.id);
         counters.completed++;
+        continue;
+      }
+
+      // Per-channel consent: if this step's channel is opted out, advance to
+      // the next step that has a contactable channel rather than dripping
+      // through SMS when SMS is blocked.
+      const channelBlocked = (
+        (step.channel === 'sms'   && lead.sms_opt_out) ||
+        (step.channel === 'email' && lead.email_opt_out)
+      );
+      if (channelBlocked) {
+        const nextIdx = idx + 1;
+        const isDone  = nextIdx >= steps.length;
+        const nextDue = isDone ? null
+          : new Date(Date.now() + (Number(steps[nextIdx].delay_hours) || 0) * 3600_000).toISOString();
+        await supa.from('leads').update({
+          sequence_step:        nextIdx,
+          sequence_next_due_at: nextDue,
+          ...(isDone ? { sequence_id: null } : {})
+        }).eq('id', lead.id);
+        counters.skipped_consent++;
         continue;
       }
 

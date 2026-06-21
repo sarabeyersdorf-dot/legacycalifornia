@@ -18,6 +18,7 @@ import leadDetail   from '../_lib/handlers/crm-lead-detail.js';
 import approve      from '../_lib/handlers/crm-approve.js';
 import messageSend  from '../_lib/handlers/crm-message-send.js';
 import noteCreate   from '../_lib/handlers/crm-note-create.js';
+import importLeads  from '../_lib/handlers/crm-import-leads.js';
 
 const TABLE = {
   'morning-brief': morningBrief,
@@ -26,7 +27,8 @@ const TABLE = {
   'lead':          leadDetail,
   'approve':       approve,
   'message':       messageSend,
-  'note':          noteCreate
+  'note':          noteCreate,
+  'import-leads':  importLeads
 };
 
 export default async function handler(req, res) {
