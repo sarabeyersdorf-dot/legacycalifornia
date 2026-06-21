@@ -43,13 +43,14 @@ async function readLead(req, res) {
     if (!id) return fail(res, 400, 'id required');
 
     const supa = adminClient();
-    const [lead, messages, events, saved, tours, offers] = await Promise.all([
+    const [lead, messages, events, saved, tours, offers, notes] = await Promise.all([
       supa.from('leads').select('*').eq('id', id).single(),
       supa.from('messages').select('*').eq('lead_id', id).order('created_at'),
       supa.from('lead_events').select('*').eq('lead_id', id).order('created_at', { ascending: false }).limit(50),
       supa.from('saved_properties').select('*, properties(*)').eq('lead_id', id).order('last_viewed_at', { ascending: false }),
       supa.from('tours').select('*, properties(address,city,mls_number)').eq('lead_id', id).order('scheduled_at', { ascending: false }),
-      supa.from('offers').select('*, properties(address,city,mls_number)').eq('buyer_lead_id', id)
+      supa.from('offers').select('*, properties(address,city,mls_number)').eq('buyer_lead_id', id),
+      supa.from('lead_notes').select('id, body, is_internal, created_at, created_by').eq('lead_id', id).order('created_at', { ascending: false }).limit(50)
     ]);
 
     if (lead.error || !lead.data) return fail(res, 404, 'lead not found');
@@ -60,7 +61,8 @@ async function readLead(req, res) {
       events:           events.data   || [],
       saved_properties: saved.data    || [],
       tours:            tours.data    || [],
-      offers:           offers.data   || []
+      offers:           offers.data   || [],
+      notes:            notes.data    || []
     });
   } catch (e) {
     return fail(res, 500, e.message);

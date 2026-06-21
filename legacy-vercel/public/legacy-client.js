@@ -1397,8 +1397,8 @@
         <div class="composer-head">
           <span class="composer-tab on" data-composer-tab="email">Email</span>
           <span class="composer-tab" data-composer-tab="sms">SMS</span>
-          <span class="composer-tab" data-composer-tab="note" title="Internal notes need a new lead_notes table — not wired yet">Note</span>
-          <span class="composer-tab" data-composer-tab="internal" title="Internal notes need a new lead_notes table — not wired yet">Internal</span>
+          <span class="composer-tab" data-composer-tab="note" title="Private note · visible to agents only">Note</span>
+          <span class="composer-tab" data-composer-tab="internal" title="Internal note · visible to agents only">Internal</span>
         </div>
         <input data-composer-subject placeholder="Subject" style="width:100%;border:1px solid #D9CFB7;padding:8px 10px;background:#fff;font:inherit;font-size:14px;margin-bottom:6px;">
         <textarea data-composer-body placeholder="Write to ${escHtml(fullName(lead))}…"></textarea>
@@ -1425,9 +1425,31 @@
       return `<div class="stage-step ${cls}"><span class="l">${s.replace(/^./, (c) => c.toUpperCase())}</span></div>`;
     }).join('');
 
-    const activityHtml = (events.slice(0, 8) || []).map((e) => {
+    // Merge lead_events + lead_notes into a single chronological activity
+    // stream. Notes get a distinct dot style and an "Internal" / "Note"
+    // tag so they're visually separable from automated events.
+    const notes  = payload.notes || [];
+    const eventsAndNotes = [
+      ...events.map((e) => ({ kind: 'event', at: e.created_at, payload: e })),
+      ...notes.map((n)  => ({ kind: 'note',  at: n.created_at, payload: n }))
+    ].sort((a, b) => new Date(b.at) - new Date(a.at)).slice(0, 12);
+
+    const activityHtml = eventsAndNotes.map((item) => {
+      if (item.kind === 'note') {
+        const n = item.payload;
+        const tag = n.is_internal ? 'Internal' : 'Note';
+        const bodyShort = (n.body || '').length > 240 ? n.body.slice(0, 240) + '…' : (n.body || '');
+        return `
+          <div class="tl-item">
+            <div class="tl-dot ink"></div>
+            <div>
+              <div class="tl-text"><strong>${escHtml(tag)}</strong> — ${escHtml(bodyShort)}</div>
+              <div class="tl-when">${escHtml(fmtRel(n.created_at))}</div>
+            </div>
+          </div>`;
+      }
+      const e = item.payload;
       const d = e.event_data || {};
-      // Stage move / reassignment (logged as score_change w/ event_data.change)
       if (e.event_type === 'score_change' && d.change === 'stage_change') {
         return `
           <div class="tl-item">
@@ -1514,7 +1536,7 @@
         </dl>
       </div>
       <div class="lp-section">
-        <h3>Activity · last events</h3>
+        <h3>Activity · ${events.length + notes.length} item${(events.length + notes.length) === 1 ? '' : 's'}</h3>
         ${activityHtml}
       </div>
       <div class="lp-section">
@@ -1674,7 +1696,7 @@
     });
   }
 
-  // ---- Composer (manual outbound via POST /api/crm/message) --------------
+  // ---- Composer (manual outbound via POST /api/crm/message, or notes via POST /api/crm/note) --
   function wireComposer(detailEl, lead) {
     const composer  = detailEl.querySelector('[data-composer]');
     if (!composer) return;
@@ -1691,27 +1713,23 @@
       tabs.forEach((t) => t.classList.toggle('on', t.getAttribute('data-composer-tab') === next));
       const isNote = next === 'note' || next === 'internal';
       const isSms  = next === 'sms';
+      subjectEl.style.display = (isNote || isSms) ? 'none' : '';
+      bodyEl.disabled = false;
+      bodyEl.style.opacity = '';
+      sendBtn.disabled = false;
+      sendBtn.title = '';
+      sendBtn.textContent = isNote ? 'Save note' : 'Send';
       if (isNote) {
-        subjectEl.style.display = 'none';
-        bodyEl.placeholder = 'Internal notes need a new lead_notes table — coordinate with backend before wiring.';
-        bodyEl.disabled = true;
-        bodyEl.style.opacity = '0.55';
-        sendBtn.disabled = true;
-        sendBtn.title    = 'Internal note endpoint pending';
-        statusEl.textContent = 'NOTES NOT WIRED';
+        const label = next === 'internal' ? 'Internal note · only agents see this' : 'Note · agents only (no client visibility)';
+        bodyEl.placeholder = `${next === 'internal' ? 'Internal' : 'Private'} note about ${fullName(lead)}…`;
+        statusEl.textContent = label;
+        statusEl.style.color = '';
+      } else if (isSms) {
+        if (!lead.phone) { sendBtn.disabled = true; statusEl.textContent = 'Lead has no phone'; bodyEl.placeholder = `No phone on file for ${fullName(lead)}.`; }
+        else             { statusEl.textContent = '';                                          bodyEl.placeholder = `Text ${fullName(lead)} (max 320 chars)`; }
       } else {
-        subjectEl.style.display = isSms ? 'none' : '';
-        bodyEl.disabled = false;
-        bodyEl.style.opacity = '';
-        sendBtn.disabled = false;
-        sendBtn.title = '';
-        if (isSms) {
-          if (!lead.phone) { sendBtn.disabled = true; statusEl.textContent = 'Lead has no phone'; bodyEl.placeholder = `No phone on file for ${fullName(lead)}.`; }
-          else             { statusEl.textContent = '';                 bodyEl.placeholder = `Text ${fullName(lead)} (max 320 chars)`; }
-        } else {
-          if (!lead.email) { sendBtn.disabled = true; statusEl.textContent = 'Lead has no email'; bodyEl.placeholder = `No email on file for ${fullName(lead)}.`; }
-          else             { statusEl.textContent = '';                 bodyEl.placeholder = `Email ${fullName(lead)}…`; }
-        }
+        if (!lead.email) { sendBtn.disabled = true; statusEl.textContent = 'Lead has no email'; bodyEl.placeholder = `No email on file for ${fullName(lead)}.`; }
+        else             { statusEl.textContent = '';                                          bodyEl.placeholder = `Email ${fullName(lead)}…`; }
       }
     }
     tabs.forEach((t) => t.addEventListener('click', () => setChannel(t.getAttribute('data-composer-tab'))));
@@ -1720,36 +1738,49 @@
     sendBtn.addEventListener('click', async () => {
       const text    = (bodyEl.value || '').trim();
       const subject = (subjectEl.value || '').trim();
-      if (!text) { statusEl.textContent = 'Body is empty'; return; }
-      if (channel === 'email' && !subject) { statusEl.textContent = 'Subject is required for email'; return; }
+      if (!text) { statusEl.style.color = '#9B2C2C'; statusEl.textContent = 'Body is empty'; return; }
+      if (channel === 'email' && !subject) { statusEl.style.color = '#9B2C2C'; statusEl.textContent = 'Subject is required for email'; return; }
 
+      const isNote = channel === 'note' || channel === 'internal';
       sendBtn.disabled = true;
-      sendBtn.textContent = 'Sending…';
+      sendBtn.textContent = isNote ? 'Saving…' : 'Sending…';
       statusEl.style.color = '';
-      statusEl.textContent = 'Sending…';
+      statusEl.textContent = isNote ? 'Saving…' : 'Sending…';
 
-      const r = await window.Legacy.api('/api/crm/message', {
-        body: {
-          lead_id: lead.id,
-          channel,
-          body:    text,
-          subject: channel === 'email' ? subject : undefined
-        }
-      });
+      let r;
+      if (isNote) {
+        r = await window.Legacy.api('/api/crm/note', {
+          body: { lead_id: lead.id, body: text, is_internal: channel === 'internal' }
+        });
+      } else {
+        r = await window.Legacy.api('/api/crm/message', {
+          body: {
+            lead_id: lead.id,
+            channel,
+            body:    text,
+            subject: channel === 'email' ? subject : undefined
+          }
+        });
+      }
 
-      if (r.ok && r.json && r.json.status === 'sent') {
+      const success = isNote
+        ? (r.ok && r.json && r.json.note)
+        : (r.ok && r.json && r.json.status === 'sent');
+
+      if (success) {
         statusEl.style.color = '#2E5C3D';
-        statusEl.textContent = `Sent via ${(r.json.provider && r.json.provider.via) || channel}`;
+        statusEl.textContent = isNote
+          ? `Note saved · ${channel === 'internal' ? 'internal' : 'private to agents'}`
+          : `Sent via ${(r.json.provider && r.json.provider.via) || channel}`;
         bodyEl.value = '';
         if (subjectEl) subjectEl.value = '';
-        sendBtn.textContent = 'Sent';
-        // Refresh thread + the lead-list preview
-        setTimeout(() => { loadLead(lead.id); refreshLeadListPreview(lead.id); }, 600);
-        setTimeout(() => { sendBtn.textContent = 'Send'; sendBtn.disabled = false; }, 1800);
+        sendBtn.textContent = isNote ? 'Saved' : 'Sent';
+        setTimeout(() => { loadLead(lead.id); if (!isNote) refreshLeadListPreview(lead.id); }, 600);
+        setTimeout(() => { sendBtn.textContent = isNote ? 'Save note' : 'Send'; sendBtn.disabled = false; }, 1800);
       } else {
         statusEl.style.color = '#9B2C2C';
-        statusEl.textContent = (r.json && r.json.error) || 'Send failed.';
-        sendBtn.textContent = 'Send';
+        statusEl.textContent = (r.json && r.json.error) || (isNote ? 'Save failed.' : 'Send failed.');
+        sendBtn.textContent = isNote ? 'Save note' : 'Send';
         sendBtn.disabled = false;
       }
     });

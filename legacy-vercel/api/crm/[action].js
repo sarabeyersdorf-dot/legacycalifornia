@@ -7,6 +7,7 @@
 //   PATCH /api/crm/lead           → update pipeline_stage / assigned_agent
 //   POST  /api/crm/approve        → approve & send a draft
 //   POST  /api/crm/message        → manual outbound from an agent
+//   POST  /api/crm/note           → agent-only note on a lead
 //
 // Counts as ONE serverless function on Vercel.
 
@@ -16,6 +17,7 @@ import pipeline     from '../_lib/handlers/crm-pipeline.js';
 import leadDetail   from '../_lib/handlers/crm-lead-detail.js';
 import approve      from '../_lib/handlers/crm-approve.js';
 import messageSend  from '../_lib/handlers/crm-message-send.js';
+import noteCreate   from '../_lib/handlers/crm-note-create.js';
 
 const TABLE = {
   'morning-brief': morningBrief,
@@ -23,7 +25,8 @@ const TABLE = {
   'pipeline':      pipeline,
   'lead':          leadDetail,
   'approve':       approve,
-  'message':       messageSend
+  'message':       messageSend,
+  'note':          noteCreate
 };
 
 export default async function handler(req, res) {
