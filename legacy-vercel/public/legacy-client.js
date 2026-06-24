@@ -440,11 +440,12 @@
   }
 
   async function wireCrmPage(session) {
-    // Run all three loaders in parallel
-    const [briefRes, inboxRes, pipelineRes] = await Promise.all([
+    // Run all loaders in parallel
+    const [briefRes, inboxRes, pipelineRes, metricsRes] = await Promise.all([
       api('/api/crm/morning-brief', { method: 'GET' }),
       api('/api/crm/inbox?filter=awaiting_reply&limit=20', { method: 'GET' }),
-      api('/api/crm/pipeline', { method: 'GET' })
+      api('/api/crm/pipeline', { method: 'GET' }),
+      api('/api/crm/metrics', { method: 'GET' })
     ]);
 
     if (briefRes.ok) {
@@ -456,6 +457,7 @@
     }
     if (inboxRes.ok)    paintQuietAsks(inboxRes.json.messages || []);
     if (pipelineRes.ok) paintPipelineStats(pipelineRes.json);
+    if (metricsRes.ok)  paintCrmMetrics(metricsRes.json);
   }
 
   // ---------------------------------------------------------------------------
@@ -562,6 +564,118 @@
       return `<div class="funnel-step"><span class="l">${escapeHtml(s.label)}</span><div class="b" style="width:${pct}%;${s.brass ? 'background:var(--brass);' : ''}"></div><span class="v">${v}</span></div>`;
     }).join('');
     if (sub) sub.textContent = `${funnel.new_leads || 0} leads in · ${funnel.closed || 0} closes out`;
+  }
+
+  // ---------------------------------------------------------------------------
+  // Phase 1J — Today-foot panels, Pipeline header, Reports KPIs / chart / closings
+  // Driven by GET /api/crm/metrics
+  // ---------------------------------------------------------------------------
+  function fmtUSDshort(n) {
+    if (!n || n < 1000) return '$' + (n || 0);
+    if (n < 1000000)    return '$' + Math.round(n / 1000) + 'K';
+    return '$' + (n / 1000000).toFixed(n >= 10000000 ? 0 : 1) + 'M';
+  }
+
+  function paintCrmMetrics(m) {
+    paintDayList(m.day_list || [], m.day_total_min || 0);
+    paintDayStats(m.yesterday || {});
+    paintPipelineHeader(m.pipeline || {});
+    paintClosedChart(m.closed_by_month || []);
+    paintRecentClosings(m.recent_closings || []);
+    paintRepKpi(m.rep_kpi || {});
+  }
+
+  function paintDayList(items, totalMin) {
+    const ul = document.querySelector('[data-day-list]');
+    if (!ul) return;
+    if (!items.length) {
+      ul.innerHTML = `<li style="opacity:.55;font-style:italic;padding:14px 0;">Quiet day list. No drafts, no radio silence, no new leads in the last 24 hours.</li>`;
+    } else {
+      ul.innerHTML = items.map((t) => `
+        <li><span class="tk-box"></span><span class="tk-body"><strong>${escapeHtml(t.title)}</strong>${t.sub ? ' · ' + escapeHtml(t.sub) : ''}</span><span class="tk-time">${escapeHtml(t.time || '')}</span></li>`).join('');
+    }
+    const foot = document.querySelector('[data-day-total]');
+    if (foot) {
+      if (!items.length) { foot.innerHTML = `<strong>0 min</strong> · inbox is clear`; }
+      else {
+        const done = new Date(Date.now() + totalMin * 60000);
+        const hh = done.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+        foot.innerHTML = `<strong>${totalMin} min</strong> · if you start now, done by ${hh}`;
+      }
+    }
+  }
+
+  function paintDayStats(y) {
+    const grid = document.querySelector('[data-day-stats]');
+    if (!grid) return;
+    const cells = [
+      [y.emails_sent      || 0,                                    'Emails sent'],
+      [`${y.drafts_total  || 0}`,                                  `AI drafts · ${y.drafts_approved || 0} approved`],
+      [y.showings_led     || 0,                                    'Showings led'],
+      [y.new_leads        || 0,                                    'New leads'],
+      [fmtUSDshort(y.pipeline_added || 0),                         'Pipeline added'],
+      [`${y.inbox_pct ?? 0}<em>%</em>`,                            'Inbox handled']
+    ];
+    grid.innerHTML = cells.map(([num, lab]) => `
+      <div class="ds-cell"><span class="ds-num">${num}</span><span class="ds-lab">${escapeHtml(lab)}</span></div>`).join('');
+  }
+
+  function paintPipelineHeader(p) {
+    const inflight = document.querySelector('[data-bind-pipe-inflight]');
+    // total in-flight $ is painted by paintKanban; we own month / week / rate.
+    const month = document.querySelector('[data-bind-pipe-month]');
+    if (month) month.textContent = fmtUSDshort(p.expected_month || 0);
+    const week = document.querySelector('[data-bind-pipe-week]');
+    if (week)  week.textContent  = String(p.closing_week || 0);
+    const rate = document.querySelector('[data-bind-pipe-rate]');
+    if (rate)  rate.textContent  = `${p.tour_to_offer_pct || 0}%`;
+  }
+
+  function paintClosedChart(months) {
+    const bars = document.querySelector('[data-closed-chart]');
+    const labels = document.querySelector('[data-closed-chart-labels]');
+    if (!bars || !labels || !months.length) return;
+    const peak = Math.max(1, ...months.map((m) => m.amount));
+    bars.innerHTML = months.map((m) => {
+      const pct = Math.max(4, Math.round((m.amount / peak) * 100));
+      const brass = m.amount >= peak * 0.7 && !m.current;
+      const opacity = m.current ? 0.5 : 1;
+      return `<div class="chart-bar${brass ? ' brass' : ''}" style="height:${pct}%;${m.current ? 'opacity:0.5;' : ''}" data-v="${fmtUSDshort(m.amount)}${m.current ? '*' : ''}"></div>`;
+    }).join('');
+    labels.innerHTML = months.map((m) => `<span>${escapeHtml(m.label)}${m.current ? '*' : ''}</span>`).join('');
+  }
+
+  function paintRecentClosings(rows) {
+    const box = document.querySelector('[data-recent-closings]');
+    const sub = document.querySelector('[data-closings-sub]');
+    const foot = document.querySelector('[data-closings-foot]');
+    if (!box) return;
+    if (!rows.length) {
+      box.innerHTML = `<div style="padding:24px;opacity:.55;font-style:italic;font-size:14px;">No closed deals yet. As leads move into the Close stage they'll appear here.</div>`;
+      if (sub) sub.textContent = 'No closings yet';
+      if (foot) foot.textContent = '';
+      return;
+    }
+    box.innerHTML = rows.map((r) => `
+      <div class="income-row">
+        <span class="name">${escapeHtml(r.date)}</span>
+        <span class="home">${escapeHtml(r.address)}</span>
+        <span class="v" style="font-family: var(--mono); font-size: 11px; font-style: normal; letter-spacing: 0.12em; color: var(--ink-mute); text-transform: uppercase;">${escapeHtml(r.side)}</span>
+        <span class="v brass">${escapeHtml(fmtUSDshort(r.price))}</span>
+      </div>`).join('');
+    if (sub) sub.textContent = `Last ${rows.length} transaction${rows.length === 1 ? '' : 's'}`;
+    if (foot) foot.textContent = '';
+  }
+
+  function paintRepKpi(k) {
+    const v = document.querySelector('[data-kpi-volume]');
+    if (v) v.textContent = fmtUSDshort(k.trailing_12_vol || 0);
+    const vs = document.querySelector('[data-kpi-volume-sub]');
+    if (vs) vs.textContent = `${k.trailing_12_count || 0} transaction${k.trailing_12_count === 1 ? '' : 's'}`;
+    const t = document.querySelector('[data-kpi-total]');
+    if (t) t.textContent = String(k.total_closed || 0);
+    const a = document.querySelector('[data-kpi-avg]');
+    if (a) a.textContent = fmtUSDshort(k.avg_sale_price || 0);
   }
 
   function paintMorningBrief(data, session) {

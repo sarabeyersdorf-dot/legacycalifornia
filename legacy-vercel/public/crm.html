@@ -266,7 +266,7 @@
               <span class="eyebrow">Day list</span>
               <h3 class="h-section" style="font-size: 22px; margin-top: 6px;">Six follow-ups, ordered.</h3>
             </div>
-            <ul class="task-list">
+            <ul class="task-list" data-day-list>
               <li><span class="tk-box"></span><span class="tk-body"><strong>Approve Renee's Saturday note</strong> · ready in draft</span><span class="tk-time">5 min</span></li>
               <li><span class="tk-box"></span><span class="tk-body"><strong>Send Beckett land check-in</strong> · 14 days dark</span><span class="tk-time">8 min</span></li>
               <li><span class="tk-box"></span><span class="tk-body"><strong>Generate Patricia’s CMA</strong> · due tonight</span><span class="tk-time">25 min</span></li>
@@ -276,7 +276,7 @@
             </ul>
             <div class="task-foot">
               <span class="label-cap">Total</span>
-              <span><strong>55 min</strong> · if you start now, done by 7:38 AM</span>
+              <span data-day-total><strong>55 min</strong> · if you start now, done by 7:38 AM</span>
             </div>
           </div>
 
@@ -285,7 +285,7 @@
               <span class="hairline-brass"></span>
               <span class="eyebrow">Yesterday at a glance</span>
             </div>
-            <div class="ds-grid">
+            <div class="ds-grid" data-day-stats>
               <div class="ds-cell"><span class="ds-num">23</span><span class="ds-lab">Emails sent</span></div>
               <div class="ds-cell"><span class="ds-num">14</span><span class="ds-lab">AI drafts · 12 approved</span></div>
               <div class="ds-cell"><span class="ds-num">3</span><span class="ds-lab">Showings led</span></div>
@@ -769,20 +769,20 @@
           </div>
         </div>
 
-        <div class="rep-kpi">
+        <div class="rep-kpi" data-rep-kpi>
           <div class="kpi-card">
             <span class="l">Closed volume · trailing 12 mo</span>
-            <span class="v">$8.2M</span>
-            <span class="ch up">21 transactions</span>
+            <span class="v" data-kpi-volume>$8.2M</span>
+            <span class="ch up" data-kpi-volume-sub>21 transactions</span>
           </div>
           <div class="kpi-card">
             <span class="l">Total sales to date</span>
-            <span class="v">98</span>
+            <span class="v" data-kpi-total>98</span>
             <span class="ch up">Since 2018</span>
           </div>
           <div class="kpi-card">
             <span class="l">Average sale price</span>
-            <span class="v">$392K</span>
+            <span class="v" data-kpi-avg>$392K</span>
             <span class="ch">$39K – $1M range</span>
           </div>
           <div class="kpi-card">
@@ -796,14 +796,14 @@
           <div class="rep-card">
             <h3>Closed volume by month</h3>
             <div class="sub">2026 YTD · $M</div>
-            <div class="chart-bars">
+            <div class="chart-bars" data-closed-chart>
               <div class="chart-bar" style="height: 36%;" data-v="$1.8M"></div>
               <div class="chart-bar" style="height: 58%;" data-v="$2.9M"></div>
               <div class="chart-bar brass" style="height: 84%;" data-v="$4.2M"></div>
               <div class="chart-bar brass" style="height: 72%;" data-v="$3.6M"></div>
               <div class="chart-bar" style="height: 28%; opacity: 0.5;" data-v="$1.4M*"></div>
             </div>
-            <div class="chart-labels">
+            <div class="chart-labels" data-closed-chart-labels>
               <span>Jan</span><span>Feb</span><span>Mar</span><span>Apr</span><span>May*</span>
             </div>
           </div>
@@ -820,13 +820,14 @@
         <div class="rep-row" style="grid-template-columns: 1fr;">
           <div class="rep-card">
             <h3>Recent closings</h3>
-            <div class="sub">Last six transactions</div>
+            <div class="sub" data-closings-sub>Last six transactions</div>
             <div class="income-row" style="border-bottom: 1px solid var(--rule); margin-bottom: 6px; padding-bottom: 11px;">
               <span class="name label-cap">Date</span>
               <span class="home label-cap">Property</span>
               <span class="v label-cap" style="font-family: var(--mono); font-style: normal; font-size: 10px; letter-spacing: 0.18em;">Side</span>
               <span class="v label-cap" style="font-family: var(--mono); font-style: normal; font-size: 10px; letter-spacing: 0.18em;">Sale price</span>
             </div>
+            <div data-recent-closings>
             <div class="income-row">
               <span class="name">May 6, 2026</span>
               <span class="home">6640 Railroad Flat Rd · Mountain Ranch</span>
@@ -857,7 +858,8 @@
               <span class="v" style="font-family: var(--mono); font-size: 11px; font-style: normal; letter-spacing: 0.12em; color: var(--ink-mute); text-transform: uppercase;">Listing</span>
               <span class="v brass">$485,000</span>
             </div>
-            <p style="margin-top: 16px; font-family: var(--mono); font-size: 10px; letter-spacing: 0.12em; color: var(--ink-faint); text-transform: uppercase;">— Pulled from Zillow profile. 98 closings to date.</p>
+            </div>
+            <p data-closings-foot style="margin-top: 16px; font-family: var(--mono); font-size: 10px; letter-spacing: 0.12em; color: var(--ink-faint); text-transform: uppercase;">— Pulled from Zillow profile. 98 closings to date.</p>
           </div>
         </div>
       </div>
