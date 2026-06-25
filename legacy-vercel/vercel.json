@@ -25,6 +25,14 @@
       ]
     }
   ],
+  "rewrites": [
+    { "source": "/listing",          "destination": "/listing.html" },
+    { "source": "/agent",            "destination": "/agent.html" },
+    { "source": "/office",           "destination": "/office.html" },
+    { "source": "/market-report",    "destination": "/market-report.html" },
+    { "source": "/listing-report",   "destination": "/listing-report.html" },
+    { "source": "/open-home-report", "destination": "/open-home-report.html" }
+  ],
   "functions": {
     "api/*.js": {
       "memory": 256,
