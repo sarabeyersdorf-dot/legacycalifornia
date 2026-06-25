@@ -125,6 +125,27 @@ const ALLOWED_JOURNEY = new Set(['discovering','narrowing','touring','ready_to_o
 const ALLOWED_STATUS  = new Set(['active','archived','lost','do_not_contact']);
 const ALLOWED_SOURCE  = new Set(['website_form','open_house','referral','ihomefinder_idx','manual']);
 
+// Mirrors the canonical mapping in api/_lib/handlers/crm-import-leads.js
+const FUB_STAGE_MAP = {
+  'past client':'sphere','past customer':'sphere','closed':'sphere','sold':'sphere','sphere':'sphere',
+  'active client':'nurture','hot prospect':'nurture','nurture':'nurture',
+  'a - hot 1-3 months':'nurture','b - warm 3-6 months':'nurture','c - cold 6+ months':'nurture',
+  'showing homes':'touring',
+  'making offers':'offer','pending':'offer','under contract':'offer',
+  'lead':'new','buyer':'new','seller':'new','buyer and seller':'new','renter':'new'
+};
+function extractFubStage(notes) {
+  if (!notes) return null;
+  const m = notes.match(/FUB stage:\s*([^.]+)/i);
+  return m ? m[1].trim() : null;
+}
+function mapFubStage(fubLabel, rawStage) {
+  const key = (fubLabel || '').toLowerCase().trim();
+  if (key && FUB_STAGE_MAP[key]) return FUB_STAGE_MAP[key];
+  if (ALLOWED_STAGES.has(rawStage)) return rawStage;
+  return 'new';
+}
+
 function mapSource(s) {
   const v = (s || '').toLowerCase().trim();
   if (ALLOWED_SOURCE.has(v)) return v;
@@ -138,7 +159,8 @@ function mapSource(s) {
 }
 
 function shapeLead(r) {
-  const stage = ALLOWED_STAGES.has(r.pipeline_stage) ? r.pipeline_stage : 'new';
+  const fubStage = r.fub_stage || extractFubStage(r.notes);
+  const stage = mapFubStage(fubStage, r.pipeline_stage);
   const agent = ALLOWED_AGENTS.has(r.assigned_agent) ? r.assigned_agent : 'sara';
   const lt    = ALLOWED_TYPES.has(r.lead_type)       ? r.lead_type      : null;
   const tmp   = ALLOWED_TEMPS.has(r.temperature)     ? r.temperature    : 'new';

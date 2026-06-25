@@ -32,6 +32,48 @@ const ALLOWED_AGENTS   = new Set(['sara','james','unassigned']);
 const ALLOWED_TYPES    = new Set(['buyer','seller','land','investor']);
 const ALLOWED_TEMPS    = new Set(['new','warm','hot','cold']);
 
+// FUB pipeline_stage label → our canonical pipeline_stage. Anything not on this
+// list falls through to the CSV's raw value (if allowed) or 'new'.
+// Critical: FUB "Past Client" / "Closed" are historical deals, NOT live ones —
+// they belong in `sphere`, not `close`. "Active Client" is just an engagement
+// tier in FUB, not evidence of a tour → demote to `nurture`.
+const FUB_STAGE_MAP = {
+  'past client':       'sphere',
+  'past customer':     'sphere',
+  'closed':            'sphere',
+  'sold':              'sphere',
+  'sphere':            'sphere',
+  'active client':     'nurture',
+  'hot prospect':      'nurture',
+  'nurture':           'nurture',
+  'a - hot 1-3 months':'nurture',
+  'b - warm 3-6 months':'nurture',
+  'c - cold 6+ months':'nurture',
+  'showing homes':     'touring',
+  'making offers':     'offer',
+  'pending':           'offer',
+  'under contract':    'offer',
+  'lead':              'new',
+  'buyer':             'new',
+  'seller':            'new',
+  'buyer and seller':  'new',
+  'renter':            'new'
+};
+
+function mapFubStage(fubLabel, rawStage) {
+  const key = (fubLabel || '').toLowerCase().trim();
+  if (key && FUB_STAGE_MAP[key]) return FUB_STAGE_MAP[key];
+  if (ALLOWED_STAGES.has(rawStage)) return rawStage;
+  return 'new';
+}
+
+// Pull "FUB stage: X" from the notes column if present (the CSV bakes this in).
+function extractFubStage(notes) {
+  if (!notes) return null;
+  const m = notes.match(/FUB stage:\s*([^.]+)/i);
+  return m ? m[1].trim() : null;
+}
+
 // ---------------------------------------------------------------------------
 // CSV parser — handles quoted fields, escaped quotes, embedded commas/newlines.
 // Returns { headers: string[], rows: object[] }.
@@ -71,7 +113,8 @@ function parseCsv(text) {
 const truthy = (v) => /^(1|true|t|yes|y)$/i.test(String(v || '').trim());
 
 function shapeLead(r) {
-  const stage = ALLOWED_STAGES.has(r.pipeline_stage) ? r.pipeline_stage : 'new';
+  const fubStage = r.fub_stage || extractFubStage(r.notes);
+  const stage = mapFubStage(fubStage, r.pipeline_stage);
   const agent = ALLOWED_AGENTS.has(r.assigned_agent) ? r.assigned_agent : 'sara';
   const lt    = ALLOWED_TYPES.has(r.lead_type)       ? r.lead_type      : null;
   const tmp   = ALLOWED_TEMPS.has(r.temperature)     ? r.temperature    : 'new';
