@@ -2091,19 +2091,24 @@
 
     async function fileToCsv(file) {
       const name = (file.name || '').toLowerCase();
-      // Plain CSV — read as text directly.
-      if (name.endsWith('.csv') || file.type === 'text/csv') return await file.text();
-      // xlsx / xls — parse client-side and emit the first sheet as CSV.
-      if (name.endsWith('.xlsx') || name.endsWith('.xls')) {
+      const buf  = await file.arrayBuffer();
+      const u8   = new Uint8Array(buf);
+
+      // Sniff first bytes — real .xlsx is a ZIP starting with 'PK' (0x50 0x4B).
+      // If it doesn't look like a ZIP, treat the file as plain text regardless
+      // of its extension (handles CSVs accidentally saved with .xlsx).
+      const looksLikeXlsx = u8[0] === 0x50 && u8[1] === 0x4B && (name.endsWith('.xlsx') || name.endsWith('.xls'));
+
+      if (looksLikeXlsx) {
         log('Converting Excel → CSV in the browser…');
         const XLSX = await loadSheetJs();
-        const buf  = await file.arrayBuffer();
         const wb   = XLSX.read(buf, { type: 'array' });
         const sheet = wb.Sheets[wb.SheetNames[0]];
         return XLSX.utils.sheet_to_csv(sheet);
       }
-      // Last resort — try text.
-      return await file.text();
+
+      // Plain CSV (or CSV mislabeled .xlsx) — decode as UTF-8.
+      return new TextDecoder('utf-8').decode(u8);
     }
 
     m.querySelector('#leg-import-close').onclick = () => { m.style.display = 'none'; };
