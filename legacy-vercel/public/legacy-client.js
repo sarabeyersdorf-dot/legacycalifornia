@@ -2060,7 +2060,7 @@
         </details>
 
         <div style="font-weight:600;font-size:13px;margin-bottom:6px;text-transform:uppercase;letter-spacing:.14em;color:#7C6A4D;">Upload your own</div>
-        <input type="file" id="leg-csv-file" accept=".csv,text/csv" style="margin-bottom:10px;font-size:13px;">
+        <input type="file" id="leg-csv-file" accept=".csv,.xlsx,.xls,text/csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel" style="margin-bottom:10px;font-size:13px;">
         <div style="display:flex;gap:8px;align-items:center;margin-bottom:14px;font-size:13px;">
           <label><input type="radio" name="leg-kind" value="leads" checked> Leads</label>
           <label><input type="radio" name="leg-kind" value="consent"> Consent flags</label>
@@ -2077,12 +2077,46 @@
     const log = (msg) => { const el = m.querySelector('#leg-import-log'); el.textContent = (typeof msg === 'string' ? msg : JSON.stringify(msg, null, 2)); el.scrollTop = el.scrollHeight; };
     let stagedCsv = null;
 
+    // Lazy-load SheetJS only if/when a non-CSV file gets uploaded.
+    function loadSheetJs() {
+      if (window.XLSX) return Promise.resolve(window.XLSX);
+      return new Promise((resolve, reject) => {
+        const s = document.createElement('script');
+        s.src = 'https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js';
+        s.onload = () => resolve(window.XLSX);
+        s.onerror = () => reject(new Error('Could not load xlsx parser. Use File → Save As → CSV in Excel and try again.'));
+        document.head.appendChild(s);
+      });
+    }
+
+    async function fileToCsv(file) {
+      const name = (file.name || '').toLowerCase();
+      // Plain CSV — read as text directly.
+      if (name.endsWith('.csv') || file.type === 'text/csv') return await file.text();
+      // xlsx / xls — parse client-side and emit the first sheet as CSV.
+      if (name.endsWith('.xlsx') || name.endsWith('.xls')) {
+        log('Converting Excel → CSV in the browser…');
+        const XLSX = await loadSheetJs();
+        const buf  = await file.arrayBuffer();
+        const wb   = XLSX.read(buf, { type: 'array' });
+        const sheet = wb.Sheets[wb.SheetNames[0]];
+        return XLSX.utils.sheet_to_csv(sheet);
+      }
+      // Last resort — try text.
+      return await file.text();
+    }
+
     m.querySelector('#leg-import-close').onclick = () => { m.style.display = 'none'; };
     m.querySelector('#leg-csv-file').onchange = async (ev) => {
       const f = ev.target.files[0]; if (!f) return;
-      stagedCsv = await f.text();
-      log(`Loaded ${f.name} (${stagedCsv.length.toLocaleString()} chars). Click Preview.`);
-      m.querySelector('#leg-commit').disabled = false;
+      try {
+        stagedCsv = await fileToCsv(f);
+        const head = stagedCsv.split('\n').slice(0, 3).join('\n');
+        log(`Loaded ${f.name} (${stagedCsv.length.toLocaleString()} chars).\n\nFirst rows:\n${head}\n\n← Click Preview to dry-run, then Commit to import.`);
+        m.querySelector('#leg-commit').disabled = false;
+      } catch (e) {
+        log(`Could not read file: ${e.message}`);
+      }
     };
     m.querySelector('#leg-preview').onclick = async () => {
       if (!stagedCsv) return log('Choose a file first.');
