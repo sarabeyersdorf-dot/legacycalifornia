@@ -2162,6 +2162,16 @@
       fetch('/api/auth/session', { method: 'DELETE', credentials: 'include' })
         .finally(() => { window.location.href = '/crm.html'; });
     }
+    const testEmail = e.target.closest('[data-send-test-email]');
+    if (testEmail) {
+      e.preventDefault();
+      const to = prompt('Send a Resend test email to which address?');
+      if (!to) return;
+      window.Legacy.api('/api/crm/test-email', { body: { to } }).then((r) => {
+        if (r.ok) alert(`✓ Sent.\n\nFrom: ${r.json.from_name} <${r.json.from_email}>\nReply-to: ${r.json.reply_to}\nResend id: ${r.json.resend?.id || '(skipped — RESEND_API_KEY missing)'}\n\nCheck the inbox of ${to}.`);
+        else      alert(`✗ Failed: ${r.json?.error || r.status}`);
+      });
+    }
   });
 })();
 

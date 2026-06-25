@@ -20,6 +20,7 @@ import messageSend  from '../_lib/handlers/crm-message-send.js';
 import noteCreate   from '../_lib/handlers/crm-note-create.js';
 import importLeads  from '../_lib/handlers/crm-import-leads.js';
 import metrics      from '../_lib/handlers/crm-metrics.js';
+import testEmail    from '../_lib/handlers/crm-test-email.js';
 
 const TABLE = {
   'morning-brief': morningBrief,
@@ -30,7 +31,8 @@ const TABLE = {
   'message':       messageSend,
   'note':          noteCreate,
   'import-leads':  importLeads,
-  'metrics':       metrics
+  'metrics':       metrics,
+  'test-email':    testEmail
 };
 
 export default async function handler(req, res) {
