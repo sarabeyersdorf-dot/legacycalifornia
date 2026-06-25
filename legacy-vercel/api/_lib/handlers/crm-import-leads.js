@@ -79,6 +79,9 @@ function extractFubStage(notes) {
 // Returns { headers: string[], rows: object[] }.
 // ---------------------------------------------------------------------------
 function parseCsv(text) {
+  // Normalize line endings: handle CRLF (Windows), CR-only (classic Mac/Excel
+  // for Mac), and LF (Unix) uniformly. Strip UTF-8 BOM if present.
+  text = String(text || '').replace(/^\uFEFF/, '').replace(/\r\n?/g, '\n');
   const rows = [];
   let row = [], field = '', inQuotes = false;
   for (let i = 0; i < text.length; i++) {
@@ -90,7 +93,6 @@ function parseCsv(text) {
     } else {
       if (c === '"')      { inQuotes = true; }
       else if (c === ',') { row.push(field); field = ''; }
-      else if (c === '\r') { /* skip */ }
       else if (c === '\n') {
         row.push(field); rows.push(row);
         row = []; field = '';
@@ -155,8 +157,17 @@ async function fetchCsv(body) {
 // ---------------------------------------------------------------------------
 async function importLeads(supa, body) {
   const text = await fetchCsv(body);
-  const { rows } = parseCsv(text);
-  if (!rows.length) return { kind: 'leads', error: 'no rows parsed' };
+  const { headers, rows } = parseCsv(text);
+  if (!rows.length) return {
+    kind: 'leads', error: 'no rows parsed',
+    headers_detected: headers,
+    first_500_chars: String(text).slice(0, 500),
+    char_count: String(text).length,
+    line_count: String(text).split('\n').length,
+    hint: headers.length === 0
+      ? 'File appears empty after parsing — check line endings or that the file is actually CSV.'
+      : 'Headers parsed but no data rows. Make sure your file has at least one row below the header line.'
+  };
 
   // Pre-fetch all existing fub_ids + emails for fast dedupe
   const { data: existing = [] } = await supa.from('leads').select('id, fub_id, email');
