@@ -32,7 +32,7 @@ export default async function handler(req, res) {
   if (handleOptions(req, res)) return;
 
   if (req.method === 'GET') {
-    const { user, profile } = await getCallerProfile(req);
+    const { user, profile } = await getCallerProfile(req, res);
     if (!user) return fail(res, 401, 'not authenticated');
     return ok(res, { user: { id: user.id, email: user.email }, profile });
   }

@@ -26,7 +26,7 @@ export default async function handler(req, res) {
 
   try {
     // Agent-only — only Sara/James/admin can enroll a lead in a sequence.
-    const { user, profile } = await getCallerProfile(req);
+    const { user, profile } = await getCallerProfile(req, res);
     if (!user)            return fail(res, 401, 'not authenticated');
     if (!isAgent(profile)) return fail(res, 403, 'agents only');
 

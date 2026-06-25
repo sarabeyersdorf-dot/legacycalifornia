@@ -2117,6 +2117,12 @@
   document.addEventListener('click', (e) => {
     const trigger = e.target.closest('[data-open-importer]');
     if (trigger) { e.preventDefault(); openImporter(); }
+    const signOut = e.target.closest('[data-sign-out]');
+    if (signOut) {
+      e.preventDefault();
+      fetch('/api/auth/session', { method: 'DELETE', credentials: 'include' })
+        .finally(() => { window.location.href = '/crm.html'; });
+    }
   });
 })();
 

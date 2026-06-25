@@ -36,7 +36,7 @@ export default async function handler(req, res) {
   if (req.method !== 'POST') return fail(res, 405, 'method_not_allowed');
 
   try {
-    const { profile } = await getCallerProfile(req);
+    const { profile } = await getCallerProfile(req, res);
     if (!isAgent(profile)) return fail(res, 401, 'agents only');
 
     const { message_id, edited_body, edited_subject } = await readJson(req);

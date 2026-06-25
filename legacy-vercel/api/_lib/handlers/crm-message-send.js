@@ -52,7 +52,7 @@ export default async function handler(req, res) {
   if (req.method !== 'POST') return fail(res, 405, 'method_not_allowed');
 
   // Auth — agents only, enforced server-side
-  const { user, profile } = await getCallerProfile(req);
+  const { user, profile } = await getCallerProfile(req, res);
   if (!user)              return fail(res, 401, 'not authenticated');
   if (!isAgent(profile))  return fail(res, 403, 'agents only');
 

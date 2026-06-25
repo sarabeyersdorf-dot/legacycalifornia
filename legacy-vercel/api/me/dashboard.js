@@ -136,7 +136,7 @@ export default async function handler(req, res) {
   if (req.method !== 'GET') return fail(res, 405, 'method_not_allowed');
 
   try {
-    const { user, profile } = await getCallerProfile(req);
+    const { user, profile } = await getCallerProfile(req, res);
     if (!user) return fail(res, 401, 'not authenticated');
 
     const supa = adminClient();
