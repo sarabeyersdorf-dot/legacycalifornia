@@ -548,40 +548,34 @@
   </div>
 </section>
 
-<!-- ============ FEATURED RESIDENCE ============ -->
-<section class="section" style="background: var(--parchment);">
+<!-- ============ ON THE MARKET — live office listings (all active) ============ -->
+<section class="section" style="background: var(--parchment);" id="listings">
   <div class="section-inner">
     <div class="section-h">
       <div>
         <span class="hairline-brass" style="margin-bottom: 16px;"></span>
-        <span class="eyebrow">Featured residence · Vol. XXII</span>
-        <h2 class="h-section" style="margin-top: 10px;">Presented by Legacy.</h2>
+        <span class="eyebrow">On the market now · Updated continuously from MLS</span>
+        <h2 class="h-section" style="margin-top: 10px;">Sara's active listings.</h2>
       </div>
-      <p class="lede right">Handpicked by Sara for exceptional value, character, or setting — properties worth a second look, and a longer conversation.</p>
+      <p class="lede right">Every home Legacy currently represents across Calaveras, Amador &amp; Tuolumne — live from the MLS, never a stale plate.</p>
     </div>
 
-    <article class="featured-card">
-      <div class="featured-photo">
-        <span class="featured-badge">Just listed</span>
-        <div class="featured-meta">Plate I · Sutter Creek</div>
-      </div>
-      <div class="featured-body">
-        <span class="eyebrow">Estate property · Murphys</span>
-        <div class="featured-price">$1,399,000</div>
-        <div class="featured-address">433 E Highway 4 · Murphys, CA 95247</div>
-        <div class="featured-specs">
-          <div class="featured-spec"><strong>4</strong><span>Bedrooms</span></div>
-          <div class="featured-spec"><strong>3</strong><span>Bathrooms</span></div>
-          <div class="featured-spec"><strong>Active</strong><span>Status</span></div>
-          <div class="featured-spec"><strong>Sara</strong><span>Listed by</span></div>
-        </div>
-        <p class="featured-desc">Panoramic vineyard views, chef's kitchen, wine cellar, and terraced acreage ready for planting. A rare opportunity for those who want to live the Gold Country dream — not just visit it.</p>
-        <div class="featured-ctas">
-          <a href="featured-listings.html" class="btn btn-ink">View residence</a>
-          <a href="find-my-match.html" class="btn btn-ghost">Request a showing</a>
-        </div>
-      </div>
-    </article>
+    <div class="idx-embed idx-office-feed">
+      <script>
+        // LIVE iHomeFinder OFFICE listings — all of Legacy's active properties,
+        // the same feed proven on featured-listings.html (all 21). Renders only on
+        // the token-authorized live domain, not in local preview.
+        // ⟶ If this shows a different set than featured-listings.html, set this
+        //   widget's scope to OFFICE listings in the iHomeFinder Control Panel.
+        document.currentScript.replaceWith(ihfKestrel.render({
+          component: "gallerySliderWidget"
+        }));
+      </script>
+    </div>
+
+    <div style="text-align: center; margin-top: 48px;">
+      <a href="property-search.html" class="btn btn-ghost">Search all listings</a>
+    </div>
   </div>
 </section>
 
@@ -636,31 +630,32 @@
   </div>
 </section>
 
-<!-- ============ MATCHED LISTINGS ============ -->
-<section class="section" style="background: var(--vellum); padding-top: 0;" id="listings">
+<!-- ============ FEATURED — handpicked highlight row (smaller) ============ -->
+<section class="section" style="background: var(--vellum); padding-top: 0;">
   <div class="section-inner" style="padding-top: 100px;">
     <div class="section-h">
       <div>
         <span class="hairline-brass" style="margin-bottom: 16px;"></span>
-        <span class="eyebrow">Matched for you · Personalized feed</span>
-        <h2 class="h-section" style="margin-top: 10px;">Your property feed.</h2>
+        <span class="eyebrow">Featured · Handpicked by Sara</span>
+        <h2 class="h-section" style="margin-top: 10px;">Worth a closer look.</h2>
       </div>
-      <p class="lede right">Based on what buyers like you save and skip, we surface the homes worth your attention first — quietly, never crowded.</p>
+      <p class="lede right">A short, rotating selection Sara is watching personally — the homes with a story behind the listing.</p>
     </div>
 
-    <div class="idx-embed idx-feature-gallery">
+    <div class="idx-embed idx-featured-row" style="max-width: 1000px; margin: 0 auto;">
       <script>
-        // Sara's real active (featured) listings, live from the iHomeFinder feed.
-        // Each card links to its real IDX detail page. Renders on the deployed,
-        // token-authorized domain (legacycalifornia.vercel.app) — not in local preview.
+        // LIVE iHomeFinder FEATURED listings — Sara's handpicked highlight set,
+        // intended as a SUBSET of the office feed above. To choose which homes
+        // appear here, point this widget at your "Featured"/handpicked Market
+        // (saved search) in the iHomeFinder Control Panel. Live domain only.
         document.currentScript.replaceWith(ihfKestrel.render({
           component: "gallerySliderWidget"
         }));
       </script>
     </div>
 
-    <div style="text-align: center; margin-top: 48px;">
-      <a href="property-search.html" class="btn btn-ghost">View all properties</a>
+    <div style="text-align: center; margin-top: 40px;">
+      <a href="featured-listings.html" class="btn btn-ghost">See all featured listings</a>
     </div>
   </div>
 </section>
