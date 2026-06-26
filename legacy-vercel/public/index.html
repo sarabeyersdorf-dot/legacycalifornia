@@ -456,15 +456,6 @@
   .featured-card { grid-template-columns: 1fr; }
 }
 </style>
-<link rel="stylesheet" href="idx-theme.css">
-<script src="https://kestrel.idxhome.com/ihf-kestrel.js"></script>
-<script>
-  window.ihfKestrel = window.ihfKestrel || {};
-  ihfKestrel.config = {
-    platform: "custom",
-    activationToken: "d77ab7ae-7afe-403d-89cf-61bd60bbf806",
-  };
-</script>
 </head>
 <body class="paper" data-screen-label="Marketing Home">
 
@@ -560,18 +551,19 @@
       <p class="lede right">Every home Legacy currently represents across Calaveras, Amador &amp; Tuolumne — live from the MLS, never a stale plate.</p>
     </div>
 
-    <div class="idx-embed idx-office-feed">
-      <script>
-        // LIVE iHomeFinder OFFICE listings — all of Legacy's active properties,
-        // the same feed proven on featured-listings.html (all 21). Renders only on
-        // the token-authorized live domain, not in local preview.
-        // ⟶ If this shows a different set than featured-listings.html, set this
-        //   widget's scope to OFFICE listings in the iHomeFinder Control Panel.
-        document.currentScript.replaceWith(ihfKestrel.render({
-          component: "gallerySliderWidget"
-        }));
-      </script>
+    <div class="idx-office-feed-wrap" style="min-height: 600px;">
+      <iframe id="officeFeed" src="featured-listings.html?embed=1" title="Sara's active listings — live from the MLS" loading="lazy" scrolling="no" style="width: 100%; border: 0; display: block; min-height: 600px;"></iframe>
     </div>
+    <script>
+      // Auto-size the listings iframe to its content (same-origin; the embedded
+      // page posts its height as it renders the live iHomeFinder feed).
+      window.addEventListener('message', function (e) {
+        if (e.data && e.data.type === 'ihf-embed-height') {
+          var f = document.getElementById('officeFeed');
+          if (f && e.data.height) f.style.height = (e.data.height + 24) + 'px';
+        }
+      });
+    </script>
 
     <div style="text-align: center; margin-top: 48px;">
       <a href="property-search.html" class="btn btn-ghost">Search all listings</a>
@@ -626,36 +618,6 @@
           </div>
         </div>
       </div>
-    </div>
-  </div>
-</section>
-
-<!-- ============ FEATURED — handpicked highlight row (smaller) ============ -->
-<section class="section" style="background: var(--vellum); padding-top: 0;">
-  <div class="section-inner" style="padding-top: 100px;">
-    <div class="section-h">
-      <div>
-        <span class="hairline-brass" style="margin-bottom: 16px;"></span>
-        <span class="eyebrow">Featured · Handpicked by Sara</span>
-        <h2 class="h-section" style="margin-top: 10px;">Worth a closer look.</h2>
-      </div>
-      <p class="lede right">A short, rotating selection Sara is watching personally — the homes with a story behind the listing.</p>
-    </div>
-
-    <div class="idx-embed idx-featured-row" style="max-width: 1000px; margin: 0 auto;">
-      <script>
-        // LIVE iHomeFinder FEATURED listings — Sara's handpicked highlight set,
-        // intended as a SUBSET of the office feed above. To choose which homes
-        // appear here, point this widget at your "Featured"/handpicked Market
-        // (saved search) in the iHomeFinder Control Panel. Live domain only.
-        document.currentScript.replaceWith(ihfKestrel.render({
-          component: "gallerySliderWidget"
-        }));
-      </script>
-    </div>
-
-    <div style="text-align: center; margin-top: 40px;">
-      <a href="featured-listings.html" class="btn btn-ghost">See all featured listings</a>
     </div>
   </div>
 </section>
