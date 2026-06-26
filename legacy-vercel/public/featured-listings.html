@@ -15,6 +15,30 @@
     activationToken: "d77ab7ae-7afe-403d-89cf-61bd60bbf806",
   };
 </script>
+<style>
+  /* Embedded (iframe or ?embed=1): show only the listings feed, no chrome */
+  html.ihf-embed .topnav, html.ihf-embed .footer { display: none !important; }
+  html.ihf-embed, html.ihf-embed body { background: transparent !important; }
+  html.ihf-embed .idx-embed { margin-top: 0 !important; }
+</style>
+<script>
+  (function () {
+    var embedded = window.self !== window.top ||
+      new URLSearchParams(location.search).get('embed') === '1';
+    if (!embedded) return;
+    document.documentElement.classList.add('ihf-embed');
+    function reportHeight() {
+      var h = Math.max(document.body.scrollHeight, document.documentElement.scrollHeight);
+      try { parent.postMessage({ type: 'ihf-embed-height', height: h }, '*'); } catch (e) {}
+    }
+    window.addEventListener('load', function () {
+      reportHeight();
+      [400, 1200, 2500, 4500, 7000].forEach(function (t) { setTimeout(reportHeight, t); });
+      if (window.ResizeObserver) { new ResizeObserver(reportHeight).observe(document.body); }
+    });
+    window.addEventListener('resize', reportHeight);
+  })();
+</script>
 </head>
 <body class="paper" data-screen-label="Featured Listings">
 
@@ -25,19 +49,19 @@
   </div>
   <nav class="topnav-bar2">
     <div class="topnav-links">
-      <a href="listings.html" class="active">Listings</a>
+      <a href="property-search.html" class="active">Listings</a>
       <a href="index.html#communities">Communities</a>
       <a href="relocate.html">Relocate</a>
-      <a href="seller.html">Sellers</a>
+      <a href="valuation.html">Sellers</a>
     </div>
     <a href="index.html" class="wordmark">
       <span class="wordmark-word">Legacy</span>
       <span class="wordmark-sub">Properties · Angels Camp CA</span>
     </a>
     <div class="topnav-links right">
-      <a href="index.html#ledger">The Ledger</a>
+      <a href="ledger.html">The Ledger</a>
       <a href="dashboard.html">Sign In</a>
-      <a href="platform.html" class="btn btn-ink btn-sm" style="padding:10px 18px;">Find My Match</a>
+      <a href="find-my-match.html" class="btn btn-ink btn-sm" style="padding:10px 18px;">Find My Match</a>
     </div>
   </nav>
 </header>
@@ -62,25 +86,25 @@
         <h4>Services</h4>
         <a href="relocate.html">Bay → Foothills relocation</a>
         <a href="towns.html">Communities</a>
-        <a href="seller.html">Sellers</a>
-        <a href="listings.html">Browse listings</a>
-        <a href="platform.html">Request a tour</a>
+        <a href="valuation.html">Sellers</a>
+        <a href="property-search.html">Browse listings</a>
+        <a href="find-my-match.html">Request a tour</a>
       </div>
       <div>
         <h4>Buy</h4>
-        <a href="listings.html">Search all listings</a>
+        <a href="property-search.html">Search all listings</a>
         <a href="fire-zone.html">Fire-zone &amp; insurance tool</a>
         <a href="commute.html">Commute calculator</a>
         <a href="relocate.html">Bay → Foothills relocation</a>
-        <a href="platform.html">Request a tour</a>
+        <a href="find-my-match.html">Request a tour</a>
       </div>
       <div>
         <h4>Sell</h4>
-        <a href="seller.html">What's my home worth?</a>
-        <a href="seller.html">Listing process</a>
+        <a href="valuation.html">What's my home worth?</a>
+        <a href="how-we-work.html">Listing process</a>
         <a href="how-we-work.html">How we work</a>
         <a href="about.html">About Sara &amp; James</a>
-        <a href="seller.html">Request a CMA</a>
+        <a href="valuation.html">Request a CMA</a>
       </div>
       <div>
         <h4>Connect</h4>
