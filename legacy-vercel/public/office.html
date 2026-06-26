@@ -44,6 +44,19 @@
 
 <div class="idx-embed">
 <script>
+  // Defensive: some IDX result links append a stray ".html" to the listing id
+  // (e.g. ?id=226081050_6.html). Strip it before Kestrel reads the URL so the
+  // real listing resolves instead of iHomeFinder's "Not Found".
+  (function () {
+    try {
+      var u = new URL(window.location.href);
+      var id = u.searchParams.get('id');
+      if (id && /\.html$/i.test(id)) {
+        u.searchParams.set('id', id.replace(/\.html$/i, ''));
+        history.replaceState(null, '', u.pathname + u.search + u.hash);
+      }
+    } catch (e) {}
+  })();
   document.currentScript.replaceWith(ihfKestrel.render());
 </script>
 </div>
