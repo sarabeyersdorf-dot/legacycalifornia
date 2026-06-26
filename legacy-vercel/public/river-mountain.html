@@ -208,6 +208,15 @@
   .scenes { grid-template-columns: 1fr 1fr; }
 }
 </style>
+<link rel="stylesheet" href="idx-theme.css">
+<script src="https://kestrel.idxhome.com/ihf-kestrel.js"></script>
+<script>
+  window.ihfKestrel = window.ihfKestrel || {};
+  ihfKestrel.config = {
+    platform: "custom",
+    activationToken: "d77ab7ae-7afe-403d-89cf-61bd60bbf806",
+  };
+</script>
 </head>
 <body class="paper" data-screen-label="River &amp; Mountain Lifestyle">
 
@@ -218,19 +227,19 @@
   </div>
   <nav class="topnav-bar2">
     <div class="topnav-links">
-      <a href="listings.html">Listings</a>
+      <a href="property-search.html">Listings</a>
       <a href="towns.html" class="active">Communities</a>
       <a href="relocate.html">Relocate</a>
-      <a href="seller.html">Sellers</a>
+      <a href="valuation.html">Sellers</a>
     </div>
     <a href="index.html" class="wordmark">
       <span class="wordmark-word">Legacy</span>
       <span class="wordmark-sub">Properties · Angels Camp CA</span>
     </a>
     <div class="topnav-links right">
-      <a href="index.html#ledger">The Ledger</a>
+      <a href="ledger.html">The Ledger</a>
       <a href="dashboard.html">Sign In</a>
-      <a href="platform.html" class="btn btn-ink btn-sm" style="padding:10px 18px;">Find My Match</a>
+      <a href="find-my-match.html" class="btn btn-ink btn-sm" style="padding:10px 18px;">Find My Match</a>
     </div>
   </nav>
 </header>
@@ -692,47 +701,19 @@
       <p class="lede right">Three lifestyle properties this week. James has walked each one.</p>
     </div>
 
-    <div class="list-grid">
-      <a href="listing.html" class="prop-card">
-        <div class="prop-photo">
-          <img src="https://images.unsplash.com/photo-1542718610-a1d656d1884c?w=800&q=85" alt="">
-          <div class="prop-tags"><span class="pill-status pill-new">Just listed</span></div>
-        </div>
-        <div class="prop-body">
-          <div class="prop-price">$895,000</div>
-          <div class="prop-address">14 ac · Pony Express Rd<br>Wilseyville, CA 95257</div>
-          <div class="prop-specs"><span>3 Bd</span><span>2 Ba</span><span>Creek frontage</span></div>
-          <div class="prop-foot"><span class="prop-match">Listed by Sara &amp; James</span><span class="label-cap" style="color:var(--ink-faint);">Plate I</span></div>
-        </div>
-      </a>
-      <a href="listing.html" class="prop-card">
-        <div class="prop-photo">
-          <img src="https://images.unsplash.com/photo-1502082553048-f009c37129b9?w=800&q=85" alt="">
-          <div class="prop-tags"><span class="pill-status pill-brass">Active</span></div>
-        </div>
-        <div class="prop-body">
-          <div class="prop-price">$549,000</div>
-          <div class="prop-address">8 ac · Old Gulch Rd<br>Mountain Ranch, CA 95246</div>
-          <div class="prop-specs"><span>2 Bd</span><span>1 Ba</span><span>San Antonio Crk</span></div>
-          <div class="prop-foot"><span class="prop-match">Listed by James</span><span class="label-cap" style="color:var(--ink-faint);">Plate II</span></div>
-        </div>
-      </a>
-      <a href="listing.html" class="prop-card">
-        <div class="prop-photo">
-          <img src="https://images.unsplash.com/photo-1448375240586-882707db888b?w=800&q=85" alt="">
-          <div class="prop-tags"><span class="pill-status pill-warm">Land</span></div>
-        </div>
-        <div class="prop-body">
-          <div class="prop-price">$1,675,000</div>
-          <div class="prop-address">42 ac · Mt. Ranch Rd<br>Sheep Ranch, CA 95250</div>
-          <div class="prop-specs"><span>Land</span><span>42 ac</span><span>Senior water right</span></div>
-          <div class="prop-foot"><span class="prop-match">Listed by James</span><span class="label-cap" style="color:var(--ink-faint);">Plate III</span></div>
-        </div>
-      </a>
+    <div class="idx-embed idx-feature-gallery">
+      <script>
+        // Sara's real active (featured) listings, live from the iHomeFinder feed.
+        // Each card links to its real IDX detail page. Renders on the deployed,
+        // token-authorized domain (legacycalifornia.vercel.app) — not in local preview.
+        document.currentScript.replaceWith(ihfKestrel.render({
+          component: "gallerySliderWidget"
+        }));
+      </script>
     </div>
 
     <div style="text-align:center; margin-top:40px;">
-      <a href="listings.html" class="btn btn-ghost">See all rural listings</a>
+      <a href="property-search.html" class="btn btn-ghost">See all rural listings</a>
     </div>
   </div>
 </section>
@@ -764,7 +745,7 @@
       <div class="letter-contact">
         <a href="tel:2095594966"><span class="glyph">◇</span> (209) 559-4966</a>
         <a href="mailto:SaraSellsCalifornia@gmail.com"><span class="glyph">◇</span> SaraSellsCalifornia@gmail.com</a>
-        <a href="platform.html"><span class="glyph">◇</span> Walk a parcel with James</a>
+        <a href="find-my-match.html"><span class="glyph">◇</span> Walk a parcel with James</a>
       </div>
     </article>
   </div>
@@ -814,7 +795,7 @@
   <h2 class="cta-h">Walk a parcel<br><em>with us.</em></h2>
   <p class="cta-sub">Half a day, three or four properties, a candid read on the water, the well, the road, and the life.</p>
   <div class="cta-ctas">
-    <a href="platform.html" class="btn btn-ink">Start the conversation</a>
+    <a href="find-my-match.html" class="btn btn-ink">Start the conversation</a>
     <a href="tel:2095594966" class="btn btn-ghost">Call (209) 559-4966</a>
   </div>
 </section>
@@ -841,15 +822,15 @@
       <div>
         <h4>Services</h4>
         <a href="relocate.html">Bay → Foothills</a>
-        <a href="listings.html">Search listings</a>
-        <a href="seller.html">Sellers</a>
-        <a href="platform.html">Request a tour</a>
+        <a href="property-search.html">Search listings</a>
+        <a href="valuation.html">Sellers</a>
+        <a href="find-my-match.html">Request a tour</a>
       </div>
       <div>
         <h4>Connect</h4>
         <a href="tel:2095594966">(209) 559-4966</a>
         <a href="mailto:SaraSellsCalifornia@gmail.com">SaraSellsCalifornia@gmail.com</a>
-        <a href="index.html#ledger">The Ledger</a>
+        <a href="ledger.html">The Ledger</a>
       </div>
     </div>
     <div class="footer-bottom">
