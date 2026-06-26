@@ -6,6 +6,15 @@
 <title>Murphys, CA — Legacy Properties</title>
 <link rel="stylesheet" href="legacy.css">
 <link rel="stylesheet" href="town.css">
+<link rel="stylesheet" href="idx-theme.css">
+<script src="https://kestrel.idxhome.com/ihf-kestrel.js"></script>
+<script>
+  window.ihfKestrel = window.ihfKestrel || {};
+  ihfKestrel.config = {
+    platform: "custom",
+    activationToken: "d77ab7ae-7afe-403d-89cf-61bd60bbf806",
+  };
+</script>
 </head>
 <body class="paper" data-screen-label="Town · Murphys">
 
@@ -17,19 +26,19 @@
   </div>
   <nav class="topnav-bar2">
     <div class="topnav-links">
-      <a href="listings.html">Listings</a>
+      <a href="property-search.html">Listings</a>
       <a href="towns.html" class="active">Communities</a>
       <a href="relocate.html">Relocate</a>
-      <a href="seller.html">Sellers</a>
+      <a href="valuation.html">Sellers</a>
     </div>
     <a href="index.html" class="wordmark">
       <span class="wordmark-word">Legacy</span>
       <span class="wordmark-sub">Properties · Angels Camp CA</span>
     </a>
     <div class="topnav-links right">
-      <a href="index.html#ledger">The Ledger</a>
+      <a href="ledger.html">The Ledger</a>
       <a href="dashboard.html">Sign In</a>
-      <a href="platform.html" class="btn btn-ink btn-sm" style="padding:10px 18px;">Find My Match</a>
+      <a href="find-my-match.html" class="btn btn-ink btn-sm" style="padding:10px 18px;">Find My Match</a>
     </div>
   </nav>
 </header>
@@ -769,68 +778,19 @@
       <p class="lede right">Three residences active this morning. Updated continuously from MLS.</p>
     </div>
 
-    <div class="list-grid">
-      <a href="listing.html" class="prop-card">
-        <div class="prop-photo">
-          <img src="https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=800&q=85" alt="">
-          <div class="prop-tags">
-            <span class="pill-status pill-new">Just listed</span>
-          </div>
-        </div>
-        <div class="prop-body">
-          <div class="prop-price">$1,399,000</div>
-          <div class="prop-address">433 E Highway 4<br>Murphys, CA 95247</div>
-          <div class="prop-specs">
-            <span>4 Bd</span><span>3 Ba</span><span>Vineyard estate</span>
-          </div>
-          <div class="prop-foot">
-            <span class="prop-match">Listed by Sara</span>
-            <span class="label-cap" style="color:var(--ink-faint);">Plate I</span>
-          </div>
-        </div>
-      </a>
-      <a href="listing.html" class="prop-card">
-        <div class="prop-photo">
-          <img src="https://images.unsplash.com/photo-1568605114967-8130f3a36994?w=800&q=85" alt="">
-          <div class="prop-tags">
-            <span class="pill-status pill-brass">Active</span>
-          </div>
-        </div>
-        <div class="prop-body">
-          <div class="prop-price">$849,000</div>
-          <div class="prop-address">217 Algiers Street<br>Murphys, CA 95247</div>
-          <div class="prop-specs">
-            <span>3 Bd</span><span>2 Ba</span><span>Walk to Main</span>
-          </div>
-          <div class="prop-foot">
-            <span class="prop-match">Listed by Sara</span>
-            <span class="label-cap" style="color:var(--ink-faint);">Plate II</span>
-          </div>
-        </div>
-      </a>
-      <a href="listing.html" class="prop-card">
-        <div class="prop-photo">
-          <img src="https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=800&q=85" alt="">
-          <div class="prop-tags">
-            <span class="pill-status">Pending</span>
-          </div>
-        </div>
-        <div class="prop-body">
-          <div class="prop-price">$595,000</div>
-          <div class="prop-address">3 acres · Six Mile Rd<br>Murphys, CA 95247</div>
-          <div class="prop-specs">
-            <span>Land</span><span>3 ac</span><span>Vineyard-ready</span>
-          </div>
-          <div class="prop-foot">
-            <span class="prop-match">Listed by Sara</span>
-            <span class="label-cap" style="color:var(--ink-faint);">Plate III</span>
-          </div>
-        </div>
-      </a>
+    <div class="idx-embed idx-feature-gallery">
+      <script>
+        // Sara's real active (featured) listings, live from the iHomeFinder feed.
+        // Each card links to its real IDX detail page. Renders on the deployed,
+        // token-authorized domain (legacycalifornia.vercel.app) — not in local preview.
+        document.currentScript.replaceWith(ihfKestrel.render({
+          component: "gallerySliderWidget"
+        }));
+      </script>
     </div>
 
     <div style="text-align:center; margin-top:40px;">
-      <a href="listings.html" class="btn btn-ghost">See all Murphys listings</a>
+      <a href="property-search.html" class="btn btn-ghost">See all Murphys listings</a>
     </div>
   </div>
 </section>
@@ -863,7 +823,7 @@
       <div class="letter-contact">
         <a href="tel:2095594966"><span class="glyph">◇</span> (209) 559-4966</a>
         <a href="mailto:SaraSellsCalifornia@gmail.com"><span class="glyph">◇</span> SaraSellsCalifornia@gmail.com</a>
-        <a href="platform.html"><span class="glyph">◇</span> Schedule a Murphys walk</a>
+        <a href="find-my-match.html"><span class="glyph">◇</span> Schedule a Murphys walk</a>
       </div>
     </article>
   </div>
@@ -932,7 +892,7 @@
   <h2 class="cta-h">Walk Main Street<br><em>with us.</em></h2>
   <p class="cta-sub">An afternoon, a list, a candid read on what's actually on the market.</p>
   <div class="cta-ctas">
-    <a href="platform.html" class="btn btn-ink">Find my Murphys match</a>
+    <a href="find-my-match.html" class="btn btn-ink">Find my Murphys match</a>
     <a href="tel:2095594966" class="btn btn-ghost">Call (209) 559-4966</a>
   </div>
 </section>
@@ -959,15 +919,15 @@
       </div>
       <div>
         <h4>Buy &amp; sell</h4>
-        <a href="listings.html">Search all listings</a>
-        <a href="seller.html">What's my home worth?</a>
-        <a href="platform.html">Request a tour</a>
+        <a href="property-search.html">Search all listings</a>
+        <a href="valuation.html">What's my home worth?</a>
+        <a href="find-my-match.html">Request a tour</a>
       </div>
       <div>
         <h4>Connect</h4>
         <a href="tel:2095594966">(209) 559-4966</a>
         <a href="mailto:SaraSellsCalifornia@gmail.com">SaraSellsCalifornia@gmail.com</a>
-        <a href="index.html#ledger">The Ledger</a>
+        <a href="ledger.html">The Ledger</a>
       </div>
     </div>
     <div class="footer-bottom">
