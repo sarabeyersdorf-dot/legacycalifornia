@@ -456,6 +456,15 @@
   .featured-card { grid-template-columns: 1fr; }
 }
 </style>
+<link rel="stylesheet" href="idx-theme.css">
+<script src="https://kestrel.idxhome.com/ihf-kestrel.js"></script>
+<script>
+  window.ihfKestrel = window.ihfKestrel || {};
+  ihfKestrel.config = {
+    platform: "custom",
+    activationToken: "d77ab7ae-7afe-403d-89cf-61bd60bbf806",
+  };
+</script>
 </head>
 <body class="paper" data-screen-label="Marketing Home">
 
@@ -471,10 +480,10 @@
   </div>
   <nav class="topnav-bar2">
     <div class="topnav-links">
-      <a href="listings.html">Listings</a>
+      <a href="property-search.html">Listings</a>
       <a href="towns.html">Communities</a>
       <a href="relocate.html">Relocate</a>
-      <a href="seller.html">Sellers</a>
+      <a href="valuation.html">Sellers</a>
     </div>
     <a href="index.html" class="wordmark">
       <span class="wordmark-word">Legacy</span>
@@ -483,7 +492,7 @@
     <div class="topnav-links right">
       <a href="ledger.html">The Ledger</a>
       <a href="dashboard.html">Sign In</a>
-      <a href="platform.html" class="btn btn-ink btn-sm" style="padding:10px 18px;">Find My Match</a>
+      <a href="find-my-match.html" class="btn btn-ink btn-sm" style="padding:10px 18px;">Find My Match</a>
     </div>
   </nav>
 </header>
@@ -508,8 +517,8 @@
       </h1>
       <p class="hero-sub">Boutique real estate across Calaveras, Amador &amp; Tuolumne counties — where the Sierra foothills meet a life well-lived.</p>
       <div class="hero-ctas">
-        <a href="listings.html" class="btn btn-ink">Browse properties</a>
-        <a href="platform.html" class="btn btn-ghost">Find my match</a>
+        <a href="property-search.html" class="btn btn-ink">Browse properties</a>
+        <a href="find-my-match.html" class="btn btn-ghost">Find my match</a>
       </div>
     </div>
   </div>
@@ -568,8 +577,8 @@
         </div>
         <p class="featured-desc">Panoramic vineyard views, chef's kitchen, wine cellar, and terraced acreage ready for planting. A rare opportunity for those who want to live the Gold Country dream — not just visit it.</p>
         <div class="featured-ctas">
-          <a href="listing.html" class="btn btn-ink">View residence</a>
-          <a href="platform.html" class="btn btn-ghost">Request a showing</a>
+          <a href="featured-listings.html" class="btn btn-ink">View residence</a>
+          <a href="find-my-match.html" class="btn btn-ghost">Request a showing</a>
         </div>
       </div>
     </article>
@@ -587,7 +596,7 @@
         <p style="font-family: var(--serif); font-style: italic; font-weight: 300; font-size: 20px; line-height: 1.5; color: rgba(250,246,236,0.78); margin-top: 24px; max-width: 540px;">Sara and James specialize in the one transaction most agents won't take on — selling your Bay Area home <em style="color: var(--brass-bright);">and</em> finding your foothills one, on a single coordinated calendar.</p>
         <div style="display: flex; gap: 14px; margin-top: 32px; flex-wrap: wrap;">
           <a href="relocate.html" class="btn btn-brass">How it works</a>
-          <a href="platform.html" class="btn btn-ghost" style="border-color: rgba(250,246,236,0.30); color: var(--shell);">Start the conversation</a>
+          <a href="find-my-match.html" class="btn btn-ghost" style="border-color: rgba(250,246,236,0.30); color: var(--shell);">Start the conversation</a>
         </div>
       </div>
 
@@ -639,66 +648,19 @@
       <p class="lede right">Based on what buyers like you save and skip, we surface the homes worth your attention first — quietly, never crowded.</p>
     </div>
 
-    <div class="list-grid">
-      <a href="listing.html" class="prop-card">
-        <div class="prop-photo">
-          <img src="https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=800&q=85" alt="" onerror="this.style.display='none'">
-          <div class="prop-tags">
-            <span class="pill-status pill-new">Active</span>
-          </div>
-        </div>
-        <div class="prop-body">
-          <div class="prop-price">$1,399,000</div>
-          <div class="prop-address">433 E Highway 4<br>Murphys, CA 95247</div>
-          <div class="prop-specs">
-            <span>4 Bd</span><span>3 Ba</span><span>Estate</span>
-          </div>
-          <div class="prop-foot">
-            <span class="prop-match">Listed by Sara</span>
-            <span class="label-cap" style="color: var(--ink-faint);">Plate II</span>
-          </div>
-        </div>
-      </a>
-
-      <a href="listing.html" class="prop-card">
-        <div class="prop-photo">
-          <img src="https://images.unsplash.com/photo-1568605114967-8130f3a36994?w=800&q=85" alt="" onerror="this.style.display='none'">
-          <div class="prop-tags">
-            <span class="pill-status pill-brass">Active</span>
-          </div>
-        </div>
-        <div class="prop-body">
-          <div class="prop-price">$399,000</div>
-          <div class="prop-address">2733 Emco Road<br>Mokelumne Hill, CA 95245</div>
-          <div class="prop-specs">
-            <span>3 Bd</span><span>2 Ba</span><span>Single family</span>
-          </div>
-          <div class="prop-foot">
-            <span class="prop-match">Listed by Sara</span>
-            <span class="label-cap" style="color: var(--ink-faint);">Plate III</span>
-          </div>
-        </div>
-      </a>
-
-      <a href="listing.html" class="prop-card">
-        <div class="prop-photo">
-          <img src="https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?w=800&q=85" alt="" onerror="this.style.display='none'">
-        </div>
-        <div class="prop-body">
-          <div class="prop-price">$1,200,000</div>
-          <div class="prop-address">7094 Heaton Moor Dr<br>San Jose, CA 95119</div>
-          <div class="prop-specs">
-            <span>3 Bd</span><span>1 Ba</span><span>Single family</span>
-          </div>
-          <div class="prop-foot">
-            <span class="prop-match">Listed by Sara</span>
-            <span class="label-cap" style="color: var(--ink-faint);">Plate IV</span>
-          </div>
-        </div>
-      </a>
+    <div class="idx-embed idx-feature-gallery">
+      <script>
+        // Sara's real active (featured) listings, live from the iHomeFinder feed.
+        // Each card links to its real IDX detail page. Renders on the deployed,
+        // token-authorized domain (legacycalifornia.vercel.app) — not in local preview.
+        document.currentScript.replaceWith(ihfKestrel.render({
+          component: "gallerySliderWidget"
+        }));
+      </script>
     </div>
+
     <div style="text-align: center; margin-top: 48px;">
-      <a href="listings.html" class="btn btn-ghost">View all properties</a>
+      <a href="property-search.html" class="btn btn-ghost">View all properties</a>
     </div>
   </div>
 </section>
@@ -809,7 +771,7 @@
         <div class="about-contact">
           <a href="tel:2095594966"><span class="glyph">◇</span> (209) 559-4966</a>
           <a href="mailto:SaraSellsCalifornia@gmail.com"><span class="glyph">◇</span> SaraSellsCalifornia@gmail.com</a>
-          <a href="platform.html"><span class="glyph">◇</span> Start a conversation</a>
+          <a href="find-my-match.html"><span class="glyph">◇</span> Start a conversation</a>
         </div>
       </div>
     </div>
@@ -829,7 +791,7 @@
           <span>—</span><span>Built in-house. No third-party CRM. No noise.</span>
         </div>
         <div style="margin-top: 28px;">
-          <a href="platform.html" class="btn btn-brass">Begin a profile</a>
+          <a href="find-my-match.html" class="btn btn-brass">Begin a profile</a>
         </div>
       </div>
       <div class="platform-features">
@@ -955,7 +917,7 @@
   <h2 class="cta-h">Your story<br>starts <em>here.</em></h2>
   <p class="cta-sub">Let's find the home — or the buyer — that changes everything.</p>
   <div class="cta-ctas">
-    <a href="platform.html" class="btn btn-ink">Find my match</a>
+    <a href="find-my-match.html" class="btn btn-ink">Find my match</a>
     <a href="tel:2095594966" class="btn btn-ghost">Call (209) 559-4966</a>
   </div>
   <div class="cta-contact">
@@ -982,15 +944,15 @@
         <h4>Services</h4>
         <a href="relocate.html">Bay → Foothills relocation</a>
         <a href="towns.html">Communities</a>
-        <a href="seller.html">Sellers</a>
-        <a href="listings.html">Browse listings</a>
-        <a href="platform.html">Request a tour</a>
+        <a href="valuation.html">Sellers</a>
+        <a href="property-search.html">Browse listings</a>
+        <a href="find-my-match.html">Request a tour</a>
       </div>
       <div>
         <h4>Buy</h4>
-        <a href="listings.html">Search all listings</a>
-        <a href="listing-map.html">Map search</a>
-        <a href="open-houses.html">Open houses</a>
+        <a href="property-search.html">Search all listings</a>
+        <a href="property-search.html">Map search</a>
+        <a href="open-home-listings.html">Open houses</a>
         <a href="featured-listings.html">Featured listings</a>
         <a href="sold-featured-listings.html">Recently sold</a>
         <a href="market-report.html">Market reports</a>
@@ -998,15 +960,15 @@
         <a href="fire-zone.html">Fire-zone &amp; insurance tool</a>
         <a href="commute.html">Commute calculator</a>
         <a href="relocate.html">Bay → Foothills relocation</a>
-        <a href="platform.html">Request a tour</a>
+        <a href="find-my-match.html">Request a tour</a>
       </div>
       <div>
         <h4>Sell</h4>
-        <a href="seller.html">What's my home worth?</a>
-        <a href="seller.html">Listing process</a>
+        <a href="valuation.html">What's my home worth?</a>
+        <a href="how-we-work.html">Listing process</a>
         <a href="how-we-work.html">How we work</a>
         <a href="about.html">About Sara &amp; James</a>
-        <a href="seller.html">Request a CMA</a>
+        <a href="valuation.html">Request a CMA</a>
       </div>
       <div>
         <h4>Connect</h4>
