@@ -456,15 +456,6 @@
   .featured-card { grid-template-columns: 1fr; }
 }
 </style>
-<link rel="stylesheet" href="idx-theme.css">
-<script src="https://kestrel.idxhome.com/ihf-kestrel.js"></script>
-<script>
-  window.ihfKestrel = window.ihfKestrel || {};
-  ihfKestrel.config = {
-    platform: "custom",
-    activationToken: "d77ab7ae-7afe-403d-89cf-61bd60bbf806",
-  };
-</script>
 </head>
 <body class="paper" data-screen-label="Marketing Home">
 
@@ -560,20 +551,12 @@
       <p class="lede right">Every home Legacy currently represents across Calaveras, Amador &amp; Tuolumne — live from the MLS, never a stale plate.</p>
     </div>
 
-    <div class="idx-embed idx-office-feed">
-      <script>
-        // Live iHomeFinder gallery of Sara's active listings, rendered INLINE.
-        // (An <iframe> of featured-listings.html does not work — IDX widgets
-        // refuse to render when framed — so the feed is embedded directly here,
-        // the same way it renders on featured-listings.html.)
-        document.currentScript.replaceWith(ihfKestrel.render({
-          component: "gallerySliderWidget"
-        }));
-      </script>
-    </div>
-
-    <div style="text-align: center; margin-top: 48px;">
-      <a href="property-search.html" class="btn btn-ghost">Search all listings</a>
+    <div style="text-align: center; padding: 16px 0 4px;">
+      <p style="font-family: var(--serif); font-style: italic; font-weight: 300; font-size: clamp(22px, 3vw, 30px); line-height: 1.4; color: var(--ink-soft); max-width: 760px; margin: 0 auto 36px;">Sara's listings update live from the MLS the moment they hit the market. Browse her current homes, or search every property across the foothills.</p>
+      <div style="display: flex; gap: 16px; justify-content: center; flex-wrap: wrap;">
+        <a href="featured-listings.html" class="btn btn-ink">View Sara's listings</a>
+        <a href="property-search.html" class="btn btn-ghost">Search all MLS listings</a>
+      </div>
     </div>
   </div>
 </section>
