@@ -1,50 +1,33 @@
 {
+  "rewrites": [
+    { "source": "/listing", "destination": "/listing.html" },
+    { "source": "/agent", "destination": "/agent.html" },
+    { "source": "/office", "destination": "/office.html" },
+    { "source": "/listing-report", "destination": "/listing-report.html" },
+    { "source": "/open-home-report", "destination": "/open-home-report.html" },
+    { "source": "/market-report", "destination": "/market-report.html" }
+  ],
   "redirects": [
-    {
-      "source": "/listings",
-      "destination": "/property-search.html",
-      "permanent": true
-    },
-    {
-      "source": "/listings.html",
-      "destination": "/property-search.html",
-      "permanent": true
-    },
-    {
-      "source": "/open-houses",
-      "destination": "/open-home-listings.html",
-      "permanent": true
-    },
-    {
-      "source": "/open-houses.html",
-      "destination": "/open-home-listings.html",
-      "permanent": true
-    }
+    { "source": "/listings", "destination": "/property-search.html", "permanent": true },
+    { "source": "/listings.html", "destination": "/property-search.html", "permanent": true },
+    { "source": "/open-houses", "destination": "/open-home-listings.html", "permanent": true },
+    { "source": "/open-houses.html", "destination": "/open-home-listings.html", "permanent": true }
   ],
   "headers": [
     {
       "source": "/api/(.*)",
       "headers": [
-        {
-          "key": "Cache-Control",
-          "value": "public, s-maxage=900, stale-while-revalidate=1800"
-        }
+        { "key": "Cache-Control", "value": "public, s-maxage=900, stale-while-revalidate=1800" }
       ]
     },
     {
       "source": "/api/photo",
       "headers": [
-        {
-          "key": "Cache-Control",
-          "value": "public, max-age=86400, s-maxage=604800, immutable"
-        }
+        { "key": "Cache-Control", "value": "public, max-age=86400, s-maxage=604800, immutable" }
       ]
     }
   ],
   "functions": {
-    "api/*.js": {
-      "memory": 256,
-      "maxDuration": 10
-    }
+    "api/*.js": { "memory": 256, "maxDuration": 10 }
   }
 }
