@@ -1,11 +1,17 @@
 {
+  "cleanUrls": true,
+  "trailingSlash": false,
   "rewrites": [
     { "source": "/listing", "destination": "/listing.html" },
-    { "source": "/agent", "destination": "/agent.html" },
-    { "source": "/office", "destination": "/office.html" },
+    { "source": "/listing/:path*", "destination": "/listing.html" },
     { "source": "/listing-report", "destination": "/listing-report.html" },
+    { "source": "/listing-report/:path*", "destination": "/listing-report.html" },
     { "source": "/open-home-report", "destination": "/open-home-report.html" },
-    { "source": "/market-report", "destination": "/market-report.html" }
+    { "source": "/open-home-report/:path*", "destination": "/open-home-report.html" },
+    { "source": "/agent", "destination": "/agent.html" },
+    { "source": "/agent/:path*", "destination": "/agent.html" },
+    { "source": "/office", "destination": "/office.html" },
+    { "source": "/office/:path*", "destination": "/office.html" }
   ],
   "redirects": [
     { "source": "/listings", "destination": "/property-search.html", "permanent": true },
@@ -28,6 +34,9 @@
     }
   ],
   "functions": {
-    "api/*.js": { "memory": 256, "maxDuration": 10 }
+    "api/*.js": {
+      "memory": 256,
+      "maxDuration": 10
+    }
   }
 }
