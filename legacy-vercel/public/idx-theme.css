@@ -14,6 +14,13 @@
   background: var(--parchment);
   font-family: var(--sans);
   margin-top: 8px;
+  /* Center the rendered widget within the site's content column + gutters,
+     so IDX pages (search, featured, AND the listing-detail view) line up
+     with the rest of the site instead of bleeding to the left edge. */
+  max-width: var(--max);
+  margin-left: auto;
+  margin-right: auto;
+  padding: 36px var(--gutter) 80px;
 }
 .idx-embed * { box-sizing: border-box; font-family: var(--sans); }
 
@@ -141,6 +148,14 @@
 /* ── Kill rounded corners / heavy shadows the widget ships with ── */
 .idx-embed [class*="rounded"] { border-radius: 0 !important; }
 .idx-embed [class*="shadow"]  { box-shadow: none !important; }
+
+/* Homepage feed is already inside a .section/.section-inner column, so it must
+   NOT re-apply the standalone-page max-width + gutters (that double-insets it). */
+.idx-home-feed {
+  max-width: none;
+  padding: 0;
+  margin-top: 8px;
+}
 
 /* ── Legacy (pre-Kestrel) iHomeFinder class names, just in case ── */
 .idx-embed .ihf-price        { font-family: var(--serif) !important; color: var(--brass) !important; }
