@@ -1,0 +1,824 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sutter Creek, CA — Legacy Properties</title>
+<link rel="stylesheet" href="legacy.css">
+<link rel="stylesheet" href="town.css">
+</head>
+<body class="paper" data-screen-label="Town · Sutter Creek">
+
+<header class="topnav">
+  <div class="topnav-bar1">
+    <span>Boutique luxury real estate · Calaveras · Amador · Tuolumne</span>
+    <span><a href="tel:2095594966">(209) 559-4966</a> · <a href="mailto:SaraSellsCalifornia@gmail.com">SaraSellsCalifornia@gmail.com</a></span>
+  </div>
+  <nav class="topnav-bar2">
+    <div class="topnav-links">
+      <a href="property-search.html">Listings</a>
+      <a href="towns.html" class="active">Communities</a>
+      <a href="relocate.html">Relocate</a>
+      <a href="valuation.html">Sellers</a>
+      <a href="market-report.html">Markets</a>
+    </div>
+    <a href="index.html" class="wordmark">
+      <span class="wordmark-word">Legacy</span>
+      <span class="wordmark-sub">Properties · Angels Camp CA</span>
+    </a>
+    <div class="topnav-links right">
+      <a href="ledger.html">The Ledger</a>
+      <a href="dashboard.html">Sign In</a>
+      <a href="find-my-match.html" class="btn btn-ink btn-sm" style="padding:10px 18px;">Find My Match</a>
+    </div>
+  </nav>
+</header>
+
+<div class="town-breadcrumb">
+  <div class="town-breadcrumb-inner">
+    <a href="index.html">Legacy</a>
+    <span class="sep">→</span>
+    <a href="towns.html">Communities</a>
+    <span class="sep">→</span>
+    <span class="cur">Sutter Creek</span>
+    <span class="spacer"></span>
+    <span class="mono small">Vol. XXII · Plate III — Gold Country Survey</span>
+  </div>
+</div>
+
+<!-- HERO -->
+<section class="town-hero" data-season="fall">
+  <div class="th-frame th-frame-spring" style="background-image:url('art/towns/sutter-creek-mainst.jpg');"></div>
+  <div class="th-frame th-frame-summer" style="background-image:url('art/towns/sutter-creek-summer-creek.jpg');"></div>
+  <div class="th-frame th-frame-fall"   style="background-image:url('art/towns/sutter-creek-footbridge-fall.jpg');"></div>
+  <div class="th-frame th-frame-winter" style="background-image:url('art/towns/sutter-creek-evening.jpg');"></div>
+  <div class="th-veil"></div>
+
+  <div class="th-inner">
+    <div class="th-eyebrow">
+      <span class="tick"></span>
+      <span class="eyebrow">Amador County · Elevation 1,198 ft · Established 1854</span>
+    </div>
+    <h1 class="th-title">
+      Sutter
+      <span class="it">Creek.</span>
+    </h1>
+    <p class="th-tag">— A six-block Main Street the National Register left exactly as it was — antiques, Italianates, and the front door of Amador wine country</p>
+
+    <div class="th-meta">
+      <div class="th-meta-row"><span class="label-cap">Population</span><span class="num">2,501</span></div>
+      <div class="th-meta-row"><span class="label-cap">Shenandoah Valley</span><span class="num">14 min east</span></div>
+      <div class="th-meta-row"><span class="label-cap">Sacramento</span><span class="num">55 min</span></div>
+      <div class="th-meta-row"><span class="label-cap">Antique shops</span><span class="num">16</span></div>
+    </div>
+  </div>
+
+  <div class="th-season">
+    <span class="label-cap" style="color:rgba(250,246,236,0.6);">A year in Sutter Creek —</span>
+    <div class="th-season-track" role="tablist">
+      <button class="th-sn" data-s="spring" data-quote="<em>Wisteria over Main Street.</em> The Shenandoah is between bud break and the bloom. The tour buses have not started yet.">Spring</button>
+      <button class="th-sn" data-s="summer" data-quote="<em>Sycamore shade on the sidewalks.</em> Theatre nights end at ten and you can hear the creek from any porch on Eureka.">Summer</button>
+      <button class="th-sn th-sn-on" data-s="fall" data-quote="<em>The crush.</em> Old vines on the Shenandoah, Italian foothills weather, sidewalks crunching with sycamore leaves.">Autumn</button>
+      <button class="th-sn" data-s="winter" data-quote="<em>Holiday lights up early November.</em> Wine-cellar tastings, fireplaces in every B&amp;B, Main Street quiet by seven.">Winter</button>
+    </div>
+    <span class="th-season-quote" id="seasonQuote">
+      <em>The crush.</em> Old vines on the Shenandoah, Italian foothills weather, sidewalks crunching with sycamore leaves.
+    </span>
+  </div>
+</section>
+
+<!-- JUMP -->
+<nav class="town-jump" id="jumpRail">
+  <div class="town-jump-inner">
+    <a href="#story" class="jump-on">The story</a>
+    <a href="#vitals">Market vitals</a>
+    <a href="#mainst">The historic blocks</a>
+    <a href="#wine">Shenandoah wines</a>
+    <a href="#picks">Sara's picks</a>
+    <a href="#listings">Listings</a>
+    <a href="#letter">A letter</a>
+  </div>
+</nav>
+
+<!-- STORY -->
+<section class="section town-story" id="story" style="background:var(--parchment);">
+  <div class="section-inner">
+    <div class="story-grid">
+      <div class="story-side">
+        <span class="hairline-brass"></span>
+        <span class="eyebrow">Field notes · § I</span>
+        <h2 class="h-section" style="margin-top:14px;">The Gold Rush town<br><em>that kept its face.</em></h2>
+      </div>
+      <div class="story-body">
+        <p class="lede">A creek, a stamp mill, a six-block Main Street of false-front shops, Italianates, and a working theatre that's been seated since 1919. Most of what was built in Sutter Creek a hundred and fifty years ago is still standing.</p>
+        <p>The town was named for John Sutter — yes, that one — who tried his hand at logging here in 1846 before Marshall's discovery upriver changed his life. The town that took his name became one of the Mother Lode's most productive, then quietly stopped, then quietly endured.</p>
+        <p>Today, Sutter Creek is the front door of Amador wine country. Fourteen minutes east up the road, the Shenandoah Valley grows some of the oldest Zinfandel vines in California. Many of Sara's buyers come for the wine, stay for the town, and then realize the town is the better story.</p>
+      </div>
+    </div>
+
+    <div class="fit-strip">
+      <div class="fit-h"><span class="label-cap">Who Sutter Creek is for —</span></div>
+      <div class="fit-cards">
+        <article class="fit-card">
+          <div class="fit-num">01</div>
+          <h4>The Victorian romantic</h4>
+          <p>An 1880s Italianate with the original molding, a porch swing, a back garden that came with two Meyer lemons.</p>
+        </article>
+        <article class="fit-card">
+          <div class="fit-num">02</div>
+          <h4>The Amador wine couple</h4>
+          <p>Ten minutes to the Shenandoah, an hour to Murphys, a barrel program at home and another at a friend's vineyard.</p>
+        </article>
+        <article class="fit-card">
+          <div class="fit-num">03</div>
+          <h4>The Sacramento weekender</h4>
+          <p>An hour from Midtown, ten minutes off Hwy 49. A second home that hosts every spring birthday on the porch.</p>
+        </article>
+        <article class="fit-card">
+          <div class="fit-num">04</div>
+          <h4>The shopkeeper</h4>
+          <p>A storefront with an apartment upstairs. A small business that doesn't ask much, gives a lot back.</p>
+        </article>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- VITALS -->
+<section class="section town-vitals" id="vitals" style="background:var(--vellum);">
+  <div class="section-inner">
+    <div class="section-h">
+      <div>
+        <span class="hairline-brass"></span>
+        <span class="eyebrow">Market intelligence · § II</span>
+        <h2 class="h-section" style="margin-top:10px;">The Sutter Creek<br>market<em>, at a glance.</em></h2>
+      </div>
+      <p class="lede right">Strong Sacramento demand. Inventory thinner than the data suggests.</p>
+    </div>
+
+    <div class="vitals-grid">
+      <div class="vitals-card vitals-card-wide">
+        <div class="vc-head">
+          <span class="label-cap">Median sale price</span>
+          <span class="vc-trend up">+5.1% YoY</span>
+        </div>
+        <div class="vc-num">$598,000</div>
+        <div class="vc-sub">12-month rolling · sourced 12 May 2026</div>
+        <svg class="vc-spark" viewBox="0 0 600 120" preserveAspectRatio="none">
+          <defs>
+            <linearGradient id="vcFillSc" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#C99E5A" stop-opacity="0.30"/>
+              <stop offset="100%" stop-color="#C99E5A" stop-opacity="0"/>
+            </linearGradient>
+          </defs>
+          <g stroke="rgba(27,24,19,0.06)">
+            <line x1="0" y1="30" x2="600" y2="30"/>
+            <line x1="0" y1="60" x2="600" y2="60"/>
+            <line x1="0" y1="90" x2="600" y2="90"/>
+          </g>
+          <path d="M0,90 L50,84 L100,80 L150,76 L200,72 L250,64 L300,58 L350,52 L400,44 L450,40 L500,34 L550,28 L600,24 L600,120 L0,120 Z" fill="url(#vcFillSc)"/>
+          <path d="M0,90 L50,84 L100,80 L150,76 L200,72 L250,64 L300,58 L350,52 L400,44 L450,40 L500,34 L550,28 L600,24" fill="none" stroke="#8C6E3D" stroke-width="2"/>
+          <g fill="#8C6E3D">
+            <circle cx="0" cy="90" r="2.5"/><circle cx="100" cy="80" r="2.5"/><circle cx="200" cy="72" r="2.5"/><circle cx="300" cy="58" r="2.5"/><circle cx="400" cy="44" r="2.5"/><circle cx="500" cy="34" r="2.5"/>
+            <circle cx="600" cy="24" r="3.5" stroke="#1B1813" stroke-width="1.5" fill="#C99E5A"/>
+          </g>
+        </svg>
+        <div class="vc-axis"><span>Jun '25</span><span>Sep</span><span>Dec</span><span>Mar '26</span><span>May '26</span></div>
+      </div>
+
+      <div class="vitals-card">
+        <span class="label-cap">Days on market</span>
+        <div class="vc-num small">21</div>
+        <div class="vc-sub"><span class="chg dn">−4 days</span> vs. last year</div>
+        <div class="dot-rule">
+          <span style="left:0%"></span><span style="left:20%; background:var(--brass);"></span><span style="left:40%"></span><span style="left:60%"></span><span style="left:80%"></span>
+        </div>
+        <div class="vc-axis"><span>fast</span><span></span><span>slow</span></div>
+      </div>
+
+      <div class="vitals-card">
+        <span class="label-cap">Active listings</span>
+        <div class="vc-num small">18</div>
+        <div class="vc-sub"><span class="chg up">+2</span> since last month</div>
+        <div class="bar-rule"><div class="bar-fill" style="width:32%"></div></div>
+        <div class="vc-axis"><span>tight</span><span></span><span>loose</span></div>
+      </div>
+
+      <div class="vitals-card">
+        <span class="label-cap">Pre-1920 share</span>
+        <div class="vc-num small">38<span class="suffix">%</span></div>
+        <div class="vc-sub">of homes within town limits</div>
+        <div class="dial">
+          <svg viewBox="0 0 100 60">
+            <path d="M10,55 A40,40 0 0,1 90,55" fill="none" stroke="rgba(27,24,19,0.10)" stroke-width="5"/>
+            <path d="M10,55 A40,40 0 0,1 62,22" fill="none" stroke="#8C6E3D" stroke-width="5" stroke-linecap="round"/>
+          </svg>
+        </div>
+      </div>
+
+      <div class="vitals-card">
+        <span class="label-cap">Per sq. ft.</span>
+        <div class="vc-num small">$389</div>
+        <div class="vc-sub"><span class="chg up">+2.6%</span> trailing 12</div>
+        <div class="dot-rule">
+          <span style="left:10%"></span><span style="left:30%"></span><span style="left:50%; background:var(--brass);"></span><span style="left:70%"></span><span style="left:90%"></span>
+        </div>
+      </div>
+
+      <div class="vitals-card">
+        <span class="label-cap">Buyer origin</span>
+        <div class="origin">
+          <div class="origin-row"><span>Sacramento</span><span class="ob"><span style="width:54%"></span></span><span class="op">54%</span></div>
+          <div class="origin-row"><span>Bay Area</span><span class="ob"><span style="width:24%"></span></span><span class="op">24%</span></div>
+          <div class="origin-row"><span>Out-of-state</span><span class="ob"><span style="width:14%"></span></span><span class="op">14%</span></div>
+          <div class="origin-row"><span>Local</span><span class="ob"><span style="width:8%"></span></span><span class="op">8%</span></div>
+        </div>
+      </div>
+
+      <div class="vitals-card vitals-card-meta">
+        <span class="label-cap">Liveability index</span>
+        <div class="live-row"><span>Walkable Main St.</span><span class="dots"><i></i><i></i><i></i><i></i><i></i></span></div>
+        <div class="live-row"><span>School rating</span><span class="dots"><i></i><i></i><i></i><i></i><i class="off"></i></span></div>
+        <div class="live-row"><span>Fire risk</span><span class="dots"><i></i><i></i><i></i><i class="off"></i><i class="off"></i></span></div>
+        <div class="live-row"><span>Broadband</span><span class="dots"><i></i><i></i><i></i><i></i><i></i></span></div>
+        <div class="live-row"><span>Historic stock</span><span class="dots"><i></i><i></i><i></i><i></i><i></i></span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- HISTORIC BLOCKS — map -->
+<section class="section" id="mainst" style="background:var(--parchment);">
+  <div class="section-inner">
+    <div class="section-h">
+      <div>
+        <span class="hairline-brass"></span>
+        <span class="eyebrow">Plate III · A walking diagram</span>
+        <h2 class="h-section" style="margin-top:10px;">Six blocks,<br><em>National Register</em>.</h2>
+      </div>
+      <p class="lede right">Hover any building. The whole town is a working museum of pre-1900 commercial architecture — and the antique store inside it.</p>
+    </div>
+
+    <div class="mainst-filters">
+      <button class="ms-filter ms-on" data-cat="all">All <span class="ct">18</span></button>
+      <button class="ms-filter" data-cat="wine">Antiques <span class="ct">6</span></button>
+      <button class="ms-filter" data-cat="eat">Eat <span class="ct">5</span></button>
+      <button class="ms-filter" data-cat="stay">Stay <span class="ct">3</span></button>
+      <button class="ms-filter" data-cat="shop">Galleries <span class="ct">2</span></button>
+      <button class="ms-filter" data-cat="do">Landmarks <span class="ct">2</span></button>
+    </div>
+
+    <div class="mainst-board">
+      <div class="mainst-map" id="mainstMap">
+        <svg viewBox="0 0 1000 600" preserveAspectRatio="xMidYMid meet">
+          <defs>
+            <pattern id="grainSc" x="0" y="0" width="2" height="2" patternUnits="userSpaceOnUse">
+              <rect width="2" height="2" fill="#EFE7D6"/>
+              <rect width="1" height="1" fill="#E8DFCC" opacity="0.5"/>
+            </pattern>
+          </defs>
+          <rect width="1000" height="600" fill="url(#grainSc)"/>
+
+          <!-- Sutter Creek (the actual creek) -->
+          <path d="M-20,540 Q200,510 460,530 T1020,500" fill="none" stroke="#9DB5C2" stroke-width="9" opacity="0.55"/>
+          <path d="M-20,540 Q200,510 460,530 T1020,500" fill="none" stroke="#7E9AAA" stroke-width="1" opacity="0.6" stroke-dasharray="3 4"/>
+          <text x="780" y="518" font-family="Cormorant Garamond" font-style="italic" font-size="14" fill="#5E7886">Sutter Creek</text>
+
+          <!-- Main Street (Hwy 49) -->
+          <rect x="0" y="240" width="1000" height="56" fill="#E0D5BB"/>
+          <line x1="0" y1="268" x2="1000" y2="268" stroke="#1B1813" stroke-opacity="0.35" stroke-dasharray="14 8"/>
+          <text x="500" y="284" text-anchor="middle" font-family="JetBrains Mono" font-size="11" letter-spacing="6" fill="rgba(27,24,19,0.55)" font-weight="500">— MAIN STREET · HWY 49 —</text>
+
+          <!-- Cross streets -->
+          <rect x="140" y="0"   width="22" height="240" fill="#E0D5BB"/>
+          <rect x="140" y="296" width="22" height="304" fill="#E0D5BB"/>
+          <rect x="370" y="0"   width="22" height="240" fill="#E0D5BB"/>
+          <rect x="370" y="296" width="22" height="304" fill="#E0D5BB"/>
+          <rect x="600" y="0"   width="22" height="240" fill="#E0D5BB"/>
+          <rect x="600" y="296" width="22" height="304" fill="#E0D5BB"/>
+          <rect x="830" y="0"   width="22" height="240" fill="#E0D5BB"/>
+          <rect x="830" y="296" width="22" height="304" fill="#E0D5BB"/>
+
+          <text x="151" y="14" text-anchor="middle" font-family="JetBrains Mono" font-size="8" fill="rgba(27,24,19,0.45)" letter-spacing="1">RANDOLPH</text>
+          <text x="381" y="14" text-anchor="middle" font-family="JetBrains Mono" font-size="8" fill="rgba(27,24,19,0.45)" letter-spacing="1">EUREKA</text>
+          <text x="611" y="14" text-anchor="middle" font-family="JetBrains Mono" font-size="8" fill="rgba(27,24,19,0.45)" letter-spacing="1">SPANISH ST</text>
+          <text x="841" y="14" text-anchor="middle" font-family="JetBrains Mono" font-size="8" fill="rgba(27,24,19,0.45)" letter-spacing="1">CHURCH</text>
+
+          <!-- Block labels -->
+          <text x="270" y="170" text-anchor="middle" font-family="Cormorant Garamond" font-style="italic" font-size="22" fill="rgba(27,24,19,0.35)">Upper Main</text>
+          <text x="500" y="170" text-anchor="middle" font-family="Cormorant Garamond" font-style="italic" font-size="22" fill="rgba(27,24,19,0.35)">Antique Row</text>
+          <text x="720" y="170" text-anchor="middle" font-family="Cormorant Garamond" font-style="italic" font-size="22" fill="rgba(27,24,19,0.35)">Lower Main</text>
+
+          <!-- Knight Foundry callout -->
+          <rect x="650" y="380" width="170" height="80" fill="none" stroke="rgba(58,74,56,0.35)" stroke-dasharray="4 3"/>
+          <text x="735" y="425" text-anchor="middle" font-family="Cormorant Garamond" font-style="italic" font-size="16" fill="rgba(58,74,56,0.6)">Knight Foundry</text>
+          <text x="735" y="442" text-anchor="middle" font-family="JetBrains Mono" font-size="8" letter-spacing="2" fill="rgba(58,74,56,0.5)">— est. 1873 —</text>
+
+          <!-- Compass -->
+          <g transform="translate(940,80)" font-family="JetBrains Mono" font-size="9" fill="rgba(27,24,19,0.55)">
+            <circle r="22" fill="none" stroke="rgba(27,24,19,0.25)"/>
+            <path d="M0,-20 L4,0 L0,4 L-4,0 Z" fill="#8C6E3D"/>
+            <text y="-26" text-anchor="middle">N</text>
+          </g>
+          <!-- Scale -->
+          <g transform="translate(40,560)" font-family="JetBrains Mono" font-size="8" fill="rgba(27,24,19,0.55)">
+            <line x1="0" y1="0" x2="100" y2="0" stroke="rgba(27,24,19,0.55)" stroke-width="1.5"/>
+            <line x1="0" y1="-4" x2="0" y2="4" stroke="rgba(27,24,19,0.55)"/>
+            <line x1="50" y1="-4" x2="50" y2="4" stroke="rgba(27,24,19,0.55)"/>
+            <line x1="100" y1="-4" x2="100" y2="4" stroke="rgba(27,24,19,0.55)"/>
+            <text x="0" y="18">0</text><text x="50" y="18">250 ft</text><text x="100" y="18">500 ft</text>
+          </g>
+        </svg>
+
+        <!-- Antiques -->
+        <button class="ms-pin" data-cat="wine" style="left:12%; top:36%;" data-name="Water Street Antiques" data-desc="Three floors of estate furniture. Bring a measuring tape.">
+          <span class="ms-pin-dot">A</span><span class="ms-pin-tip">Water St. Antiques</span>
+        </button>
+        <button class="ms-pin" data-cat="wine" style="left:24%; top:48%;" data-name="Fox &amp; Goose" data-desc="Curated mid-century, Victorian glass, the occasional brass bed.">
+          <span class="ms-pin-dot">A</span><span class="ms-pin-tip">Fox &amp; Goose</span>
+        </button>
+        <button class="ms-pin" data-cat="wine" style="left:42%; top:36%;" data-name="Sutter Creek Antiques" data-desc="Twelve dealers under one roof. Anchor of Antique Row.">
+          <span class="ms-pin-dot">A</span><span class="ms-pin-tip">Sutter Creek</span>
+        </button>
+        <button class="ms-pin" data-cat="wine" style="left:50%; top:48%;" data-name="The Pickle Barrel" data-desc="Quirky general store + collectibles. Sara's grandmother shopped here.">
+          <span class="ms-pin-dot">A</span><span class="ms-pin-tip">Pickle Barrel</span>
+        </button>
+        <button class="ms-pin" data-cat="wine" style="left:60%; top:36%;" data-name="Heirloom &amp; Co." data-desc="Estate jewelry, silver, watches. Locked cases for a reason.">
+          <span class="ms-pin-dot">A</span><span class="ms-pin-tip">Heirloom</span>
+        </button>
+        <button class="ms-pin" data-cat="wine" style="left:74%; top:48%;" data-name="Spanish St. Mercantile" data-desc="Architectural salvage. Doors, mantels, hardware.">
+          <span class="ms-pin-dot">A</span><span class="ms-pin-tip">Mercantile</span>
+        </button>
+
+        <!-- Eat -->
+        <button class="ms-pin" data-cat="eat" style="left:18%; top:64%;" data-name="Element" data-desc="Seasonal California small plates. Reserve.">
+          <span class="ms-pin-dot">E</span><span class="ms-pin-tip">Element</span>
+        </button>
+        <button class="ms-pin" data-cat="eat" style="left:32%; top:78%;" data-name="Sutter Creek Coffee Roasting" data-desc="House-roasted beans. The slow morning anchor.">
+          <span class="ms-pin-dot">E</span><span class="ms-pin-tip">Coffee Roasting</span>
+        </button>
+        <button class="ms-pin" data-cat="eat" style="left:46%; top:64%;" data-name="Susan's Place" data-desc="Wine bar + small plates on a creekside patio.">
+          <span class="ms-pin-dot">E</span><span class="ms-pin-tip">Susan's Place</span>
+        </button>
+        <button class="ms-pin" data-cat="eat" style="left:58%; top:80%;" data-name="Pizza Plus" data-desc="The local pizza joint. Order the meatlovers, two ranches.">
+          <span class="ms-pin-dot">E</span><span class="ms-pin-tip">Pizza Plus</span>
+        </button>
+        <button class="ms-pin" data-cat="eat" style="left:72%; top:64%;" data-name="Bellotti Inn" data-desc="Italian, since 1862. Family-style. Don't skip the gnocchi.">
+          <span class="ms-pin-dot">E</span><span class="ms-pin-tip">Bellotti Inn</span>
+        </button>
+
+        <!-- Stay -->
+        <button class="ms-pin" data-cat="stay" style="left:22%; top:14%;" data-name="The Foxes Inn" data-desc="Seven-room Victorian B&B. The four-poster suite is the one.">
+          <span class="ms-pin-dot">S</span><span class="ms-pin-tip">The Foxes Inn</span>
+        </button>
+        <button class="ms-pin" data-cat="stay" style="left:48%; top:14%;" data-name="Hanford House" data-desc="Mid-century-modern annex on a Victorian footprint. The rooftop.">
+          <span class="ms-pin-dot">S</span><span class="ms-pin-tip">Hanford House</span>
+        </button>
+        <button class="ms-pin" data-cat="stay" style="left:78%; top:14%;" data-name="Sutter Creek Inn" data-desc="The first B&B in California. Eighteen rooms, twelve gardens.">
+          <span class="ms-pin-dot">S</span><span class="ms-pin-tip">Sutter Creek Inn</span>
+        </button>
+
+        <!-- Galleries -->
+        <button class="ms-pin" data-cat="shop" style="left:38%; top:22%;" data-name="Sutter Creek Gallery" data-desc="Local landscape painters. Always one painting of the creek.">
+          <span class="ms-pin-dot">G</span><span class="ms-pin-tip">SC Gallery</span>
+        </button>
+        <button class="ms-pin" data-cat="shop" style="left:66%; top:22%;" data-name="Theatre Gallery" data-desc="Tied to the 1919 theatre. Posters, prints, programs.">
+          <span class="ms-pin-dot">G</span><span class="ms-pin-tip">Theatre Gallery</span>
+        </button>
+
+        <!-- Landmarks -->
+        <button class="ms-pin" data-cat="do" style="left:30%; top:90%;" data-name="Sutter Creek Theatre" data-desc="1919 cinema, restored. Indie films, live music, Friday nights.">
+          <span class="ms-pin-dot">L</span><span class="ms-pin-tip">SC Theatre</span>
+        </button>
+        <button class="ms-pin" data-cat="do" style="left:73%; top:80%;" data-name="Knight Foundry" data-desc="The last water-powered foundry in America. Tours, working days.">
+          <span class="ms-pin-dot">L</span><span class="ms-pin-tip">Knight Foundry</span>
+        </button>
+      </div>
+
+      <aside class="mainst-rail">
+        <div class="ms-rail-head">
+          <span class="label-cap">Detail</span>
+          <span class="mono" id="msCount" style="font-size:10px;color:var(--ink-faint);">18 places</span>
+        </div>
+        <div class="ms-rail-card" id="msRailCard">
+          <span class="ms-rail-tag" id="msTag">Hover the map</span>
+          <h3 class="ms-rail-name" id="msName">Eighteen rooms<br>on six blocks.</h3>
+          <p class="ms-rail-desc" id="msDesc">Filter by category to plan the afternoon — antique morning, lunch on the creek patio, theatre at seven.</p>
+          <ul class="ms-rail-list" id="msList"></ul>
+        </div>
+      </aside>
+    </div>
+  </div>
+</section>
+
+<!-- WINE — Shenandoah -->
+<section class="section town-wine" id="wine" style="background:var(--ink); color:var(--shell);">
+  <div class="section-inner">
+    <div class="section-h" style="border-bottom-color: rgba(250,246,236,0.1);">
+      <div>
+        <span class="hairline-brass" style="background:var(--brass-bright);"></span>
+        <span class="eyebrow" style="color:var(--brass-bright);">Plate IV · The Shenandoah</span>
+        <h2 class="h-section" style="color:var(--shell); margin-top:10px;">Old-vine Zinfandel,<br><em style="color:var(--brass-bright);">fourteen minutes east.</em></h2>
+      </div>
+      <p class="lede right" style="color:rgba(250,246,236,0.7);">Amador's Shenandoah Valley grows some of the oldest Zinfandel vines in California. Many planted before 1900. Some before 1880.</p>
+    </div>
+
+    <div class="wine-grid">
+      <article class="wine-card">
+        <div class="wine-letter">I</div>
+        <div class="wine-name">Story Winery</div>
+        <div class="wine-house">Mission &amp; Zin</div>
+        <div class="wine-flight"><span>Picnic Hill Mission</span><span>Sangiovese</span><span>Old-Vine Zin (1894 plant)</span></div>
+        <div class="wine-foot"><span>$15 flight</span><span>·</span><span>11–5 daily</span></div>
+      </article>
+      <article class="wine-card">
+        <div class="wine-letter">II</div>
+        <div class="wine-name">Vino Noceto</div>
+        <div class="wine-house">Sangiovese house</div>
+        <div class="wine-flight"><span>Estate Sangiovese</span><span>Dos Oakies</span><span>Frivolo Moscato</span></div>
+        <div class="wine-foot"><span>$15 flight</span><span>·</span><span>11–4 daily</span></div>
+      </article>
+      <article class="wine-card">
+        <div class="wine-letter">III</div>
+        <div class="wine-name">Renwood</div>
+        <div class="wine-house">Big-shouldered Zin</div>
+        <div class="wine-flight"><span>Grandpère Zin</span><span>Jack Rabbit Flat</span><span>Premier Old Vine</span></div>
+        <div class="wine-foot"><span>$20 flight</span><span>·</span><span>11–5 daily</span></div>
+      </article>
+      <article class="wine-card">
+        <div class="wine-letter">IV</div>
+        <div class="wine-name">Terra d'Oro</div>
+        <div class="wine-house">Estate &amp; Italianate</div>
+        <div class="wine-flight"><span>Home Vineyard Zin</span><span>Pinot Grigio</span><span>Barbera</span></div>
+        <div class="wine-foot"><span>$15 flight</span><span>·</span><span>10:30–4:30</span></div>
+      </article>
+      <article class="wine-card">
+        <div class="wine-letter">V</div>
+        <div class="wine-name">Andis Wines</div>
+        <div class="wine-house">Modern barn</div>
+        <div class="wine-flight"><span>Painted Fields Red</span><span>Semillon</span><span>Grandpère Zin</span></div>
+        <div class="wine-foot"><span>$20 flight</span><span>·</span><span>11–5 Thu–Mon</span></div>
+      </article>
+      <article class="wine-card">
+        <div class="wine-letter">VI</div>
+        <div class="wine-name">Helwig</div>
+        <div class="wine-house">Hilltop amphitheater</div>
+        <div class="wine-flight"><span>Cabernet</span><span>Zinfandel Reserve</span><span>Estate Tempranillo</span></div>
+        <div class="wine-foot"><span>$20 flight</span><span>·</span><span>11–5 daily</span></div>
+      </article>
+    </div>
+
+    <div class="wine-foot-strip">
+      <div>
+        <span class="label-cap" style="color:var(--brass-bright);">Shenandoah math —</span>
+        <span class="wf-stat">34 <em>wineries in 18 sq miles</em></span>
+        <span class="wf-stat">142 <em>year-old vines (oldest)</em></span>
+        <span class="wf-stat">14 <em>min from Main Street</em></span>
+      </div>
+      <a href="#" class="btn btn-brass btn-sm">Plan a Shenandoah day</a>
+    </div>
+  </div>
+</section>
+
+<!-- PICKS -->
+<section class="section town-picks" id="picks" style="background:var(--vellum);">
+  <div class="section-inner">
+    <div class="section-h">
+      <div>
+        <span class="hairline-brass"></span>
+        <span class="eyebrow">Plate V · The personal list</span>
+        <h2 class="h-section" style="margin-top:10px;">Sara's standing<br><em>recommendations.</em></h2>
+      </div>
+      <p class="lede right">Six blocks, a creek, the Shenandoah. This is the whole list.</p>
+    </div>
+
+    <div class="picks-tabs">
+      <button class="pick-tab pick-tab-on" data-tab="eat">Eat <span class="ct">04</span></button>
+      <button class="pick-tab" data-tab="drink">Drink <span class="ct">03</span></button>
+      <button class="pick-tab" data-tab="stay">Stay <span class="ct">03</span></button>
+      <button class="pick-tab" data-tab="do">Do <span class="ct">04</span></button>
+    </div>
+
+    <div class="picks-board">
+      <div class="pick-pane pick-pane-on" data-pane="eat">
+        <article class="pick-row">
+          <span class="pick-num">01</span>
+          <div class="pick-body">
+            <h4>Element</h4>
+            <p>The seasonal small-plates room I send wine clients to before the Shenandoah. Lamb tartare, summer corn, the duck.</p>
+            <div class="pick-tags"><span>Date</span><span>$$$</span><span>Reserve</span></div>
+          </div>
+          <div class="pick-cap"><span class="label-cap">When</span><span>Dinner · Thu–Sun</span></div>
+        </article>
+        <article class="pick-row">
+          <span class="pick-num">02</span>
+          <div class="pick-body">
+            <h4>Bellotti Inn</h4>
+            <p>Italian since 1862. Family-style, red sauce, a list of red wines a mile long. Bring the parents.</p>
+            <div class="pick-tags"><span>Italian</span><span>$$</span></div>
+          </div>
+          <div class="pick-cap"><span class="label-cap">When</span><span>Dinner daily</span></div>
+        </article>
+        <article class="pick-row">
+          <span class="pick-num">03</span>
+          <div class="pick-body">
+            <h4>Susan's Place</h4>
+            <p>Patio over the creek, wine bar, small plates. Where my buyers and I sit when we have time to talk.</p>
+            <div class="pick-tags"><span>Patio</span><span>$$</span></div>
+          </div>
+          <div class="pick-cap"><span class="label-cap">When</span><span>4 pm – close</span></div>
+        </article>
+        <article class="pick-row">
+          <span class="pick-num">04</span>
+          <div class="pick-body">
+            <h4>Sutter Creek Coffee Roasting</h4>
+            <p>The morning anchor. House-roasted beans, cinnamon-sugar pretzel, sidewalk seats facing Main.</p>
+            <div class="pick-tags"><span>Coffee</span><span>$</span></div>
+          </div>
+          <div class="pick-cap"><span class="label-cap">When</span><span>7–3 daily</span></div>
+        </article>
+      </div>
+
+      <div class="pick-pane" data-pane="drink">
+        <article class="pick-row">
+          <span class="pick-num">01</span>
+          <div class="pick-body">
+            <h4>Story Winery</h4>
+            <p>The 1894 vines. The patio at sunset, looking out at the canyon. Bring nothing but cash and a sweater.</p>
+            <div class="pick-tags"><span>Vineyard</span><span>$$</span></div>
+          </div>
+          <div class="pick-cap"><span class="label-cap">When</span><span>11–5 daily</span></div>
+        </article>
+        <article class="pick-row">
+          <span class="pick-num">02</span>
+          <div class="pick-body">
+            <h4>Vino Noceto</h4>
+            <p>The best Sangiovese north of Paso. The dog comes with the tasting room. So do the picnic tables.</p>
+            <div class="pick-tags"><span>Vineyard</span><span>$$</span></div>
+          </div>
+          <div class="pick-cap"><span class="label-cap">When</span><span>11–4 daily</span></div>
+        </article>
+        <article class="pick-row">
+          <span class="pick-num">03</span>
+          <div class="pick-body">
+            <h4>Andis</h4>
+            <p>Modern barn, brutal-honest wine, the Painted Fields red is the under-$30 hero of the valley.</p>
+            <div class="pick-tags"><span>Modern</span><span>$$</span></div>
+          </div>
+          <div class="pick-cap"><span class="label-cap">When</span><span>11–5 Thu–Mon</span></div>
+        </article>
+      </div>
+
+      <div class="pick-pane" data-pane="stay">
+        <article class="pick-row">
+          <span class="pick-num">01</span>
+          <div class="pick-body">
+            <h4>The Foxes Inn</h4>
+            <p>Seven-room Victorian B&B. The four-poster suite is the one. Three-course breakfast.</p>
+            <div class="pick-tags"><span>B&B</span><span>$$$</span></div>
+          </div>
+          <div class="pick-cap"><span class="label-cap">From</span><span>$285 / nt</span></div>
+        </article>
+        <article class="pick-row">
+          <span class="pick-num">02</span>
+          <div class="pick-body">
+            <h4>Hanford House</h4>
+            <p>Adults-oriented, mid-century interiors inside a Victorian shell. Rooftop deck under sycamores.</p>
+            <div class="pick-tags"><span>Boutique</span><span>$$$</span></div>
+          </div>
+          <div class="pick-cap"><span class="label-cap">From</span><span>$245 / nt</span></div>
+        </article>
+        <article class="pick-row">
+          <span class="pick-num">03</span>
+          <div class="pick-body">
+            <h4>Sutter Creek Inn</h4>
+            <p>California's first B&B. Eighteen gardens, a hammock under wisteria, and the cat.</p>
+            <div class="pick-tags"><span>Historic</span><span>$$</span></div>
+          </div>
+          <div class="pick-cap"><span class="label-cap">From</span><span>$185 / nt</span></div>
+        </article>
+      </div>
+
+      <div class="pick-pane" data-pane="do">
+        <article class="pick-row">
+          <span class="pick-num">01</span>
+          <div class="pick-body">
+            <h4>The Shenandoah Valley</h4>
+            <p>Thirty-four wineries in eighteen square miles. Pick four. Drive slowly. Plan to come back.</p>
+            <div class="pick-tags"><span>Wine</span><span>14 min</span></div>
+          </div>
+          <div class="pick-cap"><span class="label-cap">When</span><span>Year-round</span></div>
+        </article>
+        <article class="pick-row">
+          <span class="pick-num">02</span>
+          <div class="pick-body">
+            <h4>Sutter Creek Theatre</h4>
+            <p>1919, restored. Indie films, live folk, the occasional Shakespeare. Buy tickets ahead.</p>
+            <div class="pick-tags"><span>Culture</span><span>In town</span></div>
+          </div>
+          <div class="pick-cap"><span class="label-cap">When</span><span>Fri–Sun</span></div>
+        </article>
+        <article class="pick-row">
+          <span class="pick-num">03</span>
+          <div class="pick-body">
+            <h4>Knight Foundry tour</h4>
+            <p>The last water-powered foundry in America. Tours run two Saturdays a month. Free.</p>
+            <div class="pick-tags"><span>History</span><span>In town</span></div>
+          </div>
+          <div class="pick-cap"><span class="label-cap">When</span><span>Sat tours</span></div>
+        </article>
+        <article class="pick-row">
+          <span class="pick-num">04</span>
+          <div class="pick-body">
+            <h4>The antique row crawl</h4>
+            <p>Six dealers in three blocks. Start at Water Street, end at Spanish. Plan the truck route home.</p>
+            <div class="pick-tags"><span>Shop</span><span>In town</span></div>
+          </div>
+          <div class="pick-cap"><span class="label-cap">When</span><span>10–5 daily</span></div>
+        </article>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- LISTINGS -->
+<section class="section" id="listings" style="background:var(--parchment);">
+  <div class="section-inner">
+    <div class="section-h">
+      <div>
+        <span class="hairline-brass"></span>
+        <span class="eyebrow">Plate VI · Currently in the field</span>
+        <h2 class="h-section" style="margin-top:10px;">Homes for sale<br><em>in Sutter Creek.</em></h2>
+      </div>
+      <p class="lede right">Three on the boards this morning. Two Victorians, one creekside parcel.</p>
+    </div>
+
+    <div class="list-grid">
+      <a href="featured-listings.html" class="prop-card">
+        <div class="prop-photo">
+          <img src="https://images.unsplash.com/photo-1480074568708-e7b720bb3f09?w=800&q=85" alt="">
+          <div class="prop-tags"><span class="pill-status pill-new">Just listed</span></div>
+        </div>
+        <div class="prop-body">
+          <div class="prop-price">$725,000</div>
+          <div class="prop-address">42 Spanish Street<br>Sutter Creek, CA 95685</div>
+          <div class="prop-specs"><span>3 Bd</span><span>2 Ba</span><span>1889 Italianate</span></div>
+          <div class="prop-foot"><span class="prop-match">Listed by Sara</span><span class="label-cap" style="color:var(--ink-faint);">Plate I</span></div>
+        </div>
+      </a>
+      <a href="featured-listings.html" class="prop-card">
+        <div class="prop-photo">
+          <img src="https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=800&q=85" alt="">
+          <div class="prop-tags"><span class="pill-status pill-brass">Active</span></div>
+        </div>
+        <div class="prop-body">
+          <div class="prop-price">$548,000</div>
+          <div class="prop-address">118 Eureka Street<br>Sutter Creek, CA 95685</div>
+          <div class="prop-specs"><span>2 Bd</span><span>1 Ba</span><span>Cottage</span></div>
+          <div class="prop-foot"><span class="prop-match">Listed by Sara</span><span class="label-cap" style="color:var(--ink-faint);">Plate II</span></div>
+        </div>
+      </a>
+      <a href="featured-listings.html" class="prop-card">
+        <div class="prop-photo">
+          <img src="https://images.unsplash.com/photo-1502082553048-f009c37129b9?w=800&q=85" alt="">
+          <div class="prop-tags"><span class="pill-status">Pending</span></div>
+        </div>
+        <div class="prop-body">
+          <div class="prop-price">$389,000</div>
+          <div class="prop-address">5 ac · Shenandoah Rd<br>Sutter Creek, CA 95685</div>
+          <div class="prop-specs"><span>Land</span><span>5 ac</span><span>Vineyard-ready</span></div>
+          <div class="prop-foot"><span class="prop-match">Listed by Sara</span><span class="label-cap" style="color:var(--ink-faint);">Plate III</span></div>
+        </div>
+      </a>
+    </div>
+
+    <div style="text-align:center; margin-top:40px;">
+      <a href="property-search.html" class="btn btn-ghost">See all Sutter Creek listings</a>
+    </div>
+  </div>
+</section>
+
+<!-- LETTER -->
+<section class="section town-letter" id="letter" style="background:var(--vellum);">
+  <div class="section-inner">
+    <article class="letter-card">
+      <div class="letter-head">
+        <span class="hairline-brass"></span>
+        <span class="eyebrow">A note from your agent · § VII</span>
+      </div>
+      <div class="letter-grid">
+        <div class="letter-photo">
+          <img src="art/sara-headshot.png" alt="Sara Cooper">
+          <div class="letter-stamp">
+            <span class="ls-cir">SC</span>
+            <span class="ls-lbl">Sara Cooper · Owner-Broker</span>
+          </div>
+        </div>
+        <div class="letter-body">
+          <p class="letter-open">A few words on Sutter Creek —</p>
+          <p>Sutter Creek is the town I send people to when they tell me they want <em>old</em>. Real old. The bones of an 1880 Italianate. The smell of a foundry that still runs. A theatre seat that has held seven generations.</p>
+          <p>The market here is different from Murphys. Sacramento drives most of the demand — an hour up Highway 49 — which means inventory is thinner than the listing count suggests. Good Victorians get one shot. The cottages on Eureka Street tend to be quiet sales between people who know each other.</p>
+          <p>If old houses are your thing, we'll talk about foundations, knob-and-tube, lath-and-plaster, and the right contractors. I've done enough of these to know which questions matter and which are the realtor equivalent of small talk.</p>
+          <p class="letter-sign">— Sara</p>
+        </div>
+      </div>
+      <div class="letter-contact">
+        <a href="tel:2095594966"><span class="glyph">◇</span> (209) 559-4966</a>
+        <a href="mailto:SaraSellsCalifornia@gmail.com"><span class="glyph">◇</span> SaraSellsCalifornia@gmail.com</a>
+        <a href="find-my-match.html"><span class="glyph">◇</span> Walk Sutter Creek with Sara</a>
+      </div>
+    </article>
+  </div>
+</section>
+
+<!-- NEARBY -->
+<section class="section" style="background:var(--parchment);">
+  <div class="section-inner">
+    <div class="section-h">
+      <div>
+        <span class="hairline-brass"></span>
+        <span class="eyebrow">Plate VIII · Adjacent</span>
+        <h2 class="h-section" style="margin-top:10px;">Towns nearby.</h2>
+      </div>
+      <p class="lede right">Five more characters in the same story.</p>
+    </div>
+
+    <div class="nearby-grid">
+      <a href="town-murphys.html" class="nearby-card">
+        <div class="nb-img" style="background-image:url('art/towns/murphys-mainst-summer.jpg');"></div>
+        <div class="nb-body"><span class="nb-dist">38 min southeast</span><h4>Murphys</h4><p>Wine country, Main Street.</p></div>
+      </a>
+      <a href="town-arnold.html" class="nearby-card">
+        <div class="nb-img" style="background-image:url('art/towns/arnold-aspens-fall.jpg');"></div>
+        <div class="nb-body"><span class="nb-dist">58 min east</span><h4>Arnold</h4><p>Pines &amp; cabins.</p></div>
+      </a>
+      <a href="town-angels-camp.html" class="nearby-card">
+        <div class="nb-img" style="background-image:url('art/towns/angels-camp-mainst-fall.jpg');"></div>
+        <div class="nb-body"><span class="nb-dist">28 min southeast</span><h4>Angels Camp</h4><p>Frog Jubilee, Twain country.</p></div>
+      </a>
+      <a href="town-copperopolis.html" class="nearby-card">
+        <div class="nb-img" style="background-image:url('art/towns/copperopolis-lake-tulloch.jpg');"></div>
+        <div class="nb-body"><span class="nb-dist">42 min south</span><h4>Copperopolis</h4><p>Lake estates, golf.</p></div>
+      </a>
+      <a href="river-mountain.html" class="nearby-card">
+        <div class="nb-img" style="background-image:url('art/towns/rm-mokelumne-rapids.jpg');"></div>
+        <div class="nb-body"><span class="nb-dist">62 min south</span><h4>River &amp; Mountain</h4><p>Rural parcels &amp; lifestyle.</p></div>
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="cta">
+  <span class="hairline-brass" style="margin: 0 auto 20px; background: var(--brass-bright);"></span>
+  <span class="eyebrow" style="color: var(--brass-bright);">Begin your Sutter Creek chapter</span>
+  <h2 class="cta-h">Old bones,<br><em>new lives.</em></h2>
+  <p class="cta-sub">An honest walk through the historic stock — and the contractors who can keep it standing.</p>
+  <div class="cta-ctas">
+    <a href="find-my-match.html" class="btn btn-ink">Find my Sutter Creek match</a>
+    <a href="tel:2095594966" class="btn btn-ghost">Call (209) 559-4966</a>
+  </div>
+</section>
+
+<footer class="footer">
+  <div class="footer-inner">
+    <div class="footer-top">
+      <div>
+        <a href="index.html" class="wordmark" style="align-items: flex-start;">
+          <span class="wordmark-word">Legacy</span>
+          <span class="wordmark-sub">Properties · Angels Camp CA</span>
+        </a>
+        <p class="footer-tagline">Every home has a story. We help you find yours — or tell the one you've already lived.</p>
+      </div>
+      <div>
+        <h4>Communities</h4>
+        <a href="town-murphys.html">Murphys</a>
+        <a href="town-arnold.html">Arnold</a>
+        <a href="town-sutter-creek.html">Sutter Creek</a>
+        <a href="river-mountain.html">River &amp; Mountain</a>
+        <a href="town-angels-camp.html">Angels Camp</a>
+        <a href="town-copperopolis.html">Copperopolis</a>
+      </div>
+      <div>
+        <h4>Buy &amp; sell</h4>
+        <a href="property-search.html">Search all listings</a>
+        <a href="valuation.html">What's my home worth?</a>
+        <a href="find-my-match.html">Request a tour</a>
+      </div>
+      <div>
+        <h4>Connect</h4>
+        <a href="tel:2095594966">(209) 559-4966</a>
+        <a href="mailto:SaraSellsCalifornia@gmail.com">SaraSellsCalifornia@gmail.com</a>
+        <a href="ledger.html">The Ledger</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <div>© 2026 Legacy Properties · All rights reserved</div>
+      <div>Sara Cooper, Broker · DRE #02141987 · Equal Housing Opportunity</div>
+    </div>
+  </div>
+</footer>
+
+<script src="town.js"></script>
+</body>
+</html>

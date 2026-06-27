@@ -1,0 +1,640 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Legacy Ledger · Legacy Properties</title>
+<meta name="description" content="A monthly letter from Sara Cooper on the Gold Country property market — what's moving, what's stalling, and what it means for you.">
+<link rel="stylesheet" href="legacy.css">
+<style>
+  /* ── Page-specific ───────────────────────────────────── */
+  .ledger-mast {
+    background: var(--parchment);
+    padding: 56px var(--gutter) 32px;
+    border-bottom: 1px solid var(--rule);
+  }
+  .ledger-mast-inner {
+    max-width: var(--max); margin: 0 auto;
+    display: grid; grid-template-columns: 1fr auto 1fr;
+    align-items: center; gap: 32px;
+  }
+  .ledger-mast-side {
+    font-family: var(--mono); font-size: 10px; letter-spacing: 0.18em;
+    text-transform: uppercase; color: var(--ink-mute);
+  }
+  .ledger-mast-side.r { text-align: right; }
+  .ledger-mast-title {
+    font-family: var(--serif); font-style: italic; font-weight: 300;
+    font-size: clamp(56px, 7vw, 92px); line-height: 0.95;
+    letter-spacing: -0.01em; text-align: center; color: var(--ink);
+  }
+  .ledger-mast-title em { color: var(--brass); }
+  .ledger-mast-sub {
+    text-align: center; margin-top: 18px;
+    font-family: var(--serif); font-style: italic; font-weight: 300;
+    font-size: 20px; color: var(--ink-soft); max-width: 640px;
+    margin-left: auto; margin-right: auto;
+  }
+  .ledger-mast-rule {
+    max-width: var(--max); margin: 36px auto 0;
+    height: 4px;
+    background:
+      linear-gradient(to bottom, var(--ink) 0 1px, transparent 1px 3px, var(--ink) 3px 4px);
+  }
+
+  /* ── Featured issue ──────────────────────────────────── */
+  .led-feat {
+    padding: 80px var(--gutter);
+  }
+  .led-feat-inner {
+    max-width: var(--max); margin: 0 auto;
+    display: grid; grid-template-columns: 1.1fr 1fr; gap: 72px;
+    align-items: stretch;
+  }
+  .led-feat-cover {
+    background: var(--vellum);
+    border: 1px solid var(--rule);
+    aspect-ratio: 4/5;
+    position: relative;
+    overflow: hidden;
+    display: flex; flex-direction: column;
+    padding: 36px 36px 32px;
+  }
+  .led-feat-cover::before {
+    content: ''; position: absolute; inset: 0;
+    background:
+      repeating-linear-gradient(135deg, var(--vellum) 0 22px, var(--linen) 22px 44px);
+    opacity: 0.55;
+  }
+  .led-feat-cover > * { position: relative; z-index: 1; }
+  .led-feat-cover-top {
+    display: flex; justify-content: space-between;
+    font-family: var(--mono); font-size: 10px; letter-spacing: 0.18em;
+    color: var(--ink-mute); text-transform: uppercase;
+    padding-bottom: 18px; border-bottom: 1px solid var(--rule-strong);
+  }
+  .led-feat-cover-vol {
+    margin-top: auto;
+    font-family: var(--serif); font-style: italic; font-weight: 300;
+    font-size: 96px; line-height: 0.9; color: var(--brass);
+    letter-spacing: -0.02em;
+  }
+  .led-feat-cover-title {
+    font-family: var(--serif); font-style: italic; font-weight: 300;
+    font-size: 36px; line-height: 1.05; color: var(--ink);
+    margin-top: 10px;
+  }
+  .led-feat-cover-foot {
+    margin-top: 32px; padding-top: 18px;
+    border-top: 1px solid var(--rule-strong);
+    display: flex; justify-content: space-between;
+    font-family: var(--mono); font-size: 10px; letter-spacing: 0.18em;
+    color: var(--ink-soft); text-transform: uppercase;
+  }
+  .led-feat-body { display: flex; flex-direction: column; justify-content: center; }
+  .led-feat-body .h-section { margin-top: 12px; }
+  .led-feat-lede {
+    font-family: var(--serif); font-style: italic; font-weight: 300;
+    font-size: 22px; line-height: 1.45; color: var(--ink-soft);
+    margin-top: 24px;
+  }
+  .led-feat-meta {
+    display: flex; gap: 28px; align-items: center;
+    margin-top: 28px; padding-top: 22px; border-top: 1px solid var(--rule);
+    font-family: var(--mono); font-size: 10px; letter-spacing: 0.16em;
+    color: var(--ink-mute); text-transform: uppercase;
+  }
+  .led-feat-meta strong { color: var(--ink); font-weight: 500; }
+  .led-feat-ctas { display: flex; gap: 14px; margin-top: 32px; flex-wrap: wrap; }
+
+  /* ── Subscribe band ──────────────────────────────────── */
+  .led-sub {
+    background: var(--ink); color: var(--shell);
+    padding: 80px var(--gutter);
+  }
+  .led-sub-inner {
+    max-width: 940px; margin: 0 auto;
+    display: grid; grid-template-columns: 1.1fr 1fr; gap: 60px; align-items: center;
+  }
+  .led-sub h3 {
+    font-family: var(--serif); font-style: italic; font-weight: 300;
+    font-size: 44px; line-height: 1.05; color: var(--shell);
+  }
+  .led-sub h3 em { color: var(--brass-bright); }
+  .led-sub p {
+    margin-top: 16px; font-family: var(--serif); font-style: italic;
+    font-weight: 300; font-size: 18px; line-height: 1.5;
+    color: rgba(250,246,236,0.7);
+  }
+  .led-sub-form {
+    display: flex; flex-direction: column; gap: 12px;
+  }
+  .led-sub-form .field-label {
+    color: var(--brass-bright);
+  }
+  .led-sub-form input {
+    background: transparent; color: var(--shell);
+    border: 1px solid rgba(250,246,236,0.20);
+    padding: 14px 16px; font-family: var(--sans); font-size: 14px;
+    outline: none; transition: border-color .15s;
+  }
+  .led-sub-form input::placeholder { color: rgba(250,246,236,0.40); }
+  .led-sub-form input:focus { border-color: var(--brass-bright); }
+  .led-sub-form button {
+    border: none; background: var(--brass-bright); color: var(--ink);
+    padding: 14px 28px; font-family: var(--sans); font-size: 11px;
+    font-weight: 600; letter-spacing: 0.16em; text-transform: uppercase;
+    transition: background .15s;
+  }
+  .led-sub-form button:hover { background: var(--shell); }
+  .led-sub-foot {
+    margin-top: 14px; font-family: var(--mono); font-size: 10px;
+    letter-spacing: 0.14em; color: rgba(250,246,236,0.40);
+    text-transform: uppercase;
+  }
+
+  /* ── Archive ─────────────────────────────────────────── */
+  .led-arch { padding: 100px var(--gutter); }
+  .led-arch-inner { max-width: var(--max); margin: 0 auto; }
+  .led-filter {
+    display: flex; gap: 4px; flex-wrap: wrap;
+    margin-bottom: 48px; padding-bottom: 18px;
+    border-bottom: 1px solid var(--rule);
+  }
+  .led-filter button {
+    background: none; border: 1px solid transparent;
+    padding: 8px 16px;
+    font-family: var(--mono); font-size: 10px; letter-spacing: 0.16em;
+    text-transform: uppercase; color: var(--ink-mute);
+    cursor: pointer; transition: all .15s;
+  }
+  .led-filter button:hover { color: var(--ink); }
+  .led-filter button.on {
+    background: var(--ink); color: var(--shell); border-color: var(--ink);
+  }
+  .led-grid {
+    display: grid; grid-template-columns: repeat(3, 1fr);
+    gap: 1px; background: var(--rule); border: 1px solid var(--rule);
+  }
+  .led-issue {
+    background: var(--shell);
+    padding: 36px 32px 32px;
+    display: flex; flex-direction: column;
+    text-decoration: none; color: inherit;
+    transition: background .2s;
+    min-height: 380px;
+  }
+  .led-issue:hover { background: var(--linen); }
+  .led-issue-top {
+    display: flex; justify-content: space-between; align-items: baseline;
+    padding-bottom: 18px; border-bottom: 1px solid var(--rule);
+    font-family: var(--mono); font-size: 10px; letter-spacing: 0.16em;
+    color: var(--ink-mute); text-transform: uppercase;
+  }
+  .led-issue-vol {
+    font-family: var(--serif); font-style: italic; font-weight: 300;
+    font-size: 44px; line-height: 0.9; color: var(--brass);
+    margin: 28px 0 8px;
+  }
+  .led-issue-title {
+    font-family: var(--serif); font-style: italic; font-weight: 400;
+    font-size: 24px; line-height: 1.15; color: var(--ink);
+    margin-bottom: 14px;
+  }
+  .led-issue-lede {
+    font-size: 13.5px; line-height: 1.55; color: var(--ink-soft);
+    margin-bottom: 22px;
+  }
+  .led-issue-foot {
+    margin-top: auto; padding-top: 18px;
+    border-top: 1px solid var(--rule);
+    display: flex; justify-content: space-between; align-items: center;
+    font-family: var(--mono); font-size: 10px; letter-spacing: 0.14em;
+    color: var(--ink-mute); text-transform: uppercase;
+  }
+  .led-issue-foot .tag {
+    color: var(--brass);
+  }
+  .led-issue-foot .read {
+    color: var(--ink); transition: color .15s;
+  }
+  .led-issue:hover .read { color: var(--brass); }
+
+  /* ── Editor cards (recurring sections) ───────────────── */
+  .led-sections {
+    background: var(--vellum);
+    padding: 100px var(--gutter);
+    border-top: 1px solid var(--rule);
+    border-bottom: 1px solid var(--rule);
+  }
+  .led-sections-inner { max-width: var(--max); margin: 0 auto; }
+  .led-sections-grid {
+    display: grid; grid-template-columns: repeat(4, 1fr);
+    gap: 36px; margin-top: 56px;
+  }
+  .led-section {
+    border-top: 1px solid var(--ink); padding-top: 22px;
+  }
+  .led-section-num {
+    font-family: var(--serif); font-style: italic; font-weight: 300;
+    font-size: 14px; color: var(--brass); margin-bottom: 8px;
+  }
+  .led-section-title {
+    font-family: var(--serif); font-style: italic; font-weight: 400;
+    font-size: 22px; line-height: 1.2; margin-bottom: 12px;
+  }
+  .led-section-body {
+    font-size: 13.5px; line-height: 1.6; color: var(--ink-soft);
+  }
+
+  @media (max-width: 1000px) {
+    .led-feat-inner { grid-template-columns: 1fr; gap: 48px; }
+    .led-feat-cover { max-width: 480px; }
+    .led-sub-inner { grid-template-columns: 1fr; gap: 36px; }
+    .led-grid { grid-template-columns: repeat(2, 1fr); }
+    .led-sections-grid { grid-template-columns: repeat(2, 1fr); }
+    .ledger-mast-inner { grid-template-columns: 1fr; text-align: center; }
+    .ledger-mast-side.r { text-align: center; }
+  }
+  @media (max-width: 640px) {
+    .led-grid { grid-template-columns: 1fr; }
+    .led-sections-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+
+<template id="__bundler_thumbnail" data-bg-color="#1c1a17">
+  <svg viewBox="0 0 1200 800" xmlns="http://www.w3.org/2000/svg">
+    <rect x="200" y="170" width="800" height="120" fill="none" stroke="#c9a24b" stroke-width="6"/>
+    <text x="600" y="258" font-family="Georgia, serif" font-style="italic" font-size="86" fill="#faf6ec" text-anchor="middle">Ledger</text>
+    <rect x="200" y="330" width="800" height="3" fill="#faf6ec"/>
+    <rect x="200" y="342" width="800" height="3" fill="#faf6ec"/>
+    <rect x="200" y="400" width="240" height="230" fill="none" stroke="#c9a24b" stroke-width="5"/>
+    <rect x="480" y="400" width="240" height="230" fill="none" stroke="#6b665d" stroke-width="3"/>
+    <rect x="760" y="400" width="240" height="230" fill="none" stroke="#6b665d" stroke-width="3"/>
+    <text x="320" y="540" font-family="Georgia, serif" font-style="italic" font-size="64" fill="#c9a24b" text-anchor="middle">04</text>
+  </svg>
+</template>
+
+<body class="paper" data-screen-label="The Ledger Index">
+
+<!-- ============ TOP NAV ============ -->
+<header class="topnav">
+  <div class="topnav-bar1">
+    <span>Boutique luxury real estate · Calaveras · Amador · Tuolumne</span>
+    <span>
+      <a href="tel:2095594966">(209) 559-4966</a>
+      &nbsp;·&nbsp;
+      <a href="mailto:SaraSellsCalifornia@gmail.com">SaraSellsCalifornia@gmail.com</a>
+    </span>
+  </div>
+  <nav class="topnav-bar2">
+    <div class="topnav-links">
+      <a href="property-search.html">Listings</a>
+      <a href="towns.html">Communities</a>
+      <a href="relocate.html">Relocate</a>
+      <a href="valuation.html">Sellers</a>
+      <a href="market-report.html">Markets</a>
+    </div>
+    <a href="index.html" class="wordmark">
+      <span class="wordmark-word">Legacy</span>
+      <span class="wordmark-sub">Properties · Angels Camp CA</span>
+    </a>
+    <div class="topnav-links right">
+      <a href="ledger.html" class="active">The Ledger</a>
+      <a href="dashboard.html">Sign In</a>
+      <a href="find-my-match.html" class="btn btn-ink btn-sm" style="padding:10px 18px;">Find My Match</a>
+    </div>
+  </nav>
+</header>
+
+<!-- ============ MASTHEAD ============ -->
+<section class="ledger-mast">
+  <div class="ledger-mast-inner">
+    <div class="ledger-mast-side">Vol. XXII · No. 4</div>
+    <h1 class="ledger-mast-title">The Legacy <em>Ledger</em></h1>
+    <div class="ledger-mast-side r">Spring 2026 · Angels Camp</div>
+  </div>
+  <p class="ledger-mast-sub">A monthly letter from Sara — what's moving in the Gold Country market, what's stalling, and what it means for the version of life you're picturing here.</p>
+  <div class="ledger-mast-rule"></div>
+</section>
+
+<!-- ============ FEATURED ISSUE ============ -->
+<section class="led-feat">
+  <div class="led-feat-inner">
+    <a href="ledger-issue.html" class="led-feat-cover">
+      <div class="led-feat-cover-top">
+        <span>The Legacy Ledger</span>
+        <span>April 2026</span>
+      </div>
+      <div class="led-feat-cover-vol">XXII<span style="font-size:36px; color: var(--ink);">·04</span></div>
+      <div class="led-feat-cover-title">When the river<br>buyers come<br><em style="color: var(--brass);">looking for the mountain.</em></div>
+      <div class="led-feat-cover-foot">
+        <span>Issue · 1,840 words</span>
+        <span>By Sara Cooper</span>
+      </div>
+    </a>
+    <div class="led-feat-body">
+      <span class="hairline-brass" style="margin-bottom: 18px;"></span>
+      <span class="eyebrow">This month's letter</span>
+      <h2 class="h-section">When river buyers<br>come looking<br><em>for the mountain.</em></h2>
+      <p class="led-feat-lede">Three closings in the last six weeks went the opposite direction of the inquiry. People who wrote in asking about Copperopolis ended up in Arnold. That's not a coincidence — it's the market telling us something about elevation, snow, and how 2026 buyers are actually thinking about resilience.</p>
+      <div class="led-feat-meta">
+        <span><strong>9 min read</strong></span>
+        <span>·</span>
+        <span>Filed under <strong style="color: var(--brass);">Market</strong></span>
+        <span>·</span>
+        <span>April 14, 2026</span>
+      </div>
+      <div class="led-feat-ctas">
+        <a href="ledger-issue.html" class="btn btn-ink">Read the issue</a>
+        <a href="#subscribe" class="btn btn-ghost">Get it monthly</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ SUBSCRIBE ============ -->
+<section class="led-sub" id="subscribe">
+  <div class="led-sub-inner">
+    <div>
+      <span class="hairline-brass" style="background: var(--brass-bright); margin-bottom: 16px;"></span>
+      <span class="eyebrow" style="color: var(--brass-bright);">Free · One letter per month · No promotions</span>
+      <h3 style="margin-top: 12px;">A useful letter,<br><em>once a month.</em></h3>
+      <p>Sara sends the Ledger on the second Tuesday of every month. Two thousand words on the foothills market, a handful of listings worth knowing about, the occasional piece of unsolicited advice. Unsubscribe with one click — Sara won't be offended.</p>
+    </div>
+    <form class="led-sub-form" onsubmit="event.preventDefault(); this.querySelector('button').textContent='Sent · thank you';">
+      <div class="field">
+        <span class="field-label">Your name</span>
+        <input type="text" placeholder="First and last" required>
+      </div>
+      <div class="field">
+        <span class="field-label">Email address</span>
+        <input type="email" placeholder="you@example.com" required>
+      </div>
+      <div class="field">
+        <span class="field-label">I'm most interested in</span>
+        <select style="background: transparent; color: var(--shell); border: 1px solid rgba(250,246,236,0.20); padding: 14px 16px; font-family: var(--sans); font-size: 14px; outline: none; appearance: none;">
+          <option style="color:var(--ink);">Buying in the next 12 months</option>
+          <option style="color:var(--ink);">Selling in the next 12 months</option>
+          <option style="color:var(--ink);">Both — we're trading up here</option>
+          <option style="color:var(--ink);">Just following the region</option>
+        </select>
+      </div>
+      <button type="submit">Subscribe to the Ledger →</button>
+      <div class="led-sub-foot">2,847 subscribers · 4.8 ★ avg rating · Read by 6 brokers</div>
+    </form>
+  </div>
+</section>
+
+<!-- ============ STANDING SECTIONS ============ -->
+<section class="led-sections">
+  <div class="led-sections-inner">
+    <div class="section-h" style="border-color: var(--rule-strong);">
+      <div>
+        <span class="hairline-brass" style="margin-bottom: 16px;"></span>
+        <span class="eyebrow">In every issue</span>
+        <h2 class="h-section" style="margin-top: 10px;">Four standing<br><em>sections.</em></h2>
+      </div>
+      <p class="lede right">Every Ledger follows the same architecture. The names of things change; the shape doesn't. You'll know where to look.</p>
+    </div>
+
+    <div class="led-sections-grid">
+      <div class="led-section">
+        <div class="led-section-num">§ I</div>
+        <h3 class="led-section-title">The Letter</h3>
+        <p class="led-section-body">One topic, 1,200–1,800 words. The thing on Sara's mind — usually a pattern she's noticed across showings, a policy change, an outlier sale. Conversational, never breathless.</p>
+      </div>
+      <div class="led-section">
+        <div class="led-section-num">§ II</div>
+        <h3 class="led-section-title">By the Numbers</h3>
+        <p class="led-section-body">Five charts — median, inventory, days on market, ratio sold-to-listed, and one rotating cut. Walked from MLS personally. No "experts say" filler.</p>
+      </div>
+      <div class="led-section">
+        <div class="led-section-num">§ III</div>
+        <h3 class="led-section-title">Worth Knowing</h3>
+        <p class="led-section-body">Three properties — typically one new listing, one quietly off-market, one price reduction worth a second look. Not pushed; just shown.</p>
+      </div>
+      <div class="led-section">
+        <div class="led-section-num">§ IV</div>
+        <h3 class="led-section-title">A Note</h3>
+        <p class="led-section-body">A single paragraph — a piece of foothills life that has nothing to do with selling houses. The Calaveras Big Trees in winter, the best pie in Murphys, a thing James fixed on the porch.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ ARCHIVE ============ -->
+<section class="led-arch">
+  <div class="led-arch-inner">
+    <div class="section-h">
+      <div>
+        <span class="hairline-brass" style="margin-bottom: 16px;"></span>
+        <span class="eyebrow">The archive · Vol. XX onward</span>
+        <h2 class="h-section" style="margin-top: 10px;">Every issue,<br><em>kept.</em></h2>
+      </div>
+      <p class="lede right">Twenty-four months of letters, charts, and unsolicited opinions. Filter by what you're looking for, or read straight through — they hold up.</p>
+    </div>
+
+    <div class="led-filter">
+      <button class="on" data-tag="all">All issues</button>
+      <button data-tag="market">Market</button>
+      <button data-tag="letter">Letters</button>
+      <button data-tag="murphys">Murphys</button>
+      <button data-tag="arnold">Arnold</button>
+      <button data-tag="sutter">Sutter Creek</button>
+      <button data-tag="offmarket">Off-market</button>
+      <button data-tag="policy">Policy</button>
+    </div>
+
+    <div class="led-grid" id="ledGrid">
+      <a href="ledger-issue.html" class="led-issue" data-tags="market letter">
+        <div class="led-issue-top">
+          <span>Vol. XXII · No. 4</span>
+          <span>April 2026</span>
+        </div>
+        <div class="led-issue-vol">04</div>
+        <h3 class="led-issue-title">When river buyers come looking for the mountain.</h3>
+        <p class="led-issue-lede">Three closings in six weeks went the opposite direction of the inquiry. Why elevation and snow are quietly the 2026 story.</p>
+        <div class="led-issue-foot">
+          <span class="tag">Market · 9 min</span>
+          <span class="read">Read →</span>
+        </div>
+      </a>
+
+      <a href="ledger-issue.html" class="led-issue" data-tags="market policy">
+        <div class="led-issue-top">
+          <span>Vol. XXII · No. 3</span>
+          <span>March 2026</span>
+        </div>
+        <div class="led-issue-vol">03</div>
+        <h3 class="led-issue-title">The FAIR Plan year, twelve months in.</h3>
+        <p class="led-issue-lede">What changed for foothills buyers when CA's insurer of last resort became most peoples' first call — and how it's shaping which homes actually trade.</p>
+        <div class="led-issue-foot">
+          <span class="tag">Policy · 11 min</span>
+          <span class="read">Read →</span>
+        </div>
+      </a>
+
+      <a href="ledger-issue.html" class="led-issue" data-tags="murphys offmarket">
+        <div class="led-issue-top">
+          <span>Vol. XXII · No. 2</span>
+          <span>February 2026</span>
+        </div>
+        <div class="led-issue-vol">02</div>
+        <h3 class="led-issue-title">A quiet quarter on Main Street.</h3>
+        <p class="led-issue-lede">Three Murphys vineyard estates traded off-market between October and January. Here's what the public MLS doesn't show.</p>
+        <div class="led-issue-foot">
+          <span class="tag">Murphys · 7 min</span>
+          <span class="read">Read →</span>
+        </div>
+      </a>
+
+      <a href="ledger-issue.html" class="led-issue" data-tags="market letter">
+        <div class="led-issue-top">
+          <span>Vol. XXII · No. 1</span>
+          <span>January 2026</span>
+        </div>
+        <div class="led-issue-vol">01</div>
+        <h3 class="led-issue-title">What I'm watching in 2026.</h3>
+        <p class="led-issue-lede">Five honest predictions for Calaveras, Amador and Tuolumne — and the two I got wrong from last year, in writing.</p>
+        <div class="led-issue-foot">
+          <span class="tag">Letter · 12 min</span>
+          <span class="read">Read →</span>
+        </div>
+      </a>
+
+      <a href="ledger-issue.html" class="led-issue" data-tags="arnold letter">
+        <div class="led-issue-top">
+          <span>Vol. XXI · No. 12</span>
+          <span>December 2025</span>
+        </div>
+        <div class="led-issue-vol">12</div>
+        <h3 class="led-issue-title">The Arnold cabin paradox.</h3>
+        <p class="led-issue-lede">Why second-home buyers under $700k are quietly the most active segment in the county — and what that means for primary-residence inventory.</p>
+        <div class="led-issue-foot">
+          <span class="tag">Arnold · 8 min</span>
+          <span class="read">Read →</span>
+        </div>
+      </a>
+
+      <a href="ledger-issue.html" class="led-issue" data-tags="sutter market">
+        <div class="led-issue-top">
+          <span>Vol. XXI · No. 11</span>
+          <span>November 2025</span>
+        </div>
+        <div class="led-issue-vol">11</div>
+        <h3 class="led-issue-title">Sutter Creek, slowly.</h3>
+        <p class="led-issue-lede">The market that doesn't make headlines is the one I'd watch most carefully. Six months of data, three sales, one outlier.</p>
+        <div class="led-issue-foot">
+          <span class="tag">Sutter Creek · 6 min</span>
+          <span class="read">Read →</span>
+        </div>
+      </a>
+
+      <a href="ledger-issue.html" class="led-issue" data-tags="policy market">
+        <div class="led-issue-top">
+          <span>Vol. XXI · No. 10</span>
+          <span>October 2025</span>
+        </div>
+        <div class="led-issue-vol">10</div>
+        <h3 class="led-issue-title">The rate cut nobody felt.</h3>
+        <p class="led-issue-lede">Foothills inventory moves on its own schedule. Why the Fed's September move didn't move us — and what would.</p>
+        <div class="led-issue-foot">
+          <span class="tag">Policy · 9 min</span>
+          <span class="read">Read →</span>
+        </div>
+      </a>
+
+      <a href="ledger-issue.html" class="led-issue" data-tags="letter">
+        <div class="led-issue-top">
+          <span>Vol. XXI · No. 9</span>
+          <span>September 2025</span>
+        </div>
+        <div class="led-issue-vol">09</div>
+        <h3 class="led-issue-title">A letter to the buyer<br>still on the fence.</h3>
+        <p class="led-issue-lede">Two years of inquiries from one family. What I told them in June, and what I'd tell them now. Reprinted with permission.</p>
+        <div class="led-issue-foot">
+          <span class="tag">Letter · 6 min</span>
+          <span class="read">Read →</span>
+        </div>
+      </a>
+
+      <a href="ledger-issue.html" class="led-issue" data-tags="murphys market">
+        <div class="led-issue-top">
+          <span>Vol. XXI · No. 8</span>
+          <span>August 2025</span>
+        </div>
+        <div class="led-issue-vol">08</div>
+        <h3 class="led-issue-title">The Murphys ceiling.</h3>
+        <p class="led-issue-lede">Why $1.6M is the number every Main-Street-adjacent listing seems to die at — and which sub-market doesn't have the same problem.</p>
+        <div class="led-issue-foot">
+          <span class="tag">Murphys · 8 min</span>
+          <span class="read">Read →</span>
+        </div>
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- ============ FOOTER ============ -->
+<footer class="footer">
+  <div class="footer-inner">
+    <div class="footer-top">
+      <div>
+        <a href="index.html" class="wordmark" style="align-items: flex-start;">
+          <span class="wordmark-word">Legacy</span>
+          <span class="wordmark-sub">Properties · Angels Camp CA</span>
+        </a>
+        <p class="footer-tagline">Every home has a story. We help you find yours — or tell the one you've already lived.</p>
+      </div>
+      <div>
+        <h4>Services</h4>
+        <a href="relocate.html">Bay → Foothills relocation</a>
+        <a href="towns.html">Communities</a>
+        <a href="valuation.html">Sellers</a>
+        <a href="property-search.html">Browse listings</a>
+        <a href="find-my-match.html">Request a tour</a>
+      </div>
+      <div>
+        <h4>The Ledger</h4>
+        <a href="ledger.html">Latest issue</a>
+        <a href="ledger.html#subscribe">Subscribe</a>
+        <a href="ledger.html">Archive</a>
+        <a href="about.html">About Sara &amp; James</a>
+        <a href="how-we-work.html">How we work</a>
+      </div>
+      <div>
+        <h4>Connect</h4>
+        <a href="tel:2095594966">(209) 559-4966</a>
+        <a href="mailto:SaraSellsCalifornia@gmail.com">SaraSellsCalifornia@gmail.com</a>
+        <a href="https://www.instagram.com/legacypropertiesig/">Instagram</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <div>© 2026 Legacy Properties · All rights reserved</div>
+      <div>Sara Cooper, Broker · DRE #02141987 · Equal Housing Opportunity</div>
+    </div>
+  </div>
+</footer>
+
+<script>
+  // Filter pills
+  document.querySelectorAll('.led-filter button').forEach(b => {
+    b.addEventListener('click', () => {
+      document.querySelectorAll('.led-filter button').forEach(x => x.classList.remove('on'));
+      b.classList.add('on');
+      const tag = b.dataset.tag;
+      document.querySelectorAll('.led-issue').forEach(card => {
+        if (tag === 'all' || (card.dataset.tags || '').includes(tag)) {
+          card.style.display = '';
+        } else {
+          card.style.display = 'none';
+        }
+      });
+    });
+  });
+</script>
+
+</body>
+</html>

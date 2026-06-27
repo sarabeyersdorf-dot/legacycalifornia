@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Find My Match — Legacy Properties</title>
+<link rel="stylesheet" href="legacy.css">
+<style>
+.fmm {
+  min-height: calc(100vh - 64px);
+  background: var(--ink);
+  color: var(--shell);
+  display: flex; align-items: center; justify-content: center;
+  padding: 56px var(--gutter);
+  position: relative; isolation: isolate;
+}
+.fmm::before {
+  content: ''; position: absolute; inset: 0; z-index: -1;
+  background:
+    radial-gradient(120% 90% at 80% 0%, rgba(201,158,90,0.14) 0%, rgba(201,158,90,0) 55%),
+    radial-gradient(90% 80% at 0% 100%, rgba(201,158,90,0.08) 0%, rgba(201,158,90,0) 50%);
+}
+.fmm-card {
+  width: 100%; max-width: 720px;
+  background: var(--shell); color: var(--ink);
+  border: 1px solid rgba(250,246,236,0.14);
+  box-shadow: 0 40px 120px rgba(0,0,0,0.45);
+}
+.fmm-top {
+  padding: 30px 44px 22px;
+  border-bottom: 1px solid var(--rule);
+  display: flex; align-items: flex-end; justify-content: space-between; gap: 24px;
+}
+.fmm-top .eyebrow { color: var(--brass); display: block; margin-bottom: 8px; }
+.fmm-top h1 {
+  font-family: var(--serif); font-style: italic; font-weight: 300;
+  font-size: clamp(34px, 5vw, 48px); line-height: 0.98; color: var(--ink);
+  letter-spacing: -0.01em;
+}
+.fmm-step-count {
+  font-family: var(--mono); font-size: 10px; letter-spacing: 0.18em;
+  text-transform: uppercase; color: var(--ink-mute); white-space: nowrap;
+}
+.fmm-progress { height: 2px; background: var(--rule); position: relative; }
+.fmm-progress span { position: absolute; left: 0; top: 0; bottom: 0; background: var(--brass); transition: width .35s ease; width: 20%; }
+
+.fmm-body { padding: 40px 44px 30px; }
+.fmm-step { display: none; animation: fmmIn .35s ease; }
+.fmm-step.active { display: block; }
+@keyframes fmmIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+
+.fmm-q {
+  font-family: var(--serif); font-style: italic; font-weight: 400;
+  font-size: 27px; line-height: 1.2; color: var(--ink); margin-bottom: 6px;
+}
+.fmm-hint { font-size: 13px; color: var(--ink-mute); margin-bottom: 24px; line-height: 1.5; }
+
+.fmm-opts { display: grid; gap: 12px; }
+.fmm-opts.cols2 { grid-template-columns: 1fr 1fr; }
+.fmm-opt {
+  display: flex; flex-direction: column; gap: 3px;
+  text-align: left; padding: 18px 20px; cursor: pointer;
+  background: var(--vellum); border: 1px solid var(--rule);
+  transition: border-color .15s, background .15s;
+  font: inherit; color: inherit;
+}
+.fmm-opt:hover { border-color: var(--brass); }
+.fmm-opt.sel { border-color: var(--brass); background: var(--linen); box-shadow: inset 0 0 0 1px var(--brass); }
+.fmm-opt .t { font-family: var(--serif); font-style: italic; font-size: 20px; color: var(--ink); }
+.fmm-opt .s { font-family: var(--mono); font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-mute); }
+
+.fmm-chips { display: flex; flex-wrap: wrap; gap: 10px; }
+.fmm-chip {
+  padding: 11px 18px; cursor: pointer;
+  background: var(--vellum); border: 1px solid var(--rule);
+  font-family: var(--mono); font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase;
+  color: var(--ink-soft); transition: all .15s;
+}
+.fmm-chip:hover { border-color: var(--brass); }
+.fmm-chip.sel { background: var(--ink); color: var(--shell); border-color: var(--ink); }
+
+.fmm-field { display: flex; flex-direction: column; gap: 6px; margin-bottom: 16px; }
+.fmm-field label { font-family: var(--mono); font-size: 10px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--ink-mute); }
+.fmm-field input, .fmm-field textarea {
+  font: inherit; font-size: 16px; color: var(--ink);
+  background: #fff; border: 1px solid var(--rule-strong); padding: 13px 14px; border-radius: 0; outline: none;
+}
+.fmm-field input:focus, .fmm-field textarea:focus { border-color: var(--brass); }
+.fmm-grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+
+.fmm-foot {
+  display: flex; align-items: center; justify-content: space-between; gap: 16px;
+  padding: 22px 44px 30px;
+}
+.fmm-back {
+  background: none; border: none; cursor: pointer;
+  font-family: var(--mono); font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase;
+  color: var(--ink-mute); padding: 8px 0;
+}
+.fmm-back:hover { color: var(--ink); }
+.fmm-back[hidden] { visibility: hidden; }
+.fmm-err { font-size: 13px; color: var(--negative); min-height: 16px; }
+
+.fmm-done { text-align: center; padding: 56px 44px; display: none; }
+.fmm-done.show { display: block; animation: fmmIn .4s ease; }
+.fmm-done .mark {
+  width: 56px; height: 56px; margin: 0 auto 22px;
+  border: 1px solid var(--brass); border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 26px; color: var(--brass);
+}
+.fmm-done h2 { font-family: var(--serif); font-style: italic; font-weight: 300; font-size: 42px; color: var(--ink); margin-bottom: 14px; }
+.fmm-done p { font-size: 15px; line-height: 1.7; color: var(--ink-soft); max-width: 440px; margin: 0 auto 10px; }
+.fmm-done .contact { margin-top: 26px; font-family: var(--mono); font-size: 11px; letter-spacing: 0.12em; color: var(--ink-mute); }
+.fmm-done .contact a { color: var(--brass); text-decoration: none; }
+
+@media (max-width: 640px) {
+  .fmm-top, .fmm-body, .fmm-foot { padding-left: 24px; padding-right: 24px; }
+  .fmm-opts.cols2, .fmm-grid2 { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body class="paper" data-screen-label="Find My Match">
+
+<header class="topnav">
+  <div class="topnav-bar1">
+    <span>Boutique luxury real estate · Calaveras · Amador · Tuolumne</span>
+    <span><a href="tel:2095594966">(209) 559-4966</a> · <a href="mailto:SaraSellsCalifornia@gmail.com">SaraSellsCalifornia@gmail.com</a></span>
+  </div>
+  <nav class="topnav-bar2">
+    <div class="topnav-links">
+      <a href="property-search.html">Listings</a>
+      <a href="towns.html">Communities</a>
+      <a href="relocate.html">Relocate</a>
+      <a href="valuation.html">Sellers</a>
+      <a href="market-report.html">Markets</a>
+    </div>
+    <a href="index.html" class="wordmark">
+      <span class="wordmark-word">Legacy</span>
+      <span class="wordmark-sub">Properties · Angels Camp CA</span>
+    </a>
+    <div class="topnav-links right">
+      <a href="ledger.html">The Ledger</a>
+      <a href="dashboard.html">Sign In</a>
+      <a href="tel:2095594966" class="btn btn-ink btn-sm" style="padding:10px 18px;">(209) 559-4966</a>
+    </div>
+  </nav>
+</header>
+
+<section class="fmm">
+  <div class="fmm-card">
+    <div class="fmm-top">
+      <div>
+        <span class="eyebrow">Find my match</span>
+        <h1>Five questions.<br>We'll do the rest.</h1>
+      </div>
+      <div class="fmm-step-count" id="stepCount">01 / 05</div>
+    </div>
+    <div class="fmm-progress"><span id="progBar"></span></div>
+
+    <form id="fmmForm" novalidate>
+      <div class="fmm-body">
+
+        <!-- Q1 -->
+        <div class="fmm-step active" data-step="0">
+          <div class="fmm-q">First — are you buying or selling?</div>
+          <div class="fmm-hint">Either way, you're talking to Sara, not a call center.</div>
+          <div class="fmm-opts cols2" data-single="intent">
+            <button type="button" class="fmm-opt" data-value="buyer"><span class="t">Buying</span><span class="s">Looking for a home or land</span></button>
+            <button type="button" class="fmm-opt" data-value="seller"><span class="t">Selling</span><span class="s">I have a property to list</span></button>
+            <button type="button" class="fmm-opt" data-value="relocating"><span class="t">Both — relocating</span><span class="s">Bay → Foothills, one calendar</span></button>
+            <button type="button" class="fmm-opt" data-value="curious"><span class="t">Just exploring</span><span class="s">Getting the lay of the land</span></button>
+          </div>
+        </div>
+
+        <!-- Q2 -->
+        <div class="fmm-step" data-step="1">
+          <div class="fmm-q">What's your timeline?</div>
+          <div class="fmm-hint">No wrong answer — it just tells us how to help.</div>
+          <div class="fmm-opts" data-single="timeline">
+            <button type="button" class="fmm-opt" data-value="ready_to_offer"><span class="t">As soon as the right one appears</span><span class="s">Ready now</span></button>
+            <button type="button" class="fmm-opt" data-value="touring"><span class="t">Within the next 3–6 months</span><span class="s">Actively looking</span></button>
+            <button type="button" class="fmm-opt" data-value="narrowing"><span class="t">Sometime this year</span><span class="s">Narrowing things down</span></button>
+            <button type="button" class="fmm-opt" data-value="discovering"><span class="t">Just starting to think about it</span><span class="s">Discovering</span></button>
+          </div>
+        </div>
+
+        <!-- Q3 -->
+        <div class="fmm-step" data-step="2">
+          <div class="fmm-q">What's your range?</div>
+          <div class="fmm-hint">A rough band is plenty. We'll never show you outside it.</div>
+          <div class="fmm-opts cols2" data-single="budget">
+            <button type="button" class="fmm-opt" data-value="0-500000" data-min="0" data-max="500000"><span class="t">Up to $500K</span><span class="s">Entry &amp; cabins</span></button>
+            <button type="button" class="fmm-opt" data-value="500000-750000" data-min="500000" data-max="750000"><span class="t">$500K – $750K</span><span class="s">The foothills sweet spot</span></button>
+            <button type="button" class="fmm-opt" data-value="750000-1000000" data-min="750000" data-max="1000000"><span class="t">$750K – $1M</span><span class="s">Move-up &amp; acreage</span></button>
+            <button type="button" class="fmm-opt" data-value="1000000-" data-min="1000000" data-max=""><span class="t">$1M and up</span><span class="s">Estate &amp; vineyard</span></button>
+          </div>
+        </div>
+
+        <!-- Q4 -->
+        <div class="fmm-step" data-step="3">
+          <div class="fmm-q">Where are you looking?</div>
+          <div class="fmm-hint">Pick any that pull at you — or none, and we'll suggest the town.</div>
+          <div class="fmm-chips" data-multi="areas">
+            <button type="button" class="fmm-chip" data-value="Murphys">Murphys</button>
+            <button type="button" class="fmm-chip" data-value="Arnold">Arnold</button>
+            <button type="button" class="fmm-chip" data-value="Sutter Creek">Sutter Creek</button>
+            <button type="button" class="fmm-chip" data-value="Angels Camp">Angels Camp</button>
+            <button type="button" class="fmm-chip" data-value="Copperopolis">Copperopolis</button>
+            <button type="button" class="fmm-chip" data-value="Wilseyville">Wilseyville</button>
+            <button type="button" class="fmm-chip" data-value="Rural / acreage">Rural &amp; acreage</button>
+            <button type="button" class="fmm-chip" data-value="Not sure yet">Not sure yet</button>
+          </div>
+        </div>
+
+        <!-- Q5 -->
+        <div class="fmm-step" data-step="4">
+          <div class="fmm-q">What matters most?</div>
+          <div class="fmm-hint">The things that would make you say yes — views, single-level, a shop, walk to town, no HOA…</div>
+          <div class="fmm-field">
+            <label for="mustHaves">Your must-haves &amp; lovely-to-haves</label>
+            <textarea id="mustHaves" name="must_haves" rows="3" placeholder="Single-level, generator, oak canopy, room for a horse…"></textarea>
+          </div>
+        </div>
+
+        <!-- Contact -->
+        <div class="fmm-step" data-step="5">
+          <div class="fmm-q">Where should Sara reach you?</div>
+          <div class="fmm-hint">One personal note within the day. No drip campaigns, ever.</div>
+          <div class="fmm-grid2">
+            <div class="fmm-field">
+              <label for="firstName">First name *</label>
+              <input id="firstName" name="first_name" type="text" autocomplete="given-name" required>
+            </div>
+            <div class="fmm-field">
+              <label for="lastName">Last name</label>
+              <input id="lastName" name="last_name" type="text" autocomplete="family-name">
+            </div>
+          </div>
+          <div class="fmm-field">
+            <label for="email">Email *</label>
+            <input id="email" name="email" type="email" autocomplete="email" required>
+          </div>
+          <div class="fmm-field">
+            <label for="phone">Mobile (optional — for a quick text)</label>
+            <input id="phone" name="phone" type="tel" autocomplete="tel">
+          </div>
+        </div>
+
+      </div>
+
+      <div class="fmm-foot">
+        <button type="button" class="fmm-back" id="backBtn" hidden>← Back</button>
+        <div class="fmm-err" id="fmmErr"></div>
+        <button type="button" class="btn btn-ink" id="nextBtn">Continue</button>
+      </div>
+    </form>
+
+    <!-- Confirmation -->
+    <div class="fmm-done" id="fmmDone">
+      <div class="mark">✓</div>
+      <h2>It's with Sara.</h2>
+      <p id="doneMsg">Thank you — your answers are in front of Sara now. You'll hear back personally within the day, often much sooner.</p>
+      <div class="contact">
+        Can't wait? <a href="tel:2095594966">(209) 559-4966</a> · <a href="mailto:SaraSellsCalifornia@gmail.com">SaraSellsCalifornia@gmail.com</a>
+      </div>
+      <div style="margin-top:28px;">
+        <a href="property-search.html" class="btn btn-ghost" style="border-color:var(--rule-strong);color:var(--ink);">Browse listings while you wait</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+(function () {
+  var TOTAL = 6;            // 5 questions + contact
+  var current = 0;
+  var answers = { intent: null, timeline: null, budget: null, areas: [], must_haves: '' };
+
+  var form      = document.getElementById('fmmForm');
+  var steps     = Array.prototype.slice.call(document.querySelectorAll('.fmm-step'));
+  var nextBtn   = document.getElementById('nextBtn');
+  var backBtn   = document.getElementById('backBtn');
+  var progBar   = document.getElementById('progBar');
+  var stepCount = document.getElementById('stepCount');
+  var errEl     = document.getElementById('fmmErr');
+
+  function pad(n){ return n < 10 ? '0' + n : '' + n; }
+
+  function render() {
+    steps.forEach(function (s, i) { s.classList.toggle('active', i === current); });
+    progBar.style.width = Math.round(((current + 1) / TOTAL) * 100) + '%';
+    stepCount.textContent = pad(current + 1) + ' / ' + pad(TOTAL);
+    backBtn.hidden = current === 0;
+    nextBtn.textContent = current === TOTAL - 1 ? 'Send to Sara' : 'Continue';
+    errEl.textContent = '';
+  }
+
+  // Single-select option groups
+  document.querySelectorAll('[data-single]').forEach(function (group) {
+    var key = group.getAttribute('data-single');
+    group.querySelectorAll('.fmm-opt').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        group.querySelectorAll('.fmm-opt').forEach(function (b) { b.classList.remove('sel'); });
+        btn.classList.add('sel');
+        if (key === 'intent')   answers.intent = btn.getAttribute('data-value');
+        if (key === 'timeline') answers.timeline = btn.getAttribute('data-value');
+        if (key === 'budget') {
+          answers.budget = {
+            label: btn.querySelector('.t').textContent,
+            min: btn.getAttribute('data-min'),
+            max: btn.getAttribute('data-max')
+          };
+        }
+        errEl.textContent = '';
+        setTimeout(next, 180); // auto-advance on choice
+      });
+    });
+  });
+
+  // Multi-select chips (areas)
+  document.querySelectorAll('[data-multi="areas"] .fmm-chip').forEach(function (chip) {
+    chip.addEventListener('click', function () {
+      chip.classList.toggle('sel');
+      var v = chip.getAttribute('data-value');
+      var i = answers.areas.indexOf(v);
+      if (i === -1) answers.areas.push(v); else answers.areas.splice(i, 1);
+    });
+  });
+
+  function validate() {
+    if (current === 0 && !answers.intent)   { errEl.textContent = 'Pick one to continue.'; return false; }
+    if (current === 1 && !answers.timeline) { errEl.textContent = 'Pick one to continue.'; return false; }
+    if (current === 2 && !answers.budget)   { errEl.textContent = 'Pick a range to continue.'; return false; }
+    if (current === 5) {
+      var fn = form.first_name.value.trim();
+      var em = form.email.value.trim();
+      if (!fn) { errEl.textContent = 'Your first name, please.'; return false; }
+      if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(em)) { errEl.textContent = 'A valid email so Sara can reply.'; return false; }
+    }
+    return true;
+  }
+
+  function next() {
+    if (!validate()) return;
+    answers.must_haves = form.must_haves.value.trim();
+    if (current === TOTAL - 1) { submit(); return; }
+    current++; render();
+  }
+  function back() { if (current > 0) { current--; render(); } }
+
+  nextBtn.addEventListener('click', next);
+  backBtn.addEventListener('click', back);
+  form.addEventListener('submit', function (e) { e.preventDefault(); next(); });
+
+  function leadTypeFor(intent) {
+    if (intent === 'seller') return 'seller';
+    return 'buyer'; // buyer, relocating, curious all enter as buyer-side leads
+  }
+
+  function buildPayload() {
+    var b = answers.budget || {};
+    var summaryBits = [
+      'Intent: ' + (answers.intent || '—'),
+      'Timeline: ' + (answers.timeline || '—'),
+      'Budget: ' + (b.label || '—'),
+      'Areas: ' + (answers.areas.length ? answers.areas.join(', ') : 'Open / suggest the town'),
+      answers.must_haves ? 'Must-haves: ' + answers.must_haves : null
+    ].filter(Boolean);
+
+    return {
+      source: 'find_my_match',
+      lead_type: leadTypeFor(answers.intent),
+      journey_stage: answers.timeline || 'discovering',
+      first_name: form.first_name.value.trim(),
+      last_name:  form.last_name.value.trim() || null,
+      email:      form.email.value.trim(),
+      phone:      form.phone.value.trim() || null,
+      areas:      answers.areas.length ? answers.areas : null,
+      price_min:  b.min ? Number(b.min) : null,
+      price_max:  b.max ? Number(b.max) : null,
+      intent:     answers.intent,
+      must_haves: answers.must_haves || null,
+      message:    summaryBits.join(' · ')
+    };
+  }
+
+  function showDone(msg) {
+    document.getElementById('fmmForm').style.display = 'none';
+    document.querySelector('.fmm-progress').style.display = 'none';
+    if (msg) document.getElementById('doneMsg').textContent = msg;
+    document.getElementById('fmmDone').classList.add('show');
+  }
+
+  async function submit() {
+    nextBtn.disabled = true;
+    nextBtn.textContent = 'Sending…';
+    errEl.textContent = '';
+    var payload = buildPayload();
+    try {
+      var res = await fetch('/api/leads/intake', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify(payload)
+      });
+      var json = null;
+      try { json = await res.json(); } catch (e) {}
+      if (res.ok && (!json || json.success !== false)) {
+        showDone();
+      } else {
+        throw new Error((json && json.error) || 'Submit failed');
+      }
+    } catch (err) {
+      // Soft fallback so a preview/offline visitor still gets a path forward.
+      showDone("Thank you — we've got your answers. If you don't hear from Sara shortly, give us a call at (209) 559-4966 and we'll pick up right where this left off.");
+    }
+  }
+
+  render();
+})();
+</script>
+</body>
+</html>

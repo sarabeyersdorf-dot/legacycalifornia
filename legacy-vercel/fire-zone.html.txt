@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fire-zone &amp; insurance reality check · Legacy Properties</title>
+<meta name="description" content="Look up a Sierra foothills address — see Cal Fire severity zone, likely insurance situation, defensible-space requirements, and what it actually means for buying.">
+<link rel="stylesheet" href="legacy.css">
+<link rel="stylesheet" href="tools.css">
+</head>
+<body class="paper" data-screen-label="Fire Zone Tool">
+
+<!-- ============ TOP NAV ============ -->
+<header class="topnav">
+  <div class="topnav-bar1">
+    <span>Boutique luxury real estate · Calaveras · Amador · Tuolumne</span>
+    <span>
+      <a href="tel:2095594966">(209) 559-4966</a>
+      &nbsp;·&nbsp;
+      <a href="mailto:SaraSellsCalifornia@gmail.com">SaraSellsCalifornia@gmail.com</a>
+    </span>
+  </div>
+  <nav class="topnav-bar2">
+    <div class="topnav-links">
+      <a href="property-search.html">Listings</a>
+      <a href="towns.html">Communities</a>
+      <a href="relocate.html">Relocate</a>
+      <a href="valuation.html">Sellers</a>
+      <a href="market-report.html">Markets</a>
+    </div>
+    <a href="index.html" class="wordmark">
+      <span class="wordmark-word">Legacy</span>
+      <span class="wordmark-sub">Properties · Angels Camp CA</span>
+    </a>
+    <div class="topnav-links right">
+      <a href="ledger.html">The Ledger</a>
+      <a href="dashboard.html">Sign In</a>
+      <a href="find-my-match.html" class="btn btn-ink btn-sm" style="padding:10px 18px;">Find My Match</a>
+    </div>
+  </nav>
+</header>
+
+<!-- ============ TOOL HERO ============ -->
+<section class="tool-hero">
+  <div class="tool-hero-inner">
+    <div class="tool-hero-left">
+      <span class="hairline-brass" style="margin-bottom: 18px;"></span>
+      <span class="eyebrow">A Legacy tool · Free · No sign-up</span>
+      <h1 class="tool-h1">Fire-zone<br><em>&amp; insurance</em><br>reality check.</h1>
+      <p class="tool-dek">Paste any Calaveras, Amador or Tuolumne address. We pull the Cal Fire severity zone, the FAIR Plan likelihood, the defensible-space requirement, and what comparable homes are actually paying for coverage — so the most important number in your buying decision isn't a surprise.</p>
+      <div class="tool-hero-meta">
+        <div><span class="n">3</span><span class="l">CA counties covered</span></div>
+        <div><span class="n">8k+</span><span class="l">Parcels indexed</span></div>
+        <div><span class="n">~24mo</span><span class="l">Premium quote freshness</span></div>
+      </div>
+    </div>
+
+    <!-- LOOKUP FORM -->
+    <form class="tool-lookup" id="fzForm" onsubmit="event.preventDefault(); fzLookup();">
+      <div class="tool-lookup-top">
+        <span class="eyebrow" style="color: var(--brass);">Step 01 · Address</span>
+        <span class="label-cap">Encrypted · never stored</span>
+      </div>
+      <div class="field">
+        <span class="field-label">Property address</span>
+        <input type="text" class="field-input" id="fzAddr" placeholder="e.g. 433 E Highway 4, Murphys" value="433 E Highway 4, Murphys, CA 95247">
+      </div>
+      <div class="tool-lookup-row">
+        <div class="field" style="flex:1;">
+          <span class="field-label">Sq ft</span>
+          <input type="text" class="field-input" id="fzSqft" value="2,840">
+        </div>
+        <div class="field" style="flex:1;">
+          <span class="field-label">Year built</span>
+          <input type="text" class="field-input" id="fzYr" value="1998">
+        </div>
+        <div class="field" style="flex:1;">
+          <span class="field-label">Construction</span>
+          <select class="field-input" id="fzConst">
+            <option>Wood frame · standard</option>
+            <option>Stucco · clay tile</option>
+            <option>ICF / hardened</option>
+            <option>Manufactured</option>
+          </select>
+        </div>
+      </div>
+      <button type="submit" class="btn btn-ink" style="width: 100%; margin-top: 4px;">Run the report →</button>
+      <div class="tool-lookup-foot">
+        <span class="label-cap">Try also:</span>
+        <button type="button" class="chip" onclick="fzPreset('4242 Blue Lake Springs, Arnold, CA 95223', 'arnold')">Arnold (4,100 ft)</button>
+        <button type="button" class="chip" onclick="fzPreset('1840 Lake Tulloch Rd, Copperopolis, CA 95228', 'copper')">Copperopolis</button>
+        <button type="button" class="chip" onclick="fzPreset('19 Spanish St, Sutter Creek, CA 95685', 'sutter')">Sutter Creek</button>
+      </div>
+    </form>
+  </div>
+</section>
+
+<!-- ============ RESULT ============ -->
+<section class="tool-result" id="fzResult">
+
+  <div class="tool-result-inner">
+
+    <!-- HEADER STRIP -->
+    <div class="tool-result-head">
+      <div class="tool-result-head-l">
+        <span class="eyebrow">Report · April 14, 2026</span>
+        <h2 id="fzResAddr" class="tool-result-h">433 E Highway 4 · Murphys, CA 95247</h2>
+        <div class="tool-result-sub">
+          <span><strong id="fzResSqft">2,840</strong> sqft</span>
+          <span>·</span>
+          <span>Built <strong id="fzResYr">1998</strong></span>
+          <span>·</span>
+          <span>Elevation <strong id="fzResElev">2,140 ft</strong></span>
+          <span>·</span>
+          <span>Parcel <strong id="fzResParcel">009-178-022</strong></span>
+        </div>
+      </div>
+      <div class="tool-result-head-r">
+        <button class="btn btn-ghost btn-sm">Save to my dashboard</button>
+        <button class="btn btn-ghost btn-sm">Email to Sara</button>
+      </div>
+    </div>
+
+    <!-- TOP ROW: SCORE + MAP -->
+    <div class="tool-grid-2">
+
+      <!-- ZONE PANEL -->
+      <div class="tool-panel">
+        <div class="tool-panel-head">
+          <span class="eyebrow">§ I · Cal Fire severity zone</span>
+          <span class="label-cap">FHSZ · 2024 update</span>
+        </div>
+
+        <div class="fz-score" id="fzScore">
+          <div class="fz-score-mark" id="fzMark">HIGH</div>
+          <div class="fz-score-label">
+            <span class="fz-score-num" id="fzScoreNum">3 of 4</span>
+            <span class="fz-score-name" id="fzScoreName">Fire Hazard Severity Zone · High</span>
+            <span class="fz-score-meta" id="fzScoreMeta">SRA — State Responsibility Area</span>
+          </div>
+        </div>
+
+        <div class="fz-bars">
+          <div class="fz-bar" data-on><div class="t">Moderate</div></div>
+          <div class="fz-bar" data-on><div class="t">High</div></div>
+          <div class="fz-bar" id="fzBar3" data-on data-active><div class="t">Very High</div></div>
+          <div class="fz-bar"><div class="t">Wildland</div></div>
+        </div>
+
+        <p class="tool-readout">
+          This parcel sits in a <strong>High</strong> severity zone under the 2024 California Fire Hazard Severity Zone map. The classification is driven by <strong>vegetation type</strong> (mixed oak woodland), <strong>slope</strong> (8–15%), and <strong>fire weather frequency</strong> (avg. 14 red-flag days/year).
+        </p>
+
+        <div class="fz-callout">
+          <div class="fz-callout-lbl">Sara's read</div>
+          <p>"High is not Very High. Most carriers will still write you, the premium will be elevated but workable, and a documented mitigation plan brings it down further. This is the most common classification in Murphys proper — completely manageable."</p>
+        </div>
+      </div>
+
+      <!-- MAP PANEL -->
+      <div class="tool-panel tool-panel-map">
+        <div class="tool-panel-head">
+          <span class="eyebrow">§ II · The parcel in context</span>
+          <span class="label-cap">FHSZ overlay · 1:8000</span>
+        </div>
+
+        <div class="fz-map">
+          <!-- Topo / zone visualization -->
+          <svg viewBox="0 0 400 320" preserveAspectRatio="none" width="100%" height="100%">
+            <defs>
+              <pattern id="hatchHigh" patternUnits="userSpaceOnUse" width="6" height="6" patternTransform="rotate(45)">
+                <rect width="6" height="6" fill="rgba(184,90,62,0.10)"/>
+                <line x1="0" y1="0" x2="0" y2="6" stroke="rgba(184,90,62,0.40)" stroke-width="0.8"/>
+              </pattern>
+              <pattern id="hatchVeryHigh" patternUnits="userSpaceOnUse" width="6" height="6" patternTransform="rotate(45)">
+                <rect width="6" height="6" fill="rgba(110,42,32,0.20)"/>
+                <line x1="0" y1="0" x2="0" y2="6" stroke="rgba(110,42,32,0.60)" stroke-width="1.0"/>
+              </pattern>
+              <pattern id="hatchMod" patternUnits="userSpaceOnUse" width="8" height="8" patternTransform="rotate(45)">
+                <rect width="8" height="8" fill="rgba(201,158,90,0.08)"/>
+                <line x1="0" y1="0" x2="0" y2="8" stroke="rgba(201,158,90,0.35)" stroke-width="0.6"/>
+              </pattern>
+            </defs>
+
+            <!-- Base -->
+            <rect x="0" y="0" width="400" height="320" fill="#EFE7D6"/>
+
+            <!-- Moderate region (lower-left) -->
+            <path d="M0,180 Q60,170 100,200 T200,240 L200,320 L0,320 Z" fill="url(#hatchMod)" />
+            <!-- High region (mid) -->
+            <path d="M40,80 Q120,60 220,90 Q280,110 320,160 Q310,210 240,230 Q160,240 100,210 Q60,180 40,140 Z" fill="url(#hatchHigh)" />
+            <!-- Very-high pocket (upper-right) -->
+            <path d="M260,40 Q330,30 380,60 Q400,110 360,140 Q310,150 280,120 Q260,80 260,40 Z" fill="url(#hatchVeryHigh)" />
+
+            <!-- Topographic contour lines -->
+            <g stroke="rgba(27,24,19,0.10)" stroke-width="0.7" fill="none">
+              <path d="M-20,90 Q80,60 200,80 T420,100" />
+              <path d="M-20,130 Q80,110 200,120 T420,150" />
+              <path d="M-20,170 Q80,150 200,160 T420,190" />
+              <path d="M-20,210 Q80,200 200,205 T420,230" />
+              <path d="M-20,250 Q80,240 200,250 T420,270" />
+            </g>
+
+            <!-- Roads -->
+            <g stroke="rgba(27,24,19,0.35)" stroke-width="1.2" fill="none">
+              <path d="M0,200 Q120,180 220,200 T400,220" />
+              <path d="M180,0 Q200,80 230,160 T280,320" />
+            </g>
+            <g font-family="JetBrains Mono" font-size="8" fill="rgba(27,24,19,0.55)" letter-spacing="0.5">
+              <text x="20" y="195" transform="rotate(-5 20 195)">HWY 4 →</text>
+              <text x="240" y="80" transform="rotate(60 240 80)">SHEEP RANCH RD →</text>
+            </g>
+
+            <!-- Parcel pin -->
+            <g id="fzPin" transform="translate(190,170)">
+              <circle r="20" fill="none" stroke="rgba(140,110,61,0.30)" stroke-width="1" stroke-dasharray="3 3"/>
+              <circle r="14" fill="none" stroke="rgba(140,110,61,0.50)" stroke-width="1"/>
+              <circle r="6" fill="#8C6E3D"/>
+              <circle r="2.5" fill="#FAF6EC"/>
+            </g>
+            <text x="206" y="155" font-family="JetBrains Mono" font-size="9" letter-spacing="1" fill="#1B1813">YOUR PARCEL</text>
+
+            <!-- Compass + scale -->
+            <g transform="translate(360,272)">
+              <circle r="14" fill="none" stroke="rgba(27,24,19,0.40)"/>
+              <text x="0" y="-18" text-anchor="middle" font-family="Cormorant Garamond" font-style="italic" font-size="14" fill="#1B1813">N</text>
+              <line x1="0" y1="-12" x2="0" y2="12" stroke="rgba(27,24,19,0.55)"/>
+            </g>
+            <g transform="translate(20,295)" font-family="JetBrains Mono" font-size="8" fill="rgba(27,24,19,0.55)" letter-spacing="0.4">
+              <line x1="0" y1="0" x2="60" y2="0" stroke="rgba(27,24,19,0.55)"/>
+              <line x1="0" y1="-3" x2="0" y2="3" stroke="rgba(27,24,19,0.55)"/>
+              <line x1="30" y1="-2" x2="30" y2="2" stroke="rgba(27,24,19,0.55)"/>
+              <line x1="60" y1="-3" x2="60" y2="3" stroke="rgba(27,24,19,0.55)"/>
+              <text x="0" y="14">0</text>
+              <text x="55" y="14">0.5 mi</text>
+            </g>
+          </svg>
+        </div>
+
+        <div class="fz-legend">
+          <div class="fz-legend-row"><span class="sw mod"></span><span>Moderate · CA-CAL</span></div>
+          <div class="fz-legend-row"><span class="sw high"></span><span>High · this parcel</span></div>
+          <div class="fz-legend-row"><span class="sw vhigh"></span><span>Very High · 0.4 mi NE</span></div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- INSURANCE PANEL -->
+    <div class="tool-panel tool-panel-wide" style="margin-top: 36px;">
+      <div class="tool-panel-head">
+        <span class="eyebrow">§ III · What it costs to insure this property</span>
+        <span class="label-cap">Quotes from comparable parcels · last 24 months</span>
+      </div>
+
+      <div class="fz-ins-grid">
+        <div class="fz-ins-cell fz-ins-best">
+          <div class="lbl">Most likely admitted carrier</div>
+          <div class="name">Auto-Club ACSC</div>
+          <div class="band band-warm">High zone · 78% accept rate</div>
+          <div class="rng">$4,200<span> – $5,800 / yr</span></div>
+          <div class="note">If you have an existing AAA auto bundle and the home has Class A roof, this is the realistic path. Expect a 2024-style underwriting walk.</div>
+        </div>
+        <div class="fz-ins-cell">
+          <div class="lbl">Surplus-lines fallback</div>
+          <div class="name">Lloyd's / Markel</div>
+          <div class="band band-warm">Available · non-renewable risk</div>
+          <div class="rng">$6,500<span> – $9,400 / yr</span></div>
+          <div class="note">Higher cost, broader coverage. Used when admitted carriers decline. Sara has placed 11 of these in Murphys in the last 18 months.</div>
+        </div>
+        <div class="fz-ins-cell">
+          <div class="lbl">CA FAIR Plan + DIC wrap</div>
+          <div class="name">FAIR + DIC supplement</div>
+          <div class="band band-cold">Backstop · last resort</div>
+          <div class="rng">$5,100<span> + DIC $1,400 / yr</span></div>
+          <div class="note">Fire-only FAIR coverage paired with a "Difference in Conditions" wrap for liability and water. Practical, well-trodden.</div>
+        </div>
+      </div>
+
+      <div class="fz-ins-foot">
+        <div class="fz-foot-cell">
+          <div class="t">Median annual premium for parcels at this severity</div>
+          <div class="v">$5,400 <span class="d">+18% YoY</span></div>
+        </div>
+        <div class="fz-foot-cell">
+          <div class="t">Premium delta vs. comparable Moderate-zone parcel</div>
+          <div class="v">+$2,100 / yr <span class="d">over 30 yrs · ~$63k</span></div>
+        </div>
+        <div class="fz-foot-cell">
+          <div class="t">Mitigation discount available with documented plan</div>
+          <div class="v">8–15% off <span class="d good">avg. $620 / yr saved</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- MITIGATION CHECKLIST -->
+    <div class="tool-panel tool-panel-wide" style="margin-top: 36px;">
+      <div class="tool-panel-head">
+        <span class="eyebrow">§ IV · What's required, what helps</span>
+        <span class="label-cap">PRC 4291 · SB 38 · CA Safer From Wildfires</span>
+      </div>
+
+      <div class="fz-mit-grid">
+        <div class="fz-mit-col">
+          <h4>Zone 0 · 0–5 ft</h4>
+          <div class="fz-mit-lbl">Required by 2026 · ember-resistant zone</div>
+          <ul class="fz-mit-list">
+            <li><span class="ck on">✓</span> No combustible mulch, plants, or stored items within 5 ft of the structure</li>
+            <li><span class="ck on">✓</span> 1/8-inch metal ember screens on all vents</li>
+            <li><span class="ck warn">!</span> Wooden deck within 5 ft — needs replacement or hardening</li>
+            <li><span class="ck on">✓</span> Class A roof rating · composite shingle in good condition</li>
+          </ul>
+        </div>
+        <div class="fz-mit-col">
+          <h4>Zone 1 · 5–30 ft</h4>
+          <div class="fz-mit-lbl">Required · lean, clean &amp; green</div>
+          <ul class="fz-mit-list">
+            <li><span class="ck on">✓</span> Tree canopies trimmed 10 ft from structures</li>
+            <li><span class="ck on">✓</span> Dead vegetation cleared annually by June 1</li>
+            <li><span class="ck warn">!</span> Two large oak limbs over the roof — recommend pruning</li>
+            <li><span class="ck on">✓</span> Defensible-space inspection passed Sept 2024</li>
+          </ul>
+        </div>
+        <div class="fz-mit-col">
+          <h4>Zone 2 · 30–100 ft</h4>
+          <div class="fz-mit-lbl">Required on SRA · "reduce fuel"</div>
+          <ul class="fz-mit-list">
+            <li><span class="ck on">✓</span> Grass mowed to 4 inches or less in fire season</li>
+            <li><span class="ck warn">!</span> Ladder fuels present in oak grove · ~$1,800 to clear</li>
+            <li><span class="ck on">✓</span> 10 ft horizontal spacing between tree canopies</li>
+            <li><span class="ck on">✓</span> Driveway: 12 ft clear width, 13.5 ft vertical · meets fire access</li>
+          </ul>
+        </div>
+        <div class="fz-mit-col">
+          <h4>Beyond 100 ft</h4>
+          <div class="fz-mit-lbl">Optional · meaningful insurance lever</div>
+          <ul class="fz-mit-list">
+            <li><span class="ck dim">○</span> Community Fire Safe Council membership · $50/yr</li>
+            <li><span class="ck dim">○</span> Goat grazing in dry months · 1.5 ac/season · ~$400</li>
+            <li><span class="ck dim">○</span> Home Hardening · 20-pt audit · $150 inspection fee</li>
+            <li><span class="ck dim">○</span> Firewise USA community status · 5–8% premium discount</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="fz-mit-summary">
+        <div>
+          <span class="eyebrow" style="color: var(--brass);">Bottom line</span>
+          <h4 class="fz-summary-h">3 items to address · approx. <em>$8,400 one-time</em> &amp; recurring annual maintenance under $1,200.</h4>
+          <p class="fz-summary-p">Most of the property is already compliant. The wooden deck within 5 ft is the only structural item. The oak limbs and ladder fuels are typical seasonal maintenance for any property at this elevation. None of this is dealbreaking — it's a normal part of foothills ownership.</p>
+        </div>
+        <a href="find-my-match.html" class="btn btn-ink">Get Sara's punch list →</a>
+      </div>
+    </div>
+
+    <!-- COMPARABLES -->
+    <div class="tool-panel tool-panel-wide" style="margin-top: 36px;">
+      <div class="tool-panel-head">
+        <span class="eyebrow">§ V · Real comps from this severity tier</span>
+        <span class="label-cap">Closed last 24 months · within 4 mi</span>
+      </div>
+
+      <table class="fz-comp">
+        <thead>
+          <tr>
+            <th>Address</th>
+            <th>Zone</th>
+            <th>Sqft</th>
+            <th>Sold</th>
+            <th>Premium found</th>
+            <th>Carrier</th>
+            <th>Days · close</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>217 Algiers St</strong> · Murphys</td>
+            <td><span class="pill-status pill-warm">High</span></td>
+            <td>2,640</td>
+            <td>$1,220,000</td>
+            <td>$4,840 / yr</td>
+            <td>ACSC · admitted</td>
+            <td>34 d</td>
+          </tr>
+          <tr>
+            <td><strong>2110 Big Trees Rd</strong> · Murphys</td>
+            <td><span class="pill-status pill-warm">High</span></td>
+            <td>3,120</td>
+            <td>$1,485,000</td>
+            <td>$5,720 / yr</td>
+            <td>Markel · E&amp;S</td>
+            <td>52 d</td>
+          </tr>
+          <tr>
+            <td><strong>805 Pennsylvania Gulch</strong> · Murphys</td>
+            <td><span class="pill-status pill-warm">High</span></td>
+            <td>2,420</td>
+            <td>$985,000</td>
+            <td>$5,160 / yr</td>
+            <td>FAIR + DIC</td>
+            <td>41 d</td>
+          </tr>
+          <tr>
+            <td><strong>4242 Blue Lake Springs</strong> · Arnold</td>
+            <td><span class="pill-status pill-cold">Mod</span></td>
+            <td>2,840</td>
+            <td>$895,000</td>
+            <td>$2,890 / yr</td>
+            <td>Mercury · admitted</td>
+            <td>22 d</td>
+          </tr>
+          <tr>
+            <td><strong>118 Ridgeway Dr</strong> · Murphys</td>
+            <td><span class="pill-status pill-hot">VHigh</span></td>
+            <td>2,980</td>
+            <td>$1,310,000</td>
+            <td>$8,640 / yr</td>
+            <td>Lloyd's · E&amp;S</td>
+            <td>78 d</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+  </div>
+</section>
+
+<!-- ============ METHOD ============ -->
+<section class="tool-method">
+  <div class="tool-method-inner">
+    <div class="section-h">
+      <div>
+        <span class="hairline-brass" style="margin-bottom: 16px;"></span>
+        <span class="eyebrow">How this tool works</span>
+        <h2 class="h-section" style="margin-top: 10px;">Plain about<br><em>where the data comes from.</em></h2>
+      </div>
+      <p class="lede right">No proprietary scoring. No marketing magic. Everything here is sourced, dated, and updated on a known cadence — so you can decide how much weight to give it.</p>
+    </div>
+
+    <div class="tool-method-grid">
+      <div class="tool-method-cell">
+        <div class="tool-method-n">01</div>
+        <h4>Cal Fire FHSZ</h4>
+        <p>The Fire Hazard Severity Zone classification comes straight from the 2024 update of the California State Responsibility Area maps. Updated whenever Cal Fire updates them — typically every 5 years.</p>
+        <div class="tool-method-source">Source · osfm.fire.ca.gov</div>
+      </div>
+      <div class="tool-method-cell">
+        <div class="tool-method-n">02</div>
+        <h4>Premium estimates</h4>
+        <p>Sourced from anonymized policies tied to recent comparable sales in our book and three partner brokerages. We update the median every quarter. Your actual quote will vary based on credit, claims history, and bundling.</p>
+        <div class="tool-method-source">Source · Legacy + partner book</div>
+      </div>
+      <div class="tool-method-cell">
+        <div class="tool-method-n">03</div>
+        <h4>Mitigation checklist</h4>
+        <p>Pulled from the current PRC 4291 / SB 38 statutory requirements plus the Safer From Wildfires regulator framework. Items flagged from a high-altitude review of the parcel — a real inspection may surface more.</p>
+        <div class="tool-method-source">Source · CalFire + CDI</div>
+      </div>
+      <div class="tool-method-cell">
+        <div class="tool-method-n">04</div>
+        <h4>The disclaimer</h4>
+        <p>This is decision-support, not a binder. Get a real underwriting quote before you close. Sara can introduce you to two independent brokers who actually write foothills risk — she has no financial relationship with either.</p>
+        <div class="tool-method-source">Updated · April 14, 2026</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ NEXT STEPS ============ -->
+<section class="tool-next">
+  <div class="tool-next-inner">
+    <div class="tool-next-col">
+      <span class="eyebrow" style="color: var(--brass-bright);">Next, if you're buying</span>
+      <h3>Want this analysis on every<br><em>house you tour?</em></h3>
+      <p>Save the report to your Legacy dashboard and we'll automatically run a fire-zone &amp; insurance check on any listing you favorite — pinned to the property card before you ever schedule a showing.</p>
+      <div class="tool-next-ctas">
+        <a href="dashboard.html" class="btn btn-brass">Open dashboard</a>
+        <a href="find-my-match.html" class="btn" style="border: 1px solid var(--brass-bright); color: var(--brass-bright);">Talk to Sara</a>
+      </div>
+    </div>
+    <div class="tool-next-col tool-next-col-dim">
+      <span class="eyebrow">Adjacent tools</span>
+      <h3 style="color: var(--ink);">Pair this with the<br><em style="color:var(--brass);">commute calculator.</em></h3>
+      <p style="color: var(--ink-soft);">Insurance is one of two foothills numbers buyers under-budget for. The other is your time-of-day drive to the Bay. Our commute tool runs morning peak, mid-day, and Friday-afternoon scenarios — same address.</p>
+      <div class="tool-next-ctas">
+        <a href="commute.html" class="btn btn-ink">Commute calculator →</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ FOOTER ============ -->
+<footer class="footer">
+  <div class="footer-inner">
+    <div class="footer-top">
+      <div>
+        <a href="index.html" class="wordmark" style="align-items: flex-start;">
+          <span class="wordmark-word">Legacy</span>
+          <span class="wordmark-sub">Properties · Angels Camp CA</span>
+        </a>
+        <p class="footer-tagline">Every home has a story. We help you find yours — or tell the one you've already lived.</p>
+      </div>
+      <div>
+        <h4>Tools</h4>
+        <a href="fire-zone.html">Fire-zone &amp; insurance</a>
+        <a href="commute.html">Commute calculator</a>
+        <a href="relocate.html">Bay → Foothills relocation</a>
+        <a href="valuation.html">What's my home worth?</a>
+      </div>
+      <div>
+        <h4>The Ledger</h4>
+        <a href="ledger.html">Latest issue</a>
+        <a href="ledger.html#subscribe">Subscribe</a>
+        <a href="about.html">About Sara &amp; James</a>
+        <a href="how-we-work.html">How we work</a>
+      </div>
+      <div>
+        <h4>Connect</h4>
+        <a href="tel:2095594966">(209) 559-4966</a>
+        <a href="mailto:SaraSellsCalifornia@gmail.com">SaraSellsCalifornia@gmail.com</a>
+        <a href="https://www.instagram.com/legacypropertiesig/">Instagram</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <div>© 2026 Legacy Properties · All rights reserved</div>
+      <div>Sara Cooper, Broker · DRE #02141987 · Equal Housing Opportunity</div>
+    </div>
+  </div>
+</footer>
+
+<script>
+  // Demo lookup states
+  const FZ_PRESETS = {
+    'arnold': {
+      addr: '4242 Blue Lake Springs, Arnold, CA 95223',
+      sqft: '2,840', yr: '1986', elev: '4,100 ft', parcel: '042-018-005',
+      score: 'MOD', scoreNum: '2 of 4', scoreName: 'Moderate severity', meta: 'LRA — Local Responsibility',
+      pinX: 110, pinY: 110, sara: '"This is the easiest insurance write in the county. Admitted carriers compete for this risk. Premiums under $3k are routine."'
+    },
+    'copper': {
+      addr: '1840 Lake Tulloch Rd, Copperopolis, CA 95228',
+      sqft: '2,400', yr: '2008', elev: '780 ft', parcel: '055-203-014',
+      score: 'VHIGH', scoreNum: '4 of 4', scoreName: 'Very High severity', meta: 'SRA — chaparral grassland',
+      pinX: 280, pinY: 80, sara: '"Very High doesn\'t mean uninsurable, but it means real homework. Expect surplus lines, expect $8–12k a year, and expect Sara to talk you through whether the carrying cost still works."'
+    },
+    'sutter': {
+      addr: '19 Spanish St, Sutter Creek, CA 95685',
+      sqft: '2,160', yr: '1894', elev: '1,200 ft', parcel: '023-444-901',
+      score: 'HIGH', scoreNum: '3 of 4', scoreName: 'High severity', meta: 'SRA — historic district',
+      pinX: 160, pinY: 200, sara: '"Historic districts in Sutter sometimes get extra carrier scrutiny on the roof and electrical. The good news: stone-and-brick construction is in your favor — three carriers actually offer historic-build discounts."'
+    },
+    'default': {
+      addr: '433 E Highway 4, Murphys, CA 95247',
+      sqft: '2,840', yr: '1998', elev: '2,140 ft', parcel: '009-178-022',
+      score: 'HIGH', scoreNum: '3 of 4', scoreName: 'Fire Hazard Severity Zone · High', meta: 'SRA — State Responsibility Area',
+      pinX: 190, pinY: 170, sara: '"High is not Very High. Most carriers will still write you, the premium will be elevated but workable, and a documented mitigation plan brings it down further. This is the most common classification in Murphys proper — completely manageable."'
+    }
+  };
+
+  function fzPreset(addr, key) {
+    document.getElementById('fzAddr').value = addr;
+    fzApply(FZ_PRESETS[key]);
+  }
+  function fzLookup() {
+    // Best-guess match by string
+    const addr = document.getElementById('fzAddr').value.toLowerCase();
+    let key = 'default';
+    if (addr.includes('arnold') || addr.includes('blue lake')) key = 'arnold';
+    else if (addr.includes('copper') || addr.includes('tulloch')) key = 'copper';
+    else if (addr.includes('sutter') || addr.includes('spanish')) key = 'sutter';
+    fzApply(FZ_PRESETS[key]);
+    document.getElementById('fzResult').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+  function fzApply(d) {
+    document.getElementById('fzResAddr').textContent = d.addr;
+    document.getElementById('fzResSqft').textContent = d.sqft;
+    document.getElementById('fzResYr').textContent = d.yr;
+    document.getElementById('fzResElev').textContent = d.elev;
+    document.getElementById('fzResParcel').textContent = d.parcel;
+    document.getElementById('fzScoreNum').textContent = d.scoreNum;
+    document.getElementById('fzScoreName').textContent = d.scoreName;
+    document.getElementById('fzScoreMeta').textContent = d.meta;
+    const mark = document.getElementById('fzMark');
+    const bars = document.querySelectorAll('.fz-bar');
+    bars.forEach(b => { b.removeAttribute('data-on'); b.removeAttribute('data-active'); });
+    if (d.score === 'MOD') {
+      mark.textContent = 'MOD'; mark.className = 'fz-score-mark sc-mod';
+      bars[0].setAttribute('data-on',''); bars[0].setAttribute('data-active','');
+    } else if (d.score === 'HIGH') {
+      mark.textContent = 'HIGH'; mark.className = 'fz-score-mark sc-high';
+      bars[0].setAttribute('data-on',''); bars[1].setAttribute('data-on',''); bars[2].setAttribute('data-on',''); bars[2].setAttribute('data-active','');
+    } else if (d.score === 'VHIGH') {
+      mark.textContent = 'VHIGH'; mark.className = 'fz-score-mark sc-vhigh';
+      bars[0].setAttribute('data-on',''); bars[1].setAttribute('data-on',''); bars[2].setAttribute('data-on',''); bars[3].setAttribute('data-on',''); bars[3].setAttribute('data-active','');
+    }
+    document.getElementById('fzPin').setAttribute('transform', 'translate(' + d.pinX + ',' + d.pinY + ')');
+    document.querySelector('.fz-callout p').textContent = d.sara;
+  }
+</script>
+
+</body>
+</html>
