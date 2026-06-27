@@ -219,6 +219,60 @@ body.paper::before {
   margin-top: 4px;
 }
 
+/* ── Dynamic header wordmark (topnav only) ──────────────────────
+   The Legacy mark settles in on page load; on hover/focus an
+   antique-brass hairline sweeps out from the centre while a soft
+   gold sheen crosses the letters and the subline warms to brass.
+   Scoped to .topnav so the footer + sidebar wordmarks are untouched.
+   No markup change — pure CSS on the existing .wordmark. */
+.topnav .wordmark { position: relative; padding-bottom: 9px; }
+
+/* brass hairline, drawn out from the centre on hover/focus */
+.topnav .wordmark::after {
+  content: "";
+  position: absolute; left: 50%; bottom: 0;
+  width: 0; height: 1px; transform: translateX(-50%);
+  background: linear-gradient(90deg,
+    transparent 0%, var(--brass-warm) 18%, var(--brass-bright) 50%,
+    var(--brass-warm) 82%, transparent 100%);
+  opacity: 0;
+  transition: width .55s cubic-bezier(.22,.61,.36,1), opacity .45s ease;
+}
+.topnav .wordmark:hover::after,
+.topnav .wordmark:focus-visible::after { width: 84%; opacity: .9; }
+
+/* the name warms to brass and opens slightly on hover/focus —
+   text stays solid (always visible), motion comes from the
+   transition, the hairline below, and the load settle-in */
+.topnav .wordmark-word {
+  color: var(--ink);
+  transition: color .5s ease, letter-spacing .5s cubic-bezier(.22,.61,.36,1);
+}
+.topnav .wordmark:hover .wordmark-word,
+.topnav .wordmark:focus-visible .wordmark-word {
+  color: var(--brass);
+  letter-spacing: 0.072em;
+}
+
+/* subline warms + opens up alongside the sweep */
+.topnav .wordmark-sub { transition: color .4s ease, letter-spacing .4s ease; }
+.topnav .wordmark:hover .wordmark-sub,
+.topnav .wordmark:focus-visible .wordmark-sub { color: var(--brass); letter-spacing: 0.46em; }
+
+/* one-time settle-in on load (respects reduced-motion) */
+@media (prefers-reduced-motion: no-preference) {
+  .topnav .wordmark-word { animation: wm-rise .85s cubic-bezier(.22,.61,.36,1) backwards; }
+  .topnav .wordmark-sub  { animation: wm-track 1s .15s cubic-bezier(.22,.61,.36,1) backwards; }
+}
+@keyframes wm-rise {
+  from { opacity: 0; transform: translateY(7px); }
+  to   { opacity: 1; transform: none; }
+}
+@keyframes wm-track {
+  from { opacity: 0; letter-spacing: .66em; }
+  to   { opacity: 1; letter-spacing: .42em; }
+}
+
 /* ── Top nav (public marketing) ── */
 .topnav {
   position: sticky; top: 0; z-index: 60;
@@ -245,6 +299,15 @@ body.paper::before {
 }
 .topnav-links a:hover, .topnav-links a.active { color: var(--brass); }
 .topnav-links.right { justify-content: flex-end; }
+
+/* Nav CTA buttons keep their own contrast — `.topnav-links a` (above) is more
+   specific than `.btn-ink`, which left the Find My Match button dark-on-dark.
+   Restore the button text colours so the CTA is readable on every page. */
+.topnav-links a.btn-ink,
+.topnav-links a.btn-ink:hover,
+.topnav-links a.btn-brass,
+.topnav-links a.btn-brass:hover { color: var(--shell); }
+.topnav-links a.btn-ghost { color: var(--ink); }
 
 /* ── Footer ── */
 .footer {
