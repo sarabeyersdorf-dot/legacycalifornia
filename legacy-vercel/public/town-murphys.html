@@ -7,6 +7,8 @@
 <link rel="stylesheet" href="legacy.css">
 <link rel="stylesheet" href="town.css">
 <link rel="stylesheet" href="idx-theme.css">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+<link rel="stylesheet" href="town-map.css">
 <script src="https://kestrel.idxhome.com/ihf-kestrel.js"></script>
 <script>
   window.ihfKestrel = window.ihfKestrel || {};
@@ -30,6 +32,7 @@
       <a href="towns.html" class="active">Communities</a>
       <a href="relocate.html">Relocate</a>
       <a href="valuation.html">Sellers</a>
+      <a href="market-report.html">Markets</a>
     </div>
     <a href="index.html" class="wordmark">
       <span class="wordmark-word">Legacy</span>
@@ -308,158 +311,26 @@
     </div>
 
     <div class="mainst-filters">
-      <button class="ms-filter ms-on" data-cat="all">All <span class="ct">24</span></button>
-      <button class="ms-filter" data-cat="wine">Tasting rooms <span class="ct">9</span></button>
-      <button class="ms-filter" data-cat="eat">Eat <span class="ct">6</span></button>
+      <button class="ms-filter ms-on" data-cat="all">All <span class="ct">21</span></button>
+      <button class="ms-filter" data-cat="wine">Tasting rooms <span class="ct">8</span></button>
+      <button class="ms-filter" data-cat="eat">Eat <span class="ct">4</span></button>
       <button class="ms-filter" data-cat="stay">Stay <span class="ct">4</span></button>
       <button class="ms-filter" data-cat="shop">Shop <span class="ct">3</span></button>
       <button class="ms-filter" data-cat="do">Do <span class="ct">2</span></button>
     </div>
 
+    <div class="tm-editor" id="tmEditor">
+      <span class="tm-editor-lead">Drag any pin to its true location. <strong>Your placements save in this browser.</strong> When the map looks right, hit Copy coordinates and send them over to publish for everyone.</span>
+      <div class="tm-editor-actions">
+        <button class="tm-btn ghost" data-act="reset">Reset pins</button>
+        <button class="tm-btn" data-act="copy">Copy coordinates</button>
+      </div>
+      <span class="tm-editor-msg"></span>
+    </div>
     <div class="mainst-board">
 
       <!-- Editorial street map -->
-      <div class="mainst-map" id="mainstMap">
-        <svg viewBox="0 0 1000 600" preserveAspectRatio="xMidYMid meet">
-          <defs>
-            <pattern id="grain" x="0" y="0" width="2" height="2" patternUnits="userSpaceOnUse">
-              <rect width="2" height="2" fill="#EFE7D6"/>
-              <rect width="1" height="1" fill="#E8DFCC" opacity="0.5"/>
-            </pattern>
-            <pattern id="grass" x="0" y="0" width="14" height="14" patternUnits="userSpaceOnUse">
-              <rect width="14" height="14" fill="#D8CFB6"/>
-              <path d="M0,7 L14,7" stroke="#C7BC9C" stroke-width="0.4" opacity="0.6"/>
-              <path d="M7,0 L7,14" stroke="#C7BC9C" stroke-width="0.4" opacity="0.6"/>
-            </pattern>
-          </defs>
-
-          <!-- ground -->
-          <rect width="1000" height="600" fill="url(#grain)"/>
-
-          <!-- Park (Murphys Park) -->
-          <rect x="40" y="380" width="220" height="160" fill="url(#grass)" stroke="rgba(27,24,19,0.2)"/>
-          <text x="150" y="465" text-anchor="middle" font-family="Cormorant Garamond" font-style="italic" font-size="20" fill="rgba(27,24,19,0.55)">Murphys Park</text>
-          <text x="150" y="485" text-anchor="middle" font-family="JetBrains Mono" font-size="8" fill="rgba(27,24,19,0.4)" letter-spacing="1.5">— CREEKSIDE —</text>
-
-          <!-- Murphys Creek -->
-          <path d="M-20,320 Q200,290 460,330 T1020,310" fill="none" stroke="#9DB5C2" stroke-width="8" opacity="0.55"/>
-          <path d="M-20,320 Q200,290 460,330 T1020,310" fill="none" stroke="#7E9AAA" stroke-width="1" opacity="0.6" stroke-dasharray="3 4"/>
-          <text x="780" y="298" font-family="Cormorant Garamond" font-style="italic" font-size="13" fill="#5E7886">Murphys Creek</text>
-
-          <!-- Main Street (horizontal) -->
-          <rect x="0" y="200" width="1000" height="56" fill="#E0D5BB"/>
-          <line x1="0" y1="228" x2="1000" y2="228" stroke="#1B1813" stroke-opacity="0.35" stroke-dasharray="14 8" stroke-width="1"/>
-          <line x1="0" y1="200" x2="1000" y2="200" stroke="rgba(27,24,19,0.30)" stroke-width="1"/>
-          <line x1="0" y1="256" x2="1000" y2="256" stroke="rgba(27,24,19,0.30)" stroke-width="1"/>
-          <text x="500" y="245" text-anchor="middle" font-family="JetBrains Mono" font-size="11" letter-spacing="6" fill="rgba(27,24,19,0.55)" font-weight="500">— MAIN  STREET  —</text>
-
-          <!-- Side streets -->
-          <rect x="170" y="0"  width="22" height="200" fill="#E0D5BB"/>
-          <rect x="170" y="256" width="22" height="350" fill="#E0D5BB"/>
-          <rect x="430" y="0"  width="22" height="200" fill="#E0D5BB"/>
-          <rect x="430" y="256" width="22" height="350" fill="#E0D5BB"/>
-          <rect x="700" y="0"  width="22" height="200" fill="#E0D5BB"/>
-          <rect x="700" y="256" width="22" height="350" fill="#E0D5BB"/>
-
-          <text x="181" y="14" text-anchor="middle" font-family="JetBrains Mono" font-size="8" fill="rgba(27,24,19,0.45)" letter-spacing="1">ALGIERS</text>
-          <text x="441" y="14" text-anchor="middle" font-family="JetBrains Mono" font-size="8" fill="rgba(27,24,19,0.45)" letter-spacing="1">BIG TREES RD</text>
-          <text x="711" y="14" text-anchor="middle" font-family="JetBrains Mono" font-size="8" fill="rgba(27,24,19,0.45)" letter-spacing="1">JONES ST</text>
-
-          <!-- Compass -->
-          <g transform="translate(940,80)" font-family="JetBrains Mono" font-size="9" fill="rgba(27,24,19,0.55)">
-            <circle r="22" fill="none" stroke="rgba(27,24,19,0.25)"/>
-            <path d="M0,-20 L4,0 L0,4 L-4,0 Z" fill="#8C6E3D"/>
-            <text y="-26" text-anchor="middle">N</text>
-          </g>
-
-          <!-- Scale bar -->
-          <g transform="translate(40,560)" font-family="JetBrains Mono" font-size="8" fill="rgba(27,24,19,0.55)">
-            <line x1="0" y1="0" x2="100" y2="0" stroke="rgba(27,24,19,0.55)" stroke-width="1.5"/>
-            <line x1="0" y1="-4" x2="0" y2="4" stroke="rgba(27,24,19,0.55)"/>
-            <line x1="50" y1="-4" x2="50" y2="4" stroke="rgba(27,24,19,0.55)"/>
-            <line x1="100" y1="-4" x2="100" y2="4" stroke="rgba(27,24,19,0.55)"/>
-            <text x="0" y="18">0</text><text x="50" y="18">250 ft</text><text x="100" y="18">500 ft</text>
-          </g>
-        </svg>
-
-        <!-- Pins overlaid -->
-        <button class="ms-pin" data-cat="wine" style="left:8%; top:32%;"  data-name="Ironstone Vineyards" data-desc="Estate winery & amphitheater. Award-winning Cabernet.">
-          <span class="ms-pin-dot">W</span><span class="ms-pin-tip">Ironstone Vineyards</span>
-        </button>
-        <button class="ms-pin" data-cat="wine" style="left:15%; top:46%;" data-name="Newsome Harlow" data-desc="Boutique reds. Tasting room on Algiers.">
-          <span class="ms-pin-dot">W</span><span class="ms-pin-tip">Newsome Harlow</span>
-        </button>
-        <button class="ms-pin" data-cat="wine" style="left:22%; top:30%;" data-name="Gossamer" data-desc="Low-intervention whites. Skin-contact Vermentino is the move.">
-          <span class="ms-pin-dot">W</span><span class="ms-pin-tip">Gossamer</span>
-        </button>
-        <button class="ms-pin" data-cat="wine" style="left:31%; top:44%;" data-name="Vina Moda" data-desc="Iberian varietals in a converted machine shop. Quietly excellent.">
-          <span class="ms-pin-dot">W</span><span class="ms-pin-tip">Vina Moda</span>
-        </button>
-        <button class="ms-pin" data-cat="wine" style="left:42%; top:30%;" data-name="Lavender Ridge" data-desc="Lavender field, brie pairing, courtyard.">
-          <span class="ms-pin-dot">W</span><span class="ms-pin-tip">Lavender Ridge</span>
-        </button>
-        <button class="ms-pin" data-cat="wine" style="left:48%; top:46%;" data-name="Milliaire Winery" data-desc="Old gas-station-turned-winery. Murphys cliché in the best way.">
-          <span class="ms-pin-dot">W</span><span class="ms-pin-tip">Milliaire</span>
-        </button>
-        <button class="ms-pin" data-cat="wine" style="left:58%; top:32%;" data-name="Bodega" data-desc="Spanish-style tasting. Tempranillo & guitar.">
-          <span class="ms-pin-dot">W</span><span class="ms-pin-tip">Bodega</span>
-        </button>
-        <button class="ms-pin" data-cat="wine" style="left:66%; top:44%;" data-name="Tanner Vineyards" data-desc="High-elevation Pinot. The quiet darling of the strip.">
-          <span class="ms-pin-dot">W</span><span class="ms-pin-tip">Tanner</span>
-        </button>
-        <button class="ms-pin" data-cat="wine" style="left:74%; top:30%;" data-name="Black Sheep Winery" data-desc="Cinsault and Tempranillo. Year-round bocce court.">
-          <span class="ms-pin-dot">W</span><span class="ms-pin-tip">Black Sheep</span>
-        </button>
-
-        <button class="ms-pin" data-cat="eat" style="left:18%; top:60%;" data-name="Grounds" data-desc="Local breakfast institution. Get the breakfast burrito.">
-          <span class="ms-pin-dot">E</span><span class="ms-pin-tip">Grounds</span>
-        </button>
-        <button class="ms-pin" data-cat="eat" style="left:34%; top:62%;" data-name="Alchemy Market" data-desc="Cheese, charcuterie, wine bar. Sara's lunch spot.">
-          <span class="ms-pin-dot">E</span><span class="ms-pin-tip">Alchemy</span>
-        </button>
-        <button class="ms-pin" data-cat="eat" style="left:46%; top:60%;" data-name="V Restaurant" data-desc="Seasonal California. Date-night anchor of Main.">
-          <span class="ms-pin-dot">E</span><span class="ms-pin-tip">V Restaurant</span>
-        </button>
-        <button class="ms-pin" data-cat="eat" style="left:56%; top:62%;" data-name="Mineral" data-desc="Vegetarian-leaning farm-to-table. Tiny patio.">
-          <span class="ms-pin-dot">E</span><span class="ms-pin-tip">Mineral</span>
-        </button>
-        <button class="ms-pin" data-cat="eat" style="left:68%; top:60%;" data-name="Firewood" data-desc="Wood-fired pizza, tacos, dog-friendly patio.">
-          <span class="ms-pin-dot">E</span><span class="ms-pin-tip">Firewood</span>
-        </button>
-        <button class="ms-pin" data-cat="eat" style="left:80%; top:62%;" data-name="Vina Moda Kitchen" data-desc="Vineyard kitchen. Tuesday tacos in summer.">
-          <span class="ms-pin-dot">E</span><span class="ms-pin-tip">Moda Kitchen</span>
-        </button>
-
-        <button class="ms-pin" data-cat="stay" style="left:38%; top:18%;" data-name="Murphys Historic Hotel" data-desc="Pouring since 1856. Mark Twain slept here. So can you.">
-          <span class="ms-pin-dot">S</span><span class="ms-pin-tip">Historic Hotel</span>
-        </button>
-        <button class="ms-pin" data-cat="stay" style="left:54%; top:14%;" data-name="Murphys Suites" data-desc="Modern boutique. Walk to everything.">
-          <span class="ms-pin-dot">S</span><span class="ms-pin-tip">Murphys Suites</span>
-        </button>
-        <button class="ms-pin" data-cat="stay" style="left:64%; top:18%;" data-name="Dunbar House 1880" data-desc="B&B in a Victorian. The garden. The breakfast. The cat.">
-          <span class="ms-pin-dot">S</span><span class="ms-pin-tip">Dunbar House</span>
-        </button>
-        <button class="ms-pin" data-cat="stay" style="left:80%; top:14%;" data-name="Querencia" data-desc="Adults-only inn. Hot tubs, fire pits, hush.">
-          <span class="ms-pin-dot">S</span><span class="ms-pin-tip">Querencia</span>
-        </button>
-
-        <button class="ms-pin" data-cat="shop" style="left:26%; top:14%;" data-name="Marisolio Tasting Bar" data-desc="Olive oils & vinegars. Mid-tasting palate cleanser.">
-          <span class="ms-pin-dot">B</span><span class="ms-pin-tip">Marisolio</span>
-        </button>
-        <button class="ms-pin" data-cat="shop" style="left:50%; top:74%;" data-name="Aria" data-desc="Independent bookshop. Mountain reads.">
-          <span class="ms-pin-dot">B</span><span class="ms-pin-tip">Aria Books</span>
-        </button>
-        <button class="ms-pin" data-cat="shop" style="left:72%; top:76%;" data-name="The Spice Tin" data-desc="Spices, salts, oils, sass.">
-          <span class="ms-pin-dot">B</span><span class="ms-pin-tip">The Spice Tin</span>
-        </button>
-
-        <button class="ms-pin" data-cat="do" style="left:12%; top:80%;" data-name="Murphys Park" data-desc="Creekside playground, gazebo, July 4 institution.">
-          <span class="ms-pin-dot">D</span><span class="ms-pin-tip">Murphys Park</span>
-        </button>
-        <button class="ms-pin" data-cat="do" style="left:88%; top:80%;" data-name="Mercer Caverns" data-desc="Crystalline cavern, 1885 discovery. Seven minutes out.">
-          <span class="ms-pin-dot">D</span><span class="ms-pin-tip">Mercer Caverns</span>
-        </button>
-      </div>
+      <div class="mainst-map mainst-map--live" id="mainstMap"><div id="townMapCanvas" class="town-map-canvas"></div></div>
 
       <!-- Detail rail -->
       <aside class="mainst-rail">
@@ -595,29 +466,29 @@
         <article class="pick-row">
           <span class="pick-num">02</span>
           <div class="pick-body">
-            <h4>Alchemy Market</h4>
-            <p>Wine bar by night, lunch counter by day, cheese shop always. The dirty grilled cheese is a religion.</p>
-            <div class="pick-tags"><span>Lunch</span><span>$$</span><span>Walk-in</span></div>
+            <h4>Murphys Grade Oyster Joint</h4>
+            <p>The best oysters in the foothills, full stop. Raw bar, local bubbles, a counter worth lingering at. I send every seafood-missing transplant here first.</p>
+            <div class="pick-tags"><span>Oysters</span><span>$$$</span><span>Reserve</span></div>
           </div>
-          <div class="pick-cap"><span class="label-cap">When</span><span>11–9 daily</span></div>
+          <div class="pick-cap"><span class="label-cap">When</span><span>Dinner · Wed–Sun</span></div>
         </article>
         <article class="pick-row">
           <span class="pick-num">03</span>
           <div class="pick-body">
-            <h4>Grounds</h4>
-            <p>Breakfast institution. Sit at the counter. Order the burrito. Ask the cook how his garden is doing.</p>
-            <div class="pick-tags"><span>Breakfast</span><span>$</span><span>No reservations</span></div>
+            <h4>Doke Sushi</h4>
+            <p>Sushi on Main that surprises everyone. Sit at the bar and let them feed you. Omakase by reservation; go hungry.</p>
+            <div class="pick-tags"><span>Sushi</span><span>$$$</span><span>Reserve</span></div>
           </div>
-          <div class="pick-cap"><span class="label-cap">When</span><span>7–2 daily</span></div>
+          <div class="pick-cap"><span class="label-cap">When</span><span>Dinner · Tue–Sun</span></div>
         </article>
         <article class="pick-row">
           <span class="pick-num">04</span>
           <div class="pick-body">
-            <h4>Firewood</h4>
-            <p>Pizza and tacos under string lights. The patio is the patio. Bring the dog.</p>
-            <div class="pick-tags"><span>Casual</span><span>$$</span><span>Dog-OK</span></div>
+            <h4>Murphys Historic Hotel — Patio</h4>
+            <p>Outdoor dining under the elms. The 1856 dining room spills onto the patio when the evenings are warm. Order simply, sit late.</p>
+            <div class="pick-tags"><span>Outdoor</span><span>$$</span><span>Walk-in</span></div>
           </div>
-          <div class="pick-cap"><span class="label-cap">When</span><span>11–9 daily</span></div>
+          <div class="pick-cap"><span class="label-cap">When</span><span>Lunch & dinner daily</span></div>
         </article>
       </div>
 
@@ -626,6 +497,15 @@
         <article class="pick-row">
           <span class="pick-num">01</span>
           <div class="pick-body">
+            <h4>V Bar</h4>
+            <p>The fine-dining side of V, and some of the best cocktails in town. Scotty works the bar in an intimate, low-lit room — tell him what you like and let him build it. My standing pre-dinner ritual.</p>
+            <div class="pick-tags"><span>Cocktails</span><span>$$$</span><span>Intimate</span></div>
+          </div>
+          <div class="pick-cap"><span class="label-cap">When</span><span>5 pm – close · Thu–Sun</span></div>
+        </article>
+        <article class="pick-row">
+          <span class="pick-num">02</span>
+          <div class="pick-body">
             <h4>Murphys Historic Hotel Bar</h4>
             <p>Mark Twain's room is upstairs. The bar has been pouring since 1856. Sit at the wood, order a Manhattan.</p>
             <div class="pick-tags"><span>History</span><span>$$</span></div>
@@ -633,7 +513,7 @@
           <div class="pick-cap"><span class="label-cap">When</span><span>3 pm – close</span></div>
         </article>
         <article class="pick-row">
-          <span class="pick-num">02</span>
+          <span class="pick-num">03</span>
           <div class="pick-body">
             <h4>Newsome Harlow</h4>
             <p>Where my serious-wine clients go. The Big Joe Zinfandel will end the conversation about whether you like Zinfandel.</p>
@@ -642,22 +522,13 @@
           <div class="pick-cap"><span class="label-cap">When</span><span>11–5 Thu–Mon</span></div>
         </article>
         <article class="pick-row">
-          <span class="pick-num">03</span>
+          <span class="pick-num">04</span>
           <div class="pick-body">
             <h4>Lavender Ridge</h4>
             <p>The brie-and-lavender pairing is exactly as good as it sounds. Sit in the courtyard. Don't rush.</p>
             <div class="pick-tags"><span>Outdoor</span><span>$$</span></div>
           </div>
           <div class="pick-cap"><span class="label-cap">When</span><span>11–5 daily</span></div>
-        </article>
-        <article class="pick-row">
-          <span class="pick-num">04</span>
-          <div class="pick-body">
-            <h4>Indigeny Reserve</h4>
-            <p>Hard cider made from estate apples. Picnic tables, no agenda. Twenty minutes out, well worth the drive.</p>
-            <div class="pick-tags"><span>Cider</span><span>$$</span><span>Drive</span></div>
-          </div>
-          <div class="pick-cap"><span class="label-cap">When</span><span>11–5 Fri–Sun</span></div>
         </article>
       </div>
 
@@ -666,11 +537,11 @@
         <article class="pick-row">
           <span class="pick-num">01</span>
           <div class="pick-body">
-            <h4>Querencia</h4>
-            <p>Adults-only, six suites, hot tubs and quiet. Where I house my buyers when they're closer than they think.</p>
-            <div class="pick-tags"><span>Boutique</span><span>$$$$</span></div>
+            <h4>Glashaus</h4>
+            <p>The glass dome James and I built on twenty private acres above New Melones Lake — 360° of water, foothills and stars through the glass, an outdoor clawfoot tub set right on the ancient rock. A guest-favorite Superhost stay, and the place I send buyers who want to feel what living up here actually feels like. <a href="https://www.airbnb.com/rooms/919731657397440702" target="_blank" rel="noopener">Book it direct on Airbnb →</a></p>
+            <div class="pick-tags"><span>Glass dome</span><span>Lake view</span><span>Book direct</span></div>
           </div>
-          <div class="pick-cap"><span class="label-cap">From</span><span>$485 / nt</span></div>
+          <div class="pick-cap"><span class="label-cap">Rated</span><span><a href="https://www.airbnb.com/rooms/919731657397440702" target="_blank" rel="noopener">4.92 · Airbnb</a></span></div>
         </article>
         <article class="pick-row">
           <span class="pick-num">02</span>
@@ -938,5 +809,8 @@
 </footer>
 
 <script src="town.js"></script>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+<script src="town-map.js"></script>
+<script>LegacyTownMap.init({"town":"murphys","center":[38.1376,-120.4632],"zoom":16,"unit":"places","catMeta":{"wine":{"label":"Tasting room","letter":"W","color":"#8C6E3D"},"eat":{"label":"Restaurant","letter":"E","color":"#5E7886"},"stay":{"label":"Stay","letter":"S","color":"#4F6B4A"},"shop":{"label":"Shop","letter":"P","color":"#A6824A"},"do":{"label":"To do","letter":"D","color":"#6E5732"}},"pois":[{"name":"Ironstone Vineyards","cat":"wine","desc":"Estate winery & amphitheater. Award-winning Cabernet.","lat":38.128869,"lng":-120.462341},{"name":"Newsome Harlow","cat":"wine","desc":"Boutique reds. Tasting room on Algiers.","lat":38.137384,"lng":-120.462825},{"name":"Gossamer","cat":"wine","desc":"Low-intervention whites. Skin-contact Vermentino is the move.","lat":38.137544,"lng":-120.463866},{"name":"Vina Moda","cat":"wine","desc":"Iberian varietals in a converted machine shop. Quietly excellent.","lat":38.13724,"lng":-120.459198},{"name":"Lavender Ridge","cat":"wine","desc":"Lavender field, brie pairing, courtyard.","lat":38.137561,"lng":-120.464231},{"name":"Milliaire Winery","cat":"wine","desc":"Old gas-station-turned-winery. Murphys cliché in the best way.","lat":38.137772,"lng":-120.462223},{"name":"Tanner Vineyards","cat":"wine","desc":"High-elevation Pinot. The quiet darling of the strip.","lat":38.137569,"lng":-120.464659},{"name":"Black Sheep Winery","cat":"wine","desc":"Cinsault and Tempranillo. Year-round bocce court.","lat":38.137282,"lng":-120.45997},{"name":"V Restaurant","cat":"eat","desc":"Seasonal California. Date-night anchor of Main.","lat":38.1375,"lng":-120.4576},{"name":"Murphys Historic Hotel","cat":"stay","desc":"Pouring since 1856. Mark Twain slept here. So can you.","lat":38.137603,"lng":-120.465078},{"name":"Murphys Suites","cat":"stay","desc":"Modern boutique. Walk to everything.","lat":38.134135,"lng":-120.454692},{"name":"Dunbar House 1880","cat":"stay","desc":"B&B in a Victorian. The garden. The breakfast. The cat.","lat":38.137156,"lng":-120.460797},{"name":"Marisolio Tasting Bar","cat":"shop","desc":"Olive oils & vinegars. Mid-tasting palate cleanser.","lat":38.138168,"lng":-120.467023},{"name":"Aria","cat":"shop","desc":"Independent bookshop. Mountain reads.","lat":38.137881,"lng":-120.464971},{"name":"The Spice Tin","cat":"shop","desc":"Spices, salts, oils, sass.","lat":38.13827,"lng":-120.465476},{"name":"Murphys Park","cat":"do","desc":"Creekside playground, gazebo, July 4 institution.","lat":38.136666,"lng":-120.463748},{"name":"Mercer Caverns","cat":"do","desc":"Crystalline cavern, 1885 discovery. Seven minutes out.","lat":38.151534,"lng":-120.478052},{"name":"Grounds","cat":"eat","desc":"Breakfast institution. Counter seats, the burrito.","lat":38.1376,"lng":-120.4578},{"name":"Alchemy Market","cat":"eat","desc":"Cheese, charcuterie, wine bar. Sara's lunch spot.","lat":38.1366,"lng":-120.4557},{"name":"Firewood","cat":"eat","desc":"Pizza & tacos under string lights. Dog-friendly patio.","lat":38.1369,"lng":-120.4561},{"name":"Querencia","cat":"stay","desc":"Adults-only boutique inn — six suites, hot tubs, quiet.","lat":38.145189,"lng":-120.472644}]});</script>
 </body>
 </html>
