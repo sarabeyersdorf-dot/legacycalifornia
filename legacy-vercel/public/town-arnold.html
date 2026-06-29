@@ -6,6 +6,8 @@
 <title>Arnold, CA — Legacy Properties</title>
 <link rel="stylesheet" href="legacy.css">
 <link rel="stylesheet" href="town.css">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+<link rel="stylesheet" href="town-map.css">
 </head>
 <body class="paper" data-screen-label="Town · Arnold">
 
@@ -16,19 +18,20 @@
   </div>
   <nav class="topnav-bar2">
     <div class="topnav-links">
-      <a href="listings.html">Listings</a>
+      <a href="property-search.html">Listings</a>
       <a href="towns.html" class="active">Communities</a>
       <a href="relocate.html">Relocate</a>
-      <a href="seller.html">Sellers</a>
+      <a href="valuation.html">Sellers</a>
+      <a href="market-report.html">Markets</a>
     </div>
     <a href="index.html" class="wordmark">
       <span class="wordmark-word">Legacy</span>
       <span class="wordmark-sub">Properties · Angels Camp CA</span>
     </a>
     <div class="topnav-links right">
-      <a href="index.html#ledger">The Ledger</a>
+      <a href="ledger.html">The Ledger</a>
       <a href="dashboard.html">Sign In</a>
-      <a href="platform.html" class="btn btn-ink btn-sm" style="padding:10px 18px;">Find My Match</a>
+      <a href="find-my-match.html" class="btn btn-ink btn-sm" style="padding:10px 18px;">Find My Match</a>
     </div>
   </nav>
 </header>
@@ -264,100 +267,16 @@
       <button class="ms-filter" data-cat="stay">Strenuous <span class="ct">3</span></button>
     </div>
 
-    <div class="mainst-board">
-      <div class="mainst-map" id="mainstMap">
-        <svg viewBox="0 0 1000 600" preserveAspectRatio="xMidYMid meet">
-          <defs>
-            <pattern id="forest" x="0" y="0" width="40" height="40" patternUnits="userSpaceOnUse">
-              <rect width="40" height="40" fill="#D8CFB6"/>
-              <path d="M10,30 L14,18 L18,30 Z M22,28 L26,12 L30,28 Z" fill="#7A8A6A" opacity="0.4"/>
-            </pattern>
-            <pattern id="meadow" x="0" y="0" width="14" height="14" patternUnits="userSpaceOnUse">
-              <rect width="14" height="14" fill="#D6CCA8"/>
-              <path d="M0,7 L14,7" stroke="#BFB28C" stroke-width="0.4" opacity="0.6"/>
-            </pattern>
-          </defs>
-          <rect width="1000" height="600" fill="url(#forest)"/>
-          <!-- Contour ridges -->
-          <g fill="none" stroke="rgba(27,24,19,0.10)" stroke-width="0.8">
-            <path d="M0,160 Q200,120 400,180 T1000,150"/>
-            <path d="M0,260 Q220,220 420,290 T1000,250"/>
-            <path d="M0,360 Q240,310 460,380 T1000,340"/>
-            <path d="M0,460 Q260,420 480,470 T1000,440"/>
-          </g>
-          <!-- Highway 4 -->
-          <rect x="0" y="280" width="1000" height="32" fill="#E0D5BB"/>
-          <line x1="0" y1="296" x2="1000" y2="296" stroke="#1B1813" stroke-opacity="0.35" stroke-dasharray="14 8"/>
-          <text x="500" y="304" text-anchor="middle" font-family="JetBrains Mono" font-size="10" letter-spacing="4" fill="rgba(27,24,19,0.55)">HIGHWAY  4  ·  EBBETTS  PASS  CORRIDOR</text>
-
-          <!-- Stanislaus River -->
-          <path d="M-20,460 Q200,420 460,440 T1020,410" fill="none" stroke="#9DB5C2" stroke-width="6" opacity="0.55"/>
-          <text x="700" y="430" font-family="Cormorant Garamond" font-style="italic" font-size="13" fill="#5E7886">N. Fork Stanislaus</text>
-
-          <!-- Meadow -->
-          <ellipse cx="200" cy="500" rx="110" ry="40" fill="url(#meadow)" opacity="0.85"/>
-          <text x="200" y="505" text-anchor="middle" font-family="Cormorant Garamond" font-style="italic" font-size="16" fill="rgba(27,24,19,0.55)">Cottage Springs Meadow</text>
-
-          <!-- Big Trees boundary -->
-          <rect x="660" y="60" width="280" height="180" fill="none" stroke="rgba(58,74,56,0.35)" stroke-dasharray="4 3"/>
-          <text x="800" y="155" text-anchor="middle" font-family="Cormorant Garamond" font-style="italic" font-size="22" fill="rgba(58,74,56,0.6)">Calaveras Big Trees</text>
-          <text x="800" y="175" text-anchor="middle" font-family="JetBrains Mono" font-size="8" letter-spacing="2" fill="rgba(58,74,56,0.5)">STATE PARK</text>
-
-          <!-- Compass -->
-          <g transform="translate(940,80)" font-family="JetBrains Mono" font-size="9" fill="rgba(27,24,19,0.55)">
-            <circle r="22" fill="none" stroke="rgba(27,24,19,0.25)"/>
-            <path d="M0,-20 L4,0 L0,4 L-4,0 Z" fill="#8C6E3D"/>
-            <text y="-26" text-anchor="middle">N</text>
-          </g>
-          <!-- Scale -->
-          <g transform="translate(40,560)" font-family="JetBrains Mono" font-size="8" fill="rgba(27,24,19,0.55)">
-            <line x1="0" y1="0" x2="100" y2="0" stroke="rgba(27,24,19,0.55)" stroke-width="1.5"/>
-            <line x1="0" y1="-4" x2="0" y2="4" stroke="rgba(27,24,19,0.55)"/>
-            <line x1="50" y1="-4" x2="50" y2="4" stroke="rgba(27,24,19,0.55)"/>
-            <line x1="100" y1="-4" x2="100" y2="4" stroke="rgba(27,24,19,0.55)"/>
-            <text x="0" y="18">0</text><text x="50" y="18">1 mi</text><text x="100" y="18">2 mi</text>
-          </g>
-        </svg>
-
-        <button class="ms-pin" data-cat="wine" style="left:74%; top:24%;" data-name="North Grove Loop" data-desc="1.5 mi · 50 ft · year-round. The introductory sequoia walk. Paved.">
-          <span class="ms-pin-dot">E</span><span class="ms-pin-tip">North Grove</span>
-        </button>
-        <button class="ms-pin" data-cat="wine" style="left:84%; top:36%;" data-name="South Grove" data-desc="5 mi · 600 ft · May–Oct. The Agassiz Tree, less-traveled.">
-          <span class="ms-pin-dot">E</span><span class="ms-pin-tip">South Grove</span>
-        </button>
-        <button class="ms-pin" data-cat="wine" style="left:30%; top:60%;" data-name="Cottage Springs Pond" data-desc="0.8 mi · flat · year-round. Dogs, kids, picnics.">
-          <span class="ms-pin-dot">E</span><span class="ms-pin-tip">Cottage Springs</span>
-        </button>
-        <button class="ms-pin" data-cat="wine" style="left:18%; top:32%;" data-name="White Pines Lake" data-desc="1.2 mi · loop · year-round. Trout, paddle boats, in-town.">
-          <span class="ms-pin-dot">E</span><span class="ms-pin-tip">White Pines</span>
-        </button>
-
-        <button class="ms-pin" data-cat="eat" style="left:14%; top:74%;" data-name="Sourgrass Bridge" data-desc="3 mi · 400 ft · Apr–Nov. Swimming holes, the rope swing.">
-          <span class="ms-pin-dot">M</span><span class="ms-pin-tip">Sourgrass</span>
-        </button>
-        <button class="ms-pin" data-cat="eat" style="left:42%; top:46%;" data-name="Bull Run" data-desc="4.5 mi · 700 ft · May–Oct. Granite domes, summit views.">
-          <span class="ms-pin-dot">M</span><span class="ms-pin-tip">Bull Run</span>
-        </button>
-        <button class="ms-pin" data-cat="eat" style="left:56%; top:36%;" data-name="Spicer Reservoir Trail" data-desc="6 mi · 500 ft · Jun–Oct. Granite, alpine lake, trout.">
-          <span class="ms-pin-dot">M</span><span class="ms-pin-tip">Spicer</span>
-        </button>
-        <button class="ms-pin" data-cat="eat" style="left:38%; top:22%;" data-name="Lava Bomb" data-desc="3.8 mi · 800 ft · Jun–Oct. Volcanic outcrop, sunset spot.">
-          <span class="ms-pin-dot">M</span><span class="ms-pin-tip">Lava Bomb</span>
-        </button>
-        <button class="ms-pin" data-cat="eat" style="left:64%; top:60%;" data-name="Beaver Creek" data-desc="5 mi · 600 ft · May–Oct. Cascades, swimming holes.">
-          <span class="ms-pin-dot">M</span><span class="ms-pin-tip">Beaver Creek</span>
-        </button>
-
-        <button class="ms-pin" data-cat="stay" style="left:54%; top:16%;" data-name="Sandy Meadow → Lake Alpine" data-desc="9 mi · 1,400 ft · Jul–Oct. Granite ridges, lake views.">
-          <span class="ms-pin-dot">S</span><span class="ms-pin-tip">Sandy Meadow</span>
-        </button>
-        <button class="ms-pin" data-cat="stay" style="left:72%; top:54%;" data-name="Pinecrest → Camp Nine" data-desc="13 mi · 2,100 ft · Jul–Oct. Day pack, river finish, shuttle required.">
-          <span class="ms-pin-dot">S</span><span class="ms-pin-tip">Camp Nine</span>
-        </button>
-        <button class="ms-pin" data-cat="stay" style="left:90%; top:18%;" data-name="Mokelumne Coast to Crest" data-desc="11 mi · 1,800 ft · Jun–Oct. The connoisseur's day. Bring water.">
-          <span class="ms-pin-dot">S</span><span class="ms-pin-tip">Coast to Crest</span>
-        </button>
+    <div class="tm-editor" id="tmEditor">
+      <span class="tm-editor-lead">Drag any pin to its true location. <strong>Your placements save in this browser.</strong> When the map looks right, hit Copy coordinates and send them over to publish for everyone.</span>
+      <div class="tm-editor-actions">
+        <button class="tm-btn ghost" data-act="reset">Reset pins</button>
+        <button class="tm-btn" data-act="copy">Copy coordinates</button>
       </div>
+      <span class="tm-editor-msg"></span>
+    </div>
+    <div class="mainst-board">
+      <div class="mainst-map mainst-map--live" id="mainstMap"><div id="townMapCanvas" class="town-map-canvas"></div></div>
 
       <aside class="mainst-rail">
         <div class="ms-rail-head">
@@ -549,7 +468,7 @@
     </div>
 
     <div class="list-grid">
-      <a href="listing.html" class="prop-card">
+      <a href="featured-listings.html" class="prop-card">
         <div class="prop-photo">
           <img src="https://images.unsplash.com/photo-1518780664697-55e3ad937233?w=800&q=85" alt="">
           <div class="prop-tags"><span class="pill-status pill-new">Just listed</span></div>
@@ -561,7 +480,7 @@
           <div class="prop-foot"><span class="prop-match">Listed by Sara</span><span class="label-cap" style="color:var(--ink-faint);">Plate I</span></div>
         </div>
       </a>
-      <a href="listing.html" class="prop-card">
+      <a href="featured-listings.html" class="prop-card">
         <div class="prop-photo">
           <img src="https://images.unsplash.com/photo-1542718610-a1d656d1884c?w=800&q=85" alt="">
           <div class="prop-tags"><span class="pill-status pill-brass">Active</span></div>
@@ -573,7 +492,7 @@
           <div class="prop-foot"><span class="prop-match">Listed by Sara</span><span class="label-cap" style="color:var(--ink-faint);">Plate II</span></div>
         </div>
       </a>
-      <a href="listing.html" class="prop-card">
+      <a href="featured-listings.html" class="prop-card">
         <div class="prop-photo">
           <img src="https://images.unsplash.com/photo-1505691938895-1758d7feb511?w=800&q=85" alt="">
           <div class="prop-tags"><span class="pill-status">Pending</span></div>
@@ -588,7 +507,7 @@
     </div>
 
     <div style="text-align:center; margin-top:40px;">
-      <a href="listings.html" class="btn btn-ghost">See all Arnold listings</a>
+      <a href="property-search.html" class="btn btn-ghost">See all Arnold listings</a>
     </div>
   </div>
 </section>
@@ -620,7 +539,7 @@
       <div class="letter-contact">
         <a href="tel:2095594966"><span class="glyph">◇</span> (209) 559-4966</a>
         <a href="mailto:SaraSellsCalifornia@gmail.com"><span class="glyph">◇</span> SaraSellsCalifornia@gmail.com</a>
-        <a href="platform.html"><span class="glyph">◇</span> Walk Arnold with Sara</a>
+        <a href="find-my-match.html"><span class="glyph">◇</span> Walk Arnold with Sara</a>
       </div>
     </article>
   </div>
@@ -670,7 +589,7 @@
   <h2 class="cta-h">Cabin life,<br><em>simplified.</em></h2>
   <p class="cta-sub">A weekend up. A walk through the listings. Honest counsel on snow, septic, and the road in.</p>
   <div class="cta-ctas">
-    <a href="platform.html" class="btn btn-ink">Find my Arnold match</a>
+    <a href="find-my-match.html" class="btn btn-ink">Find my Arnold match</a>
     <a href="tel:2095594966" class="btn btn-ghost">Call (209) 559-4966</a>
   </div>
 </section>
@@ -696,15 +615,15 @@
       </div>
       <div>
         <h4>Buy &amp; sell</h4>
-        <a href="listings.html">Search all listings</a>
-        <a href="seller.html">What's my home worth?</a>
-        <a href="platform.html">Request a tour</a>
+        <a href="property-search.html">Search all listings</a>
+        <a href="valuation.html">What's my home worth?</a>
+        <a href="find-my-match.html">Request a tour</a>
       </div>
       <div>
         <h4>Connect</h4>
         <a href="tel:2095594966">(209) 559-4966</a>
         <a href="mailto:SaraSellsCalifornia@gmail.com">SaraSellsCalifornia@gmail.com</a>
-        <a href="index.html#ledger">The Ledger</a>
+        <a href="ledger.html">The Ledger</a>
       </div>
     </div>
     <div class="footer-bottom">
@@ -715,5 +634,8 @@
 </footer>
 
 <script src="town.js"></script>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+<script src="town-map.js"></script>
+<script>LegacyTownMap.init({"town":"arnold","center":[38.3,-120.2],"zoom":10,"unit":"trails","catMeta":{"wine":{"label":"Easy","letter":"E","color":"#5B8C5A"},"eat":{"label":"Moderate","letter":"M","color":"#B8922A"},"stay":{"label":"Strenuous","letter":"S","color":"#1B1813"}},"pois":[{"name":"North Grove Loop","cat":"wine","desc":"1.5 mi · 50 ft · year-round. The introductory sequoia walk. Paved.","lat":38.27807,"lng":-120.30939},{"name":"South Grove","cat":"wine","desc":"5 mi · 600 ft · May–Oct. The Agassiz Tree, less-traveled.","lat":38.2566,"lng":-120.2718},{"name":"Cottage Springs Pond","cat":"wine","desc":"0.8 mi · flat · year-round. Dogs, kids, picnics.","lat":38.3175,"lng":-120.2055},{"name":"White Pines Lake","cat":"wine","desc":"1.2 mi · loop · year-round. Trout, paddle boats, in-town.","lat":38.244,"lng":-120.361},{"name":"Sourgrass Bridge","cat":"eat","desc":"3 mi · 400 ft · Apr–Nov. Swimming holes, the rope swing.","lat":38.2877,"lng":-120.2447},{"name":"Bull Run","cat":"eat","desc":"4.5 mi · 700 ft · May–Oct. Granite domes, summit views.","lat":38.513,"lng":-119.898},{"name":"Spicer Reservoir Trail","cat":"eat","desc":"6 mi · 500 ft · Jun–Oct. Granite, alpine lake, trout.","lat":38.3905,"lng":-120.064},{"name":"Lava Bomb","cat":"eat","desc":"3.8 mi · 800 ft · Jun–Oct. Volcanic outcrop, sunset spot.","lat":38.262,"lng":-120.26},{"name":"Beaver Creek","cat":"eat","desc":"5 mi · 600 ft · May–Oct. Cascades, swimming holes.","lat":38.266,"lng":-120.27},{"name":"Sandy Meadow → Lake Alpine","cat":"stay","desc":"9 mi · 1,400 ft · Jul–Oct. Granite ridges, lake views.","lat":38.473,"lng":-120.008},{"name":"Pinecrest → Camp Nine","cat":"stay","desc":"13 mi · 2,100 ft · Jul–Oct. Day pack, river finish, shuttle required.","lat":38.09,"lng":-120.447},{"name":"Mokelumne Coast to Crest","cat":"stay","desc":"11 mi · 1,800 ft · Jun–Oct. The connoisseur's day. Bring water.","lat":38.498,"lng":-120.215}],"fitToPins":true,"fitMaxZoom":12});</script>
 </body>
 </html>
