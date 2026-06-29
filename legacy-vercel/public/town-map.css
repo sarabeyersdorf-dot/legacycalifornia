@@ -1,0 +1,97 @@
+/* ============================================================
+   town-map.css — Legacy skin for the Leaflet town map
+   Load AFTER legacy.css and Leaflet's own CSS.
+   ============================================================ */
+
+.town-map-canvas {
+  width: 100%;
+  height: 560px;
+  background: var(--linen);
+  border: 1px solid var(--rule);
+  border-radius: 0;
+  z-index: 0;
+}
+/* Hard pixel anchor so the grid cell can't stretch the Leaflet container into
+   a feedback loop (it has no intrinsic height of its own). */
+.mainst-board { align-items: start; }
+.mainst-map.mainst-map--live { height: 560px !important; align-self: start; overflow: hidden; }
+#townMapCanvas.town-map-canvas { height: 560px !important; }
+@media (max-width: 700px) {
+  .mainst-map.mainst-map--live, #townMapCanvas.town-map-canvas { height: 420px !important; }
+}
+
+/* Lettered brass/ink pins */
+.tm-pin-wrap { background: transparent !important; border: 0 !important; }
+.tm-pin {
+  display: flex; align-items: center; justify-content: center;
+  width: 30px; height: 30px; border-radius: 50%;
+  color: var(--shell);
+  font-family: var(--mono); font-size: 12px; font-weight: 600;
+  letter-spacing: 0.02em;
+  border: 2px solid var(--shell);
+  box-shadow: 0 2px 8px rgba(27,24,19,0.30);
+  cursor: grab;
+  transition: transform .15s ease, box-shadow .15s ease;
+}
+.tm-pin-wrap:hover .tm-pin {
+  transform: scale(1.18);
+  box-shadow: 0 6px 18px rgba(27,24,19,0.38);
+}
+.tm-pin-wrap:active .tm-pin { cursor: grabbing; }
+
+/* Tooltip */
+.leaflet-tooltip.tm-tip {
+  background: var(--ink); color: var(--shell);
+  border: 0; border-radius: 3px;
+  font-family: var(--mono); font-size: 10px;
+  letter-spacing: 0.08em; text-transform: uppercase;
+  padding: 6px 10px; box-shadow: 0 8px 24px rgba(0,0,0,.28);
+}
+.leaflet-tooltip.tm-tip::before { border-top-color: var(--ink); }
+
+/* Zoom control → Legacy */
+.leaflet-bar a {
+  background: var(--shell) !important; color: var(--ink) !important;
+  border-color: var(--rule) !important;
+  font-family: var(--serif) !important;
+}
+.leaflet-bar a:hover { background: var(--linen) !important; }
+.leaflet-control-attribution {
+  font-family: var(--mono) !important; font-size: 9px !important;
+  background: rgba(250,246,236,0.82) !important; color: var(--ink-mute) !important;
+}
+
+/* Editor bar (drag-to-place for Sara) */
+.tm-editor {
+  display: flex; align-items: center; gap: 16px; flex-wrap: wrap;
+  margin-top: 14px; padding: 14px 18px;
+  background: var(--shell); border: 1px solid var(--rule);
+}
+.tm-editor-lead {
+  font-family: var(--mono); font-size: 10px; letter-spacing: 0.14em;
+  text-transform: uppercase; color: var(--ink-mute);
+}
+.tm-editor-lead strong { color: var(--brass); font-weight: 600; }
+.tm-editor-actions { display: flex; gap: 10px; margin-left: auto; }
+.tm-btn {
+  font-family: var(--mono); font-size: 10px; letter-spacing: 0.12em;
+  text-transform: uppercase; cursor: pointer;
+  background: var(--ink); color: var(--shell);
+  border: 1px solid var(--ink); border-radius: 0;
+  padding: 9px 16px; transition: background .15s, color .15s;
+}
+.tm-btn:hover { background: var(--brass); border-color: var(--brass); }
+.tm-btn.ghost { background: transparent; color: var(--ink); border-color: var(--rule-strong); }
+.tm-btn.ghost:hover { background: transparent; border-color: var(--ink); color: var(--ink); }
+.tm-editor-msg {
+  flex-basis: 100%; order: 9;
+  font-family: var(--mono); font-size: 10px; letter-spacing: 0.06em;
+  color: var(--brass); opacity: 0; transition: opacity .2s ease;
+  min-height: 13px;
+}
+.tm-editor-msg.on { opacity: 1; }
+
+@media (max-width: 700px) {
+  .town-map-canvas { height: 420px; }
+  .tm-editor-actions { margin-left: 0; }
+}
