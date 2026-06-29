@@ -6,6 +6,8 @@
 <title>Copperopolis, CA — Legacy Properties</title>
 <link rel="stylesheet" href="legacy.css">
 <link rel="stylesheet" href="town.css">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+<link rel="stylesheet" href="town-map.css">
 </head>
 <body class="paper" data-screen-label="Town · Copperopolis">
 
@@ -16,19 +18,20 @@
   </div>
   <nav class="topnav-bar2">
     <div class="topnav-links">
-      <a href="listings.html">Listings</a>
+      <a href="property-search.html">Listings</a>
       <a href="towns.html" class="active">Communities</a>
       <a href="relocate.html">Relocate</a>
-      <a href="seller.html">Sellers</a>
+      <a href="valuation.html">Sellers</a>
+      <a href="market-report.html">Markets</a>
     </div>
     <a href="index.html" class="wordmark">
       <span class="wordmark-word">Legacy</span>
       <span class="wordmark-sub">Properties · Angels Camp CA</span>
     </a>
     <div class="topnav-links right">
-      <a href="index.html#ledger">The Ledger</a>
+      <a href="ledger.html">The Ledger</a>
       <a href="dashboard.html">Sign In</a>
-      <a href="platform.html" class="btn btn-ink btn-sm" style="padding:10px 18px;">Find My Match</a>
+      <a href="find-my-match.html" class="btn btn-ink btn-sm" style="padding:10px 18px;">Find My Match</a>
     </div>
   </nav>
 </header>
@@ -265,115 +268,16 @@
       <button class="ms-filter" data-cat="shop">Town <span class="ct">3</span></button>
     </div>
 
-    <div class="mainst-board">
-      <div class="mainst-map" id="mainstMap">
-        <svg viewBox="0 0 1000 600" preserveAspectRatio="xMidYMid meet">
-          <defs>
-            <radialGradient id="hillsCp" cx="50%" cy="50%" r="80%">
-              <stop offset="0%" stop-color="#E2D6B8"/>
-              <stop offset="100%" stop-color="#C7B58F"/>
-            </radialGradient>
-            <linearGradient id="waterCp" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stop-color="#7E9AAA"/>
-              <stop offset="100%" stop-color="#5E7886"/>
-            </linearGradient>
-            <pattern id="ripple" x="0" y="0" width="40" height="20" patternUnits="userSpaceOnUse">
-              <path d="M0,10 Q10,4 20,10 T40,10" fill="none" stroke="rgba(255,255,255,0.18)" stroke-width="0.8"/>
-            </pattern>
-          </defs>
-          <rect width="1000" height="600" fill="url(#hillsCp)"/>
-
-          <!-- Contour lines -->
-          <g fill="none" stroke="rgba(27,24,19,0.08)" stroke-width="0.8">
-            <path d="M0,100 Q260,80 520,120 T1020,90"/>
-            <path d="M0,520 Q260,500 520,540 T1020,510"/>
-          </g>
-
-          <!-- Lake Tulloch (horseshoe) -->
-          <path d="M 80,200 Q 200,180 360,200 L 460,260 Q 520,290 600,260 L 760,220 Q 880,180 960,220 L 960,300 Q 880,260 760,300 L 600,340 Q 520,370 460,340 L 360,400 Q 240,420 100,440 L 100,360 Q 200,330 320,330 L 380,300 Q 320,280 240,290 L 80,310 Z" fill="url(#waterCp)" stroke="#5E7886" stroke-width="1.5"/>
-          <path d="M 80,200 Q 200,180 360,200 L 460,260 Q 520,290 600,260 L 760,220 Q 880,180 960,220 L 960,300 Q 880,260 760,300 L 600,340 Q 520,370 460,340 L 360,400 Q 240,420 100,440 L 100,360 Q 200,330 320,330 L 380,300 Q 320,280 240,290 L 80,310 Z" fill="url(#ripple)"/>
-
-          <text x="240" y="180" font-family="Cormorant Garamond" font-style="italic" font-size="26" fill="#FAF6EC" opacity="0.85">Lake Tulloch</text>
-          <text x="240" y="200" font-family="JetBrains Mono" font-size="9" letter-spacing="3" fill="#FAF6EC" opacity="0.6">— 55 MI OF SHORELINE —</text>
-
-          <!-- Town label -->
-          <g transform="translate(500,490)">
-            <circle r="22" fill="#FAF6EC" stroke="#1B1813" stroke-width="2"/>
-            <circle r="4" fill="#8C6E3D"/>
-            <text y="-32" text-anchor="middle" font-family="Cormorant Garamond" font-style="italic" font-size="22" fill="#1B1813">Copperopolis</text>
-          </g>
-
-          <!-- Copper Valley (south) -->
-          <ellipse cx="780" cy="500" rx="120" ry="45" fill="#D6CCA8" stroke="rgba(58,74,56,0.4)" stroke-dasharray="3 3"/>
-          <text x="780" y="500" text-anchor="middle" font-family="Cormorant Garamond" font-style="italic" font-size="14" fill="rgba(58,74,56,0.7)">Copper Valley</text>
-          <text x="780" y="518" text-anchor="middle" font-family="JetBrains Mono" font-size="8" letter-spacing="2" fill="rgba(58,74,56,0.6)">RESORT · GOLF CLUB</text>
-
-          <!-- Compass -->
-          <g transform="translate(940,80)" font-family="JetBrains Mono" font-size="9" fill="rgba(27,24,19,0.55)">
-            <circle r="22" fill="none" stroke="rgba(27,24,19,0.25)"/>
-            <path d="M0,-20 L4,0 L0,4 L-4,0 Z" fill="#8C6E3D"/>
-            <text y="-26" text-anchor="middle">N</text>
-          </g>
-          <!-- Scale -->
-          <g transform="translate(40,560)" font-family="JetBrains Mono" font-size="8" fill="rgba(27,24,19,0.55)">
-            <line x1="0" y1="0" x2="100" y2="0" stroke="rgba(27,24,19,0.55)" stroke-width="1.5"/>
-            <line x1="0" y1="-4" x2="0" y2="4" stroke="rgba(27,24,19,0.55)"/>
-            <line x1="50" y1="-4" x2="50" y2="4" stroke="rgba(27,24,19,0.55)"/>
-            <line x1="100" y1="-4" x2="100" y2="4" stroke="rgba(27,24,19,0.55)"/>
-            <text x="0" y="18">0</text><text x="50" y="18">1 mi</text><text x="100" y="18">2 mi</text>
-          </g>
-        </svg>
-
-        <!-- Coves -->
-        <button class="ms-pin" data-cat="wine" style="left:14%; top:38%;" data-name="Connor Estates" data-desc="Gated since the early '90s. Private launch ramp, docks, tennis courts — some of the lake's best waterfront.">
-          <span class="ms-pin-dot">C</span><span class="ms-pin-tip">Connor Estates</span>
-        </button>
-        <button class="ms-pin" data-cat="wine" style="left:24%; top:32%;" data-name="Copper Cove" data-desc="The big subdivision — and the one that allows short-term rentals. Black Creek beach and swim area, the most boats on the lake.">
-          <span class="ms-pin-dot">C</span><span class="ms-pin-tip">Copper Cove</span>
-        </button>
-        <button class="ms-pin" data-cat="wine" style="left:42%; top:42%;" data-name="Poker Flat" data-desc="Lake Tulloch Shores. Central, lots-with-docks, a private launch, lively summer weekends.">
-          <span class="ms-pin-dot">C</span><span class="ms-pin-tip">Poker Flat</span>
-        </button>
-        <button class="ms-pin" data-cat="wine" style="left:62%; top:36%;" data-name="Calypso Bay" data-desc="Quiet gated community, stunning lake-and-foothill views, newer waterfront homes.">
-          <span class="ms-pin-dot">C</span><span class="ms-pin-tip">Calypso Bay</span>
-        </button>
-        <button class="ms-pin" data-cat="wine" style="left:78%; top:32%;" data-name="Peninsula Estates" data-desc="Gated, late-'90s. Forty-six near-level waterfront parcels — minimal stairs to the water — on the north end.">
-          <span class="ms-pin-dot">C</span><span class="ms-pin-tip">Peninsula</span>
-        </button>
-        <button class="ms-pin" data-cat="wine" style="left:90%; top:42%;" data-name="Sanguinetti Estates" data-desc="A smaller gated enclave — dock-out homes, modern builds, eastern morning light.">
-          <span class="ms-pin-dot">C</span><span class="ms-pin-tip">Sanguinetti</span>
-        </button>
-
-        <!-- Marinas -->
-        <button class="ms-pin" data-cat="eat" style="left:34%; top:64%;" data-name="Lake Tulloch Marina" data-desc="The main marina. Rentals, fuel, slip directory.">
-          <span class="ms-pin-dot">M</span><span class="ms-pin-tip">Tulloch Marina</span>
-        </button>
-        <button class="ms-pin" data-cat="eat" style="left:54%; top:60%;" data-name="Poker Flat Marina" data-desc="Smaller, quieter, locals' marina. The fuel dock is the social hub.">
-          <span class="ms-pin-dot">M</span><span class="ms-pin-tip">Poker Flat M.</span>
-        </button>
-        <button class="ms-pin" data-cat="eat" style="left:84%; top:54%;" data-name="Drifters Marina" data-desc="East-end. Wakeboard rentals. Tie up at Drifters Bar &amp; Grill.">
-          <span class="ms-pin-dot">M</span><span class="ms-pin-tip">Drifters M.</span>
-        </button>
-
-        <!-- Golf -->
-        <button class="ms-pin" data-cat="stay" style="left:74%; top:80%;" data-name="Copper Valley Resort" data-desc="Greg Norman, 2002. Public-access championship course. The bar at sunset.">
-          <span class="ms-pin-dot">G</span><span class="ms-pin-tip">Copper Valley</span>
-        </button>
-        <button class="ms-pin" data-cat="stay" style="left:86%; top:84%;" data-name="The Lodge at Copper Valley" data-desc="Resort homes, the spa, on-course rentals. The drop-in-with-clubs option.">
-          <span class="ms-pin-dot">G</span><span class="ms-pin-tip">The Lodge</span>
-        </button>
-
-        <!-- Town -->
-        <button class="ms-pin" data-cat="shop" style="left:48%; top:86%;" data-name="Copper Town Square" data-desc="Mock-historic main square. Market, café, hardware, post office.">
-          <span class="ms-pin-dot">T</span><span class="ms-pin-tip">Town Square</span>
-        </button>
-        <button class="ms-pin" data-cat="shop" style="left:38%; top:88%;" data-name="Gold Dust Pizza" data-desc="Town Square pizza joint. Big pies, salads, a patio.">
-          <span class="ms-pin-dot">T</span><span class="ms-pin-tip">Gold Dust</span>
-        </button>
-        <button class="ms-pin" data-cat="shop" style="left:58%; top:88%;" data-name="Copper Valley Grocery" data-desc="The only proper grocery for fifteen miles. Slim aisles, kind staff.">
-          <span class="ms-pin-dot">T</span><span class="ms-pin-tip">CV Grocery</span>
-        </button>
+    <div class="tm-editor" id="tmEditor">
+      <span class="tm-editor-lead">Drag any pin to its true location. <strong>Your placements save in this browser.</strong> When the map looks right, hit Copy coordinates and send them over to publish for everyone.</span>
+      <div class="tm-editor-actions">
+        <button class="tm-btn ghost" data-act="reset">Reset pins</button>
+        <button class="tm-btn" data-act="copy">Copy coordinates</button>
       </div>
+      <span class="tm-editor-msg"></span>
+    </div>
+    <div class="mainst-board">
+      <div class="mainst-map mainst-map--live" id="mainstMap"><div id="townMapCanvas" class="town-map-canvas"></div></div>
 
       <aside class="mainst-rail">
         <div class="ms-rail-head">
@@ -574,7 +478,7 @@
     </div>
 
     <div class="list-grid">
-      <a href="listing.html" class="prop-card">
+      <a href="featured-listings.html" class="prop-card">
         <div class="prop-photo">
           <img src="https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=800&q=85" alt="">
           <div class="prop-tags"><span class="pill-status pill-new">Just listed</span></div>
@@ -586,7 +490,7 @@
           <div class="prop-foot"><span class="prop-match">Listed by Sara</span><span class="label-cap" style="color:var(--ink-faint);">Plate I</span></div>
         </div>
       </a>
-      <a href="listing.html" class="prop-card">
+      <a href="featured-listings.html" class="prop-card">
         <div class="prop-photo">
           <img src="https://images.unsplash.com/photo-1583608205776-bfd35f0d9f83?w=800&q=85" alt="">
           <div class="prop-tags"><span class="pill-status pill-brass">Active</span></div>
@@ -598,7 +502,7 @@
           <div class="prop-foot"><span class="prop-match">Listed by Sara</span><span class="label-cap" style="color:var(--ink-faint);">Plate II</span></div>
         </div>
       </a>
-      <a href="listing.html" class="prop-card">
+      <a href="featured-listings.html" class="prop-card">
         <div class="prop-photo">
           <img src="https://images.unsplash.com/photo-1605276374104-dee2a0ed3cd6?w=800&q=85" alt="">
           <div class="prop-tags"><span class="pill-status">Pending</span></div>
@@ -613,7 +517,7 @@
     </div>
 
     <div style="text-align:center; margin-top:40px;">
-      <a href="listings.html" class="btn btn-ghost">See all Copperopolis listings</a>
+      <a href="property-search.html" class="btn btn-ghost">See all Copperopolis listings</a>
     </div>
   </div>
 </section>
@@ -645,7 +549,7 @@
       <div class="letter-contact">
         <a href="tel:2095594966"><span class="glyph">◇</span> (209) 559-4966</a>
         <a href="mailto:SaraSellsCalifornia@gmail.com"><span class="glyph">◇</span> SaraSellsCalifornia@gmail.com</a>
-        <a href="platform.html"><span class="glyph">◇</span> Tour the coves with Sara</a>
+        <a href="find-my-match.html"><span class="glyph">◇</span> Tour the coves with Sara</a>
       </div>
     </article>
   </div>
@@ -695,7 +599,7 @@
   <h2 class="cta-h">Six communities,<br><em>one decision.</em></h2>
   <p class="cta-sub">A day on the water. Honest counsel on docks, HOAs, and the cove that fits your life.</p>
   <div class="cta-ctas">
-    <a href="platform.html" class="btn btn-ink">Find my Copperopolis match</a>
+    <a href="find-my-match.html" class="btn btn-ink">Find my Copperopolis match</a>
     <a href="tel:2095594966" class="btn btn-ghost">Call (209) 559-4966</a>
   </div>
 </section>
@@ -721,15 +625,15 @@
       </div>
       <div>
         <h4>Buy &amp; sell</h4>
-        <a href="listings.html">Search all listings</a>
-        <a href="seller.html">What's my home worth?</a>
-        <a href="platform.html">Request a tour</a>
+        <a href="property-search.html">Search all listings</a>
+        <a href="valuation.html">What's my home worth?</a>
+        <a href="find-my-match.html">Request a tour</a>
       </div>
       <div>
         <h4>Connect</h4>
         <a href="tel:2095594966">(209) 559-4966</a>
         <a href="mailto:SaraSellsCalifornia@gmail.com">SaraSellsCalifornia@gmail.com</a>
-        <a href="index.html#ledger">The Ledger</a>
+        <a href="ledger.html">The Ledger</a>
       </div>
     </div>
     <div class="footer-bottom">
@@ -740,5 +644,8 @@
 </footer>
 
 <script src="town.js"></script>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+<script src="town-map.js"></script>
+<script>LegacyTownMap.init({"town":"copperopolis","center":[37.92,-120.635],"zoom":12,"unit":"spots","catMeta":{"wine":{"label":"Community","letter":"C","color":"#8C6E3D"},"eat":{"label":"Marina","letter":"M","color":"#5E7886"},"stay":{"label":"Golf","letter":"G","color":"#4F6B4A"},"shop":{"label":"Town","letter":"T","color":"#A6824A"}},"pois":[{"name":"Connor Estates","cat":"wine","desc":"Gated since the early '90s. Private launch ramp, docks, tennis courts — some of the lake's best waterfront.","lat":37.8835,"lng":-120.6515},{"name":"Copper Cove","cat":"wine","desc":"The big subdivision — and the one that allows short-term rentals. Black Creek beach and swim area, the most boats on the lake.","lat":37.895,"lng":-120.645},{"name":"Poker Flat","cat":"wine","desc":"Lake Tulloch Shores. Central, lots-with-docks, a private launch, lively summer weekends.","lat":37.872,"lng":-120.63},{"name":"Calypso Bay","cat":"wine","desc":"Quiet gated community, stunning lake-and-foothill views, newer waterfront homes.","lat":37.8682,"lng":-120.615},{"name":"Peninsula Estates","cat":"wine","desc":"Gated, late-'90s. Forty-six near-level waterfront parcels — minimal stairs to the water — on the north end.","lat":37.876,"lng":-120.6082},{"name":"Sanguinetti Estates","cat":"wine","desc":"A smaller gated enclave — dock-out homes, modern builds, eastern morning light.","lat":37.8802,"lng":-120.6005},{"name":"Lake Tulloch Marina","cat":"eat","desc":"The main marina. Rentals, fuel, slip directory.","lat":37.8767,"lng":-120.6386},{"name":"Poker Flat Marina","cat":"eat","desc":"Smaller, quieter, locals' marina. The fuel dock is the social hub.","lat":37.87,"lng":-120.6282},{"name":"Drifters Marina","cat":"eat","desc":"East-end. Wakeboard rentals. Tie up at Drifters Bar & Grill.","lat":37.8652,"lng":-120.6102},{"name":"Copper Valley Resort","cat":"stay","desc":"Greg Norman, 2002. Public-access championship course. The bar at sunset.","lat":37.956,"lng":-120.6362},{"name":"The Lodge at Copper Valley","cat":"stay","desc":"Resort homes, the spa, on-course rentals. The drop-in-with-clubs option.","lat":37.9582,"lng":-120.6342},{"name":"Copper Town Square","cat":"shop","desc":"Mock-historic main square. Market, café, hardware, post office.","lat":37.9799,"lng":-120.6388},{"name":"Gold Dust Pizza","cat":"shop","desc":"Town Square pizza joint. Big pies, salads, a patio.","lat":37.9795,"lng":-120.6392},{"name":"Copper Valley Grocery","cat":"shop","desc":"The only proper grocery for fifteen miles. Slim aisles, kind staff.","lat":37.9805,"lng":-120.638}]});</script>
 </body>
 </html>
