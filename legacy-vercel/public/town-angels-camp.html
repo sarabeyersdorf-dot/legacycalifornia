@@ -117,7 +117,7 @@
       <button class="th-sn" data-s="spring" data-quote="<em>Jubilee weekend.</em> The fairgrounds open, the frogs jump, the town doubles in three days — then quietly returns to itself.">Spring</button>
       <button class="th-sn" data-s="summer" data-quote="<em>Hot afternoons.</em> The town pool fills by ten. New Melones runs warm by July. Main Street pavement holds heat till midnight.">Summer</button>
       <button class="th-sn th-sn-on" data-s="fall" data-quote="<em>The hills go golden.</em> The pace eases. Sara hosts an open house on the second Saturday of October. Bring a sweater.">Autumn</button>
-      <button class="th-sn" data-s="winter" data-quote="<em>Mild winters.</em> Light frost on the fairgrounds, the museum gets quiet, the Mine Shaft has the only fire going on Main most nights.">Winter</button>
+      <button class="th-sn" data-s="winter" data-quote="<em>Mild winters.</em> Light frost on the fairgrounds, the museum gets quiet, the Miners Lounge has the only fire going on Main most nights.">Winter</button>
     </div>
     <span class="th-season-quote" id="seasonQuote">
       <em>The hills go golden.</em> The pace eases. Sara hosts an open house on the second Saturday of October. Bring a sweater.
@@ -131,7 +131,6 @@
     <a href="#story" class="jump-on">The story</a>
     <a href="#vitals">Market vitals</a>
     <a href="#twain">Twain &amp; the frog</a>
-    <a href="#mainst">Main Street</a>
     <a href="#picks">Sara's picks</a>
     <a href="#listings">Listings</a>
     <a href="#letter">A letter</a>
@@ -338,158 +337,6 @@
   </div>
 </section>
 
-<!-- MAIN STREET — Angels Camp version -->
-<section class="section" id="mainst" style="background:var(--parchment);">
-  <div class="section-inner">
-    <div class="section-h">
-      <div>
-        <span class="hairline-brass"></span>
-        <span class="eyebrow">Plate IV · A walking diagram</span>
-        <h2 class="h-section" style="margin-top:10px;">Main Street,<br><em>Frogtown.</em></h2>
-      </div>
-      <p class="lede right">Hover any pin. Sara's office is one of them.</p>
-    </div>
-
-    <div class="mainst-filters">
-      <button class="ms-filter ms-on" data-cat="all">All <span class="ct">16</span></button>
-      <button class="ms-filter" data-cat="wine">Eat &amp; drink <span class="ct">6</span></button>
-      <button class="ms-filter" data-cat="eat">Twain trail <span class="ct">4</span></button>
-      <button class="ms-filter" data-cat="stay">Stay <span class="ct">2</span></button>
-      <button class="ms-filter" data-cat="shop">Shop <span class="ct">2</span></button>
-      <button class="ms-filter" data-cat="do">Do <span class="ct">2</span></button>
-    </div>
-
-    <div class="mainst-board">
-      <div class="mainst-map" id="mainstMap">
-        <svg viewBox="0 0 1000 600" preserveAspectRatio="xMidYMid meet">
-          <defs>
-            <pattern id="grainAc" x="0" y="0" width="2" height="2" patternUnits="userSpaceOnUse">
-              <rect width="2" height="2" fill="#EFE7D6"/>
-              <rect width="1" height="1" fill="#E8DFCC" opacity="0.5"/>
-            </pattern>
-          </defs>
-          <rect width="1000" height="600" fill="url(#grainAc)"/>
-
-          <!-- Main Street (Hwy 49) -->
-          <rect x="0" y="220" width="1000" height="56" fill="#E0D5BB"/>
-          <line x1="0" y1="248" x2="1000" y2="248" stroke="#1B1813" stroke-opacity="0.35" stroke-dasharray="14 8"/>
-          <text x="500" y="264" text-anchor="middle" font-family="JetBrains Mono" font-size="11" letter-spacing="6" fill="rgba(27,24,19,0.55)" font-weight="500">— MAIN STREET · HWY 49 —</text>
-
-          <!-- Cross streets -->
-          <rect x="160" y="0"   width="22" height="220" fill="#E0D5BB"/>
-          <rect x="160" y="276" width="22" height="324" fill="#E0D5BB"/>
-          <rect x="420" y="0"   width="22" height="220" fill="#E0D5BB"/>
-          <rect x="420" y="276" width="22" height="324" fill="#E0D5BB"/>
-          <rect x="680" y="0"   width="22" height="220" fill="#E0D5BB"/>
-          <rect x="680" y="276" width="22" height="324" fill="#E0D5BB"/>
-
-          <text x="171" y="14" text-anchor="middle" font-family="JetBrains Mono" font-size="8" fill="rgba(27,24,19,0.45)" letter-spacing="1">FINNEGAN</text>
-          <text x="431" y="14" text-anchor="middle" font-family="JetBrains Mono" font-size="8" fill="rgba(27,24,19,0.45)" letter-spacing="1">RAGGIO</text>
-          <text x="691" y="14" text-anchor="middle" font-family="JetBrains Mono" font-size="8" fill="rgba(27,24,19,0.45)" letter-spacing="1">BIRD'S WAY</text>
-
-          <!-- Frog footprints down Main (the brass plates) -->
-          <g fill="#8C6E3D" opacity="0.55">
-            <circle cx="60" cy="240" r="3"/><circle cx="120" cy="240" r="3"/><circle cx="200" cy="240" r="3"/><circle cx="260" cy="240" r="3"/>
-            <circle cx="340" cy="240" r="3"/><circle cx="460" cy="240" r="3"/><circle cx="520" cy="240" r="3"/><circle cx="600" cy="240" r="3"/>
-            <circle cx="720" cy="240" r="3"/><circle cx="800" cy="240" r="3"/><circle cx="900" cy="240" r="3"/><circle cx="960" cy="240" r="3"/>
-          </g>
-          <text x="500" y="200" text-anchor="middle" font-family="Cormorant Garamond" font-style="italic" font-size="14" fill="rgba(140,110,61,0.7)">— brass frog plates set into the sidewalk —</text>
-
-          <!-- Fairgrounds -->
-          <rect x="660" y="380" width="280" height="160" fill="#D8CFB6" stroke="rgba(27,24,19,0.2)"/>
-          <text x="800" y="445" text-anchor="middle" font-family="Cormorant Garamond" font-style="italic" font-size="22" fill="rgba(27,24,19,0.55)">Calaveras Fairgrounds</text>
-          <text x="800" y="465" text-anchor="middle" font-family="JetBrains Mono" font-size="8" letter-spacing="2" fill="rgba(27,24,19,0.4)">— FROG JUBILEE · MAY —</text>
-
-          <!-- Compass -->
-          <g transform="translate(940,80)" font-family="JetBrains Mono" font-size="9" fill="rgba(27,24,19,0.55)">
-            <circle r="22" fill="none" stroke="rgba(27,24,19,0.25)"/>
-            <path d="M0,-20 L4,0 L0,4 L-4,0 Z" fill="#8C6E3D"/>
-            <text y="-26" text-anchor="middle">N</text>
-          </g>
-          <!-- Scale -->
-          <g transform="translate(40,560)" font-family="JetBrains Mono" font-size="8" fill="rgba(27,24,19,0.55)">
-            <line x1="0" y1="0" x2="100" y2="0" stroke="rgba(27,24,19,0.55)" stroke-width="1.5"/>
-            <line x1="0" y1="-4" x2="0" y2="4" stroke="rgba(27,24,19,0.55)"/>
-            <line x1="50" y1="-4" x2="50" y2="4" stroke="rgba(27,24,19,0.55)"/>
-            <line x1="100" y1="-4" x2="100" y2="4" stroke="rgba(27,24,19,0.55)"/>
-            <text x="0" y="18">0</text><text x="50" y="18">250 ft</text><text x="100" y="18">500 ft</text>
-          </g>
-        </svg>
-
-        <!-- Eat & Drink -->
-        <button class="ms-pin" data-cat="wine" style="left:14%; top:32%;" data-name="Crusco's" data-desc="Italian. Sara's anniversary spot. The veal piccata is the order.">
-          <span class="ms-pin-dot">E</span><span class="ms-pin-tip">Crusco's</span>
-        </button>
-        <button class="ms-pin" data-cat="wine" style="left:24%; top:50%;" data-name="Camps Restaurant" data-desc="Greenhorn Creek clubhouse, ten min south. Sunset golf views.">
-          <span class="ms-pin-dot">E</span><span class="ms-pin-tip">Camps</span>
-        </button>
-        <button class="ms-pin" data-cat="wine" style="left:38%; top:32%;" data-name="Pickle Patch Cafe" data-desc="Breakfast all day. The chilaquiles are local lore.">
-          <span class="ms-pin-dot">E</span><span class="ms-pin-tip">Pickle Patch</span>
-        </button>
-        <button class="ms-pin" data-cat="wine" style="left:50%; top:50%;" data-name="Bistro Espresso" data-desc="The coffee anchor. Pour-over morning, wine bar evening.">
-          <span class="ms-pin-dot">E</span><span class="ms-pin-tip">Bistro Espresso</span>
-        </button>
-        <button class="ms-pin" data-cat="wine" style="left:62%; top:32%;" data-name="The Mine Shaft" data-desc="The local. Burgers, pool table, the firefighters after shift.">
-          <span class="ms-pin-dot">E</span><span class="ms-pin-tip">Mine Shaft</span>
-        </button>
-        <button class="ms-pin" data-cat="wine" style="left:74%; top:50%;" data-name="Native Sons Hall" data-desc="The fraternal hall. Pancake breakfasts, taco Tuesdays.">
-          <span class="ms-pin-dot">E</span><span class="ms-pin-tip">Native Sons</span>
-        </button>
-
-        <!-- Twain trail -->
-        <button class="ms-pin" data-cat="eat" style="left:42%; top:18%;" data-name="Angels Hotel" data-desc="Where Twain heard the frog story in 1865. The bar is the bar.">
-          <span class="ms-pin-dot">T</span><span class="ms-pin-tip">Angels Hotel</span>
-        </button>
-        <button class="ms-pin" data-cat="eat" style="left:54%; top:14%;" data-name="Twain plaque" data-desc="Bronze sidewalk marker. The spot where the bar stool sat.">
-          <span class="ms-pin-dot">T</span><span class="ms-pin-tip">Twain plaque</span>
-        </button>
-        <button class="ms-pin" data-cat="eat" style="left:30%; top:74%;" data-name="Angels Camp Museum" data-desc="Mining gear, Twain ephemera, the frog hall of fame in the back.">
-          <span class="ms-pin-dot">T</span><span class="ms-pin-tip">Museum</span>
-        </button>
-        <button class="ms-pin" data-cat="eat" style="left:80%; top:68%;" data-name="Frog Jump Arena" data-desc="At the fairgrounds. The pad. The famous twenty-one-foot record.">
-          <span class="ms-pin-dot">T</span><span class="ms-pin-tip">Jump Arena</span>
-        </button>
-
-        <!-- Stay -->
-        <button class="ms-pin" data-cat="stay" style="left:18%; top:14%;" data-name="Cooper House Inn" data-desc="Six-room inn, walk to Main. Wisteria porch, the back garden.">
-          <span class="ms-pin-dot">S</span><span class="ms-pin-tip">Cooper House</span>
-        </button>
-        <button class="ms-pin" data-cat="stay" style="left:64%; top:80%;" data-name="Greenhorn Creek resort" data-desc="Townhomes around the golf course. Pool, restaurant, ten min south.">
-          <span class="ms-pin-dot">S</span><span class="ms-pin-tip">Greenhorn Creek</span>
-        </button>
-
-        <!-- Shop -->
-        <button class="ms-pin" data-cat="shop" style="left:48%; top:32%;" data-name="Legacy Properties — Sara's office" data-desc="Yes, this one. Block off Main. Stop in for coffee.">
-          <span class="ms-pin-dot">★</span><span class="ms-pin-tip">Legacy office</span>
-        </button>
-        <button class="ms-pin" data-cat="shop" style="left:36%; top:50%;" data-name="Tin Cup Trading" data-desc="Western boots, hats, the local saddle.">
-          <span class="ms-pin-dot">B</span><span class="ms-pin-tip">Tin Cup</span>
-        </button>
-
-        <!-- Do -->
-        <button class="ms-pin" data-cat="do" style="left:14%; top:74%;" data-name="Utica Park" data-desc="The town park. Playground, picnic tables, July 4 concerts.">
-          <span class="ms-pin-dot">D</span><span class="ms-pin-tip">Utica Park</span>
-        </button>
-        <button class="ms-pin" data-cat="do" style="left:88%; top:74%;" data-name="New Melones Lake" data-desc="Reservoir, 18 min west. Boat ramps, summer wakeboard culture.">
-          <span class="ms-pin-dot">D</span><span class="ms-pin-tip">New Melones</span>
-        </button>
-      </div>
-
-      <aside class="mainst-rail">
-        <div class="ms-rail-head">
-          <span class="label-cap">Detail</span>
-          <span class="mono" id="msCount" style="font-size:10px;color:var(--ink-faint);">16 places</span>
-        </div>
-        <div class="ms-rail-card" id="msRailCard">
-          <span class="ms-rail-tag" id="msTag">Hover the map</span>
-          <h3 class="ms-rail-name" id="msName">A real working town<br>— with a famous <em>frog.</em></h3>
-          <p class="ms-rail-desc" id="msDesc">Look for the gold star — that's the Legacy office, where every Angels Camp transaction starts (and most of them end).</p>
-          <ul class="ms-rail-list" id="msList"></ul>
-        </div>
-      </aside>
-    </div>
-  </div>
-</section>
 
 <!-- PICKS -->
 <section class="section town-picks" id="picks" style="background:var(--vellum);">
@@ -505,7 +352,7 @@
 
     <div class="picks-tabs">
       <button class="pick-tab pick-tab-on" data-tab="eat">Eat <span class="ct">04</span></button>
-      <button class="pick-tab" data-tab="drink">Drink <span class="ct">03</span></button>
+      <button class="pick-tab" data-tab="drink">Drink <span class="ct">02</span></button>
       <button class="pick-tab" data-tab="stay">Stay <span class="ct">03</span></button>
       <button class="pick-tab" data-tab="do">Do <span class="ct">04</span></button>
     </div>
@@ -524,7 +371,7 @@
         <article class="pick-row">
           <span class="pick-num">02</span>
           <div class="pick-body">
-            <h4>Pickle Patch Café</h4>
+            <h4>Pickled Porch</h4>
             <p>Breakfast all day, the chilaquiles are house lore. Walk-in only. The local Sunday.</p>
             <div class="pick-tags"><span>Breakfast</span><span>$</span></div>
           </div>
@@ -542,11 +389,11 @@
         <article class="pick-row">
           <span class="pick-num">04</span>
           <div class="pick-body">
-            <h4>Bistro Espresso</h4>
-            <p>The morning anchor. Pour-overs, the cinnamon roll, the regulars who'll wave you over to the corner table.</p>
-            <div class="pick-tags"><span>Coffee</span><span>$</span></div>
+            <h4>Miner Lounger</h4>
+            <p>Exceptional bites — the Main Street kitchen that's quietly become the standby. Worth holding out for the corner table.</p>
+            <div class="pick-tags"><span>Bites</span><span>$$</span></div>
           </div>
-          <div class="pick-cap"><span class="label-cap">When</span><span>6:30–3 daily</span></div>
+          <div class="pick-cap"><span class="label-cap">When</span><span>11–9 daily</span></div>
         </article>
       </div>
 
@@ -554,23 +401,14 @@
         <article class="pick-row">
           <span class="pick-num">01</span>
           <div class="pick-body">
-            <h4>Angels Hotel bar</h4>
-            <p>1851. Twain sat here. The bar has been continuously open. Order a Manhattan, sit at the wood, look around.</p>
-            <div class="pick-tags"><span>History</span><span>$$</span></div>
-          </div>
-          <div class="pick-cap"><span class="label-cap">When</span><span>3 pm – close</span></div>
-        </article>
-        <article class="pick-row">
-          <span class="pick-num">02</span>
-          <div class="pick-body">
-            <h4>The Mine Shaft</h4>
+            <h4>The Miners Lounge</h4>
             <p>The proper local. Burgers, pool table, the volunteer firefighters after a shift. The town's living room.</p>
             <div class="pick-tags"><span>Local</span><span>$$</span></div>
           </div>
           <div class="pick-cap"><span class="label-cap">When</span><span>11 am – close</span></div>
         </article>
         <article class="pick-row">
-          <span class="pick-num">03</span>
+          <span class="pick-num">02</span>
           <div class="pick-body">
             <h4>Camps bar at sunset</h4>
             <p>If you've got one drink in Angels Camp, drink it here, with the eighteenth hole in front of you and the foothills behind it.</p>
@@ -727,16 +565,16 @@
         </div>
         <div class="letter-body">
           <p class="letter-open">A few words on Angels Camp —</p>
-          <p>I live here. My office is on Main Street, my mailbox is a mile from the fairgrounds, and I owner-built our home inside the city limits. I've been in this town since 1999.</p>
+          <p>I live here. My mailbox is a mile from the fairgrounds, and I owner-built our home inside the city limits. I've been in this town since 1999.</p>
           <p>Angels Camp is the most-affordable town in the survey — by a margin that surprises Bay Area buyers when they first see the numbers. The trade-off is honest: it's a working town, not a tasting-room town. Murphys is twelve minutes north when you want that. Sonora is twenty-two minutes south when you need a hospital. Both are close enough to count as amenities.</p>
-          <p>If you're looking for the best dollar-per-square-foot in three counties, with a real Main Street, a real fair, and a real history — Angels Camp is the conversation. Come see me when you're in town. The office has coffee and Sara is usually there before nine.</p>
+          <p>If you're looking for the best dollar-per-square-foot in three counties, with a real Main Street, a real fair, and a real history — Angels Camp is the conversation. Come see me when you're in town — I'm usually around before nine.</p>
           <p class="letter-sign">— Sara</p>
         </div>
       </div>
       <div class="letter-contact">
         <a href="tel:2095594966"><span class="glyph">◇</span> (209) 559-4966</a>
         <a href="mailto:SaraSellsCalifornia@gmail.com"><span class="glyph">◇</span> SaraSellsCalifornia@gmail.com</a>
-        <a href="find-my-match.html"><span class="glyph">◇</span> Coffee at the office</a>
+        <a href="find-my-match.html"><span class="glyph">◇</span> Coffee on Main</a>
       </div>
     </article>
   </div>
