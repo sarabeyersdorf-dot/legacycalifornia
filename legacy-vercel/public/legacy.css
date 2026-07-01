@@ -206,9 +206,10 @@ body.paper::before {
   font-family: var(--serif);
   font-weight: 500;
   font-style: italic;
-  font-size: 30px;
-  letter-spacing: 0.04em;
+  font-size: 27px;
+  letter-spacing: 0.03em;
   color: var(--ink);
+  white-space: nowrap;
 }
 .wordmark-sub {
   font-family: var(--mono);

@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Bay Area to Foothills · Relocation — Legacy Properties</title>
+<title>California to Foothills · Relocation — Legacy Properties</title>
 <link rel="stylesheet" href="legacy.css">
 <style>
 /* ============================================================
@@ -212,25 +212,28 @@
 }
 .gantt-axis {
   display: grid;
-  grid-template-columns: 220px repeat(6, 1fr);
+  grid-template-columns: 220px 1fr;
   gap: 0;
   padding-bottom: 10px;
   border-bottom: 1px solid var(--rule);
   margin-bottom: 14px;
 }
-.gantt-axis-lbl { font-family: var(--mono); font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--ink-mute); }
-.gantt-axis-day {
+.gantt-axis-lbl { font-family: var(--mono); font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--ink-mute); align-self: end; }
+.gantt-axis-scale { position: relative; height: 14px; }
+.gantt-axis-tick {
+  position: absolute; bottom: 0; transform: translateX(-50%);
   font-family: var(--mono); font-size: 10px; letter-spacing: 0.12em;
-  color: var(--ink-mute);
-  text-align: left;
-  padding-left: 2px;
-  position: relative;
+  color: var(--ink-mute); white-space: nowrap;
 }
-.gantt-axis-day::before {
+.gantt-axis-tick:first-child { transform: translateX(0); }
+.gantt-axis-tick:last-child { transform: translateX(-100%); }
+.gantt-axis-tick::before {
   content: ''; position: absolute;
-  left: 0; bottom: -10px; width: 1px; height: 8px;
+  left: 50%; bottom: -10px; width: 1px; height: 8px;
   background: var(--rule-strong);
 }
+.gantt-axis-tick:first-child::before { left: 0; }
+.gantt-axis-tick:last-child::before { left: auto; right: 0; }
 
 .gantt-track {
   display: grid;
@@ -257,7 +260,7 @@
 
 .gt-rail {
   position: relative;
-  height: 56px;
+  height: 96px;
   background:
     repeating-linear-gradient(to right,
       transparent 0,
@@ -267,16 +270,59 @@
 }
 .gt-bar {
   position: absolute; top: 50%; transform: translateY(-50%);
-  height: 28px;
+  height: 60px;
   background: var(--linen);
   border: 1px solid var(--rule);
-  display: flex; align-items: center; padding: 0 14px;
-  font-family: var(--mono); font-size: 10px; letter-spacing: 0.12em;
-  color: var(--ink-soft); text-transform: uppercase;
-  transition: all .4s ease;
+  border-radius: 3px;
+  display: flex; align-items: center; padding: 4px 9px;
+  font-family: var(--mono); font-size: 11px; letter-spacing: 0; line-height: 1.12;
+  color: var(--ink-soft); text-transform: none;
+  white-space: normal; overflow: hidden;
+  cursor: default;
+  transition: box-shadow .2s ease, transform .2s ease, border-color .2s ease;
 }
-.gt-bar.bay { background: var(--shell); border-color: rgba(94,120,134,0.45); color: #4c6573; }
-.gt-bar.foot { background: var(--linen); border-color: rgba(140,110,61,0.45); color: #6e5732; }
+.gt-bar:hover {
+  z-index: 5;
+  box-shadow: 0 6px 18px rgba(27,24,19,0.16);
+  transform: translateY(-50%) scale(1.02);
+}
+.gt-bar.bay:hover { border-color: #5e7886; }
+.gt-bar.foot:hover { border-color: var(--brass); }
+
+/* Floating tooltip — full phase label, un-ellipsed */
+.gantt-tip {
+  position: fixed; z-index: 999;
+  background: var(--ink); color: var(--shell);
+  font-family: var(--mono); font-size: 10px; letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 8px 12px; border-radius: 3px;
+  pointer-events: none; opacity: 0;
+  transition: opacity .14s ease;
+  white-space: nowrap; box-shadow: 0 10px 28px rgba(0,0,0,.28);
+}
+.gantt-tip.on { opacity: 1; }
+.gantt-tip::after {
+  content: ''; position: absolute; left: 50%; bottom: -5px;
+  transform: translateX(-50%);
+  border: 5px solid transparent; border-top-color: var(--ink); border-bottom: 0;
+}
+
+/* Entrance animation when a scenario tab becomes active */
+@keyframes gtIn {
+  from { opacity: 0; transform: translateY(-50%) translateX(-8px); }
+  to   { opacity: 1; transform: translateY(-50%) translateX(0); }
+}
+.scen-pane.on .gt-bar { animation: gtIn .42s cubic-bezier(.22,.61,.36,1) both; }
+.scen-pane.on .gt-bar:nth-of-type(1) { animation-delay: .03s; }
+.scen-pane.on .gt-bar:nth-of-type(2) { animation-delay: .09s; }
+.scen-pane.on .gt-bar:nth-of-type(3) { animation-delay: .15s; }
+.scen-pane.on .gt-bar:nth-of-type(4) { animation-delay: .21s; }
+.scen-pane.on .gt-bar:nth-of-type(5) { animation-delay: .27s; }
+@media (prefers-reduced-motion: reduce) {
+  .scen-pane.on .gt-bar { animation: none; }
+}
+.gt-bar.bay { background: var(--shell); border-color: rgba(94,120,134,0.55); color: #3d5360; }
+.gt-bar.foot { background: var(--linen); border-color: rgba(140,110,61,0.55); color: #5c4727; }
 .gt-bar.bridge {
   background: var(--brass); border-color: var(--brass);
   color: var(--shell); font-weight: 600;
@@ -295,10 +341,10 @@
 .gt-milestone.brass { background: var(--brass); box-shadow: 0 0 0 1px var(--brass); }
 .gt-milestone-lbl {
   position: absolute;
-  top: -22px;
+  top: -24px;
   transform: translateX(-50%);
-  font-family: var(--mono); font-size: 9px; letter-spacing: 0.12em;
-  text-transform: uppercase; color: var(--ink);
+  font-family: var(--mono); font-size: 10.5px; letter-spacing: 0.04em;
+  text-transform: none; color: var(--ink); font-weight: 600;
   white-space: nowrap;
 }
 
@@ -565,7 +611,7 @@
 }
 </style>
 </head>
-<body class="paper" data-screen-label="Relocate · Bay → Foothills">
+<body class="paper" data-screen-label="Relocate · California → Foothills">
 
 <header class="topnav">
   <div class="topnav-bar1">
@@ -581,8 +627,8 @@
       <a href="market-report.html">Markets</a>
     </div>
     <a href="index.html" class="wordmark">
-      <span class="wordmark-word">Legacy</span>
-      <span class="wordmark-sub">Properties · Angels Camp CA</span>
+      <span class="wordmark-word">Legacy Properties</span>
+      <span class="wordmark-sub">Every Home Has A Story</span>
     </a>
     <div class="topnav-links right">
       <a href="ledger.html">The Ledger</a>
@@ -597,7 +643,7 @@
   <div class="r-crumb-inner">
     <a href="index.html">Legacy</a>
     <span class="sep">→</span>
-    <span class="cur">Relocate · Bay Area to Foothills</span>
+    <span class="cur">Relocate · California to Foothills</span>
     <span class="spacer"></span>
     <span class="mono small">Vol. XXII · The Signature Service</span>
   </div>
@@ -608,9 +654,10 @@
   <div class="r-hero-inner">
     <div>
       <span class="hairline-brass"></span>
-      <span class="eyebrow" style="display:block; margin-top:14px;">Bay Area → Sierra Foothills · The signature service</span>
+      <span class="eyebrow" style="display:block; margin-top:14px;">California metros → Sierra Foothills · The signature service</span>
       <h1>We <em>move you,</em><br>end to end.</h1>
-      <p class="lede">Sara and James specialize in the one transaction most agents won't take on — selling your Bay Area home <em>and</em> finding your foothills one, on a single coordinated calendar.</p>
+      <p class="lede">Sara and James specialize in the one transaction most agents won't take on — selling your California home <em>and</em> finding your foothills one, on a single coordinated calendar.</p>
+      <p class="r-note" style="margin-top:16px; max-width:580px; font-size:13px; line-height:1.62; color:var(--ink-mute);">Happy to talk through a move with any California seller — and we welcome out-of-state buyers. We're licensed in California, so we can't list a home outside the state, but we'll get you pointed the right way.</p>
       <div class="r-hero-ctas">
         <a href="find-my-match.html" class="btn btn-ink">Start the conversation</a>
         <a href="#calendar" class="btn btn-ghost">See the calendar</a>
@@ -626,8 +673,8 @@
 
       <div class="ft-row">
         <span class="ft-label">From</span>
-        <span class="ft-place">The Bay</span>
-        <span class="ft-sub">We list, stage, and market your home across SF, the Peninsula, and the East Bay with a licensed referral network we've worked with for years.</span>
+        <span class="ft-place">Your metro</span>
+        <span class="ft-sub">We list and market your California home ourselves — San Jose and Silicon Valley, Sacramento, Modesto, San Francisco and the East Bay. No referral hand-off; Sara runs the listing start to finish. (Staging is available at an additional cost.)</span>
       </div>
       <div class="ft-arrow">
         <span class="bar"></span><span>The bridge</span><span class="bar"></span>
@@ -635,7 +682,7 @@
       <div class="ft-row">
         <span class="ft-label">To</span>
         <span class="ft-place">The Foothills</span>
-        <span class="ft-sub">We tour you, advise on schools and septic, write the offer, and hand you the keys — coordinated to your Bay close.</span>
+        <span class="ft-sub">We tour you, advise on schools and septic, write the offer, and hand you the keys — coordinated to your home’s close.</span>
       </div>
     </div>
   </div>
@@ -659,8 +706,8 @@
       <article class="r-pp">
         <div class="r-pp-num">II</div>
         <div>
-          <h4>Marketing built for Bay buyers — not foothills sellers.</h4>
-          <p>Your Bay home needs a different playbook than the cabin you're buying. Sara's years of PR work shows up here: pre-list strategy, photography that performs on Compass and Zillow, a deliberate sequence of open houses, and a written marketing plan with weekly numbers.</p>
+          <h4>Marketing built for metro buyers — not foothills sellers.</h4>
+          <p>Your metro home needs a different playbook than the cabin you're buying. Sara's years of PR work shows up here: pre-list strategy, photography that performs on Compass and Zillow, a deliberate sequence of open houses, and a written marketing plan with weekly numbers.</p>
         </div>
       </article>
       <article class="r-pp">
@@ -680,10 +727,10 @@
     <div class="cal-h">
       <div>
         <span class="hairline-brass"></span>
-        <span class="eyebrow" style="display:block; margin-top:14px;">Plate II · The 90-day coordination calendar</span>
+        <span class="eyebrow" style="display:block; margin-top:14px;">Plate II · Three ways to coordinate the move</span>
         <h2>Two transactions,<br><em>one timeline.</em></h2>
       </div>
-      <p class="right">Most relocations fail one of three ways — and most agents only know one of them. Toggle scenarios to see how each plays out.</p>
+      <p class="right">Most relocations fail one of three ways — and most agents only know one of them. Toggle the scenarios below to see how each one works.</p>
     </div>
 
     <div class="scen-tabs" role="tablist">
@@ -694,50 +741,11 @@
 
     <!-- CONCURRENT -->
     <div class="scen-pane on" data-scen="concurrent">
-      <div class="gantt">
-        <div class="gantt-axis">
-          <div class="gantt-axis-lbl">Day</div>
-          <div class="gantt-axis-day">Day 0</div>
-          <div class="gantt-axis-day">15</div>
-          <div class="gantt-axis-day">30</div>
-          <div class="gantt-axis-day">45</div>
-          <div class="gantt-axis-day">60</div>
-          <div class="gantt-axis-day">90</div>
-        </div>
-
-        <div class="gantt-track">
-          <div class="gt-label">
-            <strong>Bay sale</strong>
-            <span class="gt-label-sub">Sara, with referral co-list</span>
-          </div>
-          <div class="gt-rail">
-            <div class="gt-bar bay" style="left:0%; width:14%;">Prep · stage</div>
-            <div class="gt-bar bay" style="left:14%; width:28%;">List · open houses</div>
-            <div class="gt-bar bay" style="left:42%; width:14%;">Under contract</div>
-            <div class="gt-bar bridge" style="left:56%; width:36%;">Escrow · disclosures · loans</div>
-            <div class="gt-milestone brass" style="left:92%;"><span class="gt-milestone-lbl">Close · Day 82</span></div>
-          </div>
-        </div>
-
-        <div class="gantt-track">
-          <div class="gt-label">
-            <strong>Foothills purchase</strong>
-            <span class="gt-label-sub">Sara &amp; James</span>
-          </div>
-          <div class="gt-rail">
-            <div class="gt-bar foot" style="left:8%; width:30%;">Tour · short list</div>
-            <div class="gt-bar foot" style="left:38%; width:14%;">Offer · accepted</div>
-            <div class="gt-bar bridge" style="left:52%; width:40%;">Escrow · contingency removal</div>
-            <div class="gt-milestone brass" style="left:92%;"><span class="gt-milestone-lbl">Close · Day 82</span></div>
-          </div>
-        </div>
-      </div>
-
       <div class="scen-summary">
         <article class="ss-card">
           <span class="ss-h">Cash flow</span>
           <span class="ss-v">Tight but clean</span>
-          <p class="ss-d">No bridge financing. Bay sale proceeds wire directly into the foothills close on the same business day. Costs the least; works only when both contracts cooperate.</p>
+          <p class="ss-d">No bridge financing. Home-sale proceeds wire directly into the foothills close on the same business day. Costs the least; works only when both contracts cooperate.</p>
         </article>
         <article class="ss-card">
           <span class="ss-h">Stress profile</span>
@@ -754,45 +762,6 @@
 
     <!-- BRIDGE -->
     <div class="scen-pane" data-scen="bridge">
-      <div class="gantt">
-        <div class="gantt-axis">
-          <div class="gantt-axis-lbl">Day</div>
-          <div class="gantt-axis-day">Day 0</div>
-          <div class="gantt-axis-day">15</div>
-          <div class="gantt-axis-day">30</div>
-          <div class="gantt-axis-day">45</div>
-          <div class="gantt-axis-day">60</div>
-          <div class="gantt-axis-day">90</div>
-        </div>
-
-        <div class="gantt-track">
-          <div class="gt-label">
-            <strong>Foothills purchase</strong>
-            <span class="gt-label-sub">Buy first, with bridge loan</span>
-          </div>
-          <div class="gt-rail">
-            <div class="gt-bar foot" style="left:0%; width:22%;">Tour · short list</div>
-            <div class="gt-bar foot" style="left:22%; width:10%;">Offer · accepted</div>
-            <div class="gt-bar bridge" style="left:32%; width:18%;">Bridge funded · close</div>
-            <div class="gt-milestone brass" style="left:50%;"><span class="gt-milestone-lbl">Move in · Day 45</span></div>
-          </div>
-        </div>
-
-        <div class="gantt-track">
-          <div class="gt-label">
-            <strong>Bay sale</strong>
-            <span class="gt-label-sub">Sell after, with staged-empty</span>
-          </div>
-          <div class="gt-rail">
-            <div class="gt-bar bay" style="left:30%; width:14%;">Prep · stage empty</div>
-            <div class="gt-bar bay" style="left:44%; width:24%;">List · open houses</div>
-            <div class="gt-bar bay" style="left:68%; width:10%;">Under contract</div>
-            <div class="gt-bar bridge" style="left:78%; width:14%;">Escrow · bridge retired</div>
-            <div class="gt-milestone brass" style="left:92%;"><span class="gt-milestone-lbl">Close · Day 82</span></div>
-          </div>
-        </div>
-      </div>
-
       <div class="scen-summary">
         <article class="ss-card">
           <span class="ss-h">Cash flow</span>
@@ -802,7 +771,7 @@
         <article class="ss-card">
           <span class="ss-h">Stress profile</span>
           <span class="ss-v">Move once. Sell empty.</span>
-          <p class="ss-d">You're already up here when the Bay home shows. Empty-staging photographs better, open houses are easier to schedule, and there's no choreography around your daily life.</p>
+          <p class="ss-d">You're already up here when your home shows. An empty home photographs better, open houses are easier to schedule, and there's no choreography around your daily life.</p>
         </article>
         <article class="ss-card">
           <span class="ss-h">Best for</span>
@@ -814,46 +783,6 @@
 
     <!-- RENT-BACK -->
     <div class="scen-pane" data-scen="rentback">
-      <div class="gantt">
-        <div class="gantt-axis">
-          <div class="gantt-axis-lbl">Day</div>
-          <div class="gantt-axis-day">Day 0</div>
-          <div class="gantt-axis-day">15</div>
-          <div class="gantt-axis-day">30</div>
-          <div class="gantt-axis-day">45</div>
-          <div class="gantt-axis-day">60</div>
-          <div class="gantt-axis-day">90</div>
-        </div>
-
-        <div class="gantt-track">
-          <div class="gt-label">
-            <strong>Bay sale</strong>
-            <span class="gt-label-sub">Sell first, rent back</span>
-          </div>
-          <div class="gt-rail">
-            <div class="gt-bar bay" style="left:0%; width:14%;">Prep · stage</div>
-            <div class="gt-bar bay" style="left:14%; width:24%;">List · open houses</div>
-            <div class="gt-bar bay" style="left:38%; width:12%;">Under contract</div>
-            <div class="gt-bar bridge" style="left:50%; width:14%;">Close · rent-back negotiated</div>
-            <div class="gt-bar foot" style="left:64%; width:24%;">You rent your old home (60 days)</div>
-            <div class="gt-milestone" style="left:50%;"><span class="gt-milestone-lbl">Bay closes · Day 45</span></div>
-          </div>
-        </div>
-
-        <div class="gantt-track">
-          <div class="gt-label">
-            <strong>Foothills purchase</strong>
-            <span class="gt-label-sub">Patient buyer; pre-approved cash equiv.</span>
-          </div>
-          <div class="gt-rail">
-            <div class="gt-bar foot" style="left:14%; width:38%;">Tour · short list · find the right one</div>
-            <div class="gt-bar foot" style="left:52%; width:12%;">Offer · accepted</div>
-            <div class="gt-bar bridge" style="left:64%; width:24%;">Escrow</div>
-            <div class="gt-milestone brass" style="left:88%;"><span class="gt-milestone-lbl">Close · Day 80</span></div>
-          </div>
-        </div>
-      </div>
-
       <div class="scen-summary">
         <article class="ss-card">
           <span class="ss-h">Cash flow</span>
@@ -863,7 +792,7 @@
         <article class="ss-card">
           <span class="ss-h">Stress profile</span>
           <span class="ss-v">Hardest negotiation</span>
-          <p class="ss-d">Bay buyer must agree to the rent-back upfront — strongest in a competitive seller's market, hardest when inventory is loose. We script this into the listing strategy from Day 0.</p>
+          <p class="ss-d">Your buyer must agree to the rent-back upfront — strongest in a competitive seller's market, hardest when inventory is loose. We script this into the listing strategy from Day 0.</p>
         </article>
         <article class="ss-card">
           <span class="ss-h">Best for</span>
@@ -888,12 +817,12 @@
       <article class="step">
         <div class="step-num">I</div>
         <h3>Sell</h3>
-        <div class="step-tag">Your Bay Area home · weeks 0–8</div>
-        <p class="step-body">A written marketing plan customized to your home, your block, and your market. We co-list with a licensed Bay Area broker we've partnered with for years — Sara remains your point of contact on both sides.</p>
+        <div class="step-tag">Your current home · weeks 0–8</div>
+        <p class="step-body">A written marketing plan customized to your home, your block, and your market. Sara lists it herself — no referral hand-off, no out-of-area co-agent. She's your single point of contact on both sides.</p>
         <ul class="step-list">
           <li>Pre-list strategy: improvements that matter, those that don't</li>
-          <li>Professional staging &amp; photography (in-budget)</li>
-          <li>Compass / Zillow / MLS narrative built for Bay buyers</li>
+          <li>Professional photography; staging available at additional cost</li>
+          <li>Compass / Zillow / MLS narrative built for metro buyers</li>
           <li>Two-week open-house cadence with weekly numbers</li>
           <li>Negotiation, contingency strategy, close coordination</li>
         </ul>
@@ -948,8 +877,8 @@
           <div class="duo-name">Sara Cooper</div>
           <div class="duo-title">Owner-Broker · Lead on every relocation</div>
           <div class="duo-role">
-            <strong>Marketing &amp; the Bay side.</strong>
-            Sara runs the Bay-Area listing strategy with our partner brokerage, writes the marketing plan, and stays on point through both closes. Buyer-side, she's your tour agent in Murphys, Sutter Creek, Angels Camp, and Copperopolis.
+            <strong>Marketing &amp; the sale side.</strong>
+            Sara runs the listing herself, writes the marketing plan, and stays on point through both closes. Buyer-side, she's your tour agent in Murphys, Sutter Creek, Angels Camp, and Copperopolis.
           </div>
           <div class="duo-spec">
             <span>Listing strategy</span><span>Buyer tours</span><span>Negotiation</span><span>PR background</span>
@@ -985,7 +914,7 @@
       <span class="eyebrow">Plate V · Recent moves</span>
       <h2>Four families,<br><em>twelve months.</em></h2>
     </div>
-    <p class="lede" style="margin-top: 14px; max-width: 720px;">Names changed; numbers are real. These are typical of the trade we run — Bay equity translated into a foothills life.</p>
+    <p class="lede" style="margin-top: 14px; max-width: 720px;">Names changed; numbers are real. These are typical of the trade we run — California-metro equity translated into a foothills life.</p>
 
     <div class="moves-grid">
       <article class="move">
@@ -1008,7 +937,7 @@
           <div class="mn-cell"><span class="mn-l">Bought</span><span class="mn-v">$585K</span></div>
           <div class="mn-cell"><span class="mn-l">Net unlocked</span><span class="mn-v">$1.42M</span></div>
         </div>
-        <p class="move-q">"We bought first with a bridge loan, moved up, then sold staged-empty. The Palo Alto listing showed better without us in it. James walked the cabin acreage before we made the offer."</p>
+        <p class="move-q">"We bought first with a bridge loan, moved up, then sold it empty. The Palo Alto listing showed better without us in it. James walked the cabin acreage before we made the offer."</p>
         <p class="move-attr">— Retired couple · early sixties</p>
       </article>
 
@@ -1052,7 +981,7 @@
     </p>
 
     <div class="q-grid">
-      <div class="q-cell"><div class="q-num">01</div><div><h4>What's the Bay home worth — honestly?</h4><p>Not Zillow. Our partner Bay broker pulls comps and walks the property in week one.</p></div></div>
+      <div class="q-cell"><div class="q-num">01</div><div><h4>What's your current home worth — honestly?</h4><p>Not Zillow. Sara pulls comps and walks the property in week one.</p></div></div>
       <div class="q-cell"><div class="q-num">02</div><div><h4>Mortgage balance, second loans, HELOCs?</h4><p>This drives bridge eligibility and net-proceeds math.</p></div></div>
       <div class="q-cell"><div class="q-num">03</div><div><h4>What's your cash floor after both transactions?</h4><p>Reserves matter more than purchase price. We model three scenarios.</p></div></div>
       <div class="q-cell"><div class="q-num">04</div><div><h4>Hard move date — or flexible window?</h4><p>School year, lease end, retirement date — these shape the timeline.</p></div></div>
@@ -1084,8 +1013,8 @@
     <div class="footer-top">
       <div>
         <a href="index.html" class="wordmark" style="align-items: flex-start;">
-          <span class="wordmark-word">Legacy</span>
-          <span class="wordmark-sub">Properties · Angels Camp CA</span>
+          <span class="wordmark-word">Legacy Properties</span>
+          <span class="wordmark-sub">Every Home Has A Story</span>
         </a>
         <p class="footer-tagline">Every home has a story. We help you find yours — or tell the one you've already lived.</p>
       </div>
@@ -1093,7 +1022,7 @@
         <h4>Services</h4>
         <a href="property-search.html">Browse listings</a>
         <a href="towns.html">Communities</a>
-        <a href="relocate.html">Bay → Foothills</a>
+        <a href="relocate.html">California → Foothills</a>
         <a href="valuation.html">Sellers</a>
       </div>
       <div>
@@ -1125,7 +1054,31 @@
       const s = t.dataset.scen;
       tabs.forEach(x => x.classList.toggle('on', x === t));
       panes.forEach(p => p.classList.toggle('on', p.dataset.scen === s));
+      // Re-trigger entrance animation on the now-active pane's bars
+      const active = document.querySelector('.scen-pane.on');
+      if (active) active.querySelectorAll('.gt-bar').forEach(b => {
+        b.style.animation = 'none'; void b.offsetWidth; b.style.animation = '';
+      });
     });
+  });
+
+  // Floating tooltip: reveal each phase's full label (bars are ellipsed)
+  const tip = document.createElement('div');
+  tip.className = 'gantt-tip';
+  document.body.appendChild(tip);
+  function place(bar){
+    const r = bar.getBoundingClientRect();
+    tip.style.left = (r.left + r.width / 2) + 'px';
+    tip.style.top  = (r.top - 10) + 'px';
+    tip.style.transform = 'translate(-50%, -100%)';
+  }
+  document.querySelectorAll('.gt-bar').forEach(bar => {
+    bar.addEventListener('mouseenter', () => {
+      tip.textContent = (bar.textContent || '').trim();
+      tip.classList.add('on'); place(bar);
+    });
+    bar.addEventListener('mousemove', () => place(bar));
+    bar.addEventListener('mouseleave', () => tip.classList.remove('on'));
   });
 })();
 </script>

@@ -1,0 +1,41 @@
+COMMIT THESE TO: legacy-vercel/public/  (overwrite existing)
+
+36 files:
+  legacy-vercel/public/about.html
+  legacy-vercel/public/agent-profile.html
+  legacy-vercel/public/agent.html
+  legacy-vercel/public/agents.html
+  legacy-vercel/public/communities.html
+  legacy-vercel/public/commute.html
+  legacy-vercel/public/favorites.html
+  legacy-vercel/public/featured-listings.html
+  legacy-vercel/public/find-my-match.html
+  legacy-vercel/public/fire-zone.html
+  legacy-vercel/public/how-we-work.html
+  legacy-vercel/public/index.html
+  legacy-vercel/public/ledger-issue.html
+  legacy-vercel/public/ledger.html
+  legacy-vercel/public/legacy.css
+  legacy-vercel/public/listing-report.html
+  legacy-vercel/public/listing.html
+  legacy-vercel/public/market-report.html
+  legacy-vercel/public/mortgage-calculator.html
+  legacy-vercel/public/office.html
+  legacy-vercel/public/offices.html
+  legacy-vercel/public/open-home-listings.html
+  legacy-vercel/public/open-home-report.html
+  legacy-vercel/public/pending-featured-listings.html
+  legacy-vercel/public/property-organizer.html
+  legacy-vercel/public/property-search.html
+  legacy-vercel/public/relocate.html
+  legacy-vercel/public/river-mountain.html
+  legacy-vercel/public/sold-featured-listings.html
+  legacy-vercel/public/town-angels-camp.html
+  legacy-vercel/public/town-arnold.html
+  legacy-vercel/public/town-copperopolis.html
+  legacy-vercel/public/town-murphys.html
+  legacy-vercel/public/town-sutter-creek.html
+  legacy-vercel/public/towns.html
+  legacy-vercel/public/valuation.html
+
+Vercel auto-deploys from main once pushed. No other deploy step.
