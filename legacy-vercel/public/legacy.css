@@ -210,6 +210,7 @@ body.paper::before {
   letter-spacing: 0.03em;
   color: var(--ink);
   white-space: nowrap;
+  display: block;
 }
 .wordmark-sub {
   font-family: var(--mono);
@@ -218,6 +219,7 @@ body.paper::before {
   text-transform: uppercase;
   color: var(--ink-mute);
   margin-top: 4px;
+  display: block;
 }
 
 /* ── Dynamic header wordmark (topnav only) ──────────────────────

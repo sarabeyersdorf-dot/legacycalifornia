@@ -15,6 +15,15 @@
     activationToken: "d77ab7ae-7afe-403d-89cf-61bd60bbf806",
   };
 </script>
+<style>
+  .mr-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(440px,1fr)); gap:1px; background:var(--rule); border:1px solid var(--rule); }
+  .mr-card { background:var(--shell); padding:28px 30px; display:flex; flex-direction:column; gap:18px; }
+  .mr-card-h { display:flex; align-items:baseline; justify-content:space-between; gap:12px; padding-bottom:14px; border-bottom:1px solid var(--rule); }
+  .mr-card-h .mr-name { font-family:var(--serif); font-style:italic; font-weight:400; font-size:26px; color:var(--ink); line-height:1; }
+  .mr-card-h .mr-area { font-family:var(--mono); font-size:10px; letter-spacing:0.14em; text-transform:uppercase; color:var(--ink-mute); white-space:nowrap; }
+  .mr-card .idx-embed { min-height:60px; }
+  @media (max-width:900px){ .mr-grid { grid-template-columns:1fr; } }
+</style>
 </head>
 <body class="paper" data-screen-label="Market Report">
 
@@ -56,16 +65,52 @@
   </div>
 </section>
 
-<div class="idx-embed">
+<section class="section" style="padding-top:0;">
+  <div class="section-inner">
+    <div class="mr-grid">
+      <article class="mr-card">
+        <div class="mr-card-h"><span class="mr-name">Murphys</span><span class="mr-area">Calaveras</span></div>
+        <div class="idx-embed">
 <script>
-  // Live iHomeFinder market-reports widget, rendered inline.
-  // If this component name differs in the account, replace this <script> block
-  // with the "Market Reports" widget snippet from the iHomeFinder Control Panel.
-  document.currentScript.replaceWith(ihfKestrel.render({
-    "component": "marketReportsWidget"
-  }));
+	document.currentScript.replaceWith(ihfKestrel.render({"component":"marketReportWidget","id":3013776,"marketReportTypeId":1}));
 </script>
-</div>
+        </div>
+      </article>
+      <article class="mr-card">
+        <div class="mr-card-h"><span class="mr-name">Copperopolis</span><span class="mr-area">Calaveras · Lake Tulloch</span></div>
+        <div class="idx-embed">
+<script>
+	document.currentScript.replaceWith(ihfKestrel.render({"component":"marketReportWidget","id":3013777,"marketReportTypeId":1}));
+</script>
+        </div>
+      </article>
+      <article class="mr-card">
+        <div class="mr-card-h"><span class="mr-name">Snow &amp; Cabins</span><span class="mr-area">Arnold · Ebbetts Pass</span></div>
+        <div class="idx-embed">
+<script>
+	document.currentScript.replaceWith(ihfKestrel.render({"component":"marketReportWidget","id":3013778,"marketReportTypeId":1}));
+</script>
+        </div>
+      </article>
+      <article class="mr-card">
+        <div class="mr-card-h"><span class="mr-name">Waterfront</span><span class="mr-area">Lakes &amp; rivers</span></div>
+        <div class="idx-embed">
+<script>
+	document.currentScript.replaceWith(ihfKestrel.render({"component":"marketReportWidget","id":3013784,"marketReportTypeId":1}));
+</script>
+        </div>
+      </article>
+      <article class="mr-card">
+        <div class="mr-card-h"><span class="mr-name">Homes on 5+ Acres</span><span class="mr-area">Rural parcels</span></div>
+        <div class="idx-embed">
+<script>
+	document.currentScript.replaceWith(ihfKestrel.render({"component":"marketReportWidget","id":3013785,"marketReportTypeId":1}));
+</script>
+        </div>
+      </article>
+    </div>
+  </div>
+</section>
 
 <footer class="footer">
   <div class="footer-inner">

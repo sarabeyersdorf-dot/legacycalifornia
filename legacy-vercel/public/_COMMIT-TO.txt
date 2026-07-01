@@ -1,0 +1,6 @@
+Commit all files to: legacy-vercel/public/  (overwrite existing)
+
+  legacy-vercel/public/legacy.css
+  legacy-vercel/public/town-arnold.html
+  legacy-vercel/public/market-report.html
+  legacy-vercel/public/river-mountain.html

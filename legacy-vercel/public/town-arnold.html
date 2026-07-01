@@ -6,6 +6,14 @@
 <title>Arnold, CA — Legacy Properties</title>
 <link rel="stylesheet" href="legacy.css">
 <link rel="stylesheet" href="town.css">
+<script src="https://kestrel.idxhome.com/ihf-kestrel.js"></script>
+<script>
+  window.ihfKestrel = window.ihfKestrel || {};
+  ihfKestrel.config = {
+    platform: "custom",
+    activationToken: "d77ab7ae-7afe-403d-89cf-61bd60bbf806",
+  };
+</script>
 <style>
   #trails .trail-groups { display:flex; flex-direction:column; gap:44px; }
   #trails .trail-group-h { display:flex; align-items:baseline; gap:16px; padding-bottom:12px; margin-bottom:18px; border-bottom:1px solid var(--rule); }
@@ -257,6 +265,25 @@
   </div>
 </section>
 
+<!-- LIVE MARKET REPORT — Snow & Cabins -->
+<section class="section" id="market" style="background:var(--parchment);">
+  <div class="section-inner">
+    <div class="section-h">
+      <div>
+        <span class="hairline-brass"></span>
+        <span class="eyebrow">Live from the MLS</span>
+        <h2 class="h-section" style="margin-top:10px;">The Arnold report,<br><em>Snow &amp; Cabins.</em></h2>
+      </div>
+      <p class="lede right">Median price, days on market, and inventory for the Ebbetts Pass corridor — pulled live and updated continuously.</p>
+    </div>
+    <div class="idx-embed">
+<script>
+	document.currentScript.replaceWith(ihfKestrel.render({"component":"marketReportWidget","id":3013778,"marketReportTypeId":1}));
+</script>
+    </div>
+  </div>
+</section>
+
 <!-- TRAILS — trailhead index -->
 <section class="section" id="trails" style="background:var(--parchment);">
   <div class="section-inner">
@@ -453,46 +480,18 @@
         <span class="eyebrow">Plate V · Currently in the field</span>
         <h2 class="h-section" style="margin-top:10px;">Homes for sale<br><em>in Arnold.</em></h2>
       </div>
-      <p class="lede right">Three cabins on the boards this morning.</p>
+      <p class="lede right">Active listings this morning — updated continuously from MLS.</p>
     </div>
 
-    <div class="list-grid">
-      <a href="featured-listings.html" class="prop-card">
-        <div class="prop-photo">
-          <img src="https://images.unsplash.com/photo-1518780664697-55e3ad937233?w=800&q=85" alt="">
-          <div class="prop-tags"><span class="pill-status pill-new">Just listed</span></div>
-        </div>
-        <div class="prop-body">
-          <div class="prop-price">$579,000</div>
-          <div class="prop-address">2118 Snow Creek Dr<br>Arnold, CA 95223</div>
-          <div class="prop-specs"><span>3 Bd</span><span>2 Ba</span><span>A-frame</span></div>
-          <div class="prop-foot"><span class="prop-match">Listed by Sara</span><span class="label-cap" style="color:var(--ink-faint);">Plate I</span></div>
-        </div>
-      </a>
-      <a href="featured-listings.html" class="prop-card">
-        <div class="prop-photo">
-          <img src="https://images.unsplash.com/photo-1542718610-a1d656d1884c?w=800&q=85" alt="">
-          <div class="prop-tags"><span class="pill-status pill-brass">Active</span></div>
-        </div>
-        <div class="prop-body">
-          <div class="prop-price">$449,000</div>
-          <div class="prop-address">315 Blue Lake Springs<br>Arnold, CA 95223</div>
-          <div class="prop-specs"><span>2 Bd</span><span>2 Ba</span><span>Cabin</span></div>
-          <div class="prop-foot"><span class="prop-match">Listed by Sara</span><span class="label-cap" style="color:var(--ink-faint);">Plate II</span></div>
-        </div>
-      </a>
-      <a href="featured-listings.html" class="prop-card">
-        <div class="prop-photo">
-          <img src="https://images.unsplash.com/photo-1505691938895-1758d7feb511?w=800&q=85" alt="">
-          <div class="prop-tags"><span class="pill-status">Pending</span></div>
-        </div>
-        <div class="prop-body">
-          <div class="prop-price">$795,000</div>
-          <div class="prop-address">4204 Pine Ridge<br>Arnold, CA 95223</div>
-          <div class="prop-specs"><span>4 Bd</span><span>3 Ba</span><span>1.2 ac</span></div>
-          <div class="prop-foot"><span class="prop-match">Listed by Sara</span><span class="label-cap" style="color:var(--ink-faint);">Plate III</span></div>
-        </div>
-      </a>
+    <div class="idx-embed idx-feature-gallery">
+      <script>
+        // Sara's real active (featured) listings, live from the iHomeFinder feed.
+        // Each card links to its real IDX detail page. Renders on the deployed,
+        // token-authorized domain (legacycalifornia.vercel.app) — not in local preview.
+        document.currentScript.replaceWith(ihfKestrel.render({
+          component: "gallerySliderWidget"
+        }));
+      </script>
     </div>
 
     <div style="text-align:center; margin-top:40px;">
