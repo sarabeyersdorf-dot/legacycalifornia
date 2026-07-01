@@ -6,8 +6,17 @@
 <title>Arnold, CA — Legacy Properties</title>
 <link rel="stylesheet" href="legacy.css">
 <link rel="stylesheet" href="town.css">
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
-<link rel="stylesheet" href="town-map.css">
+<style>
+  #trails .trail-groups { display:flex; flex-direction:column; gap:44px; }
+  #trails .trail-group-h { display:flex; align-items:baseline; gap:16px; padding-bottom:12px; margin-bottom:18px; border-bottom:1px solid var(--rule); }
+  #trails .trail-group-h .tg-name { font-family:var(--serif); font-style:italic; font-weight:400; font-size:30px; color:var(--ink); line-height:1; }
+  #trails .trail-rows { display:grid; grid-template-columns:repeat(2,1fr); gap:1px; background:var(--rule); border:1px solid var(--rule); }
+  #trails .trail-row { background:var(--shell); padding:22px 26px; }
+  #trails .trail-row .tr-stat { display:block; font-family:var(--mono); font-size:10px; letter-spacing:0.1em; text-transform:uppercase; color:var(--brass); margin-bottom:8px; }
+  #trails .trail-row h4 { font-family:var(--serif); font-style:italic; font-weight:400; font-size:22px; color:var(--ink); margin-bottom:6px; }
+  #trails .trail-row p { font-size:13px; line-height:1.6; color:var(--ink-soft); }
+  @media (max-width:800px){ #trails .trail-rows { grid-template-columns:1fr; } }
+</style>
 </head>
 <body class="paper" data-screen-label="Town · Arnold">
 
@@ -248,48 +257,46 @@
   </div>
 </section>
 
-<!-- TRAILS — the signature interactive map -->
+<!-- TRAILS — trailhead index -->
 <section class="section" id="trails" style="background:var(--parchment);">
   <div class="section-inner">
     <div class="section-h">
       <div>
         <span class="hairline-brass"></span>
-        <span class="eyebrow">Plate III · A walking diagram</span>
+        <span class="eyebrow">Plate III · The trails</span>
         <h2 class="h-section" style="margin-top:10px;">Twelve trailheads,<br><em>one ridge.</em></h2>
       </div>
-      <p class="lede right">From a paved fifteen-minute giant sequoia stroll to a serious thirteen-mile ridge — hover any pin to see distance, elevation, season.</p>
+      <p class="lede right">From a paved fifteen-minute giant-sequoia stroll to a serious thirteen-mile ridge — twelve trailheads within reach of the cabin door.</p>
     </div>
 
-    <div class="mainst-filters">
-      <button class="ms-filter ms-on" data-cat="all">All <span class="ct">12</span></button>
-      <button class="ms-filter" data-cat="wine">Easy <span class="ct">4</span></button>
-      <button class="ms-filter" data-cat="eat">Moderate <span class="ct">5</span></button>
-      <button class="ms-filter" data-cat="stay">Strenuous <span class="ct">3</span></button>
-    </div>
-
-    <div class="tm-editor" id="tmEditor">
-      <span class="tm-editor-lead">Drag any pin to its true location. <strong>Your placements save in this browser.</strong> When the map looks right, hit Copy coordinates and send them over to publish for everyone.</span>
-      <div class="tm-editor-actions">
-        <button class="tm-btn ghost" data-act="reset">Reset pins</button>
-        <button class="tm-btn" data-act="copy">Copy coordinates</button>
+    <div class="trail-groups">
+      <div class="trail-group">
+        <div class="trail-group-h"><span class="tg-name">Easy</span><span class="label-cap">Four trailheads</span></div>
+        <div class="trail-rows">
+          <article class="trail-row"><span class="tr-stat">1.5 mi · 50 ft · year-round</span><h4>North Grove Loop</h4><p>The introductory sequoia walk. Paved the whole way.</p></article>
+          <article class="trail-row"><span class="tr-stat">5 mi · 600 ft · May–Oct</span><h4>South Grove</h4><p>The Agassiz Tree, and far less-traveled than the North Grove.</p></article>
+          <article class="trail-row"><span class="tr-stat">0.8 mi · flat · year-round</span><h4>Cottage Springs Pond</h4><p>Dogs, kids, picnics — the easy after-dinner loop.</p></article>
+          <article class="trail-row"><span class="tr-stat">1.2 mi · loop · year-round</span><h4>White Pines Lake</h4><p>Trout, paddle boats, and it's right in town.</p></article>
+        </div>
       </div>
-      <span class="tm-editor-msg"></span>
-    </div>
-    <div class="mainst-board">
-      <div class="mainst-map mainst-map--live" id="mainstMap"><div id="townMapCanvas" class="town-map-canvas"></div></div>
-
-      <aside class="mainst-rail">
-        <div class="ms-rail-head">
-          <span class="label-cap">Detail</span>
-          <span class="mono" id="msCount" style="font-size:10px;color:var(--ink-faint);">12 trails</span>
+      <div class="trail-group">
+        <div class="trail-group-h"><span class="tg-name">Moderate</span><span class="label-cap">Five trailheads</span></div>
+        <div class="trail-rows">
+          <article class="trail-row"><span class="tr-stat">3 mi · 400 ft · Apr–Nov</span><h4>Sourgrass Bridge</h4><p>Swimming holes and the rope swing on the Stanislaus.</p></article>
+          <article class="trail-row"><span class="tr-stat">4.5 mi · 700 ft · May–Oct</span><h4>Bull Run</h4><p>Granite domes and summit views once you top out.</p></article>
+          <article class="trail-row"><span class="tr-stat">6 mi · 500 ft · Jun–Oct</span><h4>Spicer Reservoir Trail</h4><p>Granite, an alpine lake, and trout at the far end.</p></article>
+          <article class="trail-row"><span class="tr-stat">3.8 mi · 800 ft · Jun–Oct</span><h4>Lava Bomb</h4><p>A volcanic outcrop — the local sunset spot.</p></article>
+          <article class="trail-row"><span class="tr-stat">5 mi · 600 ft · May–Oct</span><h4>Beaver Creek</h4><p>Cascades and swimming holes the whole way up.</p></article>
         </div>
-        <div class="ms-rail-card" id="msRailCard">
-          <span class="ms-rail-tag" id="msTag">Hover the map</span>
-          <h3 class="ms-rail-name" id="msName">Twelve trails<br>from the door.</h3>
-          <p class="ms-rail-desc" id="msDesc">Sara's family hikes most of these. Ask which ones the kids actually finish.</p>
-          <ul class="ms-rail-list" id="msList"></ul>
+      </div>
+      <div class="trail-group">
+        <div class="trail-group-h"><span class="tg-name">Strenuous</span><span class="label-cap">Three trailheads</span></div>
+        <div class="trail-rows">
+          <article class="trail-row"><span class="tr-stat">9 mi · 1,400 ft · Jul–Oct</span><h4>Sandy Meadow → Lake Alpine</h4><p>Granite ridges opening to lake views up top.</p></article>
+          <article class="trail-row"><span class="tr-stat">13 mi · 2,100 ft · Jul–Oct</span><h4>Pinecrest → Camp Nine</h4><p>A full day pack with a river finish; shuttle required.</p></article>
+          <article class="trail-row"><span class="tr-stat">11 mi · 1,800 ft · Jun–Oct</span><h4>Mokelumne Coast to Crest</h4><p>The connoisseur's day. Bring water and start early.</p></article>
         </div>
-      </aside>
+      </div>
     </div>
   </div>
 </section>
@@ -307,8 +314,8 @@
     </div>
 
     <div class="picks-tabs">
-      <button class="pick-tab pick-tab-on" data-tab="eat">Eat <span class="ct">04</span></button>
-      <button class="pick-tab" data-tab="drink">Drink <span class="ct">03</span></button>
+      <button class="pick-tab pick-tab-on" data-tab="eat">Eat <span class="ct">03</span></button>
+      <button class="pick-tab" data-tab="drink">Drink <span class="ct">02</span></button>
       <button class="pick-tab" data-tab="stay">Stay <span class="ct">03</span></button>
       <button class="pick-tab" data-tab="do">Do <span class="ct">04</span></button>
     </div>
@@ -318,11 +325,11 @@
         <article class="pick-row">
           <span class="pick-num">01</span>
           <div class="pick-body">
-            <h4>Snowshoe Brewing</h4>
-            <p>Brewpub, beers brewed in back, food honest and large. The hardest table to get on a snow day.</p>
-            <div class="pick-tags"><span>Pub</span><span>$$</span><span>Family</span></div>
+            <h4>Serafina</h4>
+            <p>Italian, and the closest Arnold gets to a proper dinner out. House-made pasta, a real wine list, a fire in the corner. Book ahead on weekends.</p>
+            <div class="pick-tags"><span>Italian</span><span>$$$</span></div>
           </div>
-          <div class="pick-cap"><span class="label-cap">When</span><span>11–9 daily</span></div>
+          <div class="pick-cap"><span class="label-cap">When</span><span>Dinner Wed–Sun</span></div>
         </article>
         <article class="pick-row">
           <span class="pick-num">02</span>
@@ -342,29 +349,11 @@
           </div>
           <div class="pick-cap"><span class="label-cap">When</span><span>4 pm – close</span></div>
         </article>
-        <article class="pick-row">
-          <span class="pick-num">04</span>
-          <div class="pick-body">
-            <h4>The Cabin Café</h4>
-            <p>Breakfast all day. Pancake the size of the plate. The locals' Sunday.</p>
-            <div class="pick-tags"><span>Breakfast</span><span>$</span></div>
-          </div>
-          <div class="pick-cap"><span class="label-cap">When</span><span>7–2 Wed–Sun</span></div>
-        </article>
       </div>
 
       <div class="pick-pane" data-pane="drink">
         <article class="pick-row">
           <span class="pick-num">01</span>
-          <div class="pick-body">
-            <h4>Snowshoe Brewing — taproom</h4>
-            <p>The Grizzly Brown is the local benchmark. Take a growler home for the cabin.</p>
-            <div class="pick-tags"><span>Brewery</span><span>$$</span></div>
-          </div>
-          <div class="pick-cap"><span class="label-cap">When</span><span>11–9 daily</span></div>
-        </article>
-        <article class="pick-row">
-          <span class="pick-num">02</span>
           <div class="pick-body">
             <h4>The Pour House</h4>
             <p>Quiet wine bar, ten seats, the closest Arnold gets to date night. Curated foothill list.</p>
@@ -373,7 +362,7 @@
           <div class="pick-cap"><span class="label-cap">When</span><span>5 pm – close, Thu–Sat</span></div>
         </article>
         <article class="pick-row">
-          <span class="pick-num">03</span>
+          <span class="pick-num">02</span>
           <div class="pick-body">
             <h4>Bear Valley Lodge bar</h4>
             <p>Forty-five minutes up Hwy 4. Earned, après-ski, ridiculous in the best way.</p>
@@ -530,7 +519,6 @@
         </div>
         <div class="letter-body">
           <p class="letter-open">A few words on Arnold —</p>
-          <p>My family has owned a cabin a mile from Snowshoe Brewing since long before I was a broker. Arnold is the town where I learned to ski, learned to drive in snow, and learned that the right cabin is one you can leave for three months and trust will be standing — or buy from someone who can vouch for the same.</p>
           <p>Most of Arnold's market is cabins, second homes, and increasingly, full-time residents who used to come up on weekends and decided to stop leaving. That last group is the fastest-growing share of buyers I've worked with in the past two years. Fiber-to-the-home rolled out in 2023 and quietly changed the math.</p>
           <p>If you're looking up here, the questions worth asking are about snow load, septic age, fire setbacks, and the road grade in February. I can help you ask them.</p>
           <p class="letter-sign">— Sara</p>
@@ -634,8 +622,5 @@
 </footer>
 
 <script src="town.js"></script>
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
-<script src="town-map.js"></script>
-<script>LegacyTownMap.init({"town":"arnold","center":[38.3,-120.2],"zoom":10,"unit":"trails","catMeta":{"wine":{"label":"Easy","letter":"E","color":"#5B8C5A"},"eat":{"label":"Moderate","letter":"M","color":"#B8922A"},"stay":{"label":"Strenuous","letter":"S","color":"#1B1813"}},"pois":[{"name":"North Grove Loop","cat":"wine","desc":"1.5 mi · 50 ft · year-round. The introductory sequoia walk. Paved.","lat":38.27807,"lng":-120.30939},{"name":"South Grove","cat":"wine","desc":"5 mi · 600 ft · May–Oct. The Agassiz Tree, less-traveled.","lat":38.2566,"lng":-120.2718},{"name":"Cottage Springs Pond","cat":"wine","desc":"0.8 mi · flat · year-round. Dogs, kids, picnics.","lat":38.3175,"lng":-120.2055},{"name":"White Pines Lake","cat":"wine","desc":"1.2 mi · loop · year-round. Trout, paddle boats, in-town.","lat":38.244,"lng":-120.361},{"name":"Sourgrass Bridge","cat":"eat","desc":"3 mi · 400 ft · Apr–Nov. Swimming holes, the rope swing.","lat":38.2877,"lng":-120.2447},{"name":"Bull Run","cat":"eat","desc":"4.5 mi · 700 ft · May–Oct. Granite domes, summit views.","lat":38.513,"lng":-119.898},{"name":"Spicer Reservoir Trail","cat":"eat","desc":"6 mi · 500 ft · Jun–Oct. Granite, alpine lake, trout.","lat":38.3905,"lng":-120.064},{"name":"Lava Bomb","cat":"eat","desc":"3.8 mi · 800 ft · Jun–Oct. Volcanic outcrop, sunset spot.","lat":38.262,"lng":-120.26},{"name":"Beaver Creek","cat":"eat","desc":"5 mi · 600 ft · May–Oct. Cascades, swimming holes.","lat":38.266,"lng":-120.27},{"name":"Sandy Meadow → Lake Alpine","cat":"stay","desc":"9 mi · 1,400 ft · Jul–Oct. Granite ridges, lake views.","lat":38.473,"lng":-120.008},{"name":"Pinecrest → Camp Nine","cat":"stay","desc":"13 mi · 2,100 ft · Jul–Oct. Day pack, river finish, shuttle required.","lat":38.09,"lng":-120.447},{"name":"Mokelumne Coast to Crest","cat":"stay","desc":"11 mi · 1,800 ft · Jun–Oct. The connoisseur's day. Bring water.","lat":38.498,"lng":-120.215}],"fitToPins":true,"fitMaxZoom":12});</script>
 </body>
 </html>
