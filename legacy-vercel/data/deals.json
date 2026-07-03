@@ -1,6 +1,6 @@
 {
-  "version": "1.11",
-  "lastUpdated": "2026-07-02",
+  "version": "1.12",
+  "lastUpdated": "2026-07-03",
   "updatedBy": "Claude",
   "deals": [
     {
@@ -244,7 +244,7 @@
         "buyerCounter1": "accepted",
         "vehicleTrailerAddendum": "buyer-signed 6/23, sent to Mitzi — SELLER still needs to sign",
         "emdAddendum2": "signing complete 6/29 (Authentisign), forwarded to Mitzi for SELLER signature → then to Ashley",
-        "sellerDisclosures": "RECEIVED 7/2/2026, sent to buyers; Adrianna Castle SIGNED/accepted 7/2 (Authentisign) — confirm Guy's signature if separately required",
+        "sellerDisclosures": "RECEIVED 7/2/2026, sent to buyers; BOTH buyers signed/accepted 7/2 (Authentisign) — Adrianna AND Guy Castle confirmed",
         "TDS": "received 7/2 (in seller disclosure package)",
         "SPQ": "received 7/2 (in seller disclosure package)",
         "wellSepticInspection": "WAIVED by buyers 7/2 (Adrianna: 'We do not want to do the well and septic inspections')",
@@ -253,7 +253,7 @@
       },
       "correspondence": [],
       "notes": "Buyer-side. OFFER ACCEPTED (confirmed by Sara 6/22/2026). Offer (CA RPA) signed via Authentisign and sent to listing agents Kylie & Mitzi Windley (Chase International) 6/14/2026. Initially REJECTED 6/16 (seller objected to 'remove all debris' term and called price too low). Deal REVIVED: seller counter (SCO1) received 6/18 via Kylie Windley. Buyer counter at $615,000 (highest and best) sent 6/19 and ACCEPTED. salePrice $615,000 CONFIRMED by Sara 6/22. ESCROW OPENED 6/23 with Ashley Cuslidge at Placer Title (Order P-708659). Buyers: Adrianna & Guy Castle. VEHICLE/TRAILER ADDENDUM (buyer responsible for removing remaining vehicles & trailers, per Mitzi 6/20) sent out for buyer signatures 6/23 with Mitzi CC'd to receive once signed — SELLER STILL NEEDS TO SIGN. TITLE RESOLVED 6/29: Placer's underwriter had balked at insuring the Sheriff's-sale title, but Ashley confirmed 6/29 that WESTCOR will insure — proceeding with Westcor as underwriter, transaction STAYS AT PLACER (P-708659); 7/20 COE no longer threatened. FINANCING CHANGED AGAIN (per Sara 6/29): buyers had switched from 20% down to the GSFA 'Assist to Own' grant + family gift, BUT the buyer GOT A RAISE and NO LONGER QUALIFIES for GSFA — financing must be re-worked (likely back to conventional); RPA terms to be updated to reflect whatever the new financing is. EMD: Adrianna brought $1k to Placer 6/29; remaining $9k being dropped via Placer's mail slot 7/2–7/3 (Adrianna spoke w/ Ashley — Placer closed 7/3 holiday & Ashley out 7/6+, confirm it posts Mon 7/6); EMD Addendum #2 signing complete 6/29, forwarded to Mitzi for seller signature. UPDATE 7/2: seller disclosures received 7/2 & Adrianna signed/accepted them same day (Authentisign); buyers DECLINED well & septic inspections (Adrianna 7/2 — Sara had held off ordering inspections pending the seller's recent reports to save the buyers money). Buyer-facing timeline generated 6/23 (7230_Latigo_Buyer_Timeline.html in deal folder). Key dates from acceptance 6/19: deposit $10k by 6/24; seller docs ~6/26; all buyer contingencies (inspection/appraisal/loan/title/insurance, 17 days) 7/6; final walkthrough ~7/15; COE 30 days = 7/19 (Sun) rolls to ~7/20. Inspections TBD; home warranty waived in contract.",
-      "alerts": ["Seller disclosures signed by Adrianna 7/2 (Authentisign) — confirm Guy if needed", "Buyers WAIVED well & septic inspections (Adrianna 7/2)", "EMD remaining $9k dropped via Placer mail slot 7/2–7/3 — confirm posts Mon 7/6 (Placer closed 7/3, Ashley out 7/6+)", "Vehicle/trailer addendum buyer-signed 6/23, sent to Mitzi — SELLER still needs to sign", "FINANCING CHANGED AGAIN — buyer got a raise & NO LONGER QUALIFIES for GSFA Assist to Own; re-work financing & update RPA terms", "EMD: $1k in 6/29, remaining $9k by Fri 7/3 (Placer closed 7/3 — confirm posting); EMD Addendum #2 out to Mitzi for seller sig", "TITLE RESOLVED 6/29 — Westcor will insure, staying at Placer (P-708659)", "Buyer contingencies due 7/6"]
+      "alerts": ["Seller disclosures signed by BOTH buyers 7/2 (Adrianna + Guy, Authentisign) — resolved", "Buyers WAIVED well & septic inspections (Adrianna 7/2)", "FINANCING RESOLVED (Sara 7/3): buyers doing a HELOC + remainder conventional — update RPA terms/financing addendum to match", "CONTINGENCY REMOVAL (CR) to be delivered Mon 7/6 — Sara doing the CR Monday", "EMD remaining $9k dropped via Placer mail slot 7/2–7/3 — confirm posts Mon 7/6 (Placer closed 7/3, Ashley out 7/6+); EMD Addendum #2 out to Mitzi for seller sig", "Vehicle/trailer addendum buyer-signed 6/23, sent to Mitzi — SELLER still needs to sign", "Sara's buyer's-agent AVID to be completed week of 7/6 (per Sara 7/3)", "TITLE RESOLVED 6/29 — Westcor will insure, staying at Placer (P-708659)", "Buyer contingencies due 7/6"]
     },
     {
       "id": "1111-dunbar",
@@ -427,8 +427,8 @@
         "transactionDocs": "received"
       },
       "correspondence": [],
-      "notes": "LITIGATION — Mediation filed April 1, 2026. Commission dispute case active. All evidence and communications documented. Attorney Mike Fluetsch reviewed materials 6/21/2026 and found a VIABLE commission claim. Sara is RETAINING Mike for the case (confirmed 6/22/2026); he'll do a fuller document review before moving forward.",
-      "alerts": ["ACTIVE MEDIATION — Filed April 1, 2026. Commission case in progress.", "Mike Fluetsch retained as counsel (6/22) — send him full docs for deeper review"]
+      "notes": "LITIGATION — Mediation filed April 1, 2026. Commission dispute case active. All evidence and communications documented. Attorney Mike Fluetsch reviewed materials 6/21/2026 and found a VIABLE commission claim. Sara is RETAINING Mike for the case (confirmed 6/22/2026). ON HOLD (per Sara 7/3): Sara asked Mike to POSTPONE until she has the funds for the $10k retainer (funding after the next escrow closes).",
+      "alerts": ["ACTIVE MEDIATION — Filed April 1, 2026. Commission case in progress.", "ON HOLD — Sara asked Mike Fluetsch to postpone until retainer funds available (next closing); then send full docs for deeper review"]
     },
     {
       "id": "preparing-1510-malvick",
@@ -589,7 +589,7 @@
       "id": "buyer-roger-quillen",
       "address": "Roger Quillen (buyer client)",
       "city": "CA",
-      "stage": "buyer-prospect",
+      "stage": "inactive",
       "type": "residential",
       "side": "buyer",
       "agent": "Sara Cooper",
@@ -598,8 +598,8 @@
         "BRBC": "executed 6/24/2026"
       },
       "correspondence": [],
-      "notes": "Active buyer client. Buyer Representation agreement (BRBC) signed 6/24/2026. Showed homes Thursday 6/25. GONE QUIET as of 6/29 — Roger stopped responding after the showings; needs re-engagement.",
-      "alerts": ["Roger stopped responding after 6/25 showings (per Sara 6/29) — follow up / re-engage"]
+      "notes": "INACTIVE (per Sara 7/3/2026) — Roger never responded after the 6/25 showings despite re-engagement attempts; Sara removed him from active follow-up. BRBC signed 6/24/2026 remains on file if he resurfaces.",
+      "alerts": []
     },
     {
       "id": "lead-kristin-esperson",
@@ -615,8 +615,12 @@
       },
       "docs": {},
       "correspondence": [],
-      "notes": "FUB Realtor.com lead (received 6/29/2026). BUYER side: Sara showed her 2936 E Highway 4, Murphys, CA 95247 on 6/29 — she likes it but needs to run numbers. LISTING side: Sara doing a CMA (6/29) on Kristin's own home at 512 Gardiner Way, Rio Vista, CA 94571. Kristin says she already has a BUYER for 512 Gardiner Way, so this would likely be a REDUCED-COMMISSION 'handle the paperwork' listing. NOTE: 2936 E Highway 4 is a DIFFERENT property from Sara's 433 E Highway 4 listing.",
-      "alerts": ["CMA in progress for 512 Gardiner Way, Rio Vista — likely reduced-commission paperwork deal (Kristin has her own buyer)", "Buyer interest: 2936 E Hwy 4 Murphys (NOT Sara's 433) — running numbers"]
+      "notes": "FUB Realtor.com lead (received 6/29/2026). BUYER side: OFFER SENT on 2936 E Highway 4, Murphys, CA 95247 (per Sara 7/3) — Kristin doesn't want to sign until Mon/Tue, but the offer EXPIRES Fri 7/3, so Sara must RESEND the offer with a new expiration early next week. LISTING side: Sara doing a CMA (6/29) on Kristin's own home at 512 Gardiner Way, Rio Vista, CA 94571. Kristin says she already has a BUYER for 512 Gardiner Way, so this would likely be a REDUCED-COMMISSION 'handle the paperwork' listing. NOTE: 2936 E Highway 4 is a DIFFERENT property from Sara's 433 E Highway 4 listing.",
+      "alerts": [
+        "Offer on 2936 E Hwy 4 EXPIRES Fri 7/3 — resend with new expiration early next week (Kristin signs Mon/Tue)",
+        "CMA in progress for 512 Gardiner Way, Rio Vista — likely reduced-commission paperwork deal (Kristin has her own buyer)",
+        "Buyer interest: 2936 E Hwy 4 Murphys (NOT Sara's 433) — running numbers"
+      ]
     }
   ]
 }
