@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Your Listing · Legacy Seller Portal</title>
+<title>Your Sale · Legacy Seller Portal</title>
 <link rel="stylesheet" href="legacy.css">
 <style>
 .sell-hero {
@@ -26,7 +26,7 @@
 .sell-h-info .eyebrow { display: block; margin-bottom: 12px; }
 .sell-h-info h1 {
   font-family: var(--serif); font-style: italic; font-weight: 300;
-  font-size: clamp(40px, 5vw, 64px); line-height: 0.98;
+  font-size: clamp(36px, 4.4vw, 56px); line-height: 1.0;
   color: var(--ink); letter-spacing: -0.005em; margin-bottom: 12px;
 }
 .sell-h-info h1 em { color: var(--brass); }
@@ -50,7 +50,7 @@
 
 /* KPI strip */
 .sell-kpi {
-  display: grid; grid-template-columns: repeat(5, 1fr); gap: 1px;
+  display: grid; grid-template-columns: repeat(4, 1fr); gap: 1px;
   background: var(--rule); border: 1px solid var(--rule);
   margin: 28px 36px 0;
 }
@@ -61,9 +61,7 @@
 .sell-kpi .l { font-family: var(--mono); font-size: 9px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--ink-mute); }
 .sell-kpi .v { font-family: var(--serif); font-style: italic; font-weight: 300; font-size: 40px; color: var(--ink); line-height: 1; }
 .sell-kpi .v.brass { color: var(--brass); }
-.sell-kpi .ch { font-family: var(--mono); font-size: 10px; letter-spacing: 0.04em; }
-.ch.up { color: var(--positive); }
-.ch.dn { color: var(--negative); }
+.sell-kpi .ch { font-family: var(--mono); font-size: 10px; letter-spacing: 0.04em; color: var(--ink-mute); }
 
 /* GRID */
 .sell-grid {
@@ -77,118 +75,22 @@
 .s-card-h h2 { font-family: var(--serif); font-style: italic; font-weight: 400; font-size: 26px; color: var(--ink); }
 .s-card-h .meta { font-family: var(--mono); font-size: 10px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--ink-mute); }
 
-/* Trend chart */
-.s-chart {
-  height: 220px; position: relative;
-  border-bottom: 1px solid var(--rule-soft);
-  display: flex; align-items: flex-end; padding: 0; gap: 0;
+/* Road to closing — timeline */
+.road-item {
+  display: grid; grid-template-columns: 88px 16px 1fr; gap: 16px;
+  padding: 16px 0; border-bottom: 1px solid var(--rule-soft); position: relative;
 }
-.s-chart-bar { flex: 1; position: relative; margin-right: 6px; }
-.s-chart-bar:last-child { margin-right: 0; }
-.s-chart-bar .b { background: var(--ink); width: 100%; position: absolute; bottom: 0; transition: background .15s; }
-.s-chart-bar .b.brass { background: var(--brass); }
-.s-chart-bar:hover .b { background: var(--brass-warm); }
-.s-chart-axis {
-  display: flex; padding-top: 8px;
-  font-family: var(--mono); font-size: 9px; letter-spacing: 0.12em;
-  color: var(--ink-mute); text-transform: uppercase;
-}
-.s-chart-axis span { flex: 1; text-align: center; }
-.s-chart-legend {
-  display: flex; gap: 22px; margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--rule-soft);
-  font-family: var(--mono); font-size: 10px; letter-spacing: 0.12em; color: var(--ink-mute);
-}
-.s-chart-legend .sq { display: inline-block; width: 10px; height: 10px; margin-right: 8px; vertical-align: -1px; }
-.sq.ink { background: var(--ink); }
-.sq.brass { background: var(--brass); }
-
-/* Offers */
-.offer-card {
-  background: var(--linen); border: 1px solid var(--rule); padding: 20px 22px;
-  display: grid; grid-template-columns: 1fr auto; gap: 18px;
-  align-items: center; margin-bottom: 12px;
-}
-.offer-card:last-child { margin-bottom: 0; }
-.offer-card.lead {
-  background: var(--ink); color: var(--shell); border-color: var(--ink);
-}
-.offer-card.lead .l { color: var(--brass-bright); }
-.offer-card.lead .o-buyer { color: var(--shell); }
-.offer-card.lead .o-detail { color: rgba(250,246,236,0.65); }
-.offer-card.lead .pill-status { background: var(--brass); color: var(--shell); border-color: var(--brass); }
-
-.o-amount { font-family: var(--serif); font-style: italic; font-weight: 300; font-size: 36px; color: var(--ink); line-height: 1; margin-bottom: 4px; }
-.offer-card.lead .o-amount { color: var(--brass-bright); }
-.o-l { font-family: var(--mono); font-size: 9.5px; letter-spacing: 0.16em; text-transform: uppercase; }
-.o-buyer { font-size: 13.5px; color: var(--ink); margin-bottom: 4px; font-weight: 500; }
-.o-detail { font-size: 12.5px; color: var(--ink-soft); }
-.o-actions { display: flex; flex-direction: column; gap: 6px; align-items: flex-end; }
-
-/* Showings */
-.show-row {
-  display: grid; grid-template-columns: 64px 1fr auto; gap: 16px;
-  padding: 14px 0; border-bottom: 1px solid var(--rule-soft); align-items: center;
-}
-.show-row:last-child { border-bottom: none; }
-.show-date { text-align: center; background: var(--linen); padding: 9px 0; }
-.show-date .dow { font-family: var(--mono); font-size: 9px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--ink-mute); }
-.show-date .num { font-family: var(--serif); font-style: italic; font-size: 24px; color: var(--ink); line-height: 1; margin-top: 3px; }
-.show-info { font-size: 13px; }
-.show-time { font-family: var(--mono); font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--brass); margin-bottom: 4px; }
-.show-buyer { color: var(--ink); font-weight: 500; }
-.show-agent { color: var(--ink-soft); font-size: 12px; }
-
-/* Comp set */
-.comp-table {
-  display: grid; grid-template-columns: 1.4fr 1fr 1fr 1fr 1fr;
-}
-.comp-row {
-  display: contents;
-}
-.comp-cell {
-  padding: 13px 16px; border-bottom: 1px solid var(--rule-soft);
-  font-size: 13px; color: var(--ink); display: flex; align-items: center;
-}
-.comp-cell.head {
-  font-family: var(--mono); font-size: 9.5px; letter-spacing: 0.18em;
-  text-transform: uppercase; color: var(--ink-mute);
-  border-bottom: 1px solid var(--rule);
-}
-.comp-cell.this { background: var(--linen); font-weight: 500; }
-.comp-cell.this .price { color: var(--brass); }
-.comp-cell .price { font-family: var(--serif); font-style: italic; font-size: 16px; }
-.comp-cell .sub { font-family: var(--mono); font-size: 9px; letter-spacing: 0.12em; color: var(--ink-mute); display: block; margin-top: 2px; }
-
-/* Checklist */
-.check-row {
-  display: grid; grid-template-columns: 22px 1fr auto; gap: 14px;
-  padding: 11px 0; border-bottom: 1px solid var(--rule-soft); align-items: center;
-}
-.check-row:last-child { border-bottom: none; }
-.check-box {
-  width: 18px; height: 18px; border: 1px solid var(--rule-strong);
-  display: flex; align-items: center; justify-content: center;
-  cursor: pointer; font-family: var(--mono); font-size: 12px;
-  color: var(--shell); background: var(--shell);
-}
-.check-box.done { background: var(--brass); border-color: var(--brass); color: var(--shell); }
-.check-label { font-size: 13.5px; color: var(--ink); }
-.check-label.done { color: var(--ink-mute); text-decoration: line-through; text-decoration-color: var(--rule-strong); }
-.check-when { font-family: var(--mono); font-size: 10px; letter-spacing: 0.12em; color: var(--ink-mute); text-transform: uppercase; }
-
-/* Activity */
-.act-row {
-  display: grid; grid-template-columns: 12px 1fr; gap: 12px;
-  padding: 12px 0; position: relative;
-}
-.act-row::before { content: ''; position: absolute; left: 5px; top: 20px; width: 1px; bottom: -12px; background: var(--rule); }
-.act-row:last-child::before { display: none; }
-.act-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--brass); margin-top: 8px; }
-.act-dot.ink { background: var(--ink); }
-.act-dot.faint { background: var(--ink-faint); }
-.act-text { font-size: 13px; color: var(--ink); }
-.act-text strong { font-weight: 500; }
-.act-when { font-family: var(--mono); font-size: 9.5px; letter-spacing: 0.08em; color: var(--ink-faint); margin-top: 2px; }
+.road-item:last-child { border-bottom: none; }
+.road-mark { display: flex; justify-content: center; position: relative; }
+.road-mark::before { content: ''; position: absolute; left: 50%; transform: translateX(-50%); top: 18px; width: 1px; bottom: -20px; background: var(--rule); }
+.road-item:last-child .road-mark::before { display: none; }
+.road-dot { width: 13px; height: 13px; border-radius: 50%; border: 2px solid var(--rule-strong); background: var(--shell); margin-top: 3px; position: relative; z-index: 1; }
+.road-dot.done { background: var(--brass); border-color: var(--brass); }
+.road-dot.next { background: var(--ink); border-color: var(--ink); }
+.road-dot.key  { background: var(--brass); border-color: var(--brass); box-shadow: 0 0 0 4px var(--linen); }
+.road-date { font-family: var(--mono); font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-mute); padding-top: 4px; }
+.road-body .road-label { font-family: var(--serif); font-style: italic; font-size: 19px; color: var(--ink); line-height: 1.15; }
+.road-body .road-desc { font-size: 13px; color: var(--ink-soft); margin-top: 4px; line-height: 1.5; }
 
 /* Sara note */
 .sara-note {
@@ -204,20 +106,32 @@
 .s-mini { background: var(--shell); border: 1px solid var(--rule); padding: 24px; }
 .s-mini h3 { font-family: var(--mono); font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--brass); margin-bottom: 14px; font-weight: 600; }
 
+/* Documents */
 .doc-row {
-  display: grid; grid-template-columns: auto 1fr auto; gap: 10px; align-items: center;
-  padding: 11px 0; border-bottom: 1px solid var(--rule-soft); font-size: 13px;
+  display: grid; grid-template-columns: auto 1fr auto; gap: 12px; align-items: center;
+  padding: 12px 0; border-bottom: 1px solid var(--rule-soft); font-size: 13px;
 }
 .doc-row:last-child { border-bottom: none; }
-.doc-row .icn { font-family: var(--mono); font-size: 11px; color: var(--brass); width: 24px; }
+.doc-row .icn { font-family: var(--mono); font-size: 9.5px; letter-spacing: 0.08em; color: var(--brass); min-width: 42px; }
 .doc-row .name { color: var(--ink); }
-.doc-row .name .sub { display: block; font-family: var(--mono); font-size: 9.5px; letter-spacing: 0.12em; color: var(--ink-faint); margin-top: 2px; }
-.doc-row .open { font-family: var(--mono); font-size: 10px; letter-spacing: 0.14em; color: var(--brass); cursor: pointer; }
+.doc-row .name .sub { display: block; font-family: var(--mono); font-size: 9.5px; letter-spacing: 0.12em; color: var(--ink-faint); margin-top: 2px; text-transform: uppercase; }
+.doc-row .d-status { font-family: var(--mono); font-size: 9.5px; letter-spacing: 0.12em; color: var(--ink-mute); text-transform: uppercase; white-space: nowrap; }
 
-.share-stack { display: flex; flex-direction: column; gap: 10px; }
+/* Tasks — what I need from you */
+.task-row {
+  display: grid; grid-template-columns: 20px 1fr auto; gap: 14px;
+  padding: 12px 0; border-bottom: 1px solid var(--rule-soft); align-items: center;
+}
+.task-row:last-child { border-bottom: none; }
+.task-box { width: 17px; height: 17px; border: 1px solid var(--rule-strong); background: var(--shell); }
+.task-label { font-size: 13.5px; color: var(--ink); }
+.task-when { font-family: var(--mono); font-size: 10px; letter-spacing: 0.12em; color: var(--brass); text-transform: uppercase; white-space: nowrap; }
+.task-intro { font-size: 13px; color: var(--ink-soft); font-style: italic; line-height: 1.5; margin-bottom: 6px; }
+
+/* Team / who has access */
 .share-row {
   display: grid; grid-template-columns: 1fr auto; gap: 10px; align-items: center;
-  padding: 11px 0; border-bottom: 1px solid var(--rule-soft);
+  padding: 12px 0; border-bottom: 1px solid var(--rule-soft);
 }
 .share-row:last-child { border-bottom: none; }
 .share-row .who { font-size: 13px; color: var(--ink); font-weight: 500; }
@@ -229,7 +143,6 @@
   .sell-photo { width: 100%; }
   .sell-kpi { grid-template-columns: 1fr 1fr; }
   .sell-grid { grid-template-columns: 1fr; }
-  .comp-table { grid-template-columns: 1fr 1fr; }
 }
 </style>
 </head>
@@ -244,35 +157,27 @@
       </a>
     </div>
 
-    <div class="app-side-section">Your listing</div>
+    <div class="app-side-section">Your sale</div>
     <nav class="app-side-nav">
       <a href="seller.html" class="active">Overview</a>
-      <a href="#">Showings <span class="pill">11</span></a>
-      <a href="#">Offers <span class="pill">2</span></a>
-      <a href="#">Documents</a>
-      <a href="#">Marketing</a>
+      <a href="#road">Road to closing</a>
+      <a href="#docs">Documents <span class="pill" data-bind="nav.documents">0</span></a>
+      <a href="#tasks">What I need <span class="pill" data-bind="nav.tasks">0</span></a>
+      <a href="#team">Your team</a>
     </nav>
 
-    <div class="app-side-section">Insight</div>
+    <div class="app-side-section">Resources</div>
     <nav class="app-side-nav">
-      <a href="#">Performance</a>
-      <a href="#">Comp set</a>
-      <a href="#">Market reports</a>
-      <a href="#">Pricing strategy</a>
-    </nav>
-
-    <div class="app-side-section">Selling</div>
-    <nav class="app-side-nav">
-      <a href="#">Pre-listing checklist</a>
-      <a href="#">Closing timeline</a>
-      <a href="#">Net sheet</a>
+      <a href="mortgage-calculator.html">Net proceeds</a>
+      <a href="market-report.html">Market reports</a>
+      <a href="how-we-work.html">How we work</a>
     </nav>
 
     <div class="app-side-foot">
-      <div class="avatar avatar-sm">PW</div>
+      <div class="avatar avatar-sm">L</div>
       <div style="flex:1;min-width:0;">
-        <div style="font-size:13px;color:var(--ink);font-weight:500;">Patricia &amp; Leon W.</div>
-        <div class="mono" style="font-size:9px;letter-spacing:.16em;color:var(--ink-mute);">SELLER · LIVE 21 D</div>
+        <div style="font-size:13px;color:var(--ink);font-weight:500;" data-bind="status.address">Your listing</div>
+        <div class="mono" style="font-size:9px;letter-spacing:.16em;color:var(--ink-mute);" data-bind="status.city">SELLER PORTAL</div>
       </div>
     </div>
   </aside>
@@ -281,7 +186,7 @@
     <div class="app-topbar">
       <div class="app-search">
         <span style="font-family:var(--mono);font-size:11px;">⌕</span>
-        <input placeholder="Search documents, offers, comps…">
+        <input placeholder="Search documents, dates, your team…">
       </div>
       <div class="app-actions">
         <button class="icon-btn" title="Notifications">✉<span class="dot"></span></button>
@@ -293,53 +198,30 @@
     <section class="sell-hero">
       <div class="sell-photo">
         <img src="https://images.unsplash.com/photo-1605276374104-dee2a0ed3cd6?w=600&q=85" alt="">
-        <span class="badge">Active · Listed</span>
+        <span class="badge" data-bind="status.badge" data-optional>In escrow</span>
       </div>
       <div class="sell-h-info">
-        <span class="eyebrow">Your listing · Day 21 on market</span>
-        <h1>512 Spring Street.<br><em>Doing better than expected.</em></h1>
-        <p class="addr">512 Spring Street · Sutter Creek, CA 95685 · MLS #224018712</p>
+        <span class="eyebrow" data-bind="status.since">In escrow · Closing soon</span>
+        <h1><span data-bind="status.address">Your home</span><br><em>On track to close.</em></h1>
+        <p class="addr"><span data-bind="status.city">—</span></p>
         <div class="specs">
-          <span><strong>3</strong> Bd</span>
-          <span><strong>2</strong> Ba</span>
-          <span><strong>1,640</strong> sf</span>
-          <span><strong>0.3</strong> ac</span>
-          <span><strong>1923</strong> built</span>
+          <span data-bind="status.type" data-optional>Residential</span>
+          <span data-bind="status.label" data-optional>In escrow</span>
         </div>
       </div>
       <div class="sell-status">
-        <div class="l">Listed at</div>
-        <div class="v">$549,000</div>
-        <div class="since">Listed Apr 21 · No price drops yet</div>
+        <div class="l">Sale price</div>
+        <div class="v" data-bind="status.price">—</div>
+        <div class="since" data-bind="status.since" data-optional>Closing soon</div>
       </div>
     </section>
 
     <!-- KPI -->
-    <section class="sell-kpi">
-      <div class="cell">
-        <span class="l">Page views</span>
-        <span class="v">2,148</span>
-        <span class="ch up">↑ 38% vs comp avg</span>
-      </div>
-      <div class="cell">
-        <span class="l">Unique viewers</span>
-        <span class="v">847</span>
-        <span class="ch up">↑ 22%</span>
-      </div>
-      <div class="cell">
-        <span class="l">Saved by</span>
-        <span class="v brass">62</span>
-        <span class="ch up">↑ 18 this week</span>
-      </div>
-      <div class="cell">
-        <span class="l">Showings</span>
-        <span class="v">11</span>
-        <span class="ch up">3 upcoming</span>
-      </div>
-      <div class="cell">
-        <span class="l">Offers</span>
-        <span class="v brass">2</span>
-        <span class="ch up">Best at $565K</span>
+    <section class="sell-kpi" data-list="kpis">
+      <div class="cell" data-row>
+        <span class="l" data-bind="label">—</span>
+        <span class="v" data-bind="value">—</span>
+        <span class="ch" data-bind="change" data-optional>—</span>
       </div>
     </section>
 
@@ -348,380 +230,62 @@
       <!-- LEFT -->
       <div>
         <!-- Sara note (always visible) -->
-          <div class="sara-note">
+        <div class="sara-note">
           <div class="avatar"><img src="art/sara-headshot.png" alt="Sara Cooper"></div>
           <div>
-            <div class="sara-note-head">A note from Sara · Sent 7:42 AM</div>
-            <p class="sara-note-text">Patricia — strong weekend. We had eleven showings, two written offers, and one verbal in the wings (Bay Area couple). My read: we should hold steady at $549K and let Tuesday's offer deadline drive the bidding. I'll send the offer comparison sheet by noon. Coffee at the shop at 4 if you'd like to talk through it.</p>
-            <div class="sara-note-sign">— Sara · (209) 559-4966</div>
+            <div class="sara-note-head" data-bind="note.head">A note from Sara</div>
+            <p class="sara-note-text" data-bind="note.body">Your sale is moving along on schedule. I will flag anything that needs you the moment it comes up.</p>
+            <div class="sara-note-sign" data-bind="note.sign">— Sara · (209) 559-4966</div>
           </div>
         </div>
 
-        <!-- Interest trend -->
-        <section class="s-card">
+        <!-- Road to closing -->
+        <section class="s-card" id="road" data-list="road">
           <div class="s-card-h">
-            <h2>Interest is building.</h2>
-            <span class="meta">Daily page views · Last 21 days</span>
+            <h2>The road to closing.</h2>
+            <span class="meta">Every step, as it happens</span>
           </div>
-          <div class="s-chart">
-            <div class="s-chart-bar"><div class="b" style="height: 18%;"></div></div>
-            <div class="s-chart-bar"><div class="b" style="height: 32%;"></div></div>
-            <div class="s-chart-bar"><div class="b" style="height: 41%;"></div></div>
-            <div class="s-chart-bar"><div class="b" style="height: 28%;"></div></div>
-            <div class="s-chart-bar"><div class="b" style="height: 36%;"></div></div>
-            <div class="s-chart-bar"><div class="b" style="height: 22%;"></div></div>
-            <div class="s-chart-bar"><div class="b" style="height: 19%;"></div></div>
-            <div class="s-chart-bar"><div class="b" style="height: 34%;"></div></div>
-            <div class="s-chart-bar"><div class="b" style="height: 48%;"></div></div>
-            <div class="s-chart-bar"><div class="b" style="height: 58%;"></div></div>
-            <div class="s-chart-bar"><div class="b" style="height: 42%;"></div></div>
-            <div class="s-chart-bar"><div class="b" style="height: 56%;"></div></div>
-            <div class="s-chart-bar"><div class="b" style="height: 62%;"></div></div>
-            <div class="s-chart-bar"><div class="b" style="height: 51%;"></div></div>
-            <div class="s-chart-bar"><div class="b" style="height: 38%;"></div></div>
-            <div class="s-chart-bar"><div class="b" style="height: 72%;"></div></div>
-            <div class="s-chart-bar"><div class="b brass" style="height: 86%;"></div></div>
-            <div class="s-chart-bar"><div class="b brass" style="height: 94%;"></div></div>
-            <div class="s-chart-bar"><div class="b brass" style="height: 78%;"></div></div>
-            <div class="s-chart-bar"><div class="b brass" style="height: 88%;"></div></div>
-            <div class="s-chart-bar"><div class="b brass" style="height: 100%;"></div></div>
-          </div>
-          <div class="s-chart-axis">
-            <span>Apr 21</span><span>Apr 24</span><span>Apr 27</span><span>Apr 30</span><span>May 3</span><span>May 6</span><span>May 9</span><span>May 12</span>
-          </div>
-          <div class="s-chart-legend">
-            <span><span class="sq ink"></span>Daily views</span>
-            <span><span class="sq brass"></span>Past 5 days · open house + Bay Area feature</span>
-            <span style="margin-left: auto; color: var(--positive);">+182% week-over-week</span>
-          </div>
-        </section>
-
-        <!-- Offers -->
-        <section class="s-card">
-          <div class="s-card-h">
-            <h2>Offers received.</h2>
-            <span class="meta">Deadline Tue May 13 · 5 PM</span>
-          </div>
-          <div class="offer-card lead">
-            <div>
-              <span class="o-l">Highest offer · 5 hr ago</span>
-              <div class="o-amount">$565,000</div>
-              <div class="o-buyer">The Howard Family · Mill Valley, CA</div>
-              <div class="o-detail">20% down · 30 day close · Cash for inspections · Pre-approved Stearns Lending · Waived appraisal contingency</div>
-            </div>
-            <div class="o-actions">
-              <span class="pill-status">Strongest</span>
-              <button class="btn btn-brass btn-sm">Review &amp; reply</button>
+          <div class="road-item" data-row>
+            <div class="road-date" data-bind="date" data-optional>—</div>
+            <div class="road-mark"><span class="road-dot" data-add-class="status"></span></div>
+            <div class="road-body">
+              <div class="road-label" data-bind="label">Milestone</div>
+              <div class="road-desc" data-bind="description" data-optional>—</div>
             </div>
           </div>
-          <div class="offer-card">
-            <div>
-              <span class="o-l">First offer · 2 days ago</span>
-              <div class="o-amount">$549,000</div>
-              <div class="o-buyer">Anonymous · Listing agent contact</div>
-              <div class="o-detail">25% down · 45 day close · 10-day inspection contingency · Pre-approved Wells Fargo · Standard appraisal</div>
-            </div>
-            <div class="o-actions">
-              <span class="pill-status">At asking</span>
-              <button class="btn btn-ghost btn-sm">Review</button>
-            </div>
-          </div>
-        </section>
-
-        <!-- Showings -->
-        <section class="s-card">
-          <div class="s-card-h">
-            <h2>Showings.</h2>
-            <span class="meta">11 total · 3 upcoming</span>
-          </div>
-          <div class="show-row">
-            <div class="show-date">
-              <div class="dow">Wed</div>
-              <div class="num">13</div>
-            </div>
-            <div class="show-info">
-              <div class="show-time">11:00 AM · 30 min</div>
-              <div class="show-buyer">Coldwell Banker · agent + 1 buyer</div>
-              <div class="show-agent">Listing access · Auto-confirmed</div>
-            </div>
-            <span class="pill-status pill-new">Upcoming</span>
-          </div>
-          <div class="show-row">
-            <div class="show-date">
-              <div class="dow">Fri</div>
-              <div class="num">15</div>
-            </div>
-            <div class="show-info">
-              <div class="show-time">2:30 PM · 45 min</div>
-              <div class="show-buyer">The Howard Family · 2nd visit</div>
-              <div class="show-agent">Repeat showing · Inspector along</div>
-            </div>
-            <span class="pill-status pill-brass">2nd look</span>
-          </div>
-          <div class="show-row">
-            <div class="show-date">
-              <div class="dow">Sat</div>
-              <div class="num">16</div>
-            </div>
-            <div class="show-info">
-              <div class="show-time">1:00 – 3:00 PM</div>
-              <div class="show-buyer">Open house · public</div>
-              <div class="show-agent">Sara hosting · Expecting 12–18 visitors</div>
-            </div>
-            <span class="pill-status pill-warm">Open</span>
-          </div>
-          <div class="show-row">
-            <div class="show-date">
-              <div class="dow">Sun</div>
-              <div class="num">11</div>
-            </div>
-            <div class="show-info">
-              <div class="show-time">1:00 – 4:00 PM</div>
-              <div class="show-buyer">Open house · 16 visitors · 4 signed in</div>
-              <div class="show-agent">Sara hosting</div>
-            </div>
-            <span class="pill-status">Completed</span>
-          </div>
-        </section>
-
-        <!-- Comp set -->
-        <section class="s-card">
-          <div class="s-card-h">
-            <h2>How you compare.</h2>
-            <span class="meta">Sutter Creek · 1,400–1,800 sf · Trailing 90 days</span>
-          </div>
-          <div class="comp-table">
-            <div class="comp-cell head">Property</div>
-            <div class="comp-cell head">Price</div>
-            <div class="comp-cell head">Sq ft / $psf</div>
-            <div class="comp-cell head">Days on mkt</div>
-            <div class="comp-cell head">Status</div>
-
-            <div class="comp-cell this">
-              <div>
-                <div>512 Spring Street <span style="color: var(--brass); font-size: 11px;">· your listing</span></div>
-                <span class="sub">Built 1923 · 0.3 ac · renovated 2022</span>
-              </div>
-            </div>
-            <div class="comp-cell this"><span class="price">$549,000</span></div>
-            <div class="comp-cell this">1,640 / <span class="price">$335</span></div>
-            <div class="comp-cell this">21</div>
-            <div class="comp-cell this"><span class="pill-status pill-new">Active</span></div>
-
-            <div class="comp-cell">
-              <div>
-                88 Hanford Street
-                <span class="sub">Built 1898 · 0.25 ac</span>
-              </div>
-            </div>
-            <div class="comp-cell"><span class="price">$485,000</span></div>
-            <div class="comp-cell">1,420 / $342</div>
-            <div class="comp-cell">42</div>
-            <div class="comp-cell"><span class="pill-status">Sold · Mar</span></div>
-
-            <div class="comp-cell">
-              <div>
-                221 Eureka Street
-                <span class="sub">Built 1912 · 0.4 ac</span>
-              </div>
-            </div>
-            <div class="comp-cell"><span class="price">$612,000</span></div>
-            <div class="comp-cell">1,780 / $344</div>
-            <div class="comp-cell">18</div>
-            <div class="comp-cell"><span class="pill-status">Sold · Apr</span></div>
-
-            <div class="comp-cell">
-              <div>
-                104 Mill Avenue
-                <span class="sub">Built 1925 · 0.28 ac</span>
-              </div>
-            </div>
-            <div class="comp-cell"><span class="price">$525,000</span></div>
-            <div class="comp-cell">1,520 / $345</div>
-            <div class="comp-cell">29</div>
-            <div class="comp-cell"><span class="pill-status">Sold · Apr</span></div>
-
-            <div class="comp-cell" style="border-bottom: none;">
-              <div>
-                33 Court Street
-                <span class="sub">Built 1908 · 0.32 ac</span>
-              </div>
-            </div>
-            <div class="comp-cell" style="border-bottom: none;"><span class="price">$595,000</span></div>
-            <div class="comp-cell" style="border-bottom: none;">1,720 / $346</div>
-            <div class="comp-cell" style="border-bottom: none;">11</div>
-            <div class="comp-cell" style="border-bottom: none;"><span class="pill-status pill-warm">Pending</span></div>
-          </div>
-          <p style="margin-top: 16px; font-family: var(--mono); font-size: 10px; letter-spacing: 0.12em; color: var(--ink-faint); text-transform: uppercase;">— Avg sold $psf in segment: $344. You are priced at $335.</p>
         </section>
       </div>
 
       <!-- RIGHT -->
       <div>
-        <!-- Pre-list checklist -->
-        <section class="s-mini">
-          <h3>Pre-listing · 9 of 10</h3>
-          <div class="check-row">
-            <div class="check-box done">✓</div>
-            <div class="check-label done">Sign listing agreement</div>
-            <span class="check-when">Apr 14</span>
-          </div>
-          <div class="check-row">
-            <div class="check-box done">✓</div>
-            <div class="check-label done">Pre-inspection complete</div>
-            <span class="check-when">Apr 16</span>
-          </div>
-          <div class="check-row">
-            <div class="check-box done">✓</div>
-            <div class="check-label done">Staging consultation</div>
-            <span class="check-when">Apr 17</span>
-          </div>
-          <div class="check-row">
-            <div class="check-box done">✓</div>
-            <div class="check-label done">Professional photos &amp; video</div>
-            <span class="check-when">Apr 19</span>
-          </div>
-          <div class="check-row">
-            <div class="check-box done">✓</div>
-            <div class="check-label done">MLS listing published</div>
-            <span class="check-when">Apr 21</span>
-          </div>
-          <div class="check-row">
-            <div class="check-box done">✓</div>
-            <div class="check-label done">Open house weekend 1</div>
-            <span class="check-when">Apr 27</span>
-          </div>
-          <div class="check-row">
-            <div class="check-box done">✓</div>
-            <div class="check-label done">Bay Area featured placement</div>
-            <span class="check-when">May 4</span>
-          </div>
-          <div class="check-row">
-            <div class="check-box done">✓</div>
-            <div class="check-label done">Open house weekend 2</div>
-            <span class="check-when">May 11</span>
-          </div>
-          <div class="check-row">
-            <div class="check-box done">✓</div>
-            <div class="check-label done">Offer deadline set</div>
-            <span class="check-when">May 13</span>
-          </div>
-          <div class="check-row">
-            <div class="check-box" onclick="this.classList.toggle('done');this.textContent=this.classList.contains('done')?'✓':'';this.nextElementSibling.classList.toggle('done')">&nbsp;</div>
-            <div class="check-label">Review offers &amp; respond</div>
-            <span class="check-when">Today</span>
+        <!-- What I need from you (tasks) -->
+        <section class="s-mini" id="tasks" data-list="tasks">
+          <h3>What I need from you</h3>
+          <p class="task-intro">I only reach out when something genuinely needs your signature. Those requests land right here — and I will text you too.</p>
+          <div class="task-row" data-row>
+            <div class="task-box"></div>
+            <div class="task-label" data-bind="label">Task</div>
+            <span class="task-when" data-bind="when" data-optional>Open</span>
           </div>
         </section>
 
         <!-- Documents -->
-        <section class="s-mini">
+        <section class="s-mini" id="docs" data-list="documents">
           <h3>Documents</h3>
-          <div class="doc-row">
-            <span class="icn">PDF</span>
-            <div class="name">Listing agreement<span class="sub">Signed · Apr 14</span></div>
-            <span class="open">Open →</span>
-          </div>
-          <div class="doc-row">
-            <span class="icn">PDF</span>
-            <div class="name">Pre-inspection report<span class="sub">Foothill Inspections · Apr 16</span></div>
-            <span class="open">Open →</span>
-          </div>
-          <div class="doc-row">
-            <span class="icn">PDF</span>
-            <div class="name">Seller disclosures (TDS)<span class="sub">Signed · Apr 18</span></div>
-            <span class="open">Open →</span>
-          </div>
-          <div class="doc-row">
-            <span class="icn">PDF</span>
-            <div class="name">Preliminary title report<span class="sub">First American · Apr 20</span></div>
-            <span class="open">Open →</span>
-          </div>
-          <div class="doc-row">
-            <span class="icn">XLSX</span>
-            <div class="name">Net sheet · $549K scenario<span class="sub">Updated this morning</span></div>
-            <span class="open">Open →</span>
-          </div>
-          <div class="doc-row">
-            <span class="icn">PDF</span>
-            <div class="name">Offer 1 · Anonymous buyer<span class="sub">$549K · received May 10</span></div>
-            <span class="open">Open →</span>
-          </div>
-          <div class="doc-row">
-            <span class="icn">PDF</span>
-            <div class="name">Offer 2 · Howard Family<span class="sub">$565K · received today</span></div>
-            <span class="open">Open →</span>
+          <div class="doc-row" data-row>
+            <span class="icn" data-bind="type">DOC</span>
+            <div class="name"><span data-bind="name">Document</span><span class="sub" data-bind="sub" data-optional>—</span></div>
+            <span class="d-status" data-bind="status">On file</span>
           </div>
         </section>
 
-        <!-- Activity -->
-        <section class="s-mini">
-          <h3>Recent activity</h3>
-          <div class="act-row">
-            <div class="act-dot"></div>
-            <div>
-              <div class="act-text"><strong>Offer received</strong> — Howard Family · $565,000</div>
-              <div class="act-when">Today · 5 hr ago</div>
-            </div>
+        <!-- Your team -->
+        <section class="s-mini" id="team" data-list="team">
+          <h3>Your team</h3>
+          <div class="share-row" data-row>
+            <div class="who"><span data-bind="name">Name</span><span class="sub" data-bind="sub" data-optional>Role</span></div>
+            <span class="access" data-bind="access">Access</span>
           </div>
-          <div class="act-row">
-            <div class="act-dot"></div>
-            <div>
-              <div class="act-text">Sara updated the offer comparison sheet</div>
-              <div class="act-when">Today · 7:40 AM</div>
-            </div>
-          </div>
-          <div class="act-row">
-            <div class="act-dot ink"></div>
-            <div>
-              <div class="act-text">Open house · <strong>16 visitors, 4 signed in</strong></div>
-              <div class="act-when">Sun · May 11</div>
-            </div>
-          </div>
-          <div class="act-row">
-            <div class="act-dot ink"></div>
-            <div>
-              <div class="act-text">Marin IJ feature placement went live</div>
-              <div class="act-when">Sat · May 10</div>
-            </div>
-          </div>
-          <div class="act-row">
-            <div class="act-dot faint"></div>
-            <div>
-              <div class="act-text">Saved by 11 new viewers this week</div>
-              <div class="act-when">May 5–11</div>
-            </div>
-          </div>
-          <div class="act-row">
-            <div class="act-dot faint"></div>
-            <div>
-              <div class="act-text">First offer received · anonymous</div>
-              <div class="act-when">Sat · May 10</div>
-            </div>
-          </div>
-        </section>
-
-        <!-- Sharing -->
-        <section class="s-mini">
-          <h3>Who has access</h3>
-          <div class="share-stack">
-            <div class="share-row">
-              <div class="who">Patricia Walsh<span class="sub">Primary · You</span></div>
-              <span class="access">Owner</span>
-            </div>
-            <div class="share-row">
-              <div class="who">Leon Walsh<span class="sub">Co-owner · spouse</span></div>
-              <span class="access">Owner</span>
-            </div>
-            <div class="share-row">
-              <div class="who">Sara Cooper<span class="sub">Your agent</span></div>
-              <span class="access">Edit</span>
-            </div>
-            <div class="share-row">
-              <div class="who">First American Title<span class="sub">Escrow</span></div>
-              <span class="access">Read</span>
-            </div>
-          </div>
-          <button class="btn btn-ghost btn-sm" style="width: 100%; margin-top: 14px;">+ Invite (CPA, attorney…)</button>
         </section>
       </div>
     </div>
