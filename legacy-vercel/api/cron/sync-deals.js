@@ -8,9 +8,13 @@
 //
 // Protect with the SYNC_SECRET env var so only you can trigger it.
 
-import { readFileSync } from 'fs';
-import { join } from 'path';
+import { createRequire } from 'module';
 import { adminClient } from '../_lib/supabase.js';
+
+// Load deals.json as a module dependency (not a runtime fs read) so Vercel's
+// bundler traces it and ships it inside the serverless function. A bare
+// readFileSync(process.cwd()+...) is NOT traced and 500s with ENOENT on Vercel.
+const require = createRequire(import.meta.url);
 import { handleOptions, ok, fail } from '../_lib/cors.js';
 
 // --- document label + status maps (mirror the compliance checklist) --------
@@ -127,8 +131,7 @@ export default async function handler(req, res) {
   if (secret && req.query?.key !== secret) return fail(res, 401, 'bad key');
 
   try {
-    const raw = readFileSync(join(process.cwd(), 'data', 'deals.json'), 'utf8');
-    const data = JSON.parse(raw);
+    const data = require('../../data/deals.json');
     const supa = adminClient();
 
     const active = (data.deals || []).filter((d) => ['pending', 'listing'].includes(d.stage));
