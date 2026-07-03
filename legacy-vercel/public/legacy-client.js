@@ -174,37 +174,40 @@
     // Every page has one or more "Find My Match" links → platform.html.
     // We intercept them and open a modal in place; the link still works as fallback.
     $$('a').forEach(a => {
-      if ((a.textContent || '').trim().toLowerCase() === 'find my match') {
-        a.addEventListener('click', async (e) => {
-          e.preventDefault();
-          await openModal({
-            title:  'Find your match.',
-            intro:  'Tell us where you are looking and roughly what you can spend. Sara reviews each one personally.',
-            fields: [
-              { name: 'first_name', label: 'First name', required: true },
-              { name: 'last_name',  label: 'Last name' },
-              { name: 'email',      label: 'Email',     type: 'email', required: true },
-              { name: 'phone',      label: 'Mobile' },
-              { name: 'areas',      label: 'Towns you are watching', placeholder: 'Murphys, Arnold, Sutter Creek' },
-              { name: 'price_max',  label: 'Top of your range (USD)' },
-              { name: 'message',    label: 'Anything we should know', type: 'textarea' }
-            ],
-            submitLabel: 'Send to Sara',
-            onSubmit: (data) => submitLead({
-              ...data,
-              areas: data.areas ? data.areas.split(',').map(s => s.trim()).filter(Boolean) : null,
-              price_max: data.price_max ? Number(data.price_max.toString().replace(/[^\d]/g,'')) : null,
-              lead_type: 'buyer',
-              journey_stage: 'narrowing'
-            })
-          });
+      if ((a.textContent || '').trim().toLowerCase() !== 'find my match') return;
+      // The redesign has a dedicated find-my-match.html with its own form
+      // posting to /api/leads/intake — let those links navigate normally.
+      // Only orphaned / legacy links still get the in-place modal.
+      if (((a.getAttribute('href') || '')).toLowerCase().includes('find-my-match')) return;
+      a.addEventListener('click', async (e) => {
+        e.preventDefault();
+        await openModal({
+          title:  'Find your match.',
+          intro:  'Tell us where you are looking and roughly what you can spend. Sara reviews each one personally.',
+          fields: [
+            { name: 'first_name', label: 'First name', required: true },
+            { name: 'last_name',  label: 'Last name' },
+            { name: 'email',      label: 'Email',     type: 'email', required: true },
+            { name: 'phone',      label: 'Mobile' },
+            { name: 'areas',      label: 'Towns you are watching', placeholder: 'Murphys, Arnold, Sutter Creek' },
+            { name: 'price_max',  label: 'Top of your range (USD)' },
+            { name: 'message',    label: 'Anything we should know', type: 'textarea' }
+          ],
+          submitLabel: 'Send to Sara',
+          onSubmit: (data) => submitLead({
+            ...data,
+            areas: data.areas ? data.areas.split(',').map(s => s.trim()).filter(Boolean) : null,
+            price_max: data.price_max ? Number(data.price_max.toString().replace(/[^\d]/g,'')) : null,
+            lead_type: 'buyer',
+            journey_stage: 'narrowing'
+          })
         });
-      }
+      });
     });
   }
 
   function wireListingsPage() {
-    if (!/\/listings\.html$/.test(location.pathname)) return;
+    if (!/\/(listings|property-search)\.html$/.test(location.pathname)) return;
     // "Message Sara" buttons in the polygon CTA strip
     $$('button').forEach(b => {
       const t = (b.textContent || '').trim().toLowerCase();
@@ -246,7 +249,7 @@
   }
 
   function wireListingDetailPage() {
-    if (!/\/listing\.html$/.test(location.pathname)) return;
+    if (!/\/(listing|property)\.html$/.test(location.pathname)) return;
 
     // ---- Tour scheduler ----
     const tabs   = $$('.tour-tab');
@@ -2172,6 +2175,145 @@
         else      alert(`✗ Failed: ${r.json?.error || r.status}`);
       });
     }
+  });
+})();
+
+/* ===========================================================================
+ * CRM Sequences + Calendar tabs (APPEND-ONLY)
+ * ---------------------------------------------------------------------------
+ * Scoped to crm.html. Paints the two previously-static tabs from live data:
+ *   GET /api/crm/sequences  -> .seq-list-card [data-seq-list] + .seq-editor-card
+ *   GET /api/crm/calendar   -> the .cal-grid week board + week nav
+ * Self-contained; leaves the static mock in place if a fetch fails (e.g. the
+ * auth gate is showing a sign-in card).
+ * ======================================================================== */
+(function () {
+  'use strict';
+  if (!/\/crm\.html$/.test(location.pathname)) return;
+
+  const esc = (s) => (s == null ? '' : String(s)).replace(/[&<>"]/g,
+    (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  const getJSON = async (url) => {
+    let res;
+    try { res = await fetch(url, { method: 'GET', headers: { 'Content-Type': 'application/json' }, credentials: 'include' }); }
+    catch (_) { return null; }
+    if (!res.ok) return null;
+    try { return await res.json(); } catch (_) { return null; }
+  };
+
+  // ---- Sequences ---------------------------------------------------------
+  function seqMeta(s) {
+    const bits = [`${s.step_count} step${s.step_count === 1 ? '' : 's'}`,
+                  `${s.duration_days} day${s.duration_days === 1 ? '' : 's'}`, s.channels];
+    if (s.enrolled) bits.push(`${s.enrolled} enrolled`);
+    return bits.join(' · ');
+  }
+  function paintSeqEditor(editor, s) {
+    if (!s) { editor.innerHTML = '<span class="eyebrow">Editing</span><p class="sub" style="margin-top:8px;">Select a sequence.</p>'; return; }
+    const steps = (s.steps || []).map((st) => {
+      const snip = st.subject ? `“${esc(st.subject)}” · ${esc(st.body)}` : esc(st.body);
+      return `<div class="seq-step">
+          <div class="seq-step-num">${esc(st.step_number)}</div>
+          <div class="seq-step-body">
+            <div class="seq-step-when">${esc(st.when)}</div>
+            <p class="seq-step-snip">${snip}</p>
+          </div>
+          <span class="seq-step-ch">${esc(st.channel === 'SMS' ? 'SMS' : 'Email')}</span>
+        </div>`;
+    }).join('');
+    const sub = s.description || `${s.step_count} messages over ${s.duration_days} days. Queued as drafts for your approval.`;
+    editor.innerHTML = `
+      <span class="eyebrow">Editing</span>
+      <h3 style="margin-top: 6px;">${esc(s.name)}</h3>
+      <p class="sub">${esc(sub)}</p>
+      ${steps || '<p class="sub" style="opacity:.6;">No steps defined.</p>'}
+      <div style="display: flex; gap: 8px; margin-top: 22px; padding-top: 18px; border-top: 1px solid var(--rule);">
+        <button class="btn btn-ghost btn-sm">${esc(s.step_count)} step${s.step_count === 1 ? '' : 's'}${s.trigger_type ? ' · ' + esc(s.trigger_type.replace(/_/g, ' ')) : ''}</button>
+        <button class="btn btn-ink btn-sm" style="flex: 1;" disabled title="Sequence authoring coming soon">Edit sequence →</button>
+      </div>`;
+  }
+  async function loadSequences() {
+    const list = document.querySelector('[data-seq-list]');
+    const editor = document.querySelector('[data-seq-editor]');
+    if (!list) return;
+    const data = await getJSON('/api/crm/sequences');
+    if (!data || !Array.isArray(data.sequences)) return; // keep static mock
+    const seqs = data.sequences;
+    if (!seqs.length) {
+      list.innerHTML = '<div class="seq-row" style="opacity:.6;"><div><div class="name">No sequences yet</div><div class="meta">Seed the drip templates to see them here.</div></div></div>';
+      if (editor) paintSeqEditor(editor, null);
+      return;
+    }
+    list.innerHTML = seqs.map((s, i) => `
+      <div class="seq-row${i === 0 ? ' on' : ''}" data-seq-id="${esc(s.id)}">
+        <div>
+          <div class="name">${esc(s.name)}</div>
+          <div class="meta">${esc(seqMeta(s))}</div>
+        </div>
+        <div class="stat"><strong>${s.reply_rate == null ? '—' : s.reply_rate + '%'}</strong>Reply rate</div>
+        <div class="toggle${s.active ? ' on' : ''}" title="${s.active ? 'Active' : 'Paused'}"></div>
+      </div>`).join('');
+    if (editor) paintSeqEditor(editor, seqs[0]);
+    list.querySelectorAll('[data-seq-id]').forEach((row) => {
+      row.addEventListener('click', (e) => {
+        if (e.target.closest('.toggle')) return; // visual toggle only (no write endpoint)
+        list.querySelectorAll('.seq-row').forEach((r) => r.classList.remove('on'));
+        row.classList.add('on');
+        const s = seqs.find((x) => String(x.id) === row.getAttribute('data-seq-id'));
+        if (editor) paintSeqEditor(editor, s);
+      });
+    });
+  }
+
+  // ---- Calendar ----------------------------------------------------------
+  let calWeek = 0;
+  async function loadCalendar(offset) {
+    calWeek = offset || 0;
+    const grid = document.querySelector('.cal-grid');
+    if (!grid) return;
+    const data = await getJSON(`/api/crm/calendar?week=${calWeek}`);
+    if (!data || !Array.isArray(data.days)) return; // keep static mock
+
+    const title = document.querySelector('.cal-h-title');
+    if (title && data.week_label) title.textContent = data.week_label;
+
+    const cols = grid.querySelectorAll('.cal-day-col'); // 7 (time-col excluded)
+    cols.forEach((col, i) => {
+      const day = data.days[i];
+      const head = col.querySelector('.cal-day-head');
+      if (head && day) {
+        head.innerHTML = `${esc(day.dow)}<span class="num">${esc(day.num)}</span>`;
+        head.classList.toggle('today', !!day.is_today);
+      }
+      col.querySelectorAll('.cal-cell').forEach((cell) => { cell.innerHTML = ''; });
+    });
+
+    (data.events || []).forEach((ev) => {
+      const col = cols[ev.day];
+      if (!col) return;
+      const cell = col.querySelectorAll('.cal-cell')[ev.row];
+      if (!cell) return;
+      const el = document.createElement('div');
+      el.className = `cal-event ${ev.cls === 'call' ? 'call' : 'tour'}`;
+      el.style.top = `${ev.top}px`;
+      el.style.height = `${ev.height}px`;
+      if (ev.sub) el.title = ev.sub;
+      el.innerHTML = `<div class="t">${esc(ev.time)}</div><div class="ti">${esc(ev.title)}</div>`;
+      cell.appendChild(el);
+    });
+  }
+  function wireCalendarNav() {
+    const navBtns = document.querySelectorAll('.cal-h-nav button');
+    if (navBtns[0]) navBtns[0].addEventListener('click', () => loadCalendar(calWeek - 1));
+    if (navBtns[1]) navBtns[1].addEventListener('click', () => loadCalendar(calWeek + 1));
+    const todayBtn = document.querySelector('.cal-h-l .btn');
+    if (todayBtn) todayBtn.addEventListener('click', () => loadCalendar(0));
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    loadSequences();
+    wireCalendarNav();
+    loadCalendar(0);
   });
 })();
 
