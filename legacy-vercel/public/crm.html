@@ -46,6 +46,7 @@
     <div class="app-side-section">Import</div>
     <nav class="app-side-nav">
       <a href="#" data-open-importer>Import Leads (CSV)…</a>
+      <a href="#" data-open-link-deal>Link client to deal…</a>
       <a href="#" data-send-test-email>Send test email…</a>
       <a href="#" data-sign-out>Sign out</a>
     </nav>
@@ -888,6 +889,115 @@ function selectLead(el) {
   document.querySelectorAll('.lead-row').forEach(r => r.classList.remove('on'));
   el.classList.add('on');
 }
+</script>
+<script>
+/* Link client to deal — self-contained modal for POST /api/crm/link-deal-party.
+   Closes the identity chain users -> lead -> deal_parties -> deal so a signed-in
+   seller sees only their own portal. Agent-only (the endpoint enforces it). */
+(function () {
+  'use strict';
+  function openLinkDealModal() {
+    if (document.getElementById('leg-linkdeal-modal')) {
+      document.getElementById('leg-linkdeal-modal').style.display = 'flex';
+      return;
+    }
+    var m = document.createElement('div');
+    m.id = 'leg-linkdeal-modal';
+    m.style.cssText = 'position:fixed;inset:0;z-index:99997;background:rgba(20,18,15,0.6);display:flex;align-items:center;justify-content:center;padding:24px;font-family:Manrope,system-ui,sans-serif;';
+    m.innerHTML = ''
+      + '<div style="background:#FAF6EC;max-width:520px;width:100%;padding:28px 32px;color:#1A1714;max-height:90vh;overflow:auto;">'
+      + '  <div style="font-family:\'JetBrains Mono\',monospace;font-size:10px;letter-spacing:.22em;text-transform:uppercase;color:#7C6A4D;margin-bottom:8px;">Seller portal</div>'
+      + '  <h2 style="font-family:\'Cormorant Garamond\',serif;font-style:italic;font-weight:500;font-size:28px;margin:0 0 6px;">Link a client to their deal.</h2>'
+      + '  <p style="font-size:13.5px;line-height:1.55;color:#3A332B;margin:0 0 18px;">Ties a client to a transaction so that when they sign in they see only their own portal. Finds or creates their lead by email, then links it to the deal.</p>'
+      + '  <form id="leg-linkdeal-form" style="display:flex;flex-direction:column;gap:12px;">'
+      + '    <label style="font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:#7C6A4D;display:flex;flex-direction:column;gap:4px;">Deal (source key)'
+      + '      <input name="deal" required placeholder="e.g. 433-hwy4" style="font:inherit;font-size:15px;text-transform:none;letter-spacing:normal;color:#1A1714;background:#fff;border:1px solid #D9CFB7;padding:9px 11px;"></label>'
+      + '    <label style="font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:#7C6A4D;display:flex;flex-direction:column;gap:4px;">Client email'
+      + '      <input name="email" type="email" required placeholder="client@example.com" style="font:inherit;font-size:15px;text-transform:none;letter-spacing:normal;color:#1A1714;background:#fff;border:1px solid #D9CFB7;padding:9px 11px;"></label>'
+      + '    <div style="display:flex;gap:10px;">'
+      + '      <label style="flex:1;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:#7C6A4D;display:flex;flex-direction:column;gap:4px;">First name'
+      + '        <input name="first_name" style="font:inherit;font-size:15px;text-transform:none;letter-spacing:normal;color:#1A1714;background:#fff;border:1px solid #D9CFB7;padding:9px 11px;"></label>'
+      + '      <label style="flex:1;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:#7C6A4D;display:flex;flex-direction:column;gap:4px;">Last name'
+      + '        <input name="last_name" style="font:inherit;font-size:15px;text-transform:none;letter-spacing:normal;color:#1A1714;background:#fff;border:1px solid #D9CFB7;padding:9px 11px;"></label>'
+      + '    </div>'
+      + '    <div style="display:flex;gap:10px;">'
+      + '      <label style="flex:1;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:#7C6A4D;display:flex;flex-direction:column;gap:4px;">Phone (optional)'
+      + '        <input name="phone" style="font:inherit;font-size:15px;text-transform:none;letter-spacing:normal;color:#1A1714;background:#fff;border:1px solid #D9CFB7;padding:9px 11px;"></label>'
+      + '      <label style="flex:1;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:#7C6A4D;display:flex;flex-direction:column;gap:4px;">Role'
+      + '        <select name="role" style="font:inherit;font-size:15px;color:#1A1714;background:#fff;border:1px solid #D9CFB7;padding:9px 11px;">'
+      + '          <option value="seller">Seller</option><option value="co-seller">Co-seller</option>'
+      + '          <option value="buyer">Buyer</option><option value="co-buyer">Co-buyer</option></select></label>'
+      + '    </div>'
+      + '    <label style="display:flex;align-items:flex-start;gap:8px;font-size:13px;color:#3A332B;line-height:1.4;">'
+      + '      <input name="provision" type="checkbox" checked style="margin-top:3px;">'
+      + '      <span>Create their sign-in account now so they can log in immediately (no email is sent). Leave on unless they already have a Legacy account.</span></label>'
+      + '    <div style="display:flex;gap:10px;margin-top:6px;">'
+      + '      <button type="submit" id="leg-linkdeal-submit" style="background:#1A1714;color:#FAF6EC;border:none;padding:12px 20px;font-family:\'JetBrains Mono\',monospace;font-size:11px;letter-spacing:.22em;text-transform:uppercase;cursor:pointer;">Link client</button>'
+      + '      <button type="button" id="leg-linkdeal-close" style="margin-left:auto;background:transparent;border:none;color:#7C6A4D;cursor:pointer;font-size:13px;">Close</button>'
+      + '    </div>'
+      + '  </form>'
+      + '  <div id="leg-linkdeal-result" style="margin-top:14px;font-size:13.5px;line-height:1.5;min-height:20px;"></div>'
+      + '</div>';
+    document.body.appendChild(m);
+
+    var form   = m.querySelector('#leg-linkdeal-form');
+    var submit = m.querySelector('#leg-linkdeal-submit');
+    var result = m.querySelector('#leg-linkdeal-result');
+    function close() { m.style.display = 'none'; }
+    m.querySelector('#leg-linkdeal-close').onclick = close;
+    m.addEventListener('click', function (e) { if (e.target === m) close(); });
+
+    form.addEventListener('submit', async function (e) {
+      e.preventDefault();
+      var fd = new FormData(form);
+      var body = {
+        deal:       (fd.get('deal') || '').trim(),
+        email:      (fd.get('email') || '').trim(),
+        first_name: (fd.get('first_name') || '').trim() || undefined,
+        last_name:  (fd.get('last_name') || '').trim() || undefined,
+        phone:      (fd.get('phone') || '').trim() || undefined,
+        role:       fd.get('role') || 'seller',
+        provision:  fd.get('provision') === 'on'
+      };
+      submit.disabled = true; submit.textContent = 'Linking…';
+      result.style.color = '#7C6A4D'; result.textContent = 'Working…';
+      try {
+        var res = await fetch('/api/crm/link-deal-party', {
+          method: 'POST', credentials: 'include',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(body)
+        });
+        var json = await res.json();
+        if (res.ok && json && json.linked) {
+          var status = json.user_provisioned
+            ? 'Sign-in account created — they can log in now.'
+            : (json.user_linked
+                ? 'Linked to their existing account.'
+                : 'No account yet — the link activates the moment they first sign in with this email.');
+          result.style.color = '#2E5C3D';
+          result.innerHTML = '✓ ' + (body.first_name || 'Client') + ' linked to <strong>'
+            + (json.deal && json.deal.address ? json.deal.address : body.deal) + '</strong> as ' + json.party.role + '.<br>'
+            + (json.lead && json.lead.created ? 'New lead created. ' : 'Existing lead reused. ') + status;
+          submit.textContent = 'Linked';
+          setTimeout(function () { submit.disabled = false; submit.textContent = 'Link client'; }, 1600);
+        } else {
+          result.style.color = '#9B2C2C';
+          result.textContent = '✗ ' + ((json && json.error) || ('Failed (' + res.status + ')'));
+          submit.disabled = false; submit.textContent = 'Link client';
+        }
+      } catch (err) {
+        result.style.color = '#9B2C2C';
+        result.textContent = '✗ ' + (err.message || 'Network error');
+        submit.disabled = false; submit.textContent = 'Link client';
+      }
+    });
+  }
+
+  document.addEventListener('click', function (e) {
+    var t = e.target.closest('[data-open-link-deal]');
+    if (t) { e.preventDefault(); openLinkDealModal(); }
+  });
+})();
 </script>
 <script src="/legacy-client.js" defer></script>
 </body>
