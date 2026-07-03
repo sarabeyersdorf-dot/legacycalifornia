@@ -12,7 +12,9 @@
 
 import { adminClient } from '../supabase.js';
 import { getCallerProfile, isAgent } from '../auth.js';
-import { handleOptions, ok, fail } from '../cors.js';
+import { handleOptions, readJson, ok, fail } from '../cors.js';
+
+const EMAIL_RE = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
 
 const TZ = 'America/Los_Angeles';
 const PX_PER_HOUR = 56;
@@ -53,13 +55,86 @@ function isoWeek(y, m, d) {
 const pad2 = (n) => String(n).padStart(2, '0');
 const key = (p) => `${p.y}-${pad2(p.m)}-${pad2(p.d)}`;
 
+// Interpret Y-M-D H:M as Pacific wall-clock and return the matching UTC Date.
+// One offset correction handles all but the ~1hr DST-transition ambiguity.
+function laToUTC(y, m, d, hh, mm) {
+  const asUTC = Date.UTC(y, m - 1, d, hh, mm);
+  const p = laParts(new Date(asUTC));
+  const wallAsUTC = Date.UTC(p.y, p.m - 1, p.d, p.hour, p.minute);
+  return new Date(asUTC - (wallAsUTC - asUTC));
+}
+
+// POST → schedule a tour. tours.lead_id is required, so we resolve (or create)
+// the client's lead by email first.
+async function createTour(req, res, profile) {
+  const supa = adminClient();
+  const body = await readJson(req);
+
+  const leadId = typeof body?.lead_id === 'string' ? body.lead_id.trim() : '';
+  const email  = typeof body?.email === 'string' ? body.email.trim().toLowerCase() : '';
+  const date   = typeof body?.date === 'string' ? body.date.trim() : '';   // YYYY-MM-DD (Pacific)
+  const time   = typeof body?.time === 'string' ? body.time.trim() : '';   // HH:MM (24h, Pacific)
+  const duration = Math.max(15, Math.min(480, parseInt(body?.duration_minutes, 10) || 30));
+  const tourType = body?.tour_type === 'video' ? 'video' : 'in_person';
+  const notes    = typeof body?.notes === 'string' ? body.notes.trim() : null;
+  const propertyId = typeof body?.property_id === 'string' && body.property_id.trim() ? body.property_id.trim() : null;
+
+  const dm = /^(\d{4})-(\d{2})-(\d{2})$/.exec(date);
+  const tm = /^(\d{1,2}):(\d{2})$/.exec(time);
+  if (!dm) return fail(res, 400, 'date is required (YYYY-MM-DD)');
+  if (!tm) return fail(res, 400, 'time is required (HH:MM, 24-hour)');
+  if (!leadId && !email) return fail(res, 400, 'lead_id or email is required');
+  if (email && !leadId && !EMAIL_RE.test(email)) return fail(res, 400, 'email is not a valid address');
+
+  const scheduled = laToUTC(+dm[1], +dm[2], +dm[3], +tm[1], +tm[2]);
+  if (isNaN(scheduled)) return fail(res, 400, 'could not parse date/time');
+
+  // Resolve the lead.
+  let lead = null;
+  if (leadId) {
+    const { data } = await supa.from('leads').select('id, email').eq('id', leadId).maybeSingle();
+    lead = data || null;
+    if (!lead) return fail(res, 404, 'lead_id not found');
+  } else {
+    const { data } = await supa.from('leads').select('id, email').eq('email', email).maybeSingle();
+    lead = data || null;
+    if (!lead) {
+      const first = typeof body?.first_name === 'string' ? body.first_name.trim() : null;
+      const last  = typeof body?.last_name === 'string' ? body.last_name.trim() : null;
+      const { data: created, error: insErr } = await supa.from('leads').insert({
+        email, first_name: first, last_name: last, source: 'manual', lead_type: 'buyer',
+        assigned_agent: profile.role === 'agent_james' ? 'james' : 'sara',
+        journey_stage: 'touring', pipeline_stage: 'touring'
+      }).select('id, email').single();
+      if (insErr) return fail(res, 500, `lead create: ${insErr.message}`);
+      lead = created;
+    }
+  }
+
+  const { data: tour, error } = await supa.from('tours').insert({
+    lead_id: lead.id,
+    property_id: propertyId,
+    scheduled_at: scheduled.toISOString(),
+    duration_minutes: duration,
+    tour_type: tourType,
+    status: 'confirmed',
+    agent: profile.role === 'agent_james' ? 'james' : 'sara',
+    notes
+  }).select('id, scheduled_at, duration_minutes, tour_type, status').single();
+  if (error) return fail(res, 500, `tour create: ${error.message}`);
+
+  return ok(res, { tour, lead: { id: lead.id, email: lead.email } });
+}
+
 export default async function handler(req, res) {
   if (handleOptions(req, res)) return;
-  if (req.method !== 'GET') return fail(res, 405, 'method_not_allowed');
 
   const { user, profile } = await getCallerProfile(req, res);
   if (!user)             return fail(res, 401, 'not authenticated');
   if (!isAgent(profile)) return fail(res, 403, 'agents only');
+
+  if (req.method === 'POST') return createTour(req, res, profile);
+  if (req.method !== 'GET')  return fail(res, 405, 'method_not_allowed');
 
   try {
     const weekOffset = parseInt(req.query?.week, 10) || 0;
