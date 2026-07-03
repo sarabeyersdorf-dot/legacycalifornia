@@ -2332,7 +2332,8 @@
       const cell = col.querySelectorAll('.cal-cell')[ev.row];
       if (!cell) return;
       const el = document.createElement('div');
-      el.className = `cal-event ${ev.cls === 'call' ? 'call' : 'tour'}`;
+      const cls = ['tour', 'call', 'block', 'open'].includes(ev.cls) ? ev.cls : 'tour';
+      el.className = `cal-event ${cls}`;
       el.style.top = `${ev.top}px`;
       el.style.height = `${ev.height}px`;
       if (ev.sub) el.title = ev.sub;
@@ -2424,47 +2425,73 @@
   // ---- Calendar new-tour modal -------------------------------------------
   function mondayOf(dt) { const x = new Date(dt); const day = (x.getDay() + 6) % 7; x.setDate(x.getDate() - day); x.setHours(0, 0, 0, 0); return x; }
   function openCalModal() {
-    const m = modalShell('Schedule a tour', 'Adds a confirmed tour to the calendar, tied to a client by email.');
+    const m = modalShell('Add to calendar', 'A tour is tied to a client; a call, block, or open house is just an event.');
     m.body.innerHTML = `
       <div style="display:flex;flex-direction:column;gap:10px;">
-        <div><label style="${M_LAB}">Client email</label><input data-f-email type="email" placeholder="client@example.com" style="${M_INPUT}"></div>
-        <div style="display:flex;gap:10px;">
-          <div style="flex:1;"><label style="${M_LAB}">First name</label><input data-f-first style="${M_INPUT}"></div>
-          <div style="flex:1;"><label style="${M_LAB}">Last name</label><input data-f-last style="${M_INPUT}"></div>
+        <div><label style="${M_LAB}">Event type</label><select data-f-kind style="${M_INPUT}">
+          <option value="tour">Client tour</option><option value="call">Call</option>
+          <option value="block">Block / personal</option><option value="open">Open house</option>
+          <option value="meeting">Meeting</option></select></div>
+        <div data-tour-fields style="display:flex;flex-direction:column;gap:10px;">
+          <div><label style="${M_LAB}">Client email</label><input data-f-email type="email" placeholder="client@example.com" style="${M_INPUT}"></div>
+          <div style="display:flex;gap:10px;">
+            <div style="flex:1;"><label style="${M_LAB}">First name</label><input data-f-first style="${M_INPUT}"></div>
+            <div style="flex:1;"><label style="${M_LAB}">Last name</label><input data-f-last style="${M_INPUT}"></div>
+          </div>
+          <div><label style="${M_LAB}">Tour type</label><select data-f-type style="${M_INPUT}"><option value="in_person">In person</option><option value="video">Video</option></select></div>
+        </div>
+        <div data-appt-fields style="display:none;">
+          <label style="${M_LAB}">Title</label><input data-f-title placeholder="e.g. Lender call · Rivera" style="${M_INPUT}">
         </div>
         <div style="display:flex;gap:10px;">
           <div style="flex:1;"><label style="${M_LAB}">Date</label><input data-f-date type="date" style="${M_INPUT}"></div>
           <div style="flex:0 0 120px;"><label style="${M_LAB}">Time</label><input data-f-time type="time" style="${M_INPUT}"></div>
-        </div>
-        <div style="display:flex;gap:10px;">
-          <div style="flex:0 0 120px;"><label style="${M_LAB}">Minutes</label><input data-f-dur type="number" min="15" step="15" value="30" style="${M_INPUT}"></div>
-          <div style="flex:1;"><label style="${M_LAB}">Type</label><select data-f-type style="${M_INPUT}"><option value="in_person">In person</option><option value="video">Video</option></select></div>
+          <div style="flex:0 0 110px;"><label style="${M_LAB}">Minutes</label><input data-f-dur type="number" min="15" step="15" value="30" style="${M_INPUT}"></div>
         </div>
         <div><label style="${M_LAB}">Notes</label><textarea data-f-notes rows="2" style="${M_INPUT}"></textarea></div>
         <div style="display:flex;gap:10px;margin-top:8px;align-items:center;">
-          <button type="button" data-save style="${M_INK}">Schedule tour</button>
+          <button type="button" data-save style="${M_INK}">Add event</button>
           <button type="button" data-cancel style="${M_GHOST};margin-left:auto;">Cancel</button>
         </div>
       </div>`;
-    m.body.querySelector('[data-cancel]').addEventListener('click', m.close);
+    const kindSel = m.body.querySelector('[data-f-kind]');
+    const tourFields = m.body.querySelector('[data-tour-fields]');
+    const apptFields = m.body.querySelector('[data-appt-fields]');
     const saveBtn = m.body.querySelector('[data-save]');
+    const syncKind = () => {
+      const isTour = kindSel.value === 'tour';
+      tourFields.style.display = isTour ? 'flex' : 'none';
+      apptFields.style.display = isTour ? 'none' : 'block';
+      saveBtn.textContent = isTour ? 'Schedule tour' : 'Add event';
+    };
+    kindSel.addEventListener('change', syncKind);
+    syncKind();
+    m.body.querySelector('[data-cancel]').addEventListener('click', m.close);
     saveBtn.addEventListener('click', async () => {
-      const email = m.body.querySelector('[data-f-email]').value.trim();
+      const kind = kindSel.value;
       const date = m.body.querySelector('[data-f-date]').value;
       const time = m.body.querySelector('[data-f-time]').value;
-      if (!email) { m.err.textContent = 'Client email is required.'; return; }
       if (!date || !time) { m.err.textContent = 'Pick a date and time.'; return; }
-      const payload = { email, first_name: m.body.querySelector('[data-f-first]').value.trim(),
-        last_name: m.body.querySelector('[data-f-last]').value.trim(), date, time,
-        duration_minutes: parseInt(m.body.querySelector('[data-f-dur]').value, 10) || 30,
-        tour_type: m.body.querySelector('[data-f-type]').value, notes: m.body.querySelector('[data-f-notes]').value.trim() };
-      saveBtn.disabled = true; saveBtn.textContent = 'Scheduling…'; m.err.textContent = '';
+      const common = { date, time, duration_minutes: parseInt(m.body.querySelector('[data-f-dur]').value, 10) || 30,
+        notes: m.body.querySelector('[data-f-notes]').value.trim() };
+      let payload;
+      if (kind === 'tour') {
+        const email = m.body.querySelector('[data-f-email]').value.trim();
+        if (!email) { m.err.textContent = 'Client email is required for a tour.'; return; }
+        payload = { kind: 'tour', email, first_name: m.body.querySelector('[data-f-first]').value.trim(),
+          last_name: m.body.querySelector('[data-f-last]').value.trim(), tour_type: m.body.querySelector('[data-f-type]').value, ...common };
+      } else {
+        const title = m.body.querySelector('[data-f-title]').value.trim();
+        if (!title) { m.err.textContent = 'A title is required.'; return; }
+        payload = { kind, title, ...common };
+      }
+      saveBtn.disabled = true; saveBtn.textContent = 'Saving…'; m.err.textContent = '';
       const r = await sendJSON('/api/crm/calendar', 'POST', payload);
-      if (r.ok && r.json && r.json.tour) {
+      if (r.ok && r.json && (r.json.tour || r.json.appointment)) {
         m.close();
         const offset = Math.round((mondayOf(date + 'T12:00') - mondayOf(new Date())) / (7 * 86400000));
         loadCalendar(offset);
-      } else { m.err.textContent = (r.json && r.json.error) || 'Could not schedule.'; saveBtn.disabled = false; saveBtn.textContent = 'Schedule tour'; }
+      } else { m.err.textContent = (r.json && r.json.error) || 'Could not save.'; saveBtn.disabled = false; syncKind(); }
     });
   }
 
