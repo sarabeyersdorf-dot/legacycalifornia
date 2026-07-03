@@ -2200,6 +2200,40 @@
     if (!res.ok) return null;
     try { return await res.json(); } catch (_) { return null; }
   };
+  const sendJSON = async (url, method, bodyObj) => {
+    let res;
+    try {
+      res = await fetch(url, { method, headers: { 'Content-Type': 'application/json' },
+        credentials: 'include', body: JSON.stringify(bodyObj) });
+    } catch (e) { return { ok: false, status: 0, json: { error: e.message || 'Network error' } }; }
+    let json = null; try { json = await res.json(); } catch (_) {}
+    return { ok: res.ok, status: res.status, json };
+  };
+
+  const seqState = { list: [], selectedId: null };
+
+  // Inline modal styling (matches the importer / link-deal modals).
+  const M_INPUT = 'font:inherit;font-size:14px;color:#1A1714;background:#fff;border:1px solid #D9CFB7;padding:8px 10px;width:100%;box-sizing:border-box;';
+  const M_LAB   = 'font-family:"JetBrains Mono",monospace;font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:#7C6A4D;display:block;margin-bottom:4px;';
+  const M_INK   = 'background:#1A1714;color:#FAF6EC;border:none;padding:11px 20px;font-family:"JetBrains Mono",monospace;font-size:11px;letter-spacing:.2em;text-transform:uppercase;cursor:pointer;';
+  const M_GHOST = 'background:transparent;border:none;color:#7C6A4D;cursor:pointer;font-size:13px;';
+
+  function modalShell(title, intro) {
+    const overlay = document.createElement('div');
+    overlay.setAttribute('data-crm-modal', '');
+    overlay.style.cssText = 'position:fixed;inset:0;z-index:99997;background:rgba(20,18,15,0.6);display:flex;align-items:center;justify-content:center;padding:24px;font-family:Manrope,system-ui,sans-serif;';
+    const box = document.createElement('div');
+    box.style.cssText = 'background:#FAF6EC;max-width:600px;width:100%;padding:26px 30px;color:#1A1714;max-height:92vh;overflow:auto;';
+    box.innerHTML = `<div style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.22em;text-transform:uppercase;color:#7C6A4D;margin-bottom:8px;">Legacy CRM</div>
+      <h2 style="font-family:'Cormorant Garamond',serif;font-style:italic;font-weight:500;font-size:26px;margin:0 0 6px;">${esc(title)}</h2>
+      ${intro ? `<p style="font-size:13px;line-height:1.5;color:#3A332B;margin:0 0 16px;">${esc(intro)}</p>` : ''}
+      <div data-modal-body></div>
+      <div data-modal-error style="color:#9B2C2C;font-size:13px;margin-top:10px;min-height:18px;"></div>`;
+    overlay.appendChild(box);
+    document.body.appendChild(overlay);
+    overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.remove(); });
+    return { overlay, body: box.querySelector('[data-modal-body]'), err: box.querySelector('[data-modal-error]'), close: () => overlay.remove() };
+  }
 
   // ---- Sequences ---------------------------------------------------------
   function seqMeta(s) {
@@ -2229,7 +2263,7 @@
       ${steps || '<p class="sub" style="opacity:.6;">No steps defined.</p>'}
       <div style="display: flex; gap: 8px; margin-top: 22px; padding-top: 18px; border-top: 1px solid var(--rule);">
         <button class="btn btn-ghost btn-sm">${esc(s.step_count)} step${s.step_count === 1 ? '' : 's'}${s.trigger_type ? ' · ' + esc(s.trigger_type.replace(/_/g, ' ')) : ''}</button>
-        <button class="btn btn-ink btn-sm" style="flex: 1;" disabled title="Sequence authoring coming soon">Edit sequence →</button>
+        <button class="btn btn-ink btn-sm" style="flex: 1;" data-seq-edit>Edit sequence →</button>
       </div>`;
   }
   async function loadSequences() {
@@ -2239,11 +2273,14 @@
     const data = await getJSON('/api/crm/sequences');
     if (!data || !Array.isArray(data.sequences)) return; // keep static mock
     const seqs = data.sequences;
+    seqState.list = seqs;
     if (!seqs.length) {
-      list.innerHTML = '<div class="seq-row" style="opacity:.6;"><div><div class="name">No sequences yet</div><div class="meta">Seed the drip templates to see them here.</div></div></div>';
+      seqState.selectedId = null;
+      list.innerHTML = '<div class="seq-row" style="opacity:.6;"><div><div class="name">No sequences yet</div><div class="meta">Click “+ New sequence” to create your first drip.</div></div></div>';
       if (editor) paintSeqEditor(editor, null);
       return;
     }
+    seqState.selectedId = String(seqs[0].id);
     list.innerHTML = seqs.map((s, i) => `
       <div class="seq-row${i === 0 ? ' on' : ''}" data-seq-id="${esc(s.id)}">
         <div>
@@ -2259,7 +2296,8 @@
         if (e.target.closest('.toggle')) return; // visual toggle only (no write endpoint)
         list.querySelectorAll('.seq-row').forEach((r) => r.classList.remove('on'));
         row.classList.add('on');
-        const s = seqs.find((x) => String(x.id) === row.getAttribute('data-seq-id'));
+        seqState.selectedId = row.getAttribute('data-seq-id');
+        const s = seqs.find((x) => String(x.id) === seqState.selectedId);
         if (editor) paintSeqEditor(editor, s);
       });
     });
@@ -2309,6 +2347,133 @@
     const todayBtn = document.querySelector('.cal-h-l .btn');
     if (todayBtn) todayBtn.addEventListener('click', () => loadCalendar(0));
   }
+
+  // ---- Sequence authoring modal (create / edit) --------------------------
+  function stepRowHtml(step) {
+    const dh = step ? (Number(step.delay_hours) || 0) : 0;
+    const useDays = dh > 0 && dh % 24 === 0;
+    const dval = useDays ? dh / 24 : dh;
+    const unit = useDays ? 'days' : 'hours';
+    const ch = step ? String(step.channel || 'email').toLowerCase() : 'email';
+    const subj = step ? (step.subject || '') : '';
+    const body = step ? (step.body || '') : '';
+    return `<div data-step-row style="border:1px solid #E4DAC4;padding:10px;margin-bottom:8px;background:#fff;">
+      <div style="display:flex;gap:8px;margin-bottom:6px;align-items:end;flex-wrap:wrap;">
+        <div style="flex:0 0 64px;"><label style="${M_LAB}">Delay</label><input data-s-delay type="number" min="0" value="${esc(dval)}" style="${M_INPUT}"></div>
+        <div style="flex:0 0 84px;"><label style="${M_LAB}">Unit</label><select data-s-unit style="${M_INPUT}"><option value="hours"${unit === 'hours' ? ' selected' : ''}>hours</option><option value="days"${unit === 'days' ? ' selected' : ''}>days</option></select></div>
+        <div style="flex:0 0 84px;"><label style="${M_LAB}">Channel</label><select data-s-ch style="${M_INPUT}"><option value="email"${ch === 'email' ? ' selected' : ''}>Email</option><option value="sms"${ch === 'sms' ? ' selected' : ''}>SMS</option></select></div>
+        <div style="flex:1;min-width:120px;"><label style="${M_LAB}">Subject <span style="text-transform:none;letter-spacing:0;">(email)</span></label><input data-s-subj value="${esc(subj)}" style="${M_INPUT}"></div>
+        <button type="button" data-s-remove title="Remove step" style="background:none;border:none;color:#9B2C2C;font-size:20px;cursor:pointer;line-height:1;padding:0 2px;">×</button>
+      </div>
+      <textarea data-s-body rows="2" placeholder="What this message should say…" style="${M_INPUT}">${esc(body)}</textarea>
+    </div>`;
+  }
+  function openSeqModal(seq) {
+    const isEdit = !!seq;
+    const m = modalShell(isEdit ? 'Edit sequence' : 'New sequence',
+      'Each step is queued as a draft for your approval — never auto-sent.');
+    const triggers = [['new_lead', 'New lead'], ['open_house', 'Open house'], ['price_drop', 'Price drop'], ['radio_silence', 'Radio silence'], ['manual', 'Manual']];
+    m.body.innerHTML = `
+      <div style="display:flex;flex-direction:column;gap:10px;">
+        <div><label style="${M_LAB}">Name</label><input data-f-name value="${esc(seq ? seq.name : '')}" style="${M_INPUT}"></div>
+        <div><label style="${M_LAB}">Description</label><input data-f-desc value="${esc(seq ? seq.description : '')}" style="${M_INPUT}"></div>
+        <div style="display:flex;gap:10px;align-items:end;">
+          <div style="flex:1;"><label style="${M_LAB}">Trigger</label><select data-f-trigger style="${M_INPUT}">${triggers.map(([v, l]) => `<option value="${v}"${seq && seq.trigger_type === v ? ' selected' : ''}>${l}</option>`).join('')}</select></div>
+          <label style="display:flex;align-items:center;gap:6px;font-size:13px;color:#3A332B;padding-bottom:9px;"><input data-f-active type="checkbox"${!seq || seq.active ? ' checked' : ''}> Active</label>
+        </div>
+        <div style="margin-top:4px;"><label style="${M_LAB}">Steps</label><div data-steps></div>
+          <button type="button" data-add-step style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:#1A1714;background:transparent;border:1px dashed #B89A5C;padding:9px;width:100%;cursor:pointer;">+ Add step</button>
+        </div>
+        <div style="display:flex;gap:10px;margin-top:8px;align-items:center;">
+          <button type="button" data-save style="${M_INK}">${isEdit ? 'Save changes' : 'Create sequence'}</button>
+          <button type="button" data-cancel style="${M_GHOST};margin-left:auto;">Cancel</button>
+        </div>
+      </div>`;
+    const stepsBox = m.body.querySelector('[data-steps]');
+    const addStep = (s) => stepsBox.insertAdjacentHTML('beforeend', stepRowHtml(s));
+    (seq && seq.steps && seq.steps.length ? seq.steps : [null]).forEach(addStep);
+    m.body.querySelector('[data-add-step]').addEventListener('click', () => addStep(null));
+    stepsBox.addEventListener('click', (e) => {
+      if (!e.target.closest('[data-s-remove]')) return;
+      if (stepsBox.querySelectorAll('[data-step-row]').length > 1) e.target.closest('[data-step-row]').remove();
+    });
+    m.body.querySelector('[data-cancel]').addEventListener('click', m.close);
+    const saveBtn = m.body.querySelector('[data-save]');
+    saveBtn.addEventListener('click', async () => {
+      const name = m.body.querySelector('[data-f-name]').value.trim();
+      if (!name) { m.err.textContent = 'Name is required.'; return; }
+      const steps = [...stepsBox.querySelectorAll('[data-step-row]')].map((row) => {
+        const delay = parseFloat(row.querySelector('[data-s-delay]').value) || 0;
+        const unit = row.querySelector('[data-s-unit]').value;
+        const ch = row.querySelector('[data-s-ch]').value;
+        const subj = row.querySelector('[data-s-subj]').value.trim();
+        return { delay_hours: Math.round(delay * (unit === 'days' ? 24 : 1)), channel: ch,
+          subject_template: ch === 'sms' ? null : (subj || null), body_template: row.querySelector('[data-s-body]').value.trim() };
+      });
+      if (steps.some((s) => !s.body_template)) { m.err.textContent = 'Every step needs a message body.'; return; }
+      const payload = { name, description: m.body.querySelector('[data-f-desc]').value.trim(),
+        trigger_type: m.body.querySelector('[data-f-trigger]').value, active: m.body.querySelector('[data-f-active]').checked, steps };
+      saveBtn.disabled = true; saveBtn.textContent = 'Saving…'; m.err.textContent = '';
+      const r = isEdit ? await sendJSON('/api/crm/sequences', 'PATCH', { id: seq.id, ...payload })
+                       : await sendJSON('/api/crm/sequences', 'POST', payload);
+      if (r.ok && r.json && r.json.sequence) { m.close(); loadSequences(); }
+      else { m.err.textContent = (r.json && r.json.error) || 'Save failed.'; saveBtn.disabled = false; saveBtn.textContent = isEdit ? 'Save changes' : 'Create sequence'; }
+    });
+  }
+
+  // ---- Calendar new-tour modal -------------------------------------------
+  function mondayOf(dt) { const x = new Date(dt); const day = (x.getDay() + 6) % 7; x.setDate(x.getDate() - day); x.setHours(0, 0, 0, 0); return x; }
+  function openCalModal() {
+    const m = modalShell('Schedule a tour', 'Adds a confirmed tour to the calendar, tied to a client by email.');
+    m.body.innerHTML = `
+      <div style="display:flex;flex-direction:column;gap:10px;">
+        <div><label style="${M_LAB}">Client email</label><input data-f-email type="email" placeholder="client@example.com" style="${M_INPUT}"></div>
+        <div style="display:flex;gap:10px;">
+          <div style="flex:1;"><label style="${M_LAB}">First name</label><input data-f-first style="${M_INPUT}"></div>
+          <div style="flex:1;"><label style="${M_LAB}">Last name</label><input data-f-last style="${M_INPUT}"></div>
+        </div>
+        <div style="display:flex;gap:10px;">
+          <div style="flex:1;"><label style="${M_LAB}">Date</label><input data-f-date type="date" style="${M_INPUT}"></div>
+          <div style="flex:0 0 120px;"><label style="${M_LAB}">Time</label><input data-f-time type="time" style="${M_INPUT}"></div>
+        </div>
+        <div style="display:flex;gap:10px;">
+          <div style="flex:0 0 120px;"><label style="${M_LAB}">Minutes</label><input data-f-dur type="number" min="15" step="15" value="30" style="${M_INPUT}"></div>
+          <div style="flex:1;"><label style="${M_LAB}">Type</label><select data-f-type style="${M_INPUT}"><option value="in_person">In person</option><option value="video">Video</option></select></div>
+        </div>
+        <div><label style="${M_LAB}">Notes</label><textarea data-f-notes rows="2" style="${M_INPUT}"></textarea></div>
+        <div style="display:flex;gap:10px;margin-top:8px;align-items:center;">
+          <button type="button" data-save style="${M_INK}">Schedule tour</button>
+          <button type="button" data-cancel style="${M_GHOST};margin-left:auto;">Cancel</button>
+        </div>
+      </div>`;
+    m.body.querySelector('[data-cancel]').addEventListener('click', m.close);
+    const saveBtn = m.body.querySelector('[data-save]');
+    saveBtn.addEventListener('click', async () => {
+      const email = m.body.querySelector('[data-f-email]').value.trim();
+      const date = m.body.querySelector('[data-f-date]').value;
+      const time = m.body.querySelector('[data-f-time]').value;
+      if (!email) { m.err.textContent = 'Client email is required.'; return; }
+      if (!date || !time) { m.err.textContent = 'Pick a date and time.'; return; }
+      const payload = { email, first_name: m.body.querySelector('[data-f-first]').value.trim(),
+        last_name: m.body.querySelector('[data-f-last]').value.trim(), date, time,
+        duration_minutes: parseInt(m.body.querySelector('[data-f-dur]').value, 10) || 30,
+        tour_type: m.body.querySelector('[data-f-type]').value, notes: m.body.querySelector('[data-f-notes]').value.trim() };
+      saveBtn.disabled = true; saveBtn.textContent = 'Scheduling…'; m.err.textContent = '';
+      const r = await sendJSON('/api/crm/calendar', 'POST', payload);
+      if (r.ok && r.json && r.json.tour) {
+        m.close();
+        const offset = Math.round((mondayOf(date + 'T12:00') - mondayOf(new Date())) / (7 * 86400000));
+        loadCalendar(offset);
+      } else { m.err.textContent = (r.json && r.json.error) || 'Could not schedule.'; saveBtn.disabled = false; saveBtn.textContent = 'Schedule tour'; }
+    });
+  }
+
+  // Delegated triggers (buttons are static in crm.html or painted by the editor).
+  document.addEventListener('click', (e) => {
+    if (e.target.closest('[data-seq-new]'))  { e.preventDefault(); openSeqModal(null); }
+    else if (e.target.closest('[data-seq-edit]')) { e.preventDefault(); openSeqModal(seqState.list.find((x) => String(x.id) === seqState.selectedId) || null); }
+    else if (e.target.closest('[data-cal-new]'))  { e.preventDefault(); openCalModal(); }
+  });
 
   document.addEventListener('DOMContentLoaded', () => {
     loadSequences();
