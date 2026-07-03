@@ -126,9 +126,16 @@ function mapDocs(dealId, d) {
 export default async function handler(req, res) {
   if (handleOptions(req, res)) return;
 
-  // Simple shared-secret guard so only you can trigger a sync.
-  const secret = process.env.SYNC_SECRET;
-  if (secret && req.query?.key !== secret) return fail(res, 401, 'bad key');
+  // Auth: allow two callers.
+  //  1. Manual trigger — the bookmark URL with ?key=<SYNC_SECRET>.
+  //  2. Vercel Cron — scheduled runs carry an "x-vercel-cron" header, and
+  //     (if set) an "Authorization: Bearer <CRON_SECRET>". Either is accepted.
+  const secret     = process.env.SYNC_SECRET;
+  const cronSecret = process.env.CRON_SECRET;
+  const bearer     = String(req.headers['authorization'] || '').replace(/^Bearer\s+/i, '');
+  const okManual   = !secret || req.query?.key === secret;
+  const okCron     = !!req.headers['x-vercel-cron'] || (cronSecret && bearer === cronSecret);
+  if (!okManual && !okCron) return fail(res, 401, 'bad key');
 
   try {
     const data = require('../../data/deals.json');
