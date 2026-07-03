@@ -9,6 +9,8 @@
 //   POST  /api/crm/message        → manual outbound from an agent
 //   POST  /api/crm/note           → agent-only note on a lead
 //   POST  /api/crm/link-deal-party → link a client (lead) to their deal
+//   GET   /api/crm/sequences      → drip sequences for the Sequences tab
+//   GET   /api/crm/calendar       → week of tours/appointments for the Calendar tab
 //
 // Counts as ONE serverless function on Vercel.
 
@@ -23,6 +25,8 @@ import importLeads   from '../_lib/handlers/crm-import-leads.js';
 import metrics       from '../_lib/handlers/crm-metrics.js';
 import testEmail     from '../_lib/handlers/crm-test-email.js';
 import linkDealParty from '../_lib/handlers/crm-link-deal-party.js';
+import sequences     from '../_lib/handlers/crm-sequences.js';
+import calendar      from '../_lib/handlers/crm-calendar.js';
 
 const TABLE = {
   'morning-brief':   morningBrief,
@@ -35,7 +39,9 @@ const TABLE = {
   'import-leads':    importLeads,
   'metrics':         metrics,
   'test-email':      testEmail,
-  'link-deal-party': linkDealParty
+  'link-deal-party': linkDealParty,
+  'sequences':       sequences,
+  'calendar':        calendar
 };
 
 export default async function handler(req, res) {
