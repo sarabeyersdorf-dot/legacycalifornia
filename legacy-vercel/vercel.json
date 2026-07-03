@@ -33,5 +33,8 @@
   ],
   "functions": {
     "api/*.js": { "memory": 256, "maxDuration": 10 }
-  }
+  },
+  "crons": [
+    { "path": "/api/cron/sync-deals", "schedule": "0 * * * *" }
+  ]
 }
