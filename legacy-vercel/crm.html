@@ -1,0 +1,1004 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Legacy CRM · Sara's Desk</title>
+<link rel="stylesheet" href="legacy.css">
+<link rel="stylesheet" href="crm.css">
+</head>
+<body data-screen-label="Agent CRM">
+
+<div class="app">
+  <!-- ============ SIDEBAR ============ -->
+  <aside class="app-side">
+    <div class="app-side-brand">
+      <a href="index.html" class="wordmark">
+        <span class="wordmark-word">Legacy</span>
+        <span class="wordmark-sub">Desk · Sara</span>
+      </a>
+    </div>
+
+    <div class="app-side-section">Daily</div>
+    <nav class="app-side-nav">
+      <a href="#" class="active" onclick="showView(event,'today')">Today <span class="pill" data-roster-today>—</span></a>
+      <a href="#" onclick="showView(event,'inbox')">Inbox <span class="pill" data-roster-inbox>—</span></a>
+      <a href="#" onclick="showView(event,'pipe')">Pipeline</a>
+      <a href="#" onclick="showView(event,'cal')">Calendar <span class="pill" data-roster-calendar>—</span></a>
+      <a href="#" onclick="showView(event,'seq')">Sequences</a>
+    </nav>
+
+    <div class="app-side-section">Roster</div>
+    <nav class="app-side-nav">
+      <a href="#">Leads <span class="pill" data-roster-leads>—</span></a>
+      <a href="#">Clients <span class="pill" data-roster-clients>—</span></a>
+      <a href="#">Past clients <span class="pill" data-roster-past>—</span></a>
+      <a href="#">Sphere</a>
+    </nav>
+
+    <div class="app-side-section">Listings</div>
+    <nav class="app-side-nav">
+      <a href="#">Active <span class="pill" data-roster-listings>—</span></a>
+      <a href="#">Pending</a>
+      <a href="seller.html">Seller portal</a>
+    </nav>
+
+    <div class="app-side-section">Import</div>
+    <nav class="app-side-nav">
+      <a href="#" data-open-importer>Import Leads (CSV)…</a>
+      <a href="#" data-open-link-deal>Link client to deal…</a>
+      <a href="#" data-send-test-email>Send test email…</a>
+      <a href="#" data-sign-out>Sign out</a>
+    </nav>
+
+    <div class="app-side-section">Insight</div>
+    <nav class="app-side-nav">
+      <a href="#" onclick="showView(event,'rep')">Reports</a>
+      <a href="#">Market data</a>
+      <a href="#">Settings</a>
+    </nav>
+
+    <div class="app-side-foot">
+      <div class="avatar avatar-sm"><img src="art/sara-headshot.png" alt="Sara Cooper"></div>
+      <div style="flex:1;min-width:0;">
+        <div style="font-size:13px;color:var(--ink);font-weight:500;">Sara Cooper</div>
+        <div class="mono" style="font-size:9px;letter-spacing:.16em;color:var(--ink-mute);">BROKER · LEGACY</div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ============ MAIN ============ -->
+  <main class="app-main crm-main">
+    <div class="app-topbar">
+      <div class="app-search">
+        <span style="font-family:var(--mono);font-size:11px;">⌕</span>
+        <input placeholder="Search leads, properties, MLS#, addresses…">
+        <span class="mono" style="font-size:10px;color:var(--ink-faint);">⌘K</span>
+      </div>
+      <div class="app-actions">
+        <button class="btn btn-ghost btn-sm">+ New lead</button>
+        <button class="icon-btn" title="Notifications">⏷<span class="dot"></span></button>
+        <button class="icon-btn" title="Help">?</button>
+      </div>
+    </div>
+
+    <!-- TAB STRIP -->
+    <div class="crm-tabs">
+      <button class="crm-tab on" onclick="showView(event,'today')">Today <span class="ct" data-roster-today>—</span></button>
+      <button class="crm-tab" onclick="showView(event,'inbox')">Inbox <span class="ct" data-roster-inbox>—</span></button>
+      <button class="crm-tab" onclick="showView(event,'pipe')">Pipeline <span class="ct" data-roster-pipeline>—</span></button>
+      <button class="crm-tab" onclick="showView(event,'cal')">Calendar <span class="ct" data-roster-calendar-week>—</span></button>
+      <button class="crm-tab" onclick="showView(event,'seq')">Sequences</button>
+      <button class="crm-tab" onclick="showView(event,'rep')">Reports</button>
+    </div>
+
+    <!-- ============================================================
+         TODAY VIEW (default landing)
+         ============================================================ -->
+    <section class="crm-view on" data-view="today">
+      <div class="today">
+
+        <!-- MORNING BRIEF HEADER -->
+        <div class="today-brief">
+          <div class="tb-l">
+            <span class="label-cap" style="color: var(--brass);" data-bind-brief-date>Loading brief…</span>
+            <h1 class="tb-greet">Good morning.</h1>
+            <p class="tb-line" data-bind-narrative></p>
+          </div>
+          <div class="tb-r">
+            <div class="tb-pulse">
+              <span class="label-cap">Market pulse</span>
+              <div class="tb-pulse-row"><span>Calaveras median</span><span class="v">$542K <em class="chg up">+0.4% wk</em></span></div>
+              <div class="tb-pulse-row"><span>New on MLS, 24h</span><span class="v">7</span></div>
+              <div class="tb-pulse-row"><span>Price changes</span><span class="v">12 <em class="chg dn">9 down</em></span></div>
+              <div class="tb-pulse-row"><span>Open houses, Sat</span><span class="v">18</span></div>
+            </div>
+            <div class="tb-weather">
+              <div class="tw-day on"><span>Tue</span><span class="i">○</span><span>72°</span></div>
+              <div class="tw-day"><span>Wed</span><span class="i">○</span><span>76°</span></div>
+              <div class="tw-day"><span>Thu</span><span class="i">●</span><span>69°</span></div>
+              <div class="tw-day"><span>Fri</span><span class="i">○</span><span>74°</span></div>
+              <div class="tw-day"><span>Sat</span><span class="i">○</span><span>78°</span></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- HERO 3-COL -->
+        <div class="today-grid">
+
+          <!-- NEEDS YOU NOW -->
+          <section class="needs">
+            <div class="needs-h">
+              <span class="hairline-brass"></span>
+              <span class="eyebrow">Needs you · before 9 AM</span>
+              <h2 class="h-section" style="font-size: 32px; margin-top: 8px;">Five quiet asks.</h2>
+            </div>
+
+            <article class="need-card need-card-hot">
+              <div class="nc-rank">01</div>
+              <div class="nc-body">
+                <div class="nc-meta">
+                  <span class="pill-status pill-hot">Reply ready</span>
+                  <span class="nc-tag">AI draft · awaiting your approval</span>
+                </div>
+                <h3>Renee Dawson — Saturday walk-through</h3>
+                <p>She replied <em>“loved your note”</em> at 9:14 AM. The draft suggests 10:30 Saturday before the open house. Refs your calendar, the price-drop trigger, and Friday’s call notes.</p>
+                <div class="nc-foot">
+                  <div class="nc-foot-l"><span>Renee · Murphys buyer · score 92</span></div>
+                  <div class="nc-foot-r">
+                    <button class="btn btn-ghost btn-sm">Review draft</button>
+                    <button class="btn btn-ink btn-sm">Approve &amp; send</button>
+                  </div>
+                </div>
+              </div>
+            </article>
+
+            <article class="need-card">
+              <div class="nc-rank">02</div>
+              <div class="nc-body">
+                <div class="nc-meta">
+                  <span class="pill-status pill-warm">Offer in play</span>
+                  <span class="nc-tag">Counter signed · contingency clock running</span>
+                </div>
+                <h3>Michael Rivera — inspection due Thursday</h3>
+                <p>Sellers countered $1.18M. Inspection contingency: 12 days, of which <strong>8 remain</strong>. Financing 21 days, 17 remain. Bowman Inspections confirmed Thursday 9 AM — your reminder set for tomorrow 4 PM.</p>
+                <div class="nc-foot">
+                  <div class="nc-foot-l"><span>433 E Highway 4 · Murphys · $1.18M</span></div>
+                  <div class="nc-foot-r">
+                    <button class="btn btn-ghost btn-sm">Open deal</button>
+                  </div>
+                </div>
+              </div>
+            </article>
+
+            <article class="need-card">
+              <div class="nc-rank">03</div>
+              <div class="nc-body">
+                <div class="nc-meta">
+                  <span class="pill-status pill-brass">Listing milestone</span>
+                  <span class="nc-tag">Day 21 on market · below tour benchmark</span>
+                </div>
+                <h3>$725K Sutter Creek — Patricia wants the CMA tonight</h3>
+                <p>Three weeks on, two private showings, one Sunday open with 14 sign-ins. Below the 30-tour benchmark for this price point. Patricia asked yesterday for an updated CMA and a recommendation on a price adjustment.</p>
+                <div class="nc-foot">
+                  <div class="nc-foot-l"><span>42 Spanish St · Sutter Creek · listed $725K</span></div>
+                  <div class="nc-foot-r">
+                    <button class="btn btn-ghost btn-sm">Generate CMA</button>
+                  </div>
+                </div>
+              </div>
+            </article>
+
+            <article class="need-card">
+              <div class="nc-rank">04</div>
+              <div class="nc-body">
+                <div class="nc-meta">
+                  <span class="pill-status">Radio silence</span>
+                  <span class="nc-tag">14 days no contact · was hot</span>
+                </div>
+                <h3>The Becketts — land buyer, last seen 4/28</h3>
+                <p>James has been working the water-rights question. Suggest a check-in note today — the Foothill parcel they liked is still on market and the senior right concern has a clean answer now.</p>
+                <div class="nc-foot">
+                  <div class="nc-foot-l"><span>Tom &amp; Marie Beckett · Land · James</span></div>
+                  <div class="nc-foot-r">
+                    <button class="btn btn-ghost btn-sm">Draft check-in</button>
+                  </div>
+                </div>
+              </div>
+            </article>
+
+            <article class="need-card">
+              <div class="nc-rank">05</div>
+              <div class="nc-body">
+                <div class="nc-meta">
+                  <span class="pill-status">New lead</span>
+                  <span class="nc-tag">Saved 5 homes overnight · Arnold</span>
+                </div>
+                <h3>Jenna Novak — cabin shopper, first day</h3>
+                <p>Signed up at 11 PM, saved 5 Arnold properties before midnight. Browsing pattern: cabins under $625K with garage, weekend-home phrasing. Suggest the standard intro — ask if she's looking primary or second.</p>
+                <div class="nc-foot">
+                  <div class="nc-foot-l"><span>Jenna Novak · Buyer · score 71</span></div>
+                  <div class="nc-foot-r">
+                    <button class="btn btn-ghost btn-sm">Draft welcome</button>
+                  </div>
+                </div>
+              </div>
+            </article>
+          </section>
+
+          <!-- TODAY'S HOURS -->
+          <aside class="hours">
+            <div class="hours-h">
+              <span class="label-cap">Today · Tuesday</span>
+              <span class="hours-link">Open calendar →</span>
+            </div>
+            <div class="hours-body" data-hours-body>
+              <div class="hr-now" data-hours-now><span class="hr-now-l">Now</span><span class="hr-now-d">—</span></div>
+            </div>
+          </aside>
+
+        </div>
+
+        <!-- QUIETLY ATTENTIVE BAND -->
+        <section class="signals">
+          <div class="signals-h">
+            <span class="hairline-brass"></span>
+            <span class="eyebrow">Quietly attentive · overnight signals</span>
+            <h2 class="h-section" style="font-size: 28px; margin-top: 8px;">What happened while you slept.</h2>
+          </div>
+          <div class="signal-grid" data-signal-grid>
+          </div>
+        </section>
+
+        <!-- LIVE DEALS STRIP -->
+        <section class="deals">
+          <div class="deals-h">
+            <span class="hairline-brass"></span>
+            <span class="eyebrow">In the air right now · active deals</span>
+            <h2 class="h-section" style="font-size: 28px; margin-top: 8px;">Three deals in motion.</h2>
+          </div>
+          <div class="deal-grid" data-deal-grid>
+          </div>
+        </section>
+
+        <!-- TASKS + STATS -->
+        <section class="today-foot">
+          <div class="tasks">
+            <div class="tasks-h">
+              <span class="hairline-brass"></span>
+              <span class="eyebrow">Day list</span>
+              <h3 class="h-section" style="font-size: 22px; margin-top: 6px;">Six follow-ups, ordered.</h3>
+            </div>
+            <ul class="task-list" data-day-list>
+              <li><span class="tk-box"></span><span class="tk-body"><strong>Approve Renee's Saturday note</strong> · ready in draft</span><span class="tk-time">5 min</span></li>
+              <li><span class="tk-box"></span><span class="tk-body"><strong>Send Beckett land check-in</strong> · 14 days dark</span><span class="tk-time">8 min</span></li>
+              <li><span class="tk-box"></span><span class="tk-body"><strong>Generate Patricia’s CMA</strong> · due tonight</span><span class="tk-time">25 min</span></li>
+              <li><span class="tk-box"></span><span class="tk-body"><strong>Confirm Thursday inspection</strong> · Rivera deal</span><span class="tk-time">3 min</span></li>
+              <li><span class="tk-box"></span><span class="tk-body"><strong>Welcome Jenna Novak</strong> · new lead, 5 saves overnight</span><span class="tk-time">8 min</span></li>
+              <li><span class="tk-box"></span><span class="tk-body"><strong>Approve weekend market email</strong> · 218 recipients</span><span class="tk-time">6 min</span></li>
+            </ul>
+            <div class="task-foot">
+              <span class="label-cap">Total</span>
+              <span data-day-total><strong>55 min</strong> · if you start now, done by 7:38 AM</span>
+            </div>
+          </div>
+
+          <div class="daystats">
+            <div class="ds-h">
+              <span class="hairline-brass"></span>
+              <span class="eyebrow">Yesterday at a glance</span>
+            </div>
+            <div class="ds-grid" data-day-stats>
+              <div class="ds-cell"><span class="ds-num">23</span><span class="ds-lab">Emails sent</span></div>
+              <div class="ds-cell"><span class="ds-num">14</span><span class="ds-lab">AI drafts · 12 approved</span></div>
+              <div class="ds-cell"><span class="ds-num">3</span><span class="ds-lab">Showings led</span></div>
+              <div class="ds-cell"><span class="ds-num">4</span><span class="ds-lab">New leads</span></div>
+              <div class="ds-cell"><span class="ds-num">$2.4M</span><span class="ds-lab">Pipeline added</span></div>
+              <div class="ds-cell"><span class="ds-num">98<em>%</em></span><span class="ds-lab">Inbox handled</span></div>
+            </div>
+            <p class="ds-note">Your trailing 30-day approval rate on AI drafts is <strong>91%</strong>. Lift in lead score after AI-drafted reply: <strong>+14 pts avg.</strong></p>
+          </div>
+        </section>
+
+      </div>
+    </section>
+
+    <!-- ============================================================
+         INBOX VIEW
+         ============================================================ -->
+    <section class="crm-view" data-view="inbox">
+      <div class="inbox-shell">
+
+        <!-- LEAD LIST -->
+        <aside class="lead-list">
+          <div class="lead-list-search">
+            <input placeholder="Filter leads, addresses, tags…">
+          </div>
+          <div class="lead-filter" data-lead-filters>
+            <button class="chip on" data-filter="all">All <span class="ct" data-count="all">—</span></button>
+            <button class="chip" data-filter="hot">Hot <span class="ct" data-count="hot">—</span></button>
+            <button class="chip" data-filter="warm">Warm <span class="ct" data-count="warm">—</span></button>
+            <button class="chip" data-filter="new">New <span class="ct" data-count="new">—</span></button>
+            <button class="chip" data-filter="awaiting_reply">Awaiting reply</button>
+          </div>
+
+          <div class="lead-list-rows" data-lead-list>
+            <div class="lead-row" data-loading-placeholder>
+              <div class="avatar avatar-sm" style="opacity:.25;">··</div>
+              <div class="lead-content">
+                <div class="lead-name-row">
+                  <span class="lead-name" style="opacity:.4;">Loading your leads…</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </aside>
+
+        <!-- LEAD DETAIL -->
+        <section class="lead-detail" data-lead-detail>
+          <div class="ld-head" data-lead-detail-loading style="opacity:.5;padding:24px;font-style:italic;">Select a lead from the left to see their conversation and history.</div>
+        </section>
+
+        <!-- LEAD PROFILE PANEL -->
+        <aside class="lead-profile" data-lead-profile>
+        </aside>
+      </div>
+    </section>
+
+    <!-- ============================================================
+         PIPELINE VIEW
+         ============================================================ -->
+    <section class="crm-view" data-view="pipe">
+      <div class="pipe">
+        <div class="pipe-h">
+          <div>
+            <span class="eyebrow" data-bind-pipe-eyebrow>Active pipeline · — leads</span>
+            <h1 class="h-section" style="margin-top: 8px; font-size: 38px;">Pipeline.</h1>
+          </div>
+          <div class="pipe-stats">
+            <div><span class="v" data-bind-pipe-inflight>—</span><span class="l">In flight</span></div>
+            <div><span class="v" data-bind-pipe-month>—</span><span class="l">Expected this month</span></div>
+            <div><span class="v" data-bind-pipe-week>—</span><span class="l">Closing this week</span></div>
+            <div><span class="v" data-bind-pipe-rate>—</span><span class="l">Tour → offer rate</span></div>
+          </div>
+        </div>
+
+        <div class="kanban" data-kanban>
+          <div class="kan-col" data-stage="new">
+            <div class="kan-col-h"><span class="name">New</span><span class="count" data-stage-count>—</span></div>
+            <div class="kan-body" data-stage-body></div>
+          </div>
+          <div class="kan-col" data-stage="nurture">
+            <div class="kan-col-h"><span class="name">Nurture</span><span class="count" data-stage-count>—</span></div>
+            <div class="kan-body" data-stage-body></div>
+          </div>
+          <div class="kan-col" data-stage="touring">
+            <div class="kan-col-h"><span class="name">Touring</span><span class="count" data-stage-count>—</span></div>
+            <div class="kan-body" data-stage-body></div>
+          </div>
+          <div class="kan-col" data-stage="offer">
+            <div class="kan-col-h"><span class="name">Offer</span><span class="count" data-stage-count>—</span></div>
+            <div class="kan-body" data-stage-body></div>
+          </div>
+          <div class="kan-col" data-stage="close">
+            <div class="kan-col-h"><span class="name">Close</span><span class="count" data-stage-count>—</span></div>
+            <div class="kan-body" data-stage-body></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================
+         CALENDAR VIEW
+         ============================================================ -->
+    <section class="crm-view" data-view="cal">
+      <div class="cal">
+        <div class="cal-h">
+          <div class="cal-h-l">
+            <h1 class="cal-h-title">May 11 – 17 · Week 20</h1>
+            <div class="cal-h-nav">
+              <button>‹</button>
+              <button>›</button>
+            </div>
+            <button class="btn btn-ghost btn-xs">Today</button>
+          </div>
+          <div style="display: flex; gap: 12px; align-items: center;">
+            <div class="cal-view-toggle">
+              <button>Day</button>
+              <button class="on">Week</button>
+              <button>Month</button>
+            </div>
+            <button class="btn btn-ink btn-sm">+ New event</button>
+          </div>
+        </div>
+
+        <div class="cal-grid">
+          <div class="cal-time-col">
+            <div class="cal-day-head">&nbsp;</div>
+            <div class="cal-hour">9 AM</div>
+            <div class="cal-hour">10</div>
+            <div class="cal-hour">11</div>
+            <div class="cal-hour">12 PM</div>
+            <div class="cal-hour">1</div>
+            <div class="cal-hour">2</div>
+            <div class="cal-hour">3</div>
+            <div class="cal-hour">4</div>
+            <div class="cal-hour">5</div>
+          </div>
+          <div class="cal-day-col">
+            <div class="cal-day-head">Mon<span class="num">11</span></div>
+            <div class="cal-cell">
+              <div class="cal-event call" style="top: 0; height: 50px;">
+                <div class="t">9:00 · Call</div>
+                <div class="ti">Patricia Walsh — CMA</div>
+              </div>
+            </div>
+            <div class="cal-cell"></div>
+            <div class="cal-cell"></div>
+            <div class="cal-cell">
+              <div class="cal-event tour" style="top: 0; height: 110px;">
+                <div class="t">12:00 · Tour</div>
+                <div class="ti">Pine Crest · Kelvin Yu</div>
+              </div>
+            </div>
+            <div class="cal-cell"></div>
+            <div class="cal-cell"></div>
+            <div class="cal-cell"></div>
+            <div class="cal-cell">
+              <div class="cal-event block" style="top: 0; height: 50px;">
+                <div class="t">4:00 · Block</div>
+                <div class="ti">Followups</div>
+              </div>
+            </div>
+            <div class="cal-cell"></div>
+          </div>
+          <div class="cal-day-col">
+            <div class="cal-day-head today">Tue<span class="num">12</span></div>
+            <div class="cal-cell"></div>
+            <div class="cal-cell">
+              <div class="cal-event tour" style="top: 0; height: 100px;">
+                <div class="t">10:00 · Tour</div>
+                <div class="ti">Oak Hollow · Renee</div>
+              </div>
+            </div>
+            <div class="cal-cell"></div>
+            <div class="cal-cell"></div>
+            <div class="cal-cell">
+              <div class="cal-event call" style="top: 0; height: 50px;">
+                <div class="t">1:00 · Call</div>
+                <div class="ti">Lender — Rivera</div>
+              </div>
+            </div>
+            <div class="cal-cell"></div>
+            <div class="cal-cell">
+              <div class="cal-event call" style="top: 0; height: 50px;">
+                <div class="t">3:00 · Call</div>
+                <div class="ti">James — handoff</div>
+              </div>
+            </div>
+            <div class="cal-cell"></div>
+            <div class="cal-cell"></div>
+          </div>
+          <div class="cal-day-col">
+            <div class="cal-day-head">Wed<span class="num">13</span></div>
+            <div class="cal-cell">
+              <div class="cal-event call" style="top: 0; height: 50px;">
+                <div class="t">9:00 · Internal</div>
+                <div class="ti">Team huddle</div>
+              </div>
+            </div>
+            <div class="cal-cell"></div>
+            <div class="cal-cell">
+              <div class="cal-event tour" style="top: 0; height: 110px;">
+                <div class="t">11:30 · Tour</div>
+                <div class="ti">Vineyard Ridge · Renee</div>
+              </div>
+            </div>
+            <div class="cal-cell"></div>
+            <div class="cal-cell"></div>
+            <div class="cal-cell"></div>
+            <div class="cal-cell">
+              <div class="cal-event call" style="top: 0; height: 50px;">
+                <div class="t">3:00 · Call</div>
+                <div class="ti">Beckett – water rts</div>
+              </div>
+            </div>
+            <div class="cal-cell"></div>
+            <div class="cal-cell"></div>
+          </div>
+          <div class="cal-day-col">
+            <div class="cal-day-head">Thu<span class="num">14</span></div>
+            <div class="cal-cell"></div>
+            <div class="cal-cell">
+              <div class="cal-event tour" style="top: 0; height: 100px;">
+                <div class="t">10:00 · Tour</div>
+                <div class="ti">Pine Crest · Yu</div>
+              </div>
+            </div>
+            <div class="cal-cell"></div>
+            <div class="cal-cell">
+              <div class="cal-event block" style="top: 0; height: 110px;">
+                <div class="t">12:00 · Office</div>
+                <div class="ti">Listing prep · 3 homes</div>
+              </div>
+            </div>
+            <div class="cal-cell"></div>
+            <div class="cal-cell"></div>
+            <div class="cal-cell"></div>
+            <div class="cal-cell"></div>
+            <div class="cal-cell"></div>
+          </div>
+          <div class="cal-day-col">
+            <div class="cal-day-head">Fri<span class="num">15</span></div>
+            <div class="cal-cell"></div>
+            <div class="cal-cell">
+              <div class="cal-event call" style="top: 0; height: 50px;">
+                <div class="t">10:00 · Close</div>
+                <div class="ti">Robert Lin — Spring St</div>
+              </div>
+            </div>
+            <div class="cal-cell"></div>
+            <div class="cal-cell"></div>
+            <div class="cal-cell"></div>
+            <div class="cal-cell">
+              <div class="cal-event tour" style="top: 0; height: 100px;">
+                <div class="t">2:00 · Photo</div>
+                <div class="ti">New listing shoot</div>
+              </div>
+            </div>
+            <div class="cal-cell"></div>
+            <div class="cal-cell"></div>
+            <div class="cal-cell"></div>
+          </div>
+          <div class="cal-day-col">
+            <div class="cal-day-head">Sat<span class="num">16</span></div>
+            <div class="cal-cell"></div>
+            <div class="cal-cell">
+              <div class="cal-event tour" style="top: 24px; height: 100px;">
+                <div class="t">10:30 · Tour</div>
+                <div class="ti">Ironstone · Renee</div>
+              </div>
+            </div>
+            <div class="cal-cell"></div>
+            <div class="cal-cell"></div>
+            <div class="cal-cell">
+              <div class="cal-event open" style="top: 0; height: 110px;">
+                <div class="t">1:00 · Open</div>
+                <div class="ti">Ironstone open house</div>
+              </div>
+            </div>
+            <div class="cal-cell"></div>
+            <div class="cal-cell"></div>
+            <div class="cal-cell"></div>
+            <div class="cal-cell"></div>
+          </div>
+          <div class="cal-day-col">
+            <div class="cal-day-head">Sun<span class="num">17</span></div>
+            <div class="cal-cell"></div>
+            <div class="cal-cell"></div>
+            <div class="cal-cell"></div>
+            <div class="cal-cell"></div>
+            <div class="cal-cell"></div>
+            <div class="cal-cell">
+              <div class="cal-event block" style="top: 0; height: 110px;">
+                <div class="t">2–4 PM</div>
+                <div class="ti">Family time · Hold</div>
+              </div>
+            </div>
+            <div class="cal-cell"></div>
+            <div class="cal-cell"></div>
+            <div class="cal-cell"></div>
+          </div>
+        </div>
+
+        <!-- Availability + booking settings -->
+        <div class="cal-strip">
+          <div class="avail-card">
+            <span class="eyebrow">Public booking</span>
+            <h3 style="margin-top: 8px;">When clients can book themselves.</h3>
+            <p class="sub">Slots Renee, Tom, and Patricia see when they pick a tour from a listing page. Sundays held for family.</p>
+            <div class="avail-row"><span class="day">Mon</span><span class="hrs">10:00 AM – 5:00 PM</span><div class="toggle on" onclick="this.classList.toggle('on')"></div></div>
+            <div class="avail-row"><span class="day">Tue</span><span class="hrs">10:00 AM – 5:00 PM</span><div class="toggle on" onclick="this.classList.toggle('on')"></div></div>
+            <div class="avail-row"><span class="day">Wed</span><span class="hrs">9:00 AM – 6:00 PM</span><div class="toggle on" onclick="this.classList.toggle('on')"></div></div>
+            <div class="avail-row"><span class="day">Thu</span><span class="hrs">10:00 AM – 5:00 PM</span><div class="toggle on" onclick="this.classList.toggle('on')"></div></div>
+            <div class="avail-row"><span class="day">Fri</span><span class="hrs">9:00 AM – 4:00 PM</span><div class="toggle on" onclick="this.classList.toggle('on')"></div></div>
+            <div class="avail-row"><span class="day">Sat</span><span class="hrs">10:00 AM – 3:00 PM</span><div class="toggle on" onclick="this.classList.toggle('on')"></div></div>
+            <div class="avail-row"><span class="day">Sun</span><span class="hrs">Held</span><div class="toggle" onclick="this.classList.toggle('on')"></div></div>
+          </div>
+          <div class="avail-card">
+            <span class="eyebrow">Tour rules</span>
+            <h3 style="margin-top: 8px;">How it works.</h3>
+            <p class="sub" style="margin-bottom: 22px;">Clients can self-book tours from listing pages — Sara confirms within 1 hour during business hours, or auto-confirm for past clients.</p>
+            <div style="display: flex; flex-direction: column; gap: 14px;">
+              <div><span class="label-cap" style="display: block; margin-bottom: 4px;">Buffer between tours</span><span class="numeral" style="font-size: 18px;">30 min</span></div>
+              <div><span class="label-cap" style="display: block; margin-bottom: 4px;">Minimum lead time</span><span class="numeral" style="font-size: 18px;">2 hours</span></div>
+              <div><span class="label-cap" style="display: block; margin-bottom: 4px;">Auto-confirm past clients</span><span class="numeral" style="font-size: 18px;">On</span></div>
+              <div><span class="label-cap" style="display: block; margin-bottom: 4px;">Confirm-by-SMS deadline</span><span class="numeral" style="font-size: 18px;">24 h before</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================
+         SEQUENCES VIEW
+         ============================================================ -->
+    <section class="crm-view" data-view="seq">
+      <div class="seq">
+        <div class="seq-h">
+          <div>
+            <span class="eyebrow">Automated follow-up · Editable cadences</span>
+            <h1 class="h-section" style="margin-top: 8px; font-size: 38px;">Sequences.</h1>
+            <p class="lede" style="margin-top: 12px; max-width: 600px;">Every step is editable. Each message is queued as a draft, ready for Sara to approve before sending — written in her voice, not a template.</p>
+          </div>
+          <button class="btn btn-ink">+ New sequence</button>
+        </div>
+
+        <div class="seq-grid">
+          <!-- Sequences list -->
+          <div class="seq-list-card">
+            <div class="seq-row on">
+              <div>
+                <div class="name">New buyer · slow drip</div>
+                <div class="meta">7 steps · 14 days · Email + SMS</div>
+              </div>
+              <div class="stat"><strong>62%</strong>Reply rate</div>
+              <div class="toggle on" onclick="this.classList.toggle('on')"></div>
+            </div>
+            <div class="seq-row">
+              <div>
+                <div class="name">Open house follow-up</div>
+                <div class="meta">4 steps · 5 days · Email</div>
+              </div>
+              <div class="stat"><strong>78%</strong>Reply rate</div>
+              <div class="toggle on" onclick="this.classList.toggle('on')"></div>
+            </div>
+            <div class="seq-row">
+              <div>
+                <div class="name">Past client · annual check-in</div>
+                <div class="meta">3 steps · 365 days · Email</div>
+              </div>
+              <div class="stat"><strong>41%</strong>Reply rate</div>
+              <div class="toggle on" onclick="this.classList.toggle('on')"></div>
+            </div>
+            <div class="seq-row">
+              <div>
+                <div class="name">Out-of-state buyer visit prep</div>
+                <div class="meta">5 steps · 21 days · Email + SMS</div>
+              </div>
+              <div class="stat"><strong>84%</strong>Reply rate</div>
+              <div class="toggle on" onclick="this.classList.toggle('on')"></div>
+            </div>
+            <div class="seq-row">
+              <div>
+                <div class="name">Seller pre-listing nurture</div>
+                <div class="meta">6 steps · 30 days · Email</div>
+              </div>
+              <div class="stat"><strong>56%</strong>Reply rate</div>
+              <div class="toggle on" onclick="this.classList.toggle('on')"></div>
+            </div>
+            <div class="seq-row">
+              <div>
+                <div class="name">Price-drop revival</div>
+                <div class="meta">2 steps · 1 day · SMS-first</div>
+              </div>
+              <div class="stat"><strong>71%</strong>Reply rate</div>
+              <div class="toggle on" onclick="this.classList.toggle('on')"></div>
+            </div>
+            <div class="seq-row">
+              <div>
+                <div class="name">Cold buyer · 90-day re-engage</div>
+                <div class="meta">3 steps · 14 days · Email</div>
+              </div>
+              <div class="stat"><strong>22%</strong>Reply rate</div>
+              <div class="toggle" onclick="this.classList.toggle('on')"></div>
+            </div>
+          </div>
+
+          <!-- Sequence editor -->
+          <div class="seq-editor-card">
+            <span class="eyebrow">Editing</span>
+            <h3 style="margin-top: 6px;">New buyer · slow drip</h3>
+            <p class="sub">7 messages over 14 days. Pauses on reply. Drafts queued for Sara's approval each step. 62% reply rate (last 90 days).</p>
+
+            <div class="seq-step">
+              <div class="seq-step-num">1</div>
+              <div class="seq-step-body">
+                <div class="seq-step-when">Same day · within 5 min</div>
+                <p class="seq-step-snip">"Welcome to Legacy. A short note from me, not a robot — I've already started looking at your saved searches…"</p>
+              </div>
+              <span class="seq-step-ch">SMS</span>
+            </div>
+            <div class="seq-step">
+              <div class="seq-step-num">2</div>
+              <div class="seq-step-body">
+                <div class="seq-step-when">Day 1 · 8:00 AM</div>
+                <p class="seq-step-snip">"Three properties worth your attention this morning — and one I think will sell by Friday…"</p>
+              </div>
+              <span class="seq-step-ch">Email</span>
+            </div>
+            <div class="seq-step">
+              <div class="seq-step-num">3</div>
+              <div class="seq-step-body">
+                <div class="seq-step-when">Day 3 · 10:00 AM</div>
+                <p class="seq-step-snip">"Quick question while it's fresh — what would change in your life if you found the right home this summer?"</p>
+              </div>
+              <span class="seq-step-ch">Email</span>
+            </div>
+            <div class="seq-step">
+              <div class="seq-step-num">4</div>
+              <div class="seq-step-body">
+                <div class="seq-step-when">Day 5 · 11:00 AM</div>
+                <p class="seq-step-snip">"How Murphys actually lives, off-season — a small thing buyers often miss…"</p>
+              </div>
+              <span class="seq-step-ch">Email</span>
+            </div>
+            <div class="seq-step">
+              <div class="seq-step-num">5</div>
+              <div class="seq-step-body">
+                <div class="seq-step-when">Day 8 · trigger</div>
+                <p class="seq-step-snip">If 3+ saves on similar homes → "I'm spotting a pattern. Coffee this week?"</p>
+              </div>
+              <span class="seq-step-ch">SMS</span>
+            </div>
+
+            <div style="display: flex; gap: 8px; margin-top: 22px; padding-top: 18px; border-top: 1px solid var(--rule);">
+              <button class="btn btn-ghost btn-sm">View all 7 steps</button>
+              <button class="btn btn-ink btn-sm" style="flex: 1;">Edit sequence →</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================
+         REPORTS VIEW
+         ============================================================ -->
+    <section class="crm-view" data-view="rep">
+      <div class="rep">
+        <div class="rep-h">
+          <div>
+            <span class="eyebrow">Year to date · Through May 12</span>
+            <h1 class="h-section" style="margin-top: 8px; font-size: 38px;">Performance.</h1>
+          </div>
+          <div style="display: flex; gap: 10px;">
+            <select class="field-input" style="min-width: 160px;">
+              <option>This year</option>
+              <option>This quarter</option>
+              <option>This month</option>
+              <option>Last 12 months</option>
+            </select>
+            <button class="btn btn-ghost btn-sm">Export</button>
+          </div>
+        </div>
+
+        <div class="rep-kpi" data-rep-kpi>
+          <div class="kpi-card">
+            <span class="l">Closed volume · trailing 12 mo</span>
+            <span class="v" data-kpi-volume>$8.2M</span>
+            <span class="ch up" data-kpi-volume-sub>21 transactions</span>
+          </div>
+          <div class="kpi-card">
+            <span class="l">Total sales to date</span>
+            <span class="v" data-kpi-total>98</span>
+            <span class="ch up">Since 2018</span>
+          </div>
+          <div class="kpi-card">
+            <span class="l">Average sale price</span>
+            <span class="v" data-kpi-avg>$392K</span>
+            <span class="ch">$39K – $1M range</span>
+          </div>
+          <div class="kpi-card">
+            <span class="l">Zillow rating</span>
+            <span class="v">★ 5.0</span>
+            <span class="ch up">7 reviews</span>
+          </div>
+        </div>
+
+        <div class="rep-row">
+          <div class="rep-card">
+            <h3>Closed volume by month</h3>
+            <div class="sub">2026 YTD · $M</div>
+            <div class="chart-bars" data-closed-chart>
+              <div class="chart-bar" style="height: 36%;" data-v="$1.8M"></div>
+              <div class="chart-bar" style="height: 58%;" data-v="$2.9M"></div>
+              <div class="chart-bar brass" style="height: 84%;" data-v="$4.2M"></div>
+              <div class="chart-bar brass" style="height: 72%;" data-v="$3.6M"></div>
+              <div class="chart-bar" style="height: 28%; opacity: 0.5;" data-v="$1.4M*"></div>
+            </div>
+            <div class="chart-labels" data-closed-chart-labels>
+              <span>Jan</span><span>Feb</span><span>Mar</span><span>Apr</span><span>May*</span>
+            </div>
+          </div>
+
+          <div class="rep-card">
+            <h3>Funnel · trailing 90 days</h3>
+            <div class="sub" data-funnel-sub>— leads in · — closes out</div>
+            <div class="funnel" data-funnel>
+              <div class="funnel-step"><span class="l">New leads</span><div class="b" style="width: 0%;"></div><span class="v">—</span></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="rep-row" style="grid-template-columns: 1fr;">
+          <div class="rep-card">
+            <h3>Recent closings</h3>
+            <div class="sub" data-closings-sub>Last six transactions</div>
+            <div class="income-row" style="border-bottom: 1px solid var(--rule); margin-bottom: 6px; padding-bottom: 11px;">
+              <span class="name label-cap">Date</span>
+              <span class="home label-cap">Property</span>
+              <span class="v label-cap" style="font-family: var(--mono); font-style: normal; font-size: 10px; letter-spacing: 0.18em;">Side</span>
+              <span class="v label-cap" style="font-family: var(--mono); font-style: normal; font-size: 10px; letter-spacing: 0.18em;">Sale price</span>
+            </div>
+            <div data-recent-closings>
+            <div class="income-row">
+              <span class="name">May 6, 2026</span>
+              <span class="home">6640 Railroad Flat Rd · Mountain Ranch</span>
+              <span class="v" style="font-family: var(--mono); font-size: 11px; font-style: normal; letter-spacing: 0.12em; color: var(--ink-mute); text-transform: uppercase;">Listing</span>
+              <span class="v brass">$1,000,000</span>
+            </div>
+            <div class="income-row">
+              <span class="name">May 6, 2026</span>
+              <span class="home">10282 Piney Creek Rd · Coulterville</span>
+              <span class="v" style="font-family: var(--mono); font-size: 11px; font-style: normal; letter-spacing: 0.12em; color: var(--ink-mute); text-transform: uppercase;">Buyer</span>
+              <span class="v brass">$130,000</span>
+            </div>
+            <div class="income-row">
+              <span class="name">Jan 6, 2026</span>
+              <span class="home">208 Raccoon Hollow Loop · Copperopolis</span>
+              <span class="v" style="font-family: var(--mono); font-size: 11px; font-style: normal; letter-spacing: 0.12em; color: var(--ink-mute); text-transform: uppercase;">Buyer</span>
+              <span class="v brass">$422,500</span>
+            </div>
+            <div class="income-row">
+              <span class="name">Jan 5, 2026</span>
+              <span class="home">581 Dawn Dr · Manteca</span>
+              <span class="v" style="font-family: var(--mono); font-size: 11px; font-style: normal; letter-spacing: 0.12em; color: var(--ink-mute); text-transform: uppercase;">Listing</span>
+              <span class="v brass">$480,000</span>
+            </div>
+            <div class="income-row">
+              <span class="name">Nov 20, 2025</span>
+              <span class="home">667 S Main St · Angels Camp</span>
+              <span class="v" style="font-family: var(--mono); font-size: 11px; font-style: normal; letter-spacing: 0.12em; color: var(--ink-mute); text-transform: uppercase;">Listing</span>
+              <span class="v brass">$485,000</span>
+            </div>
+            </div>
+            <p data-closings-foot style="margin-top: 16px; font-family: var(--mono); font-size: 10px; letter-spacing: 0.12em; color: var(--ink-faint); text-transform: uppercase;">— Pulled from Zillow profile. 98 closings to date.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<script>
+function showView(e, name) {
+  if (e) e.preventDefault();
+  document.querySelectorAll('.crm-tab').forEach(t => t.classList.remove('on'));
+  document.querySelectorAll('.crm-view').forEach(v => v.classList.remove('on'));
+  // pair tab/view by name
+  const tab = document.querySelector(`.crm-tab[onclick*="'${name}'"]`);
+  if (tab) tab.classList.add('on');
+  const view = document.querySelector(`.crm-view[data-view="${name}"]`);
+  if (view) view.classList.add('on');
+  // sync sidebar
+  document.querySelectorAll('.app-side-nav a').forEach(a => a.classList.remove('active'));
+  if (e && e.target.closest('.app-side-nav')) e.target.classList.add('active');
+}
+function selectLead(el) {
+  document.querySelectorAll('.lead-row').forEach(r => r.classList.remove('on'));
+  el.classList.add('on');
+}
+</script>
+<script>
+/* Link client to deal — self-contained modal for POST /api/crm/link-deal-party.
+   Closes the identity chain users -> lead -> deal_parties -> deal so a signed-in
+   seller sees only their own portal. Agent-only (the endpoint enforces it). */
+(function () {
+  'use strict';
+  function openLinkDealModal() {
+    if (document.getElementById('leg-linkdeal-modal')) {
+      document.getElementById('leg-linkdeal-modal').style.display = 'flex';
+      return;
+    }
+    var m = document.createElement('div');
+    m.id = 'leg-linkdeal-modal';
+    m.style.cssText = 'position:fixed;inset:0;z-index:99997;background:rgba(20,18,15,0.6);display:flex;align-items:center;justify-content:center;padding:24px;font-family:Manrope,system-ui,sans-serif;';
+    m.innerHTML = ''
+      + '<div style="background:#FAF6EC;max-width:520px;width:100%;padding:28px 32px;color:#1A1714;max-height:90vh;overflow:auto;">'
+      + '  <div style="font-family:\'JetBrains Mono\',monospace;font-size:10px;letter-spacing:.22em;text-transform:uppercase;color:#7C6A4D;margin-bottom:8px;">Seller portal</div>'
+      + '  <h2 style="font-family:\'Cormorant Garamond\',serif;font-style:italic;font-weight:500;font-size:28px;margin:0 0 6px;">Link a client to their deal.</h2>'
+      + '  <p style="font-size:13.5px;line-height:1.55;color:#3A332B;margin:0 0 18px;">Ties a client to a transaction so that when they sign in they see only their own portal. Finds or creates their lead by email, then links it to the deal.</p>'
+      + '  <form id="leg-linkdeal-form" style="display:flex;flex-direction:column;gap:12px;">'
+      + '    <label style="font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:#7C6A4D;display:flex;flex-direction:column;gap:4px;">Deal (source key)'
+      + '      <input name="deal" required placeholder="e.g. 433-hwy4" style="font:inherit;font-size:15px;text-transform:none;letter-spacing:normal;color:#1A1714;background:#fff;border:1px solid #D9CFB7;padding:9px 11px;"></label>'
+      + '    <label style="font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:#7C6A4D;display:flex;flex-direction:column;gap:4px;">Client email'
+      + '      <input name="email" type="email" required placeholder="client@example.com" style="font:inherit;font-size:15px;text-transform:none;letter-spacing:normal;color:#1A1714;background:#fff;border:1px solid #D9CFB7;padding:9px 11px;"></label>'
+      + '    <div style="display:flex;gap:10px;">'
+      + '      <label style="flex:1;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:#7C6A4D;display:flex;flex-direction:column;gap:4px;">First name'
+      + '        <input name="first_name" style="font:inherit;font-size:15px;text-transform:none;letter-spacing:normal;color:#1A1714;background:#fff;border:1px solid #D9CFB7;padding:9px 11px;"></label>'
+      + '      <label style="flex:1;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:#7C6A4D;display:flex;flex-direction:column;gap:4px;">Last name'
+      + '        <input name="last_name" style="font:inherit;font-size:15px;text-transform:none;letter-spacing:normal;color:#1A1714;background:#fff;border:1px solid #D9CFB7;padding:9px 11px;"></label>'
+      + '    </div>'
+      + '    <div style="display:flex;gap:10px;">'
+      + '      <label style="flex:1;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:#7C6A4D;display:flex;flex-direction:column;gap:4px;">Phone (optional)'
+      + '        <input name="phone" style="font:inherit;font-size:15px;text-transform:none;letter-spacing:normal;color:#1A1714;background:#fff;border:1px solid #D9CFB7;padding:9px 11px;"></label>'
+      + '      <label style="flex:1;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:#7C6A4D;display:flex;flex-direction:column;gap:4px;">Role'
+      + '        <select name="role" style="font:inherit;font-size:15px;color:#1A1714;background:#fff;border:1px solid #D9CFB7;padding:9px 11px;">'
+      + '          <option value="seller">Seller</option><option value="co-seller">Co-seller</option>'
+      + '          <option value="buyer">Buyer</option><option value="co-buyer">Co-buyer</option></select></label>'
+      + '    </div>'
+      + '    <label style="display:flex;align-items:flex-start;gap:8px;font-size:13px;color:#3A332B;line-height:1.4;">'
+      + '      <input name="provision" type="checkbox" checked style="margin-top:3px;">'
+      + '      <span>Create their sign-in account now so they can log in immediately (no email is sent). Leave on unless they already have a Legacy account.</span></label>'
+      + '    <div style="display:flex;gap:10px;margin-top:6px;">'
+      + '      <button type="submit" id="leg-linkdeal-submit" style="background:#1A1714;color:#FAF6EC;border:none;padding:12px 20px;font-family:\'JetBrains Mono\',monospace;font-size:11px;letter-spacing:.22em;text-transform:uppercase;cursor:pointer;">Link client</button>'
+      + '      <button type="button" id="leg-linkdeal-close" style="margin-left:auto;background:transparent;border:none;color:#7C6A4D;cursor:pointer;font-size:13px;">Close</button>'
+      + '    </div>'
+      + '  </form>'
+      + '  <div id="leg-linkdeal-result" style="margin-top:14px;font-size:13.5px;line-height:1.5;min-height:20px;"></div>'
+      + '</div>';
+    document.body.appendChild(m);
+
+    var form   = m.querySelector('#leg-linkdeal-form');
+    var submit = m.querySelector('#leg-linkdeal-submit');
+    var result = m.querySelector('#leg-linkdeal-result');
+    function close() { m.style.display = 'none'; }
+    m.querySelector('#leg-linkdeal-close').onclick = close;
+    m.addEventListener('click', function (e) { if (e.target === m) close(); });
+
+    form.addEventListener('submit', async function (e) {
+      e.preventDefault();
+      var fd = new FormData(form);
+      var body = {
+        deal:       (fd.get('deal') || '').trim(),
+        email:      (fd.get('email') || '').trim(),
+        first_name: (fd.get('first_name') || '').trim() || undefined,
+        last_name:  (fd.get('last_name') || '').trim() || undefined,
+        phone:      (fd.get('phone') || '').trim() || undefined,
+        role:       fd.get('role') || 'seller',
+        provision:  fd.get('provision') === 'on'
+      };
+      submit.disabled = true; submit.textContent = 'Linking…';
+      result.style.color = '#7C6A4D'; result.textContent = 'Working…';
+      try {
+        var res = await fetch('/api/crm/link-deal-party', {
+          method: 'POST', credentials: 'include',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(body)
+        });
+        var json = await res.json();
+        if (res.ok && json && json.linked) {
+          var status = json.user_provisioned
+            ? 'Sign-in account created — they can log in now.'
+            : (json.user_linked
+                ? 'Linked to their existing account.'
+                : 'No account yet — the link activates the moment they first sign in with this email.');
+          result.style.color = '#2E5C3D';
+          result.innerHTML = '✓ ' + (body.first_name || 'Client') + ' linked to <strong>'
+            + (json.deal && json.deal.address ? json.deal.address : body.deal) + '</strong> as ' + json.party.role + '.<br>'
+            + (json.lead && json.lead.created ? 'New lead created. ' : 'Existing lead reused. ') + status;
+          submit.textContent = 'Linked';
+          setTimeout(function () { submit.disabled = false; submit.textContent = 'Link client'; }, 1600);
+        } else {
+          result.style.color = '#9B2C2C';
+          result.textContent = '✗ ' + ((json && json.error) || ('Failed (' + res.status + ')'));
+          submit.disabled = false; submit.textContent = 'Link client';
+        }
+      } catch (err) {
+        result.style.color = '#9B2C2C';
+        result.textContent = '✗ ' + (err.message || 'Network error');
+        submit.disabled = false; submit.textContent = 'Link client';
+      }
+    });
+  }
+
+  document.addEventListener('click', function (e) {
+    var t = e.target.closest('[data-open-link-deal]');
+    if (t) { e.preventDefault(); openLinkDealModal(); }
+  });
+})();
+</script>
+<script src="/legacy-client.js" defer></script>
+</body>
+</html>
