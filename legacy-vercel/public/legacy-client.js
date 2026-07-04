@@ -2303,50 +2303,92 @@
     });
   }
 
-  // ---- Calendar ----------------------------------------------------------
-  let calWeek = 0;
+  // ---- Calendar (agenda + full-day scrollable week) ----------------------
+  const CAL_ROW_H = 48; // px per hour — must match .calw-hour / .calw-line in crm.css
+  const CAL_MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  const cal = { week: 0, view: 'agenda', days: [], events: [], label: '' };
+  const evByKey = (key) => cal.events.find((e) => `${e.source}:${e.id}` === key);
+  const monthName = (d) => { const m = /^\d{4}-(\d{2})-\d{2}$/.exec(d || ''); return m ? CAL_MONTHS[+m[1] - 1] : ''; };
+
   async function loadCalendar(offset) {
-    calWeek = offset || 0;
-    const grid = document.querySelector('.cal-grid');
-    if (!grid) return;
-    const data = await getJSON(`/api/crm/calendar?week=${calWeek}`);
-    if (!data || !Array.isArray(data.days)) return; // keep static mock
-
-    const title = document.querySelector('.cal-h-title');
-    if (title && data.week_label) title.textContent = data.week_label;
-
-    const cols = grid.querySelectorAll('.cal-day-col'); // 7 (time-col excluded)
-    cols.forEach((col, i) => {
-      const day = data.days[i];
-      const head = col.querySelector('.cal-day-head');
-      if (head && day) {
-        head.innerHTML = `${esc(day.dow)}<span class="num">${esc(day.num)}</span>`;
-        head.classList.toggle('today', !!day.is_today);
-      }
-      col.querySelectorAll('.cal-cell').forEach((cell) => { cell.innerHTML = ''; });
-    });
-
-    (data.events || []).forEach((ev) => {
-      const col = cols[ev.day];
-      if (!col) return;
-      const cell = col.querySelectorAll('.cal-cell')[ev.row];
-      if (!cell) return;
-      const el = document.createElement('div');
-      const cls = ['tour', 'call', 'block', 'open'].includes(ev.cls) ? ev.cls : 'tour';
-      el.className = `cal-event ${cls}`;
-      el.style.top = `${ev.top}px`;
-      el.style.height = `${ev.height}px`;
-      if (ev.sub) el.title = ev.sub;
-      el.innerHTML = `<div class="t">${esc(ev.time)}</div><div class="ti">${esc(ev.title)}</div>`;
-      cell.appendChild(el);
-    });
+    if (offset != null) cal.week = offset;
+    const agendaEl = document.querySelector('[data-cal-agenda]');
+    if (!agendaEl) return;
+    const data = await getJSON(`/api/crm/calendar?week=${cal.week}`);
+    if (!data || !Array.isArray(data.days)) return;
+    cal.days = data.days; cal.events = data.events || []; cal.label = data.week_label || '';
+    const title = document.querySelector('[data-cal-title]');
+    if (title) title.textContent = cal.label;
+    renderCalendar();
   }
-  function wireCalendarNav() {
-    const navBtns = document.querySelectorAll('.cal-h-nav button');
-    if (navBtns[0]) navBtns[0].addEventListener('click', () => loadCalendar(calWeek - 1));
-    if (navBtns[1]) navBtns[1].addEventListener('click', () => loadCalendar(calWeek + 1));
-    const todayBtn = document.querySelector('.cal-h-l .btn');
-    if (todayBtn) todayBtn.addEventListener('click', () => loadCalendar(0));
+  function renderCalendar() {
+    const agendaEl = document.querySelector('[data-cal-agenda]');
+    const weekEl = document.querySelector('[data-cal-week]');
+    if (!agendaEl || !weekEl) return;
+    document.querySelectorAll('[data-cal-view]').forEach((b) => b.classList.toggle('on', b.getAttribute('data-cal-view') === cal.view));
+    if (cal.view === 'week') { agendaEl.style.display = 'none'; weekEl.style.display = ''; renderWeek(weekEl); }
+    else { weekEl.style.display = 'none'; agendaEl.style.display = ''; renderAgenda(agendaEl); }
+  }
+  function renderAgenda(root) {
+    if (!cal.events.length) {
+      root.innerHTML = '<div class="cal-ag-empty">Nothing scheduled this week.<br><span style="font-size:12px;">Use “+ New event” to add a tour, call, or block.</span></div>';
+      return;
+    }
+    const byDay = {};
+    cal.events.forEach((e) => { (byDay[e.day] = byDay[e.day] || []).push(e); });
+    let html = '';
+    cal.days.forEach((d, i) => {
+      const evs = byDay[i];
+      if (!evs || !evs.length) return;
+      html += `<div class="cal-ag-day"><div class="cal-ag-dayhead${d.is_today ? ' today' : ''}"><span class="cal-ag-dow">${esc(d.dow)}</span><span class="cal-ag-date">${esc(monthName(d.date))} ${esc(d.num)}</span></div>`;
+      evs.forEach((e) => {
+        html += `<div class="cal-ag-row" data-ev-key="${esc(e.source)}:${esc(e.id)}">
+          <span class="cal-ag-time">${esc(e.time_label)}–${esc(e.end_label)}</span>
+          <span class="cal-ag-dot ${esc(e.cls)}"></span>
+          <span class="cal-ag-title">${esc(e.title)}${e.sub ? `<span class="cal-ag-sub">${esc(e.sub)}</span>` : ''}</span>
+          <span class="cal-ag-kind">${esc(e.kind_label || '')}</span>
+        </div>`;
+      });
+      html += '</div>';
+    });
+    root.innerHTML = html;
+  }
+  function renderWeek(root) {
+    const heads = cal.days.map((d) => `<div class="calw-dayhead${d.is_today ? ' today' : ''}">${esc(d.dow)}<span class="num">${esc(d.num)}</span></div>`).join('');
+    let times = '';
+    for (let h = 0; h < 24; h++) times += `<div class="calw-hour">${h === 0 ? '12 AM' : h < 12 ? h + ' AM' : h === 12 ? '12 PM' : (h - 12) + ' PM'}</div>`;
+    let cols = '';
+    for (let i = 0; i < 7; i++) {
+      let lines = ''; for (let h = 0; h < 24; h++) lines += '<div class="calw-line"></div>';
+      cols += `<div class="calw-col" data-cal-col="${i}">${lines}</div>`;
+    }
+    root.innerHTML = `<div class="calw-head"><div class="corner"></div>${heads}</div>
+      <div class="calw-body"><div class="calw-grid"><div class="calw-times">${times}</div>${cols}</div></div>`;
+    cal.events.forEach((e) => {
+      const col = root.querySelector(`[data-cal-col="${e.day}"]`);
+      if (!col) return;
+      const el = document.createElement('div');
+      el.className = `calw-ev ${['tour', 'call', 'block', 'open'].includes(e.cls) ? e.cls : 'tour'}`;
+      el.style.top = `${Math.round((e.hour * 60 + e.minute) * (CAL_ROW_H / 60))}px`;
+      el.style.height = `${Math.max(18, Math.round(e.duration_minutes * (CAL_ROW_H / 60)))}px`;
+      el.setAttribute('data-ev-key', `${e.source}:${e.id}`);
+      el.title = `${e.time_label} · ${e.title}`;
+      el.innerHTML = `<span class="t">${esc(e.time_label)}</span><span class="ti">${esc(e.title)}</span>`;
+      col.appendChild(el);
+    });
+    const body = root.querySelector('.calw-body');
+    if (body) body.scrollTop = 7 * CAL_ROW_H; // open near 7 AM
+  }
+  function wireCalendarChrome() {
+    const prev = document.querySelector('[data-cal-prev]');
+    const next = document.querySelector('[data-cal-next]');
+    const today = document.querySelector('[data-cal-today]');
+    if (prev)  prev.addEventListener('click', () => loadCalendar(cal.week - 1));
+    if (next)  next.addEventListener('click', () => loadCalendar(cal.week + 1));
+    if (today) today.addEventListener('click', () => loadCalendar(0));
+    document.querySelectorAll('[data-cal-view]').forEach((b) => {
+      b.addEventListener('click', () => { cal.view = b.getAttribute('data-cal-view'); renderCalendar(); });
+    });
   }
 
   // ---- Sequence authoring modal (create / edit) --------------------------
@@ -2422,9 +2464,10 @@
     });
   }
 
-  // ---- Calendar new-tour modal -------------------------------------------
+  // ---- Calendar create / edit / detail modals ---------------------------
   function mondayOf(dt) { const x = new Date(dt); const day = (x.getDay() + 6) % 7; x.setDate(x.getDate() - day); x.setHours(0, 0, 0, 0); return x; }
-  function openCalModal() {
+
+  function openEventCreate() {
     const m = modalShell('Add to calendar', 'A tour is tied to a client; a call, block, or open house is just an event.');
     m.body.innerHTML = `
       <div style="display:flex;flex-direction:column;gap:10px;">
@@ -2439,6 +2482,7 @@
             <div style="flex:1;"><label style="${M_LAB}">Last name</label><input data-f-last style="${M_INPUT}"></div>
           </div>
           <div><label style="${M_LAB}">Tour type</label><select data-f-type style="${M_INPUT}"><option value="in_person">In person</option><option value="video">Video</option></select></div>
+          <label style="display:flex;align-items:flex-start;gap:8px;font-size:13px;color:#3A332B;line-height:1.4;"><input data-f-invite type="checkbox" style="margin-top:3px;"> Email the client a calendar invite now</label>
         </div>
         <div data-appt-fields style="display:none;">
           <label style="${M_LAB}">Title</label><input data-f-title placeholder="e.g. Lender call · Rivera" style="${M_INPUT}">
@@ -2464,22 +2508,21 @@
       apptFields.style.display = isTour ? 'none' : 'block';
       saveBtn.textContent = isTour ? 'Schedule tour' : 'Add event';
     };
-    kindSel.addEventListener('change', syncKind);
-    syncKind();
+    kindSel.addEventListener('change', syncKind); syncKind();
     m.body.querySelector('[data-cancel]').addEventListener('click', m.close);
     saveBtn.addEventListener('click', async () => {
       const kind = kindSel.value;
       const date = m.body.querySelector('[data-f-date]').value;
       const time = m.body.querySelector('[data-f-time]').value;
       if (!date || !time) { m.err.textContent = 'Pick a date and time.'; return; }
-      const common = { date, time, duration_minutes: parseInt(m.body.querySelector('[data-f-dur]').value, 10) || 30,
-        notes: m.body.querySelector('[data-f-notes]').value.trim() };
+      const common = { date, time, duration_minutes: parseInt(m.body.querySelector('[data-f-dur]').value, 10) || 30, notes: m.body.querySelector('[data-f-notes]').value.trim() };
       let payload;
       if (kind === 'tour') {
         const email = m.body.querySelector('[data-f-email]').value.trim();
         if (!email) { m.err.textContent = 'Client email is required for a tour.'; return; }
         payload = { kind: 'tour', email, first_name: m.body.querySelector('[data-f-first]').value.trim(),
-          last_name: m.body.querySelector('[data-f-last]').value.trim(), tour_type: m.body.querySelector('[data-f-type]').value, ...common };
+          last_name: m.body.querySelector('[data-f-last]').value.trim(), tour_type: m.body.querySelector('[data-f-type]').value,
+          send_invite: m.body.querySelector('[data-f-invite]').checked, ...common };
       } else {
         const title = m.body.querySelector('[data-f-title]').value.trim();
         if (!title) { m.err.textContent = 'A title is required.'; return; }
@@ -2489,22 +2532,112 @@
       const r = await sendJSON('/api/crm/calendar', 'POST', payload);
       if (r.ok && r.json && (r.json.tour || r.json.appointment)) {
         m.close();
-        const offset = Math.round((mondayOf(date + 'T12:00') - mondayOf(new Date())) / (7 * 86400000));
-        loadCalendar(offset);
+        cal.week = Math.round((mondayOf(date + 'T12:00') - mondayOf(new Date())) / (7 * 86400000));
+        loadCalendar(cal.week);
       } else { m.err.textContent = (r.json && r.json.error) || 'Could not save.'; saveBtn.disabled = false; syncKind(); }
     });
   }
 
-  // Delegated triggers (buttons are static in crm.html or painted by the editor).
+  function openEventEdit(e) {
+    const ed = e.edit || {};
+    const isTour = e.source === 'tour';
+    const m = modalShell('Edit event', isTour ? 'Reschedule or update this tour.' : 'Update this event.');
+    const apptKinds = [['call', 'Call'], ['block', 'Block / personal'], ['open', 'Open house'], ['meeting', 'Meeting']];
+    m.body.innerHTML = `
+      <div style="display:flex;flex-direction:column;gap:10px;">
+        ${isTour ? `
+          <div><label style="${M_LAB}">Client</label><input value="${esc((e.client_name || 'Client') + (e.client_email ? ' · ' + e.client_email : ''))}" disabled style="${M_INPUT};opacity:.7;"></div>
+          <div><label style="${M_LAB}">Tour type</label><select data-f-type style="${M_INPUT}"><option value="in_person"${ed.tour_type !== 'video' ? ' selected' : ''}>In person</option><option value="video"${ed.tour_type === 'video' ? ' selected' : ''}>Video</option></select></div>
+        ` : `
+          <div><label style="${M_LAB}">Type</label><select data-f-kind style="${M_INPUT}">${apptKinds.map(([v, l]) => `<option value="${v}"${ed.kind === v ? ' selected' : ''}>${l}</option>`).join('')}</select></div>
+          <div><label style="${M_LAB}">Title</label><input data-f-title value="${esc(ed.title || '')}" style="${M_INPUT}"></div>
+        `}
+        <div style="display:flex;gap:10px;">
+          <div style="flex:1;"><label style="${M_LAB}">Date</label><input data-f-date type="date" value="${esc(ed.date || '')}" style="${M_INPUT}"></div>
+          <div style="flex:0 0 120px;"><label style="${M_LAB}">Time</label><input data-f-time type="time" value="${esc(ed.time || '')}" style="${M_INPUT}"></div>
+          <div style="flex:0 0 110px;"><label style="${M_LAB}">Minutes</label><input data-f-dur type="number" min="15" step="15" value="${esc(ed.duration_minutes || 30)}" style="${M_INPUT}"></div>
+        </div>
+        <div><label style="${M_LAB}">Notes</label><textarea data-f-notes rows="2" style="${M_INPUT}">${esc(ed.notes || '')}</textarea></div>
+        <div style="display:flex;gap:10px;margin-top:8px;align-items:center;">
+          <button type="button" data-save style="${M_INK}">Save changes</button>
+          <button type="button" data-cancel style="${M_GHOST};margin-left:auto;">Cancel</button>
+        </div>
+      </div>`;
+    m.body.querySelector('[data-cancel]').addEventListener('click', m.close);
+    const saveBtn = m.body.querySelector('[data-save]');
+    saveBtn.addEventListener('click', async () => {
+      const date = m.body.querySelector('[data-f-date]').value;
+      const time = m.body.querySelector('[data-f-time]').value;
+      if (!date || !time) { m.err.textContent = 'Pick a date and time.'; return; }
+      const payload = { id: e.id, source: e.source, date, time, duration_minutes: parseInt(m.body.querySelector('[data-f-dur]').value, 10) || 30, notes: m.body.querySelector('[data-f-notes]').value.trim() };
+      if (isTour) payload.tour_type = m.body.querySelector('[data-f-type]').value;
+      else {
+        payload.kind = m.body.querySelector('[data-f-kind]').value;
+        const t = m.body.querySelector('[data-f-title]').value.trim();
+        if (!t) { m.err.textContent = 'A title is required.'; return; }
+        payload.title = t;
+      }
+      saveBtn.disabled = true; saveBtn.textContent = 'Saving…'; m.err.textContent = '';
+      const r = await sendJSON('/api/crm/calendar', 'PATCH', payload);
+      if (r.ok && r.json && r.json.updated) { m.close(); loadCalendar(cal.week); }
+      else { m.err.textContent = (r.json && r.json.error) || 'Update failed.'; saveBtn.disabled = false; saveBtn.textContent = 'Save changes'; }
+    });
+  }
+
+  function dayLabel(e) { const d = cal.days[e.day]; return d ? `${d.dow}, ${monthName(d.date)} ${d.num}` : (e.date || ''); }
+
+  function openEventDetail(e) {
+    if (!e) return;
+    const m = modalShell(e.title, e.kind_label || '');
+    const rows = [
+      ['When', `${esc(dayLabel(e))} · ${esc(e.time_label)}–${esc(e.end_label)}`],
+      e.client_name ? ['Client', esc(e.client_name) + (e.client_email ? ` · ${esc(e.client_email)}` : '')] : null,
+      e.location ? ['Where', esc(e.location)] : null,
+      (e.status && e.status !== 'confirmed') ? ['Status', esc(e.status)] : null,
+      (e.sub && e.sub !== e.title && e.sub !== e.location) ? ['Details', esc(e.sub)] : null
+    ].filter(Boolean);
+    m.body.innerHTML = `
+      <div style="display:flex;flex-direction:column;gap:10px;font-size:14px;color:#1A1714;">
+        ${rows.map(([k, v]) => `<div><span style="${M_LAB}">${k}</span><div style="margin-top:2px;">${v}</div></div>`).join('')}
+        <div data-detail-result style="font-size:13px;min-height:18px;"></div>
+        <div style="display:flex;gap:10px;margin-top:6px;flex-wrap:wrap;align-items:center;">
+          <button type="button" data-act="edit" style="${M_INK}">Edit</button>
+          ${e.client_email ? `<button type="button" data-act="invite" style="background:#7C6A4D;color:#FAF6EC;border:none;padding:11px 18px;font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.2em;text-transform:uppercase;cursor:pointer;">Send invite</button>` : ''}
+          <button type="button" data-act="cancel" style="background:none;border:1px solid #E8B0AA;color:#9B2C2C;padding:10px 16px;font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.16em;text-transform:uppercase;cursor:pointer;">Cancel event</button>
+          <button type="button" data-act="close" style="${M_GHOST};margin-left:auto;">Close</button>
+        </div>
+      </div>`;
+    const result = m.body.querySelector('[data-detail-result]');
+    m.body.querySelector('[data-act="close"]').addEventListener('click', m.close);
+    m.body.querySelector('[data-act="edit"]').addEventListener('click', () => { m.close(); openEventEdit(e); });
+    const inviteBtn = m.body.querySelector('[data-act="invite"]');
+    if (inviteBtn) inviteBtn.addEventListener('click', async () => {
+      inviteBtn.disabled = true; inviteBtn.textContent = 'Sending…'; result.textContent = '';
+      const r = await sendJSON('/api/crm/calendar', 'POST', { action: 'invite', id: e.id, source: e.source });
+      if (r.ok && r.json && r.json.invited) { result.style.color = '#2E5C3D'; result.textContent = `✓ Invite emailed to ${esc(r.json.to || 'the client')}.`; inviteBtn.textContent = 'Sent'; }
+      else if (r.ok && r.json && r.json.skipped) { result.style.color = '#9B2C2C'; result.textContent = 'Email is not set up yet (needs RESEND_API_KEY).'; inviteBtn.disabled = false; inviteBtn.textContent = 'Send invite'; }
+      else { result.style.color = '#9B2C2C'; result.textContent = (r.json && r.json.error) || 'Could not send invite.'; inviteBtn.disabled = false; inviteBtn.textContent = 'Send invite'; }
+    });
+    m.body.querySelector('[data-act="cancel"]').addEventListener('click', async () => {
+      if (!window.confirm(`Cancel "${e.title}"? ${e.source === 'tour' ? 'The tour will be marked cancelled.' : 'This event will be removed.'}`)) return;
+      const r = await sendJSON('/api/crm/calendar', 'DELETE', { id: e.id, source: e.source });
+      if (r.ok && r.json && r.json.deleted) { m.close(); loadCalendar(cal.week); }
+      else { result.style.color = '#9B2C2C'; result.textContent = (r.json && r.json.error) || 'Could not cancel.'; }
+    });
+  }
+
+  // Delegated triggers (buttons are static in crm.html or painted).
   document.addEventListener('click', (e) => {
-    if (e.target.closest('[data-seq-new]'))  { e.preventDefault(); openSeqModal(null); }
-    else if (e.target.closest('[data-seq-edit]')) { e.preventDefault(); openSeqModal(seqState.list.find((x) => String(x.id) === seqState.selectedId) || null); }
-    else if (e.target.closest('[data-cal-new]'))  { e.preventDefault(); openCalModal(); }
+    if (e.target.closest('[data-seq-new]'))  { e.preventDefault(); openSeqModal(null); return; }
+    if (e.target.closest('[data-seq-edit]')) { e.preventDefault(); openSeqModal(seqState.list.find((x) => String(x.id) === seqState.selectedId) || null); return; }
+    if (e.target.closest('[data-cal-new]'))  { e.preventDefault(); openEventCreate(); return; }
+    const row = e.target.closest('[data-ev-key]');
+    if (row) { e.preventDefault(); openEventDetail(evByKey(row.getAttribute('data-ev-key'))); }
   });
 
   document.addEventListener('DOMContentLoaded', () => {
     loadSequences();
-    wireCalendarNav();
+    wireCalendarChrome();
     loadCalendar(0);
   });
 })();
