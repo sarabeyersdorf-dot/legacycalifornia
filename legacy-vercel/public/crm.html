@@ -48,6 +48,7 @@
     <nav class="app-side-nav">
       <a href="#" data-open-importer>Import Leads (CSV)…</a>
       <a href="#" data-open-link-deal>Link client to deal…</a>
+      <a href="#" data-open-listing-media>Listing media…</a>
       <a href="#" data-send-test-email>Send test email…</a>
       <a href="#" data-sign-out>Sign out</a>
     </nav>
@@ -1352,6 +1353,70 @@ function selectLead(el) {
       };
     });
   }
+})();
+</script>
+<script>
+/* Listing media — attach a YouTube tour + Matterport 3D tour to a listing by
+   MLS #. Feeds the on-market seller portal's "Tour engagement" tiles. */
+(function () {
+  'use strict';
+  var IN = 'font:inherit;font-size:15px;text-transform:none;letter-spacing:normal;color:#1A1714;background:#fff;border:1px solid #D9CFB7;padding:9px 11px;';
+  var LB = 'font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:#7C6A4D;display:flex;flex-direction:column;gap:4px;';
+  function open() {
+    var id = 'leg-media-modal';
+    if (document.getElementById(id)) { document.getElementById(id).style.display = 'flex'; return; }
+    var m = document.createElement('div'); m.id = id;
+    m.style.cssText = 'position:fixed;inset:0;z-index:99997;background:rgba(20,18,15,0.6);display:flex;align-items:center;justify-content:center;padding:24px;font-family:Manrope,system-ui,sans-serif;';
+    m.innerHTML = ''
+      + '<div style="background:#FAF6EC;max-width:520px;width:100%;padding:28px 32px;color:#1A1714;max-height:90vh;overflow:auto;">'
+      + '  <div style="font-family:\'JetBrains Mono\',monospace;font-size:10px;letter-spacing:.22em;text-transform:uppercase;color:#7C6A4D;margin-bottom:8px;">Seller portal · media</div>'
+      + '  <h2 style="font-family:\'Cormorant Garamond\',serif;font-style:italic;font-weight:500;font-size:28px;margin:0 0 6px;">Attach video &amp; 3D tour.</h2>'
+      + '  <p style="font-size:13.5px;line-height:1.55;color:#3A332B;margin:0 0 18px;">Enter the listing\'s MLS #, then paste its YouTube tour link — the seller portal auto-counts video views. For Matterport, paste the tour link and type its view count from your Matterport dashboard.</p>'
+      + '  <form id="lm-form" style="display:flex;flex-direction:column;gap:12px;">'
+      + '    <label style="' + LB + '">MLS #<input name="mls_number" required placeholder="e.g. 20250142" style="' + IN + '"></label>'
+      + '    <div id="lm-found" style="font-size:12px;color:#7C6A4D;min-height:16px;"></div>'
+      + '    <label style="' + LB + '">YouTube tour URL<input name="youtube_url" placeholder="https://youtu.be/… or https://www.youtube.com/watch?v=…" style="' + IN + '"></label>'
+      + '    <label style="' + LB + '">Matterport tour URL (optional)<input name="matterport_url" placeholder="https://my.matterport.com/show/?m=…" style="' + IN + '"></label>'
+      + '    <label style="' + LB + '">Matterport views (from your dashboard, optional)<input name="tour_views" type="number" min="0" placeholder="e.g. 384" style="' + IN + '"></label>'
+      + '    <div style="display:flex;gap:10px;margin-top:6px;">'
+      + '      <button type="submit" id="lm-save" style="background:#1A1714;color:#FAF6EC;border:none;padding:12px 20px;font-family:\'JetBrains Mono\',monospace;font-size:11px;letter-spacing:.22em;text-transform:uppercase;cursor:pointer;">Save media</button>'
+      + '      <button type="button" id="lm-close" style="margin-left:auto;background:transparent;border:none;color:#7C6A4D;cursor:pointer;font-size:13px;">Close</button>'
+      + '    </div>'
+      + '  </form>'
+      + '  <div id="lm-result" style="margin-top:14px;font-size:13.5px;line-height:1.5;min-height:20px;"></div>'
+      + '</div>';
+    document.body.appendChild(m);
+    var form = m.querySelector('#lm-form'), result = m.querySelector('#lm-result'), found = m.querySelector('#lm-found');
+    function close() { m.style.display = 'none'; }
+    m.querySelector('#lm-close').onclick = close;
+    m.addEventListener('click', function (e) { if (e.target === m) close(); });
+
+    form.mls_number.addEventListener('blur', function () {
+      var mls = form.mls_number.value.trim(); if (!mls) { found.textContent = ''; return; }
+      fetch('/api/curate/listing-media?mls_number=' + encodeURIComponent(mls), { credentials: 'include' })
+        .then(function (r) { return r.json(); }).then(function (j) {
+          if (j && j.found) {
+            found.style.color = '#2E5C3D';
+            found.textContent = '✓ ' + ((j.listing && j.listing.address) || mls);
+            if (j.media) { form.youtube_url.value = j.media.youtube_url || ''; form.matterport_url.value = j.media.matterport_url || ''; form.tour_views.value = j.media.tour_views != null ? j.media.tour_views : ''; }
+          } else { found.style.color = '#9B2C2C'; found.textContent = 'No listing found for that MLS #.'; }
+        }).catch(function () {});
+    });
+
+    form.addEventListener('submit', function (e) {
+      e.preventDefault();
+      var body = { mls_number: form.mls_number.value.trim(), youtube_url: form.youtube_url.value.trim(), matterport_url: form.matterport_url.value.trim(), tour_views: form.tour_views.value ? Number(form.tour_views.value) : null };
+      var save = m.querySelector('#lm-save'); save.disabled = true; save.textContent = 'Saving…';
+      fetch('/api/curate/listing-media', { method: 'POST', credentials: 'include', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) })
+        .then(function (r) { return r.json().then(function (j) { return { ok: r.ok, j: j }; }); })
+        .then(function (x) {
+          save.disabled = false; save.textContent = 'Save media';
+          if (x.ok && x.j.saved) { result.style.color = '#2E5C3D'; result.textContent = '✓ Saved for ' + ((x.j.listing && x.j.listing.address) || body.mls_number) + '. The seller portal will show the view count shortly.'; }
+          else { result.style.color = '#9B2C2C'; result.textContent = '✗ ' + ((x.j && x.j.error) || 'Failed'); }
+        }).catch(function (err) { save.disabled = false; save.textContent = 'Save media'; result.style.color = '#9B2C2C'; result.textContent = '✗ ' + (err.message || 'Network error'); });
+    });
+  }
+  document.addEventListener('click', function (e) { var t = e.target.closest('[data-open-listing-media]'); if (t) { e.preventDefault(); open(); } });
 })();
 </script>
 <script src="/legacy-client.js" defer></script>
