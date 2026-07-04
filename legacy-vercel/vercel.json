@@ -1,5 +1,6 @@
 {
   "rewrites": [
+    { "source": "/c/:token", "destination": "/collection.html" },
     { "source": "/listing", "destination": "/listing.html" },
     { "source": "/listing/:path*", "destination": "/listing.html" },
     { "source": "/listing-report", "destination": "/listing-report.html" },
