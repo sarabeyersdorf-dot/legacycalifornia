@@ -15,13 +15,15 @@ import savedSearches from '../_lib/handlers/curate-saved-searches.js';
 import collections   from '../_lib/handlers/curate-collections.js';
 import push          from '../_lib/handlers/curate-push.js';
 import valuations    from '../_lib/handlers/curate-valuations.js';
+import preview       from '../_lib/handlers/curate-preview.js';
 
 const TABLE = {
   'search':         search,
   'saved-searches': savedSearches,
   'collections':    collections,
   'push':           push,
-  'valuations':     valuations
+  'valuations':     valuations,
+  'preview':        preview
 };
 
 export default async function handler(req, res) {
