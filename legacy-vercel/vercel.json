@@ -20,15 +20,28 @@
   ],
   "headers": [
     {
-      "source": "/api/(.*)",
+      "source": "/api/photo",
+      "headers": [
+        { "key": "Cache-Control", "value": "public, max-age=86400, s-maxage=604800, immutable" }
+      ]
+    },
+    {
+      "source": "/api/listings(.*)",
       "headers": [
         { "key": "Cache-Control", "value": "public, s-maxage=900, stale-while-revalidate=1800" }
       ]
     },
     {
-      "source": "/api/photo",
+      "source": "/api/listing(.*)",
       "headers": [
-        { "key": "Cache-Control", "value": "public, max-age=86400, s-maxage=604800, immutable" }
+        { "key": "Cache-Control", "value": "public, s-maxage=900, stale-while-revalidate=1800" }
+      ]
+    },
+    {
+      "source": "/api/(crm|me|seller|auth|ai|sequences|curate|c|leads|fub|cron|idx)(.*)",
+      "headers": [
+        { "key": "Cache-Control", "value": "private, no-store, max-age=0" },
+        { "key": "Vary", "value": "Cookie" }
       ]
     }
   ],
