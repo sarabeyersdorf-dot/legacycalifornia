@@ -395,201 +395,24 @@
       <div class="cal">
         <div class="cal-h">
           <div class="cal-h-l">
-            <h1 class="cal-h-title">May 11 – 17 · Week 20</h1>
+            <h1 class="cal-h-title" data-cal-title>Loading…</h1>
             <div class="cal-h-nav">
-              <button>‹</button>
-              <button>›</button>
+              <button data-cal-prev title="Previous week">‹</button>
+              <button data-cal-next title="Next week">›</button>
             </div>
-            <button class="btn btn-ghost btn-xs">Today</button>
+            <button class="btn btn-ghost btn-xs" data-cal-today>Today</button>
           </div>
           <div style="display: flex; gap: 12px; align-items: center;">
             <div class="cal-view-toggle">
-              <button>Day</button>
-              <button class="on">Week</button>
-              <button>Month</button>
+              <button class="on" data-cal-view="agenda">Agenda</button>
+              <button data-cal-view="week">Week</button>
             </div>
             <button class="btn btn-ink btn-sm" data-cal-new>+ New event</button>
           </div>
         </div>
 
-        <div class="cal-grid">
-          <div class="cal-time-col">
-            <div class="cal-day-head">&nbsp;</div>
-            <div class="cal-hour">9 AM</div>
-            <div class="cal-hour">10</div>
-            <div class="cal-hour">11</div>
-            <div class="cal-hour">12 PM</div>
-            <div class="cal-hour">1</div>
-            <div class="cal-hour">2</div>
-            <div class="cal-hour">3</div>
-            <div class="cal-hour">4</div>
-            <div class="cal-hour">5</div>
-          </div>
-          <div class="cal-day-col">
-            <div class="cal-day-head">Mon<span class="num">11</span></div>
-            <div class="cal-cell">
-              <div class="cal-event call" style="top: 0; height: 50px;">
-                <div class="t">9:00 · Call</div>
-                <div class="ti">Patricia Walsh — CMA</div>
-              </div>
-            </div>
-            <div class="cal-cell"></div>
-            <div class="cal-cell"></div>
-            <div class="cal-cell">
-              <div class="cal-event tour" style="top: 0; height: 110px;">
-                <div class="t">12:00 · Tour</div>
-                <div class="ti">Pine Crest · Kelvin Yu</div>
-              </div>
-            </div>
-            <div class="cal-cell"></div>
-            <div class="cal-cell"></div>
-            <div class="cal-cell"></div>
-            <div class="cal-cell">
-              <div class="cal-event block" style="top: 0; height: 50px;">
-                <div class="t">4:00 · Block</div>
-                <div class="ti">Followups</div>
-              </div>
-            </div>
-            <div class="cal-cell"></div>
-          </div>
-          <div class="cal-day-col">
-            <div class="cal-day-head today">Tue<span class="num">12</span></div>
-            <div class="cal-cell"></div>
-            <div class="cal-cell">
-              <div class="cal-event tour" style="top: 0; height: 100px;">
-                <div class="t">10:00 · Tour</div>
-                <div class="ti">Oak Hollow · Renee</div>
-              </div>
-            </div>
-            <div class="cal-cell"></div>
-            <div class="cal-cell"></div>
-            <div class="cal-cell">
-              <div class="cal-event call" style="top: 0; height: 50px;">
-                <div class="t">1:00 · Call</div>
-                <div class="ti">Lender — Rivera</div>
-              </div>
-            </div>
-            <div class="cal-cell"></div>
-            <div class="cal-cell">
-              <div class="cal-event call" style="top: 0; height: 50px;">
-                <div class="t">3:00 · Call</div>
-                <div class="ti">James — handoff</div>
-              </div>
-            </div>
-            <div class="cal-cell"></div>
-            <div class="cal-cell"></div>
-          </div>
-          <div class="cal-day-col">
-            <div class="cal-day-head">Wed<span class="num">13</span></div>
-            <div class="cal-cell">
-              <div class="cal-event call" style="top: 0; height: 50px;">
-                <div class="t">9:00 · Internal</div>
-                <div class="ti">Team huddle</div>
-              </div>
-            </div>
-            <div class="cal-cell"></div>
-            <div class="cal-cell">
-              <div class="cal-event tour" style="top: 0; height: 110px;">
-                <div class="t">11:30 · Tour</div>
-                <div class="ti">Vineyard Ridge · Renee</div>
-              </div>
-            </div>
-            <div class="cal-cell"></div>
-            <div class="cal-cell"></div>
-            <div class="cal-cell"></div>
-            <div class="cal-cell">
-              <div class="cal-event call" style="top: 0; height: 50px;">
-                <div class="t">3:00 · Call</div>
-                <div class="ti">Beckett – water rts</div>
-              </div>
-            </div>
-            <div class="cal-cell"></div>
-            <div class="cal-cell"></div>
-          </div>
-          <div class="cal-day-col">
-            <div class="cal-day-head">Thu<span class="num">14</span></div>
-            <div class="cal-cell"></div>
-            <div class="cal-cell">
-              <div class="cal-event tour" style="top: 0; height: 100px;">
-                <div class="t">10:00 · Tour</div>
-                <div class="ti">Pine Crest · Yu</div>
-              </div>
-            </div>
-            <div class="cal-cell"></div>
-            <div class="cal-cell">
-              <div class="cal-event block" style="top: 0; height: 110px;">
-                <div class="t">12:00 · Office</div>
-                <div class="ti">Listing prep · 3 homes</div>
-              </div>
-            </div>
-            <div class="cal-cell"></div>
-            <div class="cal-cell"></div>
-            <div class="cal-cell"></div>
-            <div class="cal-cell"></div>
-            <div class="cal-cell"></div>
-          </div>
-          <div class="cal-day-col">
-            <div class="cal-day-head">Fri<span class="num">15</span></div>
-            <div class="cal-cell"></div>
-            <div class="cal-cell">
-              <div class="cal-event call" style="top: 0; height: 50px;">
-                <div class="t">10:00 · Close</div>
-                <div class="ti">Robert Lin — Spring St</div>
-              </div>
-            </div>
-            <div class="cal-cell"></div>
-            <div class="cal-cell"></div>
-            <div class="cal-cell"></div>
-            <div class="cal-cell">
-              <div class="cal-event tour" style="top: 0; height: 100px;">
-                <div class="t">2:00 · Photo</div>
-                <div class="ti">New listing shoot</div>
-              </div>
-            </div>
-            <div class="cal-cell"></div>
-            <div class="cal-cell"></div>
-            <div class="cal-cell"></div>
-          </div>
-          <div class="cal-day-col">
-            <div class="cal-day-head">Sat<span class="num">16</span></div>
-            <div class="cal-cell"></div>
-            <div class="cal-cell">
-              <div class="cal-event tour" style="top: 24px; height: 100px;">
-                <div class="t">10:30 · Tour</div>
-                <div class="ti">Ironstone · Renee</div>
-              </div>
-            </div>
-            <div class="cal-cell"></div>
-            <div class="cal-cell"></div>
-            <div class="cal-cell">
-              <div class="cal-event open" style="top: 0; height: 110px;">
-                <div class="t">1:00 · Open</div>
-                <div class="ti">Ironstone open house</div>
-              </div>
-            </div>
-            <div class="cal-cell"></div>
-            <div class="cal-cell"></div>
-            <div class="cal-cell"></div>
-            <div class="cal-cell"></div>
-          </div>
-          <div class="cal-day-col">
-            <div class="cal-day-head">Sun<span class="num">17</span></div>
-            <div class="cal-cell"></div>
-            <div class="cal-cell"></div>
-            <div class="cal-cell"></div>
-            <div class="cal-cell"></div>
-            <div class="cal-cell"></div>
-            <div class="cal-cell">
-              <div class="cal-event block" style="top: 0; height: 110px;">
-                <div class="t">2–4 PM</div>
-                <div class="ti">Family time · Hold</div>
-              </div>
-            </div>
-            <div class="cal-cell"></div>
-            <div class="cal-cell"></div>
-            <div class="cal-cell"></div>
-          </div>
-        </div>
+        <div class="cal-agenda" data-cal-agenda></div>
+        <div class="cal-week" data-cal-week style="display:none;"></div>
 
         <!-- Availability + booking settings -->
         <div class="cal-strip">
