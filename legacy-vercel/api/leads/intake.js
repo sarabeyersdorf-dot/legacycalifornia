@@ -33,6 +33,28 @@ const ALLOWED_SOURCE  = new Set(['website_form','open_house','referral','ihomefi
 const ALLOWED_JOURNEY = new Set(['discovering','narrowing','touring','ready_to_offer']);
 const ALLOWED_TYPE    = new Set(['buyer','seller','both','land','relocation']);
 
+// Bots fill hidden fields a human never sees. Add one of these as a hidden,
+// visually-offscreen input to each form; a filled value = a bot.
+const HONEYPOT_FIELDS = ['company','website','url','fax'];
+
+// Per-IP / per-email velocity guard. Fail-OPEN: if the intake_hits table isn't
+// there yet or the DB hiccups, we never block a real lead.
+async function rateLimited(supa, ip, email) {
+  try {
+    const since = new Date(Date.now() - 3600_000).toISOString();
+    if (ip) {
+      const { count } = await supa.from('intake_hits').select('id', { count: 'exact', head: true }).eq('ip', ip).gte('created_at', since);
+      if ((count || 0) >= 12) return true;
+    }
+    if (email) {
+      const { count } = await supa.from('intake_hits').select('id', { count: 'exact', head: true }).eq('email', email).gte('created_at', since);
+      if ((count || 0) >= 6) return true;
+    }
+    await supa.from('intake_hits').insert({ ip, email });
+  } catch (_) { /* table missing / transient error → don't lose a real lead */ }
+  return false;
+}
+
 function sanitize(body) {
   const out = {};
   out.first_name    = (body.first_name || '').trim() || null;
@@ -55,6 +77,12 @@ export default async function handler(req, res) {
 
   try {
     const body = await readJson(req);
+
+    // Honeypot — silently accept so the bot doesn't learn, but create nothing.
+    for (const f of HONEYPOT_FIELDS) {
+      if (body[f] && String(body[f]).trim()) return ok(res, { lead_id: null, is_new: false, ignored: true });
+    }
+
     const fields = sanitize(body);
 
     if (!fields.email || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(fields.email)) {
@@ -62,6 +90,12 @@ export default async function handler(req, res) {
     }
 
     const supa = adminClient();
+
+    // Velocity guard (fail-open)
+    const ip = String(req.headers['x-forwarded-for'] || '').split(',')[0].trim() || null;
+    if (await rateLimited(supa, ip, fields.email)) {
+      return fail(res, 429, 'too many submissions — please try again in a little while');
+    }
 
     // Upsert by email
     const { data: existing } = await supa
