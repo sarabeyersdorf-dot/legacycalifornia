@@ -159,6 +159,8 @@
     <div class="fmm-progress"><span id="progBar"></span></div>
 
     <form id="fmmForm" novalidate>
+      <!-- Honeypot: offscreen field real people never see or fill; bots do. Server drops any submission with it filled. -->
+      <input type="text" name="company" id="fmmCompany" tabindex="-1" autocomplete="off" aria-hidden="true" style="position:absolute!important;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden;opacity:0;">
       <div class="fmm-body">
 
         <!-- Q1 -->
@@ -381,7 +383,8 @@
       price_max:  b.max ? Number(b.max) : null,
       intent:     answers.intent,
       must_haves: answers.must_haves || null,
-      message:    summaryBits.join(' · ')
+      message:    summaryBits.join(' · '),
+      company:    form.company ? form.company.value : ''   // honeypot — humans leave blank
     };
   }
 
