@@ -1,13 +1,18 @@
 // api/seller/[action].js
-// Single dispatcher serving all seller portal URLs:
-//   GET /api/seller/portal  → full seller portal payload
+// Single dispatcher serving seller portal URLs:
+//   GET /api/seller/listing → on-market LISTING portal (traffic, offers,
+//                             showings, comps, checklist). Served here.
+//
+// Note: the in-escrow portal is a separate concrete file, api/seller/portal.js,
+// which serves GET /api/seller/portal (it shadows this dispatcher for that path).
+// The two are different journey stages: on-market vs in-escrow.
 //
 // Counts as ONE serverless function on Vercel.
 
-import portal from '../_lib/handlers/seller-portal.js';
+import listingPortal from '../_lib/handlers/seller-portal.js';
 
 const TABLE = {
-  'portal': portal
+  'listing': listingPortal
 };
 
 export default async function handler(req, res) {
