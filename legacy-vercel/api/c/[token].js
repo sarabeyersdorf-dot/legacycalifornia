@@ -1,235 +1,131 @@
-// api/c/[token].js
-// The ONE anonymous, client-facing route. No login. Access is gated entirely by
-// the unguessable share_token, validated here before the service-role client
-// touches anything. Only the collection's INCLUDED listings are ever revealed —
-// the properties table is never exposed wholesale to anon callers.
+// api/_lib/handlers/curate-push.js
+// POST /api/curate/push   (agent-only)
 //
-//   GET  /api/c/:token                         → branded collection payload (+ logs an 'open')
-//   POST /api/c/:token { op:'react', ... }      → record a client reaction
-//   POST /api/c/:token { op:'event', ... }      → record view / dwell telemetry
-//   POST /api/c/:token { op:'valuation', ... }  → AI preliminary valuation (Feature 4)
-//
-// Feature 4 is rate-limited (3/day per email or phone), honeypot + timing bot-
-// checked, fails soft (always captures the seller lead + alerts the agent even
-// if the AI call is unavailable), and NEVER emits anything read as an appraisal.
+// Body: { collection_id, channel:'sms'|'email', to?, to_name?, message?, subject? }
+//   - Resolves recipient from the collection's client lead unless `to` is given.
+//   - Flips the collection to status='active' so the share link works.
+//   - Sends via Twilio (sms) or Resend (email) with a branded link.
+//   - Logs the outbound to public.messages (when a client lead exists) so it
+//     lands in the inbox / morning brief, mirroring crm-message-send.js.
 
-import { adminClient } from '../_lib/supabase.js';
-import { anthropicJSON } from '../_lib/anthropic.js';
-import { sendSMS } from '../_lib/twilio.js';
-import { handleOptions, readJson, ok, fail } from '../_lib/cors.js';
-import { buildClientPayload, disclaimer, agentIdentity } from '../_lib/collection-render.js';
+import { adminClient } from '../supabase.js';
+import { getCallerProfile, isAgent } from '../auth.js';
+import { sendSMS } from '../twilio.js';
+import { sendEmail as sendEmailResend, resendConfigured } from '../resend.js';
+import { sendEmail as sendEmailSendgrid, sendgridConfigured } from '../sendgrid.js';
+import { handleOptions, readJson, ok, fail } from '../cors.js';
+import { buildPushMessage, agentIdentity } from '../collection-render.js';
 
-const VAL_MODEL = 'claude-sonnet-4-6';           // matches api/_lib/anthropic.js default
-const RATE_PER_DAY = 3;
-const MIN_ELAPSED_MS = 1200;                     // faster than this ≈ a bot
+const agentKey = (profile) => (profile.role === 'agent_james' ? 'james' : 'sara');
 
-const fmtUSDfull = (n) => (n == null || !Number.isFinite(+n)) ? '—' : '$' + Math.round(+n).toLocaleString('en-US');
-
-async function loadCollection(supa, token) {
-  if (!token || !/^[a-f0-9]{24,}$/i.test(token)) return null;
-  const { data } = await supa
-    .from('curated_collections')
-    .select('*, leads(first_name)')
-    .eq('share_token', token).maybeSingle();
-  if (!data) return null;
-  if (data.status !== 'active') return { gone: true };
-  if (data.expires_at && new Date(data.expires_at) < new Date()) return { gone: true };
-  return data;
+function pickEmailProvider() {
+  if (resendConfigured())   return { name: 'resend',   send: sendEmailResend };
+  if (sendgridConfigured()) return { name: 'sendgrid', send: sendEmailSendgrid };
+  return null;
 }
 
 export default async function handler(req, res) {
   if (handleOptions(req, res)) return;
-  res.setHeader('Cache-Control', 'no-store');
+  if (req.method !== 'POST') return fail(res, 405, 'method_not_allowed');
 
-  const token = req.query?.token;
-  const supa = adminClient();
+  const { user, profile } = await getCallerProfile(req, res);
+  if (!user)             return fail(res, 401, 'not authenticated');
+  if (!isAgent(profile)) return fail(res, 403, 'agents only');
+
+  const supa  = adminClient();
+  const agent = agentKey(profile);
 
   try {
-    const coll = await loadCollection(supa, token);
-    if (!coll)        return fail(res, 404, 'collection not found');
-    if (coll.gone)    return fail(res, 410, 'this collection link is no longer active');
+    const b = await readJson(req);
+    const channel = b?.channel;
+    if (!b?.collection_id) return fail(res, 400, 'collection_id required');
+    if (!['sms', 'email'].includes(channel)) return fail(res, 400, "channel must be 'sms' or 'email'");
 
-    if (req.method === 'GET')  return view(supa, coll, res);
-    if (req.method === 'POST') {
-      const b = await readJson(req);
-      const op = b?.op;
-      if (op === 'react')     return react(supa, coll, b, res);
-      if (op === 'event')     return event(supa, coll, b, res);
-      if (op === 'valuation') return valuation(supa, coll, b, res);
-      return fail(res, 400, `unknown op: ${op}`);
+    // Collection must belong to this agent
+    const { data: coll, error: cErr } = await supa
+      .from('curated_collections')
+      .select('*, leads(id,first_name,last_name,email,phone)')
+      .eq('id', b.collection_id).eq('agent', agent).maybeSingle();
+    if (cErr)  return fail(res, 500, cErr.message);
+    if (!coll) return fail(res, 404, 'collection not found');
+
+    // Must have at least one included listing before pushing
+    const { count: includedCount } = await supa
+      .from('collection_listings')
+      .select('id', { count: 'exact', head: true })
+      .eq('collection_id', coll.id).eq('included', true);
+    if (!includedCount) return fail(res, 409, 'add at least one listing before pushing');
+
+    // Agent identity for the signature (shared with the preview)
+    const agentRow = await agentIdentity(supa, agent);
+
+    const lead = coll.leads || null;
+    const firstName = lead?.first_name || '';
+    const to = b?.to || (channel === 'sms' ? lead?.phone : lead?.email);
+    if (!to) return fail(res, 422, channel === 'sms' ? 'no phone on file for this client' : 'no email on file for this client');
+
+    // Build the EXACT message the preview shows — one source of truth.
+    const msg = buildPushMessage({ coll, agent: agentRow, channel, firstName, message: b?.message, subject: b?.subject });
+    const link = msg.link;
+
+    // Flip to active so the link is live
+    if (coll.status !== 'active') await supa.from('curated_collections').update({ status: 'active' }).eq('id', coll.id);
+
+    // ---- Send ----------------------------------------------------------
+    let providerResult, sentOk = false, bodyText = '';
+    if (channel === 'sms') {
+      bodyText = msg.body;
+      providerResult = await sendSMS({ to, body: bodyText });
+      sentOk = !providerResult.skipped;
+      providerResult.via = 'twilio';
+    } else {
+      const provider = pickEmailProvider();
+      if (!provider) return fail(res, 502, 'no email provider configured — set RESEND_API_KEY');
+      bodyText = msg.text;
+      providerResult = await provider.send({
+        to,
+        toName: lead ? [lead.first_name, lead.last_name].filter(Boolean).join(' ') || null : (b?.to_name || null),
+        subject: msg.subject,
+        text: msg.text,
+        html: msg.html
+      });
+      sentOk = !providerResult.skipped;
+      providerResult.via = provider.name;
     }
-    return fail(res, 405, 'method_not_allowed');
+
+    // ---- Log to messages (only when we have a client lead) -------------
+    let message_id = null;
+    if (lead?.id) {
+      const nowIso = new Date().toISOString();
+      const { data: row } = await supa.from('messages').insert({
+        lead_id: lead.id,
+        direction: 'outbound',
+        channel,
+        body: channel === 'sms' ? bodyText : `Collection pushed: ${link}`,
+        subject: channel === 'email' ? `Collection: ${coll.title || 'homes for you'}` : null,
+        status: sentOk ? 'sent' : 'failed',
+        ai_generated: false,
+        approved_by: agent,
+        approved_at: nowIso,
+        twilio_sid: channel === 'sms' ? (providerResult.sid || null) : null
+      }).select('id').single();
+      message_id = row?.id || null;
+      if (sentOk) {
+        await supa.from('leads').update({ last_contact_at: nowIso }).eq('id', lead.id);
+        await supa.from('lead_events').insert({
+          lead_id: lead.id, event_type: 'message_sent',
+          source: channel === 'sms' ? 'twilio' : 'mailerlite',
+          event_data: { collection_id: coll.id, channel, kind: 'curated_collection_push' }
+        });
+      }
+    }
+
+    return ok(res, {
+      pushed: sentOk, channel, to, link, message_id,
+      provider: providerResult,
+      note: providerResult.skipped ? 'Provider not configured — link generated but message not delivered.' : undefined
+    });
   } catch (e) {
     return fail(res, 500, e.message);
   }
-}
-
-// ---- GET: branded payload --------------------------------------------------
-async function view(supa, coll, res) {
-  const payload = await buildClientPayload(supa, coll);
-  delete payload._agent;   // never expose internal agent record to the client
-  // fire-and-forget open event
-  supa.from('collection_events').insert({ collection_id: coll.id, event_type: 'open', meta: {} }).then(() => {}, () => {});
-  return ok(res, payload);
-}
-
-// ---- POST react ------------------------------------------------------------
-async function react(supa, coll, b, res) {
-  const REACTIONS = ['love', 'not_for_me', 'tell_me_more', 'want_to_see'];
-  if (!REACTIONS.includes(b?.reaction)) return fail(res, 400, `reaction must be one of ${REACTIONS.join(', ')}`);
-  const row = {
-    collection_id: coll.id,
-    property_id: b?.property_id || null,
-    reaction: b.reaction,
-    comment: typeof b?.comment === 'string' ? b.comment.slice(0, 1000) : null,
-    client_label: typeof b?.client_label === 'string' ? b.client_label.slice(0, 120) : (coll.leads?.first_name || null)
-  };
-  const { error } = await supa.from('collection_reactions').insert(row);
-  if (error) return fail(res, 500, error.message);
-  supa.from('collection_events').insert({
-    collection_id: coll.id, property_id: row.property_id,
-    event_type: 'reaction', meta: { reaction: row.reaction }
-  }).then(() => {}, () => {});
-  return ok(res, { recorded: true });
-}
-
-// ---- POST event (view / dwell) ---------------------------------------------
-async function event(supa, coll, b, res) {
-  const TYPES = ['listing_view', 'dwell', 'valuation_open'];
-  if (!TYPES.includes(b?.event_type)) return fail(res, 400, `event_type must be one of ${TYPES.join(', ')}`);
-  const row = {
-    collection_id: coll.id,
-    property_id: b?.property_id || null,
-    event_type: b.event_type,
-    dwell_ms: Number.isFinite(+b?.dwell_ms) ? Math.max(0, Math.min(+b.dwell_ms, 3_600_000)) : null,
-    meta: (b && typeof b.meta === 'object' && b.meta) ? b.meta : {}
-  };
-  const { error } = await supa.from('collection_events').insert(row);
-  if (error) return fail(res, 500, error.message);
-  return ok(res, { recorded: true });
-}
-
-// ---- POST valuation (Feature 4) --------------------------------------------
-async function valuation(supa, coll, b, res) {
-  // Bot checks
-  if (b?.company) return ok(res, { received: true });                       // honeypot filled → silently accept, do nothing
-  if (Number.isFinite(+b?.elapsed_ms) && +b.elapsed_ms < MIN_ELAPSED_MS) return fail(res, 429, 'please take a moment and try again');
-
-  const address = (b?.address || '').toString().trim();
-  const email   = (b?.email || '').toString().trim().toLowerCase();
-  const phone   = (b?.phone || '').toString().trim();
-  if (!address)          return fail(res, 400, 'address is required');
-  if (!email && !phone)  return fail(res, 400, 'an email or phone is required so we can reach you');
-
-  // Rate limit: 3/day per email or phone
-  const since = new Date(Date.now() - 86_400_000).toISOString();
-  const ors = [];
-  if (email) ors.push(`email.eq.${email}`);
-  if (phone) ors.push(`phone.eq.${phone}`);
-  const { count: recent } = await supa.from('valuation_requests')
-    .select('id', { count: 'exact', head: true })
-    .gte('created_at', since)
-    .or(ors.join(','));
-  if ((recent || 0) >= RATE_PER_DAY) return fail(res, 429, "you've reached today's limit — we'll be in touch soon");
-
-  const city = (b?.city || '').toString().trim();
-  const zip  = (b?.zip || '').toString().trim();
-  const sqft = Number.isFinite(+b?.sqft) ? +b.sqft : null;
-  const beds = Number.isFinite(+b?.beds) ? +b.beds : null;
-  const baths = Number.isFinite(+b?.baths) ? +b.baths : null;
-  const condition = (b?.condition || '').toString().trim() || null;
-  const special = (b?.notes || '').toString().slice(0, 1000) || null;
-
-  // ---- Pull comps -----------------------------------------------------
-  let cq = supa.from('properties')
-    .select('address, city, zip, price, bedrooms, bathrooms, sq_ft, status, year_built, property_type')
-    .in('status', ['active', 'pending', 'sold'])
-    .not('price', 'is', null);
-  if (zip && city)      cq = cq.or(`zip.eq.${zip},city.ilike.%${city}%`);
-  else if (zip)         cq = cq.eq('zip', zip);
-  else if (city)        cq = cq.ilike('city', `%${city}%`);
-  if (sqft) cq = cq.gte('sq_ft', Math.round(sqft * 0.75)).lte('sq_ft', Math.round(sqft * 1.25));
-  const { data: pool } = await cq.limit(25);
-
-  let comps = (pool || []);
-  if (sqft) comps = comps.sort((a, bb) => Math.abs((a.sq_ft || 0) - sqft) - Math.abs((bb.sq_ft || 0) - sqft));
-  comps = comps.slice(0, 6).map((c) => ({
-    address: c.address, city: c.city, price: c.price, beds: c.bedrooms, baths: c.bathrooms,
-    sqft: c.sq_ft, status: c.status, ppsf: (c.price && c.sq_ft) ? Math.round(c.price / c.sq_ft) : null
-  }));
-
-  const agent = await agentIdentity(supa, coll.agent);
-
-  // ---- AI range (fail-soft) ------------------------------------------
-  let range_low = null, range_high = null, narrative = '';
-  try {
-    const ai = await runValuationAI({ address, city, zip, sqft, beds, baths, condition, special, comps, agentName: agent.name });
-    range_low = ai.range_low; range_high = ai.range_high; narrative = ai.narrative;
-  } catch (_) {
-    narrative = `Thank you — I have your details for ${address}. I'll pull the most recent comparable sales myself and send you a preliminary range shortly.`;
-  }
-
-  // ---- Store the request (a seller lead) -----------------------------
-  const { data: saved } = await supa.from('valuation_requests').insert({
-    agent: coll.agent, collection_id: coll.id,
-    name: (b?.name || '').toString().slice(0, 160) || null,
-    email: email || null, phone: phone || null,
-    address, city: city || null, zip: zip || null,
-    beds, baths, sqft, condition, notes: special,
-    range_low, range_high, comps, model: (range_low != null ? VAL_MODEL : null), status: 'new'
-  }).select('id').single();
-
-  // ---- Alert the agent (hot seller lead) — fail-soft -----------------
-  try {
-    if (agent.phone) {
-      const rangeStr = (range_low != null && range_high != null) ? ` (${fmtUSDfull(range_low)}–${fmtUSDfull(range_high)})` : '';
-      await sendSMS({ to: agent.phone, body: `New valuation request${rangeStr}: ${address}. ${b?.name || 'A client'} · ${email || phone}. — Legacy` });
-    }
-  } catch (_) { /* never block the client on the alert */ }
-
-  supa.from('collection_events').insert({ collection_id: coll.id, event_type: 'valuation_open', meta: { address } }).then(() => {}, () => {});
-
-  return ok(res, {
-    received: true,
-    request_id: saved?.id || null,
-    range_low, range_high,
-    range_label: (range_low != null && range_high != null) ? `${fmtUSDfull(range_low)} – ${fmtUSDfull(range_high)}` : null,
-    narrative,
-    comps_used: comps.length,
-    preliminary: true,
-    disclaimer: disclaimer(agent.name, agent.dre_number)
-  });
-}
-
-async function runValuationAI({ address, city, zip, sqft, beds, baths, condition, special, comps, agentName }) {
-  const SYSTEM = `You are a real estate assistant writing a PRELIMINARY market perspective for a homeowner, in the warm, plain-spoken voice of ${agentName} at Legacy Properties.
-Hard rules:
-1. Output a preliminary RANGE, never a single number.
-2. This is a preliminary market perspective, NOT an appraisal or a formal opinion of value. Say so.
-3. Explain the 3-4 comparable homes that drive the range in warm, plain English a non-expert understands.
-4. Stay conservative. When unsure, widen the range rather than overpromise.
-5. Do not invent comps or facts. Use only the comparable homes provided.
-6. No markdown, no bullet points, no exclamation points. 2 short paragraphs maximum.
-Return ONLY JSON: {"range_low": <int dollars>, "range_high": <int dollars>, "narrative": "<= 130 words"}.`;
-  const compLines = comps.length
-    ? comps.map((c, i) => `${i + 1}. ${c.address || 'nearby home'} — ${c.status}, ${c.beds ?? '?'}bd/${c.baths ?? '?'}ba, ${c.sqft ?? '?'} sqft, ${c.price != null ? '$' + c.price.toLocaleString('en-US') : 'n/a'}${c.ppsf ? ' ($' + c.ppsf + '/sqft)' : ''}`).join('\n')
-    : '(no close comparables found in the database yet)';
-  const prompt = `Homeowner's property:
-Address: ${address}${city ? ', ' + city : ''}${zip ? ' ' + zip : ''}
-Approx size: ${sqft ? sqft + ' sqft' : 'unknown'}; beds ${beds ?? '?'}; baths ${baths ?? '?'}; condition: ${condition || 'unspecified'}.
-Anything special: ${special || 'none noted'}.
-
-Comparable homes from our database:
-${compLines}
-
-Write the preliminary range and explanation now.`;
-  const { json } = await anthropicJSON({
-    model: VAL_MODEL, system: SYSTEM,
-    messages: [{ role: 'user', content: prompt }],
-    max_tokens: 500, temperature: 0.4
-  });
-  const low  = Math.round(Number(json.range_low));
-  const high = Math.round(Number(json.range_high));
-  if (!Number.isFinite(low) || !Number.isFinite(high) || low <= 0 || high < low) throw new Error('bad AI range');
-  return { range_low: low, range_high: high, narrative: String(json.narrative || '').trim() };
 }
