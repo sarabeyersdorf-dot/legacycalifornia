@@ -49,11 +49,13 @@
   "functions": {
     "api/*.js": { "memory": 256, "maxDuration": 10 },
     "api/idx/[action].js": { "memory": 512, "maxDuration": 60 },
-    "api/sequences/[action].js": { "memory": 256, "maxDuration": 60 }
+    "api/sequences/[action].js": { "memory": 256, "maxDuration": 60 },
+    "api/cron/flag-matches.js": { "maxDuration": 60 }
   },
   "crons": [
     { "path": "/api/cron/sync-deals", "schedule": "0 * * * *" },
     { "path": "/api/idx/sync", "schedule": "0 */3 * * *" },
+    { "path": "/api/cron/flag-matches", "schedule": "15 */3 * * *" },
     { "path": "/api/sequences/cron", "schedule": "0 * * * *" }
   ]
 }
