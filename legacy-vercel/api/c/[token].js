@@ -17,19 +17,13 @@ import { adminClient } from '../_lib/supabase.js';
 import { anthropicJSON } from '../_lib/anthropic.js';
 import { sendSMS } from '../_lib/twilio.js';
 import { handleOptions, readJson, ok, fail } from '../_lib/cors.js';
-import { shapeListing } from '../_lib/handlers/curate-search.js';
+import { buildClientPayload, disclaimer, agentIdentity } from '../_lib/collection-render.js';
 
-const BROKERAGE = { name: 'Legacy Properties', broker: 'Sara Cooper', broker_title: 'Broker-Owner', broker_dre: '02141987' };
 const VAL_MODEL = 'claude-sonnet-4-6';           // matches api/_lib/anthropic.js default
 const RATE_PER_DAY = 3;
 const MIN_ELAPSED_MS = 1200;                     // faster than this ≈ a bot
 
 const fmtUSDfull = (n) => (n == null || !Number.isFinite(+n)) ? '—' : '$' + Math.round(+n).toLocaleString('en-US');
-
-function disclaimer(agentName, dre) {
-  const who = dre ? `${agentName}, DRE #${dre}` : agentName;
-  return `Listing information is deemed reliable but not guaranteed. Any price range, valuation, or opinion provided here is preliminary. ${who} must personally view a property to provide a truly accurate listing or valuation price range. ${BROKERAGE.name} | ${BROKERAGE.broker}, ${BROKERAGE.broker_title} | DRE #${BROKERAGE.broker_dre}`;
-}
 
 async function loadCollection(supa, token) {
   if (!token || !/^[a-f0-9]{24,}$/i.test(token)) return null;
@@ -41,11 +35,6 @@ async function loadCollection(supa, token) {
   if (data.status !== 'active') return { gone: true };
   if (data.expires_at && new Date(data.expires_at) < new Date()) return { gone: true };
   return data;
-}
-
-async function agentIdentity(supa, agentKey) {
-  const { data } = await supa.from('agents').select('name, title, dre_number, phone, email, photo_url').eq('agent_key', agentKey).maybeSingle();
-  return data || { name: agentKey === 'james' ? 'James Beyersdorf' : 'Sara Cooper', title: 'Agent', dre_number: null, phone: null, email: null, photo_url: null };
 }
 
 export default async function handler(req, res) {
@@ -77,40 +66,11 @@ export default async function handler(req, res) {
 
 // ---- GET: branded payload --------------------------------------------------
 async function view(supa, coll, res) {
-  const agent = await agentIdentity(supa, coll.agent);
-
-  const { data: cls } = await supa
-    .from('collection_listings')
-    .select('*, properties(*)')
-    .eq('collection_id', coll.id).eq('included', true)
-    .order('priority', { ascending: false })
-    .order('sort_order', { ascending: true });
-
-  const listings = (cls || [])
-    .filter((row) => row.properties)
-    .map((row) => ({
-      ...shapeListing(row.properties),
-      agent_note: row.agent_note || '',
-      note_style: row.note_style || 'sticky',
-      why_note: row.why_note || '',
-      priority: !!row.priority
-    }));
-
+  const payload = await buildClientPayload(supa, coll);
+  delete payload._agent;   // never expose internal agent record to the client
   // fire-and-forget open event
   supa.from('collection_events').insert({ collection_id: coll.id, event_type: 'open', meta: {} }).then(() => {}, () => {});
-
-  return ok(res, {
-    collection: { title: coll.title || '', intro_note: coll.intro_note || '', closing_note: coll.closing_note || '' },
-    client: { first_name: coll.leads?.first_name || '' },
-    agent: {
-      name: agent.name, title: agent.title, dre_number: agent.dre_number,
-      phone: agent.phone, email: agent.email, photo_url: agent.photo_url
-    },
-    brokerage: BROKERAGE,
-    disclaimer: disclaimer(agent.name, agent.dre_number),
-    listings,
-    valuation: { enabled: true }
-  });
+  return ok(res, payload);
 }
 
 // ---- POST react ------------------------------------------------------------
