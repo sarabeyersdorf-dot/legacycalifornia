@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>A collection for you · Legacy Properties</title>
+<meta name="robots" content="noindex">
+<link rel="stylesheet" href="/legacy.css">
+<style>
+/* ============ Curated client collection — mobile-first, standalone ============ */
+body { background: var(--vellum); color: var(--ink); }
+.wrap { max-width: 680px; margin: 0 auto; background: var(--paper, #FBF8F0); min-height: 100vh; }
+.c-load, .c-gone { padding: 80px 28px; text-align: center; }
+.c-gone .eyebrow { display:block; margin-bottom: 14px; }
+.c-gone h1 { font-family: var(--serif); font-style: italic; font-weight: 300; font-size: 30px; color: var(--ink); }
+.spin { width: 26px; height: 26px; border: 2px solid var(--rule-strong); border-top-color: var(--brass); border-radius: 50%; margin: 0 auto 16px; animation: spin 0.8s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* Header */
+.c-head { text-align: center; padding: 30px 24px 22px; border-bottom: 1px solid var(--rule); background: var(--shell); }
+.c-mark { font-family: var(--mono); font-size: 11px; letter-spacing: 0.34em; text-transform: uppercase; color: var(--brass); display: inline-flex; align-items: center; gap: 8px; }
+.c-mark svg { width: 14px; height: 14px; }
+.c-tag { font-family: var(--serif); font-style: italic; font-size: 20px; color: var(--ink-soft); margin-top: 8px; }
+
+/* Agent card */
+.c-agent { display: flex; gap: 16px; align-items: center; padding: 22px 24px; background: var(--ink); color: var(--shell); }
+.c-agent .ph { width: 60px; height: 60px; border-radius: 50%; overflow: hidden; background: var(--brass); flex: none; display: flex; align-items: center; justify-content: center; font-family: var(--serif); font-size: 26px; color: var(--shell); }
+.c-agent .ph img { width: 100%; height: 100%; object-fit: cover; }
+.c-agent .nm { font-family: var(--serif); font-style: italic; font-size: 22px; line-height: 1.1; }
+.c-agent .ti { font-family: var(--mono); font-size: 9.5px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--brass-bright); margin-top: 3px; }
+.c-agent .contact { display: flex; gap: 14px; margin-top: 9px; flex-wrap: wrap; }
+.c-agent .contact a { font-family: var(--mono); font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: rgba(250,246,236,0.85); text-decoration: none; border-bottom: 1px solid rgba(250,246,236,0.3); padding-bottom: 2px; }
+.c-agent .contact a:hover { color: var(--shell); border-color: var(--brass-bright); }
+
+/* Intro / closing notes */
+.c-note { padding: 26px 26px; background: var(--linen); border-bottom: 1px solid var(--rule); animation: rise 0.7s ease both; }
+.c-note .lbl { font-family: var(--mono); font-size: 9.5px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--brass); margin-bottom: 10px; }
+.c-note p { font-family: var(--serif); font-style: italic; font-size: 19px; line-height: 1.5; color: var(--ink); }
+@keyframes rise { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
+
+/* Listing cards */
+.c-list { padding: 8px 0 0; }
+.card2 { border-bottom: 1px solid var(--rule); padding: 26px 22px 22px; }
+.gal { display: flex; gap: 6px; overflow-x: auto; scroll-snap-type: x mandatory; border-radius: 3px; margin-bottom: 14px; -webkit-overflow-scrolling: touch; }
+.gal::-webkit-scrollbar { height: 0; }
+.gal img { width: 100%; flex: none; aspect-ratio: 3/2; object-fit: cover; scroll-snap-align: center; background: var(--vellum); }
+.gal.one img { border-radius: 3px; }
+.pri { font-family: var(--serif); font-style: italic; font-weight: 300; font-size: 34px; line-height: 1; color: var(--ink); }
+.pri .ppsf { font-family: var(--mono); font-style: normal; font-size: 10px; letter-spacing: 0.1em; color: var(--ink-mute); margin-left: 10px; text-transform: uppercase; }
+.addr2 { font-family: var(--serif); font-style: italic; font-size: 17px; color: var(--ink-soft); margin-top: 6px; }
+.specs2 { display: flex; gap: 18px; margin-top: 12px; font-family: var(--mono); font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-mute); flex-wrap: wrap; }
+.specs2 strong { color: var(--ink); font-family: var(--serif); font-style: italic; font-size: 15px; letter-spacing: 0; text-transform: none; margin-right: 3px; font-weight: 400; }
+.prio { display: inline-block; font-family: var(--mono); font-size: 9px; letter-spacing: 0.16em; text-transform: uppercase; background: var(--brass); color: var(--shell); padding: 4px 9px; margin-bottom: 12px; }
+
+/* Agent note styles */
+.anote { margin-top: 16px; animation: rise 0.7s ease both; }
+.anote.sticky {
+  background: #FBF3C9; color: #40381F; padding: 16px 18px; font-family: var(--serif); font-style: italic;
+  font-size: 16px; line-height: 1.45; transform: rotate(-0.7deg); box-shadow: 0 6px 16px rgba(27,24,19,0.12);
+  border: 1px solid rgba(140,110,61,0.25);
+}
+.anote.sticky .who { display:block; transform: rotate(0.7deg); font-family: var(--mono); font-style: normal; font-size: 9px; letter-spacing: 0.16em; text-transform: uppercase; color: #8a7a3a; margin-top: 8px; }
+.anote.highlight {
+  background: var(--shell); border-left: 3px solid var(--brass); padding: 15px 18px;
+  font-family: var(--serif); font-style: italic; font-size: 16px; line-height: 1.45; color: var(--ink);
+  animation: rise 0.7s ease both, gold 2.6s ease-in-out 0.6s 2;
+}
+@keyframes gold { 0%,100% { box-shadow: 0 0 0 0 rgba(201,158,90,0); } 50% { box-shadow: 0 0 0 4px rgba(201,158,90,0.35); } }
+.anote.banner { position: relative; padding: 0; }
+.anote.banner .ribbon { display: inline-block; background: var(--ink); color: var(--shell); font-family: var(--mono); font-size: 9.5px; letter-spacing: 0.18em; text-transform: uppercase; padding: 6px 14px; }
+.anote.banner .txt { display: block; background: var(--shell); border: 1px solid var(--rule); border-top: none; padding: 14px 18px; font-family: var(--serif); font-style: italic; font-size: 16px; line-height: 1.45; color: var(--ink); }
+.why { margin-top: 10px; font-family: var(--mono); font-size: 10px; letter-spacing: 0.08em; color: var(--ink-mute); text-transform: uppercase; }
+
+/* Reactions */
+.react { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 18px; }
+.react button {
+  font-family: var(--mono); font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase;
+  padding: 12px 8px; border: 1px solid var(--rule-strong); background: var(--shell); color: var(--ink-soft);
+  transition: all 0.15s; border-radius: 2px;
+}
+.react button:hover { border-color: var(--ink); color: var(--ink); }
+.react button.on { background: var(--brass); border-color: var(--brass); color: var(--shell); }
+.react button.on.dim { background: var(--ink); border-color: var(--ink); }
+.rbox { margin-top: 10px; display: none; }
+.rbox.show { display: block; }
+.rbox textarea { width: 100%; font-family: var(--sans); font-size: 14px; padding: 11px 12px; border: 1px solid var(--rule-strong); background: var(--shell); resize: vertical; min-height: 58px; }
+.rbox .send { margin-top: 8px; }
+.rdone { margin-top: 10px; font-family: var(--mono); font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--brass); }
+
+/* Valuation CTA + form */
+.c-val { padding: 34px 26px; background: var(--ink); color: var(--shell); }
+.c-val .eyebrow { color: var(--brass-bright); }
+.c-val h2 { font-family: var(--serif); font-style: italic; font-weight: 300; font-size: 30px; line-height: 1.05; margin: 10px 0 6px; color: var(--shell); }
+.c-val p.sub { font-size: 14px; line-height: 1.55; color: rgba(250,246,236,0.7); margin-bottom: 20px; }
+.c-val .open-btn { font-family: var(--mono); font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase; background: var(--brass); color: var(--shell); border: none; padding: 14px 24px; }
+.vform { display: none; margin-top: 20px; }
+.vform.show { display: block; }
+.vform .row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.vform label { display: block; font-family: var(--mono); font-size: 9px; letter-spacing: 0.14em; text-transform: uppercase; color: rgba(250,246,236,0.55); margin: 12px 0 5px; }
+.vform input, .vform select, .vform textarea {
+  width: 100%; font-family: var(--sans); font-size: 15px; padding: 11px 12px; background: rgba(250,246,236,0.06);
+  border: 1px solid rgba(250,246,236,0.2); color: var(--shell); border-radius: 2px;
+}
+.vform textarea { min-height: 60px; resize: vertical; }
+.vform .hp { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
+.vform .submit { margin-top: 18px; width: 100%; font-family: var(--mono); font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase; background: var(--brass); color: var(--shell); border: none; padding: 15px; }
+.vform .submit:disabled { opacity: 0.5; }
+.vresult { display: none; margin-top: 20px; background: rgba(250,246,236,0.05); border: 1px solid rgba(250,246,236,0.15); padding: 22px; }
+.vresult.show { display: block; animation: rise 0.6s ease both; }
+.vresult .range { font-family: var(--serif); font-style: italic; font-weight: 300; font-size: 32px; color: var(--brass-bright); line-height: 1.1; }
+.vresult .prelim { font-family: var(--mono); font-size: 9px; letter-spacing: 0.16em; text-transform: uppercase; color: rgba(250,246,236,0.5); margin: 4px 0 14px; }
+.vresult .narr { font-family: var(--serif); font-style: italic; font-size: 16px; line-height: 1.55; color: rgba(250,246,236,0.92); }
+.vresult .disc { font-size: 11px; line-height: 1.5; color: rgba(250,246,236,0.55); margin-top: 16px; padding-top: 14px; border-top: 1px solid rgba(250,246,236,0.15); }
+
+/* Footer */
+.c-foot { padding: 30px 26px 46px; background: var(--shell); border-top: 1px solid var(--rule); }
+.c-foot .eh { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; color: var(--ink-mute); }
+.c-foot .eh svg { width: 22px; height: 22px; flex: none; }
+.c-foot .eh span { font-family: var(--mono); font-size: 9px; letter-spacing: 0.14em; text-transform: uppercase; }
+.c-foot .disc { font-size: 11.5px; line-height: 1.6; color: var(--ink-mute); }
+.c-foot .disc strong { color: var(--ink-soft); font-weight: 500; }
+.toast { position: fixed; left: 50%; bottom: 26px; transform: translateX(-50%) translateY(20px); background: var(--ink); color: var(--shell); font-family: var(--mono); font-size: 11px; letter-spacing: 0.1em; padding: 12px 20px; opacity: 0; transition: all 0.25s; pointer-events: none; z-index: 50; }
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+@media (min-width: 560px) { .react { grid-template-columns: repeat(4, 1fr); } }
+</style>
+</head>
+<body>
+<div class="wrap" id="wrap">
+  <div class="c-load" id="load"><div class="spin"></div><div class="mono" style="font-size:10px;letter-spacing:.18em;color:var(--ink-mute);text-transform:uppercase;">Opening your collection…</div></div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+(function () {
+  var LOAD_AT = Date.now();
+  // token: /c/{token} path, or ?t= for direct testing
+  var parts = location.pathname.split('/').filter(Boolean);
+  var token = (parts[0] === 'c' && parts[1]) ? parts[1] : (new URLSearchParams(location.search).get('t') || '');
+  var wrap = document.getElementById('wrap');
+
+  var esc = function (s) { return (s == null ? '' : String(s)).replace(/[&<>"]/g, function (c) { return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]); }); };
+  var api = '/api/c/' + encodeURIComponent(token);
+
+  var toastEl = document.getElementById('toast');
+  function toast(msg) { toastEl.textContent = msg; toastEl.classList.add('show'); setTimeout(function () { toastEl.classList.remove('show'); }, 2200); }
+
+  function post(body) {
+    return fetch(api, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) })
+      .then(function (r) { return r.json().catch(function () { return {}; }); });
+  }
+
+  if (!token) { gone('This link looks incomplete.'); return; }
+
+  fetch(api).then(function (r) {
+    if (r.status === 410) return r.json().then(function () { gone('This collection is no longer active. Reach out and I\'ll send a fresh one.'); throw 'gone'; });
+    if (!r.ok) { gone('We couldn\'t find this collection.'); throw 'nf'; }
+    return r.json();
+  }).then(function (d) { if (d && d.success) render(d); }).catch(function () {});
+
+  function gone(msg) {
+    wrap.innerHTML = '<div class="c-gone"><span class="eyebrow">Legacy Properties</span><h1>' + esc(msg) + '</h1></div>';
+  }
+
+  function reactBar(pid) {
+    var opts = [['love', 'Love it ♥'], ['want_to_see', 'I want to see it'], ['tell_me_more', 'Tell me more'], ['not_for_me', 'Not for me']];
+    var html = '<div class="react" data-pid="' + esc(pid) + '">';
+    opts.forEach(function (o) { html += '<button data-react="' + o[0] + '"' + (o[0] === 'not_for_me' ? ' data-dim="1"' : '') + '>' + esc(o[1]) + '</button>'; });
+    html += '</div><div class="rbox"><textarea placeholder="Add a note for me…"></textarea><button class="btn btn-ink btn-sm send">Send</button></div><div class="rdone" style="display:none;">Thanks — I\'ll see this.</div>';
+    return html;
+  }
+
+  function listingCard(l) {
+    var photos = (l.photos && l.photos.length) ? l.photos : (l.photo ? [l.photo] : []);
+    var gal = photos.length
+      ? '<div class="gal ' + (photos.length === 1 ? 'one' : '') + '">' + photos.map(function (p) { return '<img loading="lazy" src="' + esc(p) + '" alt="">'; }).join('') + '</div>'
+      : '';
+    var specs = [];
+    if (l.beds != null) specs.push('<span><strong>' + esc(l.beds) + '</strong>bd</span>');
+    if (l.baths != null) specs.push('<span><strong>' + esc(l.baths) + '</strong>ba</span>');
+    if (l.sqft) specs.push('<span><strong>' + Number(l.sqft).toLocaleString() + '</strong>sqft</span>');
+    if (l.lot_acres) specs.push('<span><strong>' + esc(l.lot_acres) + '</strong>ac</span>');
+    if (l.property_type_label) specs.push('<span>' + esc(l.property_type_label) + '</span>');
+
+    var note = '';
+    if (l.agent_note) {
+      if (l.note_style === 'highlight') note = '<div class="anote highlight">' + esc(l.agent_note) + '</div>';
+      else if (l.note_style === 'banner') note = '<div class="anote banner"><span class="ribbon">' + esc((AGENT.name || '').split(' ')[0]) + '’s Pick</span><span class="txt">' + esc(l.agent_note) + '</span></div>';
+      else note = '<div class="anote sticky">' + esc(l.agent_note) + '<span class="who">— ' + esc((AGENT.name || '').split(' ')[0]) + '</span></div>';
+    }
+    var why = l.why_note ? '<div class="why">Why I picked it · ' + esc(l.why_note) + '</div>' : '';
+    var prio = l.priority ? '<span class="prio">See this one first</span><br>' : '';
+
+    return '<div class="card2" data-card="' + esc(l.id) + '">' + prio + gal +
+      '<div class="pri">' + esc(l.price_label) + (l.ppsf_label ? '<span class="ppsf">' + esc(l.ppsf_label) + '</span>' : '') + '</div>' +
+      '<div class="addr2">' + esc(l.address) + (l.city ? ', ' + esc(l.city) : '') + '</div>' +
+      '<div class="specs2">' + specs.join('') + '</div>' + note + why +
+      reactBar(l.id) + '</div>';
+  }
+
+  var AGENT = {};
+  function render(d) {
+    AGENT = d.agent || {};
+    var a = d.agent || {}, col = d.collection || {}, client = d.client || {};
+    var initial = (a.name || 'L').trim().charAt(0);
+    var ph = a.photo_url ? '<img src="' + esc(a.photo_url) + '" alt="">' : esc(initial);
+    var contact = '';
+    if (a.phone) contact += '<a href="tel:' + esc((a.phone || '').replace(/[^0-9+]/g, '')) + '">Call ' + esc(a.phone) + '</a>';
+    if (a.email) contact += '<a href="mailto:' + esc(a.email) + '">Email</a>';
+
+    var greeting = client.first_name ? ('Hi ' + esc(client.first_name) + ' —') : '';
+
+    var html = '' +
+      '<header class="c-head"><span class="c-mark">' + micSVG() + ' Legacy Properties</span><div class="c-tag">Every Home Has A Story</div></header>' +
+      '<section class="c-agent"><div class="ph">' + ph + '</div><div><div class="nm">' + esc(a.name) + '</div><div class="ti">' + esc(a.title || '') + (a.dre_number ? ' · DRE #' + esc(a.dre_number) : '') + '</div><div class="contact">' + contact + '</div></div></section>';
+
+    if (col.intro_note || greeting) html += '<section class="c-note"><div class="lbl">A note for you</div><p>' + (greeting ? greeting + ' ' : '') + esc(col.intro_note) + '</p></section>';
+
+    html += '<section class="c-list">' + (d.listings || []).map(listingCard).join('') + '</section>';
+
+    if (col.closing_note) html += '<section class="c-note"><div class="lbl">Before you go</div><p>' + esc(col.closing_note) + '</p></section>';
+
+    html += valuationHTML(a);
+    html += footerHTML(d.disclaimer, d.brokerage);
+
+    wrap.innerHTML = html;
+    wire(d);
+  }
+
+  function valuationHTML(a) {
+    return '<section class="c-val" id="val"><span class="eyebrow">Thinking of selling?</span>' +
+      '<h2>What\'s my home worth?</h2><p class="sub">Tap below for a preliminary market perspective from ' + esc((a.name || '').split(' ')[0] || 'me') + '. Two minutes, no obligation.</p>' +
+      '<button class="open-btn" id="valOpen">Get my range</button>' +
+      '<form class="vform" id="vform" autocomplete="on">' +
+        '<div class="hp"><label>Company<input type="text" name="company" tabindex="-1" autocomplete="off"></label></div>' +
+        '<label>Property address</label><input name="address" required placeholder="123 Main St, Murphys">' +
+        '<div class="row"><div><label>City</label><input name="city"></div><div><label>ZIP</label><input name="zip"></div></div>' +
+        '<div class="row"><div><label>Beds</label><input name="beds" type="number" min="0" step="1"></div><div><label>Baths</label><input name="baths" type="number" min="0" step="0.5"></div></div>' +
+        '<div class="row"><div><label>Approx. sq ft</label><input name="sqft" type="number" min="0" step="1"></div><div><label>Condition</label><select name="condition"><option value="">—</option><option>Turnkey / updated</option><option>Well maintained</option><option>Average</option><option>Needs work</option></select></div></div>' +
+        '<label>Anything special I should know?</label><textarea name="notes" placeholder="Views, acreage, recent upgrades…"></textarea>' +
+        '<div class="row"><div><label>Your name</label><input name="name"></div><div><label>Phone</label><input name="phone" type="tel"></div></div>' +
+        '<label>Email</label><input name="email" type="email">' +
+        '<button type="submit" class="submit">Get my preliminary range</button>' +
+      '</form>' +
+      '<div class="vresult" id="vresult"></div></section>';
+  }
+
+  function footerHTML(disc, brk) {
+    return '<footer class="c-foot"><div class="eh">' + ehSVG() + '<span>Equal Housing Opportunity</span></div>' +
+      '<p class="disc">' + boldFirstAgent(esc(disc)) + '</p></footer>';
+  }
+  // Bold the middle clause (agent must personally view…) per the required treatment.
+  function boldFirstAgent(s) {
+    return s.replace(/(DRE #\d+ must personally view a property to provide a truly accurate listing or valuation price range\.)/, '<strong>$1</strong>');
+  }
+
+  function wire(d) {
+    // Reactions
+    wrap.querySelectorAll('.react').forEach(function (bar) {
+      var pid = bar.getAttribute('data-pid');
+      var card = bar.closest('.card2');
+      var rbox = card.querySelector('.rbox');
+      var rdone = card.querySelector('.rdone');
+      bar.querySelectorAll('button').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          bar.querySelectorAll('button').forEach(function (b) { b.classList.remove('on', 'dim'); });
+          btn.classList.add('on'); if (btn.getAttribute('data-dim')) btn.classList.add('dim');
+          var reaction = btn.getAttribute('data-react');
+          if (reaction === 'tell_me_more' || reaction === 'want_to_see') {
+            rbox.classList.add('show');
+            rbox.setAttribute('data-reaction', reaction);
+          } else {
+            rbox.classList.remove('show');
+            post({ op: 'react', property_id: pid, reaction: reaction });
+            rdone.style.display = 'block';
+            rdone.textContent = reaction === 'love' ? 'Loved — noted!' : 'Got it.';
+          }
+        });
+      });
+      var send = card.querySelector('.rbox .send');
+      send.addEventListener('click', function () {
+        var reaction = rbox.getAttribute('data-reaction') || 'tell_me_more';
+        var comment = card.querySelector('.rbox textarea').value.trim();
+        post({ op: 'react', property_id: pid, reaction: reaction, comment: comment });
+        rbox.classList.remove('show'); rdone.style.display = 'block';
+        rdone.textContent = reaction === 'want_to_see' ? 'Sent — I\'ll set up a showing.' : 'Sent — I\'ll be in touch.';
+      });
+    });
+
+    // Dwell / view telemetry
+    if ('IntersectionObserver' in window) {
+      var seen = {};
+      var io = new IntersectionObserver(function (entries) {
+        entries.forEach(function (e) {
+          var id = e.target.getAttribute('data-card');
+          if (e.isIntersecting) {
+            e.target._t0 = Date.now();
+            if (!seen[id]) { seen[id] = 1; post({ op: 'event', event_type: 'listing_view', property_id: id }); }
+          } else if (e.target._t0) {
+            var ms = Date.now() - e.target._t0; e.target._t0 = 0;
+            if (ms > 1500) post({ op: 'event', event_type: 'dwell', property_id: id, dwell_ms: ms });
+          }
+        });
+      }, { threshold: 0.5 });
+      wrap.querySelectorAll('.card2').forEach(function (c) { io.observe(c); });
+    }
+
+    // Valuation
+    var openBtn = document.getElementById('valOpen');
+    var form = document.getElementById('vform');
+    openBtn.addEventListener('click', function () {
+      form.classList.add('show'); openBtn.style.display = 'none';
+      post({ op: 'event', event_type: 'valuation_open' });
+      form.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+    form.addEventListener('submit', function (ev) {
+      ev.preventDefault();
+      var fd = new FormData(form), body = { op: 'valuation', elapsed_ms: Date.now() - LOAD_AT };
+      fd.forEach(function (v, k) { body[k] = v; });
+      var btn = form.querySelector('.submit'); btn.disabled = true; btn.textContent = 'Pulling comparable homes…';
+      post(body).then(function (r) {
+        btn.disabled = false; btn.textContent = 'Get my preliminary range';
+        if (!r || r.success === false) { toast(r && r.error ? r.error : 'Something went wrong — try again.'); return; }
+        showResult(r);
+      });
+    });
+  }
+
+  function showResult(r) {
+    var box = document.getElementById('vresult');
+    var html = '';
+    if (r.range_label) html += '<div class="range">' + esc(r.range_label) + '</div><div class="prelim">Preliminary market perspective · not an appraisal</div>';
+    if (r.narrative) html += '<p class="narr">' + esc(r.narrative) + '</p>';
+    if (r.disclaimer) html += '<div class="disc">' + esc(r.disclaimer) + '</div>';
+    if (!r.range_label && !r.narrative) html = '<p class="narr">Thank you — I have your details and I\'ll follow up personally with a preliminary range.</p>';
+    box.innerHTML = html; box.classList.add('show');
+    document.getElementById('vform').style.display = 'none';
+    box.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
+
+  function micSVG() { return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M6 11a6 6 0 0 0 12 0M12 17v4M8 21h8"/></svg>'; }
+  function ehSVG() { return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h14V10"/><path d="M9 14h6M9 17h6"/></svg>'; }
+})();
+</script>
+</body>
+</html>
