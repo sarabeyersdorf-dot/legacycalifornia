@@ -123,6 +123,19 @@ body { background: var(--vellum); color: var(--ink); }
 .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
 @media (min-width: 560px) { .react { grid-template-columns: repeat(4, 1fr); } }
+
+/* Agent preview chrome (only shown when opened via ?preview=<id>) */
+.pvbar { position: sticky; top: 0; z-index: 40; background: var(--brass); color: var(--shell); padding: 12px 18px; font-family: var(--mono); font-size: 10.5px; letter-spacing: 0.06em; line-height: 1.5; display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.pvbar b { text-transform: uppercase; letter-spacing: 0.14em; }
+.pvbar button { font-family: var(--mono); font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; background: var(--ink); color: var(--shell); border: none; padding: 8px 13px; border-radius: 2px; }
+.pvmsgbox { display: none; background: var(--ink); color: var(--shell); padding: 20px 18px; }
+.pvmsgbox.show { display: block; }
+.pvm { margin-bottom: 18px; }
+.pvm:last-child { margin-bottom: 0; }
+.pvm .lbl { font-family: var(--mono); font-size: 9px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--brass-bright); margin-bottom: 8px; }
+.pvm p { font-family: var(--sans); font-size: 14px; line-height: 1.55; color: rgba(250,246,236,0.9); background: rgba(250,246,236,0.06); border: 1px solid rgba(250,246,236,0.15); padding: 12px 14px; white-space: pre-wrap; }
+.pvm .none { color: rgba(250,246,236,0.5); font-style: italic; }
+.pvm iframe { width: 100%; height: 340px; border: 1px solid rgba(250,246,236,0.2); background: #FAF6EC; border-radius: 2px; }
 </style>
 </head>
 <body>
@@ -134,25 +147,31 @@ body { background: var(--vellum); color: var(--ink); }
 <script>
 (function () {
   var LOAD_AT = Date.now();
-  // token: /c/{token} path, or ?t= for direct testing
+  // token: /c/{token} path, or ?t= for direct testing.
+  // Agent preview: /collection.html?preview=<collection_id> (agent cookie).
+  var qs = new URLSearchParams(location.search);
   var parts = location.pathname.split('/').filter(Boolean);
-  var token = (parts[0] === 'c' && parts[1]) ? parts[1] : (new URLSearchParams(location.search).get('t') || '');
+  var previewId = qs.get('preview');
+  var PREVIEW = !!previewId;
+  var token = (parts[0] === 'c' && parts[1]) ? parts[1] : (qs.get('t') || '');
   var wrap = document.getElementById('wrap');
 
   var esc = function (s) { return (s == null ? '' : String(s)).replace(/[&<>"]/g, function (c) { return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]); }); };
-  var api = '/api/c/' + encodeURIComponent(token);
+  var api = PREVIEW ? ('/api/curate/preview?id=' + encodeURIComponent(previewId)) : ('/api/c/' + encodeURIComponent(token));
 
   var toastEl = document.getElementById('toast');
   function toast(msg) { toastEl.textContent = msg; toastEl.classList.add('show'); setTimeout(function () { toastEl.classList.remove('show'); }, 2200); }
 
   function post(body) {
-    return fetch(api, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) })
+    if (PREVIEW) return Promise.resolve({ success: true, preview: true });   // never write from a preview
+    return fetch('/api/c/' + encodeURIComponent(token), { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) })
       .then(function (r) { return r.json().catch(function () { return {}; }); });
   }
 
-  if (!token) { gone('This link looks incomplete.'); return; }
+  if (!PREVIEW && !token) { gone('This link looks incomplete.'); return; }
 
-  fetch(api).then(function (r) {
+  fetch(api, { credentials: 'include' }).then(function (r) {
+    if (PREVIEW && (r.status === 401 || r.status === 403)) { gone('Sign in to your CRM to preview this collection.'); throw 'auth'; }
     if (r.status === 410) return r.json().then(function () { gone('This collection is no longer active. Reach out and I\'ll send a fresh one.'); throw 'gone'; });
     if (!r.ok) { gone('We couldn\'t find this collection.'); throw 'nf'; }
     return r.json();
@@ -223,8 +242,28 @@ body { background: var(--vellum); color: var(--ink); }
     html += valuationHTML(a);
     html += footerHTML(d.disclaimer, d.brokerage);
 
+    if (PREVIEW) html = previewChrome(d) + html;
     wrap.innerHTML = html;
     wire(d);
+    if (PREVIEW) wirePreview(d);
+  }
+
+  function previewChrome(d) {
+    var m = d.messages || {}, sms = m.sms || {}, em = m.email || {};
+    return '<div class="pvbar"><span><b>Preview</b> — exactly what ' + esc(d.client_name || 'your client') + ' sees' + (d.status && d.status !== 'active' ? ' · draft, not yet sent' : '') + '</span>' +
+      '<button id="pvToggle">See the text / email they’ll get</button></div>' +
+      '<div class="pvmsgbox" id="pvmsgbox">' +
+        '<div class="pvm"><span class="lbl">Text message' + (sms.to ? ' · to ' + esc(sms.to) : ' · no phone on file') + '</span>' +
+          (sms.body ? '<p>' + esc(sms.body) + '</p>' : '<p class="none">No text will be sent.</p>') + '</div>' +
+        '<div class="pvm"><span class="lbl">Email' + (em.to ? ' · to ' + esc(em.to) : ' · no email on file') + (em.subject ? ' · ' + esc(em.subject) : '') + '</span>' +
+          (em.html ? '<iframe id="pvEmail" sandbox></iframe>' : '<p class="none">No email will be sent.</p>') + '</div>' +
+      '</div>';
+  }
+  function wirePreview(d) {
+    var t = document.getElementById('pvToggle'), box = document.getElementById('pvmsgbox');
+    if (t) t.addEventListener('click', function () { box.classList.toggle('show'); t.textContent = box.classList.contains('show') ? 'Hide the text / email' : 'See the text / email they’ll get'; });
+    var fr = document.getElementById('pvEmail');
+    if (fr && d.messages && d.messages.email && d.messages.email.html) fr.srcdoc = d.messages.email.html;
   }
 
   function valuationHTML(a) {
@@ -272,8 +311,8 @@ body { background: var(--vellum); color: var(--ink); }
           } else {
             rbox.classList.remove('show');
             post({ op: 'react', property_id: pid, reaction: reaction });
-            rdone.style.display = 'block';
-            rdone.textContent = reaction === 'love' ? 'Loved — noted!' : 'Got it.';
+            if (PREVIEW) { toast('Preview — nothing is recorded'); }
+            else { rdone.style.display = 'block'; rdone.textContent = reaction === 'love' ? 'Loved — noted!' : 'Got it.'; }
           }
         });
       });
@@ -282,7 +321,9 @@ body { background: var(--vellum); color: var(--ink); }
         var reaction = rbox.getAttribute('data-reaction') || 'tell_me_more';
         var comment = card.querySelector('.rbox textarea').value.trim();
         post({ op: 'react', property_id: pid, reaction: reaction, comment: comment });
-        rbox.classList.remove('show'); rdone.style.display = 'block';
+        rbox.classList.remove('show');
+        if (PREVIEW) { toast('Preview — nothing is sent'); return; }
+        rdone.style.display = 'block';
         rdone.textContent = reaction === 'want_to_see' ? 'Sent — I\'ll set up a showing.' : 'Sent — I\'ll be in touch.';
       });
     });
@@ -315,6 +356,7 @@ body { background: var(--vellum); color: var(--ink); }
     });
     form.addEventListener('submit', function (ev) {
       ev.preventDefault();
+      if (PREVIEW) { toast('Preview — your client sees a live range here'); return; }
       var fd = new FormData(form), body = { op: 'valuation', elapsed_ms: Date.now() - LOAD_AT };
       fd.forEach(function (v, k) { body[k] = v; });
       var btn = form.querySelector('.submit'); btn.disabled = true; btn.textContent = 'Pulling comparable homes…';
