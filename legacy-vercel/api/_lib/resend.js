@@ -27,7 +27,7 @@ export function resendConfigured() {
  * Send a single transactional email via Resend.
  * @returns {{ skipped?: boolean, id?: string, via: 'resend' }}
  */
-export async function sendEmail({ to, toName, subject, html, text }) {
+export async function sendEmail({ to, toName, subject, html, text, attachments }) {
   if (!resendConfigured()) return { skipped: true, reason: 'RESEND_API_KEY not set', via: 'resend' };
   if (!to)      throw new Error('sendEmail: `to` required');
   if (!subject) throw new Error('sendEmail: `subject` required');
@@ -41,6 +41,8 @@ export async function sendEmail({ to, toName, subject, html, text }) {
     html:      html || `<pre style="font-family:Georgia,serif;font-size:15px;line-height:1.55;white-space:pre-wrap;">${escapeHtml(text || '')}</pre>`,
     text:      text || stripHtml(html)
   };
+  // Optional attachments (e.g. a calendar invite): [{ filename, content(base64) }]
+  if (Array.isArray(attachments) && attachments.length) body.attachments = attachments;
 
   const res = await fetch(API_URL, {
     method: 'POST',
