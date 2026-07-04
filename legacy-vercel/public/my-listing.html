@@ -116,6 +116,12 @@ body { background: var(--vellum); color: var(--ink); }
 .ld-foot { padding: 26px 32px; border-top: 1px solid var(--rule); font-size: 12px; color: var(--ink-mute); }
 .ld-foot a { color: var(--brass); }
 
+.mediastat { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid var(--rule-soft); }
+.mediastat:last-child { border-bottom: none; }
+.mediastat .ml { font-family: var(--mono); font-size: 9px; letter-spacing: .14em; text-transform: uppercase; color: var(--ink-mute); }
+.mediastat .mlk { display: block; margin-top: 3px; font-family: var(--mono); font-size: 9px; letter-spacing: .1em; text-transform: uppercase; color: var(--brass); text-decoration: none; }
+.mediastat .mv { font-family: var(--serif); font-style: italic; font-size: 30px; color: var(--ink); }
+
 @media (max-width: 900px) {
   .ld-hero { grid-template-columns: 1fr; } .ld-photo { width: 100%; }
   .ld-kpi { grid-template-columns: repeat(2, 1fr); } .ld-grid { grid-template-columns: 1fr; padding: 20px; }
@@ -196,6 +202,14 @@ body { background: var(--vellum); color: var(--ink); }
       return '<div class="share"><div><div class="nm">' + esc(s.name) + '</div><div class="rl">' + esc(s.role) + '</div></div><div class="ac">' + esc(s.access) + '</div></div>';
     }).join('');
 
+    // Tour engagement (YouTube video + Matterport 3D) — only shown if present
+    var M = p.media || {};
+    var hasMedia = M.video_views != null || M.tour_views != null || M.video_url || M.tour_url;
+    var mediaCard = hasMedia ? ('<section class="card"><div class="card-h"><h2>Tour engagement.</h2></div>' +
+      ((M.video_views != null || M.video_url) ? '<div class="mediastat"><div><div class="ml">Video tour views</div>' + (M.video_url ? '<a class="mlk" href="' + esc(M.video_url) + '" target="_blank" rel="noopener">▶ watch on YouTube</a>' : '') + '</div><div class="mv">' + (M.video_views != null ? Number(M.video_views).toLocaleString() : '—') + '</div></div>' : '') +
+      ((M.tour_views != null || M.tour_url) ? '<div class="mediastat"><div><div class="ml">3D tour views</div>' + (M.tour_url ? '<a class="mlk" href="' + esc(M.tour_url) + '" target="_blank" rel="noopener">◱ open 3D tour</a>' : '') + '</div><div class="mv">' + (M.tour_views != null ? Number(M.tour_views).toLocaleString() : '—') + '</div></div>' : '') +
+      '</section>') : '';
+
     wrap.innerHTML =
       '<header class="ld-top"><div class="ld-mark">Legacy Properties<small>Your listing, live.</small></div>' +
         '<div class="ld-who"><div class="ld-av">' + esc(S.initials || 'S') + '</div><div><div class="nm">' + esc(S.name || '') + '</div><div class="mt">' + esc(S.meta || '') + '</div></div></div></header>' +
@@ -226,6 +240,7 @@ body { background: var(--vellum); color: var(--ink); }
           '<p class="price-sum">' + esc(PR.summary || '') + '</p><div style="margin-top:16px;overflow-x:auto;">' + comps + '</div></section>' +
       '</div><div>' +
         '<section class="note"><div class="h">' + esc(N.head || 'A note from Sara') + '</div><p class="b">' + esc(N.body || '') + '</p><div class="s">' + esc(N.sign || '') + '</div></section>' +
+        mediaCard +
         '<section class="card"><div class="card-h"><h2>Pre-listing.</h2><span class="meta">' + esc(p.checklist_summary || '') + '</span></div>' + checklist + '</section>' +
         '<section class="card"><div class="card-h"><h2>Documents.</h2></div>' + docs + '</section>' +
         '<section class="card"><div class="card-h"><h2>Activity.</h2></div>' + activity + '</section>' +
