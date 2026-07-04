@@ -462,6 +462,59 @@
 .cal-event.block .t { color: var(--ink-faint); }
 .cal-event.block .ti { color: var(--ink-mute); font-style: normal; font-family: var(--mono); font-size: 10px; letter-spacing: 0.1em; }
 
+/* ---- Agenda view (default) ---- */
+.cal-agenda { display: flex; flex-direction: column; }
+.cal-ag-day { border-bottom: 1px solid var(--rule); padding-bottom: 6px; }
+.cal-ag-day:last-child { border-bottom: none; }
+.cal-ag-dayhead { display: flex; align-items: baseline; gap: 12px; padding: 16px 4px 6px; }
+.cal-ag-dow { font-family: var(--mono); font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--ink-mute); }
+.cal-ag-date { font-family: var(--serif); font-style: italic; font-size: 19px; color: var(--ink); }
+.cal-ag-dayhead.today .cal-ag-date, .cal-ag-dayhead.today .cal-ag-dow { color: var(--brass); }
+.cal-ag-row {
+  display: grid; grid-template-columns: 132px 10px 1fr auto; gap: 14px; align-items: center;
+  padding: 12px 8px; border-top: 1px solid var(--rule-soft); cursor: pointer; transition: background .12s;
+}
+.cal-ag-row:hover { background: var(--linen); }
+.cal-ag-time { font-family: var(--mono); font-size: 11px; letter-spacing: 0.04em; color: var(--ink-soft); white-space: nowrap; }
+.cal-ag-dot { width: 9px; height: 9px; border-radius: 50%; background: var(--ink); }
+.cal-ag-dot.call { background: var(--brass); }
+.cal-ag-dot.open { background: var(--moss); }
+.cal-ag-dot.block { background: var(--rule-strong); }
+.cal-ag-title { font-size: 14px; color: var(--ink); font-weight: 500; }
+.cal-ag-title .cal-ag-sub { display: block; font-size: 12px; color: var(--ink-mute); font-weight: 400; margin-top: 2px; }
+.cal-ag-kind { font-family: var(--mono); font-size: 9px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-mute); }
+.cal-ag-empty { padding: 48px 8px; text-align: center; color: var(--ink-mute); font-style: italic; font-size: 14px; }
+
+/* ---- Week view (full-day, scrollable) ---- */
+.cal-week { border: 1px solid var(--rule); background: var(--shell); }
+.calw-head { display: grid; grid-template-columns: 56px repeat(7, 1fr); border-bottom: 1px solid var(--rule); }
+.calw-head .corner { border-right: 1px solid var(--rule-soft); }
+.calw-dayhead { padding: 9px 6px; text-align: center; border-right: 1px solid var(--rule-soft); font-family: var(--mono); font-size: 9.5px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-mute); }
+.calw-dayhead:last-child { border-right: none; }
+.calw-dayhead .num { font-family: var(--serif); font-style: italic; font-size: 20px; color: var(--ink); display: block; margin-top: 2px; }
+.calw-dayhead.today { background: var(--vellum); color: var(--brass); }
+.calw-dayhead.today .num { color: var(--brass); }
+.calw-body { max-height: 560px; overflow-y: auto; }
+.calw-grid { display: grid; grid-template-columns: 56px repeat(7, 1fr); }
+.calw-hour { height: 48px; border-bottom: 1px solid var(--rule-soft); font-family: var(--mono); font-size: 9px; color: var(--ink-faint); text-align: right; padding: 2px 6px 0 0; box-sizing: border-box; }
+.calw-col { position: relative; border-right: 1px solid var(--rule-soft); }
+.calw-col:last-child { border-right: none; }
+.calw-line { height: 48px; border-bottom: 1px solid var(--rule-soft); box-sizing: border-box; }
+.calw-ev {
+  position: absolute; left: 3px; right: 3px; min-height: 18px; overflow: hidden;
+  background: var(--ink); color: var(--shell); border-left: 3px solid var(--brass);
+  padding: 3px 6px; font-size: 10.5px; line-height: 1.2; cursor: pointer; z-index: 2; border-radius: 2px;
+}
+.calw-ev:hover { filter: brightness(1.1); }
+.calw-ev .t { font-family: var(--mono); font-size: 8.5px; letter-spacing: 0.06em; color: var(--brass-bright); display: block; }
+.calw-ev .ti { font-family: var(--serif); font-style: italic; font-size: 12px; }
+.calw-ev.call { background: var(--brass); border-left-color: var(--ink); }
+.calw-ev.call .t { color: rgba(250,246,236,0.75); }
+.calw-ev.open { background: var(--moss); border-left-color: var(--brass-bright); }
+.calw-ev.block { background: var(--vellum); color: var(--ink-mute); border-left-color: var(--rule-strong); }
+.calw-ev.block .t { color: var(--ink-faint); }
+.calw-ev.block .ti { font-style: normal; font-family: var(--mono); font-size: 10px; }
+
 /* Calendar legend / availability strip */
 .cal-strip {
   display: grid; grid-template-columns: 2fr 1fr; gap: 18px;
