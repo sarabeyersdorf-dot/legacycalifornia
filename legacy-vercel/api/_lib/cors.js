@@ -2,15 +2,33 @@
 // Lightweight CORS + JSON helpers for Vercel Node functions.
 // Same-origin in production; permissive in development.
 
-const ALLOWED_ORIGINS = (process.env.ALLOWED_ORIGINS || '*').split(',').map(s => s.trim());
+const ALLOWED_ORIGINS = (process.env.ALLOWED_ORIGINS || '*').split(',').map(s => s.trim()).filter(Boolean);
 
+// CORS that fails SAFE: credentials are only ever granted to an explicitly
+// allow-listed origin. In wildcard mode (ALLOWED_ORIGINS unset or '*') we send
+// `Allow-Origin: *` WITHOUT credentials — so a random site a logged-in user
+// visits can't make credentialed calls and read their CRM/portal data. The real
+// app is served from the same origin as /api, so it never needs CORS creds.
 export function applyCors(req, res) {
-  const origin = req.headers.origin || '*';
-  const allow  = ALLOWED_ORIGINS.includes('*') || ALLOWED_ORIGINS.includes(origin) ? origin : ALLOWED_ORIGINS[0];
-  res.setHeader('Access-Control-Allow-Origin',  allow);
-  res.setHeader('Access-Control-Allow-Methods', 'GET,POST,PUT,DELETE,OPTIONS');
+  const reqOrigin = req.headers.origin || '';
+  const wildcard  = ALLOWED_ORIGINS.includes('*');
+  const allowed   = reqOrigin && !wildcard && ALLOWED_ORIGINS.includes(reqOrigin);
+
+  if (allowed) {
+    res.setHeader('Access-Control-Allow-Origin', reqOrigin);
+    res.setHeader('Access-Control-Allow-Credentials', 'true');
+    res.setHeader('Vary', 'Origin');
+  } else if (wildcard) {
+    // Open mode (dev / public GETs): any origin, but NO credentials.
+    res.setHeader('Access-Control-Allow-Origin', '*');
+  } else {
+    // Configured allow-list but this origin isn't on it: don't reflect it,
+    // don't grant credentials. Cross-origin reads are refused by the browser.
+    res.setHeader('Access-Control-Allow-Origin', ALLOWED_ORIGINS[0] || 'null');
+    res.setHeader('Vary', 'Origin');
+  }
+  res.setHeader('Access-Control-Allow-Methods', 'GET,POST,PUT,PATCH,DELETE,OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type,Authorization');
-  res.setHeader('Access-Control-Allow-Credentials', 'true');
 }
 
 export function handleOptions(req, res) {
