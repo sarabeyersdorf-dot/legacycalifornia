@@ -21,6 +21,7 @@ import { adminClient }      from '../supabase.js';
 import { getCallerProfile, isAgent, isSeller } from '../auth.js';
 import { anthropicMessage } from '../anthropic.js';
 import { handleOptions, ok, fail } from '../cors.js';
+import { getVideoStats, youtubeConfigured } from '../youtube.js';
 
 // ---------------------------------------------------------------------------
 // Formatters — keep payload "paint-ready"
@@ -257,6 +258,30 @@ export default async function handler(req, res) {
     if (!listing) {
       return ok(res, { portal: emptyPortal(user, profile) });
     }
+
+    // 2b. Rich media — YouTube video tour (auto view count) + Matterport 3D tour
+    // (manual view count). Fail-soft: never let media break the portal. The
+    // YouTube count refreshes if it's stale (older than 6h).
+    let media = { video_views: null, video_url: null, tour_views: null, tour_url: null };
+    try {
+      const { data: mrow } = await supa.from('listing_media').select('*').eq('property_id', listing.id).maybeSingle();
+      if (mrow) {
+        media.video_url = mrow.youtube_url || null;
+        media.tour_url  = mrow.matterport_url || null;
+        media.tour_views  = mrow.tour_views ?? null;
+        media.video_views = mrow.video_views ?? null;
+        const stale = !mrow.video_synced_at || (Date.now() - new Date(mrow.video_synced_at).getTime()) > 6 * 3600000;
+        if (mrow.youtube_video_id && youtubeConfigured() && stale) {
+          try {
+            const st = await getVideoStats(mrow.youtube_video_id);
+            if (!st.skipped && st.views != null) {
+              media.video_views = st.views;
+              await supa.from('listing_media').update({ video_views: st.views, video_synced_at: new Date().toISOString() }).eq('property_id', listing.id);
+            }
+          } catch (_) { /* keep cached value */ }
+        }
+      }
+    } catch (_) { /* listing_media table may not exist yet — stay soft */ }
 
     // 3. Pull everything else in parallel
     const sevenAgo  = new Date(Date.now() - 7  * 86400000).toISOString().slice(0, 10);
@@ -564,7 +589,8 @@ export default async function handler(req, res) {
       checklist_summary: `Pre-listing · ${doneCount} of ${checklistArr.length || '—'}`,
       documents,
       activity:  activityArr,
-      sharing
+      sharing,
+      media
     };
 
     return ok(res, { portal });
