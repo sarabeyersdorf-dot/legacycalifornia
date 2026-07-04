@@ -26,6 +26,7 @@
       <a href="#" onclick="showView(event,'pipe')">Pipeline</a>
       <a href="#" onclick="showView(event,'cal')">Calendar <span class="pill" data-roster-calendar>—</span></a>
       <a href="#" onclick="showView(event,'seq')">Sequences</a>
+      <a href="#" onclick="showView(event,'curate')">Curated</a>
     </nav>
 
     <div class="app-side-section">Roster</div>
@@ -89,6 +90,7 @@
       <button class="crm-tab" onclick="showView(event,'pipe')">Pipeline <span class="ct" data-roster-pipeline>—</span></button>
       <button class="crm-tab" onclick="showView(event,'cal')">Calendar <span class="ct" data-roster-calendar-week>—</span></button>
       <button class="crm-tab" onclick="showView(event,'seq')">Sequences</button>
+      <button class="crm-tab" onclick="showView(event,'curate')">Curated</button>
       <button class="crm-tab" onclick="showView(event,'rep')">Reports</button>
     </div>
 
@@ -691,6 +693,94 @@
       </div>
     </section>
 
+    <!-- ============================================================
+         CURATED SEARCH & STORY PUSH
+         ============================================================ -->
+    <style>
+    .cur { padding: 22px 36px 60px; }
+    .cur-head { display:flex; justify-content:space-between; align-items:flex-end; gap:16px; margin-bottom:22px; flex-wrap:wrap; }
+    .cur-grid { display:grid; grid-template-columns:262px 1fr; gap:24px; align-items:start; }
+    .cur-side { position:sticky; top:12px; }
+    .cur-side-h { font-family:var(--mono); font-size:10px; letter-spacing:.18em; text-transform:uppercase; color:var(--brass); margin:0 0 10px; }
+    .cur-colls, .cur-saved { display:flex; flex-direction:column; gap:6px; }
+    .cur-coll { text-align:left; background:var(--shell); border:1px solid var(--rule); padding:11px 13px; cursor:pointer; display:flex; flex-direction:column; gap:3px; }
+    .cur-coll:hover { border-color:var(--ink); }
+    .cur-coll.on { border-color:var(--brass); box-shadow:inset 0 0 0 1px var(--brass); }
+    .cur-coll .t { font-family:var(--serif); font-style:italic; font-size:16px; color:var(--ink); }
+    .cur-coll .m { font-family:var(--mono); font-size:9px; letter-spacing:.1em; text-transform:uppercase; color:var(--ink-mute); }
+    .cur-empty, .cur-placeholder { color:var(--ink-mute); font-style:italic; font-family:var(--serif); font-size:16px; padding:22px 4px; }
+    .cur-saved button { text-align:left; background:transparent; border:1px solid var(--rule); padding:8px 11px; cursor:pointer; font-size:12.5px; color:var(--ink-soft); display:flex; justify-content:space-between; gap:8px; }
+    .cur-saved button:hover { border-color:var(--ink); color:var(--ink); }
+    .cur-saved button .c { font-family:var(--mono); font-size:9px; color:var(--brass); }
+    .cur-ed-h { display:flex; justify-content:space-between; align-items:flex-start; gap:16px; border-bottom:1px solid var(--rule); padding-bottom:16px; margin-bottom:18px; flex-wrap:wrap; }
+    .cur-ed-meta { flex:1; min-width:240px; display:flex; flex-direction:column; gap:8px; }
+    .cur-ed-meta input, .cur-ed-meta textarea { font:inherit; font-size:15px; background:var(--shell); border:1px solid var(--rule); padding:9px 11px; color:var(--ink); width:100%; }
+    .cur-ed-meta .title-in { font-family:var(--serif); font-style:italic; font-size:24px; }
+    .cur-ed-acts { display:flex; flex-direction:column; gap:8px; min-width:158px; }
+    .cur-status { font-family:var(--mono); font-size:9px; letter-spacing:.14em; text-transform:uppercase; padding:4px 9px; align-self:flex-start; }
+    .cur-status.draft { background:var(--linen); color:var(--ink-mute); }
+    .cur-status.active { background:var(--brass); color:var(--shell); }
+    .cur-status.revoked { background:#8B3A3A; color:#fff; }
+    .cur-subtabs { display:flex; gap:4px; margin-bottom:16px; }
+    .cur-subtab { font-family:var(--mono); font-size:10px; letter-spacing:.12em; text-transform:uppercase; padding:8px 15px; border:1px solid var(--rule); background:transparent; cursor:pointer; color:var(--ink-mute); }
+    .cur-subtab.on { background:var(--ink); color:var(--shell); border-color:var(--ink); }
+    .cur-filters { display:grid; grid-template-columns:repeat(auto-fit,minmax(132px,1fr)); gap:10px; background:var(--shell); border:1px solid var(--rule); padding:16px; margin-bottom:12px; }
+    .cur-filters label { font-family:var(--mono); font-size:9px; letter-spacing:.1em; text-transform:uppercase; color:var(--ink-mute); display:flex; flex-direction:column; gap:4px; }
+    .cur-filters input, .cur-filters select { font:inherit; font-size:14px; background:#fff; border:1px solid var(--rule); padding:8px 9px; color:var(--ink); }
+    .cur-chips { display:flex; gap:6px; flex-wrap:wrap; grid-column:1/-1; }
+    .cur-chip { font-family:var(--mono); font-size:9.5px; letter-spacing:.08em; text-transform:uppercase; border:1px solid var(--rule); padding:6px 10px; cursor:pointer; user-select:none; color:var(--ink-mute); }
+    .cur-chip.on { background:var(--brass); color:var(--shell); border-color:var(--brass); }
+    .cur-filter-actions { display:flex; gap:10px; align-items:center; margin-bottom:14px; flex-wrap:wrap; }
+    .cur-gaps { font-size:12px; color:var(--ink-mute); font-style:italic; margin:0 0 12px; line-height:1.5; }
+    .cur-results, .cur-incl { display:flex; flex-direction:column; gap:8px; }
+    .cur-row { display:grid; grid-template-columns:64px 1fr auto; gap:12px; background:var(--shell); border:1px solid var(--rule); padding:10px; align-items:center; }
+    .cur-row .thumb { width:64px; height:48px; object-fit:cover; background:var(--vellum); }
+    .cur-row .pr { font-family:var(--serif); font-style:italic; font-size:18px; color:var(--ink); }
+    .cur-row .ad { font-size:12.5px; color:var(--ink-soft); }
+    .cur-row .sp { font-family:var(--mono); font-size:9.5px; letter-spacing:.08em; color:var(--ink-mute); text-transform:uppercase; margin-top:2px; }
+    .cur-incl-ed { grid-column:1/-1; display:flex; flex-direction:column; gap:7px; border-top:1px solid var(--rule-soft); padding-top:9px; margin-top:2px; }
+    .cur-incl-ed textarea, .cur-incl-ed input[type=text] { font:inherit; font-size:13px; background:#fff; border:1px solid var(--rule); padding:7px 9px; width:100%; }
+    .cur-incl-ed .r2 { display:flex; gap:12px; align-items:center; flex-wrap:wrap; font-family:var(--mono); font-size:10px; letter-spacing:.08em; text-transform:uppercase; color:var(--ink-mute); }
+    .cur-incl-ed select { font:inherit; font-size:12px; padding:5px 7px; border:1px solid var(--rule); background:#fff; }
+    .cur-modal { position:fixed; inset:0; z-index:99998; background:rgba(20,18,15,.6); display:flex; align-items:center; justify-content:center; padding:24px; font-family:var(--sans); }
+    .cur-modal .box { background:var(--shell); max-width:600px; width:100%; max-height:92vh; overflow:auto; padding:26px 30px; }
+    .cur-modal h3 { font-family:var(--serif); font-style:italic; font-weight:500; font-size:26px; margin:0 0 6px; }
+    .cur-modal .sub { font-size:13px; color:var(--ink-soft); margin:0 0 16px; line-height:1.5; }
+    .cur-modal label { font-family:var(--mono); font-size:9px; letter-spacing:.14em; text-transform:uppercase; color:var(--ink-mute); display:block; margin:12px 0 5px; }
+    .cur-modal input, .cur-modal textarea, .cur-modal select { font:inherit; font-size:15px; width:100%; padding:10px 12px; border:1px solid var(--rule); background:#fff; color:var(--ink); }
+    .cur-msg-pv { background:var(--ink); color:var(--shell); padding:14px 16px; margin-top:12px; }
+    .cur-msg-pv .l { font-family:var(--mono); font-size:9px; letter-spacing:.16em; text-transform:uppercase; color:var(--brass-bright); margin-bottom:7px; }
+    .cur-msg-pv p { font-size:13.5px; line-height:1.5; color:rgba(250,246,236,.9); white-space:pre-wrap; }
+    .cur-msg-pv iframe { width:100%; height:300px; border:1px solid rgba(250,246,236,.2); background:#FAF6EC; margin-top:6px; }
+    .cur-modal .row { display:flex; gap:10px; }
+    .cur-modal .actions { display:flex; gap:10px; align-items:center; margin-top:18px; }
+    .cur-result { font-size:13px; margin-top:12px; min-height:18px; line-height:1.5; }
+    @media (max-width: 900px) { .cur { padding:18px; } .cur-grid { grid-template-columns:1fr; } .cur-side { position:static; } }
+    </style>
+    <section class="crm-view" data-view="curate">
+      <div class="cur">
+        <div class="cur-head">
+          <div>
+            <span class="label-cap" style="color:var(--brass);">Curated Search &amp; Story Push</span>
+            <h1 class="h-section" style="font-size:38px;margin-top:6px;">Collections.</h1>
+          </div>
+          <button class="btn btn-ink btn-sm" data-cur-new>+ New collection</button>
+        </div>
+        <div class="cur-grid">
+          <aside class="cur-side">
+            <div class="cur-side-h">Your collections</div>
+            <div class="cur-colls" data-cur-colls><div class="cur-empty">Loading…</div></div>
+            <div class="cur-side-h" style="margin-top:22px;">Saved searches</div>
+            <div class="cur-saved" data-cur-saved></div>
+          </aside>
+          <div class="cur-main" data-cur-main>
+            <div class="cur-placeholder" data-cur-placeholder>Pick a collection on the left, or start a new one, to begin curating. Every collection is hand-built — nothing reaches a client you didn't choose.</div>
+            <div data-cur-editor style="display:none;"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
   </main>
 </div>
 
@@ -820,6 +910,413 @@ function selectLead(el) {
     var t = e.target.closest('[data-open-link-deal]');
     if (t) { e.preventDefault(); openLinkDealModal(); }
   });
+})();
+</script>
+<script>
+/* ============================================================================
+   Curated Search & Story Push — agent screen (self-contained).
+   Talks to /api/curate/* and opens the client page in preview before any push.
+   ========================================================================== */
+(function () {
+  'use strict';
+  var root = document.querySelector('.crm-view[data-view="curate"]');
+  if (!root) return;
+
+  var esc = function (s) { return (s == null ? '' : String(s)).replace(/[&<>"]/g, function (c) { return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]); }); };
+  function api(path, opts) {
+    opts = opts || {};
+    opts.credentials = 'include';
+    if (opts.body && typeof opts.body !== 'string') { opts.headers = Object.assign({ 'Content-Type': 'application/json' }, opts.headers); opts.body = JSON.stringify(opts.body); }
+    return fetch('/api/curate/' + path, opts).then(function (r) { return r.json().then(function (j) { return { ok: r.ok, status: r.status, j: j }; }).catch(function () { return { ok: r.ok, status: r.status, j: {} }; }); });
+  }
+
+  var STATUS_OPTS = [['active', 'Active'], ['pending', 'Pending'], ['sold', 'Sold']];
+  var PTYPE_OPTS = [['single_family', 'Single Family'], ['condo', 'Condo/Town'], ['manufactured', 'Manufactured'], ['land', 'Land/Lots'], ['ranch', 'Farm/Ranch']];
+  var NOTE_STYLES = [['sticky', 'Sticky note'], ['highlight', 'Gold highlight'], ['banner', 'Ribbon banner']];
+
+  var state = { loaded: false, collections: [], saved: [], active: null, listings: [], inSet: {}, sub: 'listings', lastFilters: {}, gaps: [] };
+
+  // ---- lazy init on tab activation ----------------------------------------
+  function ensureLoaded() { if (state.loaded) return; state.loaded = true; loadCollections(); loadSaved(); }
+  document.addEventListener('click', function (e) {
+    var t = e.target.closest('[onclick*="\'curate\'"]');
+    if (t) setTimeout(ensureLoaded, 0);
+  });
+
+  var el = function (sel) { return root.querySelector(sel); };
+
+  // ---- collections list ----------------------------------------------------
+  function loadCollections() {
+    api('collections').then(function (r) {
+      state.collections = (r.j && r.j.collections) || [];
+      renderColls();
+    });
+  }
+  function renderColls() {
+    var box = el('[data-cur-colls]');
+    if (!state.collections.length) { box.innerHTML = '<div class="cur-empty" style="font-size:13px;">No collections yet. Start one above.</div>'; return; }
+    box.innerHTML = state.collections.map(function (c) {
+      var on = state.active && state.active.id === c.id ? ' on' : '';
+      return '<button class="cur-coll' + on + '" data-open-coll="' + esc(c.id) + '">' +
+        '<span class="t">' + esc(c.title || 'Untitled collection') + '</span>' +
+        '<span class="m">' + (c.included_count || 0) + ' picked · ' + esc(c.status) + (c.client_name ? ' · ' + esc(c.client_name) : '') + (c.reaction_count ? ' · ' + c.reaction_count + ' reactions' : '') + '</span>' +
+        '</button>';
+    }).join('');
+  }
+
+  // ---- saved searches ------------------------------------------------------
+  function loadSaved() {
+    api('saved-searches').then(function (r) { state.saved = (r.j && r.j.searches) || []; renderSaved(); });
+  }
+  function renderSaved() {
+    var box = el('[data-cur-saved]');
+    if (!state.saved.length) { box.innerHTML = '<div class="cur-empty" style="font-size:12px;padding:8px 0;">None yet — run a search and save it.</div>'; return; }
+    box.innerHTML = state.saved.map(function (s) {
+      return '<button data-apply-saved="' + esc(s.id) + '"><span>' + esc(s.name) + '</span>' + (s.new_match_count ? '<span class="c">' + s.new_match_count + ' new</span>' : '') + '</button>';
+    }).join('');
+  }
+
+  // ---- open / render a collection -----------------------------------------
+  function openCollection(id) {
+    api('collections?id=' + encodeURIComponent(id)).then(function (r) {
+      if (!r.ok) { alert((r.j && r.j.error) || 'Could not open collection'); return; }
+      state.active = r.j.collection;
+      state.listings = r.j.listings || [];
+      state.inSet = {}; state.listings.forEach(function (l) { state.inSet[l.property_id] = true; });
+      state.sub = 'listings';
+      renderColls();
+      renderEditor(r.j);
+    });
+  }
+
+  function renderEditor(data) {
+    el('[data-cur-placeholder]').style.display = 'none';
+    var c = state.active;
+    var reactions = (data && data.reactions) || [];
+    var opens = (data && data.engagement && data.engagement.opens) || 0;
+    var box = el('[data-cur-editor]');
+    box.style.display = 'block';
+    box.innerHTML =
+      '<div class="cur-ed-h">' +
+        '<div class="cur-ed-meta">' +
+          '<span class="cur-status ' + esc(c.status) + '">' + esc(c.status) + (opens ? ' · ' + opens + ' opens' : '') + '</span>' +
+          '<input class="title-in" data-meta="title" placeholder="Collection title (e.g. Five for Karen)" value="' + esc(c.title || '') + '">' +
+          '<textarea data-meta="intro_note" rows="2" placeholder="Intro note — “Hi Karen, five new ones this week…”">' + esc(c.intro_note || '') + '</textarea>' +
+          '<textarea data-meta="closing_note" rows="2" placeholder="Closing note — “Tell me which speak to you.”">' + esc(c.closing_note || '') + '</textarea>' +
+          (c.client_name ? '<div class="cur-row" style="grid-template-columns:1fr;background:transparent;border:none;padding:0;font-size:12px;color:var(--ink-mute);">For ' + esc(c.client_name) + (c.client_phone ? ' · ' + esc(c.client_phone) : '') + (c.client_email ? ' · ' + esc(c.client_email) : '') + '</div>' : '') +
+        '</div>' +
+        '<div class="cur-ed-acts">' +
+          '<button class="btn btn-ghost btn-sm" data-preview>Preview as client ↗</button>' +
+          '<button class="btn btn-brass btn-sm" data-push>Preview &amp; push…</button>' +
+          '<button class="btn btn-ghost btn-sm" data-copylink>Copy client link</button>' +
+          '<button class="btn-link" data-delete style="font-size:11px;color:var(--ink-faint);align-self:flex-start;">Delete</button>' +
+        '</div>' +
+      '</div>' +
+      (reactions.length ? '<div class="cur-gaps">Client engagement: ' + reactions.slice(0, 6).map(function (x) { return esc((x.client_label || 'Client')) + ' — ' + esc(x.reaction.replace(/_/g, ' ')); }).join(' · ') + '</div>' : '') +
+      '<div class="cur-subtabs">' +
+        '<button class="cur-subtab' + (state.sub === 'listings' ? ' on' : '') + '" data-sub="listings">In this collection (' + state.listings.filter(function (l) { return l.included; }).length + ')</button>' +
+        '<button class="cur-subtab' + (state.sub === 'search' ? ' on' : '') + '" data-sub="search">Add listings</button>' +
+      '</div>' +
+      '<div data-sub-body></div>';
+    renderSub();
+  }
+
+  function renderSub() {
+    var body = el('[data-sub-body]');
+    if (state.sub === 'listings') body.innerHTML = renderIncluded();
+    else body.innerHTML = renderSearchPanel();
+    if (state.sub === 'search') { hydrateFilters(); }
+  }
+
+  function renderIncluded() {
+    var inc = state.listings.filter(function (l) { return l.included; });
+    if (!inc.length) return '<div class="cur-empty" style="font-size:14px;">No listings picked yet. Use “Add listings” to search and tick homes in.</div>';
+    return '<div class="cur-incl">' + inc.map(function (l) {
+      var g = l.listing || {};
+      return '<div class="cur-row" data-inc="' + esc(l.property_id) + '">' +
+        '<img class="thumb" src="' + esc(g.photo || '') + '" alt="">' +
+        '<div><div class="pr">' + esc(g.price_label || '—') + '</div><div class="ad">' + esc(g.address || '') + (g.city ? ', ' + esc(g.city) : '') + '</div>' +
+          '<div class="sp">' + [g.beds != null ? g.beds + 'bd' : '', g.baths != null ? g.baths + 'ba' : '', g.sqft ? g.sqft.toLocaleString() + 'sqft' : ''].filter(Boolean).join(' · ') + '</div></div>' +
+        '<button class="btn-link" data-remove="' + esc(l.property_id) + '" style="color:#8B3A3A;font-size:10px;">Remove</button>' +
+        '<div class="cur-incl-ed">' +
+          '<textarea data-f="agent_note" rows="2" placeholder="Your note to the client about this home…">' + esc(l.agent_note || '') + '</textarea>' +
+          '<div class="r2">' +
+            '<span>Style <select data-f="note_style">' + NOTE_STYLES.map(function (s) { return '<option value="' + s[0] + '"' + (l.note_style === s[0] ? ' selected' : '') + '>' + s[1] + '</option>'; }).join('') + '</select></span>' +
+            '<label style="display:flex;gap:6px;align-items:center;cursor:pointer;"><input type="checkbox" data-f="priority"' + (l.priority ? ' checked' : '') + '> See first</label>' +
+            '<input type="text" data-f="why_note" placeholder="Why I picked it (short)" value="' + esc(l.why_note || '') + '" style="flex:1;min-width:140px;">' +
+          '</div>' +
+        '</div>' +
+      '</div>';
+    }).join('') + '</div>';
+  }
+
+  function renderSearchPanel() {
+    return '<div class="cur-filters" data-filters>' +
+        '<div class="cur-chips" data-chip-group="status">' + STATUS_OPTS.map(function (s) { return '<span class="cur-chip' + (s[0] === 'active' ? ' on' : '') + '" data-chip="' + s[0] + '">' + s[1] + '</span>'; }).join('') + '</div>' +
+        '<div class="cur-chips" data-chip-group="property_type">' + PTYPE_OPTS.map(function (s) { return '<span class="cur-chip" data-chip="' + s[0] + '">' + s[1] + '</span>'; }).join('') + '</div>' +
+        '<label>Min price<input data-q="price_min" type="number" placeholder="$"></label>' +
+        '<label>Max price<input data-q="price_max" type="number" placeholder="$"></label>' +
+        '<label>Beds min<input data-q="beds_min" type="number"></label>' +
+        '<label>Baths min<input data-q="baths_min" type="number"></label>' +
+        '<label>Min sqft<input data-q="sqft_min" type="number"></label>' +
+        '<label>Max sqft<input data-q="sqft_max" type="number"></label>' +
+        '<label>Min acres<input data-q="lot_acres_min" type="number" step="0.1"></label>' +
+        '<label>Year from<input data-q="year_min" type="number"></label>' +
+        '<label>City<input data-q="city" type="text"></label>' +
+        '<label>ZIP<input data-q="zip" type="text"></label>' +
+        '<label>Max $/sqft<input data-q="ppsf_max" type="number"></label>' +
+        '<label>Keyword<input data-q="keyword" type="text" placeholder="view, pool, acreage…"></label>' +
+        '<label>Sort<select data-q="sort"><option value="newest">Newest</option><option value="price_asc">Price ↑</option><option value="price_desc">Price ↓</option><option value="beds_desc">Beds ↓</option></select></label>' +
+      '</div>' +
+      '<div class="cur-filter-actions">' +
+        '<button class="btn btn-ink btn-sm" data-run-search>Search listings</button>' +
+        '<button class="btn btn-ghost btn-sm" data-save-search>Save this search…</button>' +
+        '<span class="mono" style="font-size:10px;color:var(--ink-mute);" data-search-count></span>' +
+      '</div>' +
+      '<div class="cur-gaps" data-search-gaps></div>' +
+      '<div class="cur-results" data-search-results></div>';
+  }
+
+  function hydrateFilters() {
+    // re-apply any last filters into the freshly rendered form
+    var f = state.lastFilters || {};
+    Object.keys(f).forEach(function (k) {
+      var input = el('[data-q="' + k + '"]');
+      if (input && typeof f[k] === 'string') input.value = f[k];
+    });
+    (f.status || []).forEach(function (v) { var c = root.querySelector('[data-chip-group="status"] [data-chip="' + v + '"]'); if (c) c.classList.add('on'); });
+    (f.property_type || []).forEach(function (v) { var c = root.querySelector('[data-chip-group="property_type"] [data-chip="' + v + '"]'); if (c) c.classList.add('on'); });
+  }
+
+  function gatherFilters() {
+    var f = {};
+    root.querySelectorAll('[data-q]').forEach(function (inp) { if (inp.value !== '') f[inp.getAttribute('data-q')] = inp.value; });
+    var st = []; root.querySelectorAll('[data-chip-group="status"] .cur-chip.on').forEach(function (c) { st.push(c.getAttribute('data-chip')); });
+    var pt = []; root.querySelectorAll('[data-chip-group="property_type"] .cur-chip.on').forEach(function (c) { pt.push(c.getAttribute('data-chip')); });
+    if (st.length) f.status = st;
+    if (pt.length) f.property_type = pt;
+    return f;
+  }
+
+  function doSearch() {
+    var f = gatherFilters(); state.lastFilters = f;
+    var qs = Object.keys(f).map(function (k) { return encodeURIComponent(k) + '=' + encodeURIComponent(Array.isArray(f[k]) ? f[k].join(',') : f[k]); }).join('&');
+    var results = el('[data-search-results]'); results.innerHTML = '<div class="cur-empty" style="font-size:13px;">Searching…</div>';
+    api('search?' + qs).then(function (r) {
+      var d = r.j || {};
+      el('[data-search-count]').textContent = (d.count != null ? d.count : (d.listings || []).length) + ' found';
+      el('[data-search-gaps]').textContent = (d.gaps && d.gaps.length) ? ('Not filtered (no data yet): ' + d.gaps.join('; ')) : '';
+      renderResults(d.listings || []);
+    });
+  }
+
+  function renderResults(list) {
+    var box = el('[data-search-results]');
+    if (!list.length) { box.innerHTML = '<div class="cur-empty" style="font-size:14px;">No matches. Loosen the filters.</div>'; return; }
+    box.innerHTML = list.map(function (g) {
+      var inC = !!state.inSet[g.id];
+      return '<div class="cur-row" data-res="' + esc(g.id) + '">' +
+        '<img class="thumb" src="' + esc(g.photo || '') + '" alt="">' +
+        '<div><div class="pr">' + esc(g.price_label || '—') + ' <span style="font-family:var(--mono);font-size:9px;color:var(--ink-mute);">' + esc(g.ppsf_label || '') + '</span></div>' +
+          '<div class="ad">' + esc(g.address || '') + (g.city ? ', ' + esc(g.city) : '') + '</div>' +
+          '<div class="sp">' + [g.beds != null ? g.beds + 'bd' : '', g.baths != null ? g.baths + 'ba' : '', g.sqft ? g.sqft.toLocaleString() + 'sqft' : '', esc(g.status_label || '')].filter(Boolean).join(' · ') + '</div></div>' +
+        '<button class="btn ' + (inC ? 'btn-ghost' : 'btn-ink') + ' btn-sm" data-toggle="' + esc(g.id) + '">' + (inC ? '✓ Added' : '+ Add') + '</button>' +
+      '</div>';
+    }).join('');
+  }
+
+  // ---- mutations -----------------------------------------------------------
+  function setListing(pid, patch, cb) {
+    var body = Object.assign({ op: 'set-listing', collection_id: state.active.id, property_id: pid, included: true }, patch);
+    api('collections', { method: 'POST', body: body }).then(function (r) { if (cb) cb(r); });
+  }
+  function toggleListing(pid) {
+    if (state.inSet[pid]) {
+      api('collections', { method: 'POST', body: { op: 'remove-listing', collection_id: state.active.id, property_id: pid } }).then(function () {
+        delete state.inSet[pid]; refreshListings(); markResult(pid);
+      });
+    } else {
+      setListing(pid, { included: true }, function () { state.inSet[pid] = true; refreshListings(); markResult(pid); });
+    }
+  }
+  function markResult(pid) {
+    var btn = root.querySelector('[data-toggle="' + pid + '"]');
+    if (!btn) return;
+    var inC = !!state.inSet[pid];
+    btn.className = 'btn ' + (inC ? 'btn-ghost' : 'btn-ink') + ' btn-sm';
+    btn.textContent = inC ? '✓ Added' : '+ Add';
+  }
+  function refreshListings() {
+    // reload just the collection's listings to keep counts/editor in sync
+    api('collections?id=' + encodeURIComponent(state.active.id)).then(function (r) {
+      if (!r.ok) return;
+      state.listings = r.j.listings || [];
+      state.inSet = {}; state.listings.forEach(function (l) { state.inSet[l.property_id] = true; });
+      // update the "In this collection (N)" tab label + list if visible
+      var tab = root.querySelector('[data-sub="listings"]');
+      if (tab) tab.textContent = 'In this collection (' + state.listings.filter(function (l) { return l.included; }).length + ')';
+      if (state.sub === 'listings') el('[data-sub-body]').innerHTML = renderIncluded();
+      loadCollections();
+    });
+  }
+
+  var metaTimer, fieldTimers = {};
+  function saveMeta() {
+    var patch = { id: state.active.id };
+    root.querySelectorAll('[data-meta]').forEach(function (i) { patch[i.getAttribute('data-meta')] = i.value; });
+    api('collections', { method: 'PATCH', body: patch }).then(function (r) { if (r.ok && r.j.collection) { state.active = Object.assign(state.active, r.j.collection); loadCollections(); } });
+  }
+
+  // ---- delegated events ----------------------------------------------------
+  root.addEventListener('click', function (e) {
+    var t;
+    if ((t = e.target.closest('[data-cur-new]'))) { newCollectionModal(); return; }
+    if ((t = e.target.closest('[data-open-coll]'))) { openCollection(t.getAttribute('data-open-coll')); return; }
+    if ((t = e.target.closest('[data-apply-saved]'))) { applySaved(t.getAttribute('data-apply-saved')); return; }
+    if ((t = e.target.closest('[data-sub]'))) { state.sub = t.getAttribute('data-sub'); renderSub(); root.querySelectorAll('[data-sub]').forEach(function (b) { b.classList.toggle('on', b === t); }); return; }
+    if ((t = e.target.closest('[data-run-search]'))) { doSearch(); return; }
+    if ((t = e.target.closest('[data-save-search]'))) { saveSearchModal(); return; }
+    if ((t = e.target.closest('[data-toggle]'))) { toggleListing(t.getAttribute('data-toggle')); return; }
+    if ((t = e.target.closest('[data-remove]'))) { toggleListing(t.getAttribute('data-remove')); return; }
+    if ((t = e.target.closest('[data-chip]'))) { t.classList.toggle('on'); return; }
+    if ((t = e.target.closest('[data-preview]'))) { window.open('/collection.html?preview=' + encodeURIComponent(state.active.id), '_blank'); return; }
+    if ((t = e.target.closest('[data-push]'))) { pushModal(); return; }
+    if ((t = e.target.closest('[data-copylink]'))) { copyLink(t); return; }
+    if ((t = e.target.closest('[data-delete]'))) { deleteCollection(); return; }
+  });
+  root.addEventListener('input', function (e) {
+    var t = e.target;
+    if (t.hasAttribute && t.hasAttribute('data-meta')) { clearTimeout(metaTimer); metaTimer = setTimeout(saveMeta, 700); return; }
+    var row = t.closest && t.closest('[data-inc]');
+    if (row && t.hasAttribute('data-f')) {
+      var pid = row.getAttribute('data-inc');
+      clearTimeout(fieldTimers[pid]); fieldTimers[pid] = setTimeout(function () {
+        setListing(pid, {
+          agent_note: row.querySelector('[data-f="agent_note"]').value,
+          note_style: row.querySelector('[data-f="note_style"]').value,
+          priority: row.querySelector('[data-f="priority"]').checked,
+          why_note: row.querySelector('[data-f="why_note"]').value
+        });
+      }, 600);
+    }
+  });
+  root.addEventListener('change', function (e) {
+    var row = e.target.closest && e.target.closest('[data-inc]');
+    if (row && e.target.hasAttribute('data-f')) {
+      var pid = row.getAttribute('data-inc');
+      setListing(pid, {
+        agent_note: row.querySelector('[data-f="agent_note"]').value,
+        note_style: row.querySelector('[data-f="note_style"]').value,
+        priority: row.querySelector('[data-f="priority"]').checked,
+        why_note: row.querySelector('[data-f="why_note"]').value
+      });
+    }
+  });
+
+  function copyLink(btn) {
+    api('preview?id=' + encodeURIComponent(state.active.id)).then(function (r) {
+      var link = r.j && r.j.share_link;
+      if (link && navigator.clipboard) navigator.clipboard.writeText(link);
+      btn.textContent = link ? 'Copied ✓' : 'No link';
+      setTimeout(function () { btn.textContent = 'Copy client link'; }, 1500);
+    });
+  }
+  function deleteCollection() {
+    if (!confirm('Delete this collection? This cannot be undone.')) return;
+    api('collections?id=' + encodeURIComponent(state.active.id), { method: 'DELETE' }).then(function () {
+      state.active = null; el('[data-cur-editor]').style.display = 'none'; el('[data-cur-placeholder]').style.display = 'block'; loadCollections();
+    });
+  }
+
+  // ---- modals --------------------------------------------------------------
+  function modal(html) {
+    var m = document.createElement('div'); m.className = 'cur-modal';
+    m.innerHTML = '<div class="box">' + html + '</div>';
+    document.body.appendChild(m);
+    m.addEventListener('click', function (e) { if (e.target === m) document.body.removeChild(m); });
+    m._close = function () { if (m.parentNode) document.body.removeChild(m); };
+    return m;
+  }
+
+  function newCollectionModal() {
+    ensureLoaded();
+    var m = modal('<h3>New collection.</h3><p class="sub">Give it a name. You can attach a client and add listings next.</p>' +
+      '<label>Title</label><input id="ncTitle" placeholder="Five for Karen" autofocus>' +
+      '<div class="actions"><button class="btn btn-ink btn-sm" id="ncGo">Create</button><button class="btn-link" id="ncX" style="margin-left:auto;">Cancel</button></div>' +
+      '<div class="cur-result" id="ncR"></div>');
+    m.querySelector('#ncX').onclick = m._close;
+    m.querySelector('#ncGo').onclick = function () {
+      var title = m.querySelector('#ncTitle').value.trim();
+      api('collections', { method: 'POST', body: { op: 'create', title: title || 'Untitled collection' } }).then(function (r) {
+        if (r.ok && r.j.collection) { m._close(); loadCollections(); openCollection(r.j.collection.id); }
+        else m.querySelector('#ncR').textContent = (r.j && r.j.error) || 'Failed.';
+      });
+    };
+  }
+
+  function saveSearchModal() {
+    var filters = gatherFilters();
+    var m = modal('<h3>Save this search.</h3><p class="sub">Store these filters to reuse for a client. New MLS matches get flagged after each sync.</p>' +
+      '<label>Name</label><input id="ssName" placeholder="Karen — single story, under 700k" autofocus>' +
+      '<div class="actions"><button class="btn btn-ink btn-sm" id="ssGo">Save</button><button class="btn-link" id="ssX" style="margin-left:auto;">Cancel</button></div><div class="cur-result" id="ssR"></div>');
+    m.querySelector('#ssX').onclick = m._close;
+    m.querySelector('#ssGo').onclick = function () {
+      var name = m.querySelector('#ssName').value.trim();
+      if (!name) { m.querySelector('#ssR').textContent = 'Give it a name.'; return; }
+      api('saved-searches', { method: 'POST', body: { name: name, filters: filters } }).then(function (r) {
+        if (r.ok) { m._close(); loadSaved(); } else m.querySelector('#ssR').textContent = (r.j && r.j.error) || 'Failed.';
+      });
+    };
+  }
+
+  function applySaved(id) {
+    var s = state.saved.filter(function (x) { return x.id === id; })[0];
+    if (!s) return;
+    if (!state.active) { alert('Open a collection first, then apply a saved search to add listings to it.'); return; }
+    state.sub = 'search'; renderSub(); root.querySelectorAll('[data-sub]').forEach(function (b) { b.classList.toggle('on', b.getAttribute('data-sub') === 'search'); });
+    state.lastFilters = s.filters || {}; hydrateFilters(); doSearch();
+  }
+
+  // ---- push (always shows the exact message before sending) ----------------
+  function pushModal() {
+    var m = modal('<h3>Preview &amp; push.</h3><p class="sub">This is exactly what your client receives. Nothing sends until you tap Send.</p><div id="pmBody">Loading the exact message…</div>');
+    api('preview?id=' + encodeURIComponent(state.active.id)).then(function (r) {
+      if (!r.ok) { m.querySelector('#pmBody').innerHTML = '<div class="cur-result">' + esc((r.j && r.j.error) || 'Could not build preview.') + '</div>'; return; }
+      var d = r.j, msgs = d.messages || {}, hasPhone = !!d.client_phone, hasEmail = !!d.client_email;
+      var chan = hasPhone ? 'sms' : (hasEmail ? 'email' : 'sms');
+      m.querySelector('#pmBody').innerHTML =
+        '<label>Send by</label><div class="row"><label style="flex:1;display:flex;gap:6px;align-items:center;font-size:13px;text-transform:none;letter-spacing:0;color:var(--ink);"><input type="radio" name="pmChan" value="sms" ' + (chan === 'sms' ? 'checked' : '') + ' style="width:auto;"> Text</label>' +
+          '<label style="flex:1;display:flex;gap:6px;align-items:center;font-size:13px;text-transform:none;letter-spacing:0;color:var(--ink);"><input type="radio" name="pmChan" value="email" ' + (chan === 'email' ? 'checked' : '') + ' style="width:auto;"> Email</label></div>' +
+        '<label>To</label><input id="pmTo" value="' + esc(chan === 'sms' ? (d.client_phone || '') : (d.client_email || '')) + '" placeholder="phone or email">' +
+        '<div id="pmPreview"></div>' +
+        '<div style="margin-top:10px;"><a href="/collection.html?preview=' + encodeURIComponent(state.active.id) + '" target="_blank" class="btn-link" style="font-size:11px;">Open the full page they’ll land on ↗</a></div>' +
+        '<div class="actions"><button class="btn btn-brass btn-sm" id="pmSend">Send now</button><button class="btn-link" id="pmX" style="margin-left:auto;">Cancel</button></div><div class="cur-result" id="pmR"></div>';
+      function paint() {
+        var ch = m.querySelector('input[name="pmChan"]:checked').value;
+        var to = m.querySelector('#pmTo');
+        if (document.activeElement !== to) to.value = ch === 'sms' ? (d.client_phone || '') : (d.client_email || '');
+        var pv = m.querySelector('#pmPreview');
+        if (ch === 'sms') pv.innerHTML = '<div class="cur-msg-pv"><div class="l">Text message</div><p>' + esc(msgs.sms ? msgs.sms.body : '') + '</p></div>';
+        else { pv.innerHTML = '<div class="cur-msg-pv"><div class="l">Email · ' + esc(msgs.email ? msgs.email.subject : '') + '</div><iframe></iframe></div>'; var fr = pv.querySelector('iframe'); if (fr && msgs.email) fr.srcdoc = msgs.email.html; }
+      }
+      m.querySelectorAll('input[name="pmChan"]').forEach(function (r) { r.addEventListener('change', paint); });
+      paint();
+      m.querySelector('#pmX').onclick = m._close;
+      m.querySelector('#pmSend').onclick = function () {
+        var ch = m.querySelector('input[name="pmChan"]:checked').value;
+        var to = m.querySelector('#pmTo').value.trim();
+        if (!to) { m.querySelector('#pmR').textContent = 'Enter a phone or email.'; return; }
+        var btn = m.querySelector('#pmSend'); btn.disabled = true; btn.textContent = 'Sending…';
+        api('push', { method: 'POST', body: { collection_id: state.active.id, channel: ch, to: to } }).then(function (rr) {
+          btn.disabled = false; btn.textContent = 'Send now';
+          var R = m.querySelector('#pmR');
+          if (rr.ok && rr.j.pushed) { R.style.color = '#2E5C3D'; R.textContent = '✓ Sent to ' + to + '. The collection is now live.'; loadCollections(); if (state.active) openCollection(state.active.id); }
+          else if (rr.ok && rr.j.note) { R.style.color = '#8a6d3b'; R.textContent = '⚠ ' + rr.j.note + ' (link is live; check Twilio/Resend keys)'; }
+          else { R.style.color = '#8B3A3A'; R.textContent = '✗ ' + ((rr.j && rr.j.error) || 'Failed.'); }
+        });
+      };
+    });
+  }
 })();
 </script>
 <script src="/legacy-client.js" defer></script>
