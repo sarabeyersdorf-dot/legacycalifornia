@@ -1008,6 +1008,7 @@ function selectLead(el) {
         '<div class="cur-ed-acts">' +
           '<button class="btn btn-ghost btn-sm" data-preview>Preview as client ↗</button>' +
           '<button class="btn btn-brass btn-sm" data-push>Preview &amp; push…</button>' +
+          '<button class="btn btn-ghost btn-sm" data-client>' + (c.client_name ? 'Change client' : 'Attach client') + '</button>' +
           '<button class="btn btn-ghost btn-sm" data-copylink>Copy client link</button>' +
           '<button class="btn-link" data-delete style="font-size:11px;color:var(--ink-faint);align-self:flex-start;">Delete</button>' +
         '</div>' +
@@ -1182,6 +1183,13 @@ function selectLead(el) {
     if ((t = e.target.closest('[data-preview]'))) { window.open('/collection.html?preview=' + encodeURIComponent(state.active.id), '_blank'); return; }
     if ((t = e.target.closest('[data-push]'))) { pushModal(); return; }
     if ((t = e.target.closest('[data-copylink]'))) { copyLink(t); return; }
+    if ((t = e.target.closest('[data-client]'))) {
+      pickClient(function (cl) {
+        api('collections', { method: 'PATCH', body: { id: state.active.id, client_lead_id: cl ? cl.id : null } })
+          .then(function () { openCollection(state.active.id); });
+      });
+      return;
+    }
     if ((t = e.target.closest('[data-delete]'))) { deleteCollection(); return; }
   });
   root.addEventListener('input', function (e) {
@@ -1240,18 +1248,45 @@ function selectLead(el) {
 
   function newCollectionModal() {
     ensureLoaded();
-    var m = modal('<h3>New collection.</h3><p class="sub">Give it a name. You can attach a client and add listings next.</p>' +
+    var picked = null;
+    var m = modal('<h3>New collection.</h3><p class="sub">Name it and (optionally) attach a client — that personalizes the greeting and pre-fills who it goes to at push time.</p>' +
       '<label>Title</label><input id="ncTitle" placeholder="Five for Karen" autofocus>' +
+      '<label>Client (optional)</label><div style="display:flex;align-items:center;gap:10px;"><button type="button" class="btn btn-ghost btn-sm" id="ncPick">Choose client…</button><span id="ncClient" style="font-size:13px;color:var(--ink-soft);"></span></div>' +
       '<div class="actions"><button class="btn btn-ink btn-sm" id="ncGo">Create</button><button class="btn-link" id="ncX" style="margin-left:auto;">Cancel</button></div>' +
       '<div class="cur-result" id="ncR"></div>');
     m.querySelector('#ncX').onclick = m._close;
+    m.querySelector('#ncPick').onclick = function () {
+      pickClient(function (c) { picked = c; m.querySelector('#ncClient').textContent = c ? ('✓ ' + c.name) : ''; });
+    };
     m.querySelector('#ncGo').onclick = function () {
       var title = m.querySelector('#ncTitle').value.trim();
-      api('collections', { method: 'POST', body: { op: 'create', title: title || 'Untitled collection' } }).then(function (r) {
+      api('collections', { method: 'POST', body: { op: 'create', title: title || 'Untitled collection', client_lead_id: picked ? picked.id : null } }).then(function (r) {
         if (r.ok && r.j.collection) { m._close(); loadCollections(); openCollection(r.j.collection.id); }
         else m.querySelector('#ncR').textContent = (r.j && r.j.error) || 'Failed.';
       });
     };
+  }
+
+  function pickClient(cb) {
+    var m = modal('<h3>Attach a client.</h3><p class="sub">Search your contacts by name, email, or phone.</p>' +
+      '<input id="pcQ" placeholder="Start typing a name…" autofocus>' +
+      '<div id="pcList" style="margin-top:12px;max-height:320px;overflow:auto;display:flex;flex-direction:column;gap:6px;"></div>' +
+      '<div class="actions"><button class="btn-link" id="pcNone">Clear / none</button><button class="btn-link" id="pcX" style="margin-left:auto;">Cancel</button></div>');
+    var listEl = m.querySelector('#pcList');
+    function search(q) {
+      api('clients?q=' + encodeURIComponent(q)).then(function (r) {
+        var cs = (r.j && r.j.clients) || [];
+        listEl.innerHTML = cs.length ? cs.map(function (c, i) {
+          return '<button class="cur-coll" data-pc="' + i + '"><span class="t" style="font-size:14px;">' + esc(c.name) + '</span><span class="m">' + esc(c.email || 'no email') + (c.phone ? ' · ' + esc(c.phone) : '') + '</span></button>';
+        }).join('') : '<div class="cur-empty" style="font-size:13px;">No matches.</div>';
+        listEl.querySelectorAll('[data-pc]').forEach(function (b) { b.onclick = function () { cb(cs[+b.getAttribute('data-pc')]); m._close(); }; });
+      });
+    }
+    var t;
+    m.querySelector('#pcQ').addEventListener('input', function (e) { clearTimeout(t); var q = e.target.value; t = setTimeout(function () { search(q); }, 250); });
+    m.querySelector('#pcX').onclick = m._close;
+    m.querySelector('#pcNone').onclick = function () { cb(null); m._close(); };
+    search('');
   }
 
   function saveSearchModal() {
