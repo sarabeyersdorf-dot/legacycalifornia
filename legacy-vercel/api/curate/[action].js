@@ -17,6 +17,7 @@ import push          from '../_lib/handlers/curate-push.js';
 import valuations    from '../_lib/handlers/curate-valuations.js';
 import preview       from '../_lib/handlers/curate-preview.js';
 import clients       from '../_lib/handlers/curate-clients.js';
+import listingMedia  from '../_lib/handlers/curate-listing-media.js';
 
 const TABLE = {
   'search':         search,
@@ -25,7 +26,8 @@ const TABLE = {
   'push':           push,
   'valuations':     valuations,
   'preview':        preview,
-  'clients':        clients
+  'clients':        clients,
+  'listing-media':  listingMedia
 };
 
 export default async function handler(req, res) {
