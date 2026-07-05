@@ -1449,9 +1449,22 @@
     if (lead.not_interested) consentChips.push('Not interested');
     if (lead.status === 'do_not_contact')      consentChips.push('Do not contact');
     if (lead.pipeline_stage === 'sphere')      consentChips.push('Sphere · no auto outreach');
-    const consentChipHtml = consentChips.length
-      ? `<div style="margin-top:6px;display:flex;gap:6px;flex-wrap:wrap;">${consentChips.map((c) => `<span class="badge" style="background:#FBE3E0;color:#9B2C2C;border:1px solid #E8B0AA;font-weight:600;">${escHtml(c)}</span>`).join('')}</div>`
-      : '';
+    const consentChipHtml = `<div style="margin-top:6px;display:flex;gap:6px;flex-wrap:wrap;align-items:center;">
+        ${consentChips.map((c) => `<span class="badge" style="background:#FBE3E0;color:#9B2C2C;border:1px solid #E8B0AA;font-weight:600;">${escHtml(c)}</span>`).join('')}
+        <button class="btn-link" data-detail-action="edit-consent" style="font-size:11px;color:var(--brass);background:none;border:none;cursor:pointer;padding:0;">${consentChips.length ? 'Edit contact prefs' : '+ Contact prefs'}</button>
+      </div>
+      <div data-consent-editor style="display:none;margin-top:10px;padding:12px 14px;background:var(--shell);border:1px solid var(--rule);font-size:13px;">
+        <div style="font-family:var(--mono);font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-mute);margin-bottom:8px;">Contact preferences</div>
+        <label style="display:flex;align-items:center;gap:8px;margin:6px 0;cursor:pointer;"><input type="checkbox" data-consent="call_opt_out" ${lead.call_opt_out ? 'checked' : ''}> Do not call</label>
+        <label style="display:flex;align-items:center;gap:8px;margin:6px 0;cursor:pointer;"><input type="checkbox" data-consent="sms_opt_out" ${lead.sms_opt_out ? 'checked' : ''}> Do not text</label>
+        <label style="display:flex;align-items:center;gap:8px;margin:6px 0;cursor:pointer;"><input type="checkbox" data-consent="email_opt_out" ${lead.email_opt_out ? 'checked' : ''}> Do not email</label>
+        <label style="display:flex;align-items:center;gap:8px;margin:6px 0;cursor:pointer;"><input type="checkbox" data-consent="not_interested" ${lead.not_interested ? 'checked' : ''}> Not interested</label>
+        <label style="display:flex;align-items:center;gap:8px;margin:6px 0;cursor:pointer;"><input type="checkbox" data-consent-status ${lead.status === 'do_not_contact' ? 'checked' : ''}> Do not contact at all (archive from outreach)</label>
+        <div style="display:flex;gap:8px;align-items:center;margin-top:10px;">
+          <button class="btn btn-ink btn-sm" data-detail-action="save-consent">Save preferences</button>
+          <span data-consent-status-msg style="font-size:12px;"></span>
+        </div>
+      </div>`;
 
     const pendingDraft = messages.find((m) => m.status === 'pending_approval' && m.ai_generated);
     const otherMessages = messages.filter((m) => m !== pendingDraft).sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
@@ -1514,16 +1527,14 @@
           </div>
         </div>
         <div class="ld-head-actions">
-          <button class="btn btn-ghost btn-sm" disabled title="Click-to-call endpoint pending">◇ Call</button>
-          <button class="btn btn-ghost btn-sm" disabled title="Tour scheduler endpoint pending">Schedule</button>
+          ${lead.phone
+            ? `<a class="btn btn-ghost btn-sm" href="tel:${escHtml(lead.phone)}" title="Call ${escHtml(lead.phone)}">◇ Call</a>`
+            : `<button class="btn btn-ghost btn-sm" disabled title="No phone number on file">◇ Call</button>`}
+          <button class="btn btn-ghost btn-sm" data-detail-action="schedule" title="Open the calendar to book a tour">Schedule</button>
           <button class="btn btn-ink btn-sm" data-detail-action="enroll">Add to sequence</button>
         </div>
       </div>
       ${draftHtml}
-      <div class="ld-thread">
-        <div class="ld-thread-h">Conversation · ${messages.length} message${messages.length === 1 ? '' : 's'}</div>
-        ${threadHtml}
-      </div>
       <div class="composer" data-composer>
         <div class="composer-head">
           <span class="composer-tab on" data-composer-tab="email">Email</span>
@@ -1539,12 +1550,46 @@
             <button class="btn btn-ink btn-sm" data-detail-action="send">Send</button>
           </div>
         </div>
+      </div>
+      <div class="ld-thread">
+        <div class="ld-thread-h">Conversation · ${messages.length} message${messages.length === 1 ? '' : 's'}</div>
+        ${threadHtml}
       </div>`;
 
     const draftEl = detailEl.querySelector('.ai-draft');
     if (draftEl && pendingDraft) wireDraftActions(draftEl, pendingDraft, lead);
     const enrollBtn = detailEl.querySelector('[data-detail-action="enroll"]');
     if (enrollBtn) enrollBtn.addEventListener('click', () => promptEnrollSequence(lead));
+
+    // Schedule → jump to the Calendar view (booking lives there).
+    const schedBtn = detailEl.querySelector('[data-detail-action="schedule"]');
+    if (schedBtn) schedBtn.addEventListener('click', () => { if (typeof window.showView === 'function') window.showView(null, 'cal'); });
+
+    // Contact-preference editor — toggle the panel, save the flags.
+    const consentToggle = detailEl.querySelector('[data-detail-action="edit-consent"]');
+    const consentPanel  = detailEl.querySelector('[data-consent-editor]');
+    if (consentToggle && consentPanel) {
+      consentToggle.addEventListener('click', () => {
+        consentPanel.style.display = consentPanel.style.display === 'none' ? 'block' : 'none';
+      });
+      const saveBtn = consentPanel.querySelector('[data-detail-action="save-consent"]');
+      const msgEl   = consentPanel.querySelector('[data-consent-status-msg]');
+      if (saveBtn) saveBtn.addEventListener('click', async () => {
+        const patch = { id: lead.id };
+        consentPanel.querySelectorAll('[data-consent]').forEach((cb) => { patch[cb.getAttribute('data-consent')] = cb.checked; });
+        const dnc = consentPanel.querySelector('[data-consent-status]');
+        patch.status = dnc && dnc.checked ? 'do_not_contact' : 'active';
+        saveBtn.disabled = true; saveBtn.textContent = 'Saving…';
+        const r = await window.Legacy.api('/api/crm/lead', { method: 'PATCH', body: patch });
+        saveBtn.disabled = false; saveBtn.textContent = 'Save preferences';
+        if (r.ok) {
+          msgEl.style.color = '#2E5C3D'; msgEl.textContent = 'Saved.';
+          selectLeadId(lead.id); // refresh detail so chips reflect the change
+        } else {
+          msgEl.style.color = '#9B2C2C'; msgEl.textContent = (r.json && r.json.error) || 'Failed to save.';
+        }
+      });
+    }
 
     // Wire the composer (channel toggle, Note/Internal placeholders, Send).
     wireComposer(detailEl, lead);

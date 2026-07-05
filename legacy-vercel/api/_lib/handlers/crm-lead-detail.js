@@ -18,8 +18,10 @@ import { adminClient } from '../supabase.js';
 import { getCallerProfile, isAgent } from '../auth.js';
 import { handleOptions, readJson, ok, fail } from '../cors.js';
 
-const PIPELINE_STAGES   = new Set(['new', 'nurture', 'touring', 'offer', 'close']);
-const ASSIGNED_AGENTS   = new Set(['sara', 'james', 'unassigned']);
+const PIPELINE_STAGES   = new Set(['new', 'nurture', 'touring', 'offer', 'close', 'sphere']);
+const ASSIGNED_AGENTS   = new Set(['sara', 'james', 'both', 'unassigned']);
+const STATUSES          = new Set(['active', 'archived', 'do_not_contact']);
+const CONSENT_FIELDS    = ['call_opt_out', 'sms_opt_out', 'email_opt_out', 'not_interested'];
 
 export default async function handler(req, res) {
   if (handleOptions(req, res)) return;
@@ -94,6 +96,18 @@ async function updateLead(req, res, profile) {
       } else {
         patch.assigned_agent = body.assigned_agent;
       }
+    }
+    if (body.status !== undefined) {
+      if (!STATUSES.has(body.status)) {
+        errors.push(`status must be one of: ${[...STATUSES].join(', ')}`);
+      } else {
+        patch.status = body.status;
+      }
+    }
+    // Contact-preference toggles — let an agent clear a wrongly-set "do not
+    // call / text / email" or "not interested" flag directly from the lead.
+    for (const f of CONSENT_FIELDS) {
+      if (body[f] !== undefined) patch[f] = !!body[f];
     }
     if (errors.length) return fail(res, 400, errors.join('; '));
     if (Object.keys(patch).length === 0) {

@@ -15,7 +15,7 @@
 
 import { adminClient } from '../supabase.js';
 import { getCallerProfile, isAgent } from '../auth.js';
-import { sendSMS } from '../twilio.js';
+import { sendSMS, twilioConfigured } from '../twilio.js';
 import { sendEmail as sendEmailResend,   resendConfigured }   from '../resend.js';
 import { sendEmail as sendEmailSendgrid, sendgridConfigured } from '../sendgrid.js';
 import { handleOptions, readJson, ok, fail } from '../cors.js';
@@ -67,29 +67,47 @@ export default async function handler(req, res) {
       .from('messages').update(patch).eq('id', message_id).select().single();
     if (updErr) return fail(res, 500, `update: ${updErr.message}`);
 
-    // 3. Send via the appropriate channel
-    let providerResult, sentPatch;
+    // 3. Send via the appropriate channel.
+    //    SMS falls back to email automatically: if Twilio isn't configured (or
+    //    rejects auth) and the lead has an email address, the note still goes
+    //    out — so approving a draft never dead-ends on a broken SMS provider.
+    async function sendEmailNow() {
+      if (!lead.email) throw new Error('lead has no email address');
+      const provider = pickEmailProvider();
+      if (!provider) throw new Error('no email provider configured — set RESEND_API_KEY or SENDGRID_API_KEY');
+      const r = await provider.send({
+        to:      lead.email,
+        toName:  [lead.first_name, lead.last_name].filter(Boolean).join(' ') || null,
+        subject: updated.subject || 'A note from Legacy Properties',
+        text:    updated.body,
+        html:    bodyToHtml(updated.body)
+      });
+      r.via = provider.name;
+      return r;
+    }
+
+    let providerResult, sentPatch, usedChannel = msg.channel;
     try {
       if (msg.channel === 'sms') {
-        if (!lead.phone) throw new Error('lead has no phone number');
-        providerResult = await sendSMS({ to: lead.phone, body: updated.body });
-        sentPatch = { status: providerResult.skipped ? 'failed' : 'sent', twilio_sid: providerResult.sid || null };
+        try {
+          if (!twilioConfigured()) throw new Error('Twilio not configured');
+          if (!lead.phone)         throw new Error('lead has no phone number');
+          providerResult = await sendSMS({ to: lead.phone, body: updated.body });
+          if (providerResult.skipped) throw new Error(providerResult.reason || 'sms skipped');
+          providerResult.via = 'twilio';
+          sentPatch = { status: 'sent', twilio_sid: providerResult.sid || null };
+        } catch (smsErr) {
+          // SMS unavailable — fall back to email when we can.
+          if (!lead.email) throw smsErr;
+          providerResult = await sendEmailNow();
+          providerResult.fell_back_from = 'sms';
+          providerResult.fallback_reason = smsErr.message;
+          usedChannel = 'email';
+          sentPatch = { status: providerResult.skipped ? 'failed' : 'sent', channel: 'email', mailerlite_id: providerResult.id || null };
+        }
       } else if (msg.channel === 'email') {
-        if (!lead.email) throw new Error('lead has no email address');
-        const provider = pickEmailProvider();
-        if (!provider) throw new Error('no email provider configured — set RESEND_API_KEY or SENDGRID_API_KEY');
-        providerResult = await provider.send({
-          to:      lead.email,
-          toName:  [lead.first_name, lead.last_name].filter(Boolean).join(' ') || null,
-          subject: updated.subject || '(no subject)',
-          text:    updated.body,
-          html:    bodyToHtml(updated.body)
-        });
-        sentPatch = {
-          status: providerResult.skipped ? 'failed' : 'sent',
-          mailerlite_id: providerResult.id || null  // reuse column for any provider's id
-        };
-        providerResult.via = provider.name;
+        providerResult = await sendEmailNow();
+        sentPatch = { status: providerResult.skipped ? 'failed' : 'sent', mailerlite_id: providerResult.id || null };
       } else {
         throw new Error(`unsupported channel: ${msg.channel}`);
       }
@@ -109,15 +127,17 @@ export default async function handler(req, res) {
       await supa.from('lead_events').insert({
         lead_id:    lead.id,
         event_type: 'message_sent',
-        source:     msg.channel === 'sms' ? 'twilio' : 'mailerlite',
-        event_data: { message_id, channel: msg.channel, approved_by: patch.approved_by }
+        source:     usedChannel === 'sms' ? 'twilio' : 'mailerlite',
+        event_data: { message_id, channel: usedChannel, approved_by: patch.approved_by, fell_back_from: providerResult.fell_back_from || null }
       });
     }
 
     return ok(res, {
       message_id,
-      status:    sentPatch.status,
-      provider:  providerResult
+      status:       sentPatch.status,
+      sent_channel: usedChannel,
+      fell_back:    providerResult.fell_back_from || null,
+      provider:     providerResult
     });
   } catch (e) {
     return fail(res, 500, e.message);

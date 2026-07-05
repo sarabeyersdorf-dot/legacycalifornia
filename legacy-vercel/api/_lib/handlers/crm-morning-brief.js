@@ -107,6 +107,15 @@ export default async function handler(req, res) {
       supa.from('leads')      .select('id', { count: 'exact', head: true }).eq('pipeline_stage', 'close').gte('updated_at', ninetyAgo)
     ]);
 
+    // Real deals in motion — the escrow/listing deals from deals.json (the
+    // deals table), NOT leads. These are Sara's actual transactions.
+    const { data: dealsInMotion } = await supa
+      .from('deals')
+      .select('source_key, address, city, stage, side, agent, list_price, sale_price, coe_date')
+      .in('stage', ['pending', 'listing'])
+      .order('coe_date', { ascending: true, nullsFirst: false })
+      .limit(8);
+
     const result = {
       drafts:        drafts.data        || [],
       tours_today:   toursToday.data    || [],
@@ -124,7 +133,7 @@ export default async function handler(req, res) {
         pipeline_count:  leadsTotal.count     || 0
       },
       signals:      shapeSignals(overnightEvents.data || []),
-      active_deals: shapeActiveDeals(activeDealsLeads.data || [], openOffers.data || []),
+      active_deals: shapeDealsInMotion(dealsInMotion || []),
       hours:        shapeHours(hoursTours.data || [], now),
       funnel: {
         new_leads: funnelNew.count     || 0,
@@ -250,6 +259,36 @@ function shapeSignals(rows) {
       time:      formatClock(e.created_at),
       body:      eventBody(e, leadName),
       tag:       EVENT_TAG[e.event_type] || 'Signal'
+    };
+  });
+}
+
+// Real transactions from the deals table (fed by deals.json). Shows Sara's
+// actual listings + escrows on the Today view, with side (buy/sell/dual),
+// price, and where each is on the road to closing.
+function shapeDealsInMotion(deals) {
+  const TRACK = ['Listed', 'Offer', 'Escrow', 'Inspection', 'Appraisal', 'Close'];
+  const sideLabel = (s) => (s === 'both' ? 'Dual agency' : (s === 'buyer' ? 'Buy-side' : 'Sell-side'));
+  return deals.map((d) => {
+    const inEscrow = d.stage === 'pending';
+    const trackIdx = inEscrow ? 2 : 0;
+    const price = d.sale_price || d.list_price || null;
+    const coe = d.coe_date ? new Date(d.coe_date) : null;
+    const daysToCoe = coe ? Math.round((coe.getTime() - Date.now()) / 86400000) : null;
+    const stageLabel = inEscrow
+      ? (daysToCoe == null ? 'In escrow'
+          : daysToCoe >= 0 ? `In escrow · ${daysToCoe} day${daysToCoe === 1 ? '' : 's'} to close`
+          : 'Closing overdue')
+      : 'On market';
+    const agentName = d.agent === 'james' ? 'James' : 'Sara';
+    return {
+      lead_id:     d.source_key,
+      lead_name:   `${sideLabel(d.side)} · ${agentName}`,
+      stage_label: stageLabel,
+      amount:      price,
+      address:     d.address || null,
+      city:        d.city || null,
+      track:       TRACK.map((label, i) => ({ label, done: i < trackIdx, on: i === trackIdx }))
     };
   });
 }
