@@ -27,8 +27,9 @@ import { adminClient } from '../supabase.js';
 import { getCallerProfile, isAgent } from '../auth.js';
 import { handleOptions, readJson, ok, fail } from '../cors.js';
 
-const ALLOWED_STAGES   = new Set(['new','nurture','touring','offer','close','sphere']);
+const ALLOWED_STAGES   = new Set(['new','nurture','consult','signed','active','under_contract','closed','sphere']);
 const ALLOWED_AGENTS   = new Set(['sara','james','unassigned']);
+const ALLOWED_SIDES    = new Set(['buyer','seller','both']);
 const ALLOWED_TYPES    = new Set(['buyer','seller','land','investor']);
 const ALLOWED_TEMPS    = new Set(['new','warm','hot','cold']);
 
@@ -49,10 +50,10 @@ const FUB_STAGE_MAP = {
   'a - hot 1-3 months':'nurture',
   'b - warm 3-6 months':'nurture',
   'c - cold 6+ months':'nurture',
-  'showing homes':     'touring',
-  'making offers':     'offer',
-  'pending':           'offer',
-  'under contract':    'offer',
+  'showing homes':     'active',
+  'making offers':     'under_contract',
+  'pending':           'under_contract',
+  'under contract':    'under_contract',
   'lead':              'new',
   'buyer':             'new',
   'seller':            'new',
@@ -131,6 +132,8 @@ function shapeLead(r) {
     source:         r.source     || 'import',
     journey_stage:  null,
     lead_type:      lt,
+    deal_side:      ALLOWED_SIDES.has(r.deal_side) ? r.deal_side
+                      : (lt === 'seller' ? 'seller' : ['buyer','investor','land'].includes(lt) ? 'buyer' : null),
     temperature:    tmp,
     assigned_agent: agent,
     pipeline_stage: stage,

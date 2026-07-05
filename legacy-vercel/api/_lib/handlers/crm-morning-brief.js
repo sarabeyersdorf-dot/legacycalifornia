@@ -75,7 +75,7 @@ export default async function handler(req, res) {
           .in('status', ['received','countered']),
       // Roster counts
       supa.from('leads')     .select('id', { count: 'exact', head: true }).eq('status', 'active'),
-      supa.from('leads')     .select('id', { count: 'exact', head: true }).eq('status', 'active').eq('pipeline_stage', 'close'),
+      supa.from('leads')     .select('id', { count: 'exact', head: true }).eq('status', 'active').in('pipeline_stage', ['closed','close']),
       supa.from('leads')     .select('id', { count: 'exact', head: true }).eq('status', 'archived'),
       supa.from('properties').select('id', { count: 'exact', head: true }).eq('status', 'active'),
       supa.from('tours')     .select('id', { count: 'exact', head: true }).gte('scheduled_at', now.toISOString()).lte('scheduled_at', weekAhead),
@@ -104,7 +104,7 @@ export default async function handler(req, res) {
       supa.from('lead_events').select('lead_id', { count: 'exact', head: true }).gte('created_at',  ninetyAgo).in('event_type', ['email_opened','sms_replied','property_viewed','property_saved']),
       supa.from('tours')      .select('lead_id', { count: 'exact', head: true }).gte('scheduled_at', ninetyAgo),
       supa.from('offers')     .select('buyer_lead_id', { count: 'exact', head: true }).gte('created_at', ninetyAgo),
-      supa.from('leads')      .select('id', { count: 'exact', head: true }).eq('pipeline_stage', 'close').gte('updated_at', ninetyAgo)
+      supa.from('leads')      .select('id', { count: 'exact', head: true }).in('pipeline_stage', ['closed','close']).gte('updated_at', ninetyAgo)
     ]);
 
     // Real deals in motion — the escrow/listing deals from deals.json (the

@@ -1432,8 +1432,9 @@
     const daysInPipeline = lead.created_at
       ? Math.max(0, Math.floor((Date.now() - new Date(lead.created_at).getTime()) / 86400000))
       : 0;
+    const SIDE_LABEL = { buyer: 'Buyer', seller: 'Seller', both: 'Dual · both sides' };
     const metaBits = [
-      (lead.lead_type || 'lead').replace(/^./, (c) => c.toUpperCase()),
+      SIDE_LABEL[lead.deal_side] || (lead.lead_type || 'lead').replace(/^./, (c) => c.toUpperCase()),
       (lead.areas && lead.areas[0]) || null,
       `${daysInPipeline} days in pipeline`,
       lead.temperature ? lead.temperature.replace(/^./, (c) => c.toUpperCase()) : null,
@@ -1451,10 +1452,19 @@
     if (lead.pipeline_stage === 'sphere')      consentChips.push('Sphere · no auto outreach');
     const consentChipHtml = `<div style="margin-top:6px;display:flex;gap:6px;flex-wrap:wrap;align-items:center;">
         ${consentChips.map((c) => `<span class="badge" style="background:#FBE3E0;color:#9B2C2C;border:1px solid #E8B0AA;font-weight:600;">${escHtml(c)}</span>`).join('')}
-        <button class="btn-link" data-detail-action="edit-consent" style="font-size:11px;color:var(--brass);background:none;border:none;cursor:pointer;padding:0;">${consentChips.length ? 'Edit contact prefs' : '+ Contact prefs'}</button>
+        <button class="btn-link" data-detail-action="edit-consent" style="font-size:11px;color:var(--brass);background:none;border:none;cursor:pointer;padding:0;">Edit details</button>
       </div>
       <div data-consent-editor style="display:none;margin-top:10px;padding:12px 14px;background:var(--shell);border:1px solid var(--rule);font-size:13px;">
-        <div style="font-family:var(--mono);font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-mute);margin-bottom:8px;">Contact preferences</div>
+        <div style="font-family:var(--mono);font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-mute);margin-bottom:8px;">Lead details &amp; contact prefs</div>
+        <div style="display:flex;align-items:center;gap:8px;margin:2px 0 10px;">
+          <span style="font-family:var(--mono);font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-mute);min-width:60px;">Side</span>
+          <select data-lead-side style="font:inherit;font-size:13px;padding:5px 9px;border:1px solid var(--rule);background:#fff;color:var(--ink);">
+            <option value="">— not set —</option>
+            <option value="buyer" ${lead.deal_side === 'buyer' ? 'selected' : ''}>Buyer</option>
+            <option value="seller" ${lead.deal_side === 'seller' ? 'selected' : ''}>Seller</option>
+            <option value="both" ${lead.deal_side === 'both' ? 'selected' : ''}>Dual · both sides</option>
+          </select>
+        </div>
         <label style="display:flex;align-items:center;gap:8px;margin:6px 0;cursor:pointer;"><input type="checkbox" data-consent="call_opt_out" ${lead.call_opt_out ? 'checked' : ''}> Do not call</label>
         <label style="display:flex;align-items:center;gap:8px;margin:6px 0;cursor:pointer;"><input type="checkbox" data-consent="sms_opt_out" ${lead.sms_opt_out ? 'checked' : ''}> Do not text</label>
         <label style="display:flex;align-items:center;gap:8px;margin:6px 0;cursor:pointer;"><input type="checkbox" data-consent="email_opt_out" ${lead.email_opt_out ? 'checked' : ''}> Do not email</label>
@@ -1579,6 +1589,8 @@
         consentPanel.querySelectorAll('[data-consent]').forEach((cb) => { patch[cb.getAttribute('data-consent')] = cb.checked; });
         const dnc = consentPanel.querySelector('[data-consent-status]');
         patch.status = dnc && dnc.checked ? 'do_not_contact' : 'active';
+        const sideSel = consentPanel.querySelector('[data-lead-side]');
+        if (sideSel) patch.deal_side = sideSel.value || null;
         saveBtn.disabled = true; saveBtn.textContent = 'Saving…';
         const r = await window.Legacy.api('/api/crm/lead', { method: 'PATCH', body: patch });
         saveBtn.disabled = false; saveBtn.textContent = 'Save preferences';
@@ -1594,11 +1606,14 @@
     // Wire the composer (channel toggle, Note/Internal placeholders, Send).
     wireComposer(detailEl, lead);
 
-    const stages = ['new', 'nurture', 'touring', 'offer', 'close'];
-    const stageIdx = Math.max(0, stages.indexOf(lead.pipeline_stage || 'new'));
+    const stages = ['new', 'nurture', 'consult', 'signed', 'active', 'under_contract', 'closed'];
+    const STAGE_REMAP = { touring: 'active', offer: 'under_contract', close: 'closed' };
+    const curStage = STAGE_REMAP[lead.pipeline_stage] || lead.pipeline_stage || 'new';
+    const stageIdx = Math.max(0, stages.indexOf(curStage));
+    const STAGE_LABELS = { new: 'New', nurture: 'Nurturing', consult: 'Consult', signed: 'Signed', active: 'Active', under_contract: 'Under contract', closed: 'Closed' };
     const stageHtml = stages.map((s, i) => {
       const cls = i < stageIdx ? 'done' : (i === stageIdx ? 'now' : '');
-      return `<div class="stage-step ${cls}"><span class="l">${s.replace(/^./, (c) => c.toUpperCase())}</span></div>`;
+      return `<div class="stage-step ${cls}"><span class="l">${STAGE_LABELS[s] || s}</span></div>`;
     }).join('');
 
     // Merge lead_events + lead_notes into a single chronological activity
@@ -1986,26 +2001,48 @@
     }
   }
 
+  // Side tag → short label + css class for the little Buyer/Seller/Dual chip.
+  const SIDE_META = {
+    buyer:  { label: 'Buyer',  cls: 'buyer'  },
+    seller: { label: 'Seller', cls: 'seller' },
+    both:   { label: 'Dual',   cls: 'both'   }
+  };
+  function sideChipHtml(side) {
+    const m = SIDE_META[side];
+    return m ? `<span class="kan-side ${m.cls}">${m.label}</span>` : '';
+  }
+  function activeSideFilter() {
+    const on = document.querySelector('[data-side-filter] .chip.on');
+    return (on && on.getAttribute('data-side')) || 'all';
+  }
+
+  let lastPipelineData = null;
   function paintKanban(pipelineData) {
-    const stages = (pipelineData && pipelineData.stages) || [];
+    if (pipelineData) lastPipelineData = pipelineData;
+    const data   = pipelineData || lastPipelineData;
+    if (!data) return;
+    const stages = (data && data.stages) || [];
+    const side   = activeSideFilter();
+    const keep   = (l) => side === 'all' || (l.deal_side || '') === side;
     stages.forEach((stage) => {
       const col  = document.querySelector(`[data-stage="${stage.stage}"]`);
       if (!col) return;
       const head = col.querySelector('[data-stage-count]');
       const body = col.querySelector('[data-stage-body]');
-      if (head) head.innerHTML = `${stage.count} · <span class="sum">${escHtml(fmtUSD(stage.estimated_value))}</span>`;
+      const leads = (stage.leads || []).filter(keep);
+      if (head) head.innerHTML = `${leads.length} · <span class="sum">${escHtml(fmtUSD(stage.estimated_value))}</span>`;
       if (!body) return;
-      if (!stage.leads.length) {
+      if (!leads.length) {
         body.innerHTML = `<div style="opacity:.4;font-style:italic;font-size:12px;padding:8px 4px;">Empty.</div>`;
         return;
       }
-      body.innerHTML = stage.leads.slice(0, 10).map((l) => {
+      body.innerHTML = leads.slice(0, 10).map((l) => {
         const pill = tempPill(l.temperature);
         const mid  = (l.price_min && l.price_max) ? (l.price_min + l.price_max) / 2 : (l.price_min || l.price_max || 0);
         const home = (l.areas && l.areas[0]) || (l.journey_stage || '').replace(/_/g, ' ');
         return `
           <div class="kan-card" data-lead-id="${escHtml(l.id)}">
-            <div class="name">${escHtml(fullName(l))}</div>
+            <div class="name">${escHtml(fullName(l))} ${sideChipHtml(l.deal_side)}</div>
             <div class="home">${mid ? `<span class="price">${escHtml(fmtUSD(mid))}</span> · ` : ''}${escHtml(home || '—')}</div>
             <div class="kan-card-foot">
               <span class="pill-status ${pill}">${escHtml((l.temperature || 'new').replace(/^./, (c) => c.toUpperCase()))} · ${l.score == null ? '—' : l.score}</span>
@@ -2022,13 +2059,21 @@
     });
 
     const eyebrow = document.querySelector('[data-bind-pipe-eyebrow]');
-    if (eyebrow) eyebrow.textContent = `Active pipeline · ${pipelineData.total_leads || 0} lead${pipelineData.total_leads === 1 ? '' : 's'}`;
+    if (eyebrow) eyebrow.textContent = `Active pipeline · ${data.total_leads || 0} lead${data.total_leads === 1 ? '' : 's'}`;
     const inflight = document.querySelector('[data-bind-pipe-inflight]');
-    if (inflight) inflight.textContent = fmtUSD(pipelineData.total_estimated_value || 0);
+    if (inflight) inflight.textContent = fmtUSD(data.total_estimated_value || 0);
 
     // Wire HTML5 drag-and-drop so cards can be moved across stage columns.
     wireKanbanDnd();
   }
+
+  // Buyer / Seller / Dual filter above the kanban — re-paints from cache.
+  document.addEventListener('click', (e) => {
+    const chip = e.target.closest('[data-side-filter] .chip');
+    if (!chip) return;
+    document.querySelectorAll('[data-side-filter] .chip').forEach((c) => c.classList.toggle('on', c === chip));
+    paintKanban(null);
+  });
 
   async function loadLead(id) {
     const detailEl = document.querySelector('[data-lead-detail]');

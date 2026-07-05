@@ -25,7 +25,8 @@ import { handleOptions, readJson, ok, fail } from '../cors.js';
 const ALLOWED_AGENTS = new Set(['sara', 'james', 'unassigned']);
 const ALLOWED_TYPES  = new Set(['buyer', 'seller', 'land', 'investor']);
 const ALLOWED_TEMPS  = new Set(['new', 'warm', 'hot', 'cold']);
-const ALLOWED_STAGES = new Set(['new', 'nurture', 'touring', 'offer', 'close', 'sphere']);
+const ALLOWED_STAGES = new Set(['new', 'nurture', 'consult', 'signed', 'active', 'under_contract', 'closed', 'sphere']);
+const ALLOWED_SIDES  = new Set(['buyer', 'seller', 'both']);
 
 function agentKeyForRole(role) {
   if (role === 'agent_james') return 'james';
@@ -78,6 +79,9 @@ export default async function handler(req, res) {
       phone,
       source:         'manual',
       lead_type:      ALLOWED_TYPES.has(body?.lead_type)   ? body.lead_type   : null,
+      deal_side:      ALLOWED_SIDES.has(body?.deal_side)   ? body.deal_side
+                        : (body?.lead_type === 'seller' ? 'seller'
+                          : ['buyer', 'investor', 'land'].includes(body?.lead_type) ? 'buyer' : null),
       temperature:    ALLOWED_TEMPS.has(body?.temperature) ? body.temperature : 'new',
       assigned_agent: assigned,
       pipeline_stage: ALLOWED_STAGES.has(body?.pipeline_stage) ? body.pipeline_stage : 'new',

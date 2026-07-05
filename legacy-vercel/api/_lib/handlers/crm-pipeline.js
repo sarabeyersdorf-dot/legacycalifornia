@@ -9,7 +9,10 @@ import { adminClient } from '../supabase.js';
 import { getCallerProfile, isAgent } from '../auth.js';
 import { handleOptions, ok, fail } from '../cors.js';
 
-const STAGES = ['new', 'nurture', 'touring', 'offer', 'close'];
+const STAGES = ['new', 'nurture', 'consult', 'signed', 'active', 'under_contract', 'closed'];
+// Legacy stage keys → new keys, so un-migrated leads still land in the right
+// column even before db/012 runs. 'sphere' is intentionally not a column.
+const STAGE_REMAP = { touring: 'active', offer: 'under_contract', close: 'closed' };
 const COMMISSION_PCT = 0.025;
 
 export default async function handler(req, res) {
@@ -23,7 +26,7 @@ export default async function handler(req, res) {
     const supa = adminClient();
     const { data: leads, error } = await supa
       .from('leads')
-      .select('id, first_name, last_name, email, pipeline_stage, score, temperature, price_min, price_max, journey_stage, lead_type, updated_at')
+      .select('id, first_name, last_name, email, pipeline_stage, deal_side, score, temperature, price_min, price_max, journey_stage, lead_type, updated_at')
       .eq('status', 'active');
 
     if (error) return fail(res, 500, error.message);
@@ -33,7 +36,9 @@ export default async function handler(req, res) {
     }]));
 
     for (const lead of (leads || [])) {
-      const g = groups[lead.pipeline_stage] || groups.new;
+      const key = STAGE_REMAP[lead.pipeline_stage] || lead.pipeline_stage;
+      const g = groups[key];
+      if (!g) continue; // sphere / unknown stages aren't columns on the active board
       g.leads.push(lead);
       g.count += 1;
       const midpoint = midPrice(lead.price_min, lead.price_max);

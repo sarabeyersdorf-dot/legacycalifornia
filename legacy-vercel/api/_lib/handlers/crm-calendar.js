@@ -270,7 +270,7 @@ async function createOrInvite(req, res, supa, agent) {
       const { data: created, error: insErr } = await supa.from('leads').insert({
         email, first_name: typeof body?.first_name === 'string' ? body.first_name.trim() : null,
         last_name: typeof body?.last_name === 'string' ? body.last_name.trim() : null,
-        source: 'manual', lead_type: 'buyer', assigned_agent: agent, journey_stage: 'touring', pipeline_stage: 'touring'
+        source: 'manual', lead_type: 'buyer', deal_side: 'buyer', assigned_agent: agent, journey_stage: 'touring', pipeline_stage: 'active'
       }).select('id, email').single();
       if (insErr) return fail(res, 500, `lead create: ${insErr.message}`);
       lead = created;

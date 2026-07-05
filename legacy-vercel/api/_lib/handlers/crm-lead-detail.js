@@ -18,9 +18,10 @@ import { adminClient } from '../supabase.js';
 import { getCallerProfile, isAgent } from '../auth.js';
 import { handleOptions, readJson, ok, fail } from '../cors.js';
 
-const PIPELINE_STAGES   = new Set(['new', 'nurture', 'touring', 'offer', 'close', 'sphere']);
+const PIPELINE_STAGES   = new Set(['new', 'nurture', 'consult', 'signed', 'active', 'under_contract', 'closed', 'sphere']);
 const ASSIGNED_AGENTS   = new Set(['sara', 'james', 'both', 'unassigned']);
 const STATUSES          = new Set(['active', 'archived', 'do_not_contact']);
+const DEAL_SIDES        = new Set(['buyer', 'seller', 'both']);
 const CONSENT_FIELDS    = ['call_opt_out', 'sms_opt_out', 'email_opt_out', 'not_interested'];
 
 export default async function handler(req, res) {
@@ -102,6 +103,15 @@ async function updateLead(req, res, profile) {
         errors.push(`status must be one of: ${[...STATUSES].join(', ')}`);
       } else {
         patch.status = body.status;
+      }
+    }
+    if (body.deal_side !== undefined) {
+      if (body.deal_side === null || body.deal_side === '') {
+        patch.deal_side = null;
+      } else if (!DEAL_SIDES.has(body.deal_side)) {
+        errors.push(`deal_side must be one of: ${[...DEAL_SIDES].join(', ')}`);
+      } else {
+        patch.deal_side = body.deal_side;
       }
     }
     // Contact-preference toggles — let an agent clear a wrongly-set "do not

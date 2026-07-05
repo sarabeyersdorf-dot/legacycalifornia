@@ -104,24 +104,26 @@ export default async function handler(req, res) {
       supa.from('messages').select('id', { count: 'exact', head: true })
           .eq('direction', 'outbound').gte('created_at', yStart),
 
-      // Pipeline header — expected this month + closing this week
+      // Pipeline header — expected this month + closing this week.
+      // Stage filters accept new + legacy keys so metrics are correct before
+      // and after the db/012 remap (offer→under_contract, close→closed, touring→active).
       supa.from('leads').select('id, pipeline_stage, price_min, price_max, updated_at')
-          .eq('status', 'active').in('pipeline_stage', ['offer','close']),
+          .eq('status', 'active').in('pipeline_stage', ['under_contract','offer','close','closed']),
       supa.from('leads').select('id', { count: 'exact', head: true })
-          .eq('status', 'active').eq('pipeline_stage', 'close')
+          .eq('status', 'active').in('pipeline_stage', ['closed','close'])
           .gte('updated_at', isoStartOfDay(now)).lte('updated_at', weekFwd),
       supa.from('leads').select('id', { count: 'exact', head: true })
-          .in('pipeline_stage', ['touring','offer','close']),
+          .in('pipeline_stage', ['active','touring','under_contract','offer','closed','close']),
       supa.from('leads').select('id', { count: 'exact', head: true })
-          .in('pipeline_stage', ['offer','close']),
+          .in('pipeline_stage', ['under_contract','offer','closed','close']),
 
-      // Reports — closed-by-month + recent closings (we use leads in pipeline_stage='close' as proxy)
+      // Reports — closed-by-month + recent closings (leads at the closed stage as proxy)
       supa.from('leads')
           .select('id, first_name, last_name, price_min, price_max, updated_at, lead_type, pipeline_stage, status')
-          .eq('pipeline_stage', 'close')
+          .in('pipeline_stage', ['closed','close'])
           .gte('updated_at', twelveMoAgo)
           .order('updated_at', { ascending: false }),
-      supa.from('leads').select('id', { count: 'exact', head: true }).eq('pipeline_stage', 'close')
+      supa.from('leads').select('id', { count: 'exact', head: true }).in('pipeline_stage', ['closed','close'])
     ]);
 
     // ---------- Day list (max 6) ----------
