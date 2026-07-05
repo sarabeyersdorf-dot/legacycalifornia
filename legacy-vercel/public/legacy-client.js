@@ -1547,6 +1547,8 @@
     const saved    = payload.saved_properties || [];
     const tours    = payload.tours || [];
     const offers   = payload.offers || [];
+    const tasks    = payload.tasks || [];
+    const appts    = payload.appointments || [];
 
     const initials = initialsOf(lead.first_name, lead.last_name, lead.email);
     const daysInPipeline = lead.created_at
@@ -1646,6 +1648,47 @@
             </div>`;
         }).join('');
 
+    // --- Shared-with-client panel -----------------------------------------
+    // Every shareable item (tasks, tours, appointments) with a per-row toggle
+    // that flips it between internal and client-visible. Client-visible rows
+    // surface in this contact's private portal. A wire-fraud guard on the
+    // server refuses to share anything that reads like payment instructions.
+    const tourTitle = (t) => (t.properties && t.properties.address)
+      ? `Tour · ${t.properties.address}`
+      : `${(t.tour_type || 'Property').replace(/^./, (c) => c.toUpperCase())} tour`;
+    const shareables = [
+      ...tasks.map((t) => ({ kind: 'task', id: t.id, title: t.title || 'Task', label: t.client_label || '', shared: t.visibility === 'client', done: !!t.done })),
+      ...tours.map((t) => ({ kind: 'tour', id: t.id, title: tourTitle(t), label: t.client_label || '', shared: t.visibility === 'client' })),
+      ...appts.map((a) => ({ kind: 'appointment', id: a.id, title: a.title || 'Appointment', label: a.client_label || '', shared: a.visibility === 'client' }))
+    ];
+    const sharedCount = shareables.filter((s) => s.shared).length;
+    const KIND_BADGE = { task: 'Task', tour: 'Tour', appointment: 'Appt' };
+    const shareRowHtml = (s) => `
+      <div class="share-row" data-kind="${escHtml(s.kind)}" data-id="${escHtml(s.id)}" style="display:flex;align-items:flex-start;gap:10px;padding:9px 0;border-top:1px solid var(--rule);">
+        <label style="display:inline-flex;align-items:center;gap:6px;cursor:pointer;white-space:nowrap;padding-top:1px;" title="Show this to the client in their portal">
+          <input type="checkbox" data-share-toggle ${s.shared ? 'checked' : ''}>
+          <span style="font-family:var(--mono);font-size:8px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-mute);">Client</span>
+        </label>
+        <div style="flex:1;min-width:0;">
+          <div style="font-size:13px;color:var(--ink);${s.done ? 'text-decoration:line-through;opacity:.55;' : ''}">
+            ${escHtml(s.title)}
+            <span style="font-family:var(--mono);font-size:8px;color:var(--ink-mute);border:1px solid var(--rule);padding:0 4px;border-radius:2px;margin-left:4px;">${KIND_BADGE[s.kind]}</span>
+          </div>
+          <div data-share-label-wrap style="margin-top:5px;display:${s.shared ? 'block' : 'none'};">
+            <input data-share-label value="${escHtml(s.label)}" placeholder="What the client sees (optional — defaults to the title)" style="width:100%;border:1px solid var(--rule);padding:5px 8px;background:#fff;font:inherit;font-size:12px;color:var(--ink);">
+          </div>
+        </div>
+      </div>`;
+    const sharedPanelHtml = shareables.length === 0 ? '' : `
+      <div class="ld-shared" data-shared-panel style="margin-top:14px;border:1px solid var(--rule);background:var(--shell);padding:12px 14px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:2px;">
+          <span style="font-family:var(--mono);font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-mute);">Shared with client</span>
+          <span style="font-family:var(--mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-mute);"><span data-share-count>${sharedCount}</span> of ${shareables.length} shared</span>
+        </div>
+        <div style="font-size:11px;color:var(--ink-mute);margin-bottom:4px;">Toggle any item to show it in this client’s private portal. Wire or payment instructions can’t be shared.</div>
+        ${shareables.map(shareRowHtml).join('')}
+      </div>`;
+
     detailEl.innerHTML = `
       <div class="ld-head">
         <div class="ld-head-l">
@@ -1688,6 +1731,7 @@
           </div>
         </div>
       </div>
+      ${sharedPanelHtml}
       <div class="ld-thread">
         <div class="ld-thread-h">Conversation · ${messages.length} message${messages.length === 1 ? '' : 's'}</div>
         ${threadHtml}
@@ -1790,6 +1834,50 @@
 
     // Wire the composer (channel toggle, Note/Internal placeholders, Send).
     wireComposer(detailEl, lead);
+
+    // Wire the shared-with-client toggles + inline labels.
+    const sharedPanel = detailEl.querySelector('[data-shared-panel]');
+    if (sharedPanel) {
+      const countEl = sharedPanel.querySelector('[data-share-count]');
+      const recount = () => {
+        if (countEl) countEl.textContent = String(sharedPanel.querySelectorAll('[data-share-toggle]:checked').length);
+      };
+      sharedPanel.querySelectorAll('.share-row').forEach((row) => {
+        const kind   = row.getAttribute('data-kind');
+        const id     = row.getAttribute('data-id');
+        const toggle = row.querySelector('[data-share-toggle]');
+        const wrap   = row.querySelector('[data-share-label-wrap]');
+        const labelI = row.querySelector('[data-share-label]');
+        const flip = async (visibility, client_label) => {
+          const body = { kind, id, visibility };
+          if (client_label !== undefined) body.client_label = client_label;
+          return window.Legacy.api('/api/crm/visibility', { method: 'POST', body });
+        };
+        if (toggle) toggle.addEventListener('change', async () => {
+          const nowShared = toggle.checked;
+          toggle.disabled = true;
+          const r = await flip(nowShared ? 'client' : 'internal', labelI ? labelI.value.trim() : undefined);
+          toggle.disabled = false;
+          if (r.ok) {
+            if (wrap) wrap.style.display = nowShared ? 'block' : 'none';
+            recount();
+            toast(nowShared ? 'Now visible in the client’s portal.' : 'Hidden from the client.');
+          } else {
+            // Wire guard (409) or any failure — revert the toggle, warn.
+            toggle.checked = !nowShared;
+            if (wrap) wrap.style.display = toggle.checked ? 'block' : 'none';
+            toast((r.json && r.json.error) || 'Could not change visibility.', false);
+          }
+        });
+        // Save an edited client_label on blur (only meaningful when shared).
+        if (labelI) labelI.addEventListener('blur', async () => {
+          if (!toggle || !toggle.checked) return;
+          const r = await flip('client', labelI.value.trim());
+          if (r.ok) toast('Label updated.');
+          else toast((r.json && r.json.error) || 'Could not update label.', false);
+        });
+      });
+    }
 
     const stages = ['new', 'nurture', 'consult', 'signed', 'active', 'under_contract', 'closed'];
     const STAGE_REMAP = { touring: 'active', offer: 'under_contract', close: 'closed' };

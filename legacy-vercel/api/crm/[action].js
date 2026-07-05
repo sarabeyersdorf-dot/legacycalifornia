@@ -33,6 +33,7 @@ import me            from '../_lib/handlers/crm-me.js';
 import listings      from '../_lib/handlers/crm-listings.js';
 import tasks         from '../_lib/handlers/crm-tasks.js';
 import actions       from '../_lib/handlers/crm-actions.js';
+import visibility    from '../_lib/handlers/crm-visibility.js';
 
 const TABLE = {
   'morning-brief':   morningBrief,
@@ -53,7 +54,8 @@ const TABLE = {
   'me':              me,
   'listings':        listings,
   'tasks':           tasks,
-  'actions':         actions
+  'actions':         actions,
+  'visibility':      visibility
 };
 
 export default async function handler(req, res) {
