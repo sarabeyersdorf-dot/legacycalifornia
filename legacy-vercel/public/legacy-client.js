@@ -896,7 +896,12 @@
       if (session) await wireCrmPage(session);
     }
     if (/\/dashboard\.html$/.test(path)) await gate(['buyer','agent_sara','agent_james','admin']);
-    if (/\/seller\.html$/.test(path))    await gate(['seller','agent_sara','agent_james','admin']);
+    if (/\/seller\.html$/.test(path)) {
+      // Private-link access (?t=<portal_token>) needs no login — the token is
+      // the credential. Only gate when there's no token.
+      const hasToken = new URLSearchParams(location.search).get('t');
+      if (!hasToken) await gate(['seller','agent_sara','agent_james','admin']);
+    }
   });
 
   // expose for debugging
@@ -1269,8 +1274,10 @@
 
   async function loadSeller() {
     let res;
+    const token = new URLSearchParams(location.search).get('t');
+    const url = '/api/seller/portal' + (token ? ('?t=' + encodeURIComponent(token)) : '');
     try {
-      res = await fetch('/api/seller/portal', {
+      res = await fetch(url, {
         method: 'GET',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include'
@@ -1635,6 +1642,9 @@
             ? `<a class="btn btn-ghost btn-sm" href="tel:${escHtml(lead.phone)}" title="Call ${escHtml(lead.phone)}">◇ Call</a>`
             : `<button class="btn btn-ghost btn-sm" disabled title="No phone number on file">◇ Call</button>`}
           <button class="btn btn-ghost btn-sm" data-detail-action="schedule" title="Open the calendar to book a tour">Schedule</button>
+          ${lead.portal_token && lead.deal_side !== 'buyer'
+            ? `<button class="btn btn-ghost btn-sm" data-detail-action="portal-link" title="Copy this client's private, no-login portal link">Copy portal link</button>`
+            : ''}
           <button class="btn btn-ink btn-sm" data-detail-action="enroll">Add to sequence</button>
         </div>
       </div>
@@ -1668,6 +1678,15 @@
     // Schedule → jump to the Calendar view (booking lives there).
     const schedBtn = detailEl.querySelector('[data-detail-action="schedule"]');
     if (schedBtn) schedBtn.addEventListener('click', () => { if (typeof window.showView === 'function') window.showView(null, 'cal'); });
+
+    // Copy the client's private, no-login portal link.
+    const portalBtn = detailEl.querySelector('[data-detail-action="portal-link"]');
+    if (portalBtn) portalBtn.addEventListener('click', () => {
+      const link = `${location.origin}/seller.html?t=${encodeURIComponent(lead.portal_token)}`;
+      const done = () => { portalBtn.textContent = 'Copied ✓'; setTimeout(() => { portalBtn.textContent = 'Copy portal link'; }, 1600); };
+      if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(link).then(done).catch(() => window.prompt('Copy this private portal link:', link));
+      else window.prompt('Copy this private portal link:', link);
+    });
 
     // Contact-preference editor — toggle the panel, save the flags.
     const consentToggle = detailEl.querySelector('[data-detail-action="edit-consent"]');

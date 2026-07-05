@@ -302,7 +302,8 @@
 /* Upgrade the hero from a neutral box to the listing's real photo (MLS photo,
    else the YouTube tour thumbnail) from the portal payload. */
 (function () {
-  fetch('/api/seller/portal', { credentials: 'include' })
+  var _t = new URLSearchParams(location.search).get('t');
+  fetch('/api/seller/portal' + (_t ? ('?t=' + encodeURIComponent(_t)) : ''), { credentials: 'include' })
     .then(function (r) { return r.ok ? r.json() : null; })
     .then(function (d) {
       var portal = (d && d.portal) || {};

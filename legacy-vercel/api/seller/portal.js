@@ -57,46 +57,66 @@ export default async function handler(req, res) {
   if (req.method !== 'GET') return fail(res, 405, 'method_not_allowed');
 
   try {
-    const { user, profile } = await getCallerProfile(req, res);
-    if (!user) return fail(res, 401, 'not authenticated');
-
     const supa = adminClient();
-    const isAgent = /^agent_/.test(profile?.role || '');
+    const token = req.query?.t ? String(req.query.t).trim() : null;
 
-    // 1. Resolve which deal to show ----------------------------------------
-    let deal = null;
+    let user = null, profile = null, isAgent = false, deal = null;
 
-    if (isAgent && req.query?.deal) {
-      const { data } = await supa.from('deals').select('*')
-        .eq('source_key', String(req.query.deal)).maybeSingle();
-      deal = data || null;
-    }
+    if (token) {
+      // Private-link access — NO login. Resolve the client by their unguessable
+      // portal_token, then their most-recent seller-side deal. An invalid token
+      // returns an empty portal (nothing to probe), never an error. The login
+      // path below is untouched.
+      const { data: lead } = await supa.from('leads')
+        .select('id, email').eq('portal_token', token).maybeSingle();
+      if (!lead) return ok(res, { portal: emptyPortal({ email: '' }) });
+      user = { email: lead.email || '', id: null };
+      const { data: parties } = await supa.from('deal_parties')
+        .select('deal_id, role, deals(*)')
+        .eq('lead_id', lead.id)
+        .in('role', ['seller', 'co-seller']);
+      const rows = (parties || []).map((p) => p.deals).filter(Boolean);
+      rows.sort((a, b) => new Date(b.updated_at || 0) - new Date(a.updated_at || 0));
+      deal = rows[0] || null;
+    } else {
+      const caller = await getCallerProfile(req, res);
+      user = caller.user; profile = caller.profile;
+      if (!user) return fail(res, 401, 'not authenticated');
+      isAgent = /^agent_/.test(profile?.role || '');
 
-    if (!deal && !isAgent) {
-      // seller: lead -> deal_parties -> deals (most recent pending)
-      let leadId = profile?.lead_id || null;
-      if (!leadId) {
-        const { data: l } = await supa.from('leads').select('id')
-          .eq('email', (user.email || '').toLowerCase()).maybeSingle();
-        leadId = l?.id || null;
+      // 1. Resolve which deal to show --------------------------------------
+      if (isAgent && req.query?.deal) {
+        const { data } = await supa.from('deals').select('*')
+          .eq('source_key', String(req.query.deal)).maybeSingle();
+        deal = data || null;
       }
-      if (leadId) {
-        const { data: parties } = await supa.from('deal_parties')
-          .select('deal_id, role, deals(*)')
-          .eq('lead_id', leadId)
-          .in('role', ['seller', 'co-seller']);
-        const rows = (parties || []).map((p) => p.deals).filter(Boolean);
-        rows.sort((a, b) => new Date(b.updated_at || 0) - new Date(a.updated_at || 0));
-        deal = rows[0] || null;
-      }
-    }
 
-    if (!deal && isAgent) {
-      // agent with no ?deal → newest pending seller-side deal
-      const { data } = await supa.from('deals').select('*')
-        .eq('stage', 'pending').in('side', ['listing', 'seller', 'both'])
-        .order('updated_at', { ascending: false }).limit(1).maybeSingle();
-      deal = data || null;
+      if (!deal && !isAgent) {
+        // seller: lead -> deal_parties -> deals (most recent pending)
+        let leadId = profile?.lead_id || null;
+        if (!leadId) {
+          const { data: l } = await supa.from('leads').select('id')
+            .eq('email', (user.email || '').toLowerCase()).maybeSingle();
+          leadId = l?.id || null;
+        }
+        if (leadId) {
+          const { data: parties } = await supa.from('deal_parties')
+            .select('deal_id, role, deals(*)')
+            .eq('lead_id', leadId)
+            .in('role', ['seller', 'co-seller']);
+          const rows = (parties || []).map((p) => p.deals).filter(Boolean);
+          rows.sort((a, b) => new Date(b.updated_at || 0) - new Date(a.updated_at || 0));
+          deal = rows[0] || null;
+        }
+      }
+
+      if (!deal && isAgent) {
+        // agent with no ?deal → newest pending seller-side deal
+        const { data } = await supa.from('deals').select('*')
+          .eq('stage', 'pending').in('side', ['listing', 'seller', 'both'])
+          .order('updated_at', { ascending: false }).limit(1).maybeSingle();
+        deal = data || null;
+      }
     }
 
     if (!deal) return ok(res, { portal: emptyPortal(user) });
@@ -233,7 +253,7 @@ function sellerFirstName(deal) {
 
 function emptyPortal(user) {
   return {
-    seller: { first_name: (user.email || '').split('@')[0] || '', who: '' },
+    seller: { first_name: (user?.email || '').split('@')[0] || '', who: '' },
     status: { label: 'No active listing', badge: '', address: '', city: '', type: '', price: '—', since: '' },
     nav: { documents: '0', tasks: '0' },
     kpis: [], road: [], documents: [], tasks: [], team: [], activity: [],
