@@ -96,6 +96,10 @@ function mapDeal(d) {
     co_agent: c.coAgent || null,
     loan_contingency_days: d.id === '433-hwy4' ? 25 : 17,
     notes_internal: d.notes || null,
+    // Media, driven from deals.json → seller portal hero photo + tour links.
+    photo_url:      d.photo      || d.photoUrl      || null,
+    video_url:      d.video      || d.youtube       || d.videoUrl      || null,
+    matterport_url: d.matterport || d.matterportUrl || null,
     updated_at: new Date().toISOString()
   };
 }
