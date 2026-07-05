@@ -30,14 +30,29 @@ export default async function handler(req, res) {
 
 async function loadLead(supa, id) {
   const { data } = await supa.from('leads')
-    .select('id, first_name, last_name, roles, pipeline_stage, assigned_agent')
+    .select('id, first_name, last_name, roles, deal_side, pipeline_stage, assigned_agent')
     .eq('id', id).maybeSingle();
   return data || null;
 }
 
+// Effective roles are computed from deal_side + stage at query time so the menu
+// is correct even when a lead is untagged or its Side was just changed (the
+// stored roles[] column can go stale). An untagged lead shows both sides'
+// actions rather than none.
+function effectiveRoles(lead) {
+  const s = lead.deal_side;
+  let base;
+  if (s === 'both')        base = ['buyer', 'seller'];
+  else if (s === 'buyer')  base = ['buyer'];
+  else if (s === 'seller') base = ['seller'];
+  else                     base = ['buyer', 'seller']; // untagged → show both
+  if (['closed', 'sphere'].includes(lead.pipeline_stage)) base.push('past_client');
+  return base;
+}
+
 // Registry query, done in JS over the small table (roles overlap + stage gate).
 function applicableActions(actions, lead) {
-  const leadRoles = lead.roles || [];
+  const leadRoles = effectiveRoles(lead);
   return (actions || []).filter((a) =>
     (a.roles || []).some((r) => leadRoles.includes(r)) &&
     (!a.stages || a.stages.length === 0 || a.stages.includes(lead.pipeline_stage))
@@ -62,7 +77,7 @@ async function list(req, res) {
     const applicable = applicableActions(actions, lead);
     const groups = {};
     for (const a of applicable) (groups[a.action_group] ||= []).push(a);
-    return ok(res, { groups, roles: lead.roles || [], stage: lead.pipeline_stage });
+    return ok(res, { groups, roles: effectiveRoles(lead), stage: lead.pipeline_stage });
   } catch (e) {
     return fail(res, 500, e.message);
   }
