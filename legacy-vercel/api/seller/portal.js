@@ -106,6 +106,20 @@ export default async function handler(req, res) {
       .eq('deal_id', deal.id).eq('client_safe', true);
     const docs = docRows || [];
 
+    // Hero photo: the linked property's MLS photo, else its YouTube tour
+    // thumbnail — never a stock placeholder on a real client's page. Fail-soft.
+    let heroPhoto = null;
+    try {
+      if (deal.property_id) {
+        const { data: prop } = await supa.from('properties').select('photos').eq('id', deal.property_id).maybeSingle();
+        heroPhoto = (prop?.photos && prop.photos[0]) || null;
+        if (!heroPhoto) {
+          const { data: lm } = await supa.from('listing_media').select('youtube_video_id').eq('property_id', deal.property_id).maybeSingle();
+          if (lm?.youtube_video_id) heroPhoto = `https://img.youtube.com/vi/${lm.youtube_video_id}/hqdefault.jpg`;
+        }
+      }
+    } catch (_) { /* stay soft — a missing photo must never break the portal */ }
+
     // 3. Derived pieces ----------------------------------------------------
     const coe   = asDate(deal.coe_date);
     const open  = asDate(deal.escrow_open_date);
@@ -172,7 +186,8 @@ export default async function handler(req, res) {
         city: sanitize(deal.city || ''),
         type: sanitize(deal.type || ''),
         price: fmtUSDfull(price),
-        since: coe ? `In escrow · Closing ${fmtDateY(coe)}` : ''
+        since: coe ? `In escrow · Closing ${fmtDateY(coe)}` : '',
+        photo: heroPhoto
       },
       nav: { documents: String(docs.length), tasks: String(tasks.length) },
       kpis, road, documents: documentsArr, tasks, team,
