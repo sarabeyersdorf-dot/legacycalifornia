@@ -1,0 +1,271 @@
+/* ===========================================================================
+ * legacy-app.css — Scoped design theme for the APP surfaces only
+ * ---------------------------------------------------------------------------
+ * Implements ui-style-guide.md (July 2026). Loaded ONLY by crm.html,
+ * seller.html, dashboard.html and scoped under `body.lp-restyle`, so it can
+ * never touch the public marketing site (which must render byte-identical).
+ *
+ * SSOT discipline: all colour/radius/shadow via the --lp-* tokens below;
+ * components reference tokens, never raw hex. The existing legacy token names
+ * (--ink, --brass, --shell…) are re-mapped onto --lp-* so the dense pre-built
+ * components re-theme too.
+ * ======================================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,700&display=swap');
+
+body.lp-restyle {
+  /* — Style-guide tokens ------------------------------------------------- */
+  --lp-paper:       #F5F2EA;
+  --lp-card:        #FFFFFF;
+  --lp-card-shared: #F4F7F2;
+  --lp-line:        #E5E1D6;
+  --lp-line-soft:   #EFECE3;
+  --lp-ink:         #1F2B24;
+  --lp-ink-soft:    #6B7468;
+  --lp-pine:        #2E4638;
+  --lp-pine-soft:   #DDE8DC;
+  --lp-terracotta:  #B05A3C;
+  --lp-gold:        #B8922A;
+  --lp-indigo:      #4F46E5;
+  --lp-black:       #141815;
+  --lp-green:       #2F7A4D;
+  --lp-radius-card: 14px;
+  --lp-radius-pill: 999px;
+  --lp-radius-tag:  6px;
+  --lp-shadow-card: 0 1px 3px rgba(31,43,36,.06);
+  --lp-shadow-menu: 0 10px 28px rgba(31,43,36,.14);
+  --lp-serif: 'Cormorant Garamond', Georgia, serif;
+  --lp-sans:  'DM Sans', system-ui, sans-serif;
+
+  /* — Re-map legacy names onto the tokens -------------------------------- */
+  --parchment:    var(--lp-paper);
+  --vellum:       #EAE4D6;
+  --shell:        var(--lp-card);
+  --linen:        var(--lp-line-soft);
+  --card-shared:  var(--lp-card-shared);
+  --ink:          var(--lp-ink);
+  --ink-2:        #14201A;
+  --ink-soft:     #3A463E;
+  --ink-mute:     var(--lp-ink-soft);
+  --ink-faint:    #9AA398;
+  --brass:        var(--lp-gold);
+  --brass-warm:   #C6A244;
+  --brass-bright: var(--lp-gold);
+  --pine:         var(--lp-pine);
+  --moss:         var(--lp-pine);
+  --oxblood:      var(--lp-terracotta);
+  --hot:          var(--lp-terracotta);
+  --warm:         var(--lp-gold);
+  --cold:         var(--lp-ink-soft);
+  --positive:     var(--lp-pine);
+  --negative:     var(--lp-terracotta);
+  --rule:         var(--lp-line);
+  --rule-soft:    var(--lp-line-soft);
+  --rule-strong:  #D4CFC1;
+  --sans:         var(--lp-sans);
+
+  background: var(--lp-paper);
+  color: var(--lp-ink);
+}
+
+/* ========================================================================
+ * 2. TYPE — DM Sans everywhere; Cormorant for names + page titles only;
+ *    uppercase letter-spacing ONLY on 11px eyebrows.
+ * ===================================================================== */
+body.lp-restyle,
+body.lp-restyle input,
+body.lp-restyle textarea,
+body.lp-restyle select,
+body.lp-restyle button { font-family: var(--lp-sans); }
+
+body.lp-restyle .ld-head h2,          /* contact name          */
+body.lp-restyle .display,
+body.lp-restyle .sell-h-info h1,      /* portal page title     */
+body.lp-restyle .dash-greet h1,       /* dashboard page title  */
+body.lp-restyle .lp-deal-title,       /* "Deal Workspace"      */
+body.lp-restyle .sara-note-text {
+  font-family: var(--lp-serif); font-weight: 500; letter-spacing: 0;
+}
+body.lp-restyle .ld-head h2 { font-weight: 600; }
+
+/* Card section titles that were serif → DM Sans 500, sentence case */
+body.lp-restyle .dash-card-h h2,
+body.lp-restyle h2.h-section { font-family: var(--lp-sans); font-style: normal; font-weight: 600; letter-spacing: -0.01em; }
+
+/* Eyebrows — the ONLY uppercase letter-spaced text (11px/700/.09em) */
+body.lp-restyle .eyebrow,
+body.lp-restyle .lp-eyebrow,
+body.lp-restyle .lp-section h3,
+body.lp-restyle .dash-card-h .meta,
+body.lp-restyle .ld-thread-h,
+body.lp-restyle .s-card-h,
+body.lp-restyle .lp-actions-group,
+body.lp-restyle .share-tag {
+  font-family: var(--lp-sans);
+  font-size: 11px; font-weight: 700;
+  letter-spacing: 0.09em; text-transform: uppercase;
+  color: var(--lp-ink-soft);
+}
+
+/* De-uppercase the prominent non-eyebrow micro-labels */
+body.lp-restyle .ld-head-meta,
+body.lp-restyle .lead-when,
+body.lp-restyle .lp-facts dt,
+body.lp-restyle .tl-when,
+body.lp-restyle .mb-when,
+body.lp-restyle .mb-ch,
+body.lp-restyle .lp-home-a,
+body.lp-restyle .lp-stage-now {
+  font-family: var(--lp-sans); text-transform: none; letter-spacing: normal;
+}
+body.lp-restyle .ld-head-meta { font-size: 12px; color: var(--lp-ink-soft); margin-top: 6px; }
+
+/* ========================================================================
+ * 3. SHAPE — 14px cards, pill buttons, lighter shadow
+ * ===================================================================== */
+body.lp-restyle .card,
+body.lp-restyle .dash-card,
+body.lp-restyle .s-card,
+body.lp-restyle .s-mini,
+body.lp-restyle .sell-status,
+body.lp-restyle .dash-summary,
+body.lp-restyle .ai-draft,
+body.lp-restyle .composer,
+body.lp-restyle .share-row,
+body.lp-restyle .lp-doc,
+body.lp-restyle .handoff { border-radius: var(--lp-radius-card); }
+
+body.lp-restyle .card,
+body.lp-restyle .dash-card,
+body.lp-restyle .s-card,
+body.lp-restyle .s-mini { box-shadow: var(--lp-shadow-card); }
+
+body.lp-restyle .btn,
+body.lp-restyle .btn-sm,
+body.lp-restyle .btn-xs,
+body.lp-restyle .lp-pill { border-radius: var(--lp-radius-pill); }
+body.lp-restyle .btn { text-transform: none; letter-spacing: 0.01em; font-weight: 600; }
+body.lp-restyle .btn-sm { font-size: 12px; padding: 9px 16px; }
+body.lp-restyle .btn-xs { font-size: 11px; padding: 6px 13px; }
+body.lp-restyle .btn-ink { background: var(--lp-black); color: #fff; }
+body.lp-restyle .btn-ink:hover { background: #000; }
+body.lp-restyle .btn-link,
+body.lp-restyle .lp-editlink { text-transform: none; letter-spacing: normal; font-family: var(--lp-sans); color: var(--lp-ink-soft); text-decoration: underline; text-underline-offset: 2px; }
+body.lp-restyle .lp-editlink:hover { color: var(--lp-pine); }
+
+/* ========================================================================
+ * 4. ACCENTS — gold to eyebrow marks + score only; structure in pine/ink
+ * ===================================================================== */
+body.lp-restyle .display em,
+body.lp-restyle .h-section em,
+body.lp-restyle .sell-h-info h1 em,
+body.lp-restyle .ld-head h2 em { color: var(--lp-ink); }
+body.lp-restyle .tl-dot { background: var(--lp-pine); }
+body.lp-restyle .tl-dot.ink { background: var(--lp-ink); }
+body.lp-restyle .tl-dot.faint { background: var(--ink-faint); }
+body.lp-restyle .lp-home-p { color: var(--lp-ink); font-style: normal; font-family: var(--lp-sans); font-weight: 600; font-size: 14px; }
+
+/* Eyebrow group markers (small squares) */
+body.lp-restyle .lp-mark { display: inline-block; width: 8px; height: 8px; border-radius: 2px; margin-right: 8px; vertical-align: middle; background: var(--lp-gold); }
+body.lp-restyle .lp-mark.communicate { background: var(--lp-pine); }
+body.lp-restyle .lp-mark.schedule    { background: var(--lp-indigo); }
+body.lp-restyle .lp-mark.market      { background: var(--lp-gold); }
+body.lp-restyle .lp-mark.transact    { background: var(--lp-terracotta); }
+
+/* Score — gold serif numeral, no black banner */
+body.lp-restyle .lp-score { background: transparent; color: var(--lp-ink); padding: 0; grid-template-columns: auto 1fr; align-items: center; gap: 16px; }
+body.lp-restyle .lp-score > div:first-child { display: flex; flex-direction: column; }
+body.lp-restyle .lp-score .v { display: block; color: var(--lp-gold); font-family: var(--lp-serif); font-style: normal; font-weight: 600; font-size: 48px; line-height: 1; }
+body.lp-restyle .lp-score .l { display: block; color: var(--lp-ink-soft); font-family: var(--lp-sans); text-transform: none; letter-spacing: normal; font-size: 12px; margin-top: 4px; }
+body.lp-restyle .lp-meter { background: rgba(31,43,36,0.10); }
+body.lp-restyle .lp-meter .fill { background: var(--lp-gold); }
+
+/* Pipeline — segmented progress bar (pine) */
+body.lp-restyle .stage-track { display: flex; gap: 3px; margin-top: 2px; }
+body.lp-restyle .stage-step { flex: 1; padding: 0; height: 6px; border-radius: 999px; background: var(--lp-line); cursor: pointer; }
+body.lp-restyle .stage-step.done,
+body.lp-restyle .stage-step.now { background: var(--lp-pine); }
+body.lp-restyle .stage-step .l { display: none; }
+body.lp-restyle .lp-stage-now { font-size: 12px; color: var(--lp-ink-soft); margin-top: 10px; }
+
+/* ========================================================================
+ * HEADER — role badge (terracotta), stage chip, portal-live pill
+ * ===================================================================== */
+/* The inbox detail column is narrower than the design's full-width
+ * workspace, so stack identity over the action row instead of overflowing. */
+body.lp-restyle .ld-head { display: flex; flex-direction: column; align-items: stretch; gap: 14px; }
+body.lp-restyle .ld-head-l { align-items: flex-start; }
+body.lp-restyle .ld-head-actions { flex-wrap: wrap; align-items: center; gap: 8px; }
+body.lp-restyle .lp-hpill { display: inline-flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 700; padding: 4px 11px; border-radius: var(--lp-radius-pill); line-height: 1; }
+body.lp-restyle .lp-hpill.side  { color: #fff; background: var(--lp-terracotta); }
+body.lp-restyle .lp-hpill.stage { color: var(--lp-ink); background: var(--lp-line); font-weight: 600; }
+body.lp-restyle .lp-hpill.live  { color: var(--lp-pine); background: var(--lp-pine-soft); font-weight: 600; }
+body.lp-restyle .lp-hpill .dot  { width: 7px; height: 7px; border-radius: 50%; background: var(--lp-green); }
+body.lp-restyle .badge { text-transform: none; letter-spacing: normal; font-family: var(--lp-sans); font-weight: 600; border-radius: var(--lp-radius-pill); padding: 3px 10px; }
+
+/* ========================================================================
+ * SHARED-WITH-CLIENT (Deal Workspace) — pine pill toggles, tinted rows
+ * ===================================================================== */
+body.lp-restyle .ld-shared { border: none; background: transparent; padding: 0; margin-top: 20px; }
+body.lp-restyle .lp-deal-title { font-size: 27px; font-weight: 500; color: var(--lp-ink); line-height: 1.15; }
+body.lp-restyle .lp-deal-sub { font-size: 13px; color: var(--lp-ink-soft); margin-top: 1px; }
+body.lp-restyle .lp-shared-count { font-size: 13px; color: var(--lp-ink-soft); }
+body.lp-restyle .lp-shared-count b { color: var(--lp-pine); font-weight: 700; }
+body.lp-restyle .lp-sharedonly { display: inline-flex; align-items: center; gap: 7px; font-size: 12px; font-weight: 600; color: var(--lp-ink-soft); padding: 6px 12px; border: 1px solid var(--lp-line); border-radius: var(--lp-radius-pill); background: #fff; cursor: pointer; }
+body.lp-restyle .lp-sharedonly .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--lp-green); }
+body.lp-restyle .lp-sharedonly.on { border-color: var(--lp-pine); color: var(--lp-pine); background: var(--lp-pine-soft); }
+
+body.lp-restyle .share-row { display: flex; gap: 16px; align-items: flex-start; justify-content: space-between; padding: 15px 17px; border: 1px solid var(--lp-line); background: var(--lp-card); margin-bottom: 10px; box-shadow: var(--lp-shadow-card); }
+body.lp-restyle .share-row.is-shared { background: var(--lp-card-shared); border-color: #BFD3C3; border-left: 3px solid var(--lp-pine); }
+body.lp-restyle .share-main { min-width: 0; flex: 1; }
+body.lp-restyle .share-tagline { display: flex; align-items: baseline; gap: 12px; margin-bottom: 5px; }
+body.lp-restyle .share-tag { border: 1px solid var(--lp-line); border-radius: var(--lp-radius-tag); padding: 1px 6px; color: var(--lp-pine); }
+body.lp-restyle .share-when { font-size: 12px; color: var(--lp-ink-soft); }
+body.lp-restyle .share-title { font-size: 15px; font-weight: 500; color: var(--lp-ink); line-height: 1.3; }
+body.lp-restyle .share-sees { font-size: 12px; color: var(--lp-ink-soft); margin-top: 7px; display: flex; align-items: baseline; gap: 6px; }
+body.lp-restyle .share-sees .who { white-space: nowrap; }
+body.lp-restyle .share-sees input { flex: 1; min-width: 0; border: none; border-bottom: 1px dashed var(--rule-strong); background: transparent; font: inherit; font-style: normal; color: var(--lp-ink); padding: 1px 2px; }
+body.lp-restyle .share-sees input:focus { outline: none; border-bottom-color: var(--lp-pine); }
+
+/* 44x24 pill toggle (styles the existing checkbox; JS untouched) */
+body.lp-restyle .lp-toggle { position: relative; display: inline-flex; flex-direction: column; align-items: center; gap: 5px; cursor: pointer; flex: none; }
+body.lp-restyle .lp-toggle input { position: absolute; top: 0; left: 0; width: 44px; height: 24px; margin: 0; opacity: 0; cursor: pointer; z-index: 2; }
+body.lp-restyle .lp-toggle-track { width: 44px; height: 24px; border-radius: 999px; background: var(--lp-line); position: relative; transition: background .15s ease; }
+body.lp-restyle .lp-toggle-track::after { content: ''; position: absolute; top: 2px; left: 2px; width: 20px; height: 20px; border-radius: 50%; background: #fff; box-shadow: 0 1px 2px rgba(31,43,36,0.25); transition: transform .15s ease; }
+body.lp-restyle .lp-toggle input:checked ~ .lp-toggle-track { background: var(--lp-pine); }
+body.lp-restyle .lp-toggle input:checked ~ .lp-toggle-track::after { transform: translateX(20px); }
+body.lp-restyle .lp-toggle-cap { font-size: 11px; font-weight: 500; color: var(--lp-ink-soft); }
+body.lp-restyle .lp-toggle input:checked ~ .lp-toggle-cap { color: var(--lp-pine); }
+
+/* ========================================================================
+ * ACTIONS DROPDOWN — grouped, markers, SHARES tags
+ * ===================================================================== */
+body.lp-restyle .lp-actions-menu { background: var(--lp-card); border: 1px solid var(--lp-line); border-radius: var(--lp-radius-card); box-shadow: var(--lp-shadow-menu); padding: 8px; }
+body.lp-restyle .lp-actions-head { font-size: 11px; font-weight: 700; letter-spacing: 0.09em; text-transform: uppercase; color: var(--lp-ink-soft); padding: 8px 10px 10px; }
+body.lp-restyle .lp-actions-group { padding: 10px 10px 5px; display: flex; align-items: center; }
+body.lp-restyle .leg-act { display: flex; align-items: center; justify-content: space-between; gap: 10px; width: 100%; text-align: left; background: transparent; border: none; padding: 9px 10px; cursor: pointer; font: inherit; font-size: 14px; color: var(--lp-ink); border-radius: 8px; }
+body.lp-restyle .leg-act:hover { background: var(--lp-paper); }
+body.lp-restyle .leg-act:active { background: var(--lp-pine-soft); }
+body.lp-restyle .lp-shares { font-size: 10px; font-weight: 700; letter-spacing: 0.04em; color: var(--lp-pine); background: var(--lp-pine-soft); padding: 2px 7px; border-radius: var(--lp-radius-tag); text-transform: uppercase; }
+
+/* ========================================================================
+ * PORTAL — "open" links, client avatar, wire banner border token
+ * ===================================================================== */
+body.lp-restyle .s-mini .d-status,
+body.lp-restyle .lp-open { color: var(--lp-green); }
+body.lp-restyle .wire-warn { border: 1px solid var(--lp-terracotta); background: var(--lp-card); color: #6E2F17; border-radius: var(--lp-radius-card); }
+body.lp-restyle .wire-warn::before { color: var(--lp-terracotta); }
+
+/* ========================================================================
+ * 4. INTERACTION — focus rings, hover, reduced motion
+ * ===================================================================== */
+body.lp-restyle a:focus-visible,
+body.lp-restyle button:focus-visible,
+body.lp-restyle input:focus-visible,
+body.lp-restyle textarea:focus-visible,
+body.lp-restyle .lp-toggle input:focus-visible ~ .lp-toggle-track {
+  outline: 2px solid var(--lp-gold); outline-offset: 2px;
+}
+@media (prefers-reduced-motion: reduce) {
+  body.lp-restyle *, body.lp-restyle *::before, body.lp-restyle *::after { transition: none !important; animation: none !important; }
+}

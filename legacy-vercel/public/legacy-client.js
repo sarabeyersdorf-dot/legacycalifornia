@@ -1559,12 +1559,20 @@
       : 0;
     const SIDE_LABEL = { buyer: 'Buyer', seller: 'Seller', both: 'Dual · both sides' };
     const metaBits = [
-      SIDE_LABEL[lead.deal_side] || (lead.lead_type || 'lead').replace(/^./, (c) => c.toUpperCase()),
       (lead.areas && lead.areas[0]) || null,
       `${daysInPipeline} days in pipeline`,
       lead.temperature ? lead.temperature.replace(/^./, (c) => c.toUpperCase()) : null,
       `Score ${lead.score == null ? '—' : lead.score}`
     ].filter(Boolean);
+
+    // Header pills — side (Seller/Buyer/Dual) + stage (In Escrow when
+    // under_contract). Sentence-case, per the style guide.
+    const STAGE_PILL = { new: 'New', nurture: 'Nurturing', consult: 'Consult', signed: 'Signed', active: 'Active', under_contract: 'In Escrow', closed: 'Closed', sphere: 'Sphere' };
+    const SIDE_PILL  = { buyer: 'Buyer', seller: 'Seller', both: 'Dual' };
+    const headPills = [
+      lead.deal_side ? `<span class="lp-hpill side">${escHtml(SIDE_PILL[lead.deal_side])}</span>` : '',
+      `<span class="lp-hpill stage">${escHtml(STAGE_PILL[lead.pipeline_stage] || (lead.pipeline_stage || 'New'))}</span>`
+    ].join(' ');
 
     // Consent badges — surface every active opt-out so an agent never sends
     // through a channel the lead has blocked.
@@ -1577,7 +1585,7 @@
     if (lead.pipeline_stage === 'sphere')      consentChips.push('Sphere · no auto outreach');
     const consentChipHtml = `<div style="margin-top:6px;display:flex;gap:6px;flex-wrap:wrap;align-items:center;">
         ${consentChips.map((c) => `<span class="badge" style="background:#FBE3E0;color:#9B2C2C;border:1px solid #E8B0AA;font-weight:600;">${escHtml(c)}</span>`).join('')}
-        <button class="btn-link" data-detail-action="edit-consent" style="font-size:11px;color:var(--brass);background:none;border:none;cursor:pointer;padding:0;">Edit details</button>
+        <button class="btn-link lp-editlink" data-detail-action="edit-consent" style="font-size:12px;background:none;border:none;cursor:pointer;padding:0;">Edit details</button>
       </div>
       <div data-consent-editor style="display:none;margin-top:10px;padding:12px 14px;background:var(--shell);border:1px solid var(--rule);font-size:13px;">
         <div style="font-family:var(--mono);font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-mute);margin-bottom:8px;">Lead details &amp; contact prefs</div>
@@ -1659,36 +1667,48 @@
     const tourTitle = (t) => (t.properties && t.properties.address)
       ? `Tour · ${t.properties.address}`
       : `${(t.tour_type || 'Property').replace(/^./, (c) => c.toUpperCase())} tour`;
+    const fmtWhen = (iso) => {
+      if (!iso) return '';
+      const d = new Date(iso); if (isNaN(d)) return '';
+      const MO = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+      return `${MO[d.getMonth()]} ${d.getDate()} · ${d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}`;
+    };
     const shareables = [
-      ...tasks.map((t) => ({ kind: 'task', id: t.id, title: t.title || 'Task', label: t.client_label || '', shared: t.visibility === 'client', done: !!t.done })),
-      ...tours.map((t) => ({ kind: 'tour', id: t.id, title: tourTitle(t), label: t.client_label || '', shared: t.visibility === 'client' })),
-      ...appts.map((a) => ({ kind: 'appointment', id: a.id, title: a.title || 'Appointment', label: a.client_label || '', shared: a.visibility === 'client' }))
+      ...tasks.map((t) => ({ kind: 'task', id: t.id, tag: 'Task', when: '', title: t.title || 'Task', label: t.client_label || '', shared: t.visibility === 'client', done: !!t.done })),
+      ...tours.map((t) => ({ kind: 'tour', id: t.id, tag: 'Tour', when: fmtWhen(t.scheduled_at), title: tourTitle(t), label: t.client_label || '', shared: t.visibility === 'client' })),
+      ...appts.map((a) => ({ kind: 'appointment', id: a.id, tag: 'Appt', when: fmtWhen(a.starts_at), title: a.title || 'Appointment', label: a.client_label || '', shared: a.visibility === 'client' }))
     ];
     const sharedCount = shareables.filter((s) => s.shared).length;
-    const KIND_BADGE = { task: 'Task', tour: 'Tour', appointment: 'Appt' };
+    const clientFirst = lead.first_name || 'your client';
     const shareRowHtml = (s) => `
-      <div class="share-row" data-kind="${escHtml(s.kind)}" data-id="${escHtml(s.id)}" style="display:flex;align-items:flex-start;gap:10px;padding:9px 0;border-top:1px solid var(--rule);">
-        <label style="display:inline-flex;align-items:center;gap:6px;cursor:pointer;white-space:nowrap;padding-top:1px;" title="Show this to the client in their portal">
-          <input type="checkbox" data-share-toggle ${s.shared ? 'checked' : ''}>
-          <span style="font-family:var(--mono);font-size:8px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-mute);">Client</span>
-        </label>
-        <div style="flex:1;min-width:0;">
-          <div style="font-size:13px;color:var(--ink);${s.done ? 'text-decoration:line-through;opacity:.55;' : ''}">
-            ${escHtml(s.title)}
-            <span style="font-family:var(--mono);font-size:8px;color:var(--ink-mute);border:1px solid var(--rule);padding:0 4px;border-radius:2px;margin-left:4px;">${KIND_BADGE[s.kind]}</span>
-          </div>
-          <div data-share-label-wrap style="margin-top:5px;display:${s.shared ? 'block' : 'none'};">
-            <input data-share-label value="${escHtml(s.label)}" placeholder="What the client sees (optional — defaults to the title)" style="width:100%;border:1px solid var(--rule);padding:5px 8px;background:#fff;font:inherit;font-size:12px;color:var(--ink);">
+      <div class="share-row${s.shared ? ' is-shared' : ''}" data-kind="${escHtml(s.kind)}" data-id="${escHtml(s.id)}">
+        <div class="share-main">
+          <div class="share-tagline"><span class="share-tag">${escHtml(s.tag)}</span>${s.when ? `<span class="share-when">${escHtml(s.when)}</span>` : ''}</div>
+          <div class="share-title"${s.done ? ' style="text-decoration:line-through;opacity:.6;"' : ''}>${escHtml(s.title)}</div>
+          <div class="share-sees" data-share-label-wrap${s.shared ? '' : ' style="display:none;"'}>
+            <span class="who">${escHtml(clientFirst)} sees:</span>
+            <input data-share-label value="${escHtml(s.label)}" placeholder="${escHtml(s.title)}">
           </div>
         </div>
+        <label class="lp-toggle" title="Show this to the client in their private portal">
+          <input type="checkbox" data-share-toggle ${s.shared ? 'checked' : ''}>
+          <span class="lp-toggle-track"></span>
+          <span class="lp-toggle-cap" data-share-cap>${s.shared ? 'Visible' : 'Internal'}</span>
+        </label>
       </div>`;
     const sharedPanelHtml = shareables.length === 0 ? '' : `
-      <div class="ld-shared" data-shared-panel style="margin-top:14px;border:1px solid var(--rule);background:var(--shell);padding:12px 14px;">
-        <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:2px;">
-          <span style="font-family:var(--mono);font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-mute);">Shared with client</span>
-          <span style="font-family:var(--mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-mute);"><span data-share-count>${sharedCount}</span> of ${shareables.length} shared</span>
+      <div class="ld-shared" data-shared-panel>
+        <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:14px;margin-bottom:14px;flex-wrap:wrap;">
+          <div>
+            <div class="lp-deal-title">Deal Workspace</div>
+            <div class="lp-deal-sub">one record · two audiences</div>
+          </div>
+          <div style="display:flex;align-items:center;gap:14px;">
+            <span class="lp-shared-count"><b data-share-count>${sharedCount}</b> of ${shareables.length} shared with ${escHtml(clientFirst)}</span>
+            <button type="button" class="lp-sharedonly" data-sharedonly title="Show only the items this client can see"><span class="dot"></span>Shared only</button>
+          </div>
         </div>
-        <div style="font-size:11px;color:var(--ink-mute);margin-bottom:4px;">Toggle any item to show it in this client’s private portal. Wire or payment instructions can’t be shared.</div>
+        <div class="lp-eyebrow" style="margin-bottom:10px;">Tasks &amp; Appointments</div>
         ${shareables.map(shareRowHtml).join('')}
       </div>`;
 
@@ -1697,23 +1717,28 @@
         <div class="ld-head-l">
           <div class="avatar avatar-lg" style="background: var(--hot); color: var(--shell); font-family: var(--serif); font-style: italic;">${escHtml(initials)}</div>
           <div>
-            <h2>${escHtml(fullName(lead))}</h2>
+            <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+              <h2>${escHtml(fullName(lead))}</h2>
+              ${headPills}
+            </div>
             <div class="ld-head-meta">${escHtml(metaBits.join(' · '))}</div>
             ${consentChipHtml}
           </div>
         </div>
         <div class="ld-head-actions">
+          ${lead.portal_token && lead.deal_side !== 'buyer'
+            ? `<span class="lp-hpill live" title="This client has a live private portal link"><span class="dot"></span>Portal live · token active</span>`
+            : ''}
           ${lead.phone
-            ? `<a class="btn btn-ghost btn-sm" href="tel:${escHtml(lead.phone)}" title="Call ${escHtml(lead.phone)}">◇ Call</a>`
-            : `<button class="btn btn-ghost btn-sm" disabled title="No phone number on file">◇ Call</button>`}
+            ? `<a class="btn btn-ghost btn-sm" href="tel:${escHtml(lead.phone)}" title="Call ${escHtml(lead.phone)}">Call</a>`
+            : `<button class="btn btn-ghost btn-sm" disabled title="No phone number on file">Call</button>`}
           <button class="btn btn-ghost btn-sm" data-detail-action="schedule" title="Open the calendar to book a tour">Schedule</button>
           ${lead.portal_token && lead.deal_side !== 'buyer'
             ? `<button class="btn btn-ghost btn-sm" data-detail-action="portal-link" title="Copy this client's private, no-login portal link">Copy portal link</button>`
             : ''}
-          <button class="btn btn-ink btn-sm" data-detail-action="enroll">Add to sequence</button>
           <span style="position:relative;display:inline-block;">
-            <button class="btn btn-ghost btn-sm" data-detail-action="actions-menu" title="Actions available for this contact">Actions ▾</button>
-            <div data-actions-menu style="display:none;position:absolute;z-index:60;right:0;top:100%;margin-top:4px;background:var(--shell);border:1px solid var(--rule);min-width:236px;box-shadow:0 10px 28px rgba(20,18,15,.14);padding:6px;text-align:left;"></div>
+            <button class="btn btn-ink btn-sm" data-detail-action="actions-menu" title="Actions available for this contact">Actions ▾</button>
+            <div class="lp-actions-menu" data-actions-menu style="display:none;position:absolute;z-index:60;right:0;top:100%;margin-top:6px;min-width:288px;text-align:left;"></div>
           </span>
         </div>
       </div>
@@ -1775,33 +1800,34 @@
         if (ep === 'copy-portal-link') { if (portalBtn) portalBtn.click(); else toast('No portal link on this contact.', false); return; }
         if (ep.indexOf('/api/crm/message') === 0) { focusComposer(/text|sms/i.test(label) ? 'sms' : 'email'); return; }
         if (ep.indexOf('/api/crm/note') === 0)    { focusComposer('note'); return; }
-        if (ep.indexOf('/api/sequences/enroll') === 0) { const en = detailEl.querySelector('[data-detail-action="enroll"]'); if (en) en.click(); return; }
+        if (ep.indexOf('/api/sequences/enroll') === 0) { promptEnrollSequence(lead); return; }
         const r = await window.Legacy.api('/api/crm/actions', { method: 'POST', body: { lead_id: lead.id, action_id: id } });
         if (r.ok) toast(r.json.client_visible ? `"${label}" added — your client will see it in their portal.` : `"${label}" logged to your tasks.`);
         else toast((r.json && r.json.error) || 'Action failed.', false);
       };
+      // "Actions for a <side> in <stage>" header — sentence-case, quiet.
+      const headSide  = SIDE_PILL[lead.deal_side] || 'contact';
+      const headStage = lead.pipeline_stage === 'under_contract' ? 'in escrow'
+                      : (STAGE_PILL[lead.pipeline_stage] || 'the pipeline').toLowerCase();
       actionsBtn.addEventListener('click', async (ev) => {
         ev.stopPropagation();
         if (actionsMenu.style.display === 'block') { actionsMenu.style.display = 'none'; return; }
-        actionsMenu.innerHTML = '<div style="padding:10px;opacity:.6;">Loading…</div>';
+        actionsMenu.innerHTML = '<div style="padding:12px;opacity:.6;">Loading…</div>';
         actionsMenu.style.display = 'block';
         const r = await window.Legacy.api('/api/crm/actions?lead_id=' + encodeURIComponent(lead.id), { method: 'GET' });
-        if (!r.ok) { actionsMenu.innerHTML = '<div style="padding:10px;color:#9B2C2C;">Could not load actions.</div>'; return; }
+        if (!r.ok) { actionsMenu.innerHTML = '<div style="padding:12px;color:#9B2C2C;">Could not load actions.</div>'; return; }
         const groups = (r.json && r.json.groups) || {};
-        let html = '';
+        let html = `<div class="lp-actions-head">Actions for a ${escHtml(headSide)} ${escHtml(headStage)}</div>`;
         ORDER.forEach((g) => {
           const items = groups[g]; if (!items || !items.length) return;
-          html += `<div style="font-family:var(--mono);font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-mute);padding:8px 8px 4px;">${GROUP_LABEL[g]}</div>`;
+          html += `<div class="lp-actions-group"><span class="lp-mark ${g}"></span>${GROUP_LABEL[g]}</div>`;
           items.forEach((a) => {
-            const cli = a.default_visibility === 'client'
-              ? ' <span style="font-family:var(--mono);font-size:8px;color:#2E5C3D;border:1px solid #BFD8C6;background:#E8F0EA;padding:0 4px;border-radius:2px;">CLIENT</span>' : '';
-            html += `<button class="leg-act" data-id="${escHtml(a.id)}" data-ep="${escHtml(a.endpoint)}" data-label="${escHtml(a.label)}" style="display:block;width:100%;text-align:left;background:transparent;border:none;padding:7px 8px;cursor:pointer;font:inherit;font-size:13px;color:var(--ink);">${escHtml(a.label)}${cli}</button>`;
+            const shares = a.default_visibility === 'client' ? '<span class="lp-shares">Shares</span>' : '';
+            html += `<button class="leg-act" data-id="${escHtml(a.id)}" data-ep="${escHtml(a.endpoint)}" data-label="${escHtml(a.label)}"><span>${escHtml(a.label)}</span>${shares}</button>`;
           });
         });
-        actionsMenu.innerHTML = html || '<div style="padding:10px;opacity:.6;">No actions for this contact.</div>';
+        actionsMenu.innerHTML = html.indexOf('leg-act') >= 0 ? html : '<div style="padding:12px;opacity:.6;">No actions for this contact.</div>';
         actionsMenu.querySelectorAll('.leg-act').forEach((b) => {
-          b.addEventListener('mouseenter', () => { b.style.background = 'var(--linen)'; });
-          b.addEventListener('mouseleave', () => { b.style.background = 'transparent'; });
           b.addEventListener('click', () => runAction(b.getAttribute('data-id'), b.getAttribute('data-ep'), b.getAttribute('data-label')));
         });
       });
@@ -1845,6 +1871,20 @@
       const recount = () => {
         if (countEl) countEl.textContent = String(sharedPanel.querySelectorAll('[data-share-toggle]:checked').length);
       };
+      const cap = (row, shared) => {
+        const c = row.querySelector('[data-share-cap]'); if (c) c.textContent = shared ? 'Visible' : 'Internal';
+        row.classList.toggle('is-shared', shared);
+      };
+      // "Shared only" filter — a pure view filter (no data change): hides rows
+      // that aren't client-visible.
+      const soBtn = sharedPanel.querySelector('[data-sharedonly]');
+      if (soBtn) soBtn.addEventListener('click', () => {
+        const on = !soBtn.classList.contains('on');
+        soBtn.classList.toggle('on', on);
+        sharedPanel.querySelectorAll('.share-row').forEach((r) => {
+          r.style.display = (on && !r.classList.contains('is-shared')) ? 'none' : '';
+        });
+      });
       sharedPanel.querySelectorAll('.share-row').forEach((row) => {
         const kind   = row.getAttribute('data-kind');
         const id     = row.getAttribute('data-id');
@@ -1862,13 +1902,15 @@
           const r = await flip(nowShared ? 'client' : 'internal', labelI ? labelI.value.trim() : undefined);
           toggle.disabled = false;
           if (r.ok) {
-            if (wrap) wrap.style.display = nowShared ? 'block' : 'none';
+            if (wrap) wrap.style.display = nowShared ? 'flex' : 'none';
+            cap(row, nowShared);
             recount();
             toast(nowShared ? 'Now visible in the client’s portal.' : 'Hidden from the client.');
           } else {
             // Wire guard (409) or any failure — revert the toggle, warn.
             toggle.checked = !nowShared;
-            if (wrap) wrap.style.display = toggle.checked ? 'block' : 'none';
+            if (wrap) wrap.style.display = toggle.checked ? 'flex' : 'none';
+            cap(row, toggle.checked);
             toast((r.json && r.json.error) || 'Could not change visibility.', false);
           }
         });
@@ -1978,7 +2020,7 @@
       <div class="lp-section">
         <h3>Pipeline stage</h3>
         <div class="stage-track">${stageHtml}</div>
-        <p style="font-family: var(--mono); font-size: 9.5px; letter-spacing: 0.12em; color: var(--ink-mute); margin-top: 10px; text-transform: uppercase;">In ${escHtml(lead.pipeline_stage || 'new')} · ${daysInPipeline}d</p>
+        <p class="lp-stage-now">${escHtml((STAGE_PILL[lead.pipeline_stage] || lead.pipeline_stage || 'New'))} · ${daysInPipeline} days</p>
       </div>
       <div class="lp-section">
         <h3>Assigned</h3>
