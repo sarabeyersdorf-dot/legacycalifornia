@@ -263,9 +263,11 @@ export default async function handler(req, res) {
     // (manual view count). Fail-soft: never let media break the portal. The
     // YouTube count refreshes if it's stale (older than 6h).
     let media = { video_views: null, video_url: null, tour_views: null, tour_url: null };
+    let ytThumbId = null;   // used as a hero-photo fallback when MLS photos are missing
     try {
       const { data: mrow } = await supa.from('listing_media').select('*').eq('property_id', listing.id).maybeSingle();
       if (mrow) {
+        ytThumbId = mrow.youtube_video_id || null;
         media.video_url = mrow.youtube_url || null;
         media.tour_url  = mrow.matterport_url || null;
         media.tour_views  = mrow.tour_views ?? null;
@@ -506,7 +508,10 @@ export default async function handler(req, res) {
 
     // 13. Listing hero strings
     const dayOnMarket = daysBetween(listing.created_at) || 0;
-    const photo = (listing.photos && listing.photos[0]) || null;
+    // Real MLS photo first; fall back to the YouTube tour's thumbnail (4:3
+    // hqdefault fits the hero) so a listing with a video tour is never a blank box.
+    const photo = (listing.photos && listing.photos[0])
+      || (ytThumbId ? `https://img.youtube.com/vi/${ytThumbId}/hqdefault.jpg` : null);
     const headline    = `${listing.address || 'Your home'}.`;
     const headline_em = dayOnMarket > 0 && pv7 > 0
       ? 'Doing better than expected.'
