@@ -266,6 +266,37 @@ export default async function handler(req, res) {
     // 7. Market snapshot — median price by town across (active + sold)
     const marketArr = buildMarketSnapshot(marketRows, lead.areas);
 
+    // 7b. Transaction items the agent shared with this buyer (portal_items),
+    //     plus the standing in-escrow wire-fraud banner. Buyers wire earnest
+    //     money and their down payment, so they are the primary wire-fraud
+    //     target — the banner is blunt and never omitted once in escrow. The
+    //     SECURITY DEFINER function returns only client-visible rows; an
+    //     internal row can never surface here. Fail-soft.
+    let agentItems = [];
+    try {
+      if (lead.portal_token) {
+        const { data: items } = await supa.rpc('portal_items', { p_token: lead.portal_token });
+        for (const it of (items || [])) {
+          if (it.item_type === 'document') continue; // buyers see docs elsewhere
+          const d = it.when_at ? new Date(it.when_at) : null;
+          const isEvent = it.item_type === 'event' && d && !isNaN(d);
+          agentItems.push({
+            label: sanitize(it.title || (it.item_type === 'event' ? 'Scheduled' : 'Update')),
+            meta: isEvent
+              ? `${d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} · ${d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}`
+              : 'From your agent'
+          });
+        }
+      }
+    } catch (_) { /* stay soft — a portal_items hiccup must not blank the dashboard */ }
+
+    const inEscrow = lead.pipeline_stage === 'under_contract';
+    const security = {
+      banner: inEscrow
+        ? 'We will never send wire instructions through this portal, by email, or by text. Before wiring funds, always call the title company directly at a phone number you have independently verified.'
+        : ''
+    };
+
     // 8. Stats counters
     const matchStrength = matched.length
       ? Math.round(matched.reduce((s, m) => s + m.pct, 0) / matched.length)
@@ -282,6 +313,8 @@ export default async function handler(req, res) {
     const firstName = lead.first_name || (user.email || '').split('@')[0] || 'there';
 
     const dashboard = {
+      security,
+      agent_items: agentItems,
       buyer: {
         initials: initialsOf(lead.first_name, lead.last_name, user.email),
         name:     fullName,
@@ -343,6 +376,8 @@ export default async function handler(req, res) {
 function emptyDashboard(user, profile) {
   const firstName = (user.email || '').split('@')[0] || 'there';
   return {
+    security: { banner: '' },
+    agent_items: [],
     buyer: {
       initials: initialsOf('', '', user.email),
       name:     user.email,

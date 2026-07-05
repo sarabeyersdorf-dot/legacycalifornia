@@ -1082,6 +1082,9 @@
     topLevelLists().forEach((c) => {
       const arr = dget(data, c.getAttribute('data-list'));
       if (arr === undefined) { exitLoading([c]); return; } // section not supplied → keep mock
+      // Sections flagged data-optional collapse entirely when their list is
+      // empty (e.g. the "From your agent" card for buyers not yet in a deal).
+      if (c.hasAttribute('data-optional')) c.style.display = (Array.isArray(arr) && arr.length) ? '' : 'none';
       paintList(c, arr);
     });
   }

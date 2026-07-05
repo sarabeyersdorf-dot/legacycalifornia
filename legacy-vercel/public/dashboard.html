@@ -7,6 +7,25 @@
 <link rel="stylesheet" href="legacy.css">
 <style>
 /* Consumer dashboard */
+/* Wire-fraud warning — high-contrast, unmissable, never dismissible. */
+.wire-warn {
+  margin: 18px 36px 0; padding: 14px 18px;
+  background: #FBEDE6; border: 1px solid #D9A38C; border-left: 4px solid #B05A3C;
+  color: #6E2F17; font-size: 13.5px; line-height: 1.5;
+}
+.wire-warn::before {
+  content: 'Protect your money'; display: block;
+  font-family: var(--mono); font-size: 9.5px; letter-spacing: 0.16em;
+  text-transform: uppercase; color: #B05A3C; margin-bottom: 5px; font-weight: 600;
+}
+/* From-your-agent shared items */
+.agent-shared .agent-item { display: flex; gap: 12px; align-items: flex-start; padding: 11px 0; border-top: 1px solid var(--rule); }
+.agent-shared .agent-item:first-of-type { border-top: none; }
+.agent-item-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--brass); margin-top: 6px; flex: none; }
+.agent-item-body { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.agent-item-label { font-size: 14px; color: var(--ink); }
+.agent-item-meta { font-family: var(--mono); font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-mute); }
+@media (max-width: 720px) { .wire-warn { margin: 14px 18px 0; } }
 .dash-hero {
   padding: 36px 36px 28px;
   border-bottom: 1px solid var(--rule);
@@ -268,6 +287,9 @@
       </div>
     </div>
 
+    <!-- WIRE-FRAUD WARNING · shown to every in-escrow buyer, never omitted -->
+    <div class="wire-warn" data-bind="security.banner" data-optional style="display:none;"></div>
+
     <!-- HERO GREETING -->
     <section class="dash-hero">
       <div class="dash-greet">
@@ -287,6 +309,21 @@
     <div class="dash-grid">
       <!-- LEFT COLUMN -->
       <div style="display: flex; flex-direction: column; gap: 28px; min-width: 0;">
+
+        <!-- From your agent · shared transaction items (collapses when empty) -->
+        <section class="dash-card agent-shared" data-list="agent_items" data-optional style="display:none;">
+          <div class="dash-card-h">
+            <h2>From your agent.</h2>
+            <span class="meta">In your transaction</span>
+          </div>
+          <div class="agent-item" data-row>
+            <span class="agent-item-dot"></span>
+            <div class="agent-item-body">
+              <span class="agent-item-label" data-bind="label">Item</span>
+              <span class="agent-item-meta" data-bind="meta" data-optional>From your agent</span>
+            </div>
+          </div>
+        </section>
 
         <!-- New matches -->
         <section class="dash-card" data-list="new_matches">
