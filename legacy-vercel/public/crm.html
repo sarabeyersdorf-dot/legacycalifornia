@@ -31,16 +31,16 @@
 
     <div class="app-side-section">Roster</div>
     <nav class="app-side-nav">
-      <a href="#">Leads <span class="pill" data-roster-leads>—</span></a>
-      <a href="#">Clients <span class="pill" data-roster-clients>—</span></a>
-      <a href="#">Past clients <span class="pill" data-roster-past>—</span></a>
-      <a href="#">Sphere</a>
+      <a href="#" onclick="showView(event,'inbox')" data-roster-nav="all">Leads <span class="pill" data-roster-leads>—</span></a>
+      <a href="#" onclick="showView(event,'inbox')" data-roster-nav="clients">Clients <span class="pill" data-roster-clients>—</span></a>
+      <a href="#" onclick="showView(event,'inbox')" data-roster-nav="sphere">Past clients <span class="pill" data-roster-past>—</span></a>
+      <a href="#" onclick="showView(event,'inbox')" data-roster-nav="sphere">Sphere</a>
     </nav>
 
     <div class="app-side-section">Listings</div>
     <nav class="app-side-nav">
-      <a href="#">Active <span class="pill" data-roster-listings>—</span></a>
-      <a href="#">Pending</a>
+      <a href="#" onclick="showView(event,'today')">Active <span class="pill" data-roster-listings>—</span></a>
+      <a href="#" onclick="showView(event,'today')">Pending</a>
       <a href="seller.html">Seller portal</a>
     </nav>
 

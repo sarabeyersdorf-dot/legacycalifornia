@@ -2052,7 +2052,9 @@
       }).join('');
       body.querySelectorAll('[data-lead-id]').forEach((card) => {
         card.addEventListener('click', () => {
-          if (typeof window.selectView === 'function') window.selectView('inbox');
+          // Switch to the Inbox view (where the detail panel lives) so the
+          // lead actually appears. The global is showView, defined in crm.html.
+          if (typeof window.showView === 'function') window.showView(null, 'inbox');
           selectLeadId(card.getAttribute('data-lead-id'));
         });
       });
@@ -2100,7 +2102,13 @@
       window.Legacy.api('/api/crm/pipeline', { method: 'GET' }),
       window.Legacy.api('/api/crm/inbox?filter=all&limit=100', { method: 'GET' })
     ]);
-    if (!pipelineRes.ok) return;
+    if (!pipelineRes.ok) {
+      // Don't fail silently — show why, so a blank CRM is never a mystery.
+      const listEl = document.querySelector('[data-lead-list]');
+      const msg = (pipelineRes.json && pipelineRes.json.error) || `Pipeline failed to load (${pipelineRes.status || '?'})`;
+      if (listEl) listEl.innerHTML = `<div class="lead-row" style="opacity:.7;padding:16px;"><div class="lead-content"><span class="lead-name" style="color:#9B2C2C;">Couldn't load leads</span><p class="lead-preview">${escHtml(msg)}</p></div></div>`;
+      return;
+    }
 
     const allLeads = [];
     (pipelineRes.json.stages || []).forEach((s) => s.leads.forEach((l) => allLeads.push(l)));
