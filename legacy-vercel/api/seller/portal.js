@@ -169,11 +169,22 @@ export default async function handler(req, res) {
       status: DOC_STATUS_LABEL[d.status] || 'On file'
     }));
 
-    // 4. Note from Sara (AI, fail-soft) ------------------------------------
+    // Per-agent portal: James's sellers see James, not Sara. Pull the deal's
+    // agent identity from the agents table (fail-soft to sensible defaults).
+    let agentRow = null;
+    try {
+      const { data } = await supa.from('agents').select('name, phone, email, dre_number').eq('agent_key', deal.agent || 'sara').maybeSingle();
+      agentRow = data || null;
+    } catch (_) { /* agents table optional */ }
+    const agentName  = agentRow?.name  || (deal.agent === 'james' ? 'James Beyersdorf' : 'Sara Cooper');
+    const agentFirst = (agentName.split(' ')[0]) || 'Sara';
+    const agentPhone = agentRow?.phone || (deal.agent === 'james' ? '209-770-7523' : '209-559-4966');
+
+    // 4. Note from the agent (AI, fail-soft) -------------------------------
     const firstName = sellerFirstName(deal);
     let noteBody = `${firstName ? firstName + ' — ' : ''}we're moving right on schedule and still pointed at a ${fmtDateY(coe)} close. I'll flag anything that needs you the moment it comes up. Call me anytime.`;
     try {
-      noteBody = await draftSellerNote({ firstName, deal, coe, dtc, signed, total: docs.length, tasks });
+      noteBody = await draftSellerNote({ firstName, deal, coe, dtc, signed, total: docs.length, tasks, agentName, agentPhone });
     } catch (_) { /* keep fallback */ }
 
     // 5. Assemble -----------------------------------------------------------
@@ -198,10 +209,11 @@ export default async function handler(req, res) {
       kpis, road, documents: documentsArr, tasks, team,
       activity: [],
       note: {
-        head: 'A note from Sara · This week',
+        head: `A note from ${agentFirst} · This week`,
         body: sanitize(noteBody),
-        sign: '— Sara · (209) 559-4966'
-      }
+        sign: `— ${agentFirst} · ${agentPhone}`
+      },
+      contact: { name: agentName, first: agentFirst, phone: agentPhone, email: agentRow?.email || null }
     };
 
     return ok(res, { portal });
@@ -229,11 +241,11 @@ function emptyPortal(user) {
   };
 }
 
-async function draftSellerNote({ firstName, deal, coe, dtc, signed, total, tasks }) {
-  const SYSTEM = `You write ONE short paragraph as Sara Cooper, Broker-Owner of Legacy Properties, to her SELLER client about their in-escrow home sale.
+async function draftSellerNote({ firstName, deal, coe, dtc, signed, total, tasks, agentName = 'Sara Cooper', agentPhone = '209-559-4966' }) {
+  const SYSTEM = `You write ONE short paragraph as ${agentName} of Legacy Properties, to your SELLER client about their in-escrow home sale.
 Voice: warm, direct, reassuring, never salesy. Short sentences. No exclamation points. No markdown. No em-dashes. No placeholders.
 Hard rules:
-1. Sara's phone is 209-559-4966. Never invent other contact info.
+1. Your phone is ${agentPhone}. Never invent other contact info.
 2. Only mention facts given below. Do NOT mention commission, financing problems, legal matters, or the buyer's private details.
 3. 3-4 short sentences. No salutation line, no signoff (those are added separately). Plain prose.`;
   const owed = tasks.length ? tasks.map((t) => t.label.replace(/^Sign /, '')).join(', ') : 'nothing right now';
