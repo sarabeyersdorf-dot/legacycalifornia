@@ -32,6 +32,7 @@ import createLead    from '../_lib/handlers/crm-create-lead.js';
 import me            from '../_lib/handlers/crm-me.js';
 import listings      from '../_lib/handlers/crm-listings.js';
 import tasks         from '../_lib/handlers/crm-tasks.js';
+import actions       from '../_lib/handlers/crm-actions.js';
 
 const TABLE = {
   'morning-brief':   morningBrief,
@@ -51,7 +52,8 @@ const TABLE = {
   'create-lead':     createLead,
   'me':              me,
   'listings':        listings,
-  'tasks':           tasks
+  'tasks':           tasks,
+  'actions':         actions
 };
 
 export default async function handler(req, res) {

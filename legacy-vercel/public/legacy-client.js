@@ -1322,6 +1322,19 @@
     return (s == null ? '' : String(s)).replace(/[&<>"]/g, (c) =>
       ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
   }
+  // Minimal transient toast (bottom-right).
+  function toast(msg, ok) {
+    let t = document.getElementById('leg-toast');
+    if (!t) {
+      t = document.createElement('div'); t.id = 'leg-toast';
+      t.style.cssText = 'position:fixed;bottom:22px;right:22px;z-index:99999;max-width:360px;padding:12px 16px;background:#1A1714;color:#FAF6EC;font-family:Manrope,system-ui,sans-serif;font-size:13.5px;line-height:1.45;box-shadow:0 10px 30px rgba(20,18,15,.3);opacity:0;transition:opacity .2s;';
+      document.body.appendChild(t);
+    }
+    t.style.borderLeft = '3px solid ' + (ok === false ? '#9B2C2C' : '#2E5C3D');
+    t.textContent = msg;
+    t.style.opacity = '1';
+    clearTimeout(t._h); t._h = setTimeout(() => { t.style.opacity = '0'; }, 3200);
+  }
   function initialsOf(first, last, fallback) {
     const a = (first || '').trim()[0] || '';
     const b = (last  || '').trim()[0] || '';
@@ -1483,6 +1496,12 @@
       });
     });
   }
+
+  // Close any open contact-action menu on an outside click (registered once).
+  document.addEventListener('click', (e) => {
+    if (e.target.closest('[data-detail-action="actions-menu"]') || e.target.closest('[data-actions-menu]')) return;
+    document.querySelectorAll('[data-actions-menu]').forEach((m) => { m.style.display = 'none'; });
+  });
 
   // Topbar global search — jump to the Inbox and filter leads by the query.
   document.addEventListener('input', (e) => {
@@ -1646,6 +1665,10 @@
             ? `<button class="btn btn-ghost btn-sm" data-detail-action="portal-link" title="Copy this client's private, no-login portal link">Copy portal link</button>`
             : ''}
           <button class="btn btn-ink btn-sm" data-detail-action="enroll">Add to sequence</button>
+          <span style="position:relative;display:inline-block;">
+            <button class="btn btn-ghost btn-sm" data-detail-action="actions-menu" title="Actions available for this contact">Actions ▾</button>
+            <div data-actions-menu style="display:none;position:absolute;z-index:60;right:0;top:100%;margin-top:4px;background:var(--shell);border:1px solid var(--rule);min-width:236px;box-shadow:0 10px 28px rgba(20,18,15,.14);padding:6px;text-align:left;"></div>
+          </span>
         </div>
       </div>
       ${draftHtml}
@@ -1687,6 +1710,55 @@
       if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(link).then(done).catch(() => window.prompt('Copy this private portal link:', link));
       else window.prompt('Copy this private portal link:', link);
     });
+
+    // Registry-driven action menu (contact_actions) — grouped, per this contact.
+    const actionsBtn  = detailEl.querySelector('[data-detail-action="actions-menu"]');
+    const actionsMenu = detailEl.querySelector('[data-actions-menu]');
+    if (actionsBtn && actionsMenu) {
+      const GROUP_LABEL = { communicate: 'Communicate', schedule: 'Schedule', market: 'Market', transact: 'Transact' };
+      const ORDER = ['communicate', 'schedule', 'market', 'transact'];
+      const focusComposer = (channel) => {
+        const composer = detailEl.querySelector('[data-composer]'); if (!composer) return;
+        const tab = composer.querySelector(`[data-composer-tab="${channel}"]`); if (tab) tab.click();
+        composer.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        const b = composer.querySelector('[data-composer-body]'); if (b) setTimeout(() => b.focus(), 200);
+      };
+      const runAction = async (id, ep, label) => {
+        actionsMenu.style.display = 'none';
+        if (ep === 'copy-portal-link') { if (portalBtn) portalBtn.click(); else toast('No portal link on this contact.', false); return; }
+        if (ep.indexOf('/api/crm/message') === 0) { focusComposer(/text|sms/i.test(label) ? 'sms' : 'email'); return; }
+        if (ep.indexOf('/api/crm/note') === 0)    { focusComposer('note'); return; }
+        if (ep.indexOf('/api/sequences/enroll') === 0) { const en = detailEl.querySelector('[data-detail-action="enroll"]'); if (en) en.click(); return; }
+        const r = await window.Legacy.api('/api/crm/actions', { method: 'POST', body: { lead_id: lead.id, action_id: id } });
+        if (r.ok) toast(r.json.client_visible ? `"${label}" added — your client will see it in their portal.` : `"${label}" logged to your tasks.`);
+        else toast((r.json && r.json.error) || 'Action failed.', false);
+      };
+      actionsBtn.addEventListener('click', async (ev) => {
+        ev.stopPropagation();
+        if (actionsMenu.style.display === 'block') { actionsMenu.style.display = 'none'; return; }
+        actionsMenu.innerHTML = '<div style="padding:10px;opacity:.6;">Loading…</div>';
+        actionsMenu.style.display = 'block';
+        const r = await window.Legacy.api('/api/crm/actions?lead_id=' + encodeURIComponent(lead.id), { method: 'GET' });
+        if (!r.ok) { actionsMenu.innerHTML = '<div style="padding:10px;color:#9B2C2C;">Could not load actions.</div>'; return; }
+        const groups = (r.json && r.json.groups) || {};
+        let html = '';
+        ORDER.forEach((g) => {
+          const items = groups[g]; if (!items || !items.length) return;
+          html += `<div style="font-family:var(--mono);font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-mute);padding:8px 8px 4px;">${GROUP_LABEL[g]}</div>`;
+          items.forEach((a) => {
+            const cli = a.default_visibility === 'client'
+              ? ' <span style="font-family:var(--mono);font-size:8px;color:#2E5C3D;border:1px solid #BFD8C6;background:#E8F0EA;padding:0 4px;border-radius:2px;">CLIENT</span>' : '';
+            html += `<button class="leg-act" data-id="${escHtml(a.id)}" data-ep="${escHtml(a.endpoint)}" data-label="${escHtml(a.label)}" style="display:block;width:100%;text-align:left;background:transparent;border:none;padding:7px 8px;cursor:pointer;font:inherit;font-size:13px;color:var(--ink);">${escHtml(a.label)}${cli}</button>`;
+          });
+        });
+        actionsMenu.innerHTML = html || '<div style="padding:10px;opacity:.6;">No actions for this contact.</div>';
+        actionsMenu.querySelectorAll('.leg-act').forEach((b) => {
+          b.addEventListener('mouseenter', () => { b.style.background = 'var(--linen)'; });
+          b.addEventListener('mouseleave', () => { b.style.background = 'transparent'; });
+          b.addEventListener('click', () => runAction(b.getAttribute('data-id'), b.getAttribute('data-ep'), b.getAttribute('data-label')));
+        });
+      });
+    }
 
     // Contact-preference editor — toggle the panel, save the flags.
     const consentToggle = detailEl.querySelector('[data-detail-action="edit-consent"]');
