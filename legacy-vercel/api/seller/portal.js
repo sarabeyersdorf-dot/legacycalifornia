@@ -20,6 +20,7 @@ import { adminClient } from '../_lib/supabase.js';
 import { getCallerProfile } from '../_lib/auth.js';
 import { anthropicMessage } from '../_lib/anthropic.js';
 import { handleOptions, ok, fail } from '../_lib/cors.js';
+import { extractYouTubeId } from '../_lib/youtube.js';
 
 // ---------------------------------------------------------------------------
 // Formatting helpers
@@ -106,19 +107,18 @@ export default async function handler(req, res) {
       .eq('deal_id', deal.id).eq('client_safe', true);
     const docs = docRows || [];
 
-    // Hero photo: the linked property's MLS photo, else its YouTube tour
-    // thumbnail — never a stock placeholder on a real client's page. Fail-soft.
-    let heroPhoto = null;
+    // Hero photo + tour media — driven from deals.json ("photo" / "video" /
+    // "matterport"), with a property-photo and YouTube-thumbnail fallback so a
+    // real client never sees a stock or blank hero. Fail-soft.
+    const videoId = extractYouTubeId(deal.video_url);
+    let heroPhoto = deal.photo_url || null;
     try {
-      if (deal.property_id) {
+      if (!heroPhoto && deal.property_id) {
         const { data: prop } = await supa.from('properties').select('photos').eq('id', deal.property_id).maybeSingle();
         heroPhoto = (prop?.photos && prop.photos[0]) || null;
-        if (!heroPhoto) {
-          const { data: lm } = await supa.from('listing_media').select('youtube_video_id').eq('property_id', deal.property_id).maybeSingle();
-          if (lm?.youtube_video_id) heroPhoto = `https://img.youtube.com/vi/${lm.youtube_video_id}/hqdefault.jpg`;
-        }
       }
     } catch (_) { /* stay soft — a missing photo must never break the portal */ }
+    if (!heroPhoto && videoId) heroPhoto = `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`;
 
     // 3. Derived pieces ----------------------------------------------------
     const coe   = asDate(deal.coe_date);
@@ -188,6 +188,11 @@ export default async function handler(req, res) {
         price: fmtUSDfull(price),
         since: coe ? `In escrow · Closing ${fmtDateY(coe)}` : '',
         photo: heroPhoto
+      },
+      tour: {
+        video_url:      deal.video_url || null,
+        video_id:       videoId,
+        matterport_url: deal.matterport_url || null
       },
       nav: { documents: String(docs.length), tasks: String(tasks.length) },
       kpis, road, documents: documentsArr, tasks, team,
