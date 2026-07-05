@@ -58,7 +58,7 @@
       <a href="#" onclick="showView(event,'rep')">Reports</a>
       <a href="#" data-broker-tab style="display:none;" onclick="showView(event,'broker')">Broker oversight</a>
       <a href="#">Market data</a>
-      <a href="#">Settings</a>
+      <a href="#" onclick="showView(event,'settings')">Settings</a>
     </nav>
 
     <div class="app-side-foot">
@@ -79,7 +79,7 @@
         <span class="mono" style="font-size:10px;color:var(--ink-faint);">⌘K</span>
       </div>
       <div class="app-actions">
-        <button class="btn btn-ghost btn-sm">+ New lead</button>
+        <button class="btn btn-ghost btn-sm" data-new-lead>+ New lead</button>
         <button class="icon-btn" title="Notifications">⏷<span class="dot"></span></button>
         <button class="icon-btn" title="Help">?</button>
       </div>
@@ -728,6 +728,63 @@
           <h1 class="h-section" style="font-size:38px;margin-top:6px;">The brokerage.</h1>
         </div></div>
         <div data-broker-body><div class="cur-empty">Loading…</div></div>
+      </div>
+    </section>
+
+    <!-- ============================================================
+         SETTINGS (account + tools for the signed-in agent)
+         ============================================================ -->
+    <style>
+    .set { padding: 22px 36px 60px; max-width: 760px; }
+    .set-card { background: var(--shell); border: 1px solid var(--rule); padding: 22px 24px; margin-bottom: 18px; }
+    .set-card h2 { font-family: var(--serif); font-style: italic; font-weight: 400; font-size: 24px; margin: 0 0 4px; }
+    .set-card .sub { font-size: 13px; color: var(--ink-soft); margin: 0 0 16px; line-height: 1.5; }
+    .set-row { display: flex; justify-content: space-between; gap: 16px; padding: 10px 0; border-bottom: 1px solid var(--rule-soft); font-size: 14px; }
+    .set-row:last-child { border-bottom: none; }
+    .set-row .k { font-family: var(--mono); font-size: 10px; letter-spacing: .12em; text-transform: uppercase; color: var(--ink-mute); }
+    .set-row .v { color: var(--ink); text-align: right; }
+    .set-tools { display: flex; flex-direction: column; gap: 8px; }
+    .set-tools button { text-align: left; background: transparent; border: 1px solid var(--rule); padding: 12px 14px; cursor: pointer; font: inherit; font-size: 14px; color: var(--ink); display: flex; justify-content: space-between; align-items: center; }
+    .set-tools button:hover { border-color: var(--ink); }
+    .set-tools button .arw { color: var(--ink-faint); }
+    .set-signout { background: transparent; border: 1px solid #8B3A3A; color: #8B3A3A; padding: 12px 18px; cursor: pointer; font: inherit; font-size: 14px; }
+    .set-signout:hover { background: #8B3A3A; color: var(--shell); }
+    @media (max-width: 900px) { .set { padding: 18px; } }
+    </style>
+    <section class="crm-view" data-view="settings">
+      <div class="set">
+        <div class="cur-head"><div>
+          <span class="label-cap" style="color:var(--brass);">Your account</span>
+          <h1 class="h-section" style="font-size:38px;margin-top:6px;">Settings.</h1>
+        </div></div>
+
+        <div class="set-card">
+          <h2>Signed in as</h2>
+          <p class="sub">This is the account the CRM is showing. Everything on your Today, Inbox, and Pipeline is scoped to you.</p>
+          <div class="set-row"><span class="k">Name</span><span class="v" data-set-name>—</span></div>
+          <div class="set-row"><span class="k">Email</span><span class="v" data-set-email>—</span></div>
+          <div class="set-row"><span class="k">Role</span><span class="v" data-set-role>—</span></div>
+          <div class="set-row"><span class="k">DRE #</span><span class="v" data-set-dre>—</span></div>
+          <div class="set-row"><span class="k">Phone</span><span class="v" data-set-phone>—</span></div>
+        </div>
+
+        <div class="set-card">
+          <h2>Tools</h2>
+          <p class="sub">The same actions live in the left sidebar under “Import.” They’re gathered here too.</p>
+          <div class="set-tools">
+            <button data-open-importer>Import leads from a CSV<span class="arw">→</span></button>
+            <button data-new-lead>Add a single lead<span class="arw">→</span></button>
+            <button data-open-link-deal>Link a client to their deal<span class="arw">→</span></button>
+            <button data-open-listing-media>Attach listing video &amp; 3D tour<span class="arw">→</span></button>
+            <button data-send-test-email>Send a test email<span class="arw">→</span></button>
+          </div>
+        </div>
+
+        <div class="set-card">
+          <h2>Session</h2>
+          <p class="sub">Sign out to switch to a different agent’s account, or to sign in as a client.</p>
+          <button class="set-signout" data-sign-out>Sign out</button>
+        </div>
       </div>
     </section>
 
@@ -1475,6 +1532,121 @@ function selectLead(el) {
       if (av) av.innerHTML = '<span style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;background:var(--brass);color:var(--shell);font-family:var(--serif);font-size:15px;">' + (first.charAt(0) || 'L') + '</span>';
     }
   }).catch(function () {});
+})();
+</script>
+<script>
+/* Add a single lead — modal wired to any [data-new-lead] trigger.
+   POSTs to /api/crm/create-lead, then reloads so the new lead shows in
+   Pipeline/Inbox with fresh counts. */
+(function () {
+  'use strict';
+  var IN = 'font:inherit;font-size:15px;text-transform:none;letter-spacing:normal;color:#1A1714;background:#fff;border:1px solid #D9CFB7;padding:9px 11px;width:100%;box-sizing:border-box;';
+  var LB = 'font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:#7C6A4D;display:flex;flex-direction:column;gap:4px;';
+  function open() {
+    var id = 'leg-newlead-modal';
+    if (document.getElementById(id)) { document.getElementById(id).style.display = 'flex'; return; }
+    var m = document.createElement('div'); m.id = id;
+    m.style.cssText = 'position:fixed;inset:0;z-index:99997;background:rgba(20,18,15,0.6);display:flex;align-items:center;justify-content:center;padding:24px;font-family:Manrope,system-ui,sans-serif;';
+    m.innerHTML = ''
+      + '<div style="background:#FAF6EC;max-width:520px;width:100%;padding:28px 32px;color:#1A1714;max-height:90vh;overflow:auto;">'
+      + '  <div style="font-family:\'JetBrains Mono\',monospace;font-size:10px;letter-spacing:.22em;text-transform:uppercase;color:#7C6A4D;margin-bottom:8px;">New lead</div>'
+      + '  <h2 style="font-family:\'Cormorant Garamond\',serif;font-style:italic;font-weight:500;font-size:28px;margin:0 0 6px;">Add a lead.</h2>'
+      + '  <p style="font-size:13.5px;line-height:1.55;color:#3A332B;margin:0 0 18px;">A name or an email is enough to start. It lands in your pipeline at the “New” stage, assigned to you.</p>'
+      + '  <form id="nl-form" style="display:flex;flex-direction:column;gap:12px;">'
+      + '    <div style="display:flex;gap:10px;">'
+      + '      <label style="flex:1;' + LB + '">First name<input name="first_name" style="' + IN + '"></label>'
+      + '      <label style="flex:1;' + LB + '">Last name<input name="last_name" style="' + IN + '"></label>'
+      + '    </div>'
+      + '    <label style="' + LB + '">Email<input name="email" type="email" placeholder="name@example.com" style="' + IN + '"></label>'
+      + '    <label style="' + LB + '">Phone<input name="phone" placeholder="(209) 555-0123" style="' + IN + '"></label>'
+      + '    <div style="display:flex;gap:10px;">'
+      + '      <label style="flex:1;' + LB + '">Type<select name="lead_type" style="' + IN + '"><option value="">—</option><option value="buyer">Buyer</option><option value="seller">Seller</option><option value="land">Land</option><option value="investor">Investor</option></select></label>'
+      + '      <label style="flex:1;' + LB + '">Temperature<select name="temperature" style="' + IN + '"><option value="new">New</option><option value="warm">Warm</option><option value="hot">Hot</option><option value="cold">Cold</option></select></label>'
+      + '    </div>'
+      + '    <label style="' + LB + '">Assign to<select name="assigned_agent" id="nl-agent" style="' + IN + '"><option value="sara">Sara</option><option value="james">James</option></select></label>'
+      + '    <label style="' + LB + '">Notes<textarea name="notes" rows="2" placeholder="Where they came from, what they want…" style="' + IN + '"></textarea></label>'
+      + '    <div style="display:flex;gap:10px;margin-top:6px;">'
+      + '      <button type="submit" id="nl-save" style="background:#1A1714;color:#FAF6EC;border:none;padding:12px 20px;font-family:\'JetBrains Mono\',monospace;font-size:11px;letter-spacing:.22em;text-transform:uppercase;cursor:pointer;">Add lead</button>'
+      + '      <button type="button" id="nl-close" style="margin-left:auto;background:transparent;border:none;color:#7C6A4D;cursor:pointer;font-size:13px;">Close</button>'
+      + '    </div>'
+      + '  </form>'
+      + '  <div id="nl-result" style="margin-top:14px;font-size:13.5px;line-height:1.5;min-height:20px;"></div>'
+      + '</div>';
+    document.body.appendChild(m);
+    var form = m.querySelector('#nl-form'), result = m.querySelector('#nl-result');
+    function close() { m.style.display = 'none'; }
+    m.querySelector('#nl-close').onclick = close;
+    m.addEventListener('click', function (e) { if (e.target === m) close(); });
+
+    // Default "Assign to" to whoever is signed in.
+    fetch('/api/auth/session', { credentials: 'include' }).then(function (r) { return r.json(); }).then(function (j) {
+      var role = j && j.profile && j.profile.role;
+      var sel = m.querySelector('#nl-agent');
+      if (sel && role === 'agent_james') sel.value = 'james';
+    }).catch(function () {});
+
+    form.addEventListener('submit', function (e) {
+      e.preventDefault();
+      var fd = new FormData(form);
+      var body = {
+        first_name: (fd.get('first_name') || '').trim(),
+        last_name:  (fd.get('last_name') || '').trim(),
+        email:      (fd.get('email') || '').trim(),
+        phone:      (fd.get('phone') || '').trim(),
+        lead_type:  fd.get('lead_type') || undefined,
+        temperature: fd.get('temperature') || 'new',
+        assigned_agent: fd.get('assigned_agent') || undefined,
+        notes:      (fd.get('notes') || '').trim()
+      };
+      if (!body.first_name && !body.last_name && !body.email) {
+        result.style.color = '#8B3A3A'; result.textContent = 'Enter at least a name or an email.'; return;
+      }
+      var save = m.querySelector('#nl-save'); save.disabled = true; save.textContent = 'Adding…';
+      fetch('/api/crm/create-lead', { method: 'POST', credentials: 'include', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) })
+        .then(function (r) { return r.json().then(function (j) { return { ok: r.ok, j: j }; }); })
+        .then(function (x) {
+          save.disabled = false; save.textContent = 'Add lead';
+          if (x.ok && x.j.lead) {
+            var nm = [x.j.lead.first_name, x.j.lead.last_name].filter(Boolean).join(' ') || x.j.lead.email || 'Lead';
+            result.style.color = '#2E5C3D';
+            result.textContent = x.j.existed
+              ? ('“' + nm + '” already exists — opened their record instead.')
+              : ('✓ Added ' + nm + '. Refreshing your pipeline…');
+            setTimeout(function () { window.location.reload(); }, 900);
+          } else {
+            result.style.color = '#8B3A3A'; result.textContent = '✗ ' + ((x.j && x.j.error) || 'Could not add the lead.');
+          }
+        }).catch(function (err) { save.disabled = false; save.textContent = 'Add lead'; result.style.color = '#8B3A3A'; result.textContent = '✗ ' + (err.message || 'Network error'); });
+    });
+  }
+  document.addEventListener('click', function (e) { var t = e.target.closest('[data-new-lead]'); if (t) { e.preventDefault(); open(); } });
+})();
+</script>
+<script>
+/* Settings — fill the account card from /api/crm/me (name, email, role,
+   DRE, phone) for whoever is signed in. */
+(function () {
+  'use strict';
+  var loaded = false;
+  function set(sel, val) { var el = document.querySelector(sel); if (el) el.textContent = val || '—'; }
+  function roleLabel(r) {
+    if (r === 'agent_sara') return 'Broker-Owner';
+    if (r === 'agent_james') return 'Agent';
+    if (r === 'admin') return 'Admin';
+    return r || '—';
+  }
+  function load() {
+    if (loaded) return; loaded = true;
+    fetch('/api/crm/me', { credentials: 'include' }).then(function (r) { return r.json(); }).then(function (j) {
+      var a = (j && j.account) || {}, ag = (j && j.agent) || {};
+      set('[data-set-name]', ag.name || a.name);
+      set('[data-set-email]', a.email || ag.email);
+      set('[data-set-role]', roleLabel(a.role));
+      set('[data-set-dre]', ag.dre_number ? ('DRE #' + ag.dre_number) : '—');
+      set('[data-set-phone]', ag.phone);
+    }).catch(function () {});
+  }
+  document.addEventListener('click', function (e) { if (e.target.closest('[onclick*="\'settings\'"]')) setTimeout(load, 0); });
 })();
 </script>
 <script src="/legacy-client.js" defer></script>

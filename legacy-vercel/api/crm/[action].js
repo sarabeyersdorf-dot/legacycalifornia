@@ -28,6 +28,8 @@ import linkDealParty from '../_lib/handlers/crm-link-deal-party.js';
 import sequences     from '../_lib/handlers/crm-sequences.js';
 import calendar      from '../_lib/handlers/crm-calendar.js';
 import broker        from '../_lib/handlers/crm-broker.js';
+import createLead    from '../_lib/handlers/crm-create-lead.js';
+import me            from '../_lib/handlers/crm-me.js';
 
 const TABLE = {
   'morning-brief':   morningBrief,
@@ -43,7 +45,9 @@ const TABLE = {
   'link-deal-party': linkDealParty,
   'sequences':       sequences,
   'calendar':        calendar,
-  'broker':          broker
+  'broker':          broker,
+  'create-lead':     createLead,
+  'me':              me
 };
 
 export default async function handler(req, res) {
