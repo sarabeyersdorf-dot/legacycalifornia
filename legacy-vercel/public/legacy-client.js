@@ -579,7 +579,9 @@
     return '$' + (n / 1000000).toFixed(n >= 10000000 ? 0 : 1) + 'M';
   }
 
+  let lastMetrics = null;
   function paintCrmMetrics(m) {
+    lastMetrics = m;
     paintDayList(m.day_list || [], m.day_total_min || 0);
     paintDayStats(m.yesterday || {});
     paintPipelineHeader(m.pipeline || {});
@@ -587,6 +589,33 @@
     paintRecentClosings(m.recent_closings || []);
     paintRepKpi(m.rep_kpi || {});
   }
+
+  // Reports → Export: download the closings + KPI summary as a CSV.
+  function csvCell(v) { const s = v == null ? '' : String(v); return /[",\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s; }
+  function exportReportsCsv() {
+    const m = lastMetrics || {};
+    const rows = [];
+    rows.push(['Recent closings']);
+    rows.push(['Date', 'Property', 'Side', 'Sale price']);
+    (m.recent_closings || []).forEach((r) => rows.push([r.date, r.address, r.side, r.price]));
+    rows.push([]);
+    const k = m.rep_kpi || {};
+    rows.push(['KPIs']);
+    rows.push(['Closed volume (trailing 12 mo)', k.trailing_12_vol]);
+    rows.push(['Transactions (trailing 12 mo)', k.trailing_12_count]);
+    rows.push(['Total closed to date', k.total_closed]);
+    rows.push(['Average sale price', k.avg_sale_price]);
+    const csv = rows.map((r) => r.map(csvCell).join(',')).join('\n');
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = 'legacy-reports.csv';
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+  }
+  document.addEventListener('click', (e) => {
+    if (e.target.closest('[data-report-export]')) { e.preventDefault(); exportReportsCsv(); }
+  });
 
   function paintDayList(items, totalMin) {
     const ul = document.querySelector('[data-day-list]');
@@ -1342,8 +1371,15 @@
     messageByLead: new Map(),
     activeFilter: 'all',
     segment: 'all',      // roster segment: all | clients | past | sphere
+    search: '',          // topbar global search over leads
     selectedLeadId: null
   };
+
+  function matchSearch(l, q) {
+    const hay = [l.first_name, l.last_name, l.email, l.phone, (l.areas && l.areas[0])]
+      .filter(Boolean).join(' ').toLowerCase();
+    return hay.includes(q);
+  }
 
   // Roster segments over pipeline_stage (legacy keys normalized).
   const STAGE_NORM = { touring: 'active', offer: 'under_contract', close: 'closed' };
@@ -1355,6 +1391,10 @@
   };
 
   function filterLeads() {
+    // Topbar search is a global override — matches across everyone, ignoring
+    // the current segment / chip.
+    const q = (state.search || '').trim().toLowerCase();
+    if (q) return state.leads.filter((l) => matchSearch(l, q));
     const segFn = SEGMENTS[state.segment] || SEGMENTS.all;
     let leads = state.leads.filter((l) => segFn(STAGE_NORM[l.pipeline_stage] || l.pipeline_stage));
     const f = state.activeFilter;
@@ -1436,6 +1476,17 @@
       });
     });
   }
+
+  // Topbar global search — jump to the Inbox and filter leads by the query.
+  document.addEventListener('input', (e) => {
+    const box = e.target.closest('[data-global-search]');
+    if (!box) return;
+    state.search = box.value || '';
+    if (state.search.trim() && typeof window.showView === 'function') window.showView(null, 'inbox');
+    paintLeadList();
+    const first = filterLeads()[0];
+    if (first) selectLeadId(first.id);
+  });
 
   // Roster sidebar segments (Leads / Clients / Past clients / Sphere) — re-filter
   // the lead list even when already on the Inbox view, so clicking between them
