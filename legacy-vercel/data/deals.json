@@ -1,5 +1,5 @@
 {
-  "version": "1.14",
+  "version": "1.15",
   "lastUpdated": "2026-07-05",
   "updatedBy": "Claude",
   "tasks": [
@@ -280,6 +280,7 @@
       "type": "commercial",
       "side": "listing",
       "agent": "sara",
+      "video": "https://youtu.be/t8gNRkJzjrY",
       "listPrice": null,
       "salePrice": null,
       "openEscrowDate": null,
@@ -310,6 +311,7 @@
       "type": "mixed-use",
       "side": "listing",
       "agent": "sara",
+      "video": "https://youtu.be/LgdfPW_QlWQ",
       "listPrice": null,
       "salePrice": 1300000,
       "openEscrowDate": "2026-06-22",
@@ -576,6 +578,7 @@
       "type": "residential",
       "side": "listing",
       "agent": "sara",
+      "video": "https://youtu.be/XRt2j7joL7E",
       "listPrice": null,
       "salePrice": null,
       "openEscrowDate": null,
