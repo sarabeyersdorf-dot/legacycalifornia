@@ -169,20 +169,33 @@ export default async function handler(req, res) {
     }
 
     // Per-agent tasks from the briefing (deals.json "tasks") → agent_tasks.
-    // The briefing is the source of truth: wipe prior briefing tasks, re-insert.
+    // The briefing is the source of truth for content, but check-offs made in
+    // the CRM are preserved across syncs (matched by agent|client|title).
     let tasksWritten = 0;
     const tasks = Array.isArray(data.tasks) ? data.tasks : [];
+    const normAgent = (a) => { a = String(a || '').toLowerCase(); return /james/.test(a) ? 'james' : (/both/.test(a) ? 'both' : 'sara'); };
+    const sig = (agent, client, title) => `${agent}|${client || ''}|${title}`;
+
+    const { data: prior } = await supa.from('agent_tasks').select('agent, client, title, done').eq('source', 'briefing');
+    const doneBy = new Map((prior || []).map((t) => [sig(t.agent, t.client, t.title), t.done]));
+
     await supa.from('agent_tasks').delete().eq('source', 'briefing');
     if (tasks.length) {
       const rows = tasks.map((t) => {
-        const a = String(t.agent || '').toLowerCase();
+        const agent  = normAgent(t.agent);
+        const title  = String(t.title || t.task || '').slice(0, 300);
+        const client = t.client ? String(t.client).slice(0, 80) : null;
+        const s = sig(agent, client, title);
         return {
-          agent:      /james/.test(a) ? 'james' : (/both/.test(a) ? 'both' : 'sara'),
-          title:      String(t.title || t.task || '').slice(0, 200),
-          sub:        t.sub ? String(t.sub).slice(0, 200) : null,
+          agent,
+          client,
+          title,
+          sub:        t.sub ? String(t.sub).slice(0, 300) : null,
+          note:       t.note ? String(t.note).slice(0, 600) : null,
           due_label:  t.due || t.due_label || null,
           source_key: t.deal || t.source_key || null,
-          source:     'briefing'
+          source:     'briefing',
+          done:       doneBy.has(s) ? doneBy.get(s) : (t.done === true)
         };
       }).filter((r) => r.title);
       if (rows.length) {

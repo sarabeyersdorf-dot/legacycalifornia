@@ -22,6 +22,7 @@
     <div class="app-side-section">Daily</div>
     <nav class="app-side-nav">
       <a href="#" class="active" onclick="showView(event,'today')">Today <span class="pill" data-roster-today>—</span></a>
+      <a href="#" onclick="showView(event,'tasks')">Tasks <span class="pill" data-roster-tasks>—</span></a>
       <a href="#" onclick="showView(event,'inbox')">Inbox <span class="pill" data-roster-inbox>—</span></a>
       <a href="#" onclick="showView(event,'pipe')">Pipeline</a>
       <a href="#" onclick="showView(event,'cal')">Calendar <span class="pill" data-roster-calendar>—</span></a>
@@ -88,6 +89,7 @@
     <!-- TAB STRIP -->
     <div class="crm-tabs">
       <button class="crm-tab on" onclick="showView(event,'today')">Today <span class="ct" data-roster-today>—</span></button>
+      <button class="crm-tab" onclick="showView(event,'tasks')">Tasks <span class="ct" data-roster-tasks>—</span></button>
       <button class="crm-tab" onclick="showView(event,'inbox')">Inbox <span class="ct" data-roster-inbox>—</span></button>
       <button class="crm-tab" onclick="showView(event,'pipe')">Pipeline <span class="ct" data-roster-pipeline>—</span></button>
       <button class="crm-tab" onclick="showView(event,'cal')">Calendar <span class="ct" data-roster-calendar-week>—</span></button>
@@ -219,6 +221,46 @@
           </div>
         </section>
 
+      </div>
+    </section>
+
+    <!-- ============================================================
+         TASKS / COMPLIANCE (fed by the daily briefing)
+         ============================================================ -->
+    <style>
+    .tsk { padding: 22px 36px 60px; max-width: 920px; }
+    .tsk-filter { display: flex; gap: 6px; margin-bottom: 14px; flex-wrap: wrap; }
+    .tsk-filter .chip span { font-family: var(--mono); font-size: 10px; color: var(--brass); margin-left: 3px; }
+    .tsk-item { display: flex; gap: 12px; align-items: flex-start; padding: 14px 2px; border-bottom: 1px solid var(--rule-soft); }
+    .tsk-item input[type=checkbox] { width: 18px; height: 18px; margin-top: 2px; cursor: pointer; accent-color: #2E5C3D; flex: none; }
+    .tsk-body { flex: 1; min-width: 0; }
+    .tsk-line { display: flex; gap: 8px; align-items: baseline; flex-wrap: wrap; }
+    .tsk-badge { font-family: var(--mono); font-size: 9px; letter-spacing: .1em; text-transform: uppercase; padding: 2px 8px; background: #8B3A3A; color: #fff; border-radius: 2px; }
+    .tsk-badge.sara { background: #7C6A4D; } .tsk-badge.james { background: #3A5A7C; }
+    .tsk-title { font-size: 15px; color: var(--ink); line-height: 1.45; }
+    .tsk-item.done .tsk-title { text-decoration: line-through; color: var(--ink-faint); }
+    .tsk-item.done .tsk-badge { opacity: .5; }
+    .tsk-who { font-family: var(--mono); font-size: 8px; letter-spacing: .1em; text-transform: uppercase; color: var(--ink-mute); border: 1px solid var(--rule); padding: 1px 5px; }
+    .tsk-note { margin-top: 6px; font-size: 13.5px; color: var(--ink-soft); background: var(--shell); border: 1px solid var(--rule); padding: 8px 11px; }
+    @media (max-width: 900px) { .tsk { padding: 18px; } }
+    </style>
+    <section class="crm-view" data-view="tasks">
+      <div class="tsk">
+        <div class="cur-head"><div>
+          <span class="label-cap" style="color:var(--brass);">From your daily briefing</span>
+          <h1 class="h-section" style="font-size:38px;margin-top:6px;">Tasks.</h1>
+        </div></div>
+        <div class="tsk-filter" data-tsk-filter>
+          <button class="chip on" data-tsk="open">Open <span data-tsk-c-open>—</span></button>
+          <button class="chip" data-tsk="done">Done <span data-tsk-c-done>—</span></button>
+          <button class="chip" data-tsk="all">All</button>
+        </div>
+        <div class="tsk-filter" data-tsk-scope style="display:none;">
+          <button class="chip on" data-scope="all">Everyone</button>
+          <button class="chip" data-scope="james">James</button>
+          <button class="chip" data-scope="sara">Me</button>
+        </div>
+        <div data-tsk-list><div class="cur-empty">Loading tasks…</div></div>
       </div>
     </section>
 
@@ -1685,6 +1727,69 @@ function selectLead(el) {
     });
   }
   document.addEventListener('click', function (e) { var t = e.target.closest('[data-new-lead]'); if (t) { e.preventDefault(); open(); } });
+})();
+</script>
+<script>
+/* Tasks / compliance — the agent's briefing tasks as a checklist (badge,
+   text, note, check-off). Scoped per agent; broker can filter by agent. */
+(function () {
+  'use strict';
+  var root = document.querySelector('.crm-view[data-view="tasks"]');
+  if (!root) return;
+  var esc = function (s) { return (s == null ? '' : String(s)).replace(/[&<>"]/g, function (c) { return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]); }); };
+  var state = { data: null, view: 'open', scope: 'all' }, loaded = false;
+  function set(sel, v) { var el = root.querySelector(sel); if (el) el.textContent = String(v); }
+  function ensure() { if (loaded) return; loaded = true; load(); }
+  document.addEventListener('click', function (e) { if (e.target.closest('[onclick*="\'tasks\'"]')) setTimeout(ensure, 0); });
+
+  function load() {
+    var url = '/api/crm/tasks' + (state.scope !== 'all' ? ('?scope=' + state.scope) : '');
+    fetch(url, { credentials: 'include' }).then(function (r) { return r.json(); }).then(function (j) {
+      state.data = j;
+      if (j.broker) { var sc = root.querySelector('[data-tsk-scope]'); if (sc) sc.style.display = 'flex'; }
+      counts(); render();
+    }).catch(function () { var l = root.querySelector('[data-tsk-list]'); if (l) l.innerHTML = '<div class="cur-empty">Could not load tasks.</div>'; });
+  }
+  function counts() {
+    if (!state.data) return;
+    set('[data-tsk-c-open]', state.data.open); set('[data-tsk-c-done]', state.data.done);
+    document.querySelectorAll('[data-roster-tasks]').forEach(function (e) { e.textContent = String(state.data.open); });
+  }
+  function item(t) {
+    var who = state.data.broker ? '<span class="tsk-who">' + (t.agent === 'james' ? 'James' : t.agent === 'both' ? 'Both' : 'Me') + '</span>' : '';
+    var badge = t.client ? '<span class="tsk-badge ' + (t.agent === 'james' ? 'james' : t.agent === 'sara' ? 'sara' : '') + '">' + esc(t.client) + '</span>' : '';
+    var sub = (t.sub || t.due_label) ? '<div style="font-size:12px;color:var(--ink-mute);margin-top:2px;">' + esc([t.sub, t.due_label].filter(Boolean).join(' · ')) + '</div>' : '';
+    var note = t.note ? '<div class="tsk-note">' + esc(t.note) + '</div>' : '';
+    return '<div class="tsk-item' + (t.done ? ' done' : '') + '" data-tid="' + esc(t.id) + '">' +
+      '<input type="checkbox" data-tsk-check ' + (t.done ? 'checked' : '') + '>' +
+      '<div class="tsk-body"><div class="tsk-line">' + badge + '<span class="tsk-title">' + esc(t.title) + '</span>' + who + '</div>' + sub + note + '</div></div>';
+  }
+  function render() {
+    var list = root.querySelector('[data-tsk-list]');
+    var all = (state.data && state.data.tasks) || [];
+    var rows = state.view === 'open' ? all.filter(function (t) { return !t.done; })
+             : state.view === 'done' ? all.filter(function (t) { return t.done; }) : all;
+    list.innerHTML = rows.length ? rows.map(item).join('') : '<div class="cur-empty">Nothing here.</div>';
+  }
+  root.addEventListener('click', function (e) {
+    var f = e.target.closest('[data-tsk]');
+    if (f) { state.view = f.getAttribute('data-tsk'); root.querySelectorAll('[data-tsk]').forEach(function (b) { b.classList.toggle('on', b === f); }); render(); return; }
+    var sc = e.target.closest('[data-scope]');
+    if (sc) { state.scope = sc.getAttribute('data-scope'); root.querySelectorAll('[data-scope]').forEach(function (b) { b.classList.toggle('on', b === sc); }); load(); return; }
+  });
+  root.addEventListener('change', function (e) {
+    var cb = e.target.closest('[data-tsk-check]'); if (!cb) return;
+    var el = cb.closest('[data-tid]'); var id = el.getAttribute('data-tid'); var done = cb.checked;
+    el.classList.toggle('done', done);
+    fetch('/api/crm/tasks', { method: 'PATCH', credentials: 'include', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: id, done: done }) })
+      .then(function (r) { return r.json(); }).then(function () {
+        var t = (state.data.tasks || []).find(function (x) { return x.id === id; });
+        if (t) t.done = done;
+        state.data.open = (state.data.tasks || []).filter(function (x) { return !x.done; }).length;
+        state.data.done = (state.data.tasks || []).filter(function (x) { return x.done; }).length;
+        counts(); if (state.view !== 'all') render();
+      }).catch(function () {});
+  });
 })();
 </script>
 <script>
