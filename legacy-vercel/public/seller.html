@@ -197,7 +197,7 @@
     <!-- HERO -->
     <section class="sell-hero">
       <div class="sell-photo">
-        <img src="https://images.unsplash.com/photo-1605276374104-dee2a0ed3cd6?w=600&q=85" alt="">
+        <img id="sell-hero-photo" src="" alt="" style="display:none;">
         <span class="badge" data-bind="status.badge" data-optional>In escrow</span>
       </div>
       <div class="sell-h-info">
@@ -293,5 +293,18 @@
 </div>
 
 <script src="/legacy-client.js" defer></script>
+<script>
+/* Upgrade the hero from a neutral box to the listing's real photo (MLS photo,
+   else the YouTube tour thumbnail) from the portal payload. */
+(function () {
+  fetch('/api/seller/portal', { credentials: 'include' })
+    .then(function (r) { return r.ok ? r.json() : null; })
+    .then(function (d) {
+      var url = d && d.portal && d.portal.status && d.portal.status.photo;
+      var img = document.getElementById('sell-hero-photo');
+      if (img && url) { img.src = url; img.style.display = 'block'; }
+    }).catch(function () {});
+})();
+</script>
 </body>
 </html>
