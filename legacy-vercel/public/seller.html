@@ -6,6 +6,18 @@
 <title>Your Sale · Legacy Seller Portal</title>
 <link rel="stylesheet" href="legacy.css">
 <style>
+/* Wire-fraud warning — high-contrast, unmissable, never dismissible. */
+.wire-warn {
+  margin: 18px 36px 0; padding: 14px 18px;
+  background: #FBEDE6; border: 1px solid #D9A38C; border-left: 4px solid #B05A3C;
+  color: #6E2F17; font-size: 13.5px; line-height: 1.5;
+}
+.wire-warn::before {
+  content: 'Protect your money'; display: block;
+  font-family: var(--mono); font-size: 9.5px; letter-spacing: 0.16em;
+  text-transform: uppercase; color: #B05A3C; margin-bottom: 5px; font-weight: 600;
+}
+@media (max-width: 720px) { .wire-warn { margin: 14px 18px 0; } }
 .sell-hero {
   padding: 36px;
   background: var(--shell); border-bottom: 1px solid var(--rule);
@@ -197,6 +209,9 @@
         <button class="btn btn-ink btn-sm" id="sell-msg-btn">Message Sara</button>
       </div>
     </div>
+
+    <!-- WIRE-FRAUD WARNING · shown to every in-escrow client, never omitted -->
+    <div class="wire-warn" data-bind="security.banner" data-optional></div>
 
     <!-- HERO -->
     <section class="sell-hero">

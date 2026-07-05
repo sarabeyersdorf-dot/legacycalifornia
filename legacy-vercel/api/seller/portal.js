@@ -61,16 +61,19 @@ export default async function handler(req, res) {
     const token = req.query?.t ? String(req.query.t).trim() : null;
 
     let user = null, profile = null, isAgent = false, deal = null;
+    let portalToken = null, leadId = null;
 
     if (token) {
       // Private-link access — NO login. Resolve the client by their unguessable
-      // portal_token, then their most-recent seller-side deal. An invalid token
-      // returns an empty portal (nothing to probe), never an error. The login
-      // path below is untouched.
+      // portal_token, then their most-recent seller-side deal. A wrong or stale
+      // token returns a neutral "link expired" page with zero client data and
+      // no detail about why (nothing to probe). The login path is untouched.
       const { data: lead } = await supa.from('leads')
-        .select('id, email').eq('portal_token', token).maybeSingle();
-      if (!lead) return ok(res, { portal: emptyPortal({ email: '' }) });
+        .select('id, email, portal_token').eq('portal_token', token).maybeSingle();
+      if (!lead) return ok(res, { portal: expiredPortal() });
       user = { email: lead.email || '', id: null };
+      portalToken = lead.portal_token || token;
+      leadId = lead.id;
       const { data: parties } = await supa.from('deal_parties')
         .select('deal_id, role, deals(*)')
         .eq('lead_id', lead.id)
@@ -93,11 +96,12 @@ export default async function handler(req, res) {
 
       if (!deal && !isAgent) {
         // seller: lead -> deal_parties -> deals (most recent pending)
-        let leadId = profile?.lead_id || null;
+        leadId = profile?.lead_id || null;
         if (!leadId) {
-          const { data: l } = await supa.from('leads').select('id')
+          const { data: l } = await supa.from('leads').select('id, portal_token')
             .eq('email', (user.email || '').toLowerCase()).maybeSingle();
           leadId = l?.id || null;
+          portalToken = l?.portal_token || null;
         }
         if (leadId) {
           const { data: parties } = await supa.from('deal_parties')
@@ -120,6 +124,39 @@ export default async function handler(req, res) {
     }
 
     if (!deal) return ok(res, { portal: emptyPortal(user) });
+
+    // 1b. Agent-shared items (portal_items) --------------------------------
+    // The single source of truth for what a client may see: the SECURITY
+    // DEFINER portal_items(token) function returns only rows the agent flipped
+    // to client-visible (tasks/events) plus client-safe documents, scoped to
+    // this token. An internal row can never surface here even if this code has
+    // a bug. Fail-soft — a portal_items hiccup must not blank the portal.
+    let sharedTasks = [], sharedEvents = [];
+    try {
+      if (!portalToken && leadId) {
+        const { data: l } = await supa.from('leads').select('portal_token').eq('id', leadId).maybeSingle();
+        portalToken = l?.portal_token || null;
+      }
+      if (portalToken) {
+        const { data: items } = await supa.rpc('portal_items', { p_token: portalToken });
+        for (const it of (items || [])) {
+          if (it.item_type === 'task') {
+            sharedTasks.push({ label: sanitize(it.title || 'Update'), when: 'From your agent', status: 'shared' });
+          } else if (it.item_type === 'event') {
+            const d = it.when_at ? new Date(it.when_at) : null;
+            sharedEvents.push({
+              date: (d && !isNaN(d)) ? `${MONTHS[d.getMonth()]} ${d.getDate()}` : '',
+              label: sanitize(it.title || 'Scheduled'),
+              status: 'upcoming',
+              description: (d && !isNaN(d)) ? d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' }) : '',
+              _at: (d && !isNaN(d)) ? d.getTime() : 0
+            });
+          }
+          // documents from portal_items are already covered by the client-safe
+          // deal_documents query below; skip to avoid duplicates.
+        }
+      }
+    } catch (_) { /* stay soft */ }
 
     // 2. Documents for this deal (client-safe only) ------------------------
     const { data: docRows } = await supa.from('deal_documents')
@@ -171,10 +208,22 @@ export default async function handler(req, res) {
       road.push({ date: fmtDate(coe), label: 'Close of escrow', status: 'key', description: 'Deed records and proceeds release.' });
     }
 
-    // What I need from you = docs the client still owes a signature on
+    // Fold agent-shared events (inspections, appraisals, meetings) into the
+    // timeline in date order, ahead of the close-of-escrow marker.
+    if (sharedEvents.length) {
+      sharedEvents.sort((a, b) => a._at - b._at);
+      const cleaned = sharedEvents.map(({ _at, ...r }) => r);
+      const keyIdx = road.findIndex((r) => r.status === 'key');
+      if (keyIdx >= 0) road.splice(keyIdx, 0, ...cleaned);
+      else road.push(...cleaned);
+    }
+
+    // What I need from you = docs the client still owes a signature on,
+    // plus any tasks the agent explicitly shared with this client.
     const tasks = docs
       .filter((d) => d.status === 'to_sign' || d.status === 'with_seller' || d.status === 'pending')
-      .map((d) => ({ label: `Sign ${d.name}`, when: DOC_STATUS_LABEL[d.status] || 'Open', status: 'open' }));
+      .map((d) => ({ label: `Sign ${d.name}`, when: DOC_STATUS_LABEL[d.status] || 'Open', status: 'open' }))
+      .concat(sharedTasks);
 
     // Team from the deal's contact columns
     const team = [];
@@ -207,8 +256,19 @@ export default async function handler(req, res) {
       noteBody = await draftSellerNote({ firstName, deal, coe, dtc, signed, total: docs.length, tasks, agentName, agentPhone });
     } catch (_) { /* keep fallback */ }
 
+    // Standing wire-fraud warning — shown to every in-escrow client. Real
+    // estate wire fraud is the reason for the private-link model; the banner is
+    // deliberately blunt and never omitted once a client is in escrow.
+    const inEscrow = deal.stage === 'pending';
+    const security = {
+      banner: inEscrow
+        ? 'We will never send wire instructions through this portal, by email, or by text. Before wiring funds, always call the title company directly at a phone number you have independently verified.'
+        : ''
+    };
+
     // 5. Assemble -----------------------------------------------------------
     const portal = {
+      security,
       seller: { first_name: firstName || '', who: sanitize(deal.address) },
       status: {
         label: deal.stage === 'pending' ? 'In escrow' : sanitize(deal.stage || ''),
@@ -253,11 +313,31 @@ function sellerFirstName(deal) {
 
 function emptyPortal(user) {
   return {
+    security: { banner: '' },
     seller: { first_name: (user?.email || '').split('@')[0] || '', who: '' },
     status: { label: 'No active listing', badge: '', address: '', city: '', type: '', price: '—', since: '' },
     nav: { documents: '0', tasks: '0' },
     kpis: [], road: [], documents: [], tasks: [], team: [], activity: [],
     note: { head: 'A note from Sara', body: 'Your listing dashboard will appear here once your sale is under way.', sign: '— Sara · (209) 559-4966' }
+  };
+}
+
+// A wrong, revoked, or stale private link. Deliberately reveals nothing — same
+// shape as an empty portal but with a neutral "link expired" message and zero
+// client data. Regenerating a lead's portal_token invalidates every prior link,
+// which lands here.
+function expiredPortal() {
+  return {
+    security: { banner: '' },
+    seller: { first_name: '', who: '' },
+    status: { label: 'Link expired', badge: '', address: '', city: '', type: '', price: '—', since: '' },
+    nav: { documents: '0', tasks: '0' },
+    kpis: [], road: [], documents: [], tasks: [], team: [], activity: [],
+    note: {
+      head: 'This link is no longer active',
+      body: 'This private link has expired or been replaced. Please contact your agent for a current link to your portal.',
+      sign: ''
+    }
   };
 }
 
