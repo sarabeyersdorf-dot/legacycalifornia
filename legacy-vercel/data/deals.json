@@ -1,5 +1,5 @@
 {
-  "version": "1.16",
+  "version": "1.17",
   "lastUpdated": "2026-07-05",
   "updatedBy": "Claude",
   "tasks": [
@@ -713,6 +713,26 @@
       },
       "correspondence": [],
       "notes": "Vacant land listing (community-commercial zone), Angels Camp. Seller-signed Vacant Land Listing Agreement (12/24), AAA, Additional Signature Addendum 2, MOT 2026 on file (_Listings/Land/590-598 S Main St). Flyer + marketing assets (plat map, OnX, parcel lines, proposed neighbor fence) ready.",
+      "alerts": []
+    },
+    {
+      "id": "1350-love-st",
+      "address": "1350 Love St",
+      "city": "Angels Camp, CA 95222",
+      "stage": "preparing",
+      "type": "land",
+      "side": "listing",
+      "agent": "sara",
+      "listPrice": null,
+      "salePrice": null,
+      "openEscrowDate": null,
+      "closingDate": null,
+      "contacts": {},
+      "docs": {
+        "titleProfile": "received"
+      },
+      "correspondence": [],
+      "notes": "Vacant land, Angels Camp Townsite (Lot 10 Blk 5), APN 060-010-036-000, Calaveras County. Title Pro property profile on file (_Listings/Land/1350 Love St). Photos shot 5/17/25 + 6/19/25, corrected set plus new photos 1/9/26. No signed listing agreement in the folder yet — stage set to preparing.",
       "alerts": []
     },
     {
