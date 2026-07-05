@@ -26,7 +26,7 @@ export default async function handler(req, res) {
     const supa = adminClient();
     const { data: leads, error } = await supa
       .from('leads')
-      .select('id, first_name, last_name, email, pipeline_stage, deal_side, score, temperature, price_min, price_max, journey_stage, lead_type, updated_at')
+      .select('id, first_name, last_name, email, pipeline_stage, deal_side, score, temperature, price_min, price_max, journey_stage, lead_type, areas, updated_at')
       .eq('status', 'active');
 
     if (error) return fail(res, 500, error.message);
@@ -34,25 +34,32 @@ export default async function handler(req, res) {
     const groups = Object.fromEntries(STAGES.map(s => [s, {
       stage: s, leads: [], count: 0, estimated_value: 0
     }]));
+    // Sphere/unknown leads aren't kanban columns, but the CRM still needs them
+    // for the Roster "Sphere" segment — carried in an extra group the kanban skips.
+    const sphere = { stage: 'sphere', leads: [], count: 0, estimated_value: 0 };
 
     for (const lead of (leads || [])) {
       const key = STAGE_REMAP[lead.pipeline_stage] || lead.pipeline_stage;
       const g = groups[key];
-      if (!g) continue; // sphere / unknown stages aren't columns on the active board
-      g.leads.push(lead);
-      g.count += 1;
-      const midpoint = midPrice(lead.price_min, lead.price_max);
-      if (midpoint) g.estimated_value += midpoint * COMMISSION_PCT;
+      if (g) {
+        g.leads.push(lead);
+        g.count += 1;
+        const midpoint = midPrice(lead.price_min, lead.price_max);
+        if (midpoint) g.estimated_value += midpoint * COMMISSION_PCT;
+      } else {
+        sphere.leads.push(lead);
+        sphere.count += 1;
+      }
     }
 
     // Sort each stage by score desc (hottest leads first)
-    for (const g of Object.values(groups)) {
+    for (const g of [...Object.values(groups), sphere]) {
       g.leads.sort((a, b) => (b.score || 0) - (a.score || 0));
       g.estimated_value = Math.round(g.estimated_value);
     }
 
     return ok(res, {
-      stages: STAGES.map(s => groups[s]),
+      stages: [...STAGES.map(s => groups[s]), sphere],
       total_leads: (leads || []).length,
       total_estimated_value: Math.round(
         STAGES.reduce((sum, s) => sum + groups[s].estimated_value, 0)

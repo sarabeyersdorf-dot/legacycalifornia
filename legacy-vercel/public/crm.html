@@ -33,14 +33,14 @@
     <nav class="app-side-nav">
       <a href="#" onclick="showView(event,'inbox')" data-roster-nav="all">Leads <span class="pill" data-roster-leads>—</span></a>
       <a href="#" onclick="showView(event,'inbox')" data-roster-nav="clients">Clients <span class="pill" data-roster-clients>—</span></a>
-      <a href="#" onclick="showView(event,'inbox')" data-roster-nav="sphere">Past clients <span class="pill" data-roster-past>—</span></a>
+      <a href="#" onclick="showView(event,'inbox')" data-roster-nav="past">Past clients <span class="pill" data-roster-past>—</span></a>
       <a href="#" onclick="showView(event,'inbox')" data-roster-nav="sphere">Sphere</a>
     </nav>
 
     <div class="app-side-section">Listings</div>
     <nav class="app-side-nav">
-      <a href="#" onclick="showView(event,'today')">Active <span class="pill" data-roster-listings>—</span></a>
-      <a href="#" onclick="showView(event,'today')">Pending</a>
+      <a href="#" onclick="showView(event,'listings')" data-lst-nav="active">Active <span class="pill" data-roster-listings>—</span></a>
+      <a href="#" onclick="showView(event,'listings')" data-lst-nav="pending">Pending <span class="pill" data-roster-pending>—</span></a>
       <a href="seller.html">Seller portal</a>
     </nav>
 
@@ -757,6 +757,42 @@
           <h1 class="h-section" style="font-size:38px;margin-top:6px;">The brokerage.</h1>
         </div></div>
         <div data-broker-body><div class="cur-empty">Loading…</div></div>
+      </div>
+    </section>
+
+    <!-- ============================================================
+         LISTINGS (the agent's own sell-side deals from deals.json)
+         ============================================================ -->
+    <style>
+    .lst { padding: 22px 36px 60px; }
+    .lst-filter .chip .c { font-family: var(--mono); font-size: 10px; color: var(--brass); margin-left: 4px; }
+    .lst-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 18px; }
+    .lst-card { background: var(--shell); border: 1px solid var(--rule); overflow: hidden; display: flex; flex-direction: column; }
+    .lst-card .ph { width: 100%; aspect-ratio: 16/10; object-fit: cover; background: var(--vellum); display: block; }
+    .lst-card .ph-empty { width: 100%; aspect-ratio: 16/10; background: var(--linen); display: flex; align-items: center; justify-content: center; font-family: var(--mono); font-size: 10px; letter-spacing: .14em; text-transform: uppercase; color: var(--ink-faint); }
+    .lst-card .bd { padding: 14px 16px; display: flex; flex-direction: column; gap: 6px; }
+    .lst-card .pr { font-family: var(--serif); font-style: italic; font-size: 24px; color: var(--ink); }
+    .lst-card .ad { font-size: 13.5px; color: var(--ink-soft); }
+    .lst-card .mt { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-top: 4px; }
+    .lst-badge { font-family: var(--mono); font-size: 8.5px; letter-spacing: .1em; text-transform: uppercase; padding: 2px 7px; border: 1px solid var(--rule); color: var(--ink-mute); }
+    .lst-badge.active  { background: #E8F0EA; color: #2E5C3D; border-color: #BFD8C6; }
+    .lst-badge.pending { background: #F3EAD6; color: #7C5A16; border-color: #E0CFA0; }
+    .lst-badge.closed  { background: var(--linen); color: var(--ink-mute); }
+    .lst-card .lk { font-family: var(--mono); font-size: 10px; letter-spacing: .1em; text-transform: uppercase; color: var(--brass); text-decoration: none; margin-top: 6px; }
+    @media (max-width: 900px) { .lst { padding: 18px; } }
+    </style>
+    <section class="crm-view" data-view="listings">
+      <div class="lst">
+        <div class="cur-head"><div>
+          <span class="label-cap" style="color:var(--brass);">Your listings</span>
+          <h1 class="h-section" style="font-size:38px;margin-top:6px;">Listings.</h1>
+        </div></div>
+        <div class="lst-filter" data-lst-filter style="display:flex;gap:6px;margin-bottom:18px;flex-wrap:wrap;">
+          <button class="chip on" data-lst="active">Active <span class="c" data-lst-c-active>—</span></button>
+          <button class="chip" data-lst="pending">Pending <span class="c" data-lst-c-pending>—</span></button>
+          <button class="chip" data-lst="closed">Closed <span class="c" data-lst-c-closed>—</span></button>
+        </div>
+        <div class="lst-grid" data-lst-grid><div class="cur-empty">Loading your listings…</div></div>
       </div>
     </section>
 
@@ -1649,6 +1685,63 @@ function selectLead(el) {
     });
   }
   document.addEventListener('click', function (e) { var t = e.target.closest('[data-new-lead]'); if (t) { e.preventDefault(); open(); } });
+})();
+</script>
+<script>
+/* Listings — the agent's own sell-side deals (deals.json) grouped
+   active / pending / closed, with photo, price, and a seller-portal link. */
+(function () {
+  'use strict';
+  var root = document.querySelector('.crm-view[data-view="listings"]');
+  if (!root) return;
+  var esc = function (s) { return (s == null ? '' : String(s)).replace(/[&<>"]/g, function (c) { return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]); }); };
+  function fmtUSD(n) { if (n == null) return '—'; var v = Math.abs(+n); if (v >= 1e6) return '$' + (+n / 1e6).toFixed(v >= 1e7 ? 0 : 2) + 'M'; if (v >= 1e3) return '$' + Math.round(+n / 1e3) + 'K'; return '$' + Math.round(+n); }
+  var state = { data: null, tab: 'active' }, loaded = false;
+  function set(sel, v) { var el = root.querySelector(sel); if (el) el.textContent = String(v); }
+  function ensure() { if (loaded) return; loaded = true; load(); }
+  function load() {
+    fetch('/api/crm/listings', { credentials: 'include' }).then(function (r) { return r.json(); }).then(function (j) {
+      state.data = j;
+      var c = (j && j.counts) || { active: 0, pending: 0, closed: 0 };
+      set('[data-lst-c-active]', c.active); set('[data-lst-c-pending]', c.pending); set('[data-lst-c-closed]', c.closed);
+      var a = document.querySelector('[data-roster-listings]'); if (a) a.textContent = String(c.active);
+      var p = document.querySelector('[data-roster-pending]'); if (p) p.textContent = String(c.pending);
+      render();
+    }).catch(function () { var g = root.querySelector('[data-lst-grid]'); if (g) g.innerHTML = '<div class="cur-empty">Could not load listings.</div>'; });
+  }
+  function badge(tab) { return tab === 'active' ? 'On market' : tab === 'pending' ? 'In escrow' : 'Closed'; }
+  function card(d) {
+    var ph = d.photo_url ? '<img class="ph" src="' + esc(d.photo_url) + '" alt="">' : '<div class="ph-empty">No photo yet</div>';
+    var tour = (d.has_video ? '<span class="lst-badge">Video</span>' : '') + (d.has_tour ? '<span class="lst-badge">3D tour</span>' : '');
+    return '<div class="lst-card">' + ph + '<div class="bd">' +
+      '<div class="pr">' + esc(fmtUSD(d.price)) + '</div>' +
+      '<div class="ad">' + esc(d.address || '') + (d.city ? ' · ' + esc(d.city) : '') + '</div>' +
+      '<div class="mt"><span class="lst-badge ' + state.tab + '">' + badge(state.tab) + '</span>' +
+        '<span class="lst-badge">' + (d.agent === 'james' ? 'James' : 'Sara') + '</span>' + tour + '</div>' +
+      (d.coe_date ? '<div style="font-size:11px;color:var(--ink-mute);">COE ' + esc(d.coe_date) + '</div>' : '') +
+      '<a class="lk" href="/seller.html?deal=' + encodeURIComponent(d.source_key) + '" target="_blank">Open seller portal ↗</a>' +
+      '</div></div>';
+  }
+  function render() {
+    var grid = root.querySelector('[data-lst-grid]');
+    if (!grid) return;
+    var rows = (state.data && state.data[state.tab]) || [];
+    grid.innerHTML = rows.length ? rows.map(card).join('') : '<div class="cur-empty">No ' + state.tab + ' listings.</div>';
+  }
+  root.addEventListener('click', function (e) {
+    var t = e.target.closest('[data-lst]'); if (!t) return;
+    state.tab = t.getAttribute('data-lst');
+    root.querySelectorAll('[data-lst]').forEach(function (b) { b.classList.toggle('on', b === t); });
+    render();
+  });
+  // Lazy-load + set tab when the Listings view opens (roster Active/Pending).
+  document.addEventListener('click', function (e) {
+    var nav = e.target.closest('[data-lst-nav]') || e.target.closest('[onclick*="\'listings\'"]');
+    if (!nav) return;
+    ensure();
+    var want = nav.getAttribute && nav.getAttribute('data-lst-nav');
+    if (want) { state.tab = want; root.querySelectorAll('[data-lst]').forEach(function (b) { b.classList.toggle('on', b.getAttribute('data-lst') === want); }); setTimeout(render, 0); }
+  });
 })();
 </script>
 <script>

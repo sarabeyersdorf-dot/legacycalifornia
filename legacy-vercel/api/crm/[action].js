@@ -30,6 +30,7 @@ import calendar      from '../_lib/handlers/crm-calendar.js';
 import broker        from '../_lib/handlers/crm-broker.js';
 import createLead    from '../_lib/handlers/crm-create-lead.js';
 import me            from '../_lib/handlers/crm-me.js';
+import listings      from '../_lib/handlers/crm-listings.js';
 
 const TABLE = {
   'morning-brief':   morningBrief,
@@ -47,7 +48,8 @@ const TABLE = {
   'calendar':        calendar,
   'broker':          broker,
   'create-lead':     createLead,
-  'me':              me
+  'me':              me,
+  'listings':        listings
 };
 
 export default async function handler(req, res) {

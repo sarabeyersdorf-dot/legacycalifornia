@@ -714,6 +714,7 @@
     if (data.roster) {
       const r = data.roster;
       const setAll = (selector, value) => {
+        if (value == null) return; // never print "undefined" over a pill
         document.querySelectorAll(selector).forEach((el) => { el.textContent = String(value); });
       };
       setAll('[data-roster-today]',        r.today_count);
@@ -1340,28 +1341,52 @@
     leadsById: new Map(),
     messageByLead: new Map(),
     activeFilter: 'all',
+    segment: 'all',      // roster segment: all | clients | past | sphere
     selectedLeadId: null
   };
 
+  // Roster segments over pipeline_stage (legacy keys normalized).
+  const STAGE_NORM = { touring: 'active', offer: 'under_contract', close: 'closed' };
+  const SEGMENTS = {
+    all:     () => true,
+    clients: (s) => ['signed', 'active', 'under_contract'].includes(s),
+    past:    (s) => s === 'closed',
+    sphere:  (s) => s === 'sphere'
+  };
+
   function filterLeads() {
+    const segFn = SEGMENTS[state.segment] || SEGMENTS.all;
+    let leads = state.leads.filter((l) => segFn(STAGE_NORM[l.pipeline_stage] || l.pipeline_stage));
     const f = state.activeFilter;
-    if (f === 'all') return state.leads;
+    if (f === 'all') return leads;
     if (f === 'awaiting_reply') {
-      return state.leads.filter((l) => {
+      return leads.filter((l) => {
         const m = state.messageByLead.get(l.id);
         return m && m.direction === 'inbound';
       });
     }
-    return state.leads.filter((l) => l.temperature === f);
+    return leads.filter((l) => l.temperature === f);
   }
 
   function paintLeadCounts() {
     const counts = { all: state.leads.length, hot: 0, warm: 0, new: 0, cold: 0 };
-    state.leads.forEach((l) => { if (counts[l.temperature] != null) counts[l.temperature]++; });
+    const seg = { clients: 0, past: 0, sphere: 0 };
+    state.leads.forEach((l) => {
+      if (counts[l.temperature] != null) counts[l.temperature]++;
+      const s = STAGE_NORM[l.pipeline_stage] || l.pipeline_stage;
+      if (SEGMENTS.clients(s)) seg.clients++;
+      else if (s === 'closed') seg.past++;
+      else if (s === 'sphere') seg.sphere++;
+    });
     document.querySelectorAll('[data-count]').forEach((el) => {
       const k = el.getAttribute('data-count');
       if (counts[k] != null) el.textContent = String(counts[k]);
     });
+    // Roster sidebar pills — segment-accurate.
+    const setPill = (sel, n) => document.querySelectorAll(sel).forEach((el) => { el.textContent = String(n); });
+    setPill('[data-roster-leads]', state.leads.length);
+    setPill('[data-roster-clients]', seg.clients);
+    setPill('[data-roster-past]', seg.past);
   }
 
   function paintLeadList() {
@@ -1411,6 +1436,24 @@
       });
     });
   }
+
+  // Roster sidebar segments (Leads / Clients / Past clients / Sphere) — re-filter
+  // the lead list even when already on the Inbox view, so clicking between them
+  // actually changes what's shown.
+  document.addEventListener('click', (e) => {
+    const link = e.target.closest('[data-roster-nav]');
+    if (!link) return;
+    state.segment = link.getAttribute('data-roster-nav') || 'all';
+    state.activeFilter = 'all';
+    document.querySelectorAll('[data-filter]').forEach((c) => c.classList.toggle('on', c.getAttribute('data-filter') === 'all'));
+    paintLeadList();
+    const first = filterLeads()[0];
+    if (first) selectLeadId(first.id);
+    else {
+      const detailEl = document.querySelector('[data-lead-detail]');
+      if (detailEl) detailEl.innerHTML = `<div style="padding:32px;opacity:.55;font-style:italic;">No leads in this group yet.</div>`;
+    }
+  });
 
   function paintLeadDetail(payload) {
     const detailEl  = document.querySelector('[data-lead-detail]');
