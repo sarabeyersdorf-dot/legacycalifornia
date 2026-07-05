@@ -56,6 +56,7 @@
     <div class="app-side-section">Insight</div>
     <nav class="app-side-nav">
       <a href="#" onclick="showView(event,'rep')">Reports</a>
+      <a href="#" data-broker-tab style="display:none;" onclick="showView(event,'broker')">Broker oversight</a>
       <a href="#">Market data</a>
       <a href="#">Settings</a>
     </nav>
@@ -93,6 +94,7 @@
       <button class="crm-tab" onclick="showView(event,'seq')">Sequences</button>
       <button class="crm-tab" onclick="showView(event,'curate')">Curated</button>
       <button class="crm-tab" onclick="showView(event,'rep')">Reports</button>
+      <button class="crm-tab" data-broker-tab style="display:none;" onclick="showView(event,'broker')">Broker</button>
     </div>
 
     <!-- ============================================================
@@ -782,6 +784,39 @@
       </div>
     </section>
 
+    <!-- ============================================================
+         BROKER OVERSIGHT (visible only to the broker-owner / admin)
+         ============================================================ -->
+    <style>
+    .brk { padding: 22px 36px 60px; }
+    .brk-agents { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; margin-bottom: 24px; }
+    .brk-ag { background: var(--shell); border: 1px solid var(--rule); padding: 20px 22px; }
+    .brk-ag h3 { font-family: var(--serif); font-style: italic; font-weight: 400; font-size: 22px; }
+    .brk-ag .st { display: flex; gap: 22px; margin: 12px 0; }
+    .brk-ag .st .n { font-family: var(--serif); font-style: italic; font-size: 28px; color: var(--ink); line-height: 1; }
+    .brk-ag .st .n.brass { color: var(--brass); }
+    .brk-ag .st .l { font-family: var(--mono); font-size: 9px; letter-spacing: .12em; text-transform: uppercase; color: var(--ink-mute); margin-top: 3px; }
+    .brk-ag .stages { font-family: var(--mono); font-size: 10px; letter-spacing: .05em; color: var(--ink-soft); text-transform: uppercase; }
+    .brk-ag .la { font-size: 11px; color: var(--ink-mute); margin-top: 8px; }
+    .brk-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    .brk-table th { font-family: var(--mono); font-size: 9px; letter-spacing: .12em; text-transform: uppercase; color: var(--ink-mute); text-align: left; padding: 8px; border-bottom: 1px solid var(--rule); }
+    .brk-table td { padding: 9px 8px; border-bottom: 1px solid var(--rule-soft); }
+    .brk-hot { color: #8B3A3A; font-family: var(--mono); font-size: 9px; letter-spacing: .1em; text-transform: uppercase; margin-left: 6px; }
+    .brk-prov { background: var(--shell); border: 1px solid var(--rule); padding: 20px 22px; margin-top: 24px; max-width: 520px; }
+    .brk-prov input, .brk-prov select { font: inherit; font-size: 14px; padding: 8px 10px; border: 1px solid var(--rule); background: #fff; width: 100%; margin-top: 4px; color: var(--ink); }
+    .brk-prov label { font-family: var(--mono); font-size: 9px; letter-spacing: .12em; text-transform: uppercase; color: var(--ink-mute); display: block; margin-top: 10px; }
+    @media (max-width: 900px) { .brk { padding: 18px; } }
+    </style>
+    <section class="crm-view" data-view="broker">
+      <div class="brk">
+        <div class="cur-head"><div>
+          <span class="label-cap" style="color:var(--brass);">Broker oversight · Legacy Properties</span>
+          <h1 class="h-section" style="font-size:38px;margin-top:6px;">The brokerage.</h1>
+        </div></div>
+        <div data-broker-body><div class="cur-empty">Loading…</div></div>
+      </div>
+    </section>
+
   </main>
 </div>
 
@@ -1417,6 +1452,92 @@ function selectLead(el) {
     });
   }
   document.addEventListener('click', function (e) { var t = e.target.closest('[data-open-listing-media]'); if (t) { e.preventDefault(); open(); } });
+})();
+</script>
+<script>
+/* Broker oversight — visible only to the broker-owner (agent_sara / admin).
+   Agent pipeline snapshot, lead reassignment, and one-click agent login setup. */
+(function () {
+  'use strict';
+  var root = document.querySelector('.crm-view[data-view="broker"]');
+  if (!root) return;
+  var esc = function (s) { return (s == null ? '' : String(s)).replace(/[&<>"]/g, function (c) { return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]); }); };
+  function api(path, opts) {
+    opts = opts || {}; opts.credentials = 'include';
+    if (opts.body && typeof opts.body !== 'string') { opts.headers = { 'Content-Type': 'application/json' }; opts.body = JSON.stringify(opts.body); }
+    return fetch('/api/crm/' + path, opts).then(function (r) { return r.json().then(function (j) { return { ok: r.ok, j: j }; }).catch(function () { return { ok: r.ok, j: {} }; }); });
+  }
+
+  // Show the Broker tab only to the broker-owner / admin.
+  fetch('/api/auth/session', { credentials: 'include' }).then(function (r) { return r.json(); }).then(function (j) {
+    var role = j && j.profile && j.profile.role;
+    if (role === 'agent_sara' || role === 'admin') {
+      document.querySelectorAll('[data-broker-tab]').forEach(function (e) { e.style.display = ''; });
+    }
+  }).catch(function () {});
+
+  var loaded = false;
+  function ensure() { if (loaded) return; loaded = true; load(); }
+  document.addEventListener('click', function (e) { if (e.target.closest('[onclick*="\'broker\'"]')) setTimeout(ensure, 0); });
+
+  function load() {
+    api('broker').then(function (r) {
+      var body = root.querySelector('[data-broker-body]');
+      if (!r.ok) { body.innerHTML = '<div class="cur-empty">' + esc((r.j && r.j.error) || 'Broker access only.') + '</div>'; return; }
+      render(r.j);
+    });
+  }
+
+  function render(d) {
+    var body = root.querySelector('[data-broker-body]');
+    var agents = (d.agents || []).map(function (a) {
+      var stages = Object.keys(a.by_stage || {}).map(function (k) { return k + ' ' + a.by_stage[k]; }).join(' · ') || 'no active leads';
+      return '<div class="brk-ag"><h3>' + esc(a.name) + '</h3>' +
+        '<div class="st"><div><div class="n">' + a.leads_total + '</div><div class="l">Active leads</div></div>' +
+        '<div><div class="n brass">' + a.hot + '</div><div class="l">Hot</div></div>' +
+        '<div><div class="n">' + a.active_deals + '</div><div class="l">Deals</div></div></div>' +
+        '<div class="stages">' + esc(stages) + '</div>' +
+        '<div class="la">Last activity: ' + esc(a.last_activity ? new Date(a.last_activity).toLocaleDateString() : '—') + '</div></div>';
+    }).join('');
+
+    var rows = (d.recent || []).map(function (l) {
+      var other = l.assigned_agent === 'james' ? 'sara' : 'james';
+      var otherName = other === 'james' ? 'James' : 'Sara';
+      return '<tr><td>' + esc(l.name) + (l.temperature === 'hot' ? '<span class="brk-hot">hot</span>' : '') + '</td>' +
+        '<td>' + esc(l.pipeline_stage || '—') + '</td><td>' + esc(l.assigned_agent || '—') + '</td>' +
+        '<td><button class="btn-link" data-reassign="' + esc(l.id) + '" data-to="' + other + '" style="font-size:10px;">→ ' + otherName + '</button></td></tr>';
+    }).join('');
+
+    body.innerHTML =
+      '<div class="brk-agents">' + agents + '</div>' +
+      '<section class="card"><div class="card-h"><h2>Leads &amp; assignment.</h2><span class="meta">' + (d.totals ? d.totals.leads : 0) + ' active · reassign to supervise</span></div>' +
+        '<div style="overflow-x:auto;"><table class="brk-table"><thead><tr><th>Lead</th><th>Stage</th><th>Agent</th><th>Move</th></tr></thead><tbody>' +
+        (rows || '<tr><td colspan="4" class="cur-empty">No active leads.</td></tr>') + '</tbody></table></div></section>' +
+      '<div class="brk-prov"><div class="cur-side-h">Set up an agent login</div>' +
+        '<p style="font-size:12.5px;color:var(--ink-soft);line-height:1.5;margin:0 0 4px;">Creates (or resets) an agent\'s sign-in and grants CRM access — no Supabase needed. Use this to set James\'s password.</p>' +
+        '<label>Agent</label><select id="brk-agent"><option value="james">James Beyersdorf</option><option value="sara">Sara Cooper</option></select>' +
+        '<label>Email</label><input id="brk-email" type="email" placeholder="JamesSellsCalifornia@gmail.com">' +
+        '<label>Password (min 8 characters)</label><input id="brk-pass" type="text" placeholder="set a password they\'ll use to sign in">' +
+        '<button class="btn btn-ink btn-sm" id="brk-provision" style="margin-top:14px;">Set up login</button>' +
+        '<div class="cur-result" id="brk-prov-result" style="margin-top:10px;font-size:13px;"></div></div>';
+
+    body.querySelectorAll('[data-reassign]').forEach(function (b) {
+      b.addEventListener('click', function () {
+        api('broker', { method: 'POST', body: { op: 'reassign', lead_id: b.getAttribute('data-reassign'), to_agent: b.getAttribute('data-to') } }).then(function () { load(); });
+      });
+    });
+    body.querySelector('#brk-provision').addEventListener('click', function () {
+      var r = body.querySelector('#brk-prov-result');
+      var payload = { op: 'provision-agent', agent_key: body.querySelector('#brk-agent').value, email: body.querySelector('#brk-email').value.trim(), password: body.querySelector('#brk-pass').value };
+      if (!payload.email) { r.style.color = '#8B3A3A'; r.textContent = 'Enter an email.'; return; }
+      var btn = body.querySelector('#brk-provision'); btn.disabled = true; btn.textContent = 'Working…';
+      api('broker', { method: 'POST', body: payload }).then(function (x) {
+        btn.disabled = false; btn.textContent = 'Set up login';
+        if (x.ok && x.j.provisioned) { r.style.color = '#2E5C3D'; r.textContent = '✓ ' + (x.j.action === 'created' ? 'Login created' : 'Login updated') + ' for ' + x.j.email + ' as ' + x.j.role + '. They can sign in at /crm.html now.'; }
+        else { r.style.color = '#8B3A3A'; r.textContent = '✗ ' + ((x.j && x.j.error) || 'Failed'); }
+      });
+    });
+  }
 })();
 </script>
 <script src="/legacy-client.js" defer></script>
