@@ -138,6 +138,10 @@
 .share-row .who .sub { display: block; font-family: var(--mono); font-size: 9.5px; letter-spacing: 0.12em; color: var(--ink-mute); margin-top: 2px; text-transform: uppercase; }
 .share-row .access { font-family: var(--mono); font-size: 10px; letter-spacing: 0.14em; color: var(--ink-mute); text-transform: uppercase; }
 
+.sell-tour { display: flex; gap: 16px; margin-top: 16px; flex-wrap: wrap; }
+.sell-tour a { font-family: var(--mono); font-size: 10px; letter-spacing: .14em; text-transform: uppercase; color: var(--brass); text-decoration: none; border-bottom: 1px solid var(--brass); padding-bottom: 3px; }
+.sell-tour a:hover { color: var(--ink); border-color: var(--ink); }
+
 @media (max-width: 1100px) {
   .sell-hero { grid-template-columns: 1fr; }
   .sell-photo { width: 100%; }
@@ -208,6 +212,7 @@
           <span data-bind="status.type" data-optional>Residential</span>
           <span data-bind="status.label" data-optional>In escrow</span>
         </div>
+        <div id="sell-tour" class="sell-tour"></div>
       </div>
       <div class="sell-status">
         <div class="l">Sale price</div>
@@ -300,9 +305,15 @@
   fetch('/api/seller/portal', { credentials: 'include' })
     .then(function (r) { return r.ok ? r.json() : null; })
     .then(function (d) {
-      var url = d && d.portal && d.portal.status && d.portal.status.photo;
+      var portal = (d && d.portal) || {};
+      var url = portal.status && portal.status.photo;
       var img = document.getElementById('sell-hero-photo');
       if (img && url) { img.src = url; img.style.display = 'block'; }
+      var tour = portal.tour || {}, box = document.getElementById('sell-tour'), html = '';
+      var ok = function (u) { return typeof u === 'string' && /^https?:\/\//.test(u); };
+      if (ok(tour.video_url))      html += '<a href="' + tour.video_url + '" target="_blank" rel="noopener">▶ Watch the video tour</a>';
+      if (ok(tour.matterport_url)) html += '<a href="' + tour.matterport_url + '" target="_blank" rel="noopener">◱ 3D walkthrough</a>';
+      if (box) box.innerHTML = html;
     }).catch(function () {});
 })();
 </script>
