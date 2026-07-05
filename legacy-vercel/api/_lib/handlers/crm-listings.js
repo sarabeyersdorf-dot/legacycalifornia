@@ -63,7 +63,7 @@ export default async function handler(req, res) {
       return na ? (byAddr.get(na) || null) : null;
     };
 
-    const buckets = { active: [], pending: [], closed: [] };
+    const buckets = { active: [], pending: [], closed: [], preparing: [] };
     for (const d of (data || [])) {
       const row = {
         source_key: d.source_key,
@@ -79,16 +79,18 @@ export default async function handler(req, res) {
         has_video:  !!d.video_url,
         has_tour:   !!d.matterport_url
       };
-      if (d.stage === 'listing')      buckets.active.push(row);
-      else if (d.stage === 'pending') buckets.pending.push(row);
-      else if (d.stage === 'closed')  buckets.closed.push(row);
+      if (d.stage === 'listing')        buckets.active.push(row);
+      else if (d.stage === 'pending')   buckets.pending.push(row);
+      else if (d.stage === 'closed')    buckets.closed.push(row);
+      else if (d.stage === 'preparing') buckets.preparing.push(row);
     }
 
     return ok(res, {
-      active:  buckets.active,
-      pending: buckets.pending,
-      closed:  buckets.closed,
-      counts:  { active: buckets.active.length, pending: buckets.pending.length, closed: buckets.closed.length }
+      active:    buckets.active,
+      pending:   buckets.pending,
+      closed:    buckets.closed,
+      preparing: buckets.preparing,
+      counts:    { active: buckets.active.length, pending: buckets.pending.length, closed: buckets.closed.length, preparing: buckets.preparing.length }
     });
   } catch (e) {
     return fail(res, 500, e.message);
