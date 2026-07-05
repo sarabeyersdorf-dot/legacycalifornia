@@ -3,1543 +3,326 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Legacy CRM · Sara's Desk</title>
+<title>Your Sale · Legacy Seller Portal</title>
 <link rel="stylesheet" href="legacy.css">
-<link rel="stylesheet" href="crm.css">
+<style>
+.sell-hero {
+  padding: 36px;
+  background: var(--shell); border-bottom: 1px solid var(--rule);
+  display: grid; grid-template-columns: 280px 1fr auto; gap: 28px;
+  align-items: start;
+}
+.sell-photo {
+  width: 280px; aspect-ratio: 4/3; background: var(--vellum); overflow: hidden;
+  border: 1px solid var(--rule); position: relative;
+}
+.sell-photo img { width: 100%; height: 100%; object-fit: cover; }
+.sell-photo .badge {
+  position: absolute; top: 12px; left: 12px;
+  background: var(--brass); color: var(--shell);
+  font-family: var(--mono); font-size: 9px; letter-spacing: 0.18em;
+  padding: 5px 10px; text-transform: uppercase;
+}
+.sell-h-info .eyebrow { display: block; margin-bottom: 12px; }
+.sell-h-info h1 {
+  font-family: var(--serif); font-style: italic; font-weight: 300;
+  font-size: clamp(36px, 4.4vw, 56px); line-height: 1.0;
+  color: var(--ink); letter-spacing: -0.005em; margin-bottom: 12px;
+}
+.sell-h-info h1 em { color: var(--brass); }
+.sell-h-info .addr {
+  font-family: var(--serif); font-style: italic; font-size: 18px; color: var(--ink-soft);
+}
+.sell-h-info .specs {
+  display: flex; gap: 22px; margin-top: 18px;
+  font-family: var(--mono); font-size: 11px; letter-spacing: 0.14em;
+  text-transform: uppercase; color: var(--ink-mute);
+}
+.sell-h-info .specs strong { color: var(--ink); font-family: var(--serif); font-style: italic; font-size: 16px; font-weight: 400; letter-spacing: 0; text-transform: none; margin-right: 4px; }
+.sell-status {
+  background: var(--ink); color: var(--shell);
+  padding: 22px 24px;
+  min-width: 260px;
+}
+.sell-status .l { font-family: var(--mono); font-size: 9.5px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--brass-bright); margin-bottom: 4px; }
+.sell-status .v { font-family: var(--serif); font-style: italic; font-weight: 300; font-size: 42px; line-height: 1; color: var(--shell); }
+.sell-status .since { font-family: var(--mono); font-size: 10px; letter-spacing: 0.14em; color: rgba(250,246,236,0.5); text-transform: uppercase; margin-top: 14px; padding-top: 12px; border-top: 1px solid rgba(250,246,236,0.15); }
+
+/* KPI strip */
+.sell-kpi {
+  display: grid; grid-template-columns: repeat(4, 1fr); gap: 1px;
+  background: var(--rule); border: 1px solid var(--rule);
+  margin: 28px 36px 0;
+}
+.sell-kpi .cell {
+  background: var(--shell); padding: 22px 24px;
+  display: flex; flex-direction: column; gap: 4px;
+}
+.sell-kpi .l { font-family: var(--mono); font-size: 9px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--ink-mute); }
+.sell-kpi .v { font-family: var(--serif); font-style: italic; font-weight: 300; font-size: 40px; color: var(--ink); line-height: 1; }
+.sell-kpi .v.brass { color: var(--brass); }
+.sell-kpi .ch { font-family: var(--mono); font-size: 10px; letter-spacing: 0.04em; color: var(--ink-mute); }
+
+/* GRID */
+.sell-grid {
+  display: grid; grid-template-columns: 2fr 1fr; gap: 28px;
+  padding: 28px 36px 60px;
+}
+.sell-grid > div { display: flex; flex-direction: column; gap: 28px; min-width: 0; }
+
+.s-card { background: var(--shell); border: 1px solid var(--rule); padding: 26px 28px; }
+.s-card-h { display: flex; justify-content: space-between; align-items: baseline; padding-bottom: 16px; border-bottom: 1px solid var(--rule); margin-bottom: 22px; flex-wrap: wrap; gap: 12px; }
+.s-card-h h2 { font-family: var(--serif); font-style: italic; font-weight: 400; font-size: 26px; color: var(--ink); }
+.s-card-h .meta { font-family: var(--mono); font-size: 10px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--ink-mute); }
+
+/* Road to closing — timeline */
+.road-item {
+  display: grid; grid-template-columns: 88px 16px 1fr; gap: 16px;
+  padding: 16px 0; border-bottom: 1px solid var(--rule-soft); position: relative;
+}
+.road-item:last-child { border-bottom: none; }
+.road-mark { display: flex; justify-content: center; position: relative; }
+.road-mark::before { content: ''; position: absolute; left: 50%; transform: translateX(-50%); top: 18px; width: 1px; bottom: -20px; background: var(--rule); }
+.road-item:last-child .road-mark::before { display: none; }
+.road-dot { width: 13px; height: 13px; border-radius: 50%; border: 2px solid var(--rule-strong); background: var(--shell); margin-top: 3px; position: relative; z-index: 1; }
+.road-dot.done { background: var(--brass); border-color: var(--brass); }
+.road-dot.next { background: var(--ink); border-color: var(--ink); }
+.road-dot.key  { background: var(--brass); border-color: var(--brass); box-shadow: 0 0 0 4px var(--linen); }
+.road-date { font-family: var(--mono); font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-mute); padding-top: 4px; }
+.road-body .road-label { font-family: var(--serif); font-style: italic; font-size: 19px; color: var(--ink); line-height: 1.15; }
+.road-body .road-desc { font-size: 13px; color: var(--ink-soft); margin-top: 4px; line-height: 1.5; }
+
+/* Sara note */
+.sara-note {
+  background: var(--ink); color: var(--shell); padding: 24px;
+  display: grid; grid-template-columns: 48px 1fr; gap: 16px; align-items: start;
+}
+.sara-note .avatar { background: var(--brass); color: var(--shell); }
+.sara-note-head { font-family: var(--mono); font-size: 10.5px; letter-spacing: 0.16em; color: var(--brass-bright); margin-bottom: 8px; text-transform: uppercase; }
+.sara-note-text { font-family: var(--serif); font-style: italic; font-size: 17px; line-height: 1.5; color: rgba(250,246,236,0.92); }
+.sara-note-sign { font-family: var(--mono); font-size: 10px; letter-spacing: 0.16em; color: rgba(250,246,236,0.5); margin-top: 14px; text-transform: uppercase; }
+
+/* Sidebar cards */
+.s-mini { background: var(--shell); border: 1px solid var(--rule); padding: 24px; }
+.s-mini h3 { font-family: var(--mono); font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--brass); margin-bottom: 14px; font-weight: 600; }
+
+/* Documents */
+.doc-row {
+  display: grid; grid-template-columns: auto 1fr auto; gap: 12px; align-items: center;
+  padding: 12px 0; border-bottom: 1px solid var(--rule-soft); font-size: 13px;
+}
+.doc-row:last-child { border-bottom: none; }
+.doc-row .icn { font-family: var(--mono); font-size: 9.5px; letter-spacing: 0.08em; color: var(--brass); min-width: 42px; }
+.doc-row .name { color: var(--ink); }
+.doc-row .name .sub { display: block; font-family: var(--mono); font-size: 9.5px; letter-spacing: 0.12em; color: var(--ink-faint); margin-top: 2px; text-transform: uppercase; }
+.doc-row .d-status { font-family: var(--mono); font-size: 9.5px; letter-spacing: 0.12em; color: var(--ink-mute); text-transform: uppercase; white-space: nowrap; }
+
+/* Tasks — what I need from you */
+.task-row {
+  display: grid; grid-template-columns: 20px 1fr auto; gap: 14px;
+  padding: 12px 0; border-bottom: 1px solid var(--rule-soft); align-items: center;
+}
+.task-row:last-child { border-bottom: none; }
+.task-box { width: 17px; height: 17px; border: 1px solid var(--rule-strong); background: var(--shell); }
+.task-label { font-size: 13.5px; color: var(--ink); }
+.task-when { font-family: var(--mono); font-size: 10px; letter-spacing: 0.12em; color: var(--brass); text-transform: uppercase; white-space: nowrap; }
+.task-intro { font-size: 13px; color: var(--ink-soft); font-style: italic; line-height: 1.5; margin-bottom: 6px; }
+
+/* Team / who has access */
+.share-row {
+  display: grid; grid-template-columns: 1fr auto; gap: 10px; align-items: center;
+  padding: 12px 0; border-bottom: 1px solid var(--rule-soft);
+}
+.share-row:last-child { border-bottom: none; }
+.share-row .who { font-size: 13px; color: var(--ink); font-weight: 500; }
+.share-row .who .sub { display: block; font-family: var(--mono); font-size: 9.5px; letter-spacing: 0.12em; color: var(--ink-mute); margin-top: 2px; text-transform: uppercase; }
+.share-row .access { font-family: var(--mono); font-size: 10px; letter-spacing: 0.14em; color: var(--ink-mute); text-transform: uppercase; }
+
+.sell-tour { display: flex; gap: 16px; margin-top: 16px; flex-wrap: wrap; }
+.sell-tour a { font-family: var(--mono); font-size: 10px; letter-spacing: .14em; text-transform: uppercase; color: var(--brass); text-decoration: none; border-bottom: 1px solid var(--brass); padding-bottom: 3px; }
+.sell-tour a:hover { color: var(--ink); border-color: var(--ink); }
+
+@media (max-width: 1100px) {
+  .sell-hero { grid-template-columns: 1fr; }
+  .sell-photo { width: 100%; }
+  .sell-kpi { grid-template-columns: 1fr 1fr; }
+  .sell-grid { grid-template-columns: 1fr; }
+}
+</style>
 </head>
-<body data-screen-label="Agent CRM">
+<body data-screen-label="Seller Portal">
 
 <div class="app">
-  <!-- ============ SIDEBAR ============ -->
   <aside class="app-side">
     <div class="app-side-brand">
       <a href="index.html" class="wordmark">
         <span class="wordmark-word">Legacy</span>
-        <span class="wordmark-sub">Desk · Sara</span>
+        <span class="wordmark-sub">Seller Portal</span>
       </a>
     </div>
 
-    <div class="app-side-section">Daily</div>
+    <div class="app-side-section">Your sale</div>
     <nav class="app-side-nav">
-      <a href="#" class="active" onclick="showView(event,'today')">Today <span class="pill" data-roster-today>—</span></a>
-      <a href="#" onclick="showView(event,'inbox')">Inbox <span class="pill" data-roster-inbox>—</span></a>
-      <a href="#" onclick="showView(event,'pipe')">Pipeline</a>
-      <a href="#" onclick="showView(event,'cal')">Calendar <span class="pill" data-roster-calendar>—</span></a>
-      <a href="#" onclick="showView(event,'seq')">Sequences</a>
-      <a href="#" onclick="showView(event,'curate')">Curated</a>
+      <a href="seller.html" class="active">Overview</a>
+      <a href="#road">Road to closing</a>
+      <a href="#docs">Documents <span class="pill" data-bind="nav.documents">0</span></a>
+      <a href="#tasks">What I need <span class="pill" data-bind="nav.tasks">0</span></a>
+      <a href="#team">Your team</a>
     </nav>
 
-    <div class="app-side-section">Roster</div>
+    <div class="app-side-section">Resources</div>
     <nav class="app-side-nav">
-      <a href="#">Leads <span class="pill" data-roster-leads>—</span></a>
-      <a href="#">Clients <span class="pill" data-roster-clients>—</span></a>
-      <a href="#">Past clients <span class="pill" data-roster-past>—</span></a>
-      <a href="#">Sphere</a>
-    </nav>
-
-    <div class="app-side-section">Listings</div>
-    <nav class="app-side-nav">
-      <a href="#">Active <span class="pill" data-roster-listings>—</span></a>
-      <a href="#">Pending</a>
-      <a href="seller.html">Seller portal</a>
-    </nav>
-
-    <div class="app-side-section">Import</div>
-    <nav class="app-side-nav">
-      <a href="#" data-open-importer>Import Leads (CSV)…</a>
-      <a href="#" data-open-link-deal>Link client to deal…</a>
-      <a href="#" data-open-listing-media>Listing media…</a>
-      <a href="#" data-send-test-email>Send test email…</a>
-      <a href="#" data-sign-out>Sign out</a>
-    </nav>
-
-    <div class="app-side-section">Insight</div>
-    <nav class="app-side-nav">
-      <a href="#" onclick="showView(event,'rep')">Reports</a>
-      <a href="#" data-broker-tab style="display:none;" onclick="showView(event,'broker')">Broker oversight</a>
-      <a href="#">Market data</a>
-      <a href="#">Settings</a>
+      <a href="mortgage-calculator.html">Net proceeds</a>
+      <a href="market-report.html">Market reports</a>
+      <a href="how-we-work.html">How we work</a>
     </nav>
 
     <div class="app-side-foot">
-      <div class="avatar avatar-sm"><img src="art/sara-headshot.png" alt="Sara Cooper"></div>
+      <div class="avatar avatar-sm">L</div>
       <div style="flex:1;min-width:0;">
-        <div style="font-size:13px;color:var(--ink);font-weight:500;">Sara Cooper</div>
-        <div class="mono" style="font-size:9px;letter-spacing:.16em;color:var(--ink-mute);">BROKER · LEGACY</div>
+        <div style="font-size:13px;color:var(--ink);font-weight:500;" data-bind="status.address">Your listing</div>
+        <div class="mono" style="font-size:9px;letter-spacing:.16em;color:var(--ink-mute);" data-bind="status.city">SELLER PORTAL</div>
       </div>
     </div>
   </aside>
 
-  <!-- ============ MAIN ============ -->
-  <main class="app-main crm-main">
+  <main class="app-main">
     <div class="app-topbar">
       <div class="app-search">
         <span style="font-family:var(--mono);font-size:11px;">⌕</span>
-        <input placeholder="Search leads, properties, MLS#, addresses…">
-        <span class="mono" style="font-size:10px;color:var(--ink-faint);">⌘K</span>
+        <input placeholder="Search documents, dates, your team…">
       </div>
       <div class="app-actions">
-        <button class="btn btn-ghost btn-sm">+ New lead</button>
-        <button class="icon-btn" title="Notifications">⏷<span class="dot"></span></button>
-        <button class="icon-btn" title="Help">?</button>
+        <button class="icon-btn" title="Notifications">✉<span class="dot"></span></button>
+        <button class="btn btn-ink btn-sm" id="sell-msg-btn">Message Sara</button>
       </div>
     </div>
 
-    <!-- TAB STRIP -->
-    <div class="crm-tabs">
-      <button class="crm-tab on" onclick="showView(event,'today')">Today <span class="ct" data-roster-today>—</span></button>
-      <button class="crm-tab" onclick="showView(event,'inbox')">Inbox <span class="ct" data-roster-inbox>—</span></button>
-      <button class="crm-tab" onclick="showView(event,'pipe')">Pipeline <span class="ct" data-roster-pipeline>—</span></button>
-      <button class="crm-tab" onclick="showView(event,'cal')">Calendar <span class="ct" data-roster-calendar-week>—</span></button>
-      <button class="crm-tab" onclick="showView(event,'seq')">Sequences</button>
-      <button class="crm-tab" onclick="showView(event,'curate')">Curated</button>
-      <button class="crm-tab" onclick="showView(event,'rep')">Reports</button>
-      <button class="crm-tab" data-broker-tab style="display:none;" onclick="showView(event,'broker')">Broker</button>
+    <!-- HERO -->
+    <section class="sell-hero">
+      <div class="sell-photo">
+        <img id="sell-hero-photo" src="" alt="" style="display:none;">
+        <span class="badge" data-bind="status.badge" data-optional>In escrow</span>
+      </div>
+      <div class="sell-h-info">
+        <span class="eyebrow" data-bind="status.since">In escrow · Closing soon</span>
+        <h1><span data-bind="status.address">Your home</span><br><em>On track to close.</em></h1>
+        <p class="addr"><span data-bind="status.city">—</span></p>
+        <div class="specs">
+          <span data-bind="status.type" data-optional>Residential</span>
+          <span data-bind="status.label" data-optional>In escrow</span>
+        </div>
+        <div id="sell-tour" class="sell-tour"></div>
+      </div>
+      <div class="sell-status">
+        <div class="l">Sale price</div>
+        <div class="v" data-bind="status.price">—</div>
+        <div class="since" data-bind="status.since" data-optional>Closing soon</div>
+      </div>
+    </section>
+
+    <!-- KPI -->
+    <section class="sell-kpi" data-list="kpis">
+      <div class="cell" data-row>
+        <span class="l" data-bind="label">—</span>
+        <span class="v" data-bind="value">—</span>
+        <span class="ch" data-bind="change" data-optional>—</span>
+      </div>
+    </section>
+
+    <!-- GRID -->
+    <div class="sell-grid">
+      <!-- LEFT -->
+      <div>
+        <!-- Sara note (always visible) -->
+        <div class="sara-note">
+          <div class="avatar" id="sell-note-avatar"><img src="art/sara-headshot.png" alt=""></div>
+          <div>
+            <div class="sara-note-head" data-bind="note.head">A note from Sara</div>
+            <p class="sara-note-text" data-bind="note.body">Your sale is moving along on schedule. I will flag anything that needs you the moment it comes up.</p>
+            <div class="sara-note-sign" data-bind="note.sign">— Sara · (209) 559-4966</div>
+          </div>
+        </div>
+
+        <!-- Road to closing -->
+        <section class="s-card" id="road" data-list="road">
+          <div class="s-card-h">
+            <h2>The road to closing.</h2>
+            <span class="meta">Every step, as it happens</span>
+          </div>
+          <div class="road-item" data-row>
+            <div class="road-date" data-bind="date" data-optional>—</div>
+            <div class="road-mark"><span class="road-dot" data-add-class="status"></span></div>
+            <div class="road-body">
+              <div class="road-label" data-bind="label">Milestone</div>
+              <div class="road-desc" data-bind="description" data-optional>—</div>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <!-- RIGHT -->
+      <div>
+        <!-- What I need from you (tasks) -->
+        <section class="s-mini" id="tasks" data-list="tasks">
+          <h3>What I need from you</h3>
+          <p class="task-intro">I only reach out when something genuinely needs your signature. Those requests land right here — and I will text you too.</p>
+          <div class="task-row" data-row>
+            <div class="task-box"></div>
+            <div class="task-label" data-bind="label">Task</div>
+            <span class="task-when" data-bind="when" data-optional>Open</span>
+          </div>
+        </section>
+
+        <!-- Documents -->
+        <section class="s-mini" id="docs" data-list="documents">
+          <h3>Documents</h3>
+          <div class="doc-row" data-row>
+            <span class="icn" data-bind="type">DOC</span>
+            <div class="name"><span data-bind="name">Document</span><span class="sub" data-bind="sub" data-optional>—</span></div>
+            <span class="d-status" data-bind="status">On file</span>
+          </div>
+        </section>
+
+        <!-- Your team -->
+        <section class="s-mini" id="team" data-list="team">
+          <h3>Your team</h3>
+          <div class="share-row" data-row>
+            <div class="who"><span data-bind="name">Name</span><span class="sub" data-bind="sub" data-optional>Role</span></div>
+            <span class="access" data-bind="access">Access</span>
+          </div>
+        </section>
+      </div>
     </div>
-
-    <!-- ============================================================
-         TODAY VIEW (default landing)
-         ============================================================ -->
-    <section class="crm-view on" data-view="today">
-      <div class="today">
-
-        <!-- MORNING BRIEF HEADER -->
-        <div class="today-brief">
-          <div class="tb-l">
-            <span class="label-cap" style="color: var(--brass);" data-bind-brief-date>Loading brief…</span>
-            <h1 class="tb-greet">Good morning.</h1>
-            <p class="tb-line" data-bind-narrative></p>
-          </div>
-          <div class="tb-r">
-            <div class="tb-pulse">
-              <span class="label-cap">Market pulse</span>
-              <div class="tb-pulse-row"><span>Calaveras median</span><span class="v">$542K <em class="chg up">+0.4% wk</em></span></div>
-              <div class="tb-pulse-row"><span>New on MLS, 24h</span><span class="v">7</span></div>
-              <div class="tb-pulse-row"><span>Price changes</span><span class="v">12 <em class="chg dn">9 down</em></span></div>
-              <div class="tb-pulse-row"><span>Open houses, Sat</span><span class="v">18</span></div>
-            </div>
-            <div class="tb-weather">
-              <div class="tw-day on"><span>Tue</span><span class="i">○</span><span>72°</span></div>
-              <div class="tw-day"><span>Wed</span><span class="i">○</span><span>76°</span></div>
-              <div class="tw-day"><span>Thu</span><span class="i">●</span><span>69°</span></div>
-              <div class="tw-day"><span>Fri</span><span class="i">○</span><span>74°</span></div>
-              <div class="tw-day"><span>Sat</span><span class="i">○</span><span>78°</span></div>
-            </div>
-          </div>
-        </div>
-
-        <!-- HERO 3-COL -->
-        <div class="today-grid">
-
-          <!-- NEEDS YOU NOW -->
-          <section class="needs">
-            <div class="needs-h">
-              <span class="hairline-brass"></span>
-              <span class="eyebrow">Needs you · before 9 AM</span>
-              <h2 class="h-section" style="font-size: 32px; margin-top: 8px;">Five quiet asks.</h2>
-            </div>
-
-            <article class="need-card need-card-hot">
-              <div class="nc-rank">01</div>
-              <div class="nc-body">
-                <div class="nc-meta">
-                  <span class="pill-status pill-hot">Reply ready</span>
-                  <span class="nc-tag">AI draft · awaiting your approval</span>
-                </div>
-                <h3>Renee Dawson — Saturday walk-through</h3>
-                <p>She replied <em>“loved your note”</em> at 9:14 AM. The draft suggests 10:30 Saturday before the open house. Refs your calendar, the price-drop trigger, and Friday’s call notes.</p>
-                <div class="nc-foot">
-                  <div class="nc-foot-l"><span>Renee · Murphys buyer · score 92</span></div>
-                  <div class="nc-foot-r">
-                    <button class="btn btn-ghost btn-sm">Review draft</button>
-                    <button class="btn btn-ink btn-sm">Approve &amp; send</button>
-                  </div>
-                </div>
-              </div>
-            </article>
-
-            <article class="need-card">
-              <div class="nc-rank">02</div>
-              <div class="nc-body">
-                <div class="nc-meta">
-                  <span class="pill-status pill-warm">Offer in play</span>
-                  <span class="nc-tag">Counter signed · contingency clock running</span>
-                </div>
-                <h3>Michael Rivera — inspection due Thursday</h3>
-                <p>Sellers countered $1.18M. Inspection contingency: 12 days, of which <strong>8 remain</strong>. Financing 21 days, 17 remain. Bowman Inspections confirmed Thursday 9 AM — your reminder set for tomorrow 4 PM.</p>
-                <div class="nc-foot">
-                  <div class="nc-foot-l"><span>433 E Highway 4 · Murphys · $1.18M</span></div>
-                  <div class="nc-foot-r">
-                    <button class="btn btn-ghost btn-sm">Open deal</button>
-                  </div>
-                </div>
-              </div>
-            </article>
-
-            <article class="need-card">
-              <div class="nc-rank">03</div>
-              <div class="nc-body">
-                <div class="nc-meta">
-                  <span class="pill-status pill-brass">Listing milestone</span>
-                  <span class="nc-tag">Day 21 on market · below tour benchmark</span>
-                </div>
-                <h3>$725K Sutter Creek — Patricia wants the CMA tonight</h3>
-                <p>Three weeks on, two private showings, one Sunday open with 14 sign-ins. Below the 30-tour benchmark for this price point. Patricia asked yesterday for an updated CMA and a recommendation on a price adjustment.</p>
-                <div class="nc-foot">
-                  <div class="nc-foot-l"><span>42 Spanish St · Sutter Creek · listed $725K</span></div>
-                  <div class="nc-foot-r">
-                    <button class="btn btn-ghost btn-sm">Generate CMA</button>
-                  </div>
-                </div>
-              </div>
-            </article>
-
-            <article class="need-card">
-              <div class="nc-rank">04</div>
-              <div class="nc-body">
-                <div class="nc-meta">
-                  <span class="pill-status">Radio silence</span>
-                  <span class="nc-tag">14 days no contact · was hot</span>
-                </div>
-                <h3>The Becketts — land buyer, last seen 4/28</h3>
-                <p>James has been working the water-rights question. Suggest a check-in note today — the Foothill parcel they liked is still on market and the senior right concern has a clean answer now.</p>
-                <div class="nc-foot">
-                  <div class="nc-foot-l"><span>Tom &amp; Marie Beckett · Land · James</span></div>
-                  <div class="nc-foot-r">
-                    <button class="btn btn-ghost btn-sm">Draft check-in</button>
-                  </div>
-                </div>
-              </div>
-            </article>
-
-            <article class="need-card">
-              <div class="nc-rank">05</div>
-              <div class="nc-body">
-                <div class="nc-meta">
-                  <span class="pill-status">New lead</span>
-                  <span class="nc-tag">Saved 5 homes overnight · Arnold</span>
-                </div>
-                <h3>Jenna Novak — cabin shopper, first day</h3>
-                <p>Signed up at 11 PM, saved 5 Arnold properties before midnight. Browsing pattern: cabins under $625K with garage, weekend-home phrasing. Suggest the standard intro — ask if she's looking primary or second.</p>
-                <div class="nc-foot">
-                  <div class="nc-foot-l"><span>Jenna Novak · Buyer · score 71</span></div>
-                  <div class="nc-foot-r">
-                    <button class="btn btn-ghost btn-sm">Draft welcome</button>
-                  </div>
-                </div>
-              </div>
-            </article>
-          </section>
-
-          <!-- TODAY'S HOURS -->
-          <aside class="hours">
-            <div class="hours-h">
-              <span class="label-cap">Today · Tuesday</span>
-              <span class="hours-link">Open calendar →</span>
-            </div>
-            <div class="hours-body" data-hours-body>
-              <div class="hr-now" data-hours-now><span class="hr-now-l">Now</span><span class="hr-now-d">—</span></div>
-            </div>
-          </aside>
-
-        </div>
-
-        <!-- QUIETLY ATTENTIVE BAND -->
-        <section class="signals">
-          <div class="signals-h">
-            <span class="hairline-brass"></span>
-            <span class="eyebrow">Quietly attentive · overnight signals</span>
-            <h2 class="h-section" style="font-size: 28px; margin-top: 8px;">What happened while you slept.</h2>
-          </div>
-          <div class="signal-grid" data-signal-grid>
-          </div>
-        </section>
-
-        <!-- LIVE DEALS STRIP -->
-        <section class="deals">
-          <div class="deals-h">
-            <span class="hairline-brass"></span>
-            <span class="eyebrow">In the air right now · active deals</span>
-            <h2 class="h-section" style="font-size: 28px; margin-top: 8px;">Three deals in motion.</h2>
-          </div>
-          <div class="deal-grid" data-deal-grid>
-          </div>
-        </section>
-
-        <!-- TASKS + STATS -->
-        <section class="today-foot">
-          <div class="tasks">
-            <div class="tasks-h">
-              <span class="hairline-brass"></span>
-              <span class="eyebrow">Day list</span>
-              <h3 class="h-section" style="font-size: 22px; margin-top: 6px;">Six follow-ups, ordered.</h3>
-            </div>
-            <ul class="task-list" data-day-list>
-              <li><span class="tk-box"></span><span class="tk-body"><strong>Approve Renee's Saturday note</strong> · ready in draft</span><span class="tk-time">5 min</span></li>
-              <li><span class="tk-box"></span><span class="tk-body"><strong>Send Beckett land check-in</strong> · 14 days dark</span><span class="tk-time">8 min</span></li>
-              <li><span class="tk-box"></span><span class="tk-body"><strong>Generate Patricia’s CMA</strong> · due tonight</span><span class="tk-time">25 min</span></li>
-              <li><span class="tk-box"></span><span class="tk-body"><strong>Confirm Thursday inspection</strong> · Rivera deal</span><span class="tk-time">3 min</span></li>
-              <li><span class="tk-box"></span><span class="tk-body"><strong>Welcome Jenna Novak</strong> · new lead, 5 saves overnight</span><span class="tk-time">8 min</span></li>
-              <li><span class="tk-box"></span><span class="tk-body"><strong>Approve weekend market email</strong> · 218 recipients</span><span class="tk-time">6 min</span></li>
-            </ul>
-            <div class="task-foot">
-              <span class="label-cap">Total</span>
-              <span data-day-total><strong>55 min</strong> · if you start now, done by 7:38 AM</span>
-            </div>
-          </div>
-
-          <div class="daystats">
-            <div class="ds-h">
-              <span class="hairline-brass"></span>
-              <span class="eyebrow">Yesterday at a glance</span>
-            </div>
-            <div class="ds-grid" data-day-stats>
-              <div class="ds-cell"><span class="ds-num">23</span><span class="ds-lab">Emails sent</span></div>
-              <div class="ds-cell"><span class="ds-num">14</span><span class="ds-lab">AI drafts · 12 approved</span></div>
-              <div class="ds-cell"><span class="ds-num">3</span><span class="ds-lab">Showings led</span></div>
-              <div class="ds-cell"><span class="ds-num">4</span><span class="ds-lab">New leads</span></div>
-              <div class="ds-cell"><span class="ds-num">$2.4M</span><span class="ds-lab">Pipeline added</span></div>
-              <div class="ds-cell"><span class="ds-num">98<em>%</em></span><span class="ds-lab">Inbox handled</span></div>
-            </div>
-            <p class="ds-note">Your trailing 30-day approval rate on AI drafts is <strong>91%</strong>. Lift in lead score after AI-drafted reply: <strong>+14 pts avg.</strong></p>
-          </div>
-        </section>
-
-      </div>
-    </section>
-
-    <!-- ============================================================
-         INBOX VIEW
-         ============================================================ -->
-    <section class="crm-view" data-view="inbox">
-      <div class="inbox-shell">
-
-        <!-- LEAD LIST -->
-        <aside class="lead-list">
-          <div class="lead-list-search">
-            <input placeholder="Filter leads, addresses, tags…">
-          </div>
-          <div class="lead-filter" data-lead-filters>
-            <button class="chip on" data-filter="all">All <span class="ct" data-count="all">—</span></button>
-            <button class="chip" data-filter="hot">Hot <span class="ct" data-count="hot">—</span></button>
-            <button class="chip" data-filter="warm">Warm <span class="ct" data-count="warm">—</span></button>
-            <button class="chip" data-filter="new">New <span class="ct" data-count="new">—</span></button>
-            <button class="chip" data-filter="awaiting_reply">Awaiting reply</button>
-          </div>
-
-          <div class="lead-list-rows" data-lead-list>
-            <div class="lead-row" data-loading-placeholder>
-              <div class="avatar avatar-sm" style="opacity:.25;">··</div>
-              <div class="lead-content">
-                <div class="lead-name-row">
-                  <span class="lead-name" style="opacity:.4;">Loading your leads…</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </aside>
-
-        <!-- LEAD DETAIL -->
-        <section class="lead-detail" data-lead-detail>
-          <div class="ld-head" data-lead-detail-loading style="opacity:.5;padding:24px;font-style:italic;">Select a lead from the left to see their conversation and history.</div>
-        </section>
-
-        <!-- LEAD PROFILE PANEL -->
-        <aside class="lead-profile" data-lead-profile>
-        </aside>
-      </div>
-    </section>
-
-    <!-- ============================================================
-         PIPELINE VIEW
-         ============================================================ -->
-    <section class="crm-view" data-view="pipe">
-      <div class="pipe">
-        <div class="pipe-h">
-          <div>
-            <span class="eyebrow" data-bind-pipe-eyebrow>Active pipeline · — leads</span>
-            <h1 class="h-section" style="margin-top: 8px; font-size: 38px;">Pipeline.</h1>
-          </div>
-          <div class="pipe-stats">
-            <div><span class="v" data-bind-pipe-inflight>—</span><span class="l">In flight</span></div>
-            <div><span class="v" data-bind-pipe-month>—</span><span class="l">Expected this month</span></div>
-            <div><span class="v" data-bind-pipe-week>—</span><span class="l">Closing this week</span></div>
-            <div><span class="v" data-bind-pipe-rate>—</span><span class="l">Tour → offer rate</span></div>
-          </div>
-        </div>
-
-        <div class="kanban" data-kanban>
-          <div class="kan-col" data-stage="new">
-            <div class="kan-col-h"><span class="name">New</span><span class="count" data-stage-count>—</span></div>
-            <div class="kan-body" data-stage-body></div>
-          </div>
-          <div class="kan-col" data-stage="nurture">
-            <div class="kan-col-h"><span class="name">Nurture</span><span class="count" data-stage-count>—</span></div>
-            <div class="kan-body" data-stage-body></div>
-          </div>
-          <div class="kan-col" data-stage="touring">
-            <div class="kan-col-h"><span class="name">Touring</span><span class="count" data-stage-count>—</span></div>
-            <div class="kan-body" data-stage-body></div>
-          </div>
-          <div class="kan-col" data-stage="offer">
-            <div class="kan-col-h"><span class="name">Offer</span><span class="count" data-stage-count>—</span></div>
-            <div class="kan-body" data-stage-body></div>
-          </div>
-          <div class="kan-col" data-stage="close">
-            <div class="kan-col-h"><span class="name">Close</span><span class="count" data-stage-count>—</span></div>
-            <div class="kan-body" data-stage-body></div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- ============================================================
-         CALENDAR VIEW
-         ============================================================ -->
-    <section class="crm-view" data-view="cal">
-      <div class="cal">
-        <div class="cal-h">
-          <div class="cal-h-l">
-            <h1 class="cal-h-title" data-cal-title>Loading…</h1>
-            <div class="cal-h-nav">
-              <button data-cal-prev title="Previous week">‹</button>
-              <button data-cal-next title="Next week">›</button>
-            </div>
-            <button class="btn btn-ghost btn-xs" data-cal-today>Today</button>
-          </div>
-          <div style="display: flex; gap: 12px; align-items: center;">
-            <div class="cal-view-toggle">
-              <button class="on" data-cal-view="agenda">Agenda</button>
-              <button data-cal-view="week">Week</button>
-            </div>
-            <button class="btn btn-ink btn-sm" data-cal-new>+ New event</button>
-          </div>
-        </div>
-
-        <div class="cal-agenda" data-cal-agenda></div>
-        <div class="cal-week" data-cal-week style="display:none;"></div>
-
-        <!-- Availability + booking settings -->
-        <div class="cal-strip">
-          <div class="avail-card">
-            <span class="eyebrow">Public booking</span>
-            <h3 style="margin-top: 8px;">When clients can book themselves.</h3>
-            <p class="sub">Slots Renee, Tom, and Patricia see when they pick a tour from a listing page. Sundays held for family.</p>
-            <div class="avail-row"><span class="day">Mon</span><span class="hrs">10:00 AM – 5:00 PM</span><div class="toggle on" onclick="this.classList.toggle('on')"></div></div>
-            <div class="avail-row"><span class="day">Tue</span><span class="hrs">10:00 AM – 5:00 PM</span><div class="toggle on" onclick="this.classList.toggle('on')"></div></div>
-            <div class="avail-row"><span class="day">Wed</span><span class="hrs">9:00 AM – 6:00 PM</span><div class="toggle on" onclick="this.classList.toggle('on')"></div></div>
-            <div class="avail-row"><span class="day">Thu</span><span class="hrs">10:00 AM – 5:00 PM</span><div class="toggle on" onclick="this.classList.toggle('on')"></div></div>
-            <div class="avail-row"><span class="day">Fri</span><span class="hrs">9:00 AM – 4:00 PM</span><div class="toggle on" onclick="this.classList.toggle('on')"></div></div>
-            <div class="avail-row"><span class="day">Sat</span><span class="hrs">10:00 AM – 3:00 PM</span><div class="toggle on" onclick="this.classList.toggle('on')"></div></div>
-            <div class="avail-row"><span class="day">Sun</span><span class="hrs">Held</span><div class="toggle" onclick="this.classList.toggle('on')"></div></div>
-          </div>
-          <div class="avail-card">
-            <span class="eyebrow">Tour rules</span>
-            <h3 style="margin-top: 8px;">How it works.</h3>
-            <p class="sub" style="margin-bottom: 22px;">Clients can self-book tours from listing pages — Sara confirms within 1 hour during business hours, or auto-confirm for past clients.</p>
-            <div style="display: flex; flex-direction: column; gap: 14px;">
-              <div><span class="label-cap" style="display: block; margin-bottom: 4px;">Buffer between tours</span><span class="numeral" style="font-size: 18px;">30 min</span></div>
-              <div><span class="label-cap" style="display: block; margin-bottom: 4px;">Minimum lead time</span><span class="numeral" style="font-size: 18px;">2 hours</span></div>
-              <div><span class="label-cap" style="display: block; margin-bottom: 4px;">Auto-confirm past clients</span><span class="numeral" style="font-size: 18px;">On</span></div>
-              <div><span class="label-cap" style="display: block; margin-bottom: 4px;">Confirm-by-SMS deadline</span><span class="numeral" style="font-size: 18px;">24 h before</span></div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- ============================================================
-         SEQUENCES VIEW
-         ============================================================ -->
-    <section class="crm-view" data-view="seq">
-      <div class="seq">
-        <div class="seq-h">
-          <div>
-            <span class="eyebrow">Automated follow-up · Editable cadences</span>
-            <h1 class="h-section" style="margin-top: 8px; font-size: 38px;">Sequences.</h1>
-            <p class="lede" style="margin-top: 12px; max-width: 600px;">Every step is editable. Each message is queued as a draft, ready for Sara to approve before sending — written in her voice, not a template.</p>
-          </div>
-          <button class="btn btn-ink" data-seq-new>+ New sequence</button>
-        </div>
-
-        <div class="seq-grid">
-          <!-- Sequences list -->
-          <div class="seq-list-card" data-seq-list>
-            <div class="seq-row on">
-              <div>
-                <div class="name">New buyer · slow drip</div>
-                <div class="meta">7 steps · 14 days · Email + SMS</div>
-              </div>
-              <div class="stat"><strong>62%</strong>Reply rate</div>
-              <div class="toggle on" onclick="this.classList.toggle('on')"></div>
-            </div>
-            <div class="seq-row">
-              <div>
-                <div class="name">Open house follow-up</div>
-                <div class="meta">4 steps · 5 days · Email</div>
-              </div>
-              <div class="stat"><strong>78%</strong>Reply rate</div>
-              <div class="toggle on" onclick="this.classList.toggle('on')"></div>
-            </div>
-            <div class="seq-row">
-              <div>
-                <div class="name">Past client · annual check-in</div>
-                <div class="meta">3 steps · 365 days · Email</div>
-              </div>
-              <div class="stat"><strong>41%</strong>Reply rate</div>
-              <div class="toggle on" onclick="this.classList.toggle('on')"></div>
-            </div>
-            <div class="seq-row">
-              <div>
-                <div class="name">Out-of-state buyer visit prep</div>
-                <div class="meta">5 steps · 21 days · Email + SMS</div>
-              </div>
-              <div class="stat"><strong>84%</strong>Reply rate</div>
-              <div class="toggle on" onclick="this.classList.toggle('on')"></div>
-            </div>
-            <div class="seq-row">
-              <div>
-                <div class="name">Seller pre-listing nurture</div>
-                <div class="meta">6 steps · 30 days · Email</div>
-              </div>
-              <div class="stat"><strong>56%</strong>Reply rate</div>
-              <div class="toggle on" onclick="this.classList.toggle('on')"></div>
-            </div>
-            <div class="seq-row">
-              <div>
-                <div class="name">Price-drop revival</div>
-                <div class="meta">2 steps · 1 day · SMS-first</div>
-              </div>
-              <div class="stat"><strong>71%</strong>Reply rate</div>
-              <div class="toggle on" onclick="this.classList.toggle('on')"></div>
-            </div>
-            <div class="seq-row">
-              <div>
-                <div class="name">Cold buyer · 90-day re-engage</div>
-                <div class="meta">3 steps · 14 days · Email</div>
-              </div>
-              <div class="stat"><strong>22%</strong>Reply rate</div>
-              <div class="toggle" onclick="this.classList.toggle('on')"></div>
-            </div>
-          </div>
-
-          <!-- Sequence editor -->
-          <div class="seq-editor-card" data-seq-editor>
-            <span class="eyebrow">Editing</span>
-            <h3 style="margin-top: 6px;">New buyer · slow drip</h3>
-            <p class="sub">7 messages over 14 days. Pauses on reply. Drafts queued for Sara's approval each step. 62% reply rate (last 90 days).</p>
-
-            <div class="seq-step">
-              <div class="seq-step-num">1</div>
-              <div class="seq-step-body">
-                <div class="seq-step-when">Same day · within 5 min</div>
-                <p class="seq-step-snip">"Welcome to Legacy. A short note from me, not a robot — I've already started looking at your saved searches…"</p>
-              </div>
-              <span class="seq-step-ch">SMS</span>
-            </div>
-            <div class="seq-step">
-              <div class="seq-step-num">2</div>
-              <div class="seq-step-body">
-                <div class="seq-step-when">Day 1 · 8:00 AM</div>
-                <p class="seq-step-snip">"Three properties worth your attention this morning — and one I think will sell by Friday…"</p>
-              </div>
-              <span class="seq-step-ch">Email</span>
-            </div>
-            <div class="seq-step">
-              <div class="seq-step-num">3</div>
-              <div class="seq-step-body">
-                <div class="seq-step-when">Day 3 · 10:00 AM</div>
-                <p class="seq-step-snip">"Quick question while it's fresh — what would change in your life if you found the right home this summer?"</p>
-              </div>
-              <span class="seq-step-ch">Email</span>
-            </div>
-            <div class="seq-step">
-              <div class="seq-step-num">4</div>
-              <div class="seq-step-body">
-                <div class="seq-step-when">Day 5 · 11:00 AM</div>
-                <p class="seq-step-snip">"How Murphys actually lives, off-season — a small thing buyers often miss…"</p>
-              </div>
-              <span class="seq-step-ch">Email</span>
-            </div>
-            <div class="seq-step">
-              <div class="seq-step-num">5</div>
-              <div class="seq-step-body">
-                <div class="seq-step-when">Day 8 · trigger</div>
-                <p class="seq-step-snip">If 3+ saves on similar homes → "I'm spotting a pattern. Coffee this week?"</p>
-              </div>
-              <span class="seq-step-ch">SMS</span>
-            </div>
-
-            <div style="display: flex; gap: 8px; margin-top: 22px; padding-top: 18px; border-top: 1px solid var(--rule);">
-              <button class="btn btn-ghost btn-sm">View all 7 steps</button>
-              <button class="btn btn-ink btn-sm" style="flex: 1;">Edit sequence →</button>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- ============================================================
-         REPORTS VIEW
-         ============================================================ -->
-    <section class="crm-view" data-view="rep">
-      <div class="rep">
-        <div class="rep-h">
-          <div>
-            <span class="eyebrow">Year to date · Through May 12</span>
-            <h1 class="h-section" style="margin-top: 8px; font-size: 38px;">Performance.</h1>
-          </div>
-          <div style="display: flex; gap: 10px;">
-            <select class="field-input" style="min-width: 160px;">
-              <option>This year</option>
-              <option>This quarter</option>
-              <option>This month</option>
-              <option>Last 12 months</option>
-            </select>
-            <button class="btn btn-ghost btn-sm">Export</button>
-          </div>
-        </div>
-
-        <div class="rep-kpi" data-rep-kpi>
-          <div class="kpi-card">
-            <span class="l">Closed volume · trailing 12 mo</span>
-            <span class="v" data-kpi-volume>$8.2M</span>
-            <span class="ch up" data-kpi-volume-sub>21 transactions</span>
-          </div>
-          <div class="kpi-card">
-            <span class="l">Total sales to date</span>
-            <span class="v" data-kpi-total>98</span>
-            <span class="ch up">Since 2018</span>
-          </div>
-          <div class="kpi-card">
-            <span class="l">Average sale price</span>
-            <span class="v" data-kpi-avg>$392K</span>
-            <span class="ch">$39K – $1M range</span>
-          </div>
-          <div class="kpi-card">
-            <span class="l">Zillow rating</span>
-            <span class="v">★ 5.0</span>
-            <span class="ch up">7 reviews</span>
-          </div>
-        </div>
-
-        <div class="rep-row">
-          <div class="rep-card">
-            <h3>Closed volume by month</h3>
-            <div class="sub">2026 YTD · $M</div>
-            <div class="chart-bars" data-closed-chart>
-              <div class="chart-bar" style="height: 36%;" data-v="$1.8M"></div>
-              <div class="chart-bar" style="height: 58%;" data-v="$2.9M"></div>
-              <div class="chart-bar brass" style="height: 84%;" data-v="$4.2M"></div>
-              <div class="chart-bar brass" style="height: 72%;" data-v="$3.6M"></div>
-              <div class="chart-bar" style="height: 28%; opacity: 0.5;" data-v="$1.4M*"></div>
-            </div>
-            <div class="chart-labels" data-closed-chart-labels>
-              <span>Jan</span><span>Feb</span><span>Mar</span><span>Apr</span><span>May*</span>
-            </div>
-          </div>
-
-          <div class="rep-card">
-            <h3>Funnel · trailing 90 days</h3>
-            <div class="sub" data-funnel-sub>— leads in · — closes out</div>
-            <div class="funnel" data-funnel>
-              <div class="funnel-step"><span class="l">New leads</span><div class="b" style="width: 0%;"></div><span class="v">—</span></div>
-            </div>
-          </div>
-        </div>
-
-        <div class="rep-row" style="grid-template-columns: 1fr;">
-          <div class="rep-card">
-            <h3>Recent closings</h3>
-            <div class="sub" data-closings-sub>Last six transactions</div>
-            <div class="income-row" style="border-bottom: 1px solid var(--rule); margin-bottom: 6px; padding-bottom: 11px;">
-              <span class="name label-cap">Date</span>
-              <span class="home label-cap">Property</span>
-              <span class="v label-cap" style="font-family: var(--mono); font-style: normal; font-size: 10px; letter-spacing: 0.18em;">Side</span>
-              <span class="v label-cap" style="font-family: var(--mono); font-style: normal; font-size: 10px; letter-spacing: 0.18em;">Sale price</span>
-            </div>
-            <div data-recent-closings>
-            <div class="income-row">
-              <span class="name">May 6, 2026</span>
-              <span class="home">6640 Railroad Flat Rd · Mountain Ranch</span>
-              <span class="v" style="font-family: var(--mono); font-size: 11px; font-style: normal; letter-spacing: 0.12em; color: var(--ink-mute); text-transform: uppercase;">Listing</span>
-              <span class="v brass">$1,000,000</span>
-            </div>
-            <div class="income-row">
-              <span class="name">May 6, 2026</span>
-              <span class="home">10282 Piney Creek Rd · Coulterville</span>
-              <span class="v" style="font-family: var(--mono); font-size: 11px; font-style: normal; letter-spacing: 0.12em; color: var(--ink-mute); text-transform: uppercase;">Buyer</span>
-              <span class="v brass">$130,000</span>
-            </div>
-            <div class="income-row">
-              <span class="name">Jan 6, 2026</span>
-              <span class="home">208 Raccoon Hollow Loop · Copperopolis</span>
-              <span class="v" style="font-family: var(--mono); font-size: 11px; font-style: normal; letter-spacing: 0.12em; color: var(--ink-mute); text-transform: uppercase;">Buyer</span>
-              <span class="v brass">$422,500</span>
-            </div>
-            <div class="income-row">
-              <span class="name">Jan 5, 2026</span>
-              <span class="home">581 Dawn Dr · Manteca</span>
-              <span class="v" style="font-family: var(--mono); font-size: 11px; font-style: normal; letter-spacing: 0.12em; color: var(--ink-mute); text-transform: uppercase;">Listing</span>
-              <span class="v brass">$480,000</span>
-            </div>
-            <div class="income-row">
-              <span class="name">Nov 20, 2025</span>
-              <span class="home">667 S Main St · Angels Camp</span>
-              <span class="v" style="font-family: var(--mono); font-size: 11px; font-style: normal; letter-spacing: 0.12em; color: var(--ink-mute); text-transform: uppercase;">Listing</span>
-              <span class="v brass">$485,000</span>
-            </div>
-            </div>
-            <p data-closings-foot style="margin-top: 16px; font-family: var(--mono); font-size: 10px; letter-spacing: 0.12em; color: var(--ink-faint); text-transform: uppercase;">— Pulled from Zillow profile. 98 closings to date.</p>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- ============================================================
-         CURATED SEARCH & STORY PUSH
-         ============================================================ -->
-    <style>
-    .cur { padding: 22px 36px 60px; }
-    .cur-head { display:flex; justify-content:space-between; align-items:flex-end; gap:16px; margin-bottom:22px; flex-wrap:wrap; }
-    .cur-grid { display:grid; grid-template-columns:262px 1fr; gap:24px; align-items:start; }
-    .cur-side { position:sticky; top:12px; }
-    .cur-side-h { font-family:var(--mono); font-size:10px; letter-spacing:.18em; text-transform:uppercase; color:var(--brass); margin:0 0 10px; }
-    .cur-colls, .cur-saved { display:flex; flex-direction:column; gap:6px; }
-    .cur-coll { text-align:left; background:var(--shell); border:1px solid var(--rule); padding:11px 13px; cursor:pointer; display:flex; flex-direction:column; gap:3px; }
-    .cur-coll:hover { border-color:var(--ink); }
-    .cur-coll.on { border-color:var(--brass); box-shadow:inset 0 0 0 1px var(--brass); }
-    .cur-coll .t { font-family:var(--serif); font-style:italic; font-size:16px; color:var(--ink); }
-    .cur-coll .m { font-family:var(--mono); font-size:9px; letter-spacing:.1em; text-transform:uppercase; color:var(--ink-mute); }
-    .cur-empty, .cur-placeholder { color:var(--ink-mute); font-style:italic; font-family:var(--serif); font-size:16px; padding:22px 4px; }
-    .cur-saved button { text-align:left; background:transparent; border:1px solid var(--rule); padding:8px 11px; cursor:pointer; font-size:12.5px; color:var(--ink-soft); display:flex; justify-content:space-between; gap:8px; }
-    .cur-saved button:hover { border-color:var(--ink); color:var(--ink); }
-    .cur-saved button .c { font-family:var(--mono); font-size:9px; color:var(--brass); }
-    .cur-ed-h { display:flex; justify-content:space-between; align-items:flex-start; gap:16px; border-bottom:1px solid var(--rule); padding-bottom:16px; margin-bottom:18px; flex-wrap:wrap; }
-    .cur-ed-meta { flex:1; min-width:240px; display:flex; flex-direction:column; gap:8px; }
-    .cur-ed-meta input, .cur-ed-meta textarea { font:inherit; font-size:15px; background:var(--shell); border:1px solid var(--rule); padding:9px 11px; color:var(--ink); width:100%; }
-    .cur-ed-meta .title-in { font-family:var(--serif); font-style:italic; font-size:24px; }
-    .cur-ed-acts { display:flex; flex-direction:column; gap:8px; min-width:158px; }
-    .cur-status { font-family:var(--mono); font-size:9px; letter-spacing:.14em; text-transform:uppercase; padding:4px 9px; align-self:flex-start; }
-    .cur-status.draft { background:var(--linen); color:var(--ink-mute); }
-    .cur-status.active { background:var(--brass); color:var(--shell); }
-    .cur-status.revoked { background:#8B3A3A; color:#fff; }
-    .cur-subtabs { display:flex; gap:4px; margin-bottom:16px; }
-    .cur-subtab { font-family:var(--mono); font-size:10px; letter-spacing:.12em; text-transform:uppercase; padding:8px 15px; border:1px solid var(--rule); background:transparent; cursor:pointer; color:var(--ink-mute); }
-    .cur-subtab.on { background:var(--ink); color:var(--shell); border-color:var(--ink); }
-    .cur-filters { display:grid; grid-template-columns:repeat(auto-fit,minmax(132px,1fr)); gap:10px; background:var(--shell); border:1px solid var(--rule); padding:16px; margin-bottom:12px; }
-    .cur-filters label { font-family:var(--mono); font-size:9px; letter-spacing:.1em; text-transform:uppercase; color:var(--ink-mute); display:flex; flex-direction:column; gap:4px; }
-    .cur-filters input, .cur-filters select { font:inherit; font-size:14px; background:#fff; border:1px solid var(--rule); padding:8px 9px; color:var(--ink); }
-    .cur-chips { display:flex; gap:6px; flex-wrap:wrap; grid-column:1/-1; }
-    .cur-chip { font-family:var(--mono); font-size:9.5px; letter-spacing:.08em; text-transform:uppercase; border:1px solid var(--rule); padding:6px 10px; cursor:pointer; user-select:none; color:var(--ink-mute); }
-    .cur-chip.on { background:var(--brass); color:var(--shell); border-color:var(--brass); }
-    .cur-filter-actions { display:flex; gap:10px; align-items:center; margin-bottom:14px; flex-wrap:wrap; }
-    .cur-gaps { font-size:12px; color:var(--ink-mute); font-style:italic; margin:0 0 12px; line-height:1.5; }
-    .cur-results, .cur-incl { display:flex; flex-direction:column; gap:8px; }
-    .cur-row { display:grid; grid-template-columns:64px 1fr auto; gap:12px; background:var(--shell); border:1px solid var(--rule); padding:10px; align-items:center; }
-    .cur-row .thumb { width:64px; height:48px; object-fit:cover; background:var(--vellum); }
-    .cur-row .pr { font-family:var(--serif); font-style:italic; font-size:18px; color:var(--ink); }
-    .cur-row .ad { font-size:12.5px; color:var(--ink-soft); }
-    .cur-row .sp { font-family:var(--mono); font-size:9.5px; letter-spacing:.08em; color:var(--ink-mute); text-transform:uppercase; margin-top:2px; }
-    .cur-incl-ed { grid-column:1/-1; display:flex; flex-direction:column; gap:7px; border-top:1px solid var(--rule-soft); padding-top:9px; margin-top:2px; }
-    .cur-incl-ed textarea, .cur-incl-ed input[type=text] { font:inherit; font-size:13px; background:#fff; border:1px solid var(--rule); padding:7px 9px; width:100%; }
-    .cur-incl-ed .r2 { display:flex; gap:12px; align-items:center; flex-wrap:wrap; font-family:var(--mono); font-size:10px; letter-spacing:.08em; text-transform:uppercase; color:var(--ink-mute); }
-    .cur-incl-ed select { font:inherit; font-size:12px; padding:5px 7px; border:1px solid var(--rule); background:#fff; }
-    .cur-modal { position:fixed; inset:0; z-index:99998; background:rgba(20,18,15,.6); display:flex; align-items:center; justify-content:center; padding:24px; font-family:var(--sans); }
-    .cur-modal .box { background:var(--shell); max-width:600px; width:100%; max-height:92vh; overflow:auto; padding:26px 30px; }
-    .cur-modal h3 { font-family:var(--serif); font-style:italic; font-weight:500; font-size:26px; margin:0 0 6px; }
-    .cur-modal .sub { font-size:13px; color:var(--ink-soft); margin:0 0 16px; line-height:1.5; }
-    .cur-modal label { font-family:var(--mono); font-size:9px; letter-spacing:.14em; text-transform:uppercase; color:var(--ink-mute); display:block; margin:12px 0 5px; }
-    .cur-modal input, .cur-modal textarea, .cur-modal select { font:inherit; font-size:15px; width:100%; padding:10px 12px; border:1px solid var(--rule); background:#fff; color:var(--ink); }
-    .cur-msg-pv { background:var(--ink); color:var(--shell); padding:14px 16px; margin-top:12px; }
-    .cur-msg-pv .l { font-family:var(--mono); font-size:9px; letter-spacing:.16em; text-transform:uppercase; color:var(--brass-bright); margin-bottom:7px; }
-    .cur-msg-pv p { font-size:13.5px; line-height:1.5; color:rgba(250,246,236,.9); white-space:pre-wrap; }
-    .cur-msg-pv iframe { width:100%; height:300px; border:1px solid rgba(250,246,236,.2); background:#FAF6EC; margin-top:6px; }
-    .cur-modal .row { display:flex; gap:10px; }
-    .cur-modal .actions { display:flex; gap:10px; align-items:center; margin-top:18px; }
-    .cur-result { font-size:13px; margin-top:12px; min-height:18px; line-height:1.5; }
-    @media (max-width: 900px) { .cur { padding:18px; } .cur-grid { grid-template-columns:1fr; } .cur-side { position:static; } }
-    </style>
-    <section class="crm-view" data-view="curate">
-      <div class="cur">
-        <div class="cur-head">
-          <div>
-            <span class="label-cap" style="color:var(--brass);">Curated Search &amp; Story Push</span>
-            <h1 class="h-section" style="font-size:38px;margin-top:6px;">Collections.</h1>
-          </div>
-          <button class="btn btn-ink btn-sm" data-cur-new>+ New collection</button>
-        </div>
-        <div class="cur-grid">
-          <aside class="cur-side">
-            <div class="cur-side-h">Your collections</div>
-            <div class="cur-colls" data-cur-colls><div class="cur-empty">Loading…</div></div>
-            <div class="cur-side-h" style="margin-top:22px;">Saved searches</div>
-            <div class="cur-saved" data-cur-saved></div>
-          </aside>
-          <div class="cur-main" data-cur-main>
-            <div class="cur-placeholder" data-cur-placeholder>Pick a collection on the left, or start a new one, to begin curating. Every collection is hand-built — nothing reaches a client you didn't choose.</div>
-            <div data-cur-editor style="display:none;"></div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- ============================================================
-         BROKER OVERSIGHT (visible only to the broker-owner / admin)
-         ============================================================ -->
-    <style>
-    .brk { padding: 22px 36px 60px; }
-    .brk-agents { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; margin-bottom: 24px; }
-    .brk-ag { background: var(--shell); border: 1px solid var(--rule); padding: 20px 22px; }
-    .brk-ag h3 { font-family: var(--serif); font-style: italic; font-weight: 400; font-size: 22px; }
-    .brk-ag .st { display: flex; gap: 22px; margin: 12px 0; }
-    .brk-ag .st .n { font-family: var(--serif); font-style: italic; font-size: 28px; color: var(--ink); line-height: 1; }
-    .brk-ag .st .n.brass { color: var(--brass); }
-    .brk-ag .st .l { font-family: var(--mono); font-size: 9px; letter-spacing: .12em; text-transform: uppercase; color: var(--ink-mute); margin-top: 3px; }
-    .brk-ag .stages { font-family: var(--mono); font-size: 10px; letter-spacing: .05em; color: var(--ink-soft); text-transform: uppercase; }
-    .brk-ag .la { font-size: 11px; color: var(--ink-mute); margin-top: 8px; }
-    .brk-table { width: 100%; border-collapse: collapse; font-size: 13px; }
-    .brk-table th { font-family: var(--mono); font-size: 9px; letter-spacing: .12em; text-transform: uppercase; color: var(--ink-mute); text-align: left; padding: 8px; border-bottom: 1px solid var(--rule); }
-    .brk-table td { padding: 9px 8px; border-bottom: 1px solid var(--rule-soft); }
-    .brk-hot { color: #8B3A3A; font-family: var(--mono); font-size: 9px; letter-spacing: .1em; text-transform: uppercase; margin-left: 6px; }
-    .brk-prov { background: var(--shell); border: 1px solid var(--rule); padding: 20px 22px; margin-top: 24px; max-width: 520px; }
-    .brk-prov input, .brk-prov select { font: inherit; font-size: 14px; padding: 8px 10px; border: 1px solid var(--rule); background: #fff; width: 100%; margin-top: 4px; color: var(--ink); }
-    .brk-prov label { font-family: var(--mono); font-size: 9px; letter-spacing: .12em; text-transform: uppercase; color: var(--ink-mute); display: block; margin-top: 10px; }
-    @media (max-width: 900px) { .brk { padding: 18px; } }
-    </style>
-    <section class="crm-view" data-view="broker">
-      <div class="brk">
-        <div class="cur-head"><div>
-          <span class="label-cap" style="color:var(--brass);">Broker oversight · Legacy Properties</span>
-          <h1 class="h-section" style="font-size:38px;margin-top:6px;">The brokerage.</h1>
-        </div></div>
-        <div data-broker-body><div class="cur-empty">Loading…</div></div>
-      </div>
-    </section>
-
   </main>
 </div>
 
-<script>
-function showView(e, name) {
-  if (e) e.preventDefault();
-  document.querySelectorAll('.crm-tab').forEach(t => t.classList.remove('on'));
-  document.querySelectorAll('.crm-view').forEach(v => v.classList.remove('on'));
-  // pair tab/view by name
-  const tab = document.querySelector(`.crm-tab[onclick*="'${name}'"]`);
-  if (tab) tab.classList.add('on');
-  const view = document.querySelector(`.crm-view[data-view="${name}"]`);
-  if (view) view.classList.add('on');
-  // sync sidebar
-  document.querySelectorAll('.app-side-nav a').forEach(a => a.classList.remove('active'));
-  if (e && e.target.closest('.app-side-nav')) e.target.classList.add('active');
-}
-function selectLead(el) {
-  document.querySelectorAll('.lead-row').forEach(r => r.classList.remove('on'));
-  el.classList.add('on');
-}
-</script>
-<script>
-/* Link client to deal — self-contained modal for POST /api/crm/link-deal-party.
-   Closes the identity chain users -> lead -> deal_parties -> deal so a signed-in
-   seller sees only their own portal. Agent-only (the endpoint enforces it). */
-(function () {
-  'use strict';
-  function openLinkDealModal() {
-    if (document.getElementById('leg-linkdeal-modal')) {
-      document.getElementById('leg-linkdeal-modal').style.display = 'flex';
-      return;
-    }
-    var m = document.createElement('div');
-    m.id = 'leg-linkdeal-modal';
-    m.style.cssText = 'position:fixed;inset:0;z-index:99997;background:rgba(20,18,15,0.6);display:flex;align-items:center;justify-content:center;padding:24px;font-family:Manrope,system-ui,sans-serif;';
-    m.innerHTML = ''
-      + '<div style="background:#FAF6EC;max-width:520px;width:100%;padding:28px 32px;color:#1A1714;max-height:90vh;overflow:auto;">'
-      + '  <div style="font-family:\'JetBrains Mono\',monospace;font-size:10px;letter-spacing:.22em;text-transform:uppercase;color:#7C6A4D;margin-bottom:8px;">Seller portal</div>'
-      + '  <h2 style="font-family:\'Cormorant Garamond\',serif;font-style:italic;font-weight:500;font-size:28px;margin:0 0 6px;">Link a client to their deal.</h2>'
-      + '  <p style="font-size:13.5px;line-height:1.55;color:#3A332B;margin:0 0 18px;">Ties a client to a transaction so that when they sign in they see only their own portal. Finds or creates their lead by email, then links it to the deal.</p>'
-      + '  <form id="leg-linkdeal-form" style="display:flex;flex-direction:column;gap:12px;">'
-      + '    <label style="font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:#7C6A4D;display:flex;flex-direction:column;gap:4px;">Deal (source key)'
-      + '      <input name="deal" required placeholder="e.g. 433-hwy4" style="font:inherit;font-size:15px;text-transform:none;letter-spacing:normal;color:#1A1714;background:#fff;border:1px solid #D9CFB7;padding:9px 11px;"></label>'
-      + '    <label style="font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:#7C6A4D;display:flex;flex-direction:column;gap:4px;">Client email'
-      + '      <input name="email" type="email" required placeholder="client@example.com" style="font:inherit;font-size:15px;text-transform:none;letter-spacing:normal;color:#1A1714;background:#fff;border:1px solid #D9CFB7;padding:9px 11px;"></label>'
-      + '    <div style="display:flex;gap:10px;">'
-      + '      <label style="flex:1;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:#7C6A4D;display:flex;flex-direction:column;gap:4px;">First name'
-      + '        <input name="first_name" style="font:inherit;font-size:15px;text-transform:none;letter-spacing:normal;color:#1A1714;background:#fff;border:1px solid #D9CFB7;padding:9px 11px;"></label>'
-      + '      <label style="flex:1;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:#7C6A4D;display:flex;flex-direction:column;gap:4px;">Last name'
-      + '        <input name="last_name" style="font:inherit;font-size:15px;text-transform:none;letter-spacing:normal;color:#1A1714;background:#fff;border:1px solid #D9CFB7;padding:9px 11px;"></label>'
-      + '    </div>'
-      + '    <div style="display:flex;gap:10px;">'
-      + '      <label style="flex:1;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:#7C6A4D;display:flex;flex-direction:column;gap:4px;">Phone (optional)'
-      + '        <input name="phone" style="font:inherit;font-size:15px;text-transform:none;letter-spacing:normal;color:#1A1714;background:#fff;border:1px solid #D9CFB7;padding:9px 11px;"></label>'
-      + '      <label style="flex:1;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:#7C6A4D;display:flex;flex-direction:column;gap:4px;">Role'
-      + '        <select name="role" style="font:inherit;font-size:15px;color:#1A1714;background:#fff;border:1px solid #D9CFB7;padding:9px 11px;">'
-      + '          <option value="seller">Seller</option><option value="co-seller">Co-seller</option>'
-      + '          <option value="buyer">Buyer</option><option value="co-buyer">Co-buyer</option></select></label>'
-      + '    </div>'
-      + '    <label style="display:flex;align-items:flex-start;gap:8px;font-size:13px;color:#3A332B;line-height:1.4;">'
-      + '      <input name="provision" type="checkbox" checked style="margin-top:3px;">'
-      + '      <span>Create their sign-in account now so they can log in immediately (no email is sent). Leave on unless they already have a Legacy account.</span></label>'
-      + '    <div style="display:flex;gap:10px;margin-top:6px;">'
-      + '      <button type="submit" id="leg-linkdeal-submit" style="background:#1A1714;color:#FAF6EC;border:none;padding:12px 20px;font-family:\'JetBrains Mono\',monospace;font-size:11px;letter-spacing:.22em;text-transform:uppercase;cursor:pointer;">Link client</button>'
-      + '      <button type="button" id="leg-linkdeal-close" style="margin-left:auto;background:transparent;border:none;color:#7C6A4D;cursor:pointer;font-size:13px;">Close</button>'
-      + '    </div>'
-      + '  </form>'
-      + '  <div id="leg-linkdeal-result" style="margin-top:14px;font-size:13.5px;line-height:1.5;min-height:20px;"></div>'
-      + '</div>';
-    document.body.appendChild(m);
-
-    var form   = m.querySelector('#leg-linkdeal-form');
-    var submit = m.querySelector('#leg-linkdeal-submit');
-    var result = m.querySelector('#leg-linkdeal-result');
-    function close() { m.style.display = 'none'; }
-    m.querySelector('#leg-linkdeal-close').onclick = close;
-    m.addEventListener('click', function (e) { if (e.target === m) close(); });
-
-    form.addEventListener('submit', async function (e) {
-      e.preventDefault();
-      var fd = new FormData(form);
-      var body = {
-        deal:       (fd.get('deal') || '').trim(),
-        email:      (fd.get('email') || '').trim(),
-        first_name: (fd.get('first_name') || '').trim() || undefined,
-        last_name:  (fd.get('last_name') || '').trim() || undefined,
-        phone:      (fd.get('phone') || '').trim() || undefined,
-        role:       fd.get('role') || 'seller',
-        provision:  fd.get('provision') === 'on'
-      };
-      submit.disabled = true; submit.textContent = 'Linking…';
-      result.style.color = '#7C6A4D'; result.textContent = 'Working…';
-      try {
-        var res = await fetch('/api/crm/link-deal-party', {
-          method: 'POST', credentials: 'include',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(body)
-        });
-        var json = await res.json();
-        if (res.ok && json && json.linked) {
-          var status = json.user_provisioned
-            ? 'Sign-in account created — they can log in now.'
-            : (json.user_linked
-                ? 'Linked to their existing account.'
-                : 'No account yet — the link activates the moment they first sign in with this email.');
-          result.style.color = '#2E5C3D';
-          result.innerHTML = '✓ ' + (body.first_name || 'Client') + ' linked to <strong>'
-            + (json.deal && json.deal.address ? json.deal.address : body.deal) + '</strong> as ' + json.party.role + '.<br>'
-            + (json.lead && json.lead.created ? 'New lead created. ' : 'Existing lead reused. ') + status;
-          submit.textContent = 'Linked';
-          setTimeout(function () { submit.disabled = false; submit.textContent = 'Link client'; }, 1600);
-        } else {
-          result.style.color = '#9B2C2C';
-          result.textContent = '✗ ' + ((json && json.error) || ('Failed (' + res.status + ')'));
-          submit.disabled = false; submit.textContent = 'Link client';
-        }
-      } catch (err) {
-        result.style.color = '#9B2C2C';
-        result.textContent = '✗ ' + (err.message || 'Network error');
-        submit.disabled = false; submit.textContent = 'Link client';
-      }
-    });
-  }
-
-  document.addEventListener('click', function (e) {
-    var t = e.target.closest('[data-open-link-deal]');
-    if (t) { e.preventDefault(); openLinkDealModal(); }
-  });
-})();
-</script>
-<script>
-/* ============================================================================
-   Curated Search & Story Push — agent screen (self-contained).
-   Talks to /api/curate/* and opens the client page in preview before any push.
-   ========================================================================== */
-(function () {
-  'use strict';
-  var root = document.querySelector('.crm-view[data-view="curate"]');
-  if (!root) return;
-
-  var esc = function (s) { return (s == null ? '' : String(s)).replace(/[&<>"]/g, function (c) { return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]); }); };
-  function api(path, opts) {
-    opts = opts || {};
-    opts.credentials = 'include';
-    if (opts.body && typeof opts.body !== 'string') { opts.headers = Object.assign({ 'Content-Type': 'application/json' }, opts.headers); opts.body = JSON.stringify(opts.body); }
-    return fetch('/api/curate/' + path, opts).then(function (r) { return r.json().then(function (j) { return { ok: r.ok, status: r.status, j: j }; }).catch(function () { return { ok: r.ok, status: r.status, j: {} }; }); });
-  }
-
-  var STATUS_OPTS = [['active', 'Active'], ['pending', 'Pending'], ['sold', 'Sold']];
-  var PTYPE_OPTS = [['single_family', 'Single Family'], ['condo', 'Condo/Town'], ['manufactured', 'Manufactured'], ['land', 'Land/Lots'], ['ranch', 'Farm/Ranch']];
-  var NOTE_STYLES = [['sticky', 'Sticky note'], ['highlight', 'Gold highlight'], ['banner', 'Ribbon banner']];
-
-  var state = { loaded: false, collections: [], saved: [], active: null, listings: [], inSet: {}, sub: 'listings', lastFilters: {}, gaps: [] };
-
-  // ---- lazy init on tab activation ----------------------------------------
-  function ensureLoaded() { if (state.loaded) return; state.loaded = true; loadCollections(); loadSaved(); }
-  document.addEventListener('click', function (e) {
-    var t = e.target.closest('[onclick*="\'curate\'"]');
-    if (t) setTimeout(ensureLoaded, 0);
-  });
-
-  var el = function (sel) { return root.querySelector(sel); };
-
-  // ---- collections list ----------------------------------------------------
-  function loadCollections() {
-    api('collections').then(function (r) {
-      state.collections = (r.j && r.j.collections) || [];
-      renderColls();
-    });
-  }
-  function renderColls() {
-    var box = el('[data-cur-colls]');
-    if (!state.collections.length) { box.innerHTML = '<div class="cur-empty" style="font-size:13px;">No collections yet. Start one above.</div>'; return; }
-    box.innerHTML = state.collections.map(function (c) {
-      var on = state.active && state.active.id === c.id ? ' on' : '';
-      return '<button class="cur-coll' + on + '" data-open-coll="' + esc(c.id) + '">' +
-        '<span class="t">' + esc(c.title || 'Untitled collection') + '</span>' +
-        '<span class="m">' + (c.included_count || 0) + ' picked · ' + esc(c.status) + (c.client_name ? ' · ' + esc(c.client_name) : '') + (c.reaction_count ? ' · ' + c.reaction_count + ' reactions' : '') + '</span>' +
-        '</button>';
-    }).join('');
-  }
-
-  // ---- saved searches ------------------------------------------------------
-  function loadSaved() {
-    api('saved-searches').then(function (r) { state.saved = (r.j && r.j.searches) || []; renderSaved(); });
-  }
-  function renderSaved() {
-    var box = el('[data-cur-saved]');
-    if (!state.saved.length) { box.innerHTML = '<div class="cur-empty" style="font-size:12px;padding:8px 0;">None yet — run a search and save it.</div>'; return; }
-    box.innerHTML = state.saved.map(function (s) {
-      return '<button data-apply-saved="' + esc(s.id) + '"><span>' + esc(s.name) + '</span>' + (s.new_match_count ? '<span class="c">' + s.new_match_count + ' new</span>' : '') + '</button>';
-    }).join('');
-  }
-
-  // ---- open / render a collection -----------------------------------------
-  function openCollection(id) {
-    api('collections?id=' + encodeURIComponent(id)).then(function (r) {
-      if (!r.ok) { alert((r.j && r.j.error) || 'Could not open collection'); return; }
-      state.active = r.j.collection;
-      state.listings = r.j.listings || [];
-      state.inSet = {}; state.listings.forEach(function (l) { state.inSet[l.property_id] = true; });
-      state.sub = 'listings';
-      renderColls();
-      renderEditor(r.j);
-    });
-  }
-
-  function renderEditor(data) {
-    el('[data-cur-placeholder]').style.display = 'none';
-    var c = state.active;
-    var reactions = (data && data.reactions) || [];
-    var opens = (data && data.engagement && data.engagement.opens) || 0;
-    var box = el('[data-cur-editor]');
-    box.style.display = 'block';
-    box.innerHTML =
-      '<div class="cur-ed-h">' +
-        '<div class="cur-ed-meta">' +
-          '<span class="cur-status ' + esc(c.status) + '">' + esc(c.status) + (opens ? ' · ' + opens + ' opens' : '') + '</span>' +
-          '<input class="title-in" data-meta="title" placeholder="Collection title (e.g. Five for Karen)" value="' + esc(c.title || '') + '">' +
-          '<textarea data-meta="intro_note" rows="2" placeholder="Intro note — “Hi Karen, five new ones this week…”">' + esc(c.intro_note || '') + '</textarea>' +
-          '<textarea data-meta="closing_note" rows="2" placeholder="Closing note — “Tell me which speak to you.”">' + esc(c.closing_note || '') + '</textarea>' +
-          (c.client_name ? '<div class="cur-row" style="grid-template-columns:1fr;background:transparent;border:none;padding:0;font-size:12px;color:var(--ink-mute);">For ' + esc(c.client_name) + (c.client_phone ? ' · ' + esc(c.client_phone) : '') + (c.client_email ? ' · ' + esc(c.client_email) : '') + '</div>' : '') +
-        '</div>' +
-        '<div class="cur-ed-acts">' +
-          '<button class="btn btn-ghost btn-sm" data-preview>Preview as client ↗</button>' +
-          '<button class="btn btn-brass btn-sm" data-push>Preview &amp; push…</button>' +
-          '<button class="btn btn-ghost btn-sm" data-client>' + (c.client_name ? 'Change client' : 'Attach client') + '</button>' +
-          '<button class="btn btn-ghost btn-sm" data-copylink>Copy client link</button>' +
-          '<button class="btn-link" data-delete style="font-size:11px;color:var(--ink-faint);align-self:flex-start;">Delete</button>' +
-        '</div>' +
-      '</div>' +
-      (reactions.length ? '<div class="cur-gaps">Client engagement: ' + reactions.slice(0, 6).map(function (x) { return esc((x.client_label || 'Client')) + ' — ' + esc(x.reaction.replace(/_/g, ' ')); }).join(' · ') + '</div>' : '') +
-      '<div class="cur-subtabs">' +
-        '<button class="cur-subtab' + (state.sub === 'listings' ? ' on' : '') + '" data-sub="listings">In this collection (' + state.listings.filter(function (l) { return l.included; }).length + ')</button>' +
-        '<button class="cur-subtab' + (state.sub === 'search' ? ' on' : '') + '" data-sub="search">Add listings</button>' +
-      '</div>' +
-      '<div data-sub-body></div>';
-    renderSub();
-  }
-
-  function renderSub() {
-    var body = el('[data-sub-body]');
-    if (state.sub === 'listings') body.innerHTML = renderIncluded();
-    else body.innerHTML = renderSearchPanel();
-    if (state.sub === 'search') { hydrateFilters(); }
-  }
-
-  function renderIncluded() {
-    var inc = state.listings.filter(function (l) { return l.included; });
-    if (!inc.length) return '<div class="cur-empty" style="font-size:14px;">No listings picked yet. Use “Add listings” to search and tick homes in.</div>';
-    return '<div class="cur-incl">' + inc.map(function (l) {
-      var g = l.listing || {};
-      return '<div class="cur-row" data-inc="' + esc(l.property_id) + '">' +
-        '<img class="thumb" src="' + esc(g.photo || '') + '" alt="">' +
-        '<div><div class="pr">' + esc(g.price_label || '—') + '</div><div class="ad">' + esc(g.address || '') + (g.city ? ', ' + esc(g.city) : '') + '</div>' +
-          '<div class="sp">' + [g.beds != null ? g.beds + 'bd' : '', g.baths != null ? g.baths + 'ba' : '', g.sqft ? g.sqft.toLocaleString() + 'sqft' : ''].filter(Boolean).join(' · ') + '</div></div>' +
-        '<button class="btn-link" data-remove="' + esc(l.property_id) + '" style="color:#8B3A3A;font-size:10px;">Remove</button>' +
-        '<div class="cur-incl-ed">' +
-          '<textarea data-f="agent_note" rows="2" placeholder="Your note to the client about this home…">' + esc(l.agent_note || '') + '</textarea>' +
-          '<div class="r2">' +
-            '<span>Style <select data-f="note_style">' + NOTE_STYLES.map(function (s) { return '<option value="' + s[0] + '"' + (l.note_style === s[0] ? ' selected' : '') + '>' + s[1] + '</option>'; }).join('') + '</select></span>' +
-            '<label style="display:flex;gap:6px;align-items:center;cursor:pointer;"><input type="checkbox" data-f="priority"' + (l.priority ? ' checked' : '') + '> See first</label>' +
-            '<input type="text" data-f="why_note" placeholder="Why I picked it (short)" value="' + esc(l.why_note || '') + '" style="flex:1;min-width:140px;">' +
-          '</div>' +
-        '</div>' +
-      '</div>';
-    }).join('') + '</div>';
-  }
-
-  function renderSearchPanel() {
-    return '<div class="cur-filters" data-filters>' +
-        '<div class="cur-chips" data-chip-group="status">' + STATUS_OPTS.map(function (s) { return '<span class="cur-chip' + (s[0] === 'active' ? ' on' : '') + '" data-chip="' + s[0] + '">' + s[1] + '</span>'; }).join('') + '</div>' +
-        '<div class="cur-chips" data-chip-group="property_type">' + PTYPE_OPTS.map(function (s) { return '<span class="cur-chip" data-chip="' + s[0] + '">' + s[1] + '</span>'; }).join('') + '</div>' +
-        '<label>Min price<input data-q="price_min" type="number" placeholder="$"></label>' +
-        '<label>Max price<input data-q="price_max" type="number" placeholder="$"></label>' +
-        '<label>Beds min<input data-q="beds_min" type="number"></label>' +
-        '<label>Baths min<input data-q="baths_min" type="number"></label>' +
-        '<label>Min sqft<input data-q="sqft_min" type="number"></label>' +
-        '<label>Max sqft<input data-q="sqft_max" type="number"></label>' +
-        '<label>Min acres<input data-q="lot_acres_min" type="number" step="0.1"></label>' +
-        '<label>Year from<input data-q="year_min" type="number"></label>' +
-        '<label>City<input data-q="city" type="text"></label>' +
-        '<label>ZIP<input data-q="zip" type="text"></label>' +
-        '<label>Max $/sqft<input data-q="ppsf_max" type="number"></label>' +
-        '<label>Keyword<input data-q="keyword" type="text" placeholder="view, pool, acreage…"></label>' +
-        '<label>Sort<select data-q="sort"><option value="newest">Newest</option><option value="price_asc">Price ↑</option><option value="price_desc">Price ↓</option><option value="beds_desc">Beds ↓</option></select></label>' +
-      '</div>' +
-      '<div class="cur-filter-actions">' +
-        '<button class="btn btn-ink btn-sm" data-run-search>Search listings</button>' +
-        '<button class="btn btn-ghost btn-sm" data-save-search>Save this search…</button>' +
-        '<span class="mono" style="font-size:10px;color:var(--ink-mute);" data-search-count></span>' +
-      '</div>' +
-      '<div class="cur-gaps" data-search-gaps></div>' +
-      '<div class="cur-results" data-search-results></div>';
-  }
-
-  function hydrateFilters() {
-    // re-apply any last filters into the freshly rendered form
-    var f = state.lastFilters || {};
-    Object.keys(f).forEach(function (k) {
-      var input = el('[data-q="' + k + '"]');
-      if (input && typeof f[k] === 'string') input.value = f[k];
-    });
-    (f.status || []).forEach(function (v) { var c = root.querySelector('[data-chip-group="status"] [data-chip="' + v + '"]'); if (c) c.classList.add('on'); });
-    (f.property_type || []).forEach(function (v) { var c = root.querySelector('[data-chip-group="property_type"] [data-chip="' + v + '"]'); if (c) c.classList.add('on'); });
-  }
-
-  function gatherFilters() {
-    var f = {};
-    root.querySelectorAll('[data-q]').forEach(function (inp) { if (inp.value !== '') f[inp.getAttribute('data-q')] = inp.value; });
-    var st = []; root.querySelectorAll('[data-chip-group="status"] .cur-chip.on').forEach(function (c) { st.push(c.getAttribute('data-chip')); });
-    var pt = []; root.querySelectorAll('[data-chip-group="property_type"] .cur-chip.on').forEach(function (c) { pt.push(c.getAttribute('data-chip')); });
-    if (st.length) f.status = st;
-    if (pt.length) f.property_type = pt;
-    return f;
-  }
-
-  function doSearch() {
-    var f = gatherFilters(); state.lastFilters = f;
-    var qs = Object.keys(f).map(function (k) { return encodeURIComponent(k) + '=' + encodeURIComponent(Array.isArray(f[k]) ? f[k].join(',') : f[k]); }).join('&');
-    var results = el('[data-search-results]'); results.innerHTML = '<div class="cur-empty" style="font-size:13px;">Searching…</div>';
-    api('search?' + qs).then(function (r) {
-      var d = r.j || {};
-      el('[data-search-count]').textContent = (d.count != null ? d.count : (d.listings || []).length) + ' found';
-      el('[data-search-gaps]').textContent = (d.gaps && d.gaps.length) ? ('Not filtered (no data yet): ' + d.gaps.join('; ')) : '';
-      renderResults(d.listings || []);
-    });
-  }
-
-  function renderResults(list) {
-    var box = el('[data-search-results]');
-    if (!list.length) { box.innerHTML = '<div class="cur-empty" style="font-size:14px;">No matches. Loosen the filters.</div>'; return; }
-    box.innerHTML = list.map(function (g) {
-      var inC = !!state.inSet[g.id];
-      return '<div class="cur-row" data-res="' + esc(g.id) + '">' +
-        '<img class="thumb" src="' + esc(g.photo || '') + '" alt="">' +
-        '<div><div class="pr">' + esc(g.price_label || '—') + ' <span style="font-family:var(--mono);font-size:9px;color:var(--ink-mute);">' + esc(g.ppsf_label || '') + '</span></div>' +
-          '<div class="ad">' + esc(g.address || '') + (g.city ? ', ' + esc(g.city) : '') + '</div>' +
-          '<div class="sp">' + [g.beds != null ? g.beds + 'bd' : '', g.baths != null ? g.baths + 'ba' : '', g.sqft ? g.sqft.toLocaleString() + 'sqft' : '', esc(g.status_label || '')].filter(Boolean).join(' · ') + '</div></div>' +
-        '<button class="btn ' + (inC ? 'btn-ghost' : 'btn-ink') + ' btn-sm" data-toggle="' + esc(g.id) + '">' + (inC ? '✓ Added' : '+ Add') + '</button>' +
-      '</div>';
-    }).join('');
-  }
-
-  // ---- mutations -----------------------------------------------------------
-  function setListing(pid, patch, cb) {
-    var body = Object.assign({ op: 'set-listing', collection_id: state.active.id, property_id: pid, included: true }, patch);
-    api('collections', { method: 'POST', body: body }).then(function (r) { if (cb) cb(r); });
-  }
-  function toggleListing(pid) {
-    if (state.inSet[pid]) {
-      api('collections', { method: 'POST', body: { op: 'remove-listing', collection_id: state.active.id, property_id: pid } }).then(function () {
-        delete state.inSet[pid]; refreshListings(); markResult(pid);
-      });
-    } else {
-      setListing(pid, { included: true }, function () { state.inSet[pid] = true; refreshListings(); markResult(pid); });
-    }
-  }
-  function markResult(pid) {
-    var btn = root.querySelector('[data-toggle="' + pid + '"]');
-    if (!btn) return;
-    var inC = !!state.inSet[pid];
-    btn.className = 'btn ' + (inC ? 'btn-ghost' : 'btn-ink') + ' btn-sm';
-    btn.textContent = inC ? '✓ Added' : '+ Add';
-  }
-  function refreshListings() {
-    // reload just the collection's listings to keep counts/editor in sync
-    api('collections?id=' + encodeURIComponent(state.active.id)).then(function (r) {
-      if (!r.ok) return;
-      state.listings = r.j.listings || [];
-      state.inSet = {}; state.listings.forEach(function (l) { state.inSet[l.property_id] = true; });
-      // update the "In this collection (N)" tab label + list if visible
-      var tab = root.querySelector('[data-sub="listings"]');
-      if (tab) tab.textContent = 'In this collection (' + state.listings.filter(function (l) { return l.included; }).length + ')';
-      if (state.sub === 'listings') el('[data-sub-body]').innerHTML = renderIncluded();
-      loadCollections();
-    });
-  }
-
-  var metaTimer, fieldTimers = {};
-  function saveMeta() {
-    var patch = { id: state.active.id };
-    root.querySelectorAll('[data-meta]').forEach(function (i) { patch[i.getAttribute('data-meta')] = i.value; });
-    api('collections', { method: 'PATCH', body: patch }).then(function (r) { if (r.ok && r.j.collection) { state.active = Object.assign(state.active, r.j.collection); loadCollections(); } });
-  }
-
-  // ---- delegated events ----------------------------------------------------
-  root.addEventListener('click', function (e) {
-    var t;
-    if ((t = e.target.closest('[data-cur-new]'))) { newCollectionModal(); return; }
-    if ((t = e.target.closest('[data-open-coll]'))) { openCollection(t.getAttribute('data-open-coll')); return; }
-    if ((t = e.target.closest('[data-apply-saved]'))) { applySaved(t.getAttribute('data-apply-saved')); return; }
-    if ((t = e.target.closest('[data-sub]'))) { state.sub = t.getAttribute('data-sub'); renderSub(); root.querySelectorAll('[data-sub]').forEach(function (b) { b.classList.toggle('on', b === t); }); return; }
-    if ((t = e.target.closest('[data-run-search]'))) { doSearch(); return; }
-    if ((t = e.target.closest('[data-save-search]'))) { saveSearchModal(); return; }
-    if ((t = e.target.closest('[data-toggle]'))) { toggleListing(t.getAttribute('data-toggle')); return; }
-    if ((t = e.target.closest('[data-remove]'))) { toggleListing(t.getAttribute('data-remove')); return; }
-    if ((t = e.target.closest('[data-chip]'))) { t.classList.toggle('on'); return; }
-    if ((t = e.target.closest('[data-preview]'))) { window.open('/collection.html?preview=' + encodeURIComponent(state.active.id), '_blank'); return; }
-    if ((t = e.target.closest('[data-push]'))) { pushModal(); return; }
-    if ((t = e.target.closest('[data-copylink]'))) { copyLink(t); return; }
-    if ((t = e.target.closest('[data-client]'))) {
-      pickClient(function (cl) {
-        api('collections', { method: 'PATCH', body: { id: state.active.id, client_lead_id: cl ? cl.id : null } })
-          .then(function () { openCollection(state.active.id); });
-      });
-      return;
-    }
-    if ((t = e.target.closest('[data-delete]'))) { deleteCollection(); return; }
-  });
-  root.addEventListener('input', function (e) {
-    var t = e.target;
-    if (t.hasAttribute && t.hasAttribute('data-meta')) { clearTimeout(metaTimer); metaTimer = setTimeout(saveMeta, 700); return; }
-    var row = t.closest && t.closest('[data-inc]');
-    if (row && t.hasAttribute('data-f')) {
-      var pid = row.getAttribute('data-inc');
-      clearTimeout(fieldTimers[pid]); fieldTimers[pid] = setTimeout(function () {
-        setListing(pid, {
-          agent_note: row.querySelector('[data-f="agent_note"]').value,
-          note_style: row.querySelector('[data-f="note_style"]').value,
-          priority: row.querySelector('[data-f="priority"]').checked,
-          why_note: row.querySelector('[data-f="why_note"]').value
-        });
-      }, 600);
-    }
-  });
-  root.addEventListener('change', function (e) {
-    var row = e.target.closest && e.target.closest('[data-inc]');
-    if (row && e.target.hasAttribute('data-f')) {
-      var pid = row.getAttribute('data-inc');
-      setListing(pid, {
-        agent_note: row.querySelector('[data-f="agent_note"]').value,
-        note_style: row.querySelector('[data-f="note_style"]').value,
-        priority: row.querySelector('[data-f="priority"]').checked,
-        why_note: row.querySelector('[data-f="why_note"]').value
-      });
-    }
-  });
-
-  function copyLink(btn) {
-    api('preview?id=' + encodeURIComponent(state.active.id)).then(function (r) {
-      var link = r.j && r.j.share_link;
-      if (link && navigator.clipboard) navigator.clipboard.writeText(link);
-      btn.textContent = link ? 'Copied ✓' : 'No link';
-      setTimeout(function () { btn.textContent = 'Copy client link'; }, 1500);
-    });
-  }
-  function deleteCollection() {
-    if (!confirm('Delete this collection? This cannot be undone.')) return;
-    api('collections?id=' + encodeURIComponent(state.active.id), { method: 'DELETE' }).then(function () {
-      state.active = null; el('[data-cur-editor]').style.display = 'none'; el('[data-cur-placeholder]').style.display = 'block'; loadCollections();
-    });
-  }
-
-  // ---- modals --------------------------------------------------------------
-  function modal(html) {
-    var m = document.createElement('div'); m.className = 'cur-modal';
-    m.innerHTML = '<div class="box">' + html + '</div>';
-    document.body.appendChild(m);
-    m.addEventListener('click', function (e) { if (e.target === m) document.body.removeChild(m); });
-    m._close = function () { if (m.parentNode) document.body.removeChild(m); };
-    return m;
-  }
-
-  function newCollectionModal() {
-    ensureLoaded();
-    var picked = null;
-    var m = modal('<h3>New collection.</h3><p class="sub">Name it and (optionally) attach a client — that personalizes the greeting and pre-fills who it goes to at push time.</p>' +
-      '<label>Title</label><input id="ncTitle" placeholder="Five for Karen" autofocus>' +
-      '<label>Client (optional)</label><div style="display:flex;align-items:center;gap:10px;"><button type="button" class="btn btn-ghost btn-sm" id="ncPick">Choose client…</button><span id="ncClient" style="font-size:13px;color:var(--ink-soft);"></span></div>' +
-      '<div class="actions"><button class="btn btn-ink btn-sm" id="ncGo">Create</button><button class="btn-link" id="ncX" style="margin-left:auto;">Cancel</button></div>' +
-      '<div class="cur-result" id="ncR"></div>');
-    m.querySelector('#ncX').onclick = m._close;
-    m.querySelector('#ncPick').onclick = function () {
-      pickClient(function (c) { picked = c; m.querySelector('#ncClient').textContent = c ? ('✓ ' + c.name) : ''; });
-    };
-    m.querySelector('#ncGo').onclick = function () {
-      var title = m.querySelector('#ncTitle').value.trim();
-      api('collections', { method: 'POST', body: { op: 'create', title: title || 'Untitled collection', client_lead_id: picked ? picked.id : null } }).then(function (r) {
-        if (r.ok && r.j.collection) { m._close(); loadCollections(); openCollection(r.j.collection.id); }
-        else m.querySelector('#ncR').textContent = (r.j && r.j.error) || 'Failed.';
-      });
-    };
-  }
-
-  function pickClient(cb) {
-    var m = modal('<h3>Attach a client.</h3><p class="sub">Search your contacts by name, email, or phone.</p>' +
-      '<input id="pcQ" placeholder="Start typing a name…" autofocus>' +
-      '<div id="pcList" style="margin-top:12px;max-height:320px;overflow:auto;display:flex;flex-direction:column;gap:6px;"></div>' +
-      '<div class="actions"><button class="btn-link" id="pcNone">Clear / none</button><button class="btn-link" id="pcX" style="margin-left:auto;">Cancel</button></div>');
-    var listEl = m.querySelector('#pcList');
-    function search(q) {
-      api('clients?q=' + encodeURIComponent(q)).then(function (r) {
-        var cs = (r.j && r.j.clients) || [];
-        listEl.innerHTML = cs.length ? cs.map(function (c, i) {
-          return '<button class="cur-coll" data-pc="' + i + '"><span class="t" style="font-size:14px;">' + esc(c.name) + '</span><span class="m">' + esc(c.email || 'no email') + (c.phone ? ' · ' + esc(c.phone) : '') + '</span></button>';
-        }).join('') : '<div class="cur-empty" style="font-size:13px;">No matches.</div>';
-        listEl.querySelectorAll('[data-pc]').forEach(function (b) { b.onclick = function () { cb(cs[+b.getAttribute('data-pc')]); m._close(); }; });
-      });
-    }
-    var t;
-    m.querySelector('#pcQ').addEventListener('input', function (e) { clearTimeout(t); var q = e.target.value; t = setTimeout(function () { search(q); }, 250); });
-    m.querySelector('#pcX').onclick = m._close;
-    m.querySelector('#pcNone').onclick = function () { cb(null); m._close(); };
-    search('');
-  }
-
-  function saveSearchModal() {
-    var filters = gatherFilters();
-    var m = modal('<h3>Save this search.</h3><p class="sub">Store these filters to reuse for a client. New MLS matches get flagged after each sync.</p>' +
-      '<label>Name</label><input id="ssName" placeholder="Karen — single story, under 700k" autofocus>' +
-      '<div class="actions"><button class="btn btn-ink btn-sm" id="ssGo">Save</button><button class="btn-link" id="ssX" style="margin-left:auto;">Cancel</button></div><div class="cur-result" id="ssR"></div>');
-    m.querySelector('#ssX').onclick = m._close;
-    m.querySelector('#ssGo').onclick = function () {
-      var name = m.querySelector('#ssName').value.trim();
-      if (!name) { m.querySelector('#ssR').textContent = 'Give it a name.'; return; }
-      api('saved-searches', { method: 'POST', body: { name: name, filters: filters } }).then(function (r) {
-        if (r.ok) { m._close(); loadSaved(); } else m.querySelector('#ssR').textContent = (r.j && r.j.error) || 'Failed.';
-      });
-    };
-  }
-
-  function applySaved(id) {
-    var s = state.saved.filter(function (x) { return x.id === id; })[0];
-    if (!s) return;
-    if (!state.active) { alert('Open a collection first, then apply a saved search to add listings to it.'); return; }
-    state.sub = 'search'; renderSub(); root.querySelectorAll('[data-sub]').forEach(function (b) { b.classList.toggle('on', b.getAttribute('data-sub') === 'search'); });
-    state.lastFilters = s.filters || {}; hydrateFilters(); doSearch();
-  }
-
-  // ---- push (always shows the exact message before sending) ----------------
-  function pushModal() {
-    var m = modal('<h3>Preview &amp; push.</h3><p class="sub">This is exactly what your client receives. Nothing sends until you tap Send.</p><div id="pmBody">Loading the exact message…</div>');
-    api('preview?id=' + encodeURIComponent(state.active.id)).then(function (r) {
-      if (!r.ok) { m.querySelector('#pmBody').innerHTML = '<div class="cur-result">' + esc((r.j && r.j.error) || 'Could not build preview.') + '</div>'; return; }
-      var d = r.j, msgs = d.messages || {}, hasPhone = !!d.client_phone, hasEmail = !!d.client_email;
-      var chan = hasPhone ? 'sms' : (hasEmail ? 'email' : 'sms');
-      m.querySelector('#pmBody').innerHTML =
-        '<label>Send by</label><div class="row"><label style="flex:1;display:flex;gap:6px;align-items:center;font-size:13px;text-transform:none;letter-spacing:0;color:var(--ink);"><input type="radio" name="pmChan" value="sms" ' + (chan === 'sms' ? 'checked' : '') + ' style="width:auto;"> Text</label>' +
-          '<label style="flex:1;display:flex;gap:6px;align-items:center;font-size:13px;text-transform:none;letter-spacing:0;color:var(--ink);"><input type="radio" name="pmChan" value="email" ' + (chan === 'email' ? 'checked' : '') + ' style="width:auto;"> Email</label></div>' +
-        '<label>To</label><input id="pmTo" value="' + esc(chan === 'sms' ? (d.client_phone || '') : (d.client_email || '')) + '" placeholder="phone or email">' +
-        '<div id="pmPreview"></div>' +
-        '<div style="margin-top:10px;"><a href="/collection.html?preview=' + encodeURIComponent(state.active.id) + '" target="_blank" class="btn-link" style="font-size:11px;">Open the full page they’ll land on ↗</a></div>' +
-        '<div class="actions"><button class="btn btn-brass btn-sm" id="pmSend">Send now</button><button class="btn-link" id="pmX" style="margin-left:auto;">Cancel</button></div><div class="cur-result" id="pmR"></div>';
-      function paint() {
-        var ch = m.querySelector('input[name="pmChan"]:checked').value;
-        var to = m.querySelector('#pmTo');
-        if (document.activeElement !== to) to.value = ch === 'sms' ? (d.client_phone || '') : (d.client_email || '');
-        var pv = m.querySelector('#pmPreview');
-        if (ch === 'sms') pv.innerHTML = '<div class="cur-msg-pv"><div class="l">Text message</div><p>' + esc(msgs.sms ? msgs.sms.body : '') + '</p></div>';
-        else { pv.innerHTML = '<div class="cur-msg-pv"><div class="l">Email · ' + esc(msgs.email ? msgs.email.subject : '') + '</div><iframe></iframe></div>'; var fr = pv.querySelector('iframe'); if (fr && msgs.email) fr.srcdoc = msgs.email.html; }
-      }
-      m.querySelectorAll('input[name="pmChan"]').forEach(function (r) { r.addEventListener('change', paint); });
-      paint();
-      m.querySelector('#pmX').onclick = m._close;
-      m.querySelector('#pmSend').onclick = function () {
-        var ch = m.querySelector('input[name="pmChan"]:checked').value;
-        var to = m.querySelector('#pmTo').value.trim();
-        if (!to) { m.querySelector('#pmR').textContent = 'Enter a phone or email.'; return; }
-        var btn = m.querySelector('#pmSend'); btn.disabled = true; btn.textContent = 'Sending…';
-        api('push', { method: 'POST', body: { collection_id: state.active.id, channel: ch, to: to } }).then(function (rr) {
-          btn.disabled = false; btn.textContent = 'Send now';
-          var R = m.querySelector('#pmR');
-          if (rr.ok && rr.j.pushed) { R.style.color = '#2E5C3D'; R.textContent = '✓ Sent to ' + to + '. The collection is now live.'; loadCollections(); if (state.active) openCollection(state.active.id); }
-          else if (rr.ok && rr.j.note) { R.style.color = '#8a6d3b'; R.textContent = '⚠ ' + rr.j.note + ' (link is live; check Twilio/Resend keys)'; }
-          else { R.style.color = '#8B3A3A'; R.textContent = '✗ ' + ((rr.j && rr.j.error) || 'Failed.'); }
-        });
-      };
-    });
-  }
-})();
-</script>
-<script>
-/* Listing media — attach a YouTube tour + Matterport 3D tour to a listing by
-   MLS #. Feeds the on-market seller portal's "Tour engagement" tiles. */
-(function () {
-  'use strict';
-  var IN = 'font:inherit;font-size:15px;text-transform:none;letter-spacing:normal;color:#1A1714;background:#fff;border:1px solid #D9CFB7;padding:9px 11px;';
-  var LB = 'font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:#7C6A4D;display:flex;flex-direction:column;gap:4px;';
-  function open() {
-    var id = 'leg-media-modal';
-    if (document.getElementById(id)) { document.getElementById(id).style.display = 'flex'; return; }
-    var m = document.createElement('div'); m.id = id;
-    m.style.cssText = 'position:fixed;inset:0;z-index:99997;background:rgba(20,18,15,0.6);display:flex;align-items:center;justify-content:center;padding:24px;font-family:Manrope,system-ui,sans-serif;';
-    m.innerHTML = ''
-      + '<div style="background:#FAF6EC;max-width:520px;width:100%;padding:28px 32px;color:#1A1714;max-height:90vh;overflow:auto;">'
-      + '  <div style="font-family:\'JetBrains Mono\',monospace;font-size:10px;letter-spacing:.22em;text-transform:uppercase;color:#7C6A4D;margin-bottom:8px;">Seller portal · media</div>'
-      + '  <h2 style="font-family:\'Cormorant Garamond\',serif;font-style:italic;font-weight:500;font-size:28px;margin:0 0 6px;">Attach video &amp; 3D tour.</h2>'
-      + '  <p style="font-size:13.5px;line-height:1.55;color:#3A332B;margin:0 0 18px;">Enter the listing\'s MLS #, then paste its YouTube tour link — the seller portal auto-counts video views. For Matterport, paste the tour link and type its view count from your Matterport dashboard.</p>'
-      + '  <form id="lm-form" style="display:flex;flex-direction:column;gap:12px;">'
-      + '    <label style="' + LB + '">MLS #<input name="mls_number" required placeholder="e.g. 20250142" style="' + IN + '"></label>'
-      + '    <div id="lm-found" style="font-size:12px;color:#7C6A4D;min-height:16px;"></div>'
-      + '    <label style="' + LB + '">YouTube tour URL<input name="youtube_url" placeholder="https://youtu.be/… or https://www.youtube.com/watch?v=…" style="' + IN + '"></label>'
-      + '    <label style="' + LB + '">Matterport tour URL (optional)<input name="matterport_url" placeholder="https://my.matterport.com/show/?m=…" style="' + IN + '"></label>'
-      + '    <label style="' + LB + '">Matterport views (from your dashboard, optional)<input name="tour_views" type="number" min="0" placeholder="e.g. 384" style="' + IN + '"></label>'
-      + '    <div style="display:flex;gap:10px;margin-top:6px;">'
-      + '      <button type="submit" id="lm-save" style="background:#1A1714;color:#FAF6EC;border:none;padding:12px 20px;font-family:\'JetBrains Mono\',monospace;font-size:11px;letter-spacing:.22em;text-transform:uppercase;cursor:pointer;">Save media</button>'
-      + '      <button type="button" id="lm-close" style="margin-left:auto;background:transparent;border:none;color:#7C6A4D;cursor:pointer;font-size:13px;">Close</button>'
-      + '    </div>'
-      + '  </form>'
-      + '  <div id="lm-result" style="margin-top:14px;font-size:13.5px;line-height:1.5;min-height:20px;"></div>'
-      + '</div>';
-    document.body.appendChild(m);
-    var form = m.querySelector('#lm-form'), result = m.querySelector('#lm-result'), found = m.querySelector('#lm-found');
-    function close() { m.style.display = 'none'; }
-    m.querySelector('#lm-close').onclick = close;
-    m.addEventListener('click', function (e) { if (e.target === m) close(); });
-
-    form.mls_number.addEventListener('blur', function () {
-      var mls = form.mls_number.value.trim(); if (!mls) { found.textContent = ''; return; }
-      fetch('/api/curate/listing-media?mls_number=' + encodeURIComponent(mls), { credentials: 'include' })
-        .then(function (r) { return r.json(); }).then(function (j) {
-          if (j && j.found) {
-            found.style.color = '#2E5C3D';
-            found.textContent = '✓ ' + ((j.listing && j.listing.address) || mls);
-            if (j.media) { form.youtube_url.value = j.media.youtube_url || ''; form.matterport_url.value = j.media.matterport_url || ''; form.tour_views.value = j.media.tour_views != null ? j.media.tour_views : ''; }
-          } else { found.style.color = '#9B2C2C'; found.textContent = 'No listing found for that MLS #.'; }
-        }).catch(function () {});
-    });
-
-    form.addEventListener('submit', function (e) {
-      e.preventDefault();
-      var body = { mls_number: form.mls_number.value.trim(), youtube_url: form.youtube_url.value.trim(), matterport_url: form.matterport_url.value.trim(), tour_views: form.tour_views.value ? Number(form.tour_views.value) : null };
-      var save = m.querySelector('#lm-save'); save.disabled = true; save.textContent = 'Saving…';
-      fetch('/api/curate/listing-media', { method: 'POST', credentials: 'include', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) })
-        .then(function (r) { return r.json().then(function (j) { return { ok: r.ok, j: j }; }); })
-        .then(function (x) {
-          save.disabled = false; save.textContent = 'Save media';
-          if (x.ok && x.j.saved) { result.style.color = '#2E5C3D'; result.textContent = '✓ Saved for ' + ((x.j.listing && x.j.listing.address) || body.mls_number) + '. The seller portal will show the view count shortly.'; }
-          else { result.style.color = '#9B2C2C'; result.textContent = '✗ ' + ((x.j && x.j.error) || 'Failed'); }
-        }).catch(function (err) { save.disabled = false; save.textContent = 'Save media'; result.style.color = '#9B2C2C'; result.textContent = '✗ ' + (err.message || 'Network error'); });
-    });
-  }
-  document.addEventListener('click', function (e) { var t = e.target.closest('[data-open-listing-media]'); if (t) { e.preventDefault(); open(); } });
-})();
-</script>
-<script>
-/* Broker oversight — visible only to the broker-owner (agent_sara / admin).
-   Agent pipeline snapshot, lead reassignment, and one-click agent login setup. */
-(function () {
-  'use strict';
-  var root = document.querySelector('.crm-view[data-view="broker"]');
-  if (!root) return;
-  var esc = function (s) { return (s == null ? '' : String(s)).replace(/[&<>"]/g, function (c) { return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]); }); };
-  function api(path, opts) {
-    opts = opts || {}; opts.credentials = 'include';
-    if (opts.body && typeof opts.body !== 'string') { opts.headers = { 'Content-Type': 'application/json' }; opts.body = JSON.stringify(opts.body); }
-    return fetch('/api/crm/' + path, opts).then(function (r) { return r.json().then(function (j) { return { ok: r.ok, j: j }; }).catch(function () { return { ok: r.ok, j: {} }; }); });
-  }
-
-  // Show the Broker tab only to the broker-owner / admin.
-  fetch('/api/auth/session', { credentials: 'include' }).then(function (r) { return r.json(); }).then(function (j) {
-    var role = j && j.profile && j.profile.role;
-    if (role === 'agent_sara' || role === 'admin') {
-      document.querySelectorAll('[data-broker-tab]').forEach(function (e) { e.style.display = ''; });
-    }
-  }).catch(function () {});
-
-  var loaded = false;
-  function ensure() { if (loaded) return; loaded = true; load(); }
-  document.addEventListener('click', function (e) { if (e.target.closest('[onclick*="\'broker\'"]')) setTimeout(ensure, 0); });
-
-  function load() {
-    api('broker').then(function (r) {
-      var body = root.querySelector('[data-broker-body]');
-      if (!r.ok) { body.innerHTML = '<div class="cur-empty">' + esc((r.j && r.j.error) || 'Broker access only.') + '</div>'; return; }
-      render(r.j);
-    });
-  }
-
-  function render(d) {
-    var body = root.querySelector('[data-broker-body]');
-    var agents = (d.agents || []).map(function (a) {
-      var stages = Object.keys(a.by_stage || {}).map(function (k) { return k + ' ' + a.by_stage[k]; }).join(' · ') || 'no active leads';
-      return '<div class="brk-ag"><h3>' + esc(a.name) + '</h3>' +
-        '<div class="st"><div><div class="n">' + a.leads_total + '</div><div class="l">Active leads</div></div>' +
-        '<div><div class="n brass">' + a.hot + '</div><div class="l">Hot</div></div>' +
-        '<div><div class="n">' + a.active_deals + '</div><div class="l">Deals</div></div></div>' +
-        '<div class="stages">' + esc(stages) + '</div>' +
-        '<div class="la">Last activity: ' + esc(a.last_activity ? new Date(a.last_activity).toLocaleDateString() : '—') + '</div></div>';
-    }).join('');
-
-    var rows = (d.recent || []).map(function (l) {
-      var other = l.assigned_agent === 'james' ? 'sara' : 'james';
-      var otherName = other === 'james' ? 'James' : 'Sara';
-      return '<tr><td>' + esc(l.name) + (l.temperature === 'hot' ? '<span class="brk-hot">hot</span>' : '') + '</td>' +
-        '<td>' + esc(l.pipeline_stage || '—') + '</td><td>' + esc(l.assigned_agent || '—') + '</td>' +
-        '<td><button class="btn-link" data-reassign="' + esc(l.id) + '" data-to="' + other + '" style="font-size:10px;">→ ' + otherName + '</button></td></tr>';
-    }).join('');
-
-    body.innerHTML =
-      '<div class="brk-agents">' + agents + '</div>' +
-      '<section class="card"><div class="card-h"><h2>Leads &amp; assignment.</h2><span class="meta">' + (d.totals ? d.totals.leads : 0) + ' active · reassign to supervise</span></div>' +
-        '<div style="overflow-x:auto;"><table class="brk-table"><thead><tr><th>Lead</th><th>Stage</th><th>Agent</th><th>Move</th></tr></thead><tbody>' +
-        (rows || '<tr><td colspan="4" class="cur-empty">No active leads.</td></tr>') + '</tbody></table></div></section>' +
-      '<div class="brk-prov"><div class="cur-side-h">Set up an agent login</div>' +
-        '<p style="font-size:12.5px;color:var(--ink-soft);line-height:1.5;margin:0 0 4px;">Creates (or resets) an agent\'s sign-in and grants CRM access — no Supabase needed. Use this to set James\'s password.</p>' +
-        '<label>Agent</label><select id="brk-agent"><option value="james">James Beyersdorf</option><option value="sara">Sara Cooper</option></select>' +
-        '<label>Email</label><input id="brk-email" type="email" placeholder="JamesSellsCalifornia@gmail.com">' +
-        '<label>Password (min 8 characters)</label><input id="brk-pass" type="text" placeholder="set a password they\'ll use to sign in">' +
-        '<button class="btn btn-ink btn-sm" id="brk-provision" style="margin-top:14px;">Set up login</button>' +
-        '<div class="cur-result" id="brk-prov-result" style="margin-top:10px;font-size:13px;"></div></div>';
-
-    body.querySelectorAll('[data-reassign]').forEach(function (b) {
-      b.addEventListener('click', function () {
-        api('broker', { method: 'POST', body: { op: 'reassign', lead_id: b.getAttribute('data-reassign'), to_agent: b.getAttribute('data-to') } }).then(function () { load(); });
-      });
-    });
-    body.querySelector('#brk-provision').addEventListener('click', function () {
-      var r = body.querySelector('#brk-prov-result');
-      var payload = { op: 'provision-agent', agent_key: body.querySelector('#brk-agent').value, email: body.querySelector('#brk-email').value.trim(), password: body.querySelector('#brk-pass').value };
-      if (!payload.email) { r.style.color = '#8B3A3A'; r.textContent = 'Enter an email.'; return; }
-      var btn = body.querySelector('#brk-provision'); btn.disabled = true; btn.textContent = 'Working…';
-      api('broker', { method: 'POST', body: payload }).then(function (x) {
-        btn.disabled = false; btn.textContent = 'Set up login';
-        if (x.ok && x.j.provisioned) { r.style.color = '#2E5C3D'; r.textContent = '✓ ' + (x.j.action === 'created' ? 'Login created' : 'Login updated') + ' for ' + x.j.email + ' as ' + x.j.role + '. They can sign in at /crm.html now.'; }
-        else { r.style.color = '#8B3A3A'; r.textContent = '✗ ' + ((x.j && x.j.error) || 'Failed'); }
-      });
-    });
-  }
-})();
-</script>
 <script src="/legacy-client.js" defer></script>
+<script>
+/* Upgrade the hero from a neutral box to the listing's real photo (MLS photo,
+   else the YouTube tour thumbnail) from the portal payload. */
+(function () {
+  fetch('/api/seller/portal', { credentials: 'include' })
+    .then(function (r) { return r.ok ? r.json() : null; })
+    .then(function (d) {
+      var portal = (d && d.portal) || {};
+      var url = portal.status && portal.status.photo;
+      var img = document.getElementById('sell-hero-photo');
+      if (img && url) { img.src = url; img.style.display = 'block'; }
+      var tour = portal.tour || {}, box = document.getElementById('sell-tour'), html = '';
+      var ok = function (u) { return typeof u === 'string' && /^https?:\/\//.test(u); };
+      if (ok(tour.video_url))      html += '<a href="' + tour.video_url + '" target="_blank" rel="noopener">▶ Watch the video tour</a>';
+      if (ok(tour.matterport_url)) html += '<a href="' + tour.matterport_url + '" target="_blank" rel="noopener">◱ 3D walkthrough</a>';
+      if (box) box.innerHTML = html;
+      // Per-agent: "Message {agent}" + note avatar reflect the deal's agent.
+      var c = portal.contact || {};
+      var first = (c.first || '').replace(/[<>"]/g, '');
+      var btn = document.getElementById('sell-msg-btn');
+      if (btn && first) btn.textContent = 'Message ' + first;
+      var av = document.getElementById('sell-note-avatar');
+      if (av && first && first !== 'Sara') av.innerHTML = '<span style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-family:Cormorant Garamond,serif;font-size:20px;color:#FAF6EC;">' + first.charAt(0) + '</span>';
+    }).catch(function () {});
+})();
+</script>
 </body>
 </html>
