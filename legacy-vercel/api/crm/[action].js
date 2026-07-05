@@ -27,6 +27,7 @@ import testEmail     from '../_lib/handlers/crm-test-email.js';
 import linkDealParty from '../_lib/handlers/crm-link-deal-party.js';
 import sequences     from '../_lib/handlers/crm-sequences.js';
 import calendar      from '../_lib/handlers/crm-calendar.js';
+import broker        from '../_lib/handlers/crm-broker.js';
 
 const TABLE = {
   'morning-brief':   morningBrief,
@@ -41,7 +42,8 @@ const TABLE = {
   'test-email':      testEmail,
   'link-deal-party': linkDealParty,
   'sequences':       sequences,
-  'calendar':        calendar
+  'calendar':        calendar,
+  'broker':          broker
 };
 
 export default async function handler(req, res) {
