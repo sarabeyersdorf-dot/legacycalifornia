@@ -127,22 +127,36 @@ export default async function handler(req, res) {
     ]);
 
     // ---------- Day list (max 6) ----------
+    // The signed-in agent's own briefing tasks come first (what Sara wrote for
+    // them in deals.json), then auto-generated follow-ups fill the rest.
+    const agentKey = profile.role === 'agent_james' ? 'james' : 'sara';
+    const { data: myTasks } = await supa
+      .from('agent_tasks')
+      .select('title, sub, due_label')
+      .in('agent', [agentKey, 'both'])
+      .eq('done', false)
+      .order('created_at', { ascending: true });
+
     const day_list = [];
-    (pendingDrafts.data || []).forEach((m) => {
+    (myTasks || []).slice(0, 6).forEach((t) => {
+      day_list.push({ title: t.title, sub: t.sub || '', time: t.due_label || '', from_briefing: true });
+    });
+    const room = () => Math.max(0, 6 - day_list.length);
+    (pendingDrafts.data || []).slice(0, room()).forEach((m) => {
       const name = [m.leads?.first_name, m.leads?.last_name].filter(Boolean).join(' ') || 'a lead';
       day_list.push({ title: `Approve ${name}'s ${m.channel} draft`, sub: 'ready in draft', time: '5 min' });
     });
-    (radioSilence.data || []).slice(0, 6 - day_list.length).forEach((l) => {
+    (radioSilence.data || []).slice(0, room()).forEach((l) => {
       const name = [l.first_name, l.last_name].filter(Boolean).join(' ') || 'lead';
       const days = l.last_contact_at ? Math.floor((Date.now() - new Date(l.last_contact_at).getTime()) / 86400000) : null;
       day_list.push({ title: `Send ${name} check-in`, sub: days ? `${days} days dark` : 'no contact yet', time: '8 min' });
     });
-    (toursToday.data || []).slice(0, 6 - day_list.length).forEach((t) => {
+    (toursToday.data || []).slice(0, room()).forEach((t) => {
       const name = [t.leads?.first_name, t.leads?.last_name].filter(Boolean).join(' ') || 'tour';
       const addr = t.properties?.address || '';
       day_list.push({ title: `Confirm ${name} tour`, sub: addr || 'today on calendar', time: '3 min' });
     });
-    (newToday.data || []).slice(0, 6 - day_list.length).forEach((l) => {
+    (newToday.data || []).slice(0, room()).forEach((l) => {
       const name = [l.first_name, l.last_name].filter(Boolean).join(' ') || 'lead';
       day_list.push({ title: `Welcome ${name}`, sub: `new lead${l.source ? ' · ' + l.source : ''}`, time: '8 min' });
     });

@@ -94,6 +94,7 @@ function mapDeal(d) {
     escrow_officer: c.escrow || null,
     title_company: c.title || null,
     co_agent: c.coAgent || null,
+    mls_number: d.mls || d.mlsNumber || d.mls_number || null,
     loan_contingency_days: d.id === '433-hwy4' ? 25 : 17,
     notes_internal: d.notes || null,
     // Media, driven from deals.json → seller portal hero photo + tour links.
@@ -145,7 +146,7 @@ export default async function handler(req, res) {
     const data = require('../../data/deals.json');
     const supa = adminClient();
 
-    const active = (data.deals || []).filter((d) => ['pending', 'listing'].includes(d.stage));
+    const active = (data.deals || []).filter((d) => ['pending', 'listing', 'closed'].includes(d.stage));
     let dealsUpserted = 0, docsWritten = 0;
 
     for (const d of active) {
@@ -167,11 +168,36 @@ export default async function handler(req, res) {
       }
     }
 
+    // Per-agent tasks from the briefing (deals.json "tasks") → agent_tasks.
+    // The briefing is the source of truth: wipe prior briefing tasks, re-insert.
+    let tasksWritten = 0;
+    const tasks = Array.isArray(data.tasks) ? data.tasks : [];
+    await supa.from('agent_tasks').delete().eq('source', 'briefing');
+    if (tasks.length) {
+      const rows = tasks.map((t) => {
+        const a = String(t.agent || '').toLowerCase();
+        return {
+          agent:      /james/.test(a) ? 'james' : (/both/.test(a) ? 'both' : 'sara'),
+          title:      String(t.title || t.task || '').slice(0, 200),
+          sub:        t.sub ? String(t.sub).slice(0, 200) : null,
+          due_label:  t.due || t.due_label || null,
+          source_key: t.deal || t.source_key || null,
+          source:     'briefing'
+        };
+      }).filter((r) => r.title);
+      if (rows.length) {
+        const { error: te } = await supa.from('agent_tasks').insert(rows);
+        if (te) throw new Error(`tasks: ${te.message}`);
+        tasksWritten = rows.length;
+      }
+    }
+
     return ok(res, {
       synced: true,
       source_version: data.version || null,
       deals_upserted: dealsUpserted,
       documents_written: docsWritten,
+      tasks_written: tasksWritten,
       ran_at: new Date().toISOString()
     });
   } catch (e) {

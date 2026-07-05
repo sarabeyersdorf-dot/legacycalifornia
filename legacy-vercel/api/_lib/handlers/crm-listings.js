@@ -32,14 +32,19 @@ export default async function handler(req, res) {
 
   try {
     const supa = adminClient();
-    const [dealsRes, propsRes] = await Promise.all([
-      supa.from('deals')
-        .select('source_key, address, city, stage, side, agent, list_price, sale_price, coe_date, photo_url, video_url, matterport_url')
-        .in('side', ['listing', 'seller', 'both'])
-        .order('coe_date', { ascending: true, nullsFirst: false }),
-      // IDX listings (on-market) — used to backfill listing photos by address.
-      supa.from('properties').select('mls_number, address, photos').in('status', ['active', 'pending']).limit(2000)
-    ]);
+    const COLS_MLS = 'source_key, address, city, stage, side, agent, list_price, sale_price, coe_date, photo_url, video_url, matterport_url, mls_number';
+    const COLS     = COLS_MLS.replace(', mls_number', '');
+    const dealsQuery = (cols) => supa.from('deals').select(cols)
+      .in('side', ['listing', 'seller', 'both'])
+      .order('coe_date', { ascending: true, nullsFirst: false });
+
+    // IDX listings (on-market) — backfill listing photos by MLS / address.
+    const propsPromise = supa.from('properties').select('mls_number, address, photos').in('status', ['active', 'pending']).limit(2000);
+
+    // Prefer selecting mls_number; fall back if the column isn't there yet (pre-013).
+    let dealsRes = await dealsQuery(COLS_MLS);
+    if (dealsRes.error) dealsRes = await dealsQuery(COLS);
+    const propsRes = await propsPromise;
     const { data, error } = dealsRes;
     if (error) return fail(res, 500, error.message);
 

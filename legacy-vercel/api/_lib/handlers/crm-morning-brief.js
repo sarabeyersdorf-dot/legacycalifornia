@@ -108,13 +108,16 @@ export default async function handler(req, res) {
     ]);
 
     // Real deals in motion — the escrow/listing deals from deals.json (the
-    // deals table), NOT leads. These are Sara's actual transactions.
-    const { data: dealsInMotion } = await supa
+    // deals table), NOT leads. Scoped per agent: James sees his deals; the
+    // broker-owner (Sara / admin) sees the whole brokerage.
+    let dealsQ = supa
       .from('deals')
       .select('source_key, address, city, stage, side, agent, list_price, sale_price, coe_date')
       .in('stage', ['pending', 'listing'])
       .order('coe_date', { ascending: true, nullsFirst: false })
       .limit(8);
+    if (profile.role === 'agent_james') dealsQ = dealsQ.eq('agent', 'james');
+    const { data: dealsInMotion } = await dealsQ;
 
     const result = {
       drafts:        drafts.data        || [],
