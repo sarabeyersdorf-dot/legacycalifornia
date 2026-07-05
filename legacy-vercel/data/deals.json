@@ -1,5 +1,5 @@
 {
-  "version": "1.15",
+  "version": "1.16",
   "lastUpdated": "2026-07-05",
   "updatedBy": "Claude",
   "tasks": [
@@ -618,6 +618,102 @@
       "correspondence": [],
       "notes": "New listing — met with seller Vicky Teller. Target price ~$275,000. CMA SENT 6/23 via email to Quiterian@sbcglobal.net. Sara followed up with Vicky 6/29. UPDATE 7/5: Vicky texted — ALMOST READY to list, will let Sara know.",
       "alerts": ["Vicky texted 7/5 — almost ready to list, will let Sara know (CMA sent 6/23)"]
+    },
+    {
+      "id": "701-mark-twain",
+      "address": "701 Mark Twain Rd",
+      "city": "Angels Camp, CA",
+      "stage": "listing",
+      "type": "land",
+      "side": "listing",
+      "agent": "both",
+      "video": "https://youtu.be/KlSz4OV6Bjk",
+      "listPrice": null,
+      "salePrice": null,
+      "openEscrowDate": null,
+      "closingDate": null,
+      "contacts": {},
+      "docs": {
+        "listingAgreement": "executed",
+        "AAA": "executed",
+        "additionalSignatureAddendum": "executed",
+        "modificationOfTerms": "executed"
+      },
+      "correspondence": [],
+      "notes": "Vacant land listing, Angels Camp. Seller-signed Vacant Land Listing Agreement (12/24), AAA, Additional Signature Addendum 2, MOT 2026 on file (_Listings/Land/701 Mark Twain Rd). Flyer + marketing assets (plat map, OnX, conceptual land-use study, Utica Park plan) ready. Partner-supplied parcel docs (1977 PM, 2021 RS) on file.",
+      "alerts": []
+    },
+    {
+      "id": "635-s-main",
+      "address": "635 S Main St",
+      "city": "Angels Camp, CA",
+      "stage": "listing",
+      "type": "land",
+      "side": "listing",
+      "agent": "both",
+      "video": "https://youtu.be/PU4eAT9Dq6k",
+      "listPrice": null,
+      "salePrice": null,
+      "openEscrowDate": null,
+      "closingDate": null,
+      "contacts": {},
+      "docs": {
+        "listingAgreement": "executed",
+        "AAA": "executed",
+        "additionalSignatureAddendum": "executed",
+        "modificationOfTerms": "executed"
+      },
+      "correspondence": [],
+      "notes": "Vacant land listing (Sultana commercial district), Angels Camp. Seller-signed Vacant Land Listing Agreement (12/24), AAA, Additional Signature Addendum 2, MOT 2026 on file (_Listings/Land/635 S Main St). Flyer + marketing assets (plat maps, OnX, commercial-zone maps) ready. A past buyer VLPA sits in Duds/635 Main St — dead offer, not active.",
+      "alerts": []
+    },
+    {
+      "id": "2000-gun-club",
+      "address": "2000 Gun Club Rd",
+      "city": "Angels Camp, CA",
+      "stage": "listing",
+      "type": "land",
+      "side": "listing",
+      "agent": "both",
+      "video": "https://youtu.be/kM3AeK00xvg",
+      "listPrice": null,
+      "salePrice": null,
+      "openEscrowDate": null,
+      "closingDate": null,
+      "contacts": {},
+      "docs": {
+        "listingAgreement": "executed",
+        "AAA": "executed",
+        "additionalSignatureAddendum": "executed",
+        "modificationOfTerms": "executed"
+      },
+      "correspondence": [],
+      "notes": "Vacant land listing (Frogtown area), Angels Camp. Seller-signed Vacant Land Listing Agreement (12/24), AAA, Additional Signature Addendum 2, MOT 2026 on file (_Listings/Land/2000 Gun Club Rd). Flyer + marketing assets (plat map, OnX topo/POI) ready.",
+      "alerts": []
+    },
+    {
+      "id": "590-598-s-main",
+      "address": "590-598 S Main St",
+      "city": "Angels Camp, CA",
+      "stage": "listing",
+      "type": "land",
+      "side": "listing",
+      "agent": "both",
+      "video": "https://youtu.be/QU8iHD43oeU",
+      "listPrice": null,
+      "salePrice": null,
+      "openEscrowDate": null,
+      "closingDate": null,
+      "contacts": {},
+      "docs": {
+        "listingAgreement": "executed",
+        "AAA": "executed",
+        "additionalSignatureAddendum": "executed",
+        "modificationOfTerms": "executed"
+      },
+      "correspondence": [],
+      "notes": "Vacant land listing (community-commercial zone), Angels Camp. Seller-signed Vacant Land Listing Agreement (12/24), AAA, Additional Signature Addendum 2, MOT 2026 on file (_Listings/Land/590-598 S Main St). Flyer + marketing assets (plat map, OnX, parcel lines, proposed neighbor fence) ready.",
+      "alerts": []
     },
     {
       "id": "buyer-roger-quillen",
