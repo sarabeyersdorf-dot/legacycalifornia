@@ -11,6 +11,54 @@
 import { adminClient } from '../supabase.js';
 import { getCallerProfile, isAgent } from '../auth.js';
 import { handleOptions, ok, fail } from '../cors.js';
+import { isConfigured as mlsConfigured, apiGet as mlsGet, shape as mlsShape, ids as mlsIds } from '../../_metrolist.js';
+
+// The public site shows listing photos from the LIVE MetroList (RESO) feed —
+// the one that actually carries Media. The CRM used to read only the
+// `properties` table (a separate iHomefinder sync that may be unconfigured and
+// empty), so deals rendered with no photo. Pull from the same MetroList feed
+// the website uses, matched by address, and cache the office's active/pending
+// listings module-scope for a few minutes so we don't re-hit RESO on every
+// Deals-view open.
+let _mlsCache = null, _mlsCacheAt = 0;
+const MLS_TTL = 5 * 60 * 1000;
+
+async function metrolistPhotoMaps(nowMs) {
+  if (!mlsConfigured()) return { byMls: new Map(), byAddr: new Map(), count: 0, configured: false };
+  if (_mlsCache && (nowMs - _mlsCacheAt) < MLS_TTL) return _mlsCache;
+
+  const byMls = new Map(), byAddr = new Map();
+  let count = 0;
+  try {
+    // Office-wide so BOTH Sara's and James's own listings come back; fall back
+    // to the single agent id if no office id is set.
+    const scope = mlsIds.office ? `ListOfficeMlsId eq '${mlsIds.office}'`
+                : mlsIds.agent  ? `ListAgentMlsId eq '${mlsIds.agent}'`
+                : null;
+    const filters = [`(MlsStatus eq 'Active' or MlsStatus eq 'Pending')`];
+    if (scope) filters.push(scope);
+    const data = await mlsGet('/Property', {
+      '$filter':  filters.join(' and '),
+      '$top':     100,
+      '$orderby': 'ModificationTimestamp desc',
+      '$expand':  'Media',
+      '$select':  'ListingId,UnparsedAddress,City,MlsStatus'
+    });
+    for (const p of (data.value || [])) {
+      const s = mlsShape(p);
+      const photo = (s.photos && s.photos[0]) || null;
+      if (!photo) continue;
+      count++;
+      if (s.id) byMls.set(String(s.id), photo);
+      const na = normAddr(s.address);
+      if (na && !byAddr.has(na)) byAddr.set(na, photo);
+    }
+  } catch (_) { /* fail-soft — photos are a nicety, never break the Deals list */ }
+
+  _mlsCache = { byMls, byAddr, count, configured: true };
+  _mlsCacheAt = nowMs;
+  return _mlsCache;
+}
 
 // Normalize a street address so a deal (deals.json) can be matched to an IDX
 // property: drop the city after the first comma, lowercase, strip punctuation
@@ -44,17 +92,23 @@ export default async function handler(req, res) {
       .in('side', SIDES)
       .order('coe_date', { ascending: true, nullsFirst: false });
 
-    // IDX listings (on-market) — backfill listing photos by MLS / address.
+    // Photos come from two sources, in priority order:
+    //   1. the LIVE MetroList feed (what the public site uses — has real Media)
+    //   2. the `properties` table (iHomefinder sync; may be empty if unconfigured)
+    // Both are keyed by MLS number and by normalized address so a deal with no
+    // MLS still matches by street address.
     const propsPromise = supa.from('properties').select('mls_number, address, photos').in('status', ['active', 'pending']).limit(2000);
+    const mlsPromise   = metrolistPhotoMaps(Date.now());
 
     // Prefer selecting mls_number; fall back if the column isn't there yet (pre-013).
     let dealsRes = await dealsQuery(COLS_MLS);
     if (dealsRes.error) dealsRes = await dealsQuery(COLS);
     const propsRes = await propsPromise;
+    const mls      = await mlsPromise;
     const { data, error } = dealsRes;
     if (error) return fail(res, 500, error.message);
 
-    // Lookup maps from the IDX feed → first photo.
+    // Lookup maps from the properties table → first photo.
     const byMls = new Map(), byAddr = new Map();
     for (const p of (propsRes.data || [])) {
       const photo = Array.isArray(p.photos) && p.photos.length ? p.photos[0] : null;
@@ -63,14 +117,22 @@ export default async function handler(req, res) {
       const na = normAddr(p.address);
       if (na && !byAddr.has(na)) byAddr.set(na, photo);
     }
+    // MetroList is the authoritative photo source — the public site uses it —
+    // so let it win over any stale properties-table entry for the same key.
+    for (const [k, v] of mls.byMls)  byMls.set(k, v);
+    for (const [k, v] of mls.byAddr) byAddr.set(k, v);
+
     const idxPhotoFor = (d) => {
       if (d.mls_number && byMls.has(String(d.mls_number))) return byMls.get(String(d.mls_number));
       const na = normAddr(d.address);
       return na ? (byAddr.get(na) || null) : null;
     };
 
+    let photosMatched = 0;
     const buckets = { active: [], pending: [], closed: [], preparing: [] };
     for (const d of (data || [])) {
+      const photo = d.photo_url || idxPhotoFor(d);   // deals.json photo, else IDX/MetroList
+      if (photo) photosMatched++;
       const row = {
         source_key: d.source_key,
         address:    d.address,
@@ -81,7 +143,7 @@ export default async function handler(req, res) {
         list_price: d.list_price,
         sale_price: d.sale_price,
         coe_date:   d.coe_date,
-        photo_url:  d.photo_url || idxPhotoFor(d),   // deals.json photo, else IDX feed
+        photo_url:  photo,
         has_video:  !!d.video_url,
         has_tour:   !!d.matterport_url
       };
@@ -96,7 +158,18 @@ export default async function handler(req, res) {
       pending:   buckets.pending,
       closed:    buckets.closed,
       preparing: buckets.preparing,
-      counts:    { active: buckets.active.length, pending: buckets.pending.length, closed: buckets.closed.length, preparing: buckets.preparing.length }
+      counts:    { active: buckets.active.length, pending: buckets.pending.length, closed: buckets.closed.length, preparing: buckets.preparing.length },
+      // Photo-sourcing diagnostics: how many deals got a photo, and where the
+      // feeds stood. If metrolist_configured is false, the MetroList env vars
+      // aren't set on this deployment; if metrolist_listings is 0, the office
+      // filter returned nothing.
+      photo_debug: {
+        deals_total:          (data || []).length,
+        photos_matched:       photosMatched,
+        metrolist_configured: mls.configured,
+        metrolist_listings:   mls.count,
+        properties_rows:      (propsRes.data || []).length
+      }
     });
   } catch (e) {
     return fail(res, 500, e.message);
