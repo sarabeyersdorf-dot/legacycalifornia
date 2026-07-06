@@ -128,17 +128,21 @@ async function perform(req, res, profile) {
     if (!action) return fail(res, 404, 'action not found');
 
     const name = [lead.first_name, lead.last_name].filter(Boolean).join(' ') || 'Client';
+    // Always create the task INTERNAL (visibility off), regardless of the
+    // action's default. The agent reviews and edits the wording, then flips the
+    // toggle when they're ready for the client to see it — nothing reaches the
+    // portal automatically. shareable = this action is meant to be shared.
     const { data: task, error } = await supa.from('agent_tasks').insert({
       agent:      agentKey(profile.role),
       lead_id:    lead.id,
       client:     name,
       title:      action.label,
-      visibility: action.default_visibility === 'client' ? 'client' : 'internal',
+      visibility: 'internal',
       source:     'action'
     }).select().single();
     if (error) return fail(res, 500, `task: ${error.message}`);
 
-    return ok(res, { task, client_visible: task.visibility === 'client' });
+    return ok(res, { task, shareable: action.default_visibility === 'client' });
   } catch (e) {
     return fail(res, 500, e.message);
   }

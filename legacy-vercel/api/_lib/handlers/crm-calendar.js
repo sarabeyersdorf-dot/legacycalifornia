@@ -147,11 +147,11 @@ async function listWeek(req, res, supa) {
 
   const [toursRes, apptRes] = await Promise.all([
     supa.from('tours')
-      .select('id, scheduled_at, duration_minutes, tour_type, status, notes, leads(first_name,last_name,email), properties(address,city)')
+      .select('id, lead_id, scheduled_at, duration_minutes, tour_type, status, notes, visibility, client_label, leads(first_name,last_name,email), properties(address,city)')
       .gte('scheduled_at', startISO).lt('scheduled_at', endISO).neq('status', 'cancelled')
       .order('scheduled_at', { ascending: true }),
     supa.from('appointments')
-      .select('id, title, kind, starts_at, duration_minutes, notes, leads(first_name,last_name,email)')
+      .select('id, lead_id, title, kind, starts_at, duration_minutes, notes, visibility, client_label, leads(first_name,last_name,email)')
       .gte('starts_at', startISO).lt('starts_at', endISO)
       .order('starts_at', { ascending: true })
   ]);
@@ -180,6 +180,7 @@ async function listWeek(req, res, supa) {
       time_label: timeLabel(p.hour, p.minute), end_label: timeLabel(end.hour, end.minute),
       kind_label: kindLabel,
       client_email: lead.email || null, client_name: who,
+      lead_id: t.lead_id || null, shared: t.visibility === 'client', client_label: t.client_label || null,
       location: prop.address || null,
       edit: {
         source: 'tour', date: dkey(p), time: `${pad2(p.hour)}:${pad2(p.minute)}`,
@@ -207,6 +208,7 @@ async function listWeek(req, res, supa) {
       time_label: timeLabel(p.hour, p.minute), end_label: timeLabel(end.hour, end.minute),
       kind_label: label,
       client_email: lead.email || null, client_name: who,
+      lead_id: a.lead_id || null, shared: a.visibility === 'client', client_label: a.client_label || null,
       location: null,
       edit: {
         source: 'appointment', kind: a.kind || 'block', title: a.title || '',

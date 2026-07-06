@@ -186,12 +186,29 @@ export default async function handler(req, res) {
 
     const signed = docs.filter((d) => d.status === 'signed' || d.status === 'on_file').length;
 
-    const kpis = [
-      { label: 'Days to close', value: dtc != null ? String(dtc) : '—', change: dtc != null && dtc >= 0 ? 'On schedule' : '' },
-      { label: 'Sale price',    value: fmtUSD(price), change: '' },
-      { label: 'Documents',     value: `${signed} / ${docs.length}`, change: docs.length > signed ? `${docs.length - signed} open` : 'complete' },
-      { label: 'Close of escrow', value: fmtDate(coe), change: coe ? String(coe.getFullYear()) : '' }
-    ];
+    // Stage model. ONLY a 'pending' deal is in escrow — a 'listing' is on the
+    // market and must NEVER be described in escrow/closing terms.
+    const inEscrow   = deal.stage === 'pending';
+    const isListing  = deal.stage === 'listing';
+    const isPreparing= deal.stage === 'preparing';
+    const isClosed   = deal.stage === 'closed';
+    const STAGE_LABEL = { pending: 'In escrow', listing: 'On the market', preparing: 'Preparing to list', closed: 'Sold' };
+    const stageLabel = STAGE_LABEL[deal.stage] || sanitize(deal.stage || '');
+    const docsKpi = { label: 'Documents', value: `${signed} / ${docs.length}`, change: docs.length > signed ? `${docs.length - signed} open` : 'complete' };
+
+    // KPIs are stage-appropriate — escrow terms only when actually in escrow.
+    const kpis = inEscrow
+      ? [
+          { label: 'Days to close',   value: dtc != null ? String(dtc) : '—', change: dtc != null && dtc >= 0 ? 'On schedule' : '' },
+          { label: 'Sale price',      value: fmtUSD(price), change: '' },
+          docsKpi,
+          { label: 'Close of escrow', value: fmtDate(coe), change: coe ? String(coe.getFullYear()) : '' }
+        ]
+      : [
+          { label: 'List price', value: fmtUSD(price), change: '' },
+          { label: 'Status',     value: stageLabel, change: '' },
+          docsKpi
+        ];
 
     // Road to closing (built from the dates we hold; enrich later via deal_milestones)
     const road = [];
@@ -249,17 +266,29 @@ export default async function handler(req, res) {
     const agentFirst = (agentName.split(' ')[0]) || 'Sara';
     const agentPhone = agentRow?.phone || (deal.agent === 'james' ? '209-770-7523' : '209-559-4966');
 
-    // 4. Note from the agent (AI, fail-soft) -------------------------------
+    // 4. Note from the agent — stage-appropriate. The escrow-framed AI note is
+    //    used ONLY when the deal is actually in escrow; otherwise we use safe,
+    //    deterministic copy so a listing is never described as "in escrow".
     const firstName = sellerFirstName(deal);
-    let noteBody = `${firstName ? firstName + ' — ' : ''}we're moving right on schedule and still pointed at a ${fmtDateY(coe)} close. I'll flag anything that needs you the moment it comes up. Call me anytime.`;
-    try {
-      noteBody = await draftSellerNote({ firstName, deal, coe, dtc, signed, total: docs.length, tasks, agentName, agentPhone });
-    } catch (_) { /* keep fallback */ }
+    const hi = firstName ? `${firstName} — ` : '';
+    let noteBody;
+    if (inEscrow) {
+      noteBody = `${hi}we're moving right on schedule and still pointed at a ${fmtDateY(coe)} close. I'll flag anything that needs you the moment it comes up. Call me anytime.`;
+      try {
+        noteBody = await draftSellerNote({ firstName, deal, coe, dtc, signed, total: docs.length, tasks, agentName, agentPhone });
+      } catch (_) { /* keep fallback */ }
+    } else if (isListing) {
+      noteBody = `${hi}your home is live on the market and getting in front of buyers. I'll keep you posted on showings and feedback, and reach out the moment we have an offer to review. Call me anytime.`;
+    } else if (isPreparing) {
+      noteBody = `${hi}we're getting everything ready to bring your home to market — photos, prep, and pricing. I'll walk you through each step. Call me anytime.`;
+    } else if (isClosed) {
+      noteBody = `${hi}congratulations, your sale has closed. It was a pleasure representing you, and I'm here whenever you need anything down the road.`;
+    } else {
+      noteBody = `${hi}I'll keep this page updated as things move along. Call me anytime with any questions.`;
+    }
 
-    // Standing wire-fraud warning — shown to every in-escrow client. Real
-    // estate wire fraud is the reason for the private-link model; the banner is
-    // deliberately blunt and never omitted once a client is in escrow.
-    const inEscrow = deal.stage === 'pending';
+    // Standing wire-fraud warning — shown ONLY to in-escrow clients (the reason
+    // the private-link model exists). Never on a listing that isn't in escrow.
     const security = {
       banner: inEscrow
         ? 'We will never send wire instructions through this portal, by email, or by text. Before wiring funds, always call the title company directly at a phone number you have independently verified.'
@@ -271,13 +300,20 @@ export default async function handler(req, res) {
       security,
       seller: { first_name: firstName || '', who: sanitize(deal.address) },
       status: {
-        label: deal.stage === 'pending' ? 'In escrow' : sanitize(deal.stage || ''),
-        badge: deal.stage === 'pending' ? 'In escrow' : sanitize(deal.stage || ''),
+        label: stageLabel,
+        badge: stageLabel,
         address: sanitize(deal.address),
         city: sanitize(deal.city || ''),
         type: sanitize(deal.type || ''),
         price: fmtUSDfull(price),
-        since: coe ? `In escrow · Closing ${fmtDateY(coe)}` : '',
+        since: inEscrow && coe ? `In escrow · Closing ${fmtDateY(coe)}`
+             : isListing ? 'On the market'
+             : isClosed ? 'Sale closed'
+             : isPreparing ? 'Preparing to list' : '',
+        tagline: inEscrow ? 'On track to close.'
+               : isListing ? 'Live on the market.'
+               : isClosed ? 'Sale complete.'
+               : isPreparing ? 'Getting ready to list.' : '',
         photo: heroPhoto
       },
       tour: {

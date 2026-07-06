@@ -297,6 +297,11 @@ body.lp-restyle .lp-agent-details[open] > summary::after { content: ' ▴'; }
 body.lp-restyle .lp-agent-details-body .lp-section { border-bottom: 1px solid var(--lp-line-soft); padding: 16px 0; }
 body.lp-restyle .lp-agent-details-body .lp-section:last-child { border-bottom: none; }
 
+/* Calendar agenda: room for the per-event client-visibility toggle */
+body.lp-restyle .cal-ag-row { grid-template-columns: 120px 10px 1fr auto auto; }
+body.lp-restyle .cal-ag-toggle { flex-direction: row; align-items: center; gap: 7px; }
+body.lp-restyle .cal-ag-toggle .lp-toggle-cap { font-size: 10px; }
+
 /* Composer tabs + filter chips → DM Sans, normal case (not mono uppercase) */
 body.lp-restyle .composer-head,
 body.lp-restyle .composer-tab,

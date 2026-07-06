@@ -754,7 +754,9 @@
       setAll('[data-roster-leads]',        r.leads_total);
       setAll('[data-roster-clients]',      r.clients);
       setAll('[data-roster-past]',         r.past_clients);
-      setAll('[data-roster-listings]',     r.active_listings);
+      // NOTE: the Active/Pending listing pills are owned by the Listings loader
+      // (crm.html), which counts the deals table directly. Metrics must not
+      // overwrite them — it was clobbering the real count (9) back to 0.
     }
   }
 
@@ -1342,6 +1344,7 @@
     t.style.opacity = '1';
     clearTimeout(t._h); t._h = setTimeout(() => { t.style.opacity = '0'; }, 3200);
   }
+  if (window.Legacy) window.Legacy.toast = toast;   // share the toast with other modules (calendar)
   function initialsOf(first, last, fallback) {
     const a = (first || '').trim()[0] || '';
     const b = (last  || '').trim()[0] || '';
@@ -1883,20 +1886,25 @@
         composer.scrollIntoView({ behavior: 'smooth', block: 'center' });
         const b = composer.querySelector('[data-composer-body]'); if (b) setTimeout(() => b.focus(), 200);
       };
-      const runAction = async (id, ep, label) => {
+      const runAction = async (id, ep, label, group) => {
         actionsMenu.style.display = 'none';
         if (ep === 'copy-portal-link') { if (portalBtn) portalBtn.click(); else toast('No portal link on this contact.', false); return; }
         if (ep.indexOf('/api/crm/message') === 0) { focusComposer(/text|sms/i.test(label) ? 'sms' : 'email'); return; }
         if (ep.indexOf('/api/crm/note') === 0)    { focusComposer('note'); return; }
         if (ep.indexOf('/api/sequences/enroll') === 0) { promptEnrollSequence(lead); return; }
         const r = await window.Legacy.api('/api/crm/actions', { method: 'POST', body: { lead_id: lead.id, action_id: id } });
-        if (r.ok) {
-          const who = lead.first_name || 'the client';
-          toast(r.json.client_visible
-            ? `"${label}" added to ${who}'s workspace — now visible in their portal.`
-            : `"${label}" added to ${who}'s workspace (internal — only you see it).`);
-          selectLeadId(lead.id);   // refresh so the new item appears in the Deal Workspace + live preview
-        } else toast((r.json && r.json.error) || 'Action failed.', false);
+        if (!r.ok) { toast((r.json && r.json.error) || 'Action failed.', false); return; }
+        const who = lead.first_name || 'the client';
+        // Every registry action lands INTERNAL first — the agent edits the
+        // wording, then toggles it on to share. Nothing auto-reaches the portal.
+        if (group === 'schedule') {
+          // Scheduling actions open the calendar to create the real event.
+          toast(`"${label}" logged. Opening the calendar to schedule it.`);
+          if (typeof window.showView === 'function') window.showView(null, 'cal');
+        } else {
+          toast(`"${label}" added to ${who}'s workspace — internal for now. Toggle it on when you're ready to share.`);
+          selectLeadId(lead.id);   // refresh so the new item appears in the Deal Workspace
+        }
       };
       // "Actions for a <side> in <stage>" header — sentence-case, quiet.
       const headSide  = SIDE_PILL[lead.deal_side] || 'contact';
@@ -1916,12 +1924,12 @@
           html += `<div class="lp-actions-group"><span class="lp-mark ${g}"></span>${GROUP_LABEL[g]}</div>`;
           items.forEach((a) => {
             const shares = a.default_visibility === 'client' ? '<span class="lp-shares">Shares</span>' : '';
-            html += `<button class="leg-act" data-id="${escHtml(a.id)}" data-ep="${escHtml(a.endpoint)}" data-label="${escHtml(a.label)}"><span>${escHtml(a.label)}</span>${shares}</button>`;
+            html += `<button class="leg-act" data-id="${escHtml(a.id)}" data-ep="${escHtml(a.endpoint)}" data-label="${escHtml(a.label)}" data-group="${escHtml(g)}"><span>${escHtml(a.label)}</span>${shares}</button>`;
           });
         });
         actionsMenu.innerHTML = html.indexOf('leg-act') >= 0 ? html : '<div style="padding:12px;opacity:.6;">No actions for this contact.</div>';
         actionsMenu.querySelectorAll('.leg-act').forEach((b) => {
-          b.addEventListener('click', () => runAction(b.getAttribute('data-id'), b.getAttribute('data-ep'), b.getAttribute('data-label')));
+          b.addEventListener('click', () => runAction(b.getAttribute('data-id'), b.getAttribute('data-ep'), b.getAttribute('data-label'), b.getAttribute('data-group')));
         });
       });
     }
@@ -2866,16 +2874,42 @@
       if (!evs || !evs.length) return;
       html += `<div class="cal-ag-day"><div class="cal-ag-dayhead${d.is_today ? ' today' : ''}"><span class="cal-ag-dow">${esc(d.dow)}</span><span class="cal-ag-date">${esc(monthName(d.date))} ${esc(d.num)}</span></div>`;
       evs.forEach((e) => {
+        // Events tied to a client get a visibility toggle: flip it on to add
+        // the event to what that client sees in their portal.
+        const toggle = e.lead_id ? `<label class="lp-toggle cal-ag-toggle" title="${e.shared ? 'Shown in the client’s portal' : 'Add this to what the client sees'}" onclick="event.stopPropagation()">
+            <input type="checkbox" data-cal-share data-kind="${esc(e.source)}" data-id="${esc(e.id)}" ${e.shared ? 'checked' : ''}>
+            <span class="lp-toggle-track"></span>
+            <span class="lp-toggle-cap">${e.shared ? 'Visible' : 'Private'}</span>
+          </label>` : '';
         html += `<div class="cal-ag-row" data-ev-key="${esc(e.source)}:${esc(e.id)}">
           <span class="cal-ag-time">${esc(e.time_label)}–${esc(e.end_label)}</span>
           <span class="cal-ag-dot ${esc(e.cls)}"></span>
           <span class="cal-ag-title">${esc(e.title)}${e.sub ? `<span class="cal-ag-sub">${esc(e.sub)}</span>` : ''}</span>
           <span class="cal-ag-kind">${esc(e.kind_label || '')}</span>
+          ${toggle}
         </div>`;
       });
       html += '</div>';
     });
     root.innerHTML = html;
+
+    // Delegated visibility toggle (wired once) — flips a calendar event between
+    // internal and client-visible via the shared wire-guarded endpoint.
+    if (!root._shareWired) {
+      root._shareWired = true;
+      root.addEventListener('change', async (ev) => {
+        const cb = ev.target.closest('[data-cal-share]'); if (!cb) return;
+        const kind = cb.getAttribute('data-kind'), id = cb.getAttribute('data-id');
+        const now = cb.checked;
+        const cap = cb.parentElement.querySelector('.lp-toggle-cap');
+        cb.disabled = true;
+        const r = await window.Legacy.api('/api/crm/visibility', { method: 'POST', body: { kind, id, visibility: now ? 'client' : 'internal' } });
+        cb.disabled = false;
+        const say = (m, ok) => { if (window.Legacy && window.Legacy.toast) window.Legacy.toast(m, ok); };
+        if (r.ok) { if (cap) cap.textContent = now ? 'Visible' : 'Private'; say(now ? 'Added to the client’s portal.' : 'Hidden from the client.'); }
+        else { cb.checked = !now; if (cap) cap.textContent = cb.checked ? 'Visible' : 'Private'; say((r.json && r.json.error) || 'Could not change visibility.', false); }
+      });
+    }
   }
   function renderWeek(root) {
     const heads = cal.days.map((d) => `<div class="calw-dayhead${d.is_today ? ' today' : ''}">${esc(d.dow)}<span class="num">${esc(d.num)}</span></div>`).join('');
