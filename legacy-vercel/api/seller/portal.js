@@ -43,6 +43,16 @@ const fmtDateY = (d) => d ? `${MONTHS[d.getMonth()]} ${d.getDate()}, ${d.getFull
 const daysBetween = (a, b) => (a && b) ? Math.round((b - a) / 86400000) : null;
 const sanitize = (s) => (s || '').replace(/[<>]/g, '');
 
+// Dropbox share links preview with dl=0 and force-download with dl=1. Cowork
+// creates these links from the executed files in Dropbox; we derive the right
+// variant per action. Non-Dropbox URLs are returned unchanged.
+function dbxLink(url, dl) {
+  if (!url || !/dropbox\.com/i.test(url)) return url;
+  let u = url.replace(/([?&])dl=[01]/i, `$1dl=${dl}`);
+  if (!/[?&]dl=/i.test(u)) u += (u.includes('?') ? '&' : '?') + 'dl=' + dl;
+  return u;
+}
+
 // Party owed / status → client label
 const DOC_STATUS_LABEL = {
   signed: 'Signed', on_file: 'On file', to_sign: 'To sign',
@@ -257,14 +267,15 @@ export default async function handler(req, res) {
     if (deal.co_agent)       team.push({ name: sanitize(deal.co_agent), sub: "Buyer's side", access: 'Buyer side' });
 
     const documentsArr = docs.map((d) => {
-      const url = (d.doc_url && /^https?:\/\//i.test(d.doc_url)) ? d.doc_url : '';
+      const raw = (d.doc_url && /^https?:\/\//i.test(d.doc_url)) ? d.doc_url : '';
       return {
         type: (d.doc_type || '').toUpperCase().slice(0, 6),
         name: sanitize(d.name), sub: sanitize(d.sub || ''),
         status: DOC_STATUS_LABEL[d.status] || 'On file',
-        url,                                    // link to the executed file (empty = none)
-        view_label:     url ? 'View' : '',      // data-optional anchors hide when empty
-        download_label: url ? 'Download ↓' : ''
+        view_url:       raw ? dbxLink(raw, 0) : '',   // preview (Dropbox dl=0)
+        download_url:   raw ? dbxLink(raw, 1) : '',   // force download (Dropbox dl=1)
+        view_label:     raw ? 'View' : '',            // data-optional anchors hide when empty
+        download_label: raw ? 'Download ↓' : ''
       };
     });
 
