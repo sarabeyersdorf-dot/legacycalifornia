@@ -72,6 +72,7 @@ export default async function handler(req, res) {
 
     let user = null, profile = null, isAgent = false, deal = null;
     let portalToken = null, leadId = null;
+    let previewKey = null, previewMiss = false;
 
     if (token) {
       // Private-link access — NO login. Resolve the client by their unguessable
@@ -99,9 +100,22 @@ export default async function handler(req, res) {
 
       // 1. Resolve which deal to show --------------------------------------
       if (isAgent && req.query?.deal) {
-        const { data } = await supa.from('deals').select('*')
-          .eq('source_key', String(req.query.deal)).maybeSingle();
-        deal = data || null;
+        previewKey = String(req.query.deal);
+        // Tolerant lookup: .limit(1) returns an array, so a duplicate
+        // source_key (from an earlier upsert path) can't null the row out the
+        // way .maybeSingle() would. Match by source_key first, then by id.
+        let { data } = await supa.from('deals').select('*')
+          .eq('source_key', previewKey)
+          .order('updated_at', { ascending: false }).limit(1);
+        deal = (data && data[0]) || null;
+        if (!deal) {
+          const alt = await supa.from('deals').select('*').eq('id', previewKey).limit(1);
+          deal = (alt.data && alt.data[0]) || null;
+        }
+        // Agent asked for a SPECIFIC deal that isn't in the table. Don't fall
+        // back to "newest pending" (that's how a listing showed 433's escrow) —
+        // return a clear "not found" state instead.
+        if (!deal) previewMiss = true;
       }
 
       if (!deal && !isAgent) {
@@ -124,7 +138,7 @@ export default async function handler(req, res) {
         }
       }
 
-      if (!deal && isAgent) {
+      if (!deal && isAgent && !previewKey) {
         // agent with no ?deal → newest pending seller-side deal
         const { data } = await supa.from('deals').select('*')
           .eq('stage', 'pending').in('side', ['listing', 'seller', 'both'])
@@ -133,6 +147,7 @@ export default async function handler(req, res) {
       }
     }
 
+    if (!deal && previewMiss) return ok(res, { portal: notFoundPortal(previewKey) });
     if (!deal) return ok(res, { portal: emptyPortal(user) });
 
     // 1b. Agent-shared items (portal_items) --------------------------------
@@ -375,10 +390,31 @@ function emptyPortal(user) {
   return {
     security: { banner: '' },
     seller: { first_name: (user?.email || '').split('@')[0] || '', who: '' },
-    status: { label: 'No active listing', badge: '', address: '', city: '', type: '', price: '—', since: '' },
+    status: { label: 'No active listing', badge: '', address: '', city: '', type: '', price: '—', since: '', tagline: '' },
+    tour: { video_url: null, video_id: null, matterport_url: null },
     nav: { documents: '0', tasks: '0' },
     kpis: [], road: [], documents: [], tasks: [], team: [], activity: [],
     note: { head: 'A note from Sara', body: 'Your listing dashboard will appear here once your sale is under way.', sign: '— Sara · (209) 559-4966' }
+  };
+}
+
+// Agent preview of a deal key that isn't in the deals table (usually: the
+// hourly sync hasn't run since Cowork added it, or the key drifted). This is an
+// AGENT-ONLY state, so unlike emptyPortal it names the missing key so Sara can
+// tell "not synced yet" from a real empty portal. No client ever sees this.
+function notFoundPortal(key) {
+  return {
+    security: { banner: '' },
+    seller: { first_name: '', who: '' },
+    status: { label: 'Deal not found', badge: '', address: '', city: '', type: '', price: '—', since: '', tagline: '' },
+    tour: { video_url: null, video_id: null, matterport_url: null },
+    nav: { documents: '0', tasks: '0' },
+    kpis: [], road: [], documents: [], tasks: [], team: [], activity: [],
+    note: {
+      head: 'This deal isn’t in the CRM yet',
+      body: `No deal matching “${sanitize(key || '')}” is in the table yet. If Cowork just added it, run the deals sync (or wait for the next hourly run) and refresh.`,
+      sign: ''
+    }
   };
 }
 
@@ -390,7 +426,8 @@ function expiredPortal() {
   return {
     security: { banner: '' },
     seller: { first_name: '', who: '' },
-    status: { label: 'Link expired', badge: '', address: '', city: '', type: '', price: '—', since: '' },
+    status: { label: 'Link expired', badge: '', address: '', city: '', type: '', price: '—', since: '', tagline: '' },
+    tour: { video_url: null, video_id: null, matterport_url: null },
     nav: { documents: '0', tasks: '0' },
     kpis: [], road: [], documents: [], tasks: [], team: [], activity: [],
     note: {
