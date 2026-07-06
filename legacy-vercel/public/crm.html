@@ -814,7 +814,9 @@
     .lst { padding: 22px 36px 60px; }
     .lst-filter .chip .c { font-family: var(--mono); font-size: 10px; color: var(--brass); margin-left: 4px; }
     .lst-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 18px; }
-    .lst-card { background: var(--shell); border: 1px solid var(--rule); overflow: hidden; display: flex; flex-direction: column; }
+    .lst-card { background: var(--shell); border: 1px solid var(--rule); overflow: hidden; display: flex; flex-direction: column; text-decoration: none; color: inherit; cursor: pointer; transition: border-color .12s, box-shadow .12s, transform .12s; }
+    .lst-card:hover { border-color: var(--brass); box-shadow: 0 4px 16px rgba(0,0,0,.06); transform: translateY(-1px); }
+    .lst-card:focus-visible { outline: 2px solid var(--brass); outline-offset: 2px; }
     .lst-card .ph { width: 100%; aspect-ratio: 16/10; object-fit: cover; background: var(--vellum); display: block; }
     .lst-card .ph-empty { width: 100%; aspect-ratio: 16/10; background: var(--linen); display: flex; align-items: center; justify-content: center; font-family: var(--mono); font-size: 10px; letter-spacing: .14em; text-transform: uppercase; color: var(--ink-faint); }
     .lst-card .bd { padding: 14px 16px; display: flex; flex-direction: column; gap: 6px; }
@@ -1858,14 +1860,18 @@ function selectLead(el) {
     var tour = (d.has_video ? '<span class="lst-badge">Video</span>' : '') + (d.has_tour ? '<span class="lst-badge">3D tour</span>' : '');
     var buying = d.side === 'buyer';
     var sideBadge = '<span class="lst-badge ' + (buying ? 'buying' : 'selling') + '">' + (buying ? 'Buying' : 'Selling') + '</span>';
-    return '<div class="lst-card">' + ph + '<div class="bd">' +
+    // The whole card is the link to the deal's portal (not just the small text
+    // line), so a click anywhere on a deal opens it. source_key can be missing
+    // on a malformed row — fall back to a no-op href so the card never 404s.
+    var href = d.source_key ? '/seller.html?deal=' + encodeURIComponent(d.source_key) : null;
+    return '<a class="lst-card"' + (href ? ' href="' + href + '" target="_blank" rel="noopener"' : '') + '>' + ph + '<div class="bd">' +
       '<div class="pr">' + esc(fmtUSD(d.price)) + '</div>' +
       '<div class="ad">' + esc(d.address || '') + (d.city ? ' · ' + esc(d.city) : '') + '</div>' +
       '<div class="mt"><span class="lst-badge ' + state.tab + '">' + badge(state.tab) + '</span>' + sideBadge +
         '<span class="lst-badge">' + (d.agent === 'james' ? 'James' : 'Sara') + '</span>' + tour + '</div>' +
       (d.coe_date ? '<div style="font-size:11px;color:var(--ink-mute);">COE ' + esc(d.coe_date) + '</div>' : '') +
-      '<a class="lk" href="/seller.html?deal=' + encodeURIComponent(d.source_key) + '" target="_blank">Open ' + (buying ? 'buyer' : 'seller') + ' portal ↗</a>' +
-      '</div></div>';
+      '<span class="lk">Open ' + (buying ? 'buyer' : 'seller') + ' portal ↗</span>' +
+      '</div></a>';
   }
   function render() {
     var grid = root.querySelector('[data-lst-grid]');
