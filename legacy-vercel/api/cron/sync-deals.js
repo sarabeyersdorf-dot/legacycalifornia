@@ -107,6 +107,15 @@ function mapDeal(d) {
 
 function mapDocs(dealId, d) {
   const out = [];
+
+  // A curated flat list (clientDocuments) is the authoritative set of files the
+  // CLIENT should see. When one exists, the compliance `docs` object is treated
+  // as INTERNAL only (client_safe:false) so the portal shows just the curated
+  // uploads — not the old pre-curation compliance rows stacked alongside them.
+  const flat = [d.clientDocuments, d.portalDocs, d.documents, d.portalDocuments]
+    .find(Array.isArray) || [];
+  const hasFlat = flat.length > 0;
+
   const docs = d.docs || {};
   for (const [token, val] of Object.entries(docs)) {
     if (DOC_SKIP.has(token)) continue;
@@ -127,7 +136,7 @@ function mapDocs(dealId, d) {
       sub: label[1] || null,
       status,
       doc_url: url ? String(url) : null,         // link to the executed document, if provided
-      client_safe: true,
+      client_safe: !hasFlat,                     // hidden from the portal once a curated list exists
       updated_at: new Date().toISOString()
     });
   }
@@ -135,8 +144,6 @@ function mapDocs(dealId, d) {
   // SIMPLE PATH — a flat list of files to drop straight into the client portal.
   // No compliance token, no status required: Cowork lists the deal's Dropbox
   // files + share links and writes them here. Any of these keys works.
-  const flat = [d.clientDocuments, d.portalDocs, d.documents, d.portalDocuments]
-    .find(Array.isArray) || [];
   for (const doc of flat) {
     if (!doc) continue;
     const name = String(doc.name || doc.title || doc.label || '').trim();

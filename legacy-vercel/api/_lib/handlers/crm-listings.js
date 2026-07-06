@@ -36,12 +36,19 @@ function proxyPhoto(u) {
   return u;
 }
 
+// Hard ceiling on how long the photo enrichment may take. Photos are optional;
+// the deals list must ALWAYS return fast. If MetroList is slow/hangs we skip
+// photos this round rather than let the whole /api/crm/listings call time out
+// (which made deals appear to vanish on navigation).
+const RESO_TIMEOUT = 2500;
+const EMPTY_MAPS = { byMls: new Map(), byAddr: new Map(), count: 0, configured: false };
+
 async function metrolistPhotoMaps(nowMs) {
-  if (!mlsConfigured()) return { byMls: new Map(), byAddr: new Map(), count: 0, configured: false };
+  if (!mlsConfigured()) return EMPTY_MAPS;
   if (_mlsCache && (nowMs - _mlsCacheAt) < MLS_TTL) return _mlsCache;
 
   const byMls = new Map(), byAddr = new Map();
-  let count = 0;
+  let count = 0, timedOut = false;
   try {
     // Office-wide so BOTH Sara's and James's own listings come back; fall back
     // to the single agent id if no office id is set.
@@ -50,13 +57,17 @@ async function metrolistPhotoMaps(nowMs) {
                 : null;
     const filters = [`(MlsStatus eq 'Active' or MlsStatus eq 'Pending')`];
     if (scope) filters.push(scope);
-    const data = await mlsGet('/Property', {
+    // Race the RESO call against a timeout, and make the call itself
+    // non-rejecting so a late failure can't surface as an unhandled rejection.
+    const call = mlsGet('/Property', {
       '$filter':  filters.join(' and '),
       '$top':     100,
       '$orderby': 'ModificationTimestamp desc',
       '$expand':  'Media',
       '$select':  'ListingId,UnparsedAddress,City,MlsStatus'
-    });
+    }).catch(() => ({ value: [] }));
+    const timer = new Promise((resolve) => setTimeout(() => { timedOut = true; resolve({ value: [] }); }, RESO_TIMEOUT));
+    const data = await Promise.race([call, timer]);
     for (const p of (data.value || [])) {
       const s = mlsShape(p);
       const photo = proxyPhoto((s.photos && s.photos[0]) || null);   // through /api/photo
@@ -68,9 +79,11 @@ async function metrolistPhotoMaps(nowMs) {
     }
   } catch (_) { /* fail-soft — photos are a nicety, never break the Deals list */ }
 
-  _mlsCache = { byMls, byAddr, count, configured: true };
-  _mlsCacheAt = nowMs;
-  return _mlsCache;
+  const result = { byMls, byAddr, count, configured: true };
+  // Only cache a real result. If we timed out (or got nothing), don't lock in
+  // an empty map for the full TTL — let the next request try again.
+  if (!timedOut && count > 0) { _mlsCache = result; _mlsCacheAt = nowMs; }
+  return result;
 }
 
 // Normalize a street address so a deal (deals.json) can be matched to an IDX
