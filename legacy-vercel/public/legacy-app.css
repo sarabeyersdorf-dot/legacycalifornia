@@ -219,11 +219,13 @@ body.lp-restyle .share-row { display: flex; gap: 16px; align-items: flex-start; 
 body.lp-restyle .share-row.is-shared { background: var(--lp-card-shared); border-color: #BFD3C3; border-left: 3px solid var(--lp-pine); }
 body.lp-restyle .share-main { min-width: 0; flex: 1; }
 body.lp-restyle .share-tagline { display: flex; align-items: baseline; gap: 12px; margin-bottom: 5px; }
-body.lp-restyle .share-tag { border: 1px solid var(--lp-line); border-radius: var(--lp-radius-tag); padding: 1px 6px; color: var(--lp-pine); }
+body.lp-restyle .share-tag { background: var(--lp-line-soft); border-radius: var(--lp-radius-tag); padding: 2px 7px; color: var(--lp-ink-soft); }
 body.lp-restyle .share-when { font-size: 12px; color: var(--lp-ink-soft); }
 body.lp-restyle .share-title { font-size: 15px; font-weight: 500; color: var(--lp-ink); line-height: 1.3; }
 body.lp-restyle .share-sees { font-size: 12px; color: var(--lp-ink-soft); margin-top: 7px; display: flex; align-items: baseline; gap: 6px; }
 body.lp-restyle .share-sees .who { white-space: nowrap; }
+body.lp-restyle .lp-sees-mark { width: 12px; height: 12px; border-radius: 3px; border: 1.5px solid var(--lp-green); position: relative; flex: none; align-self: center; }
+body.lp-restyle .lp-sees-mark::after { content: ''; position: absolute; left: 3px; top: 0px; width: 3px; height: 7px; border: solid var(--lp-green); border-width: 0 1.5px 1.5px 0; transform: rotate(45deg); }
 body.lp-restyle .share-sees input { flex: 1; min-width: 0; border: none; border-bottom: 1px dashed var(--rule-strong); background: transparent; font: inherit; font-style: normal; color: var(--lp-ink); padding: 1px 2px; }
 body.lp-restyle .share-sees input:focus { outline: none; border-bottom-color: var(--lp-pine); }
 
@@ -236,6 +238,12 @@ body.lp-restyle .lp-toggle input:checked ~ .lp-toggle-track { background: var(--
 body.lp-restyle .lp-toggle input:checked ~ .lp-toggle-track::after { transform: translateX(20px); }
 body.lp-restyle .lp-toggle-cap { font-size: 11px; font-weight: 500; color: var(--lp-ink-soft); }
 body.lp-restyle .lp-toggle input:checked ~ .lp-toggle-cap { color: var(--lp-pine); }
+/* Locked — wire/payment item that can never be shared (mirrors server guard) */
+body.lp-restyle .lp-toggle.is-locked { cursor: not-allowed; }
+body.lp-restyle .lp-toggle.is-locked input { cursor: not-allowed; }
+body.lp-restyle .lp-toggle.is-locked .lp-toggle-track { background: #E1A48E; }
+body.lp-restyle .lp-toggle.is-locked .lp-toggle-cap { color: var(--lp-terracotta); }
+body.lp-restyle .share-row:has(.lp-toggle.is-locked) { border-left: 3px solid var(--lp-terracotta); }
 
 /* ========================================================================
  * ACTIONS DROPDOWN — grouped, markers, SHARES tags
@@ -255,6 +263,39 @@ body.lp-restyle .s-mini .d-status,
 body.lp-restyle .lp-open { color: var(--lp-green); }
 body.lp-restyle .wire-warn { border: 1px solid var(--lp-terracotta); background: var(--lp-card); color: #6E2F17; border-radius: var(--lp-radius-card); }
 body.lp-restyle .wire-warn::before { color: var(--lp-terracotta); }
+
+/* ========================================================================
+ * LIVE CLIENT-PORTAL PREVIEW (right pane) — mirrors what the client sees
+ * ===================================================================== */
+body.lp-restyle .lead-profile { background: var(--lp-paper); }
+body.lp-restyle .lp-preview { padding: 22px 22px 44px; }
+body.lp-restyle .lp-urlchip { display: flex; align-items: center; gap: 7px; font-size: 12px; color: var(--lp-ink-soft); background: #fff; border: 1px solid var(--lp-line); border-radius: 999px; padding: 6px 12px; margin-bottom: 18px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+body.lp-restyle .lp-urlchip .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--lp-green); flex: none; }
+body.lp-restyle .lp-preview-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 18px; }
+body.lp-restyle .lp-preview-title { font-family: var(--lp-serif); font-weight: 500; font-size: 22px; color: var(--lp-ink); line-height: 1.15; }
+body.lp-restyle .lp-preview-sub { font-size: 13px; color: var(--lp-ink-soft); margin-top: 2px; }
+body.lp-restyle .lp-preview-avatar { width: 40px; height: 40px; border-radius: 50%; background: #E7D3C9; color: var(--lp-terracotta); display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; flex: none; }
+body.lp-restyle .lp-wirecard { background: #FBF1E7; border: 1px solid #E7C4AE; border-left: 4px solid var(--lp-terracotta); border-radius: var(--lp-radius-card); padding: 13px 15px; }
+body.lp-restyle .lp-wire-h { font-size: 13px; font-weight: 700; color: #6E2F17; margin-bottom: 4px; }
+body.lp-restyle .lp-wire-glyph { color: var(--lp-terracotta); }
+body.lp-restyle .lp-wire-b { font-size: 12.5px; line-height: 1.5; color: #7A4B36; }
+body.lp-restyle .lp-pcard { background: #fff; border: 1px solid var(--lp-line); border-radius: var(--lp-radius-card); box-shadow: var(--lp-shadow-card); padding: 13px 15px; margin-bottom: 10px; }
+body.lp-restyle .lp-pcard-top { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; margin-bottom: 4px; }
+body.lp-restyle .lp-ptype { display: inline-flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--lp-pine); }
+body.lp-restyle .lp-ptype .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--lp-pine); }
+body.lp-restyle .lp-pdate { font-size: 12px; color: var(--lp-ink-soft); white-space: nowrap; }
+body.lp-restyle .lp-pcard-title { font-size: 15px; font-weight: 500; color: var(--lp-ink); line-height: 1.3; }
+body.lp-restyle .lp-pcard-sub { font-size: 12.5px; color: var(--lp-ink-soft); margin-top: 2px; }
+body.lp-restyle .lp-preview-empty { font-size: 13px; color: var(--lp-ink-soft); font-style: italic; padding: 8px 2px; }
+
+/* Relocated agent rail — collapsible in the workspace, nothing lost */
+body.lp-restyle .lp-agent-details { margin-top: 24px; border-top: 1px solid var(--lp-line); }
+body.lp-restyle .lp-agent-details > summary { list-style: none; cursor: pointer; padding: 14px 0 2px; font-size: 11px; font-weight: 700; letter-spacing: 0.09em; text-transform: uppercase; color: var(--lp-ink-soft); }
+body.lp-restyle .lp-agent-details > summary::-webkit-details-marker { display: none; }
+body.lp-restyle .lp-agent-details > summary::after { content: ' ▾'; }
+body.lp-restyle .lp-agent-details[open] > summary::after { content: ' ▴'; }
+body.lp-restyle .lp-agent-details-body .lp-section { border-bottom: 1px solid var(--lp-line-soft); padding: 16px 0; }
+body.lp-restyle .lp-agent-details-body .lp-section:last-child { border-bottom: none; }
 
 /* ========================================================================
  * 4. INTERACTION — focus rings, hover, reduced motion

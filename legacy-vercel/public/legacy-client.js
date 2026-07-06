@@ -1673,27 +1673,73 @@
       const MO = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
       return `${MO[d.getMonth()]} ${d.getDate()} · ${d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}`;
     };
+    // Client-side mirror of the server wire-fraud guard. An item whose text
+    // reads like wire/payment instructions can NEVER be shared — its toggle
+    // renders locked (red) and disabled, matching the server, which is still
+    // the real enforcement point.
+    const WIRE_RE = [/\bwir(?:e|ing|ed)\b/i, /\brouting\b/i, /\baba\b/i, /\bswift\b/i, /\biban\b/i, /\baccount\s*(?:#|no\.?\b|number\b)/i, /\bacct\b/i, /\b\d{9}\b/];
+    const isWire = (...t) => { const b = t.filter(Boolean).join(' \n '); return WIRE_RE.some((re) => re.test(b)); };
     const shareables = [
-      ...tasks.map((t) => ({ kind: 'task', id: t.id, tag: 'Task', when: '', title: t.title || 'Task', label: t.client_label || '', shared: t.visibility === 'client', done: !!t.done })),
-      ...tours.map((t) => ({ kind: 'tour', id: t.id, tag: 'Tour', when: fmtWhen(t.scheduled_at), title: tourTitle(t), label: t.client_label || '', shared: t.visibility === 'client' })),
-      ...appts.map((a) => ({ kind: 'appointment', id: a.id, tag: 'Appt', when: fmtWhen(a.starts_at), title: a.title || 'Appointment', label: a.client_label || '', shared: a.visibility === 'client' }))
+      ...tasks.map((t) => ({ kind: 'task', id: t.id, tag: 'Task', when: '', title: t.title || 'Task', label: t.client_label || '', shared: t.visibility === 'client', done: !!t.done, locked: isWire(t.title, t.note, t.client_label) })),
+      ...tours.map((t) => ({ kind: 'tour', id: t.id, tag: 'Tour', when: fmtWhen(t.scheduled_at), title: tourTitle(t), label: t.client_label || '', shared: t.visibility === 'client', locked: isWire(tourTitle(t), t.notes, t.client_label) })),
+      ...appts.map((a) => ({ kind: 'appointment', id: a.id, tag: 'Appt', when: fmtWhen(a.starts_at), title: a.title || 'Appointment', label: a.client_label || '', shared: a.visibility === 'client', locked: isWire(a.title, a.location, a.notes, a.client_label) }))
     ];
     const sharedCount = shareables.filter((s) => s.shared).length;
     const clientFirst = lead.first_name || 'your client';
+
+    // Live client-portal preview — a faithful mirror of what this client sees
+    // at their private link. Renders only shared (non-locked) items, in the
+    // client's language (client_label), and repaints whenever a toggle flips.
+    function buildPreview(items) {
+      const inEscrow = lead.pipeline_stage === 'under_contract';
+      const ptype = (s) => (s.kind === 'task' ? 'To do' : 'Appointment');
+      const psub  = (s) => (s.kind === 'task' ? (s.done ? 'Done' : 'Action needed') : (s.when ? 'On the calendar' : ''));
+      const mask  = (t) => t ? `${String(t).slice(0, 4)}…${String(t).slice(-4)}` : '';
+      const shared = items.filter((s) => s.shared && !s.locked);
+      const cards = shared.length
+        ? shared.map((s) => `
+            <div class="lp-pcard">
+              <div class="lp-pcard-top"><span class="lp-ptype"><span class="dot"></span>${escHtml(ptype(s))}</span>${s.when ? `<span class="lp-pdate">${escHtml(s.when)}</span>` : ''}</div>
+              <div class="lp-pcard-title">${escHtml(s.label || s.title)}</div>
+              ${psub(s) ? `<div class="lp-pcard-sub">${escHtml(psub(s))}</div>` : ''}
+            </div>`).join('')
+        : `<div class="lp-preview-empty">Nothing shared with ${escHtml(clientFirst)} yet. Flip a toggle and it appears here, live.</div>`;
+      const wire = inEscrow ? `
+        <div class="lp-wirecard">
+          <div class="lp-wire-h"><span class="lp-wire-glyph">◆</span> Wire-fraud protection</div>
+          <div class="lp-wire-b">We will never send wire instructions through this portal, by email, or by text. Before wiring funds, always call the title company directly at a phone number you have independently verified.</div>
+        </div>` : '';
+      const portalOk = lead.portal_token && lead.deal_side !== 'buyer';
+      return `
+        <div class="lp-preview">
+          ${portalOk ? `<div class="lp-urlchip"><span class="dot"></span>${escHtml(location.host)}/seller.html?t=${escHtml(mask(lead.portal_token))}</div>` : ''}
+          <div class="lp-preview-head">
+            <div>
+              <div class="lp-preview-title">Your Sale — ${escHtml((lead.areas && lead.areas[0]) || 'Your listing')}</div>
+              <div class="lp-preview-sub">What ${escHtml(clientFirst)} sees, live</div>
+            </div>
+            <div class="lp-preview-avatar">${escHtml(initials)}</div>
+          </div>
+          ${wire}
+          <div class="lp-eyebrow" style="margin-top:18px;margin-bottom:10px;">Upcoming</div>
+          ${cards}
+        </div>`;
+    }
+
     const shareRowHtml = (s) => `
       <div class="share-row${s.shared ? ' is-shared' : ''}" data-kind="${escHtml(s.kind)}" data-id="${escHtml(s.id)}">
         <div class="share-main">
           <div class="share-tagline"><span class="share-tag">${escHtml(s.tag)}</span>${s.when ? `<span class="share-when">${escHtml(s.when)}</span>` : ''}</div>
           <div class="share-title"${s.done ? ' style="text-decoration:line-through;opacity:.6;"' : ''}>${escHtml(s.title)}</div>
           <div class="share-sees" data-share-label-wrap${s.shared ? '' : ' style="display:none;"'}>
-            <span class="who">${escHtml(clientFirst)} sees:</span>
+            <span class="lp-sees-mark"></span><span class="who">${escHtml(clientFirst)} sees:</span>
             <input data-share-label value="${escHtml(s.label)}" placeholder="${escHtml(s.title)}">
           </div>
         </div>
-        <label class="lp-toggle" title="Show this to the client in their private portal">
-          <input type="checkbox" data-share-toggle ${s.shared ? 'checked' : ''}>
+        <label class="lp-toggle${s.locked ? ' is-locked' : ''}" title="${s.locked ? 'Contains wire or payment language — this can never be shared' : 'Show this to the client in their private portal'}">
+          <input type="checkbox" data-share-toggle ${s.shared && !s.locked ? 'checked' : ''} ${s.locked ? 'disabled' : ''}>
           <span class="lp-toggle-track"></span>
-          <span class="lp-toggle-cap" data-share-cap>${s.shared ? 'Visible' : 'Internal'}</span>
+          <span class="lp-toggle-cap" data-share-cap>${s.locked ? 'Locked' : (s.shared ? 'Visible' : 'Internal')}</span>
         </label>
       </div>`;
     const sharedPanelHtml = shareables.length === 0 ? '' : `
@@ -1901,9 +1947,12 @@
           toggle.disabled = true;
           const r = await flip(nowShared ? 'client' : 'internal', labelI ? labelI.value.trim() : undefined);
           toggle.disabled = false;
+          const item = shareables.find((x) => x.kind === kind && String(x.id) === String(id));
           if (r.ok) {
             if (wrap) wrap.style.display = nowShared ? 'flex' : 'none';
             cap(row, nowShared);
+            if (item) item.shared = nowShared;
+            profileEl.innerHTML = buildPreview(shareables); // live-mirror the client portal
             recount();
             toast(nowShared ? 'Now visible in the client’s portal.' : 'Hidden from the client.');
           } else {
@@ -1918,8 +1967,12 @@
         if (labelI) labelI.addEventListener('blur', async () => {
           if (!toggle || !toggle.checked) return;
           const r = await flip('client', labelI.value.trim());
-          if (r.ok) toast('Label updated.');
-          else toast((r.json && r.json.error) || 'Could not update label.', false);
+          if (r.ok) {
+            const item = shareables.find((x) => x.kind === kind && String(x.id) === String(id));
+            if (item) item.label = labelI.value.trim();
+            profileEl.innerHTML = buildPreview(shareables); // live-mirror the new label
+            toast('Label updated.');
+          } else toast((r.json && r.json.error) || 'Could not update label.', false);
         });
       });
     }
@@ -2006,7 +2059,10 @@
     }).join('') || `<div style="opacity:.5;font-style:italic;font-size:13px;">No saved properties yet.</div>`;
 
     const assigned = lead.assigned_agent || 'sara';
-    profileEl.innerHTML = `
+    // The agent rail (score / pipeline / contact / activity) is relocated into
+    // a collapsible in the workspace, because the right pane now hosts the LIVE
+    // client-portal preview. Nothing is removed — just moved.
+    const railHtml = `
       <div class="lp-section">
         <h3>Score &amp; signal</h3>
         <div class="lp-score">
@@ -2055,9 +2111,14 @@
       ${tours.length ? `<div class="lp-section"><h3>Tours · ${tours.length}</h3>${tours.slice(0,3).map((t) => `<div class="tl-item"><div class="tl-dot"></div><div><div class="tl-text"><strong>${escHtml(t.properties && t.properties.address || 'Tour')}</strong></div><div class="tl-when">${escHtml(fmtRel(t.scheduled_at))} · ${escHtml(t.status || '')}</div></div></div>`).join('')}</div>` : ''}
       ${offers.length ? `<div class="lp-section"><h3>Offers · ${offers.length}</h3>${offers.slice(0,3).map((o) => `<div class="tl-item"><div class="tl-dot ink"></div><div><div class="tl-text"><strong>${escHtml(fmtUSD(o.amount))}</strong> · ${escHtml(o.status || '')}</div><div class="tl-when">${escHtml(o.properties && o.properties.address || '')}</div></div></div>`).join('')}</div>` : ''}
     `;
+    detailEl.insertAdjacentHTML('beforeend', `<details class="lp-agent-details"><summary>Agent details · internal</summary><div class="lp-agent-details-body">${railHtml}</div></details>`);
 
-    // Wire the Reassign button now that profileEl has the live markup.
-    const reassignBtn = profileEl.querySelector('[data-detail-action="reassign"]');
+    // Right pane = LIVE client-portal preview (mirrors exactly what this client
+    // sees at their private link; repaints as visibility toggles flip).
+    profileEl.innerHTML = buildPreview(shareables);
+
+    // Wire the Reassign button now that the rail markup is in the workspace.
+    const reassignBtn = detailEl.querySelector('[data-detail-action="reassign"]');
     if (reassignBtn) reassignBtn.addEventListener('click', () => promptReassign(lead));
   }
 
