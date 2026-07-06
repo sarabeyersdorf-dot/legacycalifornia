@@ -826,6 +826,8 @@
     .lst-badge.pending { background: #F3EAD6; color: #7C5A16; border-color: #E0CFA0; }
     .lst-badge.preparing { background: #EAE6F3; color: #4A3B7C; border-color: #CDC2E0; }
     .lst-badge.closed  { background: var(--linen); color: var(--ink-mute); }
+    .lst-badge.selling { background: #EAF0F6; color: #2B4A6B; border-color: #C3D4E6; }
+    .lst-badge.buying  { background: #F6EFE8; color: #6B4A2B; border-color: #E6D2C3; }
     .lst-card .lk { font-family: var(--mono); font-size: 10px; letter-spacing: .1em; text-transform: uppercase; color: var(--brass); text-decoration: none; margin-top: 6px; }
     @media (max-width: 900px) { .lst { padding: 18px; } }
     </style>
@@ -1854,13 +1856,15 @@ function selectLead(el) {
   function card(d) {
     var ph = d.photo_url ? '<img class="ph" src="' + esc(d.photo_url) + '" alt="">' : '<div class="ph-empty">No photo yet</div>';
     var tour = (d.has_video ? '<span class="lst-badge">Video</span>' : '') + (d.has_tour ? '<span class="lst-badge">3D tour</span>' : '');
+    var buying = d.side === 'buyer';
+    var sideBadge = '<span class="lst-badge ' + (buying ? 'buying' : 'selling') + '">' + (buying ? 'Buying' : 'Selling') + '</span>';
     return '<div class="lst-card">' + ph + '<div class="bd">' +
       '<div class="pr">' + esc(fmtUSD(d.price)) + '</div>' +
       '<div class="ad">' + esc(d.address || '') + (d.city ? ' · ' + esc(d.city) : '') + '</div>' +
-      '<div class="mt"><span class="lst-badge ' + state.tab + '">' + badge(state.tab) + '</span>' +
+      '<div class="mt"><span class="lst-badge ' + state.tab + '">' + badge(state.tab) + '</span>' + sideBadge +
         '<span class="lst-badge">' + (d.agent === 'james' ? 'James' : 'Sara') + '</span>' + tour + '</div>' +
       (d.coe_date ? '<div style="font-size:11px;color:var(--ink-mute);">COE ' + esc(d.coe_date) + '</div>' : '') +
-      '<a class="lk" href="/seller.html?deal=' + encodeURIComponent(d.source_key) + '" target="_blank">Open seller portal ↗</a>' +
+      '<a class="lk" href="/seller.html?deal=' + encodeURIComponent(d.source_key) + '" target="_blank">Open ' + (buying ? 'buyer' : 'seller') + ' portal ↗</a>' +
       '</div></div>';
   }
   function render() {

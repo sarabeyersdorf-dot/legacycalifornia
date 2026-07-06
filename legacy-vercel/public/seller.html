@@ -177,7 +177,7 @@
       </a>
     </div>
 
-    <div class="app-side-section">Your sale</div>
+    <div class="app-side-section" data-bind="status.headline">Your sale</div>
     <nav class="app-side-nav">
       <a href="seller.html" class="active">Overview</a>
       <a href="#road">Road to closing</a>
@@ -234,7 +234,7 @@
         <div id="sell-tour" class="sell-tour"></div>
       </div>
       <div class="sell-status">
-        <div class="l">Sale price</div>
+        <div class="l" data-bind="status.price_label">List price</div>
         <div class="v" data-bind="status.price">—</div>
         <div class="since" data-bind="status.since" data-optional>Closing soon</div>
       </div>

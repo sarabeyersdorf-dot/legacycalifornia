@@ -34,8 +34,14 @@ export default async function handler(req, res) {
     const supa = adminClient();
     const COLS_MLS = 'source_key, address, city, stage, side, agent, list_price, sale_price, coe_date, photo_url, video_url, matterport_url, mls_number';
     const COLS     = COLS_MLS.replace(', mls_number', '');
+    // Include buyer-side deals too — a purchase we represent is a live
+    // transaction that needs a client portal, and Sara expects to see it under
+    // the in-escrow list. It's tagged by `side` so the card can say Buying vs
+    // Selling. (We exclude only non-transaction rows like prospects/leads,
+    // which aren't a real side.)
+    const SIDES = ['listing', 'seller', 'both', 'buyer'];
     const dealsQuery = (cols) => supa.from('deals').select(cols)
-      .in('side', ['listing', 'seller', 'both'])
+      .in('side', SIDES)
       .order('coe_date', { ascending: true, nullsFirst: false });
 
     // IDX listings (on-market) — backfill listing photos by MLS / address.

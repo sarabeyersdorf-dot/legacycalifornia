@@ -102,7 +102,7 @@ export default async function handler(req, res) {
       const { data: parties } = await supa.from('deal_parties')
         .select('deal_id, role, deals(*)')
         .eq('lead_id', lead.id)
-        .in('role', ['seller', 'co-seller']);
+        .in('role', ['seller', 'co-seller', 'buyer', 'co-buyer']);
       const rows = (parties || []).map((p) => p.deals).filter(Boolean);
       rows.sort((a, b) => new Date(b.updated_at || 0) - new Date(a.updated_at || 0));
       deal = rows[0] || null;
@@ -145,7 +145,7 @@ export default async function handler(req, res) {
           const { data: parties } = await supa.from('deal_parties')
             .select('deal_id, role, deals(*)')
             .eq('lead_id', leadId)
-            .in('role', ['seller', 'co-seller']);
+            .in('role', ['seller', 'co-seller', 'buyer', 'co-buyer']);
           const rows = (parties || []).map((p) => p.deals).filter(Boolean);
           rows.sort((a, b) => new Date(b.updated_at || 0) - new Date(a.updated_at || 0));
           deal = rows[0] || null;
@@ -228,7 +228,6 @@ export default async function handler(req, res) {
     const open  = asDate(deal.escrow_open_date);
     const today = new Date(); today.setHours(0,0,0,0);
     const dtc   = daysBetween(today, coe);
-    const price = deal.sale_price || deal.list_price;
 
     const signed = docs.filter((d) => d.status === 'signed' || d.status === 'on_file').length;
 
@@ -238,6 +237,19 @@ export default async function handler(req, res) {
     const isListing  = deal.stage === 'listing';
     const isPreparing= deal.stage === 'preparing';
     const isClosed   = deal.stage === 'closed';
+    const isBuyerSide = deal.side === 'buyer';
+
+    // Price is stage-correct: a listing shows its LIST price; an in-escrow /
+    // closed deal shows the agreed PRICE. Label matches — "List price" while
+    // on market, "Purchase price" for a buyer we represent in escrow, else
+    // "Sale price". Never label a listing's number "Sale price".
+    const price = (isListing || isPreparing)
+      ? (deal.list_price ?? deal.sale_price)
+      : (deal.sale_price ?? deal.list_price);
+    const priceLabel = (isListing || isPreparing) ? 'List price'
+                     : inEscrow ? (isBuyerSide ? 'Purchase price' : 'Sale price')
+                     : isClosed ? (isBuyerSide ? 'Purchase price' : 'Sale price')
+                     : 'Price';
     const STAGE_LABEL = { pending: 'In escrow', listing: 'On the market', preparing: 'Preparing to list', closed: 'Sold' };
     const stageLabel = STAGE_LABEL[deal.stage] || sanitize(deal.stage || '');
     const docsKpi = { label: 'Documents', value: `${signed} / ${docs.length}`, change: docs.length > signed ? `${docs.length - signed} open` : 'complete' };
@@ -246,13 +258,13 @@ export default async function handler(req, res) {
     const kpis = inEscrow
       ? [
           { label: 'Days to close',   value: dtc != null ? String(dtc) : '—', change: dtc != null && dtc >= 0 ? 'On schedule' : '' },
-          { label: 'Sale price',      value: fmtUSD(price), change: '' },
+          { label: priceLabel,        value: fmtUSD(price), change: '' },
           docsKpi,
           { label: 'Close of escrow', value: fmtDate(coe), change: coe ? String(coe.getFullYear()) : '' }
         ]
       : [
-          { label: 'List price', value: fmtUSD(price), change: '' },
-          { label: 'Status',     value: stageLabel, change: '' },
+          { label: priceLabel, value: fmtUSD(price), change: '' },
+          { label: 'Status',   value: stageLabel, change: '' },
           docsKpi
         ];
 
@@ -329,7 +341,7 @@ export default async function handler(req, res) {
     if (inEscrow) {
       noteBody = `${hi}we're moving right on schedule and still pointed at a ${fmtDateY(coe)} close. I'll flag anything that needs you the moment it comes up. Call me anytime.`;
       try {
-        noteBody = await draftSellerNote({ firstName, deal, coe, dtc, signed, total: docs.length, tasks, agentName, agentPhone, noun });
+        noteBody = await draftSellerNote({ firstName, deal, coe, dtc, signed, total: docs.length, tasks, agentName, agentPhone, noun, isBuyerSide });
       } catch (_) { /* keep fallback */ }
     } else if (isListing) {
       noteBody = `${hi}your ${noun} is live on the market and getting in front of buyers. I'll keep you posted on showings and feedback, and reach out the moment we have an offer to review. Call me anytime.`;
@@ -360,6 +372,8 @@ export default async function handler(req, res) {
         city: sanitize(deal.city || ''),
         type: sanitize(deal.type || ''),
         price: fmtUSDfull(price),
+        price_label: priceLabel,     // "List price" on market · "Purchase/Sale price" in escrow
+        headline: isBuyerSide ? 'Your purchase' : 'Your sale',   // sidebar/title, side-aware
         since: inEscrow && coe ? `In escrow · Closing ${fmtDateY(coe)}`
              : isListing ? 'On the market'
              : isClosed ? 'Sale closed'
@@ -453,17 +467,21 @@ function expiredPortal() {
   };
 }
 
-async function draftSellerNote({ firstName, deal, coe, dtc, signed, total, tasks, agentName = 'Sara Cooper', agentPhone = '209-559-4966', noun = 'property' }) {
-  const SYSTEM = `You write ONE short paragraph as ${agentName} of Legacy Properties, to your SELLER client about their in-escrow ${noun} sale.
+async function draftSellerNote({ firstName, deal, coe, dtc, signed, total, tasks, agentName = 'Sara Cooper', agentPhone = '209-559-4966', noun = 'property', isBuyerSide = false }) {
+  const clientKind = isBuyerSide ? 'BUYER' : 'SELLER';
+  const dealKind   = isBuyerSide ? `${noun} purchase` : `${noun} sale`;
+  const SYSTEM = `You write ONE short paragraph as ${agentName} of Legacy Properties, to your ${clientKind} client about their in-escrow ${dealKind}.
 Call the property their "${noun}" — never assume it is a house if it is ${noun === 'land' ? 'vacant land' : 'a ' + noun}.
+This client is ${isBuyerSide ? 'BUYING' : 'SELLING'} — never mix up the side.
 Voice: warm, direct, reassuring, never salesy. Short sentences. No exclamation points. No markdown. No em-dashes. No placeholders.
 Hard rules:
 1. Your phone is ${agentPhone}. Never invent other contact info.
 2. Only mention facts given below. Do NOT mention commission, financing problems, legal matters, or the buyer's private details.
 3. 3-4 short sentences. No salutation line, no signoff (those are added separately). Plain prose.`;
   const owed = tasks.length ? tasks.map((t) => t.label.replace(/^Sign /, '')).join(', ') : 'nothing right now';
-  const prompt = `Write the weekly note to ${firstName || 'the seller'} about their sale at ${deal.address}.
-Facts: close of escrow ${fmtDateY(coe)} (${dtc != null ? dtc + ' days out' : 'date set'}); ${signed} of ${total} documents in the file; still need from the seller: ${owed}.
+  const who = firstName || (isBuyerSide ? 'the buyer' : 'the seller');
+  const prompt = `Write the weekly note to ${who} about their ${isBuyerSide ? 'purchase' : 'sale'} at ${deal.address}.
+Facts: close of escrow ${fmtDateY(coe)} (${dtc != null ? dtc + ' days out' : 'date set'}); ${signed} of ${total} documents in the file; still need from ${isBuyerSide ? 'the buyer' : 'the seller'}: ${owed}.
 Reassure them things are on track, note what you need from them if anything, and invite them to call. Under 80 words.`;
   const { text } = await anthropicMessage({
     system: SYSTEM, messages: [{ role: 'user', content: prompt }],
