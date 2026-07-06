@@ -243,6 +243,13 @@
     .tsk-item.done .tsk-badge { opacity: .5; }
     .tsk-who { font-family: var(--mono); font-size: 8px; letter-spacing: .1em; text-transform: uppercase; color: var(--ink-mute); border: 1px solid var(--rule); padding: 1px 5px; }
     .tsk-note { margin-top: 6px; font-size: 13.5px; color: var(--ink-soft); background: var(--shell); border: 1px solid var(--rule); padding: 8px 11px; }
+    .tsk-flag { margin-left: auto; background: none; border: none; cursor: pointer; color: var(--ink-faint); font-size: 15px; line-height: 1; padding: 0 2px; flex: none; }
+    .tsk-flag.on { color: #B05A3C; }
+    .tsk-item.flagged { border-left: 3px solid #B05A3C; padding-left: 10px; margin-left: -13px; }
+    .tsk-feedback { display: flex; align-items: baseline; gap: 8px; margin-top: 7px; }
+    .tsk-note-in { flex: 1; min-width: 0; border: none; border-bottom: 1px dashed var(--rule-strong); background: transparent; font: inherit; font-size: 12.5px; color: var(--ink); padding: 3px 0; }
+    .tsk-note-in:focus { outline: none; border-bottom-color: #2E4638; }
+    .tsk-note-by { font-size: 11px; color: var(--ink-faint); white-space: nowrap; }
     @media (max-width: 900px) { .tsk { padding: 18px; } }
     </style>
     <section class="crm-view" data-view="tasks">
@@ -1759,10 +1766,23 @@ function selectLead(el) {
     var who = state.data.broker ? '<span class="tsk-who">' + (t.agent === 'james' ? 'James' : t.agent === 'both' ? 'Both' : 'Me') + '</span>' : '';
     var badge = t.client ? '<span class="tsk-badge ' + (t.agent === 'james' ? 'james' : t.agent === 'sara' ? 'sara' : '') + '">' + esc(t.client) + '</span>' : '';
     var sub = (t.sub || t.due_label) ? '<div style="font-size:12px;color:var(--ink-mute);margin-top:2px;">' + esc([t.sub, t.due_label].filter(Boolean).join(' · ')) + '</div>' : '';
-    var note = t.note ? '<div class="tsk-note">' + esc(t.note) + '</div>' : '';
-    return '<div class="tsk-item' + (t.done ? ' done' : '') + '" data-tid="' + esc(t.id) + '">' +
+    var note = t.note ? '<div class="tsk-note">' + esc(t.note) + '</div>' : '';   // from the briefing (Cowork)
+    var flag = '<button class="tsk-flag' + (t.attention ? ' on' : '') + '" data-tsk-flag title="Flag this for the briefing">⚑</button>';
+    var by = t.agent_note_by ? '<span class="tsk-note-by">— ' + esc(t.agent_note_by === 'james' ? 'James' : 'Sara') + '</span>' : '';
+    // Note back to the briefing — Cowork reads this and tunes the next agenda.
+    var fb = '<div class="tsk-feedback"><input class="tsk-note-in" data-tsk-note placeholder="Note back to the briefing…" value="' + esc(t.agent_note || '') + '">' + by + '</div>';
+    return '<div class="tsk-item' + (t.done ? ' done' : '') + (t.attention ? ' flagged' : '') + '" data-tid="' + esc(t.id) + '">' +
       '<input type="checkbox" data-tsk-check ' + (t.done ? 'checked' : '') + '>' +
-      '<div class="tsk-body"><div class="tsk-line">' + badge + '<span class="tsk-title">' + esc(t.title) + '</span>' + who + '</div>' + sub + note + '</div></div>';
+      '<div class="tsk-body"><div class="tsk-line">' + badge + '<span class="tsk-title">' + esc(t.title) + '</span>' + who + flag + '</div>' + sub + note + fb + '</div></div>';
+  }
+  // Save a note or attention flag back to the briefing.
+  function patchTask(id, body) {
+    body.id = id;
+    return fetch('/api/crm/tasks', { method: 'PATCH', credentials: 'include', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) })
+      .then(function (r) { return r.json(); }).then(function () {
+        var t = (state.data.tasks || []).find(function (x) { return x.id === id; });
+        if (t) { if (body.agent_note !== undefined) t.agent_note = body.agent_note; if (body.attention !== undefined) t.attention = body.attention; }
+      }).catch(function () {});
   }
   function render() {
     var list = root.querySelector('[data-tsk-list]');
@@ -1776,6 +1796,17 @@ function selectLead(el) {
     if (f) { state.view = f.getAttribute('data-tsk'); root.querySelectorAll('[data-tsk]').forEach(function (b) { b.classList.toggle('on', b === f); }); render(); return; }
     var sc = e.target.closest('[data-scope]');
     if (sc) { state.scope = sc.getAttribute('data-scope'); root.querySelectorAll('[data-scope]').forEach(function (b) { b.classList.toggle('on', b === sc); }); load(); return; }
+    var fl = e.target.closest('[data-tsk-flag]');
+    if (fl) { var el = fl.closest('[data-tid]'); var id = el.getAttribute('data-tid'); var on = !fl.classList.contains('on'); fl.classList.toggle('on', on); el.classList.toggle('flagged', on); patchTask(id, { attention: on }); return; }
+  });
+  // Save the note-back-to-briefing when the field loses focus.
+  root.addEventListener('focusout', function (e) {
+    var ni = e.target.closest('[data-tsk-note]'); if (!ni) return;
+    var el = ni.closest('[data-tid]'); if (!el) return;
+    var id = el.getAttribute('data-tid');
+    var t = (state.data.tasks || []).find(function (x) { return x.id === id; });
+    if (t && (t.agent_note || '') === ni.value) return;   // no change
+    patchTask(id, { agent_note: ni.value });
   });
   root.addEventListener('change', function (e) {
     var cb = e.target.closest('[data-tsk-check]'); if (!cb) return;

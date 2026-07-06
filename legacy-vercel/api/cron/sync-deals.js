@@ -234,8 +234,21 @@ export default async function handler(req, res) {
     const normAgent = (a) => { a = String(a || '').toLowerCase(); return /james/.test(a) ? 'james' : (/both/.test(a) ? 'both' : 'sara'); };
     const sig = (agent, client, title) => `${agent}|${client || ''}|${title}`;
 
-    const { data: prior } = await supa.from('agent_tasks').select('agent, client, title, done').eq('source', 'briefing');
-    const doneBy = new Map((prior || []).map((t) => [sig(t.agent, t.client, t.title), t.done]));
+    // Preserve, across the re-sync, the done checkmark AND the agents'
+    // note-back-to-briefing + attention flag (matched by agent|client|title),
+    // so a re-sync never wipes an agent's feedback.
+    let hasFbCols = true, prior = [];
+    {
+      const r = await supa.from('agent_tasks')
+        .select('agent, client, title, done, agent_note, attention, agent_note_by, agent_note_at')
+        .eq('source', 'briefing');
+      if (r.error) {
+        hasFbCols = false;
+        const r2 = await supa.from('agent_tasks').select('agent, client, title, done').eq('source', 'briefing');
+        prior = r2.data || [];
+      } else prior = r.data || [];
+    }
+    const keepBy = new Map(prior.map((t) => [sig(t.agent, t.client, t.title), t]));
 
     await supa.from('agent_tasks').delete().eq('source', 'briefing');
     if (tasks.length) {
@@ -244,7 +257,8 @@ export default async function handler(req, res) {
         const title  = String(t.title || t.task || '').slice(0, 300);
         const client = t.client ? String(t.client).slice(0, 80) : null;
         const s = sig(agent, client, title);
-        return {
+        const kept = keepBy.get(s);
+        const row = {
           agent,
           client,
           title,
@@ -253,8 +267,15 @@ export default async function handler(req, res) {
           due_label:  t.due || t.due_label || null,
           source_key: t.deal || t.source_key || null,
           source:     'briefing',
-          done:       doneBy.has(s) ? doneBy.get(s) : (t.done === true)
+          done:       kept ? !!kept.done : (t.done === true)
         };
+        if (hasFbCols && kept) {
+          row.agent_note    = kept.agent_note ?? null;
+          row.attention     = !!kept.attention;
+          row.agent_note_by = kept.agent_note_by ?? null;
+          row.agent_note_at = kept.agent_note_at ?? null;
+        }
+        return row;
       }).filter((r) => r.title);
       if (rows.length) {
         const { error: te } = await supa.from('agent_tasks').insert(rows);

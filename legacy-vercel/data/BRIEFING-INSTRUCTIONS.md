@@ -10,6 +10,34 @@ to today's date, and keep the JSON valid.
 
 ---
 
+## 0. Start of run — read what James & Sara sent back
+
+Before you rebuild the agenda, **fetch the CRM feedback** so you can carry
+their notes forward:
+
+```
+GET https://legacycalifornia.vercel.app/api/crm/briefing-feedback?key=<SYNC_SECRET>
+```
+
+(Use Sara's real site domain + the `SYNC_SECRET`.) The response tells you, per
+task: `done`, `needs_attention`, and the free-text `agent_note` James or Sara
+typed on the Tasks board — plus a `needs_review` list of just the flagged /
+annotated ones.
+
+Use it to tune the day:
+- A task marked **done** → don't repeat it; if it closes a loop, note the
+  outcome and drop it.
+- A task flagged **needs_attention** or carrying an **agent_note** → act on
+  what they said (reword it, add the follow-up they asked for, re-assign, or
+  escalate). Reflect their note in the deal/task you write back.
+- If a note answers a question you'd have asked, use the answer directly.
+
+You don't edit their notes — you *respond* to them by updating `deals.json`.
+Their checkmarks and notes survive the sync automatically, so you never wipe
+them.
+
+---
+
 ## 1. Deals — the `"deals"` array (one object per transaction)
 
 Find the deal by `"address"` (or `"id"`) and update:
