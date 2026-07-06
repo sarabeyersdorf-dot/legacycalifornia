@@ -23,6 +23,19 @@ import { isConfigured as mlsConfigured, apiGet as mlsGet, shape as mlsShape, ids
 let _mlsCache = null, _mlsCacheAt = 0;
 const MLS_TTL = 5 * 60 * 1000;
 
+// MetroList's data agreement forbids exposing raw MLS photo URLs, and those
+// hosts block direct <img> loading (CORS/referrer), so the site serves every
+// MetroList photo through the same-origin /api/photo proxy. Mirror that here —
+// a raw MediaURL stored on the card would just render as a broken image.
+const PHOTO_HOSTS = /(^|\.)(metrolistmls\.com|flexmls\.com)$/i;
+function proxyPhoto(u) {
+  if (!u) return u;
+  try {
+    if (PHOTO_HOSTS.test(new URL(u).hostname)) return `/api/photo?url=${encodeURIComponent(u)}`;
+  } catch (_) { /* not a URL — leave as-is */ }
+  return u;
+}
+
 async function metrolistPhotoMaps(nowMs) {
   if (!mlsConfigured()) return { byMls: new Map(), byAddr: new Map(), count: 0, configured: false };
   if (_mlsCache && (nowMs - _mlsCacheAt) < MLS_TTL) return _mlsCache;
@@ -46,7 +59,7 @@ async function metrolistPhotoMaps(nowMs) {
     });
     for (const p of (data.value || [])) {
       const s = mlsShape(p);
-      const photo = (s.photos && s.photos[0]) || null;
+      const photo = proxyPhoto((s.photos && s.photos[0]) || null);   // through /api/photo
       if (!photo) continue;
       count++;
       if (s.id) byMls.set(String(s.id), photo);
