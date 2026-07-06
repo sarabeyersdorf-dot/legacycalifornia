@@ -43,24 +43,31 @@ function proxyPhoto(u) {
 const RESO_TIMEOUT = 2500;
 const EMPTY_MAPS = { byMls: new Map(), byAddr: new Map(), count: 0, configured: false };
 
-async function metrolistPhotoMaps(nowMs) {
+async function metrolistPhotoMaps(nowMs, mlsNumbers) {
   if (!mlsConfigured()) return EMPTY_MAPS;
   if (_mlsCache && (nowMs - _mlsCacheAt) < MLS_TTL) return _mlsCache;
 
   const byMls = new Map(), byAddr = new Map();
   let count = 0, timedOut = false;
   try {
-    // Office-wide so BOTH Sara's and James's own listings come back; fall back
-    // to the single agent id if no office id is set.
-    const scope = mlsIds.office ? `ListOfficeMlsId eq '${mlsIds.office}'`
-                : mlsIds.agent  ? `ListAgentMlsId eq '${mlsIds.agent}'`
-                : null;
-    const filters = [`(MlsStatus eq 'Active' or MlsStatus eq 'Pending')`];
-    if (scope) filters.push(scope);
+    // Prefer an EXACT ListingId query for the deals we're showing — this pulls
+    // each listing's photo straight by MLS number and doesn't depend on the
+    // office/agent filter being right. Fall back to the office-wide feed
+    // (matched later by address) when we have no MLS numbers.
+    const mlsList = [...new Set((mlsNumbers || []).filter(Boolean).map(String))].slice(0, 60);
+    let filter;
+    if (mlsList.length) {
+      filter = '(' + mlsList.map((m) => `ListingId eq '${m.replace(/'/g, "''")}'`).join(' or ') + ')';
+    } else {
+      const scope = mlsIds.office ? `ListOfficeMlsId eq '${mlsIds.office}'`
+                  : mlsIds.agent  ? `ListAgentMlsId eq '${mlsIds.agent}'`
+                  : null;
+      filter = [`(MlsStatus eq 'Active' or MlsStatus eq 'Pending')`, scope].filter(Boolean).join(' and ');
+    }
     // Race the RESO call against a timeout, and make the call itself
     // non-rejecting so a late failure can't surface as an unhandled rejection.
     const call = mlsGet('/Property', {
-      '$filter':  filters.join(' and '),
+      '$filter':  filter,
       '$top':     100,
       '$orderby': 'ModificationTimestamp desc',
       '$expand':  'Media',
@@ -106,8 +113,10 @@ export default async function handler(req, res) {
 
   try {
     const supa = adminClient();
-    const COLS_MLS = 'source_key, address, city, stage, side, agent, list_price, sale_price, coe_date, photo_url, video_url, matterport_url, mls_number';
-    const COLS     = COLS_MLS.replace(', mls_number', '');
+    const BASE      = 'source_key, address, city, stage, side, agent, list_price, sale_price, coe_date, photo_url, video_url, matterport_url';
+    const COLS_FULL = BASE + ', mls_number, listing_meta';
+    const COLS_MLS  = BASE + ', mls_number';
+    const COLS      = BASE;
     // Include buyer-side deals too — a purchase we represent is a live
     // transaction that needs a client portal, and Sara expects to see it under
     // the in-escrow list. It's tagged by `side` so the card can say Buying vs
@@ -124,15 +133,21 @@ export default async function handler(req, res) {
     // Both are keyed by MLS number and by normalized address so a deal with no
     // MLS still matches by street address.
     const propsPromise = supa.from('properties').select('mls_number, address, photos').in('status', ['active', 'pending']).limit(2000);
-    const mlsPromise   = metrolistPhotoMaps(Date.now());
 
-    // Prefer selecting mls_number; fall back if the column isn't there yet (pre-013).
-    let dealsRes = await dealsQuery(COLS_MLS);
+    // Prefer the full column set; degrade gracefully if listing_meta (019) or
+    // mls_number (013) aren't in the table yet.
+    let dealsRes = await dealsQuery(COLS_FULL);
+    if (dealsRes.error) dealsRes = await dealsQuery(COLS_MLS);
     if (dealsRes.error) dealsRes = await dealsQuery(COLS);
-    const propsRes = await propsPromise;
-    const mls      = await mlsPromise;
     const { data, error } = dealsRes;
     if (error) return fail(res, 500, error.message);
+
+    // Now that we have the deals, fetch their photos from MetroList BY exact MLS
+    // number (falls back to the office feed if a deal has no MLS). Bounded by a
+    // timeout so it can never delay the deals response.
+    const dealMls = (data || []).map((d) => d.mls_number).filter(Boolean);
+    const propsRes = await propsPromise;
+    const mls      = await metrolistPhotoMaps(Date.now(), dealMls);
 
     // Lookup maps from the properties table → first photo.
     const byMls = new Map(), byAddr = new Map();
@@ -169,6 +184,8 @@ export default async function handler(req, res) {
         list_price: d.list_price,
         sale_price: d.sale_price,
         coe_date:   d.coe_date,
+        mls:        d.mls_number || null,
+        meta:       d.listing_meta || null,   // client, apn, beds/baths, sqft, dates, disclosure, video
         photo_url:  photo,
         has_video:  !!d.video_url,
         has_tour:   !!d.matterport_url

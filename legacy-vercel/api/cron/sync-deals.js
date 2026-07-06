@@ -101,6 +101,9 @@ function mapDeal(d) {
     photo_url:      d.photo      || d.photoUrl      || null,
     video_url:      d.video      || d.youtube       || d.videoUrl      || null,
     matterport_url: d.matterport || d.matterportUrl || null,
+    // Listing-sheet metadata (client, apn, beds/baths, sqft, lot, year, dates,
+    // commission, disclosure package, branded video) for the Listings roster.
+    listing_meta:   d.listing || d.listingMeta || null,
     updated_at: new Date().toISOString()
   };
 }
@@ -207,16 +210,23 @@ export default async function handler(req, res) {
           .from('deals').select('id').eq('source_key', mapped.source_key).maybeSingle();
         if (selErr) throw new Error(`lookup: ${selErr.message}`);
 
-        let dealId;
-        if (ex) {
-          const { error: upErr } = await supa.from('deals').update(mapped).eq('id', ex.id);
-          if (upErr) throw new Error(`update: ${upErr.message}`);
-          dealId = ex.id;
-        } else {
-          const { data: ins, error: insErr } = await supa.from('deals').insert(mapped).select('id').single();
-          if (insErr) throw new Error(`insert: ${insErr.message}`);
-          dealId = ins.id;
+        // If a newly-added column (e.g. listing_meta before migration 019 runs)
+        // isn't in the table yet, retry once without it rather than dropping the
+        // whole deal — a missing optional column must never blank the roster.
+        const writeDeal = async (payload) => {
+          if (ex) {
+            const { error } = await supa.from('deals').update(payload).eq('id', ex.id);
+            return { error, id: ex.id };
+          }
+          const { data: ins, error } = await supa.from('deals').insert(payload).select('id').single();
+          return { error, id: ins?.id };
+        };
+        let { error: wErr, id: dealId } = await writeDeal(mapped);
+        if (wErr && /listing_meta/i.test(wErr.message || '')) {
+          const { listing_meta, ...safe } = mapped;
+          ({ error: wErr, id: dealId } = await writeDeal(safe));
         }
+        if (wErr) throw new Error(`${ex ? 'update' : 'insert'}: ${wErr.message}`);
         dealsUpserted++;
 
         // Rebuild this deal's documents (delete then insert = idempotent)

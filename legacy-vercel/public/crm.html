@@ -46,6 +46,12 @@
       <a href="#" onclick="showView(event,'listings')" title="Pick a listing to open its seller portal">Seller portals</a>
     </nav>
 
+    <div class="app-side-section">Listings</div>
+    <nav class="app-side-nav">
+      <a href="#" onclick="showView(event,'roster')" title="All brokerage listings, filterable by agent">All listings</a>
+      <a href="#" onclick="showView(event,'roster')" data-rost-nav="preparing" title="Future listings not yet on market">Preparing to list</a>
+    </nav>
+
     <div class="app-side-section">Import</div>
     <nav class="app-side-nav">
       <a href="#" data-open-importer>Import Leads (CSV)…</a>
@@ -846,6 +852,58 @@
           <button class="chip" data-lst="closed">Closed <span class="c" data-lst-c-closed>—</span></button>
         </div>
         <div class="lst-grid" data-lst-grid><div class="cur-empty">Loading your listings…</div></div>
+      </div>
+    </section>
+
+    <!-- ============================================================
+         LISTINGS ROSTER — all brokerage sell-side listings, filterable
+         by agent, with a Preparing-to-list section for future listings.
+         ============================================================ -->
+    <style>
+    .rost { padding: 22px 36px 60px; }
+    .rost-filters { display: flex; align-items: center; gap: 18px; margin: 14px 0 18px; flex-wrap: wrap; }
+    .rost-seg { display: flex; gap: 6px; flex-wrap: wrap; }
+    .rost-seg .chip .c { color: var(--ink-faint); font-size: 11px; }
+    .rost-agents { display: flex; gap: 6px; align-items: center; }
+    .rost-agents .lbl { font-family: var(--mono); font-size: 9px; letter-spacing: .14em; text-transform: uppercase; color: var(--ink-mute); margin-right: 2px; }
+    .rost-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 18px; }
+    .rost-card { background: var(--shell); border: 1px solid var(--rule); overflow: hidden; display: flex; flex-direction: column; }
+    .rost-card .ph { width: 100%; aspect-ratio: 16/10; object-fit: cover; background: var(--vellum); display: block; }
+    .rost-card .ph-empty { width: 100%; aspect-ratio: 16/10; background: var(--linen); display: flex; align-items: center; justify-content: center; font-family: var(--mono); font-size: 10px; letter-spacing: .14em; text-transform: uppercase; color: var(--ink-faint); }
+    .rost-bd { padding: 14px 16px; display: flex; flex-direction: column; gap: 5px; }
+    .rost-top { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; }
+    .rost-price { font-family: var(--serif); font-style: italic; font-size: 24px; color: var(--ink); }
+    .rost-addr { font-size: 14px; color: var(--ink); font-weight: 500; }
+    .rost-client { font-size: 12.5px; color: var(--ink-soft); }
+    .rost-facts { font-size: 12px; color: var(--ink-mute); }
+    .rost-metaline { font-family: var(--mono); font-size: 10px; letter-spacing: .06em; color: var(--ink-mute); text-transform: uppercase; }
+    .rost-badges { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 2px; }
+    .rost-links { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 8px; padding-top: 10px; border-top: 1px solid var(--rule-soft); }
+    .rost-links a { font-family: var(--mono); font-size: 10px; letter-spacing: .08em; text-transform: uppercase; color: var(--brass); text-decoration: none; }
+    .rost-links a:hover { color: var(--ink); }
+    @media (max-width: 900px) { .rost { padding: 18px; } }
+    </style>
+    <section class="crm-view" data-view="roster">
+      <div class="rost">
+        <div class="cur-head"><div>
+          <span class="label-cap" style="color:var(--brass);">Brokerage listings</span>
+          <h1 class="h-section" style="font-size:38px;margin-top:6px;">Listings.</h1>
+        </div></div>
+        <div class="rost-filters">
+          <div class="rost-seg" data-rost-tabs>
+            <button class="chip on" data-rost="active">On market <span class="c" data-rost-c-active>—</span></button>
+            <button class="chip" data-rost="preparing">Preparing <span class="c" data-rost-c-preparing>—</span></button>
+            <button class="chip" data-rost="pending">In escrow <span class="c" data-rost-c-pending>—</span></button>
+            <button class="chip" data-rost="closed">Sold <span class="c" data-rost-c-closed>—</span></button>
+          </div>
+          <div class="rost-agents" data-rost-agents>
+            <span class="lbl">Agent</span>
+            <button class="chip on" data-rost-agent="all">All</button>
+            <button class="chip" data-rost-agent="sara">Sara</button>
+            <button class="chip" data-rost-agent="james">James</button>
+          </div>
+        </div>
+        <div class="rost-grid" data-rost-grid><div class="cur-empty">Loading listings…</div></div>
       </div>
     </section>
 
@@ -1904,6 +1962,94 @@ function selectLead(el) {
   });
   // Populate the Active/Pending roster counts on load — not just when the
   // Listings view is first opened.
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', load);
+  else load();
+})();
+</script>
+<script>
+/* Listings roster — all brokerage SELL-SIDE listings from /api/crm/listings,
+   filterable by agent (All/Sara/James) with a Preparing-to-list tab. Rich cards
+   with client, MLS, facts, dates, disclosure package + branded video links. */
+(function () {
+  'use strict';
+  var root = document.querySelector('.crm-view[data-view="roster"]');
+  if (!root) return;
+  var esc = function (s) { return (s == null ? '' : String(s)).replace(/[&<>"]/g, function (c) { return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]); }); };
+  function fmtUSD(n) { if (n == null) return '—'; var v = Math.abs(+n); if (v >= 1e6) return '$' + (+n / 1e6).toFixed(v >= 1e7 ? 0 : 2) + 'M'; if (v >= 1e3) return '$' + Math.round(+n / 1e3) + 'K'; return '$' + Math.round(+n); }
+  function fmtDate(s) { if (!s) return ''; var d = new Date(/^\d{4}-\d{2}-\d{2}$/.test(s) ? s + 'T00:00:00' : s); if (isNaN(d)) return String(s); return (d.getMonth() + 1) + '/' + d.getDate() + '/' + d.getFullYear(); }
+  var state = { data: null, tab: 'active', agent: 'all', loading: false };
+  var BUCKET = { active: 'active', preparing: 'preparing', pending: 'pending', closed: 'closed' };
+
+  function sellSide(rows) { return (rows || []).filter(function (r) { return r.side !== 'buyer'; }); }
+  function forAgent(rows) { return state.agent === 'all' ? rows : rows.filter(function (r) { return r.agent === state.agent; }); }
+  function rowsFor(tab) { return forAgent(sellSide(state.data && state.data[BUCKET[tab]])); }
+
+  function facts(m) {
+    if (!m) return '';
+    var bits = [];
+    if (m.beds != null || m.baths != null) bits.push((m.beds != null ? m.beds : '?') + ' bd · ' + (m.baths != null ? m.baths : '?') + ' ba');
+    if (m.sqft) bits.push(Number(m.sqft).toLocaleString() + ' sqft');
+    if (m.lotAcres) bits.push(m.lotAcres + ' ac');
+    if (m.yearBuilt) bits.push('Built ' + m.yearBuilt);
+    return bits.join(' · ');
+  }
+  function card(d) {
+    var m = d.meta || {};
+    var ph = d.photo_url ? '<img class="ph" src="' + esc(d.photo_url) + '" alt="">' : '<div class="ph-empty">No photo yet</div>';
+    var f = facts(m);
+    var metaBits = [];
+    if (d.mls) metaBits.push('MLS ' + esc(d.mls));
+    if (m.expiration) metaBits.push('Exp ' + esc(fmtDate(m.expiration)));
+    else if (m.dateListed) metaBits.push('Listed ' + esc(fmtDate(m.dateListed)));
+    if (m.commission) metaBits.push(esc(m.commission) + ' comm');
+    var links = [];
+    if (d.source_key) links.push('<a href="/seller.html?deal=' + encodeURIComponent(d.source_key) + '" target="_blank" rel="noopener">Portal ↗</a>');
+    if (m.disclosurePackage) links.push('<a href="' + esc(m.disclosurePackage) + '" target="_blank" rel="noopener">Disclosures ↗</a>');
+    if (d.has_video) links.push('<a href="/seller.html?deal=' + encodeURIComponent(d.source_key) + '" target="_blank" rel="noopener">Video ↗</a>');
+    return '<div class="rost-card">' + ph + '<div class="rost-bd">' +
+      '<div class="rost-top"><span class="rost-price">' + esc(fmtUSD(d.list_price || d.price)) + '</span>' +
+        '<span class="lst-badge">' + (d.agent === 'james' ? 'James' : 'Sara') + '</span></div>' +
+      '<div class="rost-addr">' + esc(d.address || '') + (d.city ? ' · ' + esc(d.city) : '') + '</div>' +
+      (m.client ? '<div class="rost-client">' + esc(m.client) + '</div>' : '') +
+      (f ? '<div class="rost-facts">' + esc(f) + '</div>' : '') +
+      (metaBits.length ? '<div class="rost-metaline">' + metaBits.join(' &nbsp;·&nbsp; ') + '</div>' : '') +
+      (links.length ? '<div class="rost-links">' + links.join('') + '</div>' : '') +
+      '</div></div>';
+  }
+  function counts() {
+    ['active', 'preparing', 'pending', 'closed'].forEach(function (t) {
+      var el = root.querySelector('[data-rost-c-' + t + ']'); if (el) el.textContent = rowsFor(t).length;
+    });
+  }
+  function render() {
+    var grid = root.querySelector('[data-rost-grid]'); if (!grid) return;
+    var rows = rowsFor(state.tab);
+    grid.innerHTML = rows.length ? rows.map(card).join('') : '<div class="cur-empty">No ' + (state.tab === 'active' ? 'on-market' : state.tab === 'closed' ? 'sold' : state.tab) + ' listings' + (state.agent !== 'all' ? ' for ' + state.agent : '') + '.</div>';
+    counts();
+  }
+  function load() {
+    if (state.loading) return;
+    state.loading = true;
+    fetch('/api/crm/listings', { credentials: 'include' }).then(function (r) { return r.ok ? r.json() : null; }).then(function (j) {
+      state.loading = false;
+      if (!j || !j.counts) { if (!state.data) { var g = root.querySelector('[data-rost-grid]'); if (g) g.innerHTML = '<div class="cur-empty">Could not load listings — try again.</div>'; } return; }
+      state.data = j; render();
+    }).catch(function () { state.loading = false; if (!state.data) { var g = root.querySelector('[data-rost-grid]'); if (g) g.innerHTML = '<div class="cur-empty">Could not load listings — try again.</div>'; } });
+  }
+  root.addEventListener('click', function (e) {
+    var t = e.target.closest('[data-rost]');
+    if (t) { state.tab = t.getAttribute('data-rost'); root.querySelectorAll('[data-rost]').forEach(function (b) { b.classList.toggle('on', b === t); }); render(); return; }
+    var a = e.target.closest('[data-rost-agent]');
+    if (a) { state.agent = a.getAttribute('data-rost-agent'); root.querySelectorAll('[data-rost-agent]').forEach(function (b) { b.classList.toggle('on', b === a); }); render(); return; }
+  });
+  // Sidebar "Preparing to list" jumps straight to that tab; either sidebar entry
+  // (re)loads the roster so it's current after a sync.
+  document.addEventListener('click', function (e) {
+    var nav = e.target.closest('[onclick*="\'roster\'"]'); if (!nav) return;
+    load();
+    var want = nav.getAttribute && nav.getAttribute('data-rost-nav');
+    if (want) { state.tab = want; root.querySelectorAll('[data-rost]').forEach(function (b) { b.classList.toggle('on', b.getAttribute('data-rost') === want); }); setTimeout(render, 0); }
+  });
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', load);
   else load();
 })();

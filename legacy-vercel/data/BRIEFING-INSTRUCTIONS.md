@@ -56,11 +56,32 @@ Find the deal by `"address"` (or `"id"`) and update:
 
 Add to the **deal** object:
 
-- `"mls"` — the MLS number. **Preferred** — pulls the exact IDX photo (avoids
-  wrong-town street-name collisions).
+- `"mls"` — the MLS number (MetroList ListingId, e.g. `"226071603"`).
+  **ALWAYS set this on a sell-side listing.** The CRM pulls the listing's photo
+  straight from MetroList by this number — without it, no photo shows.
 - `"photo"` — a direct image URL (overrides IDX).
 - `"video"` — the YouTube tour link (the portal auto-counts views).
 - `"matterport"` — the 3D-tour link.
+
+## 2b. Listing roster metadata (the CRM "Listings" view)
+
+For sell-side listings, add a `"listing"` object with whatever's on the listing
+sheet. It shows on the **Listings** roster (filterable by agent, with a
+Preparing-to-list tab). Everything is optional; include what you have:
+
+```json
+"listing": {
+  "client": "Laura Redding",
+  "apn": "226-071-603",
+  "beds": 3, "baths": 2, "sqft": 1200, "lotAcres": 5.11, "yearBuilt": 1979,
+  "dateListed": "2026-06-04", "expiration": "2027-01-31",
+  "commission": "3%", "preEscrow": "P-706807",
+  "disclosurePackage": "https://app.disclosures.io/link/..."
+}
+```
+
+Future listings you're tracking before they hit the market: set the deal
+`"stage": "preparing"` — they appear under the roster's **Preparing** tab.
 
 ## 3. Documents in the client portal
 
