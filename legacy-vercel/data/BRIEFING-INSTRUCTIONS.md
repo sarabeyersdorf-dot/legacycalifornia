@@ -34,28 +34,38 @@ Add to the **deal** object:
 - `"video"` — the YouTube tour link (the portal auto-counts views).
 - `"matterport"` — the 3D-tour link.
 
-## 3. Documents — linking the executed files (client view / download)
+## 3. Documents in the client portal
 
-Each deal has a `"docs"` object. A document's value is normally just its
-**status** (`"received"`, `"signed"`, `"drafted"`, `null`, …). To let the
-client **view and download the executed file** in their seller portal, make
-the value an object with a `"url"`:
+### The simple way — just drop the files in (use this for most transactions)
+
+When Sara says *"put [deal]'s documents in the client portal"*, list the
+files from that deal's **Dropbox folder**, make a Dropbox **share link** for
+each, and write a flat `"clientDocuments"` array on the deal. No status, no
+compliance codes — just a name and a link per file:
 
 ```json
-"docs": {
-  "RPA":  { "status": "signed",   "url": "https://…/executed-purchase-agreement.pdf" },
-  "TDS":  { "status": "received", "url": "https://…/tds.pdf" },
-  "prelim": "drafted"
-}
+"clientDocuments": [
+  { "name": "Purchase Agreement",  "url": "https://www.dropbox.com/…/rpa.pdf" },
+  { "name": "Seller Disclosures",  "url": "https://www.dropbox.com/…/tds.pdf" },
+  { "name": "Preliminary Title Report", "url": "https://www.dropbox.com/…/prelim.pdf" }
+]
 ```
 
-- Only **client-safe** documents surface in the portal (internal / legal docs
-  are never shown). A `"url"` on those still won't appear to the client.
-- Prefer a **signed / expiring link**. The portal is behind a private,
-  unguessable link, but the file URL itself shouldn't be a permanent public
-  link to something sensitive.
-- No `"url"` → the document still shows with its status, just without the
-  View / Download links.
+- Everything in `clientDocuments` shows in the portal with **View** and
+  **Download** links. The portal handles the Dropbox `dl=0`/`dl=1`
+  preview-vs-download automatically.
+- Only put files here that the **client should see**. (Internal-only files —
+  commission, broker memos, etc. — stay out of this list.)
+- `"status"` and `"sub"` are optional if she ever wants them; skip them
+  otherwise.
+- Prefer Dropbox links set to **expire** for anything sensitive.
+
+### The detailed way — the compliance checklist (`"docs"`)
+
+The `"docs"` object is the compliance checklist (status per named document).
+A value can also carry a link: `{ "status": "signed", "url": "…" }`. Use this
+only when Sara is tracking document *status*; for "just show the client the
+files," use `clientDocuments` above.
 
 ## 4. Tasks / compliance — the top-level `"tasks"` array
 

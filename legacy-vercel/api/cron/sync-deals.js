@@ -131,7 +131,40 @@ function mapDocs(dealId, d) {
       updated_at: new Date().toISOString()
     });
   }
+
+  // SIMPLE PATH — a flat list of files to drop straight into the client portal.
+  // No compliance token, no status required: Cowork lists the deal's Dropbox
+  // files + share links and writes them here. Any of these keys works.
+  const flat = [d.clientDocuments, d.portalDocs, d.documents, d.portalDocuments]
+    .find(Array.isArray) || [];
+  for (const doc of flat) {
+    if (!doc) continue;
+    const name = String(doc.name || doc.title || doc.label || '').trim();
+    const url  = doc.url || doc.link || doc.href || doc.file || null;
+    if (!name && !url) continue;
+    out.push({
+      deal_id: dealId,
+      doc_type: extType(name || url),
+      name: name || 'Document',
+      sub: doc.sub || doc.note || null,
+      status: doc.status ? docStatus(doc.status) : null,   // status is OPTIONAL here
+      doc_url: url ? String(url) : null,
+      client_safe: doc.client_safe === false ? false : true, // shareable by default
+      updated_at: new Date().toISOString()
+    });
+  }
   return out;
+}
+
+// A short type tag from a filename / URL extension (PDF / DOC / IMG / …).
+function extType(s) {
+  const m = /\.([a-z0-9]{1,5})(?:[?#]|$)/i.exec(String(s || ''));
+  const e = (m ? m[1] : '').toLowerCase();
+  if (e === 'pdf') return 'PDF';
+  if (e === 'doc' || e === 'docx') return 'DOC';
+  if (['jpg','jpeg','png','heic','gif','webp'].includes(e)) return 'IMG';
+  if (['xls','xlsx','csv'].includes(e)) return 'XLS';
+  return e ? e.toUpperCase().slice(0, 4) : 'DOC';
 }
 
 export default async function handler(req, res) {

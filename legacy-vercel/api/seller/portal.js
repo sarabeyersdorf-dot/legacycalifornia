@@ -271,7 +271,7 @@ export default async function handler(req, res) {
       return {
         type: (d.doc_type || '').toUpperCase().slice(0, 6),
         name: sanitize(d.name), sub: sanitize(d.sub || ''),
-        status: DOC_STATUS_LABEL[d.status] || 'On file',
+        status: d.status ? (DOC_STATUS_LABEL[d.status] || 'On file') : '',   // optional — blank for flat drops
         view_url:       raw ? dbxLink(raw, 0) : '',   // preview (Dropbox dl=0)
         download_url:   raw ? dbxLink(raw, 1) : '',   // force download (Dropbox dl=1)
         view_label:     raw ? 'View' : '',            // data-optional anchors hide when empty
