@@ -38,10 +38,22 @@ Add to the **deal** object:
 
 ### The simple way — just drop the files in (use this for most transactions)
 
-When Sara says *"put [deal]'s documents in the client portal"*, list the
-files from that deal's **Dropbox folder**, make a Dropbox **share link** for
-each, and write a flat `"clientDocuments"` array on the deal. No status, no
-compliance codes — just a name and a link per file:
+When Sara says *"put [deal]'s documents in the client portal"*, follow these
+steps **in order** — do NOT write anything to `deals.json` until she confirms:
+
+1. **List the folder.** Open that deal's **Dropbox folder** and list every
+   file you find. Show Sara a numbered list with (a) the real Dropbox filename
+   and (b) the clean, client-facing name you propose (tidy it up: drop file
+   extensions, dates, and version tags; use Title Case — e.g. `RPA_signed_v2.pdf`
+   → **"Purchase Agreement"**).
+
+2. **Offer to rename + drop.** Tell her: *"Here are the N files I'll add. Tell
+   me any to rename, and any to leave out."* Wait for her reply. Let her rename
+   any file or exclude internal ones (commission, broker memos, etc.).
+
+3. **Only after she confirms:** make a Dropbox **share link** for each kept
+   file and write the flat `"clientDocuments"` array on the deal — the final
+   (possibly renamed) name + the link per file:
 
 ```json
 "clientDocuments": [
@@ -51,14 +63,18 @@ compliance codes — just a name and a link per file:
 ]
 ```
 
+4. Bump `"version"` + `"lastUpdated"`, keep the JSON valid, and tell her it's
+   in — the portal updates on the next sync.
+
+Notes:
 - Everything in `clientDocuments` shows in the portal with **View** and
   **Download** links. The portal handles the Dropbox `dl=0`/`dl=1`
   preview-vs-download automatically.
-- Only put files here that the **client should see**. (Internal-only files —
-  commission, broker memos, etc. — stay out of this list.)
-- `"status"` and `"sub"` are optional if she ever wants them; skip them
-  otherwise.
+- Only include files the **client should see**; internal files stay out.
+- `"status"` and `"sub"` are optional; skip them unless she asks.
 - Prefer Dropbox links set to **expire** for anything sensitive.
+- If she just says *"add the executed purchase agreement for [deal]: [link]"*,
+  skip the folder listing and append that one entry.
 
 ### The detailed way — the compliance checklist (`"docs"`)
 
