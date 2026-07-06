@@ -1452,42 +1452,76 @@
     setPill('[data-roster-past]', seg.past);
   }
 
+  // One rendered lead row.
+  function leadRowHtml(l) {
+    const msg = state.messageByLead.get(l.id);
+    const preview = msg
+      ? (msg.subject ? `<strong>${escHtml(msg.subject)}</strong> — ` : '') + escHtml((msg.body || '').slice(0, 140))
+      : (l.areas && l.areas[0] ? `Browsing ${escHtml(l.areas[0])}` : '<em>No conversation yet</em>');
+    const when = msg ? fmtRel(msg.created_at) : fmtRel(l.updated_at);
+    const isActive = l.id === state.selectedLeadId;
+    const initials = initialsOf(l.first_name, l.last_name, l.email);
+    return `
+      <div class="lead-row ${isActive ? 'on' : ''}" data-lead-id="${escHtml(l.id)}">
+        <div class="${avatarClassFor(l.temperature)}">${escHtml(initials)}</div>
+        <div class="lead-content">
+          <div class="lead-name-row">
+            <span class="lead-name">${escHtml(fullName(l))}</span>
+            <span class="lead-when">${escHtml(when)}</span>
+          </div>
+          <p class="lead-preview">${preview}</p>
+          <div class="lead-meta">
+            ${tempBadge(l.temperature)}
+            <span class="badge">${escHtml(leadTypeLabel(l))}</span>
+            <span class="score">${l.score == null ? '—' : l.score}</span>
+          </div>
+        </div>
+      </div>`;
+  }
+
+  const LEAD_PAGE = 50;   // render 50 rows at a time; infinite-scroll the rest
+
+  // Append the next page of already-filtered leads to the list.
+  function appendLeadRows(container) {
+    const leads = state._leadView || [];
+    const start = state._leadShown || 0;
+    const slice = leads.slice(start, start + LEAD_PAGE);
+    if (!slice.length) return;
+    container.insertAdjacentHTML('beforeend', slice.map(leadRowHtml).join(''));
+    state._leadShown = start + slice.length;
+  }
+
+  // Wire delegated click + infinite scroll on the list container (once).
+  function wireLeadList(container) {
+    if (container._wired) return;
+    container._wired = true;
+    container.addEventListener('click', (e) => {
+      const row = e.target.closest('[data-lead-id]');
+      if (row) selectLeadId(row.getAttribute('data-lead-id'));
+    });
+    container.addEventListener('scroll', () => {
+      if (container.scrollTop + container.clientHeight >= container.scrollHeight - 240) {
+        appendLeadRows(container);   // near the bottom → load the next 50
+      }
+    });
+  }
+
   function paintLeadList() {
     const container = document.querySelector('[data-lead-list]');
     if (!container) return;
+    // Filtering/search still resolve the full set; only the RENDER is paged, so
+    // a 2,000-lead roster no longer paints 2,000 DOM rows at once (the INP hit).
     const leads = filterLeads();
+    state._leadView = leads;
+    state._leadShown = 0;
     if (!leads.length) {
       container.innerHTML = `<div class="lead-row" style="opacity:.55;"><div class="lead-content"><div class="lead-name-row"><span class="lead-name" style="font-style:italic;">No leads in this filter yet.</span></div></div></div>`;
       return;
     }
-    container.innerHTML = leads.map((l) => {
-      const msg = state.messageByLead.get(l.id);
-      const preview = msg
-        ? (msg.subject ? `<strong>${escHtml(msg.subject)}</strong> — ` : '') + escHtml((msg.body || '').slice(0, 140))
-        : (l.areas && l.areas[0] ? `Browsing ${escHtml(l.areas[0])}` : '<em>No conversation yet</em>');
-      const when = msg ? fmtRel(msg.created_at) : fmtRel(l.updated_at);
-      const isActive = l.id === state.selectedLeadId;
-      const initials = initialsOf(l.first_name, l.last_name, l.email);
-      return `
-        <div class="lead-row ${isActive ? 'on' : ''}" data-lead-id="${escHtml(l.id)}">
-          <div class="${avatarClassFor(l.temperature)}">${escHtml(initials)}</div>
-          <div class="lead-content">
-            <div class="lead-name-row">
-              <span class="lead-name">${escHtml(fullName(l))}</span>
-              <span class="lead-when">${escHtml(when)}</span>
-            </div>
-            <p class="lead-preview">${preview}</p>
-            <div class="lead-meta">
-              ${tempBadge(l.temperature)}
-              <span class="badge">${escHtml(leadTypeLabel(l))}</span>
-              <span class="score">${l.score == null ? '—' : l.score}</span>
-            </div>
-          </div>
-        </div>`;
-    }).join('');
-    container.querySelectorAll('[data-lead-id]').forEach((row) => {
-      row.addEventListener('click', () => selectLeadId(row.getAttribute('data-lead-id')));
-    });
+    container.innerHTML = '';
+    container.scrollTop = 0;
+    appendLeadRows(container);
+    wireLeadList(container);
   }
 
   function paintFilters() {
@@ -1709,13 +1743,17 @@
           <div class="lp-wire-h"><span class="lp-wire-glyph">◆</span> Wire-fraud protection</div>
           <div class="lp-wire-b">We will never send wire instructions through this portal, by email, or by text. Before wiring funds, always call the title company directly at a phone number you have independently verified.</div>
         </div>` : '';
-      const portalOk = lead.portal_token && lead.deal_side !== 'buyer';
+      const isBuyer  = lead.deal_side === 'buyer';
+      const portalOk = lead.portal_token && !isBuyer;
+      const previewTitle = isBuyer
+        ? 'Your Search'
+        : `Your Sale — ${(lead.areas && lead.areas[0]) || 'Your listing'}`;
       return `
         <div class="lp-preview">
           ${portalOk ? `<div class="lp-urlchip"><span class="dot"></span>${escHtml(location.host)}/seller.html?t=${escHtml(mask(lead.portal_token))}</div>` : ''}
           <div class="lp-preview-head">
             <div>
-              <div class="lp-preview-title">Your Sale — ${escHtml((lead.areas && lead.areas[0]) || 'Your listing')}</div>
+              <div class="lp-preview-title">${escHtml(previewTitle)}</div>
               <div class="lp-preview-sub">What ${escHtml(clientFirst)} sees, live</div>
             </div>
             <div class="lp-preview-avatar">${escHtml(initials)}</div>

@@ -297,6 +297,20 @@ body.lp-restyle .lp-agent-details[open] > summary::after { content: ' ▴'; }
 body.lp-restyle .lp-agent-details-body .lp-section { border-bottom: 1px solid var(--lp-line-soft); padding: 16px 0; }
 body.lp-restyle .lp-agent-details-body .lp-section:last-child { border-bottom: none; }
 
+/* Composer tabs + filter chips → DM Sans, normal case (not mono uppercase) */
+body.lp-restyle .composer-head,
+body.lp-restyle .composer-tab,
+body.lp-restyle .lead-filter .chip,
+body.lp-restyle .lst-filter .chip {
+  font-family: var(--lp-sans);
+  text-transform: none;
+  letter-spacing: normal;
+}
+body.lp-restyle .composer-head { font-size: 13px; }
+body.lp-restyle .composer-tab { font-size: 13px; font-weight: 500; border-radius: var(--lp-radius-pill); }
+body.lp-restyle .lead-filter .chip,
+body.lp-restyle .lst-filter .chip { font-size: 12px; font-weight: 500; border-radius: var(--lp-radius-pill); }
+
 /* ========================================================================
  * 4. INTERACTION — focus rings, hover, reduced motion
  * ===================================================================== */

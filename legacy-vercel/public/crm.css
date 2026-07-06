@@ -1088,3 +1088,57 @@
   .ds-grid { grid-template-columns: 1fr; }
   .need-card { grid-template-columns: 40px 1fr; gap: 14px; padding: 18px 20px; }
 }
+
+/* ============================================================
+   FIXED APP SHELL (authoritative — appended last so it wins).
+   The document body never scrolls; the nav, the lead list, and the
+   detail/preview panes each scroll on their own. Appears once: the
+   search bar lives only in the fixed topbar. crm.css loads only on
+   crm.html, so none of this can reach the public marketing site.
+   ============================================================ */
+html, body { height: 100%; }
+body { overflow: hidden; }
+.app { height: 100vh; min-height: 0; overflow: hidden; }
+.app-side { height: 100vh; }                        /* keeps its own overflow-y:auto */
+.app-main {
+  height: 100vh; min-width: 0;
+  display: flex; flex-direction: column; overflow: hidden;
+}
+.app-topbar { flex: 0 0 auto; position: static; }   /* the single, fixed search */
+
+/* Scrollable content views fill the remaining height and scroll internally */
+.crm-view.on { display: flex; flex-direction: column; flex: 1 1 auto; min-height: 0; overflow-y: auto; }
+
+/* Inbox is special: the view itself never scrolls — its three columns do */
+.crm-view[data-view="inbox"].on { overflow: hidden; }
+.inbox-shell { flex: 1 1 auto; min-height: 0; }
+.lead-list    { height: 100%; overflow: hidden; }   /* flex column; only its rows scroll */
+.lead-detail  { height: 100%; overflow-y: auto; }
+.lead-profile { height: 100%; overflow-y: auto; }
+
+/* Phone: the fixed 3-pane can't fit — fall back to one natural scroll */
+@media (max-width: 760px) {
+  html, body { overflow-x: hidden; }
+  body { overflow-y: auto; }
+  /* Content first, nav below — land on the search + inbox, not a long nav scroll */
+  .app { height: auto; min-height: 100vh; display: flex; flex-direction: column-reverse; overflow: visible; }
+  .app-side { border-right: none; border-top: 1px solid var(--rule); }
+  .app-side { position: static; height: auto; overflow: visible; }
+  .app-main { height: auto; overflow: visible; }
+  .crm-view.on,
+  .crm-view[data-view="inbox"].on { overflow: visible; }
+  .inbox-shell { display: block; }
+  .lead-list, .lead-detail, .lead-profile { height: auto; overflow: visible; width: 100%; }
+  .lead-list { border-right: none; border-bottom: 1px solid var(--rule); }
+  .lead-profile { border-top: 1px solid var(--rule); border-left: none; }
+  /* Topbar wraps: full-width search on its own row, actions below */
+  .app-topbar { flex-wrap: wrap; gap: 10px 8px; padding: 12px 16px; }
+  .app-search { min-width: 0; flex: 1 1 100%; }
+  /* The horizontal view-tab strip scrolls instead of overflowing the page */
+  .crm-tabs { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  /* Compact the nav so you reach content without a long scroll */
+  .app-side { padding: 14px 0; }
+  .app-side-brand { padding: 0 20px 14px; }
+  .app-side-section { padding: 12px 20px 5px; }
+  .app-side-nav a { padding: 7px 14px; font-size: 13px; }
+}
