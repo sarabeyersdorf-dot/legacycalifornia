@@ -1,6 +1,6 @@
 {
-  "version": "1.17",
-  "lastUpdated": "2026-07-05",
+  "version": "1.18",
+  "lastUpdated": "2026-07-06",
   "updatedBy": "Claude",
   "tasks": [
     { "agent": "james", "client": "Wendell", "title": "no BRBC in the EX folder (James owes); file a copy if signed", "note": "monday", "done": false },
@@ -13,7 +13,9 @@
     { "agent": "sara", "client": "433 Hwy 4", "title": "Tenant IN POSSESSION — put the through-end-of-Aug extension in writing with Neriah (SIP/TIP addendum)", "done": false },
     { "agent": "sara", "client": "Latigo", "title": "No BRBC in Ex folder for the Castles — sign/file a copy", "note": "monday", "done": false },
     { "agent": "sara", "client": "433 Hwy 4", "title": "File buyer-signed disclosure set (DocuSign 7/1) in Ex; get sellers' NHD signature pages + MU-PA back to Melissa", "note": "monday", "done": false },
-    { "agent": "james", "client": "Sheep Ranch", "title": "Escrow P-698773 cancellation instructions — buyer signature pending (James sent 7/4); chase so Placer can close out", "done": false }
+    { "agent": "james", "client": "Sheep Ranch", "title": "Escrow P-698773 cancellation instructions — buyer signature pending (James sent 7/4); chase so Placer can close out", "done": false },
+    { "agent": "sara", "client": "Rathburn", "title": "Listing appointment — Lilia Rathburn, 11 AM", "note": "today 7/6", "done": false },
+    { "agent": "james", "client": "Copperopolis", "title": "Showing — mobile home in Copperopolis, 9 AM", "note": "today 7/6", "done": false }
   ],
   "deals": [
     {
@@ -349,7 +351,7 @@
       "type": "residential",
       "side": "listing",
       "agent": "sara",
-      "listPrice": null,
+      "listPrice": 89000,
       "salePrice": null,
       "openEscrowDate": null,
       "closingDate": null,
@@ -366,8 +368,8 @@
         "sellerDocs": null
       },
       "correspondence": [],
-      "notes": "New listing. Flyer and prelim ready. Separate from the sold 467 Skyline transaction. Homes.com lead Sharon Hedges (7/3) — James reached out 7/4, no reply yet; following up.",
-      "alerts": []
+      "notes": "New listing. Flyer and prelim ready. Separate from the sold 467 Skyline transaction. Homes.com lead Sharon Hedges (7/3) — James reached out 7/4, no reply yet; following up. PRICE REDUCTION to $89,000 in progress (per Sara 7/6).",
+      "alerts": ["Price reduction to 89000 in progress (7/6)"]
     },
     {
       "id": "9568-sheep-ranch",
@@ -719,7 +721,7 @@
       "id": "1350-love-st",
       "address": "1350 Love St",
       "city": "Angels Camp, CA 95222",
-      "stage": "preparing",
+      "stage": "listing",
       "type": "land",
       "side": "listing",
       "agent": "sara",
@@ -729,10 +731,11 @@
       "closingDate": null,
       "contacts": {},
       "docs": {
-        "titleProfile": "received"
+        "titleProfile": "received",
+        "listingAgreement": "executed"
       },
       "correspondence": [],
-      "notes": "Vacant land, Angels Camp Townsite (Lot 10 Blk 5), APN 060-010-036-000, Calaveras County. Title Pro property profile on file (_Listings/Land/1350 Love St). Photos shot 5/17/25 + 6/19/25, corrected set plus new photos 1/9/26. No signed listing agreement in the folder yet — stage set to preparing.",
+      "notes": "Vacant land, Angels Camp Townsite (Lot 10 Blk 5), APN 060-010-036-000, Calaveras County. Title Pro property profile on file (_Listings/Land/1350 Love St). Photos shot 5/17/25 + 6/19/25, corrected set plus new photos 1/9/26. Listing agreement SIGNED (per Sara 7/6) — Sara filing the LA in the ex folder.",
       "alerts": []
     },
     {
