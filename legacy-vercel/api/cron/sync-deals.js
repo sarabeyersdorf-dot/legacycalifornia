@@ -110,7 +110,12 @@ function mapDocs(dealId, d) {
   const docs = d.docs || {};
   for (const [token, val] of Object.entries(docs)) {
     if (DOC_SKIP.has(token)) continue;
-    const status = docStatus(val);
+    // A doc value may be a bare status string ("received") OR an object that
+    // also carries the link to the executed file: { status, url }.
+    const isObj    = val && typeof val === 'object';
+    const rawState = isObj ? (val.status ?? val.state ?? val.value) : val;
+    const url      = isObj ? (val.url || val.link || val.href || val.file || null) : null;
+    const status = docStatus(rawState);
     if (!status) continue;
     const base = token.split('_')[0];
     const label = DOC_LABELS[token] || DOC_LABELS[base];
@@ -121,6 +126,7 @@ function mapDocs(dealId, d) {
       name: label[0],
       sub: label[1] || null,
       status,
+      doc_url: url ? String(url) : null,         // link to the executed document, if provided
       client_safe: true,
       updated_at: new Date().toISOString()
     });

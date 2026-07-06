@@ -129,6 +129,9 @@
 .doc-row .name { color: var(--ink); }
 .doc-row .name .sub { display: block; font-family: var(--mono); font-size: 9.5px; letter-spacing: 0.12em; color: var(--ink-faint); margin-top: 2px; text-transform: uppercase; }
 .doc-row .d-status { font-family: var(--mono); font-size: 9.5px; letter-spacing: 0.12em; color: var(--ink-mute); text-transform: uppercase; white-space: nowrap; }
+.doc-actions { grid-column: 2 / -1; display: flex; gap: 18px; margin-top: 7px; }
+.doc-link { font-size: 12px; font-weight: 600; color: #2F7A4D; text-decoration: none; }
+.doc-link:hover { text-decoration: underline; }
 
 /* Tasks — what I need from you */
 .task-row {
@@ -297,6 +300,10 @@
             <span class="icn" data-bind="type">DOC</span>
             <div class="name"><span data-bind="name">Document</span><span class="sub" data-bind="sub" data-optional>—</span></div>
             <span class="d-status" data-bind="status">On file</span>
+            <span class="doc-actions">
+              <a class="doc-link" data-bind="view_label" data-bind-href="url" data-optional href="#" target="_blank" rel="noopener">View</a>
+              <a class="doc-link doc-download" data-bind="download_label" data-bind-href="url" data-optional href="#" target="_blank" rel="noopener" download>Download ↓</a>
+            </span>
           </div>
         </section>
 

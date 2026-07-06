@@ -159,10 +159,17 @@ export default async function handler(req, res) {
     } catch (_) { /* stay soft */ }
 
     // 2. Documents for this deal (client-safe only) ------------------------
-    const { data: docRows } = await supa.from('deal_documents')
-      .select('doc_type, name, sub, status, party_owed, client_safe')
+    // Prefer selecting doc_url (link to the executed file); fall back if the
+    // column isn't there yet (pre-016) so documents never disappear.
+    let docRes = await supa.from('deal_documents')
+      .select('doc_type, name, sub, status, party_owed, client_safe, doc_url')
       .eq('deal_id', deal.id).eq('client_safe', true);
-    const docs = docRows || [];
+    if (docRes.error) {
+      docRes = await supa.from('deal_documents')
+        .select('doc_type, name, sub, status, party_owed, client_safe')
+        .eq('deal_id', deal.id).eq('client_safe', true);
+    }
+    const docs = docRes.data || [];
 
     // Hero photo + tour media — driven from deals.json ("photo" / "video" /
     // "matterport"), with a property-photo and YouTube-thumbnail fallback so a
@@ -249,11 +256,17 @@ export default async function handler(req, res) {
     if (deal.escrow_officer) team.push({ name: sanitize(deal.escrow_officer), sub: 'Escrow / Title', access: 'Escrow' });
     if (deal.co_agent)       team.push({ name: sanitize(deal.co_agent), sub: "Buyer's side", access: 'Buyer side' });
 
-    const documentsArr = docs.map((d) => ({
-      type: (d.doc_type || '').toUpperCase().slice(0, 6),
-      name: sanitize(d.name), sub: sanitize(d.sub || ''),
-      status: DOC_STATUS_LABEL[d.status] || 'On file'
-    }));
+    const documentsArr = docs.map((d) => {
+      const url = (d.doc_url && /^https?:\/\//i.test(d.doc_url)) ? d.doc_url : '';
+      return {
+        type: (d.doc_type || '').toUpperCase().slice(0, 6),
+        name: sanitize(d.name), sub: sanitize(d.sub || ''),
+        status: DOC_STATUS_LABEL[d.status] || 'On file',
+        url,                                    // link to the executed file (empty = none)
+        view_label:     url ? 'View' : '',      // data-optional anchors hide when empty
+        download_label: url ? 'Download ↓' : ''
+      };
+    });
 
     // Per-agent portal: James's sellers see James, not Sara. Pull the deal's
     // agent identity from the agents table (fail-soft to sensible defaults).

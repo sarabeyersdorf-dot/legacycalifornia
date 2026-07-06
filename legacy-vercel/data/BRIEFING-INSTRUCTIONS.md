@@ -34,7 +34,30 @@ Add to the **deal** object:
 - `"video"` — the YouTube tour link (the portal auto-counts views).
 - `"matterport"` — the 3D-tour link.
 
-## 3. Tasks / compliance — the top-level `"tasks"` array
+## 3. Documents — linking the executed files (client view / download)
+
+Each deal has a `"docs"` object. A document's value is normally just its
+**status** (`"received"`, `"signed"`, `"drafted"`, `null`, …). To let the
+client **view and download the executed file** in their seller portal, make
+the value an object with a `"url"`:
+
+```json
+"docs": {
+  "RPA":  { "status": "signed",   "url": "https://…/executed-purchase-agreement.pdf" },
+  "TDS":  { "status": "received", "url": "https://…/tds.pdf" },
+  "prelim": "drafted"
+}
+```
+
+- Only **client-safe** documents surface in the portal (internal / legal docs
+  are never shown). A `"url"` on those still won't appear to the client.
+- Prefer a **signed / expiring link**. The portal is behind a private,
+  unguessable link, but the file URL itself shouldn't be a permanent public
+  link to something sensitive.
+- No `"url"` → the document still shows with its status, just without the
+  View / Download links.
+
+## 4. Tasks / compliance — the top-level `"tasks"` array
 
 Sara's daily task & compliance checklist. Shows on the CRM **Tasks** tab and at
 the top of each person's **Today**. When she says *"add a task for James…"* or
