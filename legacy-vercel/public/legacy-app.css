@@ -206,7 +206,7 @@ body.lp-restyle .badge { text-transform: none; letter-spacing: normal; font-fami
 /* ========================================================================
  * SHARED-WITH-CLIENT (Deal Workspace) — pine pill toggles, tinted rows
  * ===================================================================== */
-body.lp-restyle .ld-shared { border: none; background: transparent; padding: 0; margin-top: 20px; }
+body.lp-restyle .ld-shared { border: none; background: transparent; padding: 0 28px; margin-top: 20px; }
 body.lp-restyle .lp-deal-title { font-size: 27px; font-weight: 500; color: var(--lp-ink); line-height: 1.15; }
 body.lp-restyle .lp-deal-sub { font-size: 13px; color: var(--lp-ink-soft); margin-top: 1px; }
 body.lp-restyle .lp-shared-count { font-size: 13px; color: var(--lp-ink-soft); }
@@ -289,7 +289,7 @@ body.lp-restyle .lp-pcard-sub { font-size: 12.5px; color: var(--lp-ink-soft); ma
 body.lp-restyle .lp-preview-empty { font-size: 13px; color: var(--lp-ink-soft); font-style: italic; padding: 8px 2px; }
 
 /* Relocated agent rail — collapsible in the workspace, nothing lost */
-body.lp-restyle .lp-agent-details { margin-top: 24px; border-top: 1px solid var(--lp-line); }
+body.lp-restyle .lp-agent-details { margin-top: 24px; padding: 0 28px; border-top: 1px solid var(--lp-line); }
 body.lp-restyle .lp-agent-details > summary { list-style: none; cursor: pointer; padding: 14px 0 2px; font-size: 11px; font-weight: 700; letter-spacing: 0.09em; text-transform: uppercase; color: var(--lp-ink-soft); }
 body.lp-restyle .lp-agent-details > summary::-webkit-details-marker { display: none; }
 body.lp-restyle .lp-agent-details > summary::after { content: ' ▾'; }
