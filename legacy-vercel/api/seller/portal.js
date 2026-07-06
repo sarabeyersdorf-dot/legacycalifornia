@@ -53,6 +53,20 @@ function dbxLink(url, dl) {
   return u;
 }
 
+// Map a deal's property type to the right noun so a listing is never
+// mis-described (vacant land is not a "home"). Falls back to "property", which
+// is correct for anything. Matches on substrings so "single-family residential",
+// "vacant land", "commercial building" etc. all resolve.
+function propertyNoun(type) {
+  const t = String(type || '').toLowerCase();
+  if (/land|lot|acre|parcel/.test(t))            return 'land';
+  if (/condo|townhome|townhouse/.test(t))        return 'condo';
+  if (/commercial|retail|office|industrial|mixed/.test(t)) return 'property';
+  if (/multi|duplex|triplex|fourplex|apartment/.test(t))   return 'property';
+  if (/resid|home|house|single/.test(t))         return 'home';
+  return 'property';
+}
+
 // Party owed / status → client label
 const DOC_STATUS_LABEL = {
   signed: 'Signed', on_file: 'On file', to_sign: 'To sign',
@@ -310,16 +324,17 @@ export default async function handler(req, res) {
     //    deterministic copy so a listing is never described as "in escrow".
     const firstName = sellerFirstName(deal);
     const hi = firstName ? `${firstName} — ` : '';
+    const noun = propertyNoun(deal.type);   // home / land / condo / property
     let noteBody;
     if (inEscrow) {
       noteBody = `${hi}we're moving right on schedule and still pointed at a ${fmtDateY(coe)} close. I'll flag anything that needs you the moment it comes up. Call me anytime.`;
       try {
-        noteBody = await draftSellerNote({ firstName, deal, coe, dtc, signed, total: docs.length, tasks, agentName, agentPhone });
+        noteBody = await draftSellerNote({ firstName, deal, coe, dtc, signed, total: docs.length, tasks, agentName, agentPhone, noun });
       } catch (_) { /* keep fallback */ }
     } else if (isListing) {
-      noteBody = `${hi}your home is live on the market and getting in front of buyers. I'll keep you posted on showings and feedback, and reach out the moment we have an offer to review. Call me anytime.`;
+      noteBody = `${hi}your ${noun} is live on the market and getting in front of buyers. I'll keep you posted on showings and feedback, and reach out the moment we have an offer to review. Call me anytime.`;
     } else if (isPreparing) {
-      noteBody = `${hi}we're getting everything ready to bring your home to market — photos, prep, and pricing. I'll walk you through each step. Call me anytime.`;
+      noteBody = `${hi}we're getting everything ready to bring your ${noun} to market — ${noun === 'land' ? 'photos, signage, and pricing' : 'photos, prep, and pricing'}. I'll walk you through each step. Call me anytime.`;
     } else if (isClosed) {
       noteBody = `${hi}congratulations, your sale has closed. It was a pleasure representing you, and I'm here whenever you need anything down the road.`;
     } else {
@@ -438,8 +453,9 @@ function expiredPortal() {
   };
 }
 
-async function draftSellerNote({ firstName, deal, coe, dtc, signed, total, tasks, agentName = 'Sara Cooper', agentPhone = '209-559-4966' }) {
-  const SYSTEM = `You write ONE short paragraph as ${agentName} of Legacy Properties, to your SELLER client about their in-escrow home sale.
+async function draftSellerNote({ firstName, deal, coe, dtc, signed, total, tasks, agentName = 'Sara Cooper', agentPhone = '209-559-4966', noun = 'property' }) {
+  const SYSTEM = `You write ONE short paragraph as ${agentName} of Legacy Properties, to your SELLER client about their in-escrow ${noun} sale.
+Call the property their "${noun}" — never assume it is a house if it is ${noun === 'land' ? 'vacant land' : 'a ' + noun}.
 Voice: warm, direct, reassuring, never salesy. Short sentences. No exclamation points. No markdown. No em-dashes. No placeholders.
 Hard rules:
 1. Your phone is ${agentPhone}. Never invent other contact info.

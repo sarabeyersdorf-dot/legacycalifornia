@@ -325,8 +325,14 @@
 /* Upgrade the hero from a neutral box to the listing's real photo (MLS photo,
    else the YouTube tour thumbnail) from the portal payload. */
 (function () {
-  var _t = new URLSearchParams(location.search).get('t');
-  fetch('/api/seller/portal' + (_t ? ('?t=' + encodeURIComponent(_t)) : ''), { credentials: 'include' })
+  var _p = new URLSearchParams(location.search);
+  var _t = _p.get('t'), _deal = _p.get('deal');
+  // Forward the SAME target as the main painter: a client token (?t=) or an
+  // agent deal preview (?deal=). Without ?deal this fetch fell back to the
+  // newest pending deal, so every agent preview showed that deal's hero photo
+  // and video tour (e.g. 433's) instead of the listing's own.
+  var _q = _t ? ('?t=' + encodeURIComponent(_t)) : (_deal ? ('?deal=' + encodeURIComponent(_deal)) : '');
+  fetch('/api/seller/portal' + _q, { credentials: 'include' })
     .then(function (r) { return r.ok ? r.json() : null; })
     .then(function (d) {
       var portal = (d && d.portal) || {};
