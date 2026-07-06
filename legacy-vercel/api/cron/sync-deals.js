@@ -148,23 +148,42 @@ export default async function handler(req, res) {
 
     const active = (data.deals || []).filter((d) => ['pending', 'listing', 'closed', 'preparing'].includes(d.stage));
     let dealsUpserted = 0, docsWritten = 0;
+    const errors = [];
 
     for (const d of active) {
-      const { data: up, error } = await supa
-        .from('deals')
-        .upsert(mapDeal(d), { onConflict: 'source_key' })
-        .select('id')
-        .single();
-      if (error) throw new Error(`deal ${d.id}: ${error.message}`);
-      dealsUpserted++;
+      try {
+        const mapped = mapDeal(d);
+        // Manual upsert (select → update|insert) so we DON'T depend on a unique
+        // constraint on source_key existing in the (ad-hoc) deals table. A
+        // missing constraint would make .upsert(onConflict) throw and abort the
+        // whole sync, zeroing every listing.
+        const { data: ex, error: selErr } = await supa
+          .from('deals').select('id').eq('source_key', mapped.source_key).maybeSingle();
+        if (selErr) throw new Error(`lookup: ${selErr.message}`);
 
-      // Rebuild this deal's documents (delete then insert = idempotent)
-      await supa.from('deal_documents').delete().eq('deal_id', up.id);
-      const docRows = mapDocs(up.id, d);
-      if (docRows.length) {
-        const { error: de } = await supa.from('deal_documents').insert(docRows);
-        if (de) throw new Error(`docs ${d.id}: ${de.message}`);
-        docsWritten += docRows.length;
+        let dealId;
+        if (ex) {
+          const { error: upErr } = await supa.from('deals').update(mapped).eq('id', ex.id);
+          if (upErr) throw new Error(`update: ${upErr.message}`);
+          dealId = ex.id;
+        } else {
+          const { data: ins, error: insErr } = await supa.from('deals').insert(mapped).select('id').single();
+          if (insErr) throw new Error(`insert: ${insErr.message}`);
+          dealId = ins.id;
+        }
+        dealsUpserted++;
+
+        // Rebuild this deal's documents (delete then insert = idempotent)
+        await supa.from('deal_documents').delete().eq('deal_id', dealId);
+        const docRows = mapDocs(dealId, d);
+        if (docRows.length) {
+          const { error: de } = await supa.from('deal_documents').insert(docRows);
+          if (de) throw new Error(`docs: ${de.message}`);
+          docsWritten += docRows.length;
+        }
+      } catch (e) {
+        // Keep going — one malformed deal must never zero out every listing.
+        errors.push({ deal: d.id, address: d.address || null, error: e.message || String(e) });
       }
     }
 
@@ -205,12 +224,24 @@ export default async function handler(req, res) {
       }
     }
 
+    // Post-sync breakdown of the deals table (side/stage) so a single trigger
+    // is self-diagnosing: you can see exactly what the CRM Listings view reads.
+    let dealsInTable = null;
+    try {
+      const { data: after } = await supa.from('deals').select('side, stage');
+      const bd = {};
+      for (const r of (after || [])) { const k = `${r.side || '?'}/${r.stage || '?'}`; bd[k] = (bd[k] || 0) + 1; }
+      dealsInTable = { total: (after || []).length, by_side_stage: bd };
+    } catch (_) { /* diagnostic only */ }
+
     return ok(res, {
       synced: true,
       source_version: data.version || null,
       deals_upserted: dealsUpserted,
       documents_written: docsWritten,
       tasks_written: tasksWritten,
+      deal_errors: errors,
+      deals_in_table: dealsInTable,
       ran_at: new Date().toISOString()
     });
   } catch (e) {
