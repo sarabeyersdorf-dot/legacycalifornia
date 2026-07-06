@@ -1277,8 +1277,12 @@
 
   async function loadSeller() {
     let res;
-    const token = new URLSearchParams(location.search).get('t');
-    const url = '/api/seller/portal' + (token ? ('?t=' + encodeURIComponent(token)) : '');
+    const params = new URLSearchParams(location.search);
+    const token = params.get('t');
+    const deal  = params.get('deal');   // agent preview of a specific deal
+    let url = '/api/seller/portal';
+    if (token)     url += '?t=' + encodeURIComponent(token);
+    else if (deal) url += '?deal=' + encodeURIComponent(deal);
     try {
       res = await fetch(url, {
         method: 'GET',
@@ -1886,8 +1890,13 @@
         if (ep.indexOf('/api/crm/note') === 0)    { focusComposer('note'); return; }
         if (ep.indexOf('/api/sequences/enroll') === 0) { promptEnrollSequence(lead); return; }
         const r = await window.Legacy.api('/api/crm/actions', { method: 'POST', body: { lead_id: lead.id, action_id: id } });
-        if (r.ok) toast(r.json.client_visible ? `"${label}" added — your client will see it in their portal.` : `"${label}" logged to your tasks.`);
-        else toast((r.json && r.json.error) || 'Action failed.', false);
+        if (r.ok) {
+          const who = lead.first_name || 'the client';
+          toast(r.json.client_visible
+            ? `"${label}" added to ${who}'s workspace — now visible in their portal.`
+            : `"${label}" added to ${who}'s workspace (internal — only you see it).`);
+          selectLeadId(lead.id);   // refresh so the new item appears in the Deal Workspace + live preview
+        } else toast((r.json && r.json.error) || 'Action failed.', false);
       };
       // "Actions for a <side> in <stage>" header — sentence-case, quiet.
       const headSide  = SIDE_PILL[lead.deal_side] || 'contact';

@@ -1852,6 +1852,10 @@ function selectLead(el) {
     var want = nav.getAttribute && nav.getAttribute('data-lst-nav');
     if (want) { state.tab = want; root.querySelectorAll('[data-lst]').forEach(function (b) { b.classList.toggle('on', b.getAttribute('data-lst') === want); }); setTimeout(render, 0); }
   });
+  // Populate the Active/Pending roster counts on load — not just when the
+  // Listings view is first opened.
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', load);
+  else load();
 })();
 </script>
 <script>
