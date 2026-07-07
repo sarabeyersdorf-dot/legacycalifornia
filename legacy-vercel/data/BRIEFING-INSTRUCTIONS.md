@@ -24,6 +24,18 @@ task: `done`, `needs_attention`, and the free-text `agent_note` James or Sara
 typed on the Tasks board — plus a `needs_review` list of just the flagged /
 annotated ones.
 
+Also pull the **week ahead** so the agenda reflects what's actually scheduled:
+
+```
+GET https://legacycalifornia.vercel.app/api/crm/briefing-calendar?key=<SYNC_SECRET>&days=7
+```
+
+Read-only, same key. `days` defaults to 7 (max 30). Returns `events[]` from today
+through today+days — showings/tours, listing appointments, inspections, and
+escrow deadlines / close-of-escrow — each with `start`, `end`, `all_day`,
+`agent`, `client`, `deal` (matching a deals.json id when it's escrow-related),
+`type`, `location`, and `notes`, sorted earliest-first.
+
 Use it to tune the day:
 - A task marked **done** → don't repeat it; if it closes a loop, note the
   outcome and drop it.
