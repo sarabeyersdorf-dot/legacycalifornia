@@ -1,5 +1,5 @@
 {
-  "version": "1.22",
+  "version": "1.23",
   "lastUpdated": "2026-07-07",
   "updatedBy": "Claude",
   "tasks": [
@@ -837,6 +837,7 @@
       "type": "land",
       "side": "listing",
       "agent": "sara",
+      "mls": "226003169",
       "listPrice": null,
       "salePrice": null,
       "openEscrowDate": null,
