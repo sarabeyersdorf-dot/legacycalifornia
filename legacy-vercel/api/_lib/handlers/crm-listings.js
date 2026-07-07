@@ -137,10 +137,25 @@ export default async function handler(req, res) {
     // Prefer the full column set; degrade gracefully if listing_meta (019) or
     // mls_number (013) aren't in the table yet.
     let dealsRes = await dealsQuery(COLS_FULL);
-    if (dealsRes.error) dealsRes = await dealsQuery(COLS_MLS);
-    if (dealsRes.error) dealsRes = await dealsQuery(COLS);
+    let usedCols = 'full';
+    if (dealsRes.error) { dealsRes = await dealsQuery(COLS_MLS); usedCols = 'mls'; }
+    if (dealsRes.error) { dealsRes = await dealsQuery(COLS); usedCols = 'base'; }
     const { data, error } = dealsRes;
     if (error) return fail(res, 500, error.message);
+
+    // DIAGNOSTIC — why does the sync see 25 rows but this endpoint see 0?
+    // Compare an UNFILTERED count against the filtered result, and surface the
+    // DB host + which column tier won, so one request tells us if it's the
+    // side filter, a schema-cache error, or a different/empty database.
+    let dbg = { usedCols, dealsQueryError: dealsRes.error ? dealsRes.error.message : null };
+    try {
+      const cnt = await supa.from('deals').select('id', { count: 'exact', head: true });
+      dbg.deals_unfiltered = cnt.count; if (cnt.error) dbg.count_error = cnt.error.message;
+      const s = await supa.from('deals').select('side, stage').limit(3);
+      dbg.sample = (s.data || []).map((r) => `${r.side}/${r.stage}`);
+    } catch (e) { dbg.diag_threw = e.message; }
+    try { dbg.db_host = new URL(process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL || 'http://none').host; } catch (_) {}
+    dbg.service_key = !!(process.env.SUPABASE_SERVICE_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SECRET_KEY);
 
     // Now that we have the deals, fetch their photos from MetroList BY exact MLS
     // number (falls back to the office feed if a deal has no MLS). Bounded by a
@@ -212,7 +227,8 @@ export default async function handler(req, res) {
         metrolist_configured: mls.configured,
         metrolist_listings:   mls.count,
         properties_rows:      (propsRes.data || []).length
-      }
+      },
+      _diag: dbg
     });
   } catch (e) {
     return fail(res, 500, e.message);
