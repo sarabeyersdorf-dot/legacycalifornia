@@ -64,6 +64,42 @@ Find the deal by `"address"` (or `"id"`) and update:
 | `"notes"` | free-text context about the deal (shows on the deal / seller portal) |
 | `"alerts"` | array of short strings — time-sensitive deal alerts |
 
+## 1b. Deal timeline — RPA deadlines (`"timeline"`)
+
+For an **in-escrow** deal, add a `"timeline"` object so the briefing calendar
+(`/api/crm/briefing-calendar`) computes contingency + close-of-escrow deadlines
+the **CA RPA** way: **acceptance is Day 0** (final signature on the last
+counter), NOT escrow open. All keys optional; keep it as accurate as you can:
+
+```json
+"timeline": {
+  "acceptance": "2026-06-19",      // Day 0 — REQUIRED for real deadlines
+  "coe": "2026-08-10",             // contract COE (auto-rolls off weekends/holidays)
+  "overrides": { "loan": 25 },     // per-contingency day overrides (default is 17)
+  "remaining": ["appraisal","loan"],   // after a partial CR — only these still run
+  "removed":   ["inspection","insurance","title"],  // OR list what was removed
+  "clockStart": null               // present & null = clocks PAUSED (see below)
+}
+```
+
+- Standard contingencies (all **17 days** from acceptance unless overridden):
+  `inspection`, `appraisal`, `loan`, `insurance`, `title`.
+- **Contingency removal (CR):** when a CR is executed, set `"remaining"` to just
+  the contingencies still active (e.g. 7230 Latigo CR1 → `["appraisal","loan"]`),
+  or `"removed"` to the ones taken out. Removed ones stop generating deadlines.
+- **Overrides / COE:** e.g. 433 E Hwy 4 has a 25-day loan (`"overrides":{"loan":25}`)
+  and COE 8/10. COE never lands on a weekend/holiday — the calendar rolls it to
+  the next business day automatically (so an 8/1 Saturday COE shows 8/3).
+- **Paused clock (court/approval sales):** if periods only start on a written
+  notice (e.g. 9985 Wendell, a bankruptcy sale per ADM1), set
+  `"clockStart": null`. While null, NO deadlines are emitted — only an
+  "Awaiting court-approval notice — all clocks paused" marker. When the notice
+  arrives, set `"clockStart"` to that date (it becomes Day 0), or move the date
+  into `"acceptance"` and drop `clockStart`.
+- If you only know escrow-open (no acceptance), the calendar still estimates
+  deadlines but flags them `(basis: escrow open — verify)` — add `"acceptance"`
+  as soon as you have it to make them authoritative.
+
 ## 2. Listing media (so photos / videos load in the CRM)
 
 Add to the **deal** object:

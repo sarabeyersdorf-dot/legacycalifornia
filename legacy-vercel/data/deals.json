@@ -180,6 +180,7 @@
       "agent": "james",
       "listPrice": null,
       "salePrice": 375000,
+      "timeline": { "clockStart": null, "note": "Bankruptcy court sale (ADM1) — all contingency + COE periods start only on seller's written notice of court approval" },
       "openEscrowDate": null,
       "closingDate": null,
       "contacts": {
@@ -240,6 +241,7 @@
       "agent": "james",
       "listPrice": null,
       "salePrice": 207000,
+      "timeline": { "acceptance": "2026-06-17", "coe": "2026-08-01" },
       "openEscrowDate": null,
       "closingDate": "2026-08-03",
       "contacts": {
@@ -292,6 +294,7 @@
       "agent": "sara",
       "listPrice": null,
       "salePrice": 615000,
+      "timeline": { "acceptance": "2026-06-19", "coe": "2026-07-20", "remaining": ["appraisal", "loan"] },
       "openEscrowDate": "2026-06-23",
       "closingDate": "2026-07-20",
       "contacts": {
@@ -390,6 +393,7 @@
       "video": "https://youtu.be/LgdfPW_QlWQ",
       "listPrice": null,
       "salePrice": 1300000,
+      "timeline": { "acceptance": "2026-06-19", "overrides": { "loan": 25 }, "coe": "2026-08-10" },
       "openEscrowDate": "2026-06-22",
       "closingDate": "2026-08-10",
       "contacts": {

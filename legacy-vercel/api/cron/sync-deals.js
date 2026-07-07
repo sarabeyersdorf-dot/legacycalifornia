@@ -104,6 +104,9 @@ function mapDeal(d) {
     // Listing-sheet metadata (client, apn, beds/baths, sqft, lot, year, dates,
     // commission, disclosure package, branded video) for the Listings roster.
     listing_meta:   d.listing || d.listingMeta || null,
+    // CA RPA timeline (acceptance Day 0, overrides, removals, paused clock) for
+    // the briefing calendar's contingency/COE deadline math.
+    timeline:       d.timeline || null,
     updated_at: new Date().toISOString()
   };
 }
@@ -222,8 +225,12 @@ export default async function handler(req, res) {
           return { error, id: ins?.id };
         };
         let { error: wErr, id: dealId } = await writeDeal(mapped);
-        if (wErr && /listing_meta/i.test(wErr.message || '')) {
-          const { listing_meta, ...safe } = mapped;
+        // If a not-yet-migrated optional column (listing_meta / timeline) is
+        // referenced before its migration runs, retry without them rather than
+        // dropping the whole deal — a missing column must never blank the list.
+        // They're restored automatically on the next sync once migrated.
+        if (wErr && /(listing_meta|timeline)/i.test(wErr.message || '')) {
+          const { listing_meta, timeline, ...safe } = mapped;
           ({ error: wErr, id: dealId } = await writeDeal(safe));
         }
         if (wErr) throw new Error(`${ex ? 'update' : 'insert'}: ${wErr.message}`);

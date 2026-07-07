@@ -1,0 +1,24 @@
+-- 021_deal_timeline.sql
+-- CA RPA timeline data for a deal, consumed by /api/crm/briefing-calendar to
+-- compute contingency + COE deadlines from ACCEPTANCE (Day 0), not escrow open.
+-- Kept as one JSON blob so the model stays flexible; the sync writes deals.json's
+-- `timeline` object here verbatim. Shape (all keys optional):
+--
+--   {
+--     "acceptance":      "YYYY-MM-DD",   -- Day 0 (final signature on last counter)
+--     "escrowOpen":      "YYYY-MM-DD",   -- fallback basis for legacy records
+--     "clockStart":      null | "YYYY-MM-DD",
+--                                        -- present & null → clock paused (no deadlines)
+--                                        -- a date          → that date is Day 0
+--     "contingencyDays": 17,             -- default period (overridable)
+--     "overrides":       { "loan": 25 }, -- per-contingency day overrides
+--     "coe":             "YYYY-MM-DD",   -- explicit contract COE (rolls off weekends/holidays)
+--     "coeDays":         31,             -- alt: COE days from Day 0
+--     "remaining":       ["appraisal","loan"],   -- only these contingencies still active
+--     "removed":         ["inspection","insurance","title"]  -- OR: these were removed
+--   }
+--
+-- Contingency keys: inspection | appraisal | loan | insurance | title.
+-- Safe to run repeatedly.
+
+alter table public.deals add column if not exists timeline jsonb;

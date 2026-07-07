@@ -18,6 +18,7 @@
 
 import { adminClient } from '../supabase.js';
 import { handleOptions, ok, fail } from '../cors.js';
+import { timelineEvents } from '../deal-timeline.js';
 
 const TZ = 'America/Los_Angeles';
 const pad2 = (n) => String(n).padStart(2, '0');
@@ -105,6 +106,7 @@ export default async function handler(req, res) {
         start: start.toISOString(),
         end: end.toISOString(),
         all_day: false,
+        weekend: false,
         agent: normAgent(row.agent),
         client: who,
         deal: null,                                              // tours link to a property/lead, not a deal
@@ -136,6 +138,7 @@ export default async function handler(req, res) {
         start: start.toISOString(),
         end: end.toISOString(),
         all_day: false,
+        weekend: false,
         agent: normAgent(row.agent),
         client: fullName(row.leads),
         deal: null,
@@ -145,46 +148,22 @@ export default async function handler(req, res) {
       }, start.getTime());
     }
 
-    // 3. Deals → escrow deadlines + close of escrow --------------------------
-    // Synthesize all-day markers from the dates we hold. deal `source_key`
+    // 3. Deals → RPA contingency deadlines + close of escrow -----------------
+    // Timelines follow CA RPA convention: acceptance = Day 0, 17-day default
+    // periods (per-deal overridable), COE rolls off weekends/holidays, removed
+    // contingencies drop off, and a present-but-null clock_start pauses a deal.
+    // All of that math lives in computeTimeline() (unit-tested). `source_key`
     // matches deals.json ids so the briefing can tie an event back to its deal.
-    const DEAL_COLS = 'source_key, agent, address, stage, coe_date, escrow_open_date, loan_contingency_days, listing_meta';
+    const DEAL_COLS = 'source_key, agent, address, stage, coe_date, escrow_open_date, loan_contingency_days, timeline, listing_meta';
     let dealsRes = await supa.from('deals').select(DEAL_COLS);
+    if (dealsRes.error) dealsRes = await supa.from('deals').select('source_key, agent, address, stage, coe_date, escrow_open_date, loan_contingency_days, listing_meta');
     if (dealsRes.error) dealsRes = await supa.from('deals').select('source_key, agent, address, stage, coe_date, escrow_open_date, loan_contingency_days');
     if (dealsRes.error) dealsRes = await supa.from('deals').select('source_key, agent, address, stage, coe_date, escrow_open_date');
     if (dealsRes.error) return fail(res, 500, `deals: ${dealsRes.error.message}`);
+    const tsOf = (ds) => laToUTC(+ds.slice(0, 4), +ds.slice(5, 7), +ds.slice(8, 10), 0, 0).getTime();
 
     for (const d of (dealsRes.data || [])) {
-      const client = clean(d.listing_meta?.client) || null;
-      const addrShort = d.address ? String(d.address).split(',')[0] : null;
-      const agent = normAgent(d.agent);
-
-      // Close of escrow
-      const coe = clean(d.coe_date);
-      if (coe && /^\d{4}-\d{2}-\d{2}$/.test(coe) && inDateRange(coe)) {
-        push({
-          title: `Close of escrow${addrShort ? ' — ' + addrShort : ''}`,
-          start: coe, end: null, all_day: true,
-          agent, client, deal: d.source_key || null, type: 'coe',
-          location: clean(d.address), notes: 'Deed records and proceeds release.'
-        }, laToUTC(+coe.slice(0, 4), +coe.slice(5, 7), +coe.slice(8, 10), 0, 0).getTime());
-      }
-
-      // Loan-contingency removal deadline = escrow open + loan_contingency_days
-      const open = clean(d.escrow_open_date);
-      const lcDays = Number(d.loan_contingency_days);
-      if (open && /^\d{4}-\d{2}-\d{2}$/.test(open) && Number.isFinite(lcDays) && lcDays > 0) {
-        const shifted = ymdShift(+open.slice(0, 4), +open.slice(5, 7), +open.slice(8, 10), lcDays);
-        const dl = ymd(shifted);
-        if (inDateRange(dl)) {
-          push({
-            title: `Loan contingency deadline${addrShort ? ' — ' + addrShort : ''}`,
-            start: dl, end: null, all_day: true,
-            agent, client, deal: d.source_key || null, type: 'deadline',
-            location: clean(d.address), notes: `${lcDays}-day loan contingency from escrow open.`
-          }, laToUTC(shifted.y, shifted.m, shifted.d, 0, 0).getTime());
-        }
-      }
+      for (const ev of timelineEvents(d, { todayStr, endStr })) push(ev, tsOf(ev.start));
     }
 
     // Sort by start ascending, then strip the internal sort key.
