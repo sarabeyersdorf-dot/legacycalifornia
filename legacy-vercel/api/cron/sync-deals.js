@@ -76,6 +76,15 @@ function docStatus(val) {
   return 'on_file';
 }
 
+// Merge a deal's listing-sheet metadata with a top-level `client` name (from
+// the executed docs) so buyer-side deals carry a client without a full listing.
+function mergeMeta(d) {
+  const base = d.listing || d.listingMeta || null;
+  const client = d.client || d.clientName || (base && base.client) || null;
+  if (!base && !client) return null;
+  return { ...(base || {}), ...(client ? { client } : {}) };
+}
+
 function mapDeal(d) {
   const agent = /james/i.test(d.agent || '') ? 'james' : 'sara';
   const c = d.contacts || {};
@@ -103,7 +112,9 @@ function mapDeal(d) {
     matterport_url: d.matterport || d.matterportUrl || null,
     // Listing-sheet metadata (client, apn, beds/baths, sqft, lot, year, dates,
     // commission, disclosure package, branded video) for the Listings roster.
-    listing_meta:   d.listing || d.listingMeta || null,
+    // A top-level "client" (buyer/seller name from the executed docs) folds in
+    // so buyer-side deals get a client name without a full listing block.
+    listing_meta:   mergeMeta(d),
     // CA RPA timeline (acceptance Day 0, overrides, removals, paused clock) for
     // the briefing calendar's contingency/COE deadline math.
     timeline:       d.timeline || null,

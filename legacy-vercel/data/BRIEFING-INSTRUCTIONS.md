@@ -57,6 +57,7 @@ Find the deal by `"address"` (or `"id"`) and update:
 | Field | Meaning |
 |---|---|
 | `"agent"` | **`"sara"` or `"james"`** — whose deal it is. **Always set this.** Routes the deal to the right desk / seller portal. |
+| `"client"` | **The client's name(s)** — on a BUYER-side deal, the buyer(s); on a listing, the seller(s). **Pull this from the executed documents** (the RPA / purchase agreement names the parties) when a deal comes in, and set it here. Shows on the Deals/Listings roster and the briefing calendar. e.g. `"client": "Roger & Kristin Quillen"`. |
 | `"side"` | `"listing"`/`"seller"` = sell-side · `"buyer"` = buy-side · `"both"` = dual agency |
 | `"stage"` | `"listing"` = on market · `"pending"` = in escrow · `"closed"` = funded |
 | `"listPrice"` / `"salePrice"` | numbers only — no `$`, no commas |
