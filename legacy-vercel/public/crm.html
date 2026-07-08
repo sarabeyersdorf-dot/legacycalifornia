@@ -1927,19 +1927,21 @@ function selectLead(el) {
     var tour = (d.has_video ? '<span class="lst-badge">Video</span>' : '') + (d.has_tour ? '<span class="lst-badge">3D tour</span>' : '');
     var buying = d.side === 'buyer';
     var sideBadge = '<span class="lst-badge ' + (buying ? 'buying' : 'selling') + '">' + (buying ? 'Buying' : 'Selling') + '</span>';
-    // The whole card is the link to the deal's portal (not just the small text
-    // line), so a click anywhere on a deal opens it. source_key can be missing
-    // on a malformed row — fall back to a no-op href so the card never 404s.
-    var href = d.source_key ? '/seller.html?deal=' + encodeURIComponent(d.source_key) : null;
-    return '<a class="lst-card"' + (href ? ' href="' + href + '" target="_blank" rel="noopener"' : '') + '>' + ph + '<div class="bd">' +
+    // The whole card opens the deal's portal. We drive it from an explicit
+    // click handler (window.open, with a same-tab fallback) rather than an
+    // <a target="_blank">, because some contexts (webviews / popup blockers)
+    // silently swallow target=_blank so the portal "wouldn't open".
+    var url = d.source_key ? '/seller.html?deal=' + encodeURIComponent(d.source_key) : '';
+    return '<div class="lst-card"' + (url ? ' data-portal="' + esc(url) + '" role="link" tabindex="0"' : '') + '>' + ph + '<div class="bd">' +
       '<div class="pr">' + esc(fmtUSD(d.price)) + '</div>' +
       '<div class="ad">' + esc(d.address || '') + (d.city ? ' · ' + esc(d.city) : '') + '</div>' +
       '<div class="mt"><span class="lst-badge ' + state.tab + '">' + badge(state.tab) + '</span>' + sideBadge +
         '<span class="lst-badge">' + (d.agent === 'james' ? 'James' : 'Sara') + '</span>' + tour + '</div>' +
       (d.coe_date ? '<div style="font-size:11px;color:var(--ink-mute);">COE ' + esc(d.coe_date) + '</div>' : '') +
       '<span class="lk">Open ' + (buying ? 'buyer' : 'seller') + ' portal ↗</span>' +
-      '</div></a>';
+      '</div></div>';
   }
+  function openPortal(url) { if (!url) return; var w = window.open(url, '_blank', 'noopener'); if (!w) location.href = url; }
   function render() {
     var grid = root.querySelector('[data-lst-grid]');
     if (!grid) return;
@@ -1947,10 +1949,17 @@ function selectLead(el) {
     grid.innerHTML = rows.length ? rows.map(card).join('') : '<div class="cur-empty">No ' + state.tab + ' listings.</div>';
   }
   root.addEventListener('click', function (e) {
+    var cardEl = e.target.closest('.lst-card[data-portal]');
+    if (cardEl) { openPortal(cardEl.getAttribute('data-portal')); return; }
     var t = e.target.closest('[data-lst]'); if (!t) return;
     state.tab = t.getAttribute('data-lst');
     root.querySelectorAll('[data-lst]').forEach(function (b) { b.classList.toggle('on', b === t); });
     render();
+  });
+  root.addEventListener('keydown', function (e) {
+    if (e.key !== 'Enter' && e.key !== ' ') return;
+    var cardEl = e.target.closest('.lst-card[data-portal]');
+    if (cardEl) { e.preventDefault(); openPortal(cardEl.getAttribute('data-portal')); }
   });
   // Lazy-load + set tab when the Listings view opens (roster Active/Pending).
   document.addEventListener('click', function (e) {
@@ -2037,6 +2046,10 @@ function selectLead(el) {
     }).catch(function () { state.loading = false; if (!state.data) { var g = root.querySelector('[data-rost-grid]'); if (g) g.innerHTML = '<div class="cur-empty">Could not load listings — try again.</div>'; } });
   }
   root.addEventListener('click', function (e) {
+    // Open Portal / Disclosures / Video reliably (window.open with a same-tab
+    // fallback) rather than relying on target=_blank, which webviews can drop.
+    var link = e.target.closest('.rost-links a[href]');
+    if (link) { e.preventDefault(); var u = link.getAttribute('href'); var w = window.open(u, '_blank', 'noopener'); if (!w) location.href = u; return; }
     var t = e.target.closest('[data-rost]');
     if (t) { state.tab = t.getAttribute('data-rost'); root.querySelectorAll('[data-rost]').forEach(function (b) { b.classList.toggle('on', b === t); }); render(); return; }
     var a = e.target.closest('[data-rost-agent]');

@@ -1483,6 +1483,7 @@
             <span class="score">${l.score == null ? '—' : l.score}</span>
           </div>
         </div>
+        <button class="lead-del" type="button" data-lead-del="${escHtml(l.id)}" title="Delete contact permanently" aria-label="Delete contact">🗑</button>
       </div>`;
   }
 
@@ -1503,6 +1504,14 @@
     if (container._wired) return;
     container._wired = true;
     container.addEventListener('click', (e) => {
+      const del = e.target.closest('[data-lead-del]');
+      if (del) {
+        e.stopPropagation();
+        const row = del.closest('[data-lead-id]');
+        const nameEl = row && row.querySelector('.lead-name');
+        deleteLeadFlow(del.getAttribute('data-lead-del'), nameEl ? nameEl.textContent : '');
+        return;
+      }
       const row = e.target.closest('[data-lead-id]');
       if (row) selectLeadId(row.getAttribute('data-lead-id'));
     });
@@ -1555,7 +1564,7 @@
     if (state.search.trim() && typeof window.showView === 'function') window.showView(null, 'inbox');
     paintLeadList();
     const first = filterLeads()[0];
-    if (first) selectLeadId(first.id);
+    if (first) selectLeadId(first.id, true);
   });
 
   // Roster sidebar segments (Leads / Clients / Past clients / Sphere) — re-filter
@@ -1569,7 +1578,7 @@
     document.querySelectorAll('[data-filter]').forEach((c) => c.classList.toggle('on', c.getAttribute('data-filter') === 'all'));
     paintLeadList();
     const first = filterLeads()[0];
-    if (first) selectLeadId(first.id);
+    if (first) selectLeadId(first.id, true);
     else {
       const detailEl = document.querySelector('[data-lead-detail]');
       if (detailEl) detailEl.innerHTML = `<div style="padding:32px;opacity:.55;font-style:italic;">No leads in this group yet.</div>`;
@@ -1633,10 +1642,11 @@
         <div style="display:flex;align-items:center;gap:8px;margin:2px 0 10px;">
           <span style="font-family:var(--mono);font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-mute);min-width:60px;">Side</span>
           <select data-lead-side style="font:inherit;font-size:13px;padding:5px 9px;border:1px solid var(--rule);background:#fff;color:var(--ink);">
-            <option value="">— not set —</option>
-            <option value="buyer" ${lead.deal_side === 'buyer' ? 'selected' : ''}>Buyer</option>
-            <option value="seller" ${lead.deal_side === 'seller' ? 'selected' : ''}>Seller</option>
-            <option value="both" ${lead.deal_side === 'both' ? 'selected' : ''}>Dual · both sides</option>
+            ${(() => {
+              const cur = lead.contact_type || lead.deal_side || '';
+              const opts = [['', '— not set —'], ['buyer', 'Buyer'], ['seller', 'Seller'], ['both', 'Buyer and Seller'], ['closed', 'Closed'], ['past_client', 'Past Client'], ['sphere', 'Sphere'], ['nurture', 'Nurture'], ['has_agent', 'Has Agent'], ['showing_homes', 'Showing Homes'], ['making_offers', 'Making Offers'], ['do_not_call', 'Do Not Call'], ['__trash__', '🗑 Trash — delete permanently']];
+              return opts.map((o) => `<option value="${o[0]}"${cur === o[0] ? ' selected' : ''}>${escHtml(o[1])}</option>`).join('');
+            })()}
           </select>
         </div>
         <label style="display:flex;align-items:center;gap:8px;margin:6px 0;cursor:pointer;"><input type="checkbox" data-consent="call_opt_out" ${lead.call_opt_out ? 'checked' : ''}> Do not call</label>
@@ -1944,18 +1954,24 @@
       const saveBtn = consentPanel.querySelector('[data-detail-action="save-consent"]');
       const msgEl   = consentPanel.querySelector('[data-consent-status-msg]');
       if (saveBtn) saveBtn.addEventListener('click', async () => {
+        const sideSel = consentPanel.querySelector('[data-lead-side]');
+        // "Trash" is a delete, not a save — confirm and permanently remove.
+        if (sideSel && sideSel.value === '__trash__') {
+          if (deleteLeadFlow(lead.id, fullName(lead))) return;
+          sideSel.value = lead.contact_type || lead.deal_side || '';   // cancelled → reset
+          return;
+        }
         const patch = { id: lead.id };
         consentPanel.querySelectorAll('[data-consent]').forEach((cb) => { patch[cb.getAttribute('data-consent')] = cb.checked; });
         const dnc = consentPanel.querySelector('[data-consent-status]');
         patch.status = dnc && dnc.checked ? 'do_not_contact' : 'active';
-        const sideSel = consentPanel.querySelector('[data-lead-side]');
-        if (sideSel) patch.deal_side = sideSel.value || null;
+        if (sideSel) patch.contact_type = sideSel.value || null;   // buyer/seller/both also sync deal_side server-side
         saveBtn.disabled = true; saveBtn.textContent = 'Saving…';
         const r = await window.Legacy.api('/api/crm/lead', { method: 'PATCH', body: patch });
         saveBtn.disabled = false; saveBtn.textContent = 'Save preferences';
         if (r.ok) {
           msgEl.style.color = '#2E5C3D'; msgEl.textContent = 'Saved.';
-          selectLeadId(lead.id); // refresh detail so chips reflect the change
+          selectLeadId(lead.id, true); // force refresh so chips reflect the change
         } else {
           msgEl.style.color = '#9B2C2C'; msgEl.textContent = (r.json && r.json.error) || 'Failed to save.';
         }
@@ -2519,13 +2535,42 @@
     else if (detailEl) detailEl.innerHTML = `<div style="padding:24px;color:#9B2C2C;">${escHtml((r.json && r.json.error) || 'Could not load lead.')}</div>`;
   }
 
-  function selectLeadId(id) {
-    if (state.selectedLeadId === id) return;
+  function selectLeadId(id, force) {
+    // `force` re-loads even if this lead is already selected — needed after an
+    // in-place edit (save prefs) and when switching subsets that land back on
+    // the same lead, so the detail pane + its per-paint tab handlers rebuild
+    // instead of leaving a stale pane that only works after you tick away.
+    if (!force && state.selectedLeadId === id) return;
     state.selectedLeadId = id;
     document.querySelectorAll('[data-lead-list] [data-lead-id]').forEach((r) => {
       r.classList.toggle('on', r.getAttribute('data-lead-id') === id);
     });
     loadLead(id);
+  }
+
+  // Permanently delete a contact (the "Trash" option / card delete icon).
+  // Returns true if the delete was started (confirmed), false if cancelled.
+  function deleteLeadFlow(id, name) {
+    if (!id) return false;
+    if (!window.confirm(`Permanently delete ${name || 'this contact'}? This cannot be undone.`)) return false;
+    window.Legacy.api('/api/crm/lead?id=' + encodeURIComponent(id), { method: 'DELETE', body: { id } }).then((r) => {
+      if (r && r.ok) {
+        // Drop from the in-memory roster + DOM, and clear the detail if it was open.
+        if (Array.isArray(state.leads)) state.leads = state.leads.filter((l) => l.id !== id);
+        if (state._leadView) state._leadView = state._leadView.filter((l) => l.id !== id);
+        const row = document.querySelector(`[data-lead-list] [data-lead-id="${id}"]`);
+        if (row) row.remove();
+        if (state.selectedLeadId === id) {
+          state.selectedLeadId = null;
+          const det = document.querySelector('[data-lead-detail]');
+          if (det) det.innerHTML = '<div class="ld-empty" style="padding:40px;color:var(--ink-mute);">Contact deleted.</div>';
+        }
+        if (window.Legacy.toast) window.Legacy.toast('Contact deleted.');
+      } else {
+        window.alert((r && r.json && r.json.error) || 'Could not delete the contact.');
+      }
+    });
+    return true;
   }
 
   async function bootCrmInbox() {

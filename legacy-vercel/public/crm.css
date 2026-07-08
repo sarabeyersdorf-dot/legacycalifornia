@@ -71,10 +71,17 @@
   cursor: pointer;
   transition: background .12s;
   position: relative;
-  display: grid; grid-template-columns: 36px 1fr; gap: 12px;
+  display: grid; grid-template-columns: 36px 1fr auto; gap: 12px;
   align-items: start;
 }
 .lead-row:hover { background: var(--linen); }
+.lead-del {
+  border: none; background: transparent; cursor: pointer; align-self: center;
+  font-size: 13px; line-height: 1; padding: 5px 6px; border-radius: 7px;
+  color: var(--ink-faint); opacity: .4; transition: opacity .12s, background .12s, color .12s;
+}
+.lead-row:hover .lead-del { opacity: .85; }
+.lead-del:hover, .lead-del:focus-visible { opacity: 1; color: #9B2C2C; background: #F3E3E3; outline: none; }
 .lead-row.on {
   background: var(--linen);
   box-shadow: inset 3px 0 0 var(--brass);

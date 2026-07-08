@@ -22,6 +22,7 @@ const PIPELINE_STAGES   = new Set(['new', 'nurture', 'consult', 'signed', 'activ
 const ASSIGNED_AGENTS   = new Set(['sara', 'james', 'both', 'unassigned']);
 const STATUSES          = new Set(['active', 'archived', 'do_not_contact']);
 const DEAL_SIDES        = new Set(['buyer', 'seller', 'both']);
+const CONTACT_TYPES     = new Set(['buyer', 'seller', 'both', 'closed', 'past_client', 'sphere', 'nurture', 'has_agent', 'showing_homes', 'making_offers', 'do_not_call']);
 const CONSENT_FIELDS    = ['call_opt_out', 'sms_opt_out', 'email_opt_out', 'not_interested'];
 
 export default async function handler(req, res) {
@@ -32,9 +33,34 @@ export default async function handler(req, res) {
   if (!user)              return fail(res, 401, 'not authenticated');
   if (!isAgent(profile))  return fail(res, 403, 'agents only');
 
-  if (req.method === 'GET')   return readLead(req, res);
-  if (req.method === 'PATCH') return updateLead(req, res, profile);
+  if (req.method === 'GET')    return readLead(req, res);
+  if (req.method === 'PATCH')  return updateLead(req, res, profile);
+  if (req.method === 'DELETE') return deleteLead(req, res);
   return fail(res, 405, 'method_not_allowed');
+}
+
+// ---------------------------------------------------------------------------
+// DELETE — permanently remove a contact ("Trash"). Agents only.
+// ---------------------------------------------------------------------------
+async function deleteLead(req, res) {
+  try {
+    let id = req.query?.id;
+    if (!id) { const body = await readJson(req).catch(() => ({})); id = body?.id; }
+    if (!id) return fail(res, 400, 'id required');
+
+    const supa = adminClient();
+    // Clear links that may not cascade (identity + shared-visibility), then the
+    // lead. Dependent rows with ON DELETE CASCADE (lead_events, messages, tours,
+    // saved_properties) go automatically. Best-effort on the link tables so a
+    // missing/renamed table never blocks the delete.
+    await supa.from('deal_parties').delete().eq('lead_id', id).then(() => {}, () => {});
+    await supa.from('portal_items').delete().eq('lead_id', id).then(() => {}, () => {});
+    const { error } = await supa.from('leads').delete().eq('id', id);
+    if (error) return fail(res, 500, error.message);
+    return ok(res, { deleted: true, id });
+  } catch (e) {
+    return fail(res, 500, e.message);
+  }
 }
 
 // ---------------------------------------------------------------------------
@@ -118,6 +144,19 @@ async function updateLead(req, res, profile) {
         patch.deal_side = body.deal_side;
       }
     }
+    // Contact "Side / category". buyer/seller/both also mirror to deal_side so
+    // portal/side logic stays correct; "do_not_call" also sets call_opt_out.
+    if (body.contact_type !== undefined) {
+      if (body.contact_type === null || body.contact_type === '') {
+        patch.contact_type = null;
+      } else if (!CONTACT_TYPES.has(body.contact_type)) {
+        errors.push(`contact_type must be one of: ${[...CONTACT_TYPES].join(', ')}`);
+      } else {
+        patch.contact_type = body.contact_type;
+        if (DEAL_SIDES.has(body.contact_type)) patch.deal_side = body.contact_type;
+        if (body.contact_type === 'do_not_call') patch.call_opt_out = true;
+      }
+    }
     // Contact-preference toggles — let an agent clear a wrongly-set "do not
     // call / text / email" or "not interested" flag directly from the lead.
     for (const f of CONSENT_FIELDS) {
@@ -125,7 +164,7 @@ async function updateLead(req, res, profile) {
     }
     if (errors.length) return fail(res, 400, errors.join('; '));
     if (Object.keys(patch).length === 0) {
-      return fail(res, 400, 'nothing to update — pass pipeline_stage and/or assigned_agent');
+      return fail(res, 400, 'nothing to update');
     }
 
     const supa = adminClient();
