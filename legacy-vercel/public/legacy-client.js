@@ -1615,47 +1615,58 @@
       `Score ${lead.score == null ? '—' : lead.score}`
     ].filter(Boolean);
 
-    // Header pills — side (Seller/Buyer/Dual) + stage (In Escrow when
-    // under_contract). Sentence-case, per the style guide.
+    // Header pills — side + side-aware status. A dual (buyer+seller) client
+    // shows a pill pair per side. Status comes from buyer_stage/seller_stage;
+    // a category (Past Client / Sphere / Do Not Contact) shows as one pill.
     const STAGE_PILL = { new: 'New', nurture: 'Nurturing', consult: 'Consult', signed: 'Signed', active: 'Active', under_contract: 'In Escrow', closed: 'Closed', sphere: 'Sphere' };
-    const SIDE_PILL  = { buyer: 'Buyer', seller: 'Seller', both: 'Dual' };
-    const headPills = [
-      lead.deal_side ? `<span class="lp-hpill side">${escHtml(SIDE_PILL[lead.deal_side])}</span>` : '',
-      `<span class="lp-hpill stage">${escHtml(STAGE_PILL[lead.pipeline_stage] || (lead.pipeline_stage || 'New'))}</span>`
-    ].join(' ');
+    const BUYER_STAGE_LABEL  = { new: 'New', nurture: 'Nurture', showing_homes: 'Showing Homes', writing_offers: 'Writing Offers', in_escrow: 'In Escrow', closed: 'Closed' };
+    const SELLER_STAGE_LABEL = { new: 'New', nurture: 'Nurture', preparing: 'Preparing to List', on_market: 'On Market', reviewing_offers: 'Reviewing Offers', in_escrow: 'In Escrow', closed: 'Closed' };
+    const CATEGORY_LABEL     = { past_client: 'Past Client', sphere: 'Sphere', do_not_contact: 'Do Not Contact' };
+    const side = lead.contact_type || lead.deal_side || '';
+    const pill = (cls, label) => `<span class="lp-hpill ${cls}">${escHtml(label)}</span>`;
+    let headPills = '';
+    if (side === 'buyer' || side === 'both') headPills += pill('side', 'Buyer') + (lead.buyer_stage ? pill('stage', BUYER_STAGE_LABEL[lead.buyer_stage] || lead.buyer_stage) : '');
+    if (side === 'seller' || side === 'both') headPills += pill('side', 'Seller') + (lead.seller_stage ? pill('stage', SELLER_STAGE_LABEL[lead.seller_stage] || lead.seller_stage) : '');
+    if (CATEGORY_LABEL[side]) headPills += pill('side', CATEGORY_LABEL[side]);
+    if (!headPills) headPills = pill('stage', STAGE_PILL[lead.pipeline_stage] || 'New');
 
-    // Consent badges — surface every active opt-out so an agent never sends
-    // through a channel the lead has blocked.
-    const consentChips = [];
-    if (lead.call_opt_out)   consentChips.push('Do not call');
-    if (lead.sms_opt_out)    consentChips.push('Do not text');
-    if (lead.email_opt_out)  consentChips.push('Do not email');
-    if (lead.not_interested) consentChips.push('Not interested');
-    if (lead.status === 'do_not_contact')      consentChips.push('Do not contact');
-    if (lead.pipeline_stage === 'sphere')      consentChips.push('Sphere · no auto outreach');
-    const consentChipHtml = `<div style="margin-top:6px;display:flex;gap:6px;flex-wrap:wrap;align-items:center;">
-        ${consentChips.map((c) => `<span class="badge" style="background:#FBE3E0;color:#9B2C2C;border:1px solid #E8B0AA;font-weight:600;">${escHtml(c)}</span>`).join('')}
-        <button class="btn-link lp-editlink" data-detail-action="edit-consent" style="font-size:12px;background:none;border:none;cursor:pointer;padding:0;">Edit details</button>
+    // Contact card + "Update contact" editor: name/phone/email + Side + the
+    // side-aware status dropdown(s). Buyer/Seller show one; Dual shows both.
+    const optTags = (map, cur) => '<option value="">— set —</option>' + Object.keys(map).map((k) => `<option value="${k}"${cur === k ? ' selected' : ''}>${escHtml(map[k])}</option>`).join('');
+    const showBuy  = (side === 'buyer' || side === 'both');
+    const showSell = (side === 'seller' || side === 'both');
+    const fld = 'font:inherit;font-size:13px;padding:6px 8px;border:1px solid var(--rule);background:#fff;color:var(--ink);';
+    const cap = 'font-family:var(--mono);font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-mute);min-width:72px;';
+    const contactEditorHtml = `
+      <div style="margin-top:6px;display:flex;gap:12px;flex-wrap:wrap;align-items:center;font-size:13px;color:var(--ink-soft);">
+        ${lead.phone ? `<span>📞 ${escHtml(lead.phone)}</span>` : ''}
+        ${lead.email ? `<span>✉ ${escHtml(lead.email)}</span>` : ''}
+        <button class="btn-link lp-editlink" data-detail-action="edit-consent" style="font-size:12px;background:none;border:none;cursor:pointer;padding:0;color:var(--brass);">Update contact</button>
       </div>
-      <div data-consent-editor style="display:none;margin-top:10px;padding:12px 14px;background:var(--shell);border:1px solid var(--rule);font-size:13px;">
-        <div style="font-family:var(--mono);font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-mute);margin-bottom:8px;">Lead details &amp; contact prefs</div>
-        <div style="display:flex;align-items:center;gap:8px;margin:2px 0 10px;">
-          <span style="font-family:var(--mono);font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-mute);min-width:60px;">Side</span>
-          <select data-lead-side style="font:inherit;font-size:13px;padding:5px 9px;border:1px solid var(--rule);background:#fff;color:var(--ink);">
-            ${(() => {
-              const cur = lead.contact_type || lead.deal_side || '';
-              const opts = [['', '— not set —'], ['buyer', 'Buyer'], ['seller', 'Seller'], ['both', 'Buyer and Seller'], ['closed', 'Closed'], ['past_client', 'Past Client'], ['sphere', 'Sphere'], ['nurture', 'Nurture'], ['has_agent', 'Has Agent'], ['showing_homes', 'Showing Homes'], ['making_offers', 'Making Offers'], ['do_not_call', 'Do Not Call'], ['__trash__', '🗑 Trash — delete permanently']];
-              return opts.map((o) => `<option value="${o[0]}"${cur === o[0] ? ' selected' : ''}>${escHtml(o[1])}</option>`).join('');
-            })()}
+      <div data-consent-editor style="display:none;margin-top:10px;padding:14px 16px;background:var(--shell);border:1px solid var(--rule);font-size:13px;max-width:540px;">
+        <div style="font-family:var(--mono);font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-mute);margin-bottom:10px;">Update contact</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px 10px;margin-bottom:12px;">
+          <label style="display:flex;flex-direction:column;gap:3px;font-size:11px;color:var(--ink-mute);">First name<input data-lead-first value="${escHtml(lead.first_name || '')}" style="${fld}"></label>
+          <label style="display:flex;flex-direction:column;gap:3px;font-size:11px;color:var(--ink-mute);">Last name<input data-lead-last value="${escHtml(lead.last_name || '')}" style="${fld}"></label>
+          <label style="display:flex;flex-direction:column;gap:3px;font-size:11px;color:var(--ink-mute);">Phone<input data-lead-phone value="${escHtml(lead.phone || '')}" style="${fld}"></label>
+          <label style="display:flex;flex-direction:column;gap:3px;font-size:11px;color:var(--ink-mute);">Email<input data-lead-email value="${escHtml(lead.email || '')}" style="${fld}"></label>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;margin:2px 0 8px;">
+          <span style="${cap}">Side</span>
+          <select data-lead-side style="${fld}">
+            ${(() => { const opts = [['', '— not set —'], ['buyer', 'Buyer'], ['seller', 'Seller'], ['both', 'Buyer and Seller'], ['past_client', 'Past Client'], ['sphere', 'Sphere'], ['do_not_contact', 'Do Not Contact'], ['__trash__', '🗑 Trash — delete permanently']]; return opts.map((o) => `<option value="${o[0]}"${side === o[0] ? ' selected' : ''}>${escHtml(o[1])}</option>`).join(''); })()}
           </select>
         </div>
-        <label style="display:flex;align-items:center;gap:8px;margin:6px 0;cursor:pointer;"><input type="checkbox" data-consent="call_opt_out" ${lead.call_opt_out ? 'checked' : ''}> Do not call</label>
-        <label style="display:flex;align-items:center;gap:8px;margin:6px 0;cursor:pointer;"><input type="checkbox" data-consent="sms_opt_out" ${lead.sms_opt_out ? 'checked' : ''}> Do not text</label>
-        <label style="display:flex;align-items:center;gap:8px;margin:6px 0;cursor:pointer;"><input type="checkbox" data-consent="email_opt_out" ${lead.email_opt_out ? 'checked' : ''}> Do not email</label>
-        <label style="display:flex;align-items:center;gap:8px;margin:6px 0;cursor:pointer;"><input type="checkbox" data-consent="not_interested" ${lead.not_interested ? 'checked' : ''}> Not interested</label>
-        <label style="display:flex;align-items:center;gap:8px;margin:6px 0;cursor:pointer;"><input type="checkbox" data-consent-status ${lead.status === 'do_not_contact' ? 'checked' : ''}> Do not contact at all (archive from outreach)</label>
-        <div style="display:flex;gap:8px;align-items:center;margin-top:10px;">
-          <button class="btn btn-ink btn-sm" data-detail-action="save-consent">Save preferences</button>
+        <div data-buy-status style="display:${showBuy ? 'flex' : 'none'};align-items:center;gap:8px;margin:6px 0;">
+          <span style="${cap}">Buy status</span>
+          <select data-buyer-stage style="${fld}">${optTags(BUYER_STAGE_LABEL, lead.buyer_stage || '')}</select>
+        </div>
+        <div data-sell-status style="display:${showSell ? 'flex' : 'none'};align-items:center;gap:8px;margin:6px 0;">
+          <span style="${cap}">Sell status</span>
+          <select data-seller-stage style="${fld}">${optTags(SELLER_STAGE_LABEL, lead.seller_stage || '')}</select>
+        </div>
+        <div style="display:flex;gap:8px;align-items:center;margin-top:12px;">
+          <button class="btn btn-ink btn-sm" data-detail-action="save-consent">Save contact</button>
           <span data-consent-status-msg style="font-size:12px;"></span>
         </div>
       </div>`;
@@ -1823,7 +1834,7 @@
               ${headPills}
             </div>
             <div class="ld-head-meta">${escHtml(metaBits.join(' · '))}</div>
-            ${consentChipHtml}
+            ${contactEditorHtml}
           </div>
         </div>
         <div class="ld-head-actions">
@@ -1917,7 +1928,7 @@
         }
       };
       // "Actions for a <side> in <stage>" header — sentence-case, quiet.
-      const headSide  = SIDE_PILL[lead.deal_side] || 'contact';
+      const headSide  = ({ buyer: 'buyer', seller: 'seller', both: 'buyer & seller' }[lead.deal_side]) || 'contact';
       const headStage = lead.pipeline_stage === 'under_contract' ? 'in escrow'
                       : (STAGE_PILL[lead.pipeline_stage] || 'the pipeline').toLowerCase();
       actionsBtn.addEventListener('click', async (ev) => {
@@ -1951,27 +1962,47 @@
       consentToggle.addEventListener('click', () => {
         consentPanel.style.display = consentPanel.style.display === 'none' ? 'block' : 'none';
       });
+      // Show the right status dropdown(s) as the Side changes (live).
+      const sideSel  = consentPanel.querySelector('[data-lead-side]');
+      const buyRow   = consentPanel.querySelector('[data-buy-status]');
+      const sellRow  = consentPanel.querySelector('[data-sell-status]');
+      const syncRows = () => {
+        const v = sideSel ? sideSel.value : '';
+        if (buyRow)  buyRow.style.display  = (v === 'buyer'  || v === 'both') ? 'flex' : 'none';
+        if (sellRow) sellRow.style.display = (v === 'seller' || v === 'both') ? 'flex' : 'none';
+      };
+      if (sideSel) sideSel.addEventListener('change', syncRows);
       const saveBtn = consentPanel.querySelector('[data-detail-action="save-consent"]');
       const msgEl   = consentPanel.querySelector('[data-consent-status-msg]');
       if (saveBtn) saveBtn.addEventListener('click', async () => {
-        const sideSel = consentPanel.querySelector('[data-lead-side]');
+        const v = sideSel ? sideSel.value : '';
         // "Trash" is a delete, not a save — confirm and permanently remove.
-        if (sideSel && sideSel.value === '__trash__') {
+        if (v === '__trash__') {
           if (deleteLeadFlow(lead.id, fullName(lead))) return;
-          sideSel.value = lead.contact_type || lead.deal_side || '';   // cancelled → reset
+          if (sideSel) sideSel.value = lead.contact_type || lead.deal_side || '';   // cancelled → reset
+          syncRows();
           return;
         }
         const patch = { id: lead.id };
-        consentPanel.querySelectorAll('[data-consent]').forEach((cb) => { patch[cb.getAttribute('data-consent')] = cb.checked; });
-        const dnc = consentPanel.querySelector('[data-consent-status]');
-        patch.status = dnc && dnc.checked ? 'do_not_contact' : 'active';
-        if (sideSel) patch.contact_type = sideSel.value || null;   // buyer/seller/both also sync deal_side server-side
+        // Name / phone / email.
+        const g = (sel) => { const el = consentPanel.querySelector(sel); return el ? el.value : undefined; };
+        patch.first_name = g('[data-lead-first]');
+        patch.last_name  = g('[data-lead-last]');
+        patch.phone      = g('[data-lead-phone]');
+        patch.email      = g('[data-lead-email]');
+        // Side + side-aware status. Only send the stage(s) for the chosen side;
+        // clear the other so a mis-set stage doesn't linger.
+        patch.contact_type = v || null;
+        const buyVal  = g('[data-buyer-stage]') || null;
+        const sellVal = g('[data-seller-stage]') || null;
+        patch.buyer_stage  = (v === 'buyer'  || v === 'both') ? buyVal  : null;
+        patch.seller_stage = (v === 'seller' || v === 'both') ? sellVal : null;
         saveBtn.disabled = true; saveBtn.textContent = 'Saving…';
         const r = await window.Legacy.api('/api/crm/lead', { method: 'PATCH', body: patch });
-        saveBtn.disabled = false; saveBtn.textContent = 'Save preferences';
+        saveBtn.disabled = false; saveBtn.textContent = 'Save contact';
         if (r.ok) {
-          msgEl.style.color = '#2E5C3D'; msgEl.textContent = 'Saved.';
-          selectLeadId(lead.id, true); // force refresh so chips reflect the change
+          msgEl.style.color = '#2E5C3D'; msgEl.textContent = (r.json && r.json.warning) ? 'Saved (run pending migration).' : 'Saved.';
+          selectLeadId(lead.id, true); // force refresh so header pills reflect the change
         } else {
           msgEl.style.color = '#9B2C2C'; msgEl.textContent = (r.json && r.json.error) || 'Failed to save.';
         }

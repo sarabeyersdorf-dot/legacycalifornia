@@ -22,8 +22,29 @@ const PIPELINE_STAGES   = new Set(['new', 'nurture', 'consult', 'signed', 'activ
 const ASSIGNED_AGENTS   = new Set(['sara', 'james', 'both', 'unassigned']);
 const STATUSES          = new Set(['active', 'archived', 'do_not_contact']);
 const DEAL_SIDES        = new Set(['buyer', 'seller', 'both']);
-const CONTACT_TYPES     = new Set(['buyer', 'seller', 'both', 'closed', 'past_client', 'sphere', 'nurture', 'has_agent', 'showing_homes', 'making_offers', 'do_not_call']);
+const CONTACT_TYPES     = new Set(['buyer', 'seller', 'both', 'past_client', 'sphere', 'do_not_contact']);
+const BUYER_STAGES      = new Set(['new', 'nurture', 'showing_homes', 'writing_offers', 'in_escrow', 'closed']);
+const SELLER_STAGES     = new Set(['new', 'nurture', 'preparing', 'on_market', 'reviewing_offers', 'in_escrow', 'closed']);
 const CONSENT_FIELDS    = ['call_opt_out', 'sms_opt_out', 'email_opt_out', 'not_interested'];
+
+// Rank a side stage so a dual client's kanban/header follows the more-advanced
+// side, and map each side stage to the coarse pipeline_stage (one source of
+// truth — changing a status moves the contact in the pipeline).
+const STAGE_RANK = { new: 0, nurture: 1, showing_homes: 2, preparing: 2, on_market: 3, writing_offers: 3, reviewing_offers: 3, in_escrow: 4, closed: 5 };
+const STAGE_TO_PIPELINE = {
+  new: 'new', nurture: 'nurture',
+  showing_homes: 'active', preparing: 'active', on_market: 'active',
+  writing_offers: 'active', reviewing_offers: 'active',
+  in_escrow: 'under_contract', closed: 'closed'
+};
+// The pipeline_stage that best represents a contact given its side stages + category.
+function derivePipeline(contactType, buyerStage, sellerStage) {
+  if (contactType === 'sphere' || contactType === 'past_client') return 'sphere';
+  const candidates = [buyerStage, sellerStage].filter((s) => s && STAGE_RANK[s] != null);
+  if (!candidates.length) return null;
+  const best = candidates.reduce((a, b) => (STAGE_RANK[b] > STAGE_RANK[a] ? b : a));
+  return STAGE_TO_PIPELINE[best] || null;
+}
 
 export default async function handler(req, res) {
   if (handleOptions(req, res)) return;
@@ -145,7 +166,7 @@ async function updateLead(req, res, profile) {
       }
     }
     // Contact "Side / category". buyer/seller/both also mirror to deal_side so
-    // portal/side logic stays correct; "do_not_call" also sets call_opt_out.
+    // portal/side logic stays correct; "do_not_contact" sets the status.
     if (body.contact_type !== undefined) {
       if (body.contact_type === null || body.contact_type === '') {
         patch.contact_type = null;
@@ -154,13 +175,48 @@ async function updateLead(req, res, profile) {
       } else {
         patch.contact_type = body.contact_type;
         if (DEAL_SIDES.has(body.contact_type)) patch.deal_side = body.contact_type;
-        if (body.contact_type === 'do_not_call') patch.call_opt_out = true;
+        if (body.contact_type === 'do_not_contact') patch.status = 'do_not_contact';
       }
     }
-    // Contact-preference toggles — let an agent clear a wrongly-set "do not
-    // call / text / email" or "not interested" flag directly from the lead.
-    for (const f of CONSENT_FIELDS) {
-      if (body[f] !== undefined) patch[f] = !!body[f];
+    // Side-aware pipeline status. Accept null/'' to clear the side.
+    if (body.buyer_stage !== undefined) {
+      if (body.buyer_stage === null || body.buyer_stage === '') patch.buyer_stage = null;
+      else if (!BUYER_STAGES.has(body.buyer_stage)) errors.push(`buyer_stage must be one of: ${[...BUYER_STAGES].join(', ')}`);
+      else patch.buyer_stage = body.buyer_stage;
+    }
+    if (body.seller_stage !== undefined) {
+      if (body.seller_stage === null || body.seller_stage === '') patch.seller_stage = null;
+      else if (!SELLER_STAGES.has(body.seller_stage)) errors.push(`seller_stage must be one of: ${[...SELLER_STAGES].join(', ')}`);
+      else patch.seller_stage = body.seller_stage;
+    }
+    // Editable contact fields (manual "Update contact").
+    if (typeof body.first_name === 'string') patch.first_name = body.first_name.trim() || null;
+    if (typeof body.last_name === 'string')  patch.last_name  = body.last_name.trim() || null;
+    if (typeof body.phone === 'string')      patch.phone      = body.phone.trim() || null;
+    if (typeof body.email === 'string') {
+      const em = body.email.trim().toLowerCase();
+      if (em && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(em)) errors.push('email is not a valid address');
+      else patch.email = em || null;
+    }
+    // Derive the coarse pipeline_stage (kanban + header) from the side stages /
+    // category, unless the caller set pipeline_stage explicitly. Keeps status
+    // and pipeline as one source of truth.
+    if (patch.pipeline_stage === undefined) {
+      const ct = patch.contact_type !== undefined ? patch.contact_type : undefined;
+      const bs = patch.buyer_stage  !== undefined ? patch.buyer_stage  : undefined;
+      const ss = patch.seller_stage !== undefined ? patch.seller_stage : undefined;
+      if (ct !== undefined || bs !== undefined || ss !== undefined) {
+        // Fill unspecified pieces from the existing row so the derivation is complete.
+        const supaTmp = adminClient();
+        const { data: cur } = await supaTmp.from('leads')
+          .select('contact_type, buyer_stage, seller_stage').eq('id', id).maybeSingle();
+        const derived = derivePipeline(
+          ct !== undefined ? ct : cur?.contact_type,
+          bs !== undefined ? bs : cur?.buyer_stage,
+          ss !== undefined ? ss : cur?.seller_stage
+        );
+        if (derived) patch.pipeline_stage = derived;
+      }
     }
     if (errors.length) return fail(res, 400, errors.join('; '));
     if (Object.keys(patch).length === 0) {
@@ -175,10 +231,20 @@ async function updateLead(req, res, profile) {
     if (beforeErr) return fail(res, 500, beforeErr.message);
     if (!before)   return fail(res, 404, 'lead not found');
 
-    // 2. Apply the patch
+    // 2. Apply the patch. If a not-yet-migrated column (contact_type / 022,
+    //    buyer_stage|seller_stage / 023) is referenced before its migration
+    //    runs, strip those optional columns and retry so name/phone/email/stage
+    //    still save instead of the whole update hard-failing.
     patch.updated_at = new Date().toISOString();
-    const { data: after, error: updErr } = await supa
+    let { data: after, error: updErr } = await supa
       .from('leads').update(patch).eq('id', id).select().single();
+    if (updErr && /(contact_type|buyer_stage|seller_stage).*(schema cache|does not exist|could not find)/i.test(updErr.message || '')) {
+      const { contact_type, buyer_stage, seller_stage, ...safe } = patch;
+      ({ data: after, error: updErr } = await supa.from('leads').update(safe).eq('id', id).select().single());
+      if (!updErr) {
+        return ok(res, { lead: after, warning: 'Saved, but the side/status columns are not migrated yet — run db/022_contact_type.sql and db/023_side_stages.sql in Supabase.' });
+      }
+    }
     if (updErr) return fail(res, 500, updErr.message);
 
     // 3. Log lead_events for each field that actually changed. We piggyback
