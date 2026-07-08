@@ -60,6 +60,11 @@ const normAgent = (a) => {
 
 export default async function handler(req, res) {
   if (handleOptions(req, res)) return;
+  // This feeds a morning-briefing agent and must ALWAYS reflect live data —
+  // never let Vercel's edge/CDN (or any intermediary) serve a stale payload.
+  res.setHeader('Cache-Control', 'private, no-store, no-cache, must-revalidate');
+  res.setHeader('CDN-Cache-Control', 'no-store');
+  res.setHeader('Vercel-CDN-Cache-Control', 'no-store');
   if (req.method !== 'GET') return fail(res, 405, 'method_not_allowed');
 
   const secret = process.env.SYNC_SECRET || process.env.BRIEFING_FEEDBACK_SECRET;
