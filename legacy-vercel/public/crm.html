@@ -119,21 +119,10 @@
             <h1 class="tb-greet">Good morning.</h1>
             <p class="tb-line" data-bind-narrative></p>
           </div>
+          <!-- Market snapshot + weather removed — they were hardcoded placeholders,
+               not live data. The morning-brief assessment (below) carries the day. -->
           <div class="tb-r">
-            <div class="tb-pulse">
-              <span class="label-cap">Market pulse</span>
-              <div class="tb-pulse-row"><span>Calaveras median</span><span class="v">$542K <em class="chg up">+0.4% wk</em></span></div>
-              <div class="tb-pulse-row"><span>New on MLS, 24h</span><span class="v">7</span></div>
-              <div class="tb-pulse-row"><span>Price changes</span><span class="v">12 <em class="chg dn">9 down</em></span></div>
-              <div class="tb-pulse-row"><span>Open houses, Sat</span><span class="v">18</span></div>
-            </div>
-            <div class="tb-weather">
-              <div class="tw-day on"><span>Tue</span><span class="i">○</span><span>72°</span></div>
-              <div class="tw-day"><span>Wed</span><span class="i">○</span><span>76°</span></div>
-              <div class="tw-day"><span>Thu</span><span class="i">●</span><span>69°</span></div>
-              <div class="tw-day"><span>Fri</span><span class="i">○</span><span>74°</span></div>
-              <div class="tw-day"><span>Sat</span><span class="i">○</span><span>78°</span></div>
-            </div>
+            <div class="tb-assess" data-bind-assessment></div>
           </div>
         </div>
 

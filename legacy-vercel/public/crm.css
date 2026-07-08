@@ -65,6 +65,18 @@
 .lead-list-rows {
   flex: 1; overflow-y: auto;
 }
+/* Segment-browse search pane (roster eyebrow → search-first) */
+.lead-seg { padding: 14px 18px 12px; border-bottom: 1px solid var(--rule); }
+.lead-seg-input {
+  width: 100%; box-sizing: border-box; font: inherit; font-size: 14px;
+  padding: 9px 12px; border: 1px solid var(--rule); background: #fff; color: var(--ink);
+}
+.lead-seg-input:focus { outline: none; border-color: var(--brass); }
+.lead-seg-hint {
+  display: block; margin-top: 8px; font-family: var(--mono); font-size: 9px;
+  letter-spacing: .1em; text-transform: uppercase; color: var(--ink-faint);
+}
+.lead-seg-results { }
 .lead-row {
   padding: 14px 18px;
   border-bottom: 1px solid var(--rule-soft);

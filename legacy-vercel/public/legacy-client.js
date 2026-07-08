@@ -739,6 +739,35 @@
       }
     }
 
+    // 3b. At-a-glance assessment — replaces the old hardcoded market/weather
+    // widgets with live numbers from the brief. Only real counts, no fabrication.
+    const assessEl = document.querySelector('[data-bind-assessment]');
+    if (assessEl) {
+      const r = data.roster || {};
+      const drafts   = (data.drafts && data.drafts.length) || 0;
+      const deals    = (data.active_deals && data.active_deals.length) || 0;
+      const tours    = (data.hours && data.hours.length) || 0;
+      const inbox     = r.inbox_count != null ? r.inbox_count : null;
+      const pipeline  = r.pipeline_count != null ? r.pipeline_count : null;
+      const row = (label, val, accent) => val == null ? '' :
+        `<div class="tb-pulse-row"><span>${label}</span><span class="v">${escapeHtml(String(val))}${accent ? ` <em class="chg ${accent.cls}">${escapeHtml(accent.text)}</em>` : ''}</span></div>`;
+      // Lead line: what needs her first.
+      const lead = drafts ? `${drafts} draft${drafts === 1 ? '' : 's'} waiting on you`
+                 : tours   ? `${tours} on the calendar today`
+                 : deals    ? `${deals} deal${deals === 1 ? '' : 's'} in motion`
+                 : 'Inbox at zero — quiet morning';
+      assessEl.innerHTML = `
+        <div class="tb-pulse">
+          <span class="label-cap">At a glance</span>
+          <div class="tb-pulse-row" style="font-weight:600;"><span>${escapeHtml(lead)}</span><span class="v"></span></div>
+          ${row('Awaiting your approval', drafts, drafts ? { cls: 'dn', text: 'review' } : null)}
+          ${row('On the calendar today', tours)}
+          ${row('Deals in motion', deals)}
+          ${row('Inbox awaiting reply', inbox)}
+          ${row('Active pipeline', pipeline)}
+        </div>`;
+    }
+
     // 4. Sidebar + tab badge counts (only present on crm.html)
     if (data.roster) {
       const r = data.roster;
@@ -1419,6 +1448,7 @@
     past:    (s) => s === 'closed',
     sphere:  (s) => s === 'sphere'
   };
+  const SEGMENT_LABEL = { all: 'leads', clients: 'clients', past: 'past clients', sphere: 'sphere' };
 
   function filterLeads() {
     // Topbar search is a global override — matches across everyone, ignoring
@@ -1522,9 +1552,44 @@
     });
   }
 
+  // Segment-browse mode: clicking a roster eyebrow (Leads / Clients / Past /
+  // Sphere) opens a search-first pane rather than dumping every contact. The
+  // list stays empty until Sara types, then shows matches she can open.
+  function renderSegmentBrowse(container) {
+    const segLeads = filterLeads();   // segment + chip, no global search (state.search is empty here)
+    const segName  = SEGMENT_LABEL[state.segment] || 'contacts';
+    container.innerHTML = `
+      <div class="lead-seg">
+        <input type="text" class="lead-seg-input" data-roster-search placeholder="Search ${escHtml(segName)} by name, email, area…" value="${escHtml(state.rosterSearch || '')}" autocomplete="off">
+        <div class="lead-seg-hint">${segLeads.length} ${escHtml(segName)} · type a name to open one</div>
+      </div>
+      <div class="lead-seg-results" data-roster-results></div>`;
+    wireLeadList(container);
+    renderSegmentResults(container);
+    const inp = container.querySelector('[data-roster-search]');
+    if (inp) { const v = inp.value; inp.focus(); inp.setSelectionRange(v.length, v.length); }
+  }
+  // Only the results sub-list re-renders on each keystroke, so the search input
+  // keeps focus and the caret doesn't jump.
+  function renderSegmentResults(container) {
+    const results = container.querySelector('[data-roster-results]');
+    if (!results) return;
+    const q = (state.rosterSearch || '').trim().toLowerCase();
+    if (!q) { results.innerHTML = ''; return; }
+    const matches = filterLeads().filter((l) => matchSearch(l, q));
+    results.innerHTML = matches.length
+      ? matches.slice(0, 50).map(leadRowHtml).join('')
+      : `<div class="lead-row" style="opacity:.55;"><div class="lead-content"><div class="lead-name-row"><span class="lead-name" style="font-style:italic;">No match for “${escHtml(state.rosterSearch)}.”</span></div></div></div>`;
+  }
+
   function paintLeadList() {
     const container = document.querySelector('[data-lead-list]');
     if (!container) return;
+    // Eyebrow-driven browse → search-first (unless a global topbar search is active).
+    if (state.segmentBrowse && !(state.search || '').trim()) {
+      renderSegmentBrowse(container);
+      return;
+    }
     // Filtering/search still resolve the full set; only the RENDER is paged, so
     // a 2,000-lead roster no longer paints 2,000 DOM rows at once (the INP hit).
     const leads = filterLeads();
@@ -1561,10 +1626,20 @@
     const box = e.target.closest('[data-global-search]');
     if (!box) return;
     state.search = box.value || '';
-    if (state.search.trim() && typeof window.showView === 'function') window.showView(null, 'inbox');
+    if (state.search.trim()) { state.segmentBrowse = false; if (typeof window.showView === 'function') window.showView(null, 'inbox'); }
     paintLeadList();
     const first = filterLeads()[0];
     if (first) selectLeadId(first.id, true);
+  });
+
+  // In-pane roster search (segment-browse mode) — filter within the segment and
+  // only re-render the results sub-list so the input keeps focus.
+  document.addEventListener('input', (e) => {
+    const box = e.target.closest('[data-roster-search]');
+    if (!box) return;
+    state.rosterSearch = box.value || '';
+    const container = document.querySelector('[data-lead-list]');
+    if (container) renderSegmentResults(container);
   });
 
   // Roster sidebar segments (Leads / Clients / Past clients / Sphere) — re-filter
@@ -1575,14 +1650,20 @@
     if (!link) return;
     state.segment = link.getAttribute('data-roster-nav') || 'all';
     state.activeFilter = 'all';
+    // Search-first: show a search box for this segment instead of listing
+    // everyone. Clear any prior query and topbar search so the pane starts fresh.
+    state.segmentBrowse = true;
+    state.rosterSearch  = '';
+    state.search        = '';
+    document.querySelectorAll('[data-global-search]').forEach((b) => { b.value = ''; });
     document.querySelectorAll('[data-filter]').forEach((c) => c.classList.toggle('on', c.getAttribute('data-filter') === 'all'));
     paintLeadList();
-    const first = filterLeads()[0];
-    if (first) selectLeadId(first.id, true);
-    else {
-      const detailEl = document.querySelector('[data-lead-detail]');
-      if (detailEl) detailEl.innerHTML = `<div style="padding:32px;opacity:.55;font-style:italic;">No leads in this group yet.</div>`;
-    }
+    // Don't auto-open a contact — Sara picks one from the search results.
+    const detailEl = document.querySelector('[data-lead-detail]');
+    const segLeads = filterLeads();
+    if (detailEl) detailEl.innerHTML = segLeads.length
+      ? `<div style="padding:32px;opacity:.55;font-style:italic;">Search ${escHtml(SEGMENT_LABEL[state.segment] || 'contacts')} on the left, then pick a contact to open it here.</div>`
+      : `<div style="padding:32px;opacity:.55;font-style:italic;">No contacts in this group yet.</div>`;
   });
 
   function paintLeadDetail(payload) {
@@ -1664,6 +1745,10 @@
         <div data-sell-status style="display:${showSell ? 'flex' : 'none'};align-items:center;gap:8px;margin:6px 0;">
           <span style="${cap}">Sell status</span>
           <select data-seller-stage style="${fld}">${optTags(SELLER_STAGE_LABEL, lead.seller_stage || '')}</select>
+        </div>
+        <div data-assign-deal-row style="display:${(lead.buyer_stage === 'in_escrow' || lead.seller_stage === 'in_escrow') ? 'flex' : 'none'};align-items:center;gap:8px;margin:6px 0;">
+          <span style="${cap}">Deal</span>
+          <select data-assign-deal style="${fld}"><option value="">— loading deals… —</option></select>
         </div>
         <div style="display:flex;gap:8px;align-items:center;margin-top:12px;">
           <button class="btn btn-ink btn-sm" data-detail-action="save-consent">Save contact</button>
@@ -1966,12 +2051,40 @@
       const sideSel  = consentPanel.querySelector('[data-lead-side]');
       const buyRow   = consentPanel.querySelector('[data-buy-status]');
       const sellRow  = consentPanel.querySelector('[data-sell-status]');
+      const buyStageSel  = consentPanel.querySelector('[data-buyer-stage]');
+      const sellStageSel = consentPanel.querySelector('[data-seller-stage]');
+      const dealRow  = consentPanel.querySelector('[data-assign-deal-row]');
+      const dealSel  = consentPanel.querySelector('[data-assign-deal]');
+      let dealsLoaded = false;
+      // When either side reaches "In escrow", offer a deal to link the contact
+      // to (their portal). Populate the dropdown lazily from /api/crm/listings.
+      async function loadDealOptions() {
+        if (dealsLoaded || !dealSel) return;
+        dealsLoaded = true;
+        const r = await window.Legacy.api('/api/crm/listings', { method: 'GET' });
+        const j = r.ok ? r.json : {};
+        const all = [...(j.active || []), ...(j.pending || []), ...(j.preparing || []), ...(j.closed || [])];
+        const cur = lead.deal_source_key || (lead.deal && lead.deal.source_key) || '';
+        dealSel.innerHTML = '<option value="">— pick a deal —</option>' + all.map((d) => {
+          const label = [d.address, d.city].filter(Boolean).join(', ') || d.source_key;
+          return `<option value="${escHtml(d.source_key)}"${cur === d.source_key ? ' selected' : ''}>${escHtml(label)}</option>`;
+        }).join('');
+        if (!all.length) dealSel.innerHTML = '<option value="">No deals found</option>';
+      }
       const syncRows = () => {
         const v = sideSel ? sideSel.value : '';
         if (buyRow)  buyRow.style.display  = (v === 'buyer'  || v === 'both') ? 'flex' : 'none';
         if (sellRow) sellRow.style.display = (v === 'seller' || v === 'both') ? 'flex' : 'none';
+        const buyEsc  = buyStageSel  && (v === 'buyer'  || v === 'both') && buyStageSel.value  === 'in_escrow';
+        const sellEsc = sellStageSel && (v === 'seller' || v === 'both') && sellStageSel.value === 'in_escrow';
+        if (dealRow) dealRow.style.display = (buyEsc || sellEsc) ? 'flex' : 'none';
+        if (buyEsc || sellEsc) loadDealOptions();
       };
-      if (sideSel) sideSel.addEventListener('change', syncRows);
+      if (sideSel)      sideSel.addEventListener('change', syncRows);
+      if (buyStageSel)  buyStageSel.addEventListener('change', syncRows);
+      if (sellStageSel) sellStageSel.addEventListener('change', syncRows);
+      // If the contact is already in escrow, load the deal list on open.
+      if (dealRow && dealRow.style.display !== 'none') loadDealOptions();
       const saveBtn = consentPanel.querySelector('[data-detail-action="save-consent"]');
       const msgEl   = consentPanel.querySelector('[data-consent-status-msg]');
       if (saveBtn) saveBtn.addEventListener('click', async () => {
@@ -1999,13 +2112,31 @@
         patch.seller_stage = (v === 'seller' || v === 'both') ? sellVal : null;
         saveBtn.disabled = true; saveBtn.textContent = 'Saving…';
         const r = await window.Legacy.api('/api/crm/lead', { method: 'PATCH', body: patch });
-        saveBtn.disabled = false; saveBtn.textContent = 'Save contact';
-        if (r.ok) {
-          msgEl.style.color = '#2E5C3D'; msgEl.textContent = (r.json && r.json.warning) ? 'Saved (run pending migration).' : 'Saved.';
-          selectLeadId(lead.id, true); // force refresh so header pills reflect the change
-        } else {
+        if (!r.ok) {
+          saveBtn.disabled = false; saveBtn.textContent = 'Save contact';
           msgEl.style.color = '#9B2C2C'; msgEl.textContent = (r.json && r.json.error) || 'Failed to save.';
+          return;
         }
+        // In escrow + a deal picked → link the contact to their deal (portal).
+        const dealKey = (dealRow && dealRow.style.display !== 'none' && dealSel) ? dealSel.value : '';
+        let linkMsg = '';
+        if (dealKey) {
+          const email = (patch.email || lead.email || '').trim();
+          if (!email) {
+            linkMsg = ' — add an email to link the deal.';
+          } else {
+            const role = (patch.buyer_stage === 'in_escrow') ? 'buyer' : 'seller';
+            const lr = await window.Legacy.api('/api/crm/link-deal-party', {
+              method: 'POST',
+              body: { deal: dealKey, email, first_name: patch.first_name || undefined, last_name: patch.last_name || undefined, phone: patch.phone || undefined, role, provision: false }
+            });
+            linkMsg = (lr.ok && lr.json && lr.json.linked) ? ' Linked to deal.' : ' — deal link failed.';
+          }
+        }
+        saveBtn.disabled = false; saveBtn.textContent = 'Save contact';
+        msgEl.style.color = '#2E5C3D';
+        msgEl.textContent = ((r.json && r.json.warning) ? 'Saved (run pending migration).' : 'Saved.') + linkMsg;
+        selectLeadId(lead.id, true); // force refresh so header pills reflect the change
       });
     }
 
