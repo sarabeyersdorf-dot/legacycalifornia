@@ -2303,17 +2303,27 @@
     }
   }
 
-  async function moveLeadToStage(leadId, newStage) {
+  // `field` is which column-axis was dropped onto: 'pipeline_stage' for the
+  // coarse (All / Dual) board, or 'buyer_stage' / 'seller_stage' for the
+  // side-specific boards. When a side stage changes the API re-derives
+  // pipeline_stage, so status and pipeline stay one source of truth.
+  async function moveLeadToStage(leadId, newStage, field) {
+    field = field || 'pipeline_stage';
     const stateLead = state.leadsById.get(leadId);
     if (!stateLead) return;
-    const prevStage = stateLead.pipeline_stage;
+    const prevStage = stateLead[field];
     if (prevStage === newStage) return;
 
     // Optimistic
-    stateLead.pipeline_stage = newStage;
+    stateLead[field] = newStage;
 
-    const r = await patchLead(leadId, { pipeline_stage: newStage });
+    const r = await patchLead(leadId, { [field]: newStage });
     if (r.ok && r.json && r.json.lead) {
+      // Keep the local row in sync with any server-derived fields (e.g. a
+      // side-stage change re-derives pipeline_stage).
+      if (r.json.lead.pipeline_stage != null) stateLead.pipeline_stage = r.json.lead.pipeline_stage;
+      if (r.json.lead.buyer_stage  !== undefined) stateLead.buyer_stage  = r.json.lead.buyer_stage;
+      if (r.json.lead.seller_stage !== undefined) stateLead.seller_stage = r.json.lead.seller_stage;
       // Server-truth — refresh kanban + (if this lead is open) the detail.
       // Cheapest reconcile: refetch the pipeline to get fresh counts/values.
       const pr = await window.Legacy.api('/api/crm/pipeline', { method: 'GET' });
@@ -2321,7 +2331,7 @@
       if (state.selectedLeadId === leadId) loadLead(leadId);
     } else {
       // Roll back
-      stateLead.pipeline_stage = prevStage;
+      stateLead[field] = prevStage;
       // Re-fetch to restore the column visually
       const pr = await window.Legacy.api('/api/crm/pipeline', { method: 'GET' });
       if (pr.ok) paintKanban(pr.json);
@@ -2363,7 +2373,8 @@
         const targetCol = body.closest('[data-stage]');
         if (!targetCol || !leadId) return;
         const newStage = targetCol.getAttribute('data-stage');
-        moveLeadToStage(leadId, newStage);
+        const field    = targetCol.getAttribute('data-stage-field') || 'pipeline_stage';
+        moveLeadToStage(leadId, newStage, field);
       });
     });
   }
@@ -2497,57 +2508,129 @@
     return (on && on.getAttribute('data-side')) || 'all';
   }
 
+  // ---- Side-aware kanban column sets -------------------------------------
+  // The board mirrors the contact-editor status dropdowns. "All"/"Dual" show
+  // the coarse pipeline_stage columns; "Buyers"/"Sellers" show the fine
+  // side-specific stages, bucketed by buyer_stage / seller_stage.
+  const KAN_COARSE = [
+    { key: 'new',            name: 'New',            sub: 'Just came in' },
+    { key: 'nurture',        name: 'Nurturing',      sub: 'Staying in touch' },
+    { key: 'consult',        name: 'Consult',        sub: 'Buyer consult / listing appt' },
+    { key: 'signed',         name: 'Signed',         sub: 'Buyer-rep / listing agreement' },
+    { key: 'active',         name: 'Active',         sub: 'Touring · on-market' },
+    { key: 'under_contract', name: 'Under contract', sub: 'In escrow' },
+    { key: 'closed',         name: 'Closed',         sub: 'Funded & recorded' }
+  ];
+  const KAN_BUYER = [
+    { key: 'new',            name: 'New',            sub: 'Just came in' },
+    { key: 'nurture',        name: 'Nurturing',      sub: 'Staying in touch' },
+    { key: 'showing_homes',  name: 'Showing homes',  sub: 'Actively touring' },
+    { key: 'writing_offers', name: 'Writing offers', sub: 'Making offers' },
+    { key: 'in_escrow',      name: 'In escrow',      sub: 'Under contract' },
+    { key: 'closed',         name: 'Closed',         sub: 'Funded & recorded' }
+  ];
+  const KAN_SELLER = [
+    { key: 'new',              name: 'New',               sub: 'Just came in' },
+    { key: 'nurture',          name: 'Nurturing',         sub: 'Staying in touch' },
+    { key: 'preparing',        name: 'Preparing to list', sub: 'Prep & pricing' },
+    { key: 'on_market',        name: 'On market',         sub: 'Active listing' },
+    { key: 'reviewing_offers', name: 'Reviewing offers',  sub: 'Offers in hand' },
+    { key: 'in_escrow',        name: 'In escrow',         sub: 'Under contract' },
+    { key: 'closed',           name: 'Closed',            sub: 'Funded & recorded' }
+  ];
+  // Legacy coarse-stage aliases + fallbacks so un-migrated rows (no
+  // buyer_stage/seller_stage yet) still land in a sensible side column.
+  const KAN_REMAP      = { touring: 'active', offer: 'under_contract', close: 'closed' };
+  const PIPE_TO_BUYER  = { new: 'new', nurture: 'nurture', consult: 'nurture', signed: 'showing_homes', active: 'showing_homes', under_contract: 'in_escrow', closed: 'closed' };
+  const PIPE_TO_SELLER = { new: 'new', nurture: 'nurture', consult: 'preparing', signed: 'preparing', active: 'on_market', under_contract: 'in_escrow', closed: 'closed' };
+
+  function kanBoardFor(side) {
+    if (side === 'buyer')  return { cols: KAN_BUYER,  field: 'buyer_stage',  bucket: kanBuyerKey,  keep: (l) => ['buyer', 'both'].includes(l.deal_side || '') };
+    if (side === 'seller') return { cols: KAN_SELLER, field: 'seller_stage', bucket: kanSellerKey, keep: (l) => ['seller', 'both'].includes(l.deal_side || '') };
+    if (side === 'both')   return { cols: KAN_COARSE, field: 'pipeline_stage', bucket: kanCoarseKey, keep: (l) => (l.deal_side || '') === 'both' };
+    return                        { cols: KAN_COARSE, field: 'pipeline_stage', bucket: kanCoarseKey, keep: () => true };
+  }
+  function kanCoarseKey(l) { const p = l.pipeline_stage; return KAN_REMAP[p] || p; }
+  function kanBuyerKey(l)  { return l.buyer_stage  || PIPE_TO_BUYER[kanCoarseKey(l)]  || null; }
+  function kanSellerKey(l) { return l.seller_stage || PIPE_TO_SELLER[kanCoarseKey(l)] || null; }
+
   let lastPipelineData = null;
   function paintKanban(pipelineData) {
     if (pipelineData) lastPipelineData = pipelineData;
-    const data   = pipelineData || lastPipelineData;
+    const data = pipelineData || lastPipelineData;
     if (!data) return;
-    const stages = (data && data.stages) || [];
-    const side   = activeSideFilter();
-    const keep   = (l) => side === 'all' || (l.deal_side || '') === side;
-    stages.forEach((stage) => {
-      const col  = document.querySelector(`[data-stage="${stage.stage}"]`);
-      if (!col) return;
-      const head = col.querySelector('[data-stage-count]');
-      const body = col.querySelector('[data-stage-body]');
-      const leads = (stage.leads || []).filter(keep);
-      if (head) head.innerHTML = `${leads.length} · <span class="sum">${escHtml(fmtUSD(stage.estimated_value))}</span>`;
-      if (!body) return;
-      if (!leads.length) {
-        body.innerHTML = `<div style="opacity:.4;font-style:italic;font-size:12px;padding:8px 4px;">Empty.</div>`;
-        return;
-      }
-      body.innerHTML = leads.slice(0, 10).map((l) => {
-        const pill = tempPill(l.temperature);
-        const mid  = (l.price_min && l.price_max) ? (l.price_min + l.price_max) / 2 : (l.price_min || l.price_max || 0);
-        const home = (l.areas && l.areas[0]) || (l.journey_stage || '').replace(/_/g, ' ');
-        return `
-          <div class="kan-card" data-lead-id="${escHtml(l.id)}">
-            <div class="name">${escHtml(fullName(l))} ${sideChipHtml(l.deal_side)}</div>
-            <div class="home">${mid ? `<span class="price">${escHtml(fmtUSD(mid))}</span> · ` : ''}${escHtml(home || '—')}</div>
-            <div class="kan-card-foot">
-              <span class="pill-status ${pill}">${escHtml((l.temperature || 'new').replace(/^./, (c) => c.toUpperCase()))} · ${l.score == null ? '—' : l.score}</span>
-              <span>· ${escHtml(fmtRel(l.updated_at))}</span>
-            </div>
-          </div>`;
-      }).join('');
-      body.querySelectorAll('[data-lead-id]').forEach((card) => {
-        card.addEventListener('click', () => {
-          // Switch to the Inbox view (where the detail panel lives) so the
-          // lead actually appears. The global is showView, defined in crm.html.
-          if (typeof window.showView === 'function') window.showView(null, 'inbox');
-          selectLeadId(card.getAttribute('data-lead-id'));
-        });
+    const kan = document.querySelector('[data-kanban]');
+    if (!kan) return;
+
+    // Flatten every active lead the pipeline API returned (all groups incl.
+    // sphere), then re-bucket by the active board's axis.
+    const allLeads = (data.stages || []).flatMap((s) => s.leads || []);
+    const side  = activeSideFilter();
+    const board = kanBoardFor(side);
+    const leads = allLeads.filter(board.keep);
+
+    // Bucket + tally per column.
+    const byCol = {};
+    board.cols.forEach((c) => { byCol[c.key] = { leads: [], value: 0 }; });
+    let totalValue = 0;
+    for (const l of leads) {
+      const k = board.bucket(l);
+      const slot = byCol[k];
+      if (!slot) continue;               // no matching column → drop (e.g. sphere)
+      slot.leads.push(l);
+      const mid = midPrice(l.price_min, l.price_max);
+      if (mid) { slot.value += mid * 0.025; totalValue += mid * 0.025; }
+    }
+
+    kan.innerHTML = board.cols.map((c) => {
+      const slot = byCol[c.key];
+      slot.leads.sort((a, b) => (b.score || 0) - (a.score || 0));
+      const cards = slot.leads.length
+        ? slot.leads.slice(0, 12).map(kanCardHtml).join('')
+        : `<div style="opacity:.4;font-style:italic;font-size:12px;padding:8px 4px;">Empty.</div>`;
+      return `
+        <div class="kan-col" data-stage="${escHtml(c.key)}" data-stage-field="${board.field}">
+          <div class="kan-col-h"><span class="name">${escHtml(c.name)}</span><span class="count" data-stage-count>${slot.leads.length} · <span class="sum">${escHtml(fmtUSD(Math.round(slot.value)))}</span></span></div>
+          <div class="kan-sub">${escHtml(c.sub)}</div>
+          <div class="kan-body" data-stage-body>${cards}</div>
+        </div>`;
+    }).join('');
+
+    kan.querySelectorAll('[data-lead-id]').forEach((card) => {
+      card.addEventListener('click', () => {
+        // Switch to the Inbox view (where the detail panel lives) so the
+        // lead actually appears. The global is showView, defined in crm.html.
+        if (typeof window.showView === 'function') window.showView(null, 'inbox');
+        selectLeadId(card.getAttribute('data-lead-id'));
       });
     });
 
     const eyebrow = document.querySelector('[data-bind-pipe-eyebrow]');
-    if (eyebrow) eyebrow.textContent = `Active pipeline · ${data.total_leads || 0} lead${data.total_leads === 1 ? '' : 's'}`;
+    if (eyebrow) eyebrow.textContent = `Active pipeline · ${leads.length} lead${leads.length === 1 ? '' : 's'}`;
     const inflight = document.querySelector('[data-bind-pipe-inflight]');
-    if (inflight) inflight.textContent = fmtUSD(data.total_estimated_value || 0);
+    if (inflight) inflight.textContent = fmtUSD(Math.round(totalValue));
 
     // Wire HTML5 drag-and-drop so cards can be moved across stage columns.
     wireKanbanDnd();
+  }
+
+  function midPrice(min, max) {
+    if (min && max) return (min + max) / 2;
+    return min || max || 0;
+  }
+  function kanCardHtml(l) {
+    const pill = tempPill(l.temperature);
+    const mid  = midPrice(l.price_min, l.price_max);
+    const home = (l.areas && l.areas[0]) || (l.journey_stage || '').replace(/_/g, ' ');
+    return `
+      <div class="kan-card" data-lead-id="${escHtml(l.id)}">
+        <div class="name">${escHtml(fullName(l))} ${sideChipHtml(l.deal_side)}</div>
+        <div class="home">${mid ? `<span class="price">${escHtml(fmtUSD(mid))}</span> · ` : ''}${escHtml(home || '—')}</div>
+        <div class="kan-card-foot">
+          <span class="pill-status ${pill}">${escHtml((l.temperature || 'new').replace(/^./, (c) => c.toUpperCase()))} · ${l.score == null ? '—' : l.score}</span>
+          <span>· ${escHtml(fmtRel(l.updated_at))}</span>
+        </div>
+      </div>`;
   }
 
   // Buyer / Seller / Dual filter above the kanban — re-paints from cache.

@@ -342,43 +342,9 @@
           <button class="chip" data-side="both">Dual · both sides</button>
         </div>
 
-        <div class="kanban" data-kanban>
-          <div class="kan-col" data-stage="new">
-            <div class="kan-col-h"><span class="name">New</span><span class="count" data-stage-count>—</span></div>
-            <div class="kan-sub">Just came in</div>
-            <div class="kan-body" data-stage-body></div>
-          </div>
-          <div class="kan-col" data-stage="nurture">
-            <div class="kan-col-h"><span class="name">Nurturing</span><span class="count" data-stage-count>—</span></div>
-            <div class="kan-sub">Staying in touch</div>
-            <div class="kan-body" data-stage-body></div>
-          </div>
-          <div class="kan-col" data-stage="consult">
-            <div class="kan-col-h"><span class="name">Consult</span><span class="count" data-stage-count>—</span></div>
-            <div class="kan-sub">Buyer consult / listing appt</div>
-            <div class="kan-body" data-stage-body></div>
-          </div>
-          <div class="kan-col" data-stage="signed">
-            <div class="kan-col-h"><span class="name">Signed</span><span class="count" data-stage-count>—</span></div>
-            <div class="kan-sub">Buyer-rep / listing agreement</div>
-            <div class="kan-body" data-stage-body></div>
-          </div>
-          <div class="kan-col" data-stage="active">
-            <div class="kan-col-h"><span class="name">Active</span><span class="count" data-stage-count>—</span></div>
-            <div class="kan-sub">Touring · on-market</div>
-            <div class="kan-body" data-stage-body></div>
-          </div>
-          <div class="kan-col" data-stage="under_contract">
-            <div class="kan-col-h"><span class="name">Under contract</span><span class="count" data-stage-count>—</span></div>
-            <div class="kan-sub">In escrow</div>
-            <div class="kan-body" data-stage-body></div>
-          </div>
-          <div class="kan-col" data-stage="closed">
-            <div class="kan-col-h"><span class="name">Closed</span><span class="count" data-stage-count>—</span></div>
-            <div class="kan-sub">Funded &amp; recorded</div>
-            <div class="kan-body" data-stage-body></div>
-          </div>
-        </div>
+        <!-- Columns are rendered by paintKanban(); they change with the
+             Buyers / Sellers side filter above (side-aware statuses). -->
+        <div class="kanban" data-kanban></div>
       </div>
     </section>
     <style>

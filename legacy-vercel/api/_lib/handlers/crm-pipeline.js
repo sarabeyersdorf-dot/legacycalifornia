@@ -24,10 +24,16 @@ export default async function handler(req, res) {
     if (!isAgent(profile)) return fail(res, 401, 'agents only');
 
     const supa = adminClient();
-    const { data: leads, error } = await supa
-      .from('leads')
-      .select('id, first_name, last_name, email, pipeline_stage, deal_side, score, temperature, price_min, price_max, journey_stage, lead_type, areas, updated_at')
-      .eq('status', 'active');
+    // Prefer the side-aware columns (db/023); fall back gracefully if that
+    // migration hasn't been run yet so the board still loads.
+    const FULL = 'id, first_name, last_name, email, pipeline_stage, deal_side, buyer_stage, seller_stage, contact_type, score, temperature, price_min, price_max, journey_stage, lead_type, areas, updated_at';
+    const BASE = 'id, first_name, last_name, email, pipeline_stage, deal_side, score, temperature, price_min, price_max, journey_stage, lead_type, areas, updated_at';
+    let { data: leads, error } = await supa
+      .from('leads').select(FULL).eq('status', 'active');
+    if (error && /column|schema cache/i.test(error.message || '')) {
+      ({ data: leads, error } = await supa
+        .from('leads').select(BASE).eq('status', 'active'));
+    }
 
     if (error) return fail(res, 500, error.message);
 
