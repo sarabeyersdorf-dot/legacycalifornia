@@ -1,5 +1,5 @@
 {
-  "version": "1.25",
+  "version": "1.26",
   "lastUpdated": "2026-07-08",
   "updatedBy": "Claude",
   "tasks": [
@@ -124,6 +124,18 @@
       "agent": "sara",
       "client": "Rathburn",
       "title": "Chase Lilia's signature on the 14281 Cobb Ln listing agreement (sent 7/7 at 999k)",
+      "done": false
+    },
+    {
+      "agent": "sara",
+      "client": "433 Hwy 4",
+      "title": "Reply to Melissa re: tenant estoppel — TEC box UNCHECKED on both TOPAs (not a contract deliverable); check the signed MU-PA text first, then decide courtesy TEC if lender requires (in writing)",
+      "done": false
+    },
+    {
+      "agent": "sara",
+      "client": "433 Hwy 4",
+      "title": "FHDS signed 7/6 has UNCHECKED boxes (per Melissa) — issue corrected FHDS for signatures",
       "done": false
     }
   ],
