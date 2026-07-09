@@ -114,9 +114,9 @@ export default async function handler(req, res) {
   try {
     const supa = adminClient();
     const BASE      = 'source_key, address, city, stage, side, agent, list_price, sale_price, coe_date, photo_url, video_url, matterport_url';
-    const COLS_FULL = BASE + ', mls_number, listing_meta';
-    const COLS_MLS  = BASE + ', mls_number';
-    const COLS      = BASE;
+    const COLS_FULL = BASE + ', mls_number, listing_meta, stage_override';
+    const COLS_MLS  = BASE + ', mls_number, stage_override';
+    const COLS      = BASE;   // ultimate fallback — no stage_override (pre-024)
     // Include buyer-side deals too — a purchase we represent is a live
     // transaction that needs a client portal, and Sara expects to see it under
     // the in-escrow list. It's tagged by `side` so the card can say Buying vs
@@ -185,10 +185,15 @@ export default async function handler(req, res) {
     };
 
     let photosMatched = 0;
-    const buckets = { active: [], pending: [], closed: [], preparing: [] };
+    const buckets = { offers: [], active: [], pending: [], closed: [], preparing: [] };
     for (const d of (data || [])) {
       const photo = d.photo_url || idxPhotoFor(d);   // deals.json photo, else IDX/MetroList
       if (photo) photosMatched++;
+      // Effective stage. The agent's stage_override (set from the Deals view)
+      // only applies while deals.json still has the deal at 'offer' — so
+      // flipping an accepted offer to escrow sticks until Cowork advances the
+      // deal in deals.json, then self-heals. Any other time, `stage` wins.
+      const stage = (d.stage === 'offer' && d.stage_override) ? d.stage_override : d.stage;
       const row = {
         source_key: d.source_key,
         address:    d.address,
@@ -203,20 +208,23 @@ export default async function handler(req, res) {
         meta:       d.listing_meta || null,   // client, apn, beds/baths, sqft, dates, disclosure, video
         photo_url:  photo,
         has_video:  !!d.video_url,
-        has_tour:   !!d.matterport_url
+        has_tour:   !!d.matterport_url,
+        stage:      stage
       };
-      if (d.stage === 'listing')        buckets.active.push(row);
-      else if (d.stage === 'pending')   buckets.pending.push(row);
-      else if (d.stage === 'closed')    buckets.closed.push(row);
-      else if (d.stage === 'preparing') buckets.preparing.push(row);
+      if (stage === 'offer')          buckets.offers.push(row);
+      else if (stage === 'listing')   buckets.active.push(row);
+      else if (stage === 'pending')   buckets.pending.push(row);
+      else if (stage === 'closed')    buckets.closed.push(row);
+      else if (stage === 'preparing') buckets.preparing.push(row);
     }
 
     return ok(res, {
+      offers:    buckets.offers,
       active:    buckets.active,
       pending:   buckets.pending,
       closed:    buckets.closed,
       preparing: buckets.preparing,
-      counts:    { active: buckets.active.length, pending: buckets.pending.length, closed: buckets.closed.length, preparing: buckets.preparing.length },
+      counts:    { offers: buckets.offers.length, active: buckets.active.length, pending: buckets.pending.length, closed: buckets.closed.length, preparing: buckets.preparing.length },
       // Photo-sourcing diagnostics: how many deals got a photo, and where the
       // feeds stood. If metrolist_configured is false, the MetroList env vars
       // aren't set on this deployment; if metrolist_listings is 0, the office

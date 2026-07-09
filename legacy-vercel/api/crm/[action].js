@@ -36,6 +36,7 @@ import actions       from '../_lib/handlers/crm-actions.js';
 import visibility    from '../_lib/handlers/crm-visibility.js';
 import briefingFeedback from '../_lib/handlers/crm-briefing-feedback.js';
 import briefingCalendar from '../_lib/handlers/crm-briefing-calendar.js';
+import dealStage        from '../_lib/handlers/crm-deal-stage.js';
 
 const TABLE = {
   'morning-brief':   morningBrief,
@@ -59,7 +60,8 @@ const TABLE = {
   'actions':         actions,
   'visibility':      visibility,
   'briefing-feedback': briefingFeedback,
-  'briefing-calendar': briefingCalendar
+  'briefing-calendar': briefingCalendar,
+  'deal-stage':        dealStage
 };
 
 export default async function handler(req, res) {

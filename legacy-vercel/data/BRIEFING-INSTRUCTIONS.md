@@ -59,7 +59,8 @@ Find the deal by `"address"` (or `"id"`) and update:
 | `"agent"` | **`"sara"` or `"james"`** — whose deal it is. **Always set this.** Routes the deal to the right desk / seller portal. |
 | `"client"` | **The client's name(s)** — on a BUYER-side deal, the buyer(s); on a listing, the seller(s). **Pull this from the executed documents** (the RPA / purchase agreement names the parties) when a deal comes in, and set it here. Shows on the Deals/Listings roster and the briefing calendar. e.g. `"client": "Roger & Kristin Quillen"`. |
 | `"side"` | `"listing"`/`"seller"` = sell-side · `"buyer"` = buy-side · `"both"` = dual agency |
-| `"stage"` | `"listing"` = on market · `"pending"` = in escrow · `"closed"` = funded |
+| `"stage"` | `"offer"` = we have an offer out/in on it, not yet accepted · `"listing"` = on market · `"pending"` = in escrow · `"closed"` = funded · `"preparing"` = future listing |
+| `"stage": "offer"` | **Use for any property we have an offer on that isn't accepted yet** — an offer we WROTE for a buyer client (set `"side": "buyer"`), or an offer RECEIVED on one of our listings (`"side": "listing"`). These show under the **Offers** tab of the Deals and Offers view. When the offer is accepted, either set `"stage": "pending"` here, or Sara flips it with the card's "Mark accepted → escrow" toggle (that override self-heals once you move it to `"pending"` in this file). |
 | `"listPrice"` / `"salePrice"` | numbers only — no `$`, no commas |
 | `"openEscrowDate"` / `"closingDate"` | `"YYYY-MM-DD"` |
 | `"notes"` | free-text context about the deal (shows on the deal / seller portal) |

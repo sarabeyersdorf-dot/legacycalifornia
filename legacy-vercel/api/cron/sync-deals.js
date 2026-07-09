@@ -209,7 +209,7 @@ export default async function handler(req, res) {
     const data = require('../../data/deals.json');
     const supa = adminClient();
 
-    const active = (data.deals || []).filter((d) => ['pending', 'listing', 'closed', 'preparing'].includes(d.stage));
+    const active = (data.deals || []).filter((d) => ['offer', 'pending', 'listing', 'closed', 'preparing'].includes(d.stage));
     let dealsUpserted = 0, docsWritten = 0;
     const errors = [];
 

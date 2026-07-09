@@ -39,10 +39,10 @@
       <a href="#" onclick="showView(event,'inbox')" data-roster-nav="sphere">Sphere</a>
     </nav>
 
-    <div class="app-side-section">Deals</div>
+    <div class="app-side-section">Deals &amp; offers</div>
     <nav class="app-side-nav">
-      <a href="#" onclick="showView(event,'listings')" data-lst-nav="active">Active <span class="pill" data-roster-listings>—</span></a>
-      <a href="#" onclick="showView(event,'listings')" data-lst-nav="pending">Pending <span class="pill" data-roster-pending>—</span></a>
+      <a href="#" onclick="showView(event,'listings')" data-lst-nav="offers">Offers <span class="pill" data-roster-offers>—</span></a>
+      <a href="#" onclick="showView(event,'listings')" data-lst-nav="pending">In escrow <span class="pill" data-roster-pending>—</span></a>
       <a href="#" onclick="showView(event,'listings')" title="Pick a listing to open its seller portal">Seller portals</a>
     </nav>
 
@@ -785,6 +785,7 @@
     .lst-card .ad { font-size: 13.5px; color: var(--ink-soft); }
     .lst-card .mt { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-top: 4px; }
     .lst-badge { font-family: var(--mono); font-size: 8.5px; letter-spacing: .1em; text-transform: uppercase; padding: 2px 7px; border: 1px solid var(--rule); color: var(--ink-mute); }
+    .lst-badge.offers  { background: #F6E6E1; color: #8A3B2B; border-color: #E6C3B9; }
     .lst-badge.active  { background: #E8F0EA; color: #2E5C3D; border-color: #BFD8C6; }
     .lst-badge.pending { background: #F3EAD6; color: #7C5A16; border-color: #E0CFA0; }
     .lst-badge.preparing { background: #EAE6F3; color: #4A3B7C; border-color: #CDC2E0; }
@@ -792,17 +793,20 @@
     .lst-badge.selling { background: #EAF0F6; color: #2B4A6B; border-color: #C3D4E6; }
     .lst-badge.buying  { background: #F6EFE8; color: #6B4A2B; border-color: #E6D2C3; }
     .lst-card .lk { font-family: var(--mono); font-size: 10px; letter-spacing: .1em; text-transform: uppercase; color: var(--brass); text-decoration: none; margin-top: 6px; }
+    .lst-accept { margin-top: 10px; align-self: flex-start; font-family: var(--mono); font-size: 9.5px; letter-spacing: .12em; text-transform: uppercase; padding: 7px 12px; border: 1px solid var(--ink); background: var(--ink); color: var(--shell); cursor: pointer; transition: opacity .12s; }
+    .lst-accept:hover { opacity: .85; }
+    .lst-accept:disabled { opacity: .5; cursor: default; }
     @media (max-width: 900px) { .lst { padding: 18px; } }
     </style>
     <section class="crm-view" data-view="listings">
       <div class="lst">
         <div class="cur-head"><div>
-          <span class="label-cap" style="color:var(--brass);">Your deals</span>
-          <h1 class="h-section" style="font-size:38px;margin-top:6px;">Deals.</h1>
+          <span class="label-cap" style="color:var(--brass);">Your deals and offers</span>
+          <h1 class="h-section" style="font-size:38px;margin-top:6px;">Deals and Offers.</h1>
         </div></div>
         <div class="lst-filter" data-lst-filter style="display:flex;gap:6px;margin-bottom:18px;flex-wrap:wrap;">
-          <button class="chip on" data-lst="active">Active <span class="c" data-lst-c-active>—</span></button>
-          <button class="chip" data-lst="pending">Pending <span class="c" data-lst-c-pending>—</span></button>
+          <button class="chip on" data-lst="offers">Offers <span class="c" data-lst-c-offers>—</span></button>
+          <button class="chip" data-lst="pending">In escrow <span class="c" data-lst-c-pending>—</span></button>
           <button class="chip" data-lst="preparing">Preparing <span class="c" data-lst-c-preparing>—</span></button>
           <button class="chip" data-lst="closed">Closed <span class="c" data-lst-c-closed>—</span></button>
         </div>
@@ -1849,7 +1853,7 @@ function selectLead(el) {
   if (!root) return;
   var esc = function (s) { return (s == null ? '' : String(s)).replace(/[&<>"]/g, function (c) { return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]); }); };
   function fmtUSD(n) { if (n == null) return '—'; var v = Math.abs(+n); if (v >= 1e6) return '$' + (+n / 1e6).toFixed(v >= 1e7 ? 0 : 2) + 'M'; if (v >= 1e3) return '$' + Math.round(+n / 1e3) + 'K'; return '$' + Math.round(+n); }
-  var state = { data: null, tab: 'active', loading: false };
+  var state = { data: null, tab: 'offers', loading: false };
   function set(sel, v) { var el = root.querySelector(sel); if (el) el.textContent = String(v); }
   // Re-fetch every time the view opens so the list stays current after a deals
   // sync — a one-time cache used to leave it permanently empty until reload.
@@ -1865,7 +1869,8 @@ function selectLead(el) {
       if (!j || !j.counts) { if (!state.data) { var g0 = root.querySelector('[data-lst-grid]'); if (g0) g0.innerHTML = '<div class="cur-empty">Could not load deals — try again.</div>'; } return; }
       state.data = j;
       var c = j.counts;
-      set('[data-lst-c-active]', c.active); set('[data-lst-c-pending]', c.pending); set('[data-lst-c-preparing]', c.preparing || 0); set('[data-lst-c-closed]', c.closed);
+      set('[data-lst-c-offers]', c.offers || 0); set('[data-lst-c-pending]', c.pending); set('[data-lst-c-preparing]', c.preparing || 0); set('[data-lst-c-closed]', c.closed);
+      var o = document.querySelector('[data-roster-offers]'); if (o) o.textContent = String(c.offers || 0);
       var a = document.querySelector('[data-roster-listings]'); if (a) a.textContent = String(c.active);
       var p = document.querySelector('[data-roster-pending]'); if (p) p.textContent = String(c.pending);
       render();
@@ -1876,17 +1881,26 @@ function selectLead(el) {
       if (!state.data) { var g = root.querySelector('[data-lst-grid]'); if (g) g.innerHTML = '<div class="cur-empty">Could not load deals — try again.</div>'; }
     });
   }
-  function badge(tab) { return tab === 'active' ? 'On market' : tab === 'pending' ? 'In escrow' : tab === 'preparing' ? 'Preparing to list' : 'Closed'; }
+  function badge(tab) { return tab === 'offers' ? 'Offer out' : tab === 'active' ? 'On market' : tab === 'pending' ? 'In escrow' : tab === 'preparing' ? 'Preparing to list' : 'Closed'; }
   function card(d) {
     var ph = d.photo_url ? '<img class="ph" src="' + esc(d.photo_url) + '" alt="">' : '<div class="ph-empty">No photo yet</div>';
     var tour = (d.has_video ? '<span class="lst-badge">Video</span>' : '') + (d.has_tour ? '<span class="lst-badge">3D tour</span>' : '');
     var buying = d.side === 'buyer';
-    var sideBadge = '<span class="lst-badge ' + (buying ? 'buying' : 'selling') + '">' + (buying ? 'Buying' : 'Selling') + '</span>';
+    // An offer's side tells the story: a buyer-side offer is one we WROTE for a
+    // buyer client; a sell-side offer is one RECEIVED on our listing.
+    var sideBadge = state.tab === 'offers'
+      ? '<span class="lst-badge ' + (buying ? 'buying' : 'selling') + '">' + (buying ? 'Offer we made' : 'Offer received') + '</span>'
+      : '<span class="lst-badge ' + (buying ? 'buying' : 'selling') + '">' + (buying ? 'Buying' : 'Selling') + '</span>';
     // The whole card opens the deal's portal. We drive it from an explicit
     // click handler (window.open, with a same-tab fallback) rather than an
     // <a target="_blank">, because some contexts (webviews / popup blockers)
     // silently swallow target=_blank so the portal "wouldn't open".
     var url = d.source_key ? '/seller.html?deal=' + encodeURIComponent(d.source_key) : '';
+    // Offer cards get an accept toggle — flip to escrow (pending) the moment
+    // the offer is accepted. It stops propagation so it doesn't open the portal.
+    var accept = state.tab === 'offers'
+      ? '<button class="lst-accept" data-accept="' + esc(d.source_key || '') + '">Mark accepted → escrow</button>'
+      : '';
     return '<div class="lst-card"' + (url ? ' data-portal="' + esc(url) + '" role="link" tabindex="0"' : '') + '>' + ph + '<div class="bd">' +
       '<div class="pr">' + esc(fmtUSD(d.price)) + '</div>' +
       '<div class="ad">' + esc(d.address || '') + (d.city ? ' · ' + esc(d.city) : '') + '</div>' +
@@ -1894,16 +1908,57 @@ function selectLead(el) {
         '<span class="lst-badge">' + (d.agent === 'james' ? 'James' : 'Sara') + '</span>' + tour + '</div>' +
       (d.coe_date ? '<div style="font-size:11px;color:var(--ink-mute);">COE ' + esc(d.coe_date) + '</div>' : '') +
       '<span class="lk">Open ' + (buying ? 'buyer' : 'seller') + ' portal ↗</span>' +
+      accept +
       '</div></div>';
   }
   function openPortal(url) { if (!url) return; var w = window.open(url, '_blank', 'noopener'); if (!w) location.href = url; }
+  async function acceptOffer(sourceKey, btn) {
+    if (!sourceKey) return;
+    btn.disabled = true; btn.textContent = 'Moving…';
+    try {
+      var res = await fetch('/api/crm/deal-stage', {
+        method: 'POST', credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ source_key: sourceKey, accepted: true })
+      });
+      var j = await res.json().catch(function () { return {}; });
+      if (res.ok && j && j.updated) {
+        // Optimistically move the row from Offers → In escrow.
+        if (state.data && Array.isArray(state.data.offers)) {
+          var idx = state.data.offers.findIndex(function (x) { return x.source_key === sourceKey; });
+          if (idx >= 0) {
+            var moved = state.data.offers.splice(idx, 1)[0];
+            moved.stage = 'pending';
+            (state.data.pending = state.data.pending || []).unshift(moved);
+            if (state.data.counts) { state.data.counts.offers = state.data.offers.length; state.data.counts.pending = state.data.pending.length; }
+            set('[data-lst-c-offers]', state.data.counts ? state.data.counts.offers : '');
+            set('[data-lst-c-pending]', state.data.counts ? state.data.counts.pending : '');
+            var oPill = document.querySelector('[data-roster-offers]'); if (oPill && state.data.counts) oPill.textContent = String(state.data.counts.offers);
+            var pPill = document.querySelector('[data-roster-pending]'); if (pPill && state.data.counts) pPill.textContent = String(state.data.counts.pending);
+          }
+        }
+        render();
+      } else {
+        btn.disabled = false; btn.textContent = 'Mark accepted → escrow';
+        alert((j && j.error) || 'Could not move the offer.');
+      }
+    } catch (err) {
+      btn.disabled = false; btn.textContent = 'Mark accepted → escrow';
+      alert('Network error moving the offer.');
+    }
+  }
   function render() {
     var grid = root.querySelector('[data-lst-grid]');
     if (!grid) return;
     var rows = (state.data && state.data[state.tab]) || [];
-    grid.innerHTML = rows.length ? rows.map(card).join('') : '<div class="cur-empty">No ' + state.tab + ' listings.</div>';
+    var emptyMsg = state.tab === 'offers' ? 'No open offers. Cowork adds properties as offers go out.'
+                 : state.tab === 'pending' ? 'Nothing in escrow right now.'
+                 : 'No ' + state.tab + ' deals.';
+    grid.innerHTML = rows.length ? rows.map(card).join('') : '<div class="cur-empty">' + emptyMsg + '</div>';
   }
   root.addEventListener('click', function (e) {
+    var acc = e.target.closest('[data-accept]');
+    if (acc) { e.stopPropagation(); acceptOffer(acc.getAttribute('data-accept'), acc); return; }
     var cardEl = e.target.closest('.lst-card[data-portal]');
     if (cardEl) { openPortal(cardEl.getAttribute('data-portal')); return; }
     var t = e.target.closest('[data-lst]'); if (!t) return;
