@@ -1,6 +1,6 @@
 {
-  "version": "1.26",
-  "lastUpdated": "2026-07-08",
+  "version": "1.27",
+  "lastUpdated": "2026-07-09",
   "updatedBy": "Claude",
   "tasks": [
     {
@@ -42,7 +42,7 @@
       "agent": "sara",
       "client": "Latigo",
       "title": "Complete buyer-agent AVID (only listing agent AVID on file)",
-      "note": "week of 7/6",
+      "note": "out for signatures 7/9",
       "done": false
     },
     {
@@ -136,6 +136,18 @@
       "agent": "sara",
       "client": "433 Hwy 4",
       "title": "FHDS signed 7/6 has UNCHECKED boxes (per Melissa) — issue corrected FHDS for signatures",
+      "done": false
+    },
+    {
+      "agent": "james",
+      "client": "Duarte",
+      "title": "6240 Michel Rd — SCO1 at 434000 (sellers signed 7/8) expires ~Sat 7/11 — review with Brian and respond (accept/counter/walk)",
+      "done": false
+    },
+    {
+      "agent": "james",
+      "client": "Robinson",
+      "title": "Write the offer on 992 Iroquois Cir for Ashley Robinson (BRBC signed 7/5)",
       "done": false
     }
   ],
@@ -575,7 +587,7 @@
         "EMD": "received in FULL — $10000 total posted at Placer; receipt from Amanda Boitano 7/7 on file (Receipt_414331)",
         "prelim": "received 7/1 (Placer Order P-708659)",
         "BRBC": "signed/filed 7/7 (Castles)",
-        "CR1_BIW": "executed 7/6 (Authentisign) — CR1 removes ALL contingencies except appraisal & loan; Mitzi received copy via CC on the signing"
+        "CR1_BIW": "executed 7/6 (Authentisign) — CR1 removes ALL contingencies except appraisal & loan; Mitzi received copy via CC; FILED in Ex 7/9"
       },
       "clientDocuments": [
         {
@@ -695,8 +707,69 @@
         "TITLE WOBBLE RESOLVED 7/6/7: Amanda (Placer) said Westcor declined, then reversed same day — 'file can proceed'; written confirmation obtained (Sara 7/7); 7/20 COE holds",
         "EMD received in FULL — $10k receipt from Amanda 7/7 filed (Receipt_414331)",
         "Vehicle/trailer addendum + EMD Addendum #2 still awaiting SELLER signatures via Mitzi (chased 7/6)",
-        "Sara's buyer's-agent AVID still owed (week of 7/6)",
+        "Sara's buyer's-agent AVID out for signatures 7/9",
         "Final walkthrough ~7/15 (not yet scheduled); COE Mon 7/20"
+      ]
+    },
+    {
+      "id": "offer-6240-michel",
+      "address": "6240 Michel Rd",
+      "city": "Mountain Ranch, CA 95246",
+      "stage": "offer",
+      "type": "residential",
+      "side": "buyer",
+      "agent": "james",
+      "client": "Brian Duarte",
+      "mls": "226080924",
+      "listPrice": 439000,
+      "salePrice": null,
+      "openEscrowDate": null,
+      "closingDate": null,
+      "contacts": {
+        "coAgent": "Mike (Xingwen) Chen (Keller Williams Realty, Elk Grove) - listing/seller side",
+        "escrow": null,
+        "lender": null,
+        "title": null
+      },
+      "docs": {
+        "BRBC": "executed (prepared 7/2)",
+        "RPA": "offer signed & sent 7/4 — 385000, conventional loan 371525 (96.5%), 10000 initial deposit, COE 30 days after acceptance",
+        "sellerCounter1": "received — SCO1 signed by BOTH sellers 7/8 at 434000; awaiting Brian's response"
+      },
+      "correspondence": [],
+      "notes": "OFFER OUT — James's buyer Brian Duarte. Offer written 7/4/2026 at $385,000 (conventional, $371,525 loan 96.5%, $10k initial deposit, COE 30 days after acceptance) on 6240 Michel Rd, Mountain Ranch (MLS 226080924, listed 6/26 at $439,000). Sellers Yueying Wen & Steve Kwong (agent Mike/Xingwen Chen, Keller Williams Elk Grove) COUNTERED: SCO1 at $434,000, signed by both sellers 7/8, all other terms unchanged. SCO1 expires 5 PM on the 3rd day after seller signing (~Sat 7/11). Docs in _Offers/Buy Side/Brian Duarte.",
+      "alerts": [
+        "SCO1 at 434000 (sellers signed 7/8) expires ~Sat 7/11 5 PM — review with Brian and respond (accept / buyer counter / walk)"
+      ]
+    },
+    {
+      "id": "offer-992-iroquois",
+      "address": "992 Iroquois Cir",
+      "city": "Copperopolis, CA 95228",
+      "stage": "offer",
+      "type": "residential",
+      "side": "buyer",
+      "agent": "james",
+      "client": "Ashley Robinson",
+      "mls": "226026039",
+      "listPrice": 135000,
+      "salePrice": null,
+      "openEscrowDate": null,
+      "closingDate": null,
+      "contacts": {
+        "coAgent": "Denise Stepps (Coldwell Banker Lake Tulloch, 209-603-2985) - listing/seller side",
+        "escrow": null,
+        "lender": null,
+        "title": null
+      },
+      "docs": {
+        "BRBC": "executed (prepared 7/5, James)",
+        "RPA": null
+      },
+      "correspondence": [],
+      "notes": "OFFER IN PREPARATION — James's buyer Ashley Robinson. Target: 992 Iroquois Cir, Copperopolis (MLS 226026039, listed 3/5/26 at $135,000; 3bd/2ba manufactured on permanent foundation, 896 sqft, 0.08 ac, own-the-land, vacant, Lake Tulloch launch access). Listing agent Denise Stepps, Coldwell Banker Lake Tulloch. BRBC signed, agent MLS pulled 7/5; no RPA written yet. Docs in _Offers/Buy Side/Robinson.",
+      "alerts": [
+        "No offer written yet — BRBC + MLS on file; write the RPA when Ashley is ready"
       ]
     },
     {
@@ -903,9 +976,10 @@
         "sellerDocs": null
       },
       "correspondence": [],
-      "notes": "New listing. Flyer and prelim ready. Separate from the sold 467 Skyline transaction. Homes.com lead Sharon Hedges (7/3) — James reached out 7/4, no reply yet; following up. PRICE REDUCTION to $89,000 in progress (per Sara 7/6). A 'Modification of Terms, Listing Agreement #1' finished signing 7/7 (Authentisign) — likely this price-reduction MOD (Sara to confirm which listing it belongs to).",
+      "notes": "New listing. Flyer and prelim ready. Separate from the sold 467 Skyline transaction. Homes.com lead Sharon Hedges (7/3) — James reached out 7/4, no reply yet; following up. PRICE REDUCTION to $89,000 in progress (per Sara 7/6). HOT LEAD Kerstin Breidenthal (Zillow inquiry + 3 Ylopo views 7/8; (408) 612-5906, kerstin.ahlgren@icloud.com) — Sara SPOKE with her 7/8 and texted her the disclosure link. A 'Modification of Terms, Listing Agreement #1' finished signing 7/7 (Authentisign) — likely this price-reduction MOD (Sara to confirm which listing it belongs to).",
       "alerts": [
-        "Price reduction to 89000 in progress (7/6) — MOT signing completed 7/7, confirm & finish MLS change"
+        "Price reduction to 89000 in progress (7/6) — MOT signing completed 7/7, confirm & finish MLS change",
+        "Hot lead Kerstin Breidenthal — Sara spoke with her 7/8 and texted the disclosure link; follow up for feedback/showing"
       ]
     },
     {
