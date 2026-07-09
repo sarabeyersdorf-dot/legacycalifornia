@@ -106,11 +106,20 @@ counter), NOT escrow open. All keys optional; keep it as accurate as you can:
 
 Add to the **deal** object:
 
-- `"mls"` — the MLS number (MetroList ListingId, e.g. `"226071603"`).
-  **ALWAYS set this on a sell-side listing.** The CRM pulls the listing's photo
-  straight from MetroList by this number — without it, no photo shows.
-- `"photo"` — a direct image URL (overrides IDX).
-- `"video"` — the YouTube tour link (the portal auto-counts views).
+The CRM card/roster/portal photo comes from the FIRST of these that's present:
+**`"photo"` → MetroList (by `"mls"`) → the `"video"` tour's YouTube thumbnail.**
+So a deal with a `"video"` always shows an image even if MetroList isn't wired
+up. For a deal with none of the three, the card shows a "No photo yet" tile.
+
+- `"photo"` — a direct image URL. **The most reliable option** — always shows,
+  no MetroList/env dependency. Use this for any deal that has no video tour
+  (e.g. a buyer-side purchase, land, or a listing whose MLS photos aren't
+  syncing). Any public image URL works (hosted file, Cloudinary, etc.).
+- `"mls"` — the MLS number (MetroList ListingId, e.g. `"226071603"`). Set this
+  on a sell-side listing; the CRM pulls the photo from MetroList by this number
+  **only if the MetroList API keys are configured on the deployment.**
+- `"video"` — the YouTube tour link (auto-counts views AND supplies a thumbnail
+  photo fallback).
 - `"matterport"` — the 3D-tour link.
 
 ## 2b. Listing roster metadata (the CRM "Listings" view)

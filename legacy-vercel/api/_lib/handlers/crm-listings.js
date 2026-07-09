@@ -12,6 +12,15 @@ import { adminClient } from '../supabase.js';
 import { getCallerProfile, isAgent } from '../auth.js';
 import { handleOptions, ok, fail } from '../cors.js';
 import { isConfigured as mlsConfigured, apiGet as mlsGet, shape as mlsShape, ids as mlsIds } from '../../_metrolist.js';
+import { extractYouTubeId } from '../youtube.js';
+
+// A branded YouTube tour gives us a real, hotlinkable thumbnail — no MetroList
+// feed, no proxy, no env needed. Used as a photo fallback so a deal with a
+// video tour never renders blank.
+function youtubeThumb(videoUrl) {
+  const id = extractYouTubeId(videoUrl);
+  return id ? `https://img.youtube.com/vi/${id}/hqdefault.jpg` : null;
+}
 
 // The public site shows listing photos from the LIVE MetroList (RESO) feed —
 // the one that actually carries Media. The CRM used to read only the
@@ -187,7 +196,10 @@ export default async function handler(req, res) {
     let photosMatched = 0;
     const buckets = { offers: [], active: [], pending: [], closed: [], preparing: [] };
     for (const d of (data || [])) {
-      const photo = d.photo_url || idxPhotoFor(d);   // deals.json photo, else IDX/MetroList
+      // Photo source order: explicit deals.json photo → MetroList/IDX (by MLS
+      // or address) → the branded YouTube tour's thumbnail. The last one needs
+      // no MetroList config, so a listing with a video tour always has an image.
+      const photo = d.photo_url || idxPhotoFor(d) || youtubeThumb(d.video_url);
       if (photo) photosMatched++;
       // Effective stage. The agent's stage_override (set from the Deals view)
       // only applies while deals.json still has the deal at 'offer' — so
