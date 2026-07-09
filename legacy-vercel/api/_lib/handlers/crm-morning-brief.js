@@ -147,6 +147,28 @@ export default async function handler(req, res) {
       }
     };
 
+    // Phase 2C — Recent Communications (Twilio deal inbox). Active messages from
+    // the last 24h, grouped by contact, plus a count of items still awaiting
+    // triage. Kept OUTSIDE the main Promise.all and fail-soft so the brief still
+    // loads if deal_messages hasn't been migrated yet or is empty.
+    result.recent_comms = [];
+    result.review_pending_count = 0;
+    try {
+      const dayAgoIso = new Date(Date.now() - 24 * 3600 * 1000).toISOString();
+      const [{ data: comms }, { count: pending }] = await Promise.all([
+        supa.from('deal_messages')
+          .select('id, contact_id, direction, channel, content, call_duration_seconds, created_at, leads(first_name,last_name)')
+          .eq('status', 'active')
+          .gte('created_at', dayAgoIso)
+          .order('created_at', { ascending: false }),
+        supa.from('deal_messages')
+          .select('id', { count: 'exact', head: true })
+          .eq('status', 'pending_review')
+      ]);
+      result.recent_comms = shapeRecentComms(comms || []);
+      result.review_pending_count = pending || 0;
+    } catch (_) { /* table absent / transient — leave empty, never break the brief */ }
+
     // Look for today's cached brief first. Refresh narrative if older than 4h.
     const agent = profile.role === 'agent_james' ? 'james' : 'sara';
     const today = new Date().toISOString().slice(0, 10);
@@ -264,6 +286,26 @@ function shapeSignals(rows) {
       tag:       EVENT_TAG[e.event_type] || 'Signal'
     };
   });
+}
+
+// Phase 2C — group active Twilio messages/calls by contact for the brief's
+// "Recent Communications" section. Most-recent activity first.
+function shapeRecentComms(rows) {
+  const groups = new Map();
+  for (const m of rows) {
+    const key = m.contact_id || `anon:${m.id}`;
+    let g = groups.get(key);
+    if (!g) {
+      const nm = [m.leads?.first_name, m.leads?.last_name].filter(Boolean).join(' ').trim();
+      g = { contact_id: m.contact_id || null, name: nm || 'Unknown contact',
+            count: 0, texts: 0, calls: 0, last_at: m.created_at };
+      groups.set(key, g);
+    }
+    g.count += 1;
+    if (m.channel === 'call') g.calls += 1; else g.texts += 1;
+    if (new Date(m.created_at) > new Date(g.last_at)) g.last_at = m.created_at;
+  }
+  return [...groups.values()].sort((a, b) => new Date(b.last_at) - new Date(a.last_at));
 }
 
 // Real transactions from the deals table (fed by deals.json). Shows Sara's

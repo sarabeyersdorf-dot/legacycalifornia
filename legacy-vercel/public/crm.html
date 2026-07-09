@@ -184,6 +184,17 @@
           </div>
         </section>
 
+        <!-- RECENT COMMUNICATIONS (Twilio deal inbox) -->
+        <section class="deals" data-comms-section style="display:none;">
+          <div class="deals-h">
+            <span class="hairline-brass"></span>
+            <span class="eyebrow">Recent communications · texts &amp; calls, last 24h</span>
+            <h2 class="h-section" style="font-size: 28px; margin-top: 8px;">Who reached out.</h2>
+            <a href="#" class="hours-link" data-comms-review style="display:none;">0 unreviewed →</a>
+          </div>
+          <div class="deal-grid" data-comms-grid></div>
+        </section>
+
         <!-- TASKS + STATS -->
         <section class="today-foot">
           <div class="tasks">
@@ -1051,6 +1062,85 @@ function selectLead(el) {
   document.addEventListener('click', function (e) {
     var t = e.target.closest('[data-open-link-deal]');
     if (t) { e.preventDefault(); openLinkDealModal(); }
+  });
+})();
+</script>
+<script>
+/* Review queue (Phase 2C) — triage unmatched inbound texts/calls. Only numbers
+   that DIDN'T match a contact land here; each is a new-lead-or-personal-call
+   decision. Self-contained modal, agent-only endpoint. */
+(function () {
+  'use strict';
+  function esc(s){return (s==null?'':String(s)).replace(/[&<>"]/g,function(c){return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]);});}
+  function when(iso){ try { return new Date(iso).toLocaleString('en-US',{month:'short',day:'numeric',hour:'numeric',minute:'2-digit'}); } catch(e){ return ''; } }
+  function ensureModal() {
+    var m = document.getElementById('leg-review-modal');
+    if (m) return m;
+    m = document.createElement('div');
+    m.id = 'leg-review-modal';
+    m.style.cssText = 'position:fixed;inset:0;z-index:99997;background:rgba(20,18,15,0.6);display:flex;align-items:center;justify-content:center;padding:24px;font-family:Manrope,system-ui,sans-serif;';
+    m.innerHTML = ''
+      + '<div style="background:#FAF6EC;max-width:560px;width:100%;padding:26px 30px;color:#1A1714;max-height:88vh;overflow:auto;">'
+      + '  <div style="font-family:\'JetBrains Mono\',monospace;font-size:10px;letter-spacing:.22em;text-transform:uppercase;color:#7C6A4D;margin-bottom:8px;">Review queue</div>'
+      + '  <h2 style="font-family:\'Cormorant Garamond\',serif;font-style:italic;font-weight:500;font-size:26px;margin:0 0 4px;">Unknown numbers.</h2>'
+      + '  <p style="font-size:13px;line-height:1.5;color:#3A332B;margin:0 0 16px;">Texts and calls from numbers not yet in your contacts. Make each a lead, or dismiss it.</p>'
+      + '  <div id="leg-review-list">Loading…</div>'
+      + '  <div style="margin-top:16px;text-align:right;"><button id="leg-review-close" style="background:transparent;border:none;color:#7C6A4D;cursor:pointer;font-size:13px;">Close</button></div>'
+      + '</div>';
+    document.body.appendChild(m);
+    m.querySelector('#leg-review-close').onclick = function(){ m.style.display='none'; };
+    m.addEventListener('click', function(e){ if (e.target===m) m.style.display='none'; });
+    return m;
+  }
+  function itemRow(it) {
+    return '<div class="leg-rev-item" data-rev-id="'+esc(it.id)+'" style="border:1px solid #E0D6C0;padding:12px 14px;margin-bottom:10px;display:flex;gap:12px;align-items:flex-start;justify-content:space-between;">'
+      + '<div style="min-width:0;">'
+      + '<div style="font-weight:600;font-size:14px;">'+esc(it.phone||'Unknown')+' <span style="font-family:\'JetBrains Mono\',monospace;font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:#7C6A4D;">'+esc(it.channel)+' · '+esc(it.direction)+'</span></div>'
+      + '<div style="font-size:13px;color:#3A332B;margin-top:3px;word-break:break-word;">'+esc(it.snippet||'')+'</div>'
+      + '<div style="font-size:11px;color:#8A7B60;margin-top:3px;">'+esc(when(it.created_at))+'</div>'
+      + '</div>'
+      + '<div style="display:flex;flex-direction:column;gap:6px;flex-shrink:0;">'
+      + '<button data-rev-act="lead" style="background:#1A1714;color:#FAF6EC;border:none;padding:7px 10px;font-family:\'JetBrains Mono\',monospace;font-size:9px;letter-spacing:.14em;text-transform:uppercase;cursor:pointer;white-space:nowrap;">This is a lead</button>'
+      + '<button data-rev-act="dismiss" style="background:transparent;border:1px solid #C9BC9E;color:#7C6A4D;padding:7px 10px;font-family:\'JetBrains Mono\',monospace;font-size:9px;letter-spacing:.14em;text-transform:uppercase;cursor:pointer;">Dismiss</button>'
+      + '</div></div>';
+  }
+  async function load(listEl) {
+    listEl.textContent = 'Loading…';
+    try {
+      var r = await fetch('/api/crm/review-queue', { credentials:'include' });
+      var j = await r.json().catch(function(){return {};});
+      var items = (j && j.items) || [];
+      if (!items.length) { listEl.innerHTML = '<div style="font-style:italic;color:#8A7B60;padding:8px 0;">Nothing to review. You\'re all caught up.</div>'; return; }
+      listEl.innerHTML = items.map(itemRow).join('');
+    } catch (e) { listEl.innerHTML = '<div style="color:#9B2C2C;">Could not load the review queue.</div>'; }
+  }
+  async function act(id, action, itemEl) {
+    var btns = itemEl.querySelectorAll('button'); btns.forEach(function(b){ b.disabled = true; });
+    try {
+      var r = await fetch('/api/crm/review-queue', { method:'POST', credentials:'include', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ id: id, action: action }) });
+      var j = await r.json().catch(function(){return {};});
+      if (r.ok && j && j.status) {
+        itemEl.remove();
+        var link = document.querySelector('[data-comms-review]');
+        // Decrement the brief's unreviewed counter.
+        if (link) { var n = parseInt((link.textContent.match(/\d+/)||[0])[0],10)||0; n = Math.max(0, n-1); link.textContent = n+' unreviewed →'; if (!n) link.style.display='none'; }
+        var listEl = document.getElementById('leg-review-list');
+        if (listEl && !listEl.querySelector('.leg-rev-item')) listEl.innerHTML = '<div style="font-style:italic;color:#8A7B60;padding:8px 0;">Nothing to review. You\'re all caught up.</div>';
+      } else { btns.forEach(function(b){ b.disabled = false; }); alert((j && j.error) || 'Action failed.'); }
+    } catch (e) { btns.forEach(function(b){ b.disabled = false; }); alert('Network error.'); }
+  }
+  window.openReviewQueue = function () {
+    var m = ensureModal(); m.style.display = 'flex';
+    load(m.querySelector('#leg-review-list'));
+  };
+  document.addEventListener('click', function (e) {
+    var open = e.target.closest('[data-comms-review]');
+    if (open) { e.preventDefault(); window.openReviewQueue(); return; }
+    var actBtn = e.target.closest('[data-rev-act]');
+    if (actBtn) {
+      var item = actBtn.closest('[data-rev-id]');
+      if (item) act(item.getAttribute('data-rev-id'), actBtn.getAttribute('data-rev-act'), item);
+    }
   });
 })();
 </script>

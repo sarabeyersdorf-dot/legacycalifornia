@@ -455,6 +455,7 @@
       paintMorningBrief(briefRes.json, session);
       paintSignals(briefRes.json.signals || []);
       paintActiveDeals(briefRes.json.active_deals || []);
+      paintRecentComms(briefRes.json);
       paintHours(briefRes.json.hours || []);
       paintReportsFunnel(briefRes.json.funnel || null);
     }
@@ -517,6 +518,57 @@
           <div class="deal-track">${track}</div>
         </article>`;
     }).join('');
+  }
+
+  // Phase 2C — "Recent Communications" (Twilio deal inbox). Groups of active
+  // texts/calls from the last 24h, plus a link to the unmatched-number review
+  // queue. Hidden entirely when there's nothing recent AND nothing to review.
+  function paintRecentComms(data) {
+    const section = document.querySelector('[data-comms-section]');
+    const grid    = document.querySelector('[data-comms-grid]');
+    const link    = document.querySelector('[data-comms-review]');
+    if (!section || !grid) return;
+    const groups  = (data && data.recent_comms) || [];
+    const pending = (data && data.review_pending_count) || 0;
+
+    if (link) {
+      if (pending > 0) {
+        link.textContent = `${pending} unreviewed →`;
+        link.style.display = '';
+      } else {
+        link.style.display = 'none';
+      }
+    }
+
+    if (!groups.length && pending === 0) { section.style.display = 'none'; return; }
+    section.style.display = '';
+
+    if (!groups.length) {
+      grid.innerHTML = emptyPanel('No new texts or calls in the last 24 hours.');
+      return;
+    }
+    grid.innerHTML = groups.map((g) => {
+      const parts = [];
+      if (g.texts) parts.push(`${g.texts} text${g.texts === 1 ? '' : 's'}`);
+      if (g.calls) parts.push(`${g.calls} call${g.calls === 1 ? '' : 's'}`);
+      const clickable = g.contact_id ? ` data-comm-contact="${escapeHtml(g.contact_id)}" style="cursor:pointer;"` : '';
+      return `
+        <article class="deal"${clickable}>
+          <div class="deal-h">
+            <span class="deal-stage">${g.count} new</span>
+            <span class="deal-amt" style="font-size:13px;">${escapeHtml(fmtRelative(g.last_at))}</span>
+          </div>
+          <h4>${escapeHtml(g.name)}</h4>
+          <p class="deal-buyer">${escapeHtml(parts.join(' · ') || 'Activity')}</p>
+        </article>`;
+    }).join('');
+
+    grid.querySelectorAll('[data-comm-contact]').forEach((card) => {
+      card.addEventListener('click', () => {
+        if (typeof window.showView === 'function') window.showView(null, 'inbox');
+        if (typeof selectLeadId === 'function') selectLeadId(card.getAttribute('data-comm-contact'), true);
+      });
+    });
   }
 
   function paintHours(items) {
