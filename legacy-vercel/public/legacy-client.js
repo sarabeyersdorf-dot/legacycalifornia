@@ -523,6 +523,9 @@
     const body = document.querySelector('[data-hours-body]');
     if (!body) return;
     const now = new Date();
+    // Header weekday — was hardcoded "Today · Tuesday".
+    const todayEl = document.querySelector('[data-hours-today]');
+    if (todayEl) todayEl.textContent = `Today · ${now.toLocaleDateString('en-US', { weekday: 'long' })}`;
     const nowEl = body.querySelector('[data-hours-now]');
     if (nowEl) {
       nowEl.innerHTML = `<span class="hr-now-l">Now · ${escapeHtml(now.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' }))}</span><span class="hr-now-d">${items.length ? items.length + ' scheduled today' : 'No tours on the calendar today'}</span>`;
