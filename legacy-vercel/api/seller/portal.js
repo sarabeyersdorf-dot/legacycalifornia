@@ -229,7 +229,13 @@ export default async function handler(req, res) {
     const today = new Date(); today.setHours(0,0,0,0);
     const dtc   = daysBetween(today, coe);
 
-    const signed = docs.filter((d) => d.status === 'signed' || d.status === 'on_file').length;
+    // "In the file" count. A doc counts as on-file if it's explicitly
+    // signed/on_file OR it's a curated flat drop with no workflow status —
+    // those are the executed PDFs Sara uploaded, so a listed file IS in the
+    // file. Without this, curated portals showed 0 / N (e.g. 0/17) because
+    // flat drops carry a null status. Docs with an OPEN status (to_sign /
+    // with_seller / pending) are still counted as outstanding.
+    const signed = docs.filter((d) => d.status === 'signed' || d.status === 'on_file' || !d.status).length;
 
     // Stage model. ONLY a 'pending' deal is in escrow — a 'listing' is on the
     // market and must NEVER be described in escrow/closing terms.
