@@ -43,6 +43,7 @@ import reviewQueue      from '../_lib/handlers/crm-review-queue.js';
 import dealPhoto        from '../_lib/handlers/crm-deal-photo.js';
 import dealClient       from '../_lib/handlers/crm-deal-client.js';
 import dealVisibility    from '../_lib/handlers/crm-deal-visibility.js';
+import dealNotes         from '../_lib/handlers/crm-deal-notes.js';
 
 const TABLE = {
   'morning-brief':   morningBrief,
@@ -71,7 +72,8 @@ const TABLE = {
   'review-queue':      reviewQueue,
   'deal-photo':        dealPhoto,
   'deal-client':       dealClient,
-  'deal-visibility':   dealVisibility
+  'deal-visibility':   dealVisibility,
+  'deal-notes':        dealNotes
 };
 
 export default async function handler(req, res) {

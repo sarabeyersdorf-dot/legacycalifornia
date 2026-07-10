@@ -832,6 +832,15 @@
     .cc-title { display: flex; align-items: center; gap: 12px; }
     .cc-title h1 { font-family: var(--serif); font-style: italic; font-weight: 500; font-size: 30px; color: var(--ink); line-height: 1; }
     .cc-statuschip { font-family: var(--mono); font-size: 10px; letter-spacing: .1em; text-transform: uppercase; padding: 4px 11px; border-radius: 20px; color: var(--shell); background: var(--brass); }
+    .cc-inote { margin: 0 0 20px; background: var(--vellum); border: 1px solid var(--rule); border-left: 3px solid var(--brass); border-radius: 12px; padding: 14px 16px; }
+    .cc-inote-h { font-family: var(--mono); font-size: 10px; letter-spacing: .1em; text-transform: uppercase; color: var(--ink); margin-bottom: 9px; }
+    .cc-inote-h span { color: var(--ink-mute); text-transform: none; letter-spacing: 0; font-size: 11px; }
+    .cc-inote-ta { width: 100%; box-sizing: border-box; min-height: 64px; resize: vertical; font-family: var(--sans, inherit); font-size: 13.5px; line-height: 1.5; color: var(--ink); background: var(--shell); border: 1px solid var(--rule); border-radius: 9px; padding: 10px 12px; }
+    .cc-inote-ta:focus { outline: none; border-color: var(--brass); }
+    .cc-inote-foot { display: flex; align-items: center; gap: 12px; margin-top: 9px; }
+    .cc-inote-status { font-size: 12px; color: var(--ink-mute); margin-right: auto; }
+    .cc-inote-status.ok { color: #2E5C3D; }
+    .cc-inote-status.warn { color: #A23B26; }
     .cc-body { display: grid; grid-template-columns: 448px 1fr; gap: 20px; align-items: start; }
     @media (max-width: 1040px) { .cc-body { grid-template-columns: 1fr; } }
     .cc-card { background: var(--shell); border: 1px solid var(--rule); border-top: 3px solid var(--brass); border-radius: 14px; overflow: hidden; }
@@ -1066,6 +1075,11 @@
         +   '<div class="cc-crumb"><a data-cc-back>Deals &amp; Offers</a> / '+esc(deal.address||deal.source_key)+'</div>'
         +   '<div class="cc-title"><h1>Command Center</h1><span class="cc-statuschip">'+esc(st.chip)+'</span></div>'
         + '</div></div>'
+        + '<div class="cc-inote">'
+        +   '<div class="cc-inote-h">Internal notes <span>· agent-only, never shown to the client</span></div>'
+        +   '<textarea class="cc-inote-ta" data-cc-inote placeholder="Private notes on this deal — reminders, next steps, anything only you and James should see…"></textarea>'
+        +   '<div class="cc-inote-foot"><span class="cc-inote-status" data-cc-inote-status></span><button class="cc-btn" data-cc-inote-save>Save note</button></div>'
+        + '</div>'
         + '<div class="cc-body">'
         +   '<div class="cc-card">'
         +     '<div class="cc-photo" data-cc-photo>'+photoInner
@@ -1093,6 +1107,42 @@
         wirePhoto();
         loadDealClient(deal);
         loadDealVisibility(deal);
+        loadDealNotes(deal);
+      }
+
+      // ---- internal (agent-only) notes on the deal ----------------------
+      function loadDealNotes(deal){
+        var ta = root.querySelector('[data-cc-inote]');
+        if(!ta) return;
+        // If we've already loaded notes for this deal, prefill from the cache so
+        // a re-render (e.g. after a photo upload) doesn't clobber the field.
+        if(typeof deal.agent_notes === 'string'){ ta.value = deal.agent_notes; return; }
+        ta.disabled = true;
+        fetch('/api/crm/deal-notes?deal='+encodeURIComponent(deal.source_key),{credentials:'include'})
+          .then(function(r){ return r.json().then(function(j){ return {ok:r.ok,j:j}; }); })
+          .then(function(res){
+            if(!current || current.source_key !== deal.source_key) return;   // another deal opened
+            var t = root.querySelector('[data-cc-inote]'); if(!t) return;
+            t.disabled = false;
+            var notes = (res.ok && res.j && res.j.notes) || '';
+            deal.agent_notes = notes;   // cache on the live deal object
+            t.value = notes;
+          }).catch(function(){ var t = root.querySelector('[data-cc-inote]'); if(t) t.disabled=false; });
+      }
+      function saveDealNotes(btn){
+        var ta = root.querySelector('[data-cc-inote]');
+        var status = root.querySelector('[data-cc-inote-status]');
+        if(!ta || !current) return;
+        var val = ta.value;
+        btn.disabled = true; var orig = btn.textContent; btn.textContent = 'Saving…';
+        if(status){ status.className = 'cc-inote-status'; status.textContent = ''; }
+        fetch('/api/crm/deal-notes',{method:'POST',credentials:'include',headers:{'Content-Type':'application/json'},body:JSON.stringify({ source_key: current.source_key, notes: val })})
+          .then(function(r){ return r.json().then(function(j){ return {ok:r.ok,j:j}; }); })
+          .then(function(res){
+            btn.disabled = false; btn.textContent = orig;
+            if(res.ok && res.j && res.j.saved){ current.agent_notes = res.j.notes; if(status){ status.className = 'cc-inote-status ok'; status.textContent = 'Saved.'; } }
+            else { if(status){ status.className = 'cc-inote-status warn'; status.textContent = (res.j && res.j.error) || 'Could not save.'; } }
+          }).catch(function(){ btn.disabled = false; btn.textContent = orig; if(status){ status.className = 'cc-inote-status warn'; status.textContent = 'Network error saving.'; } });
       }
 
       // ---- photo drop / upload ------------------------------------------
@@ -1139,6 +1189,8 @@
           if(navigator.clipboard&&navigator.clipboard.writeText){ navigator.clipboard.writeText(link).then(done).catch(done); } else { done(); } return; }
         var sched=e.target.closest('[data-cc-schedule]');
         if(sched){ e.preventDefault(); if(typeof window.showView==='function') window.showView(null,'cal'); return; }
+        var inoteSave=e.target.closest('[data-cc-inote-save]');
+        if(inoteSave && current){ e.preventDefault(); saveDealNotes(inoteSave); return; }
       });
 
       // ---- in-console messaging: the deal's linked client + thread -------
