@@ -1,6 +1,6 @@
 {
-  "version": "1.28",
-  "lastUpdated": "2026-07-09",
+  "version": "1.29",
+  "lastUpdated": "2026-07-10",
   "updatedBy": "Claude",
   "tasks": [
     {
@@ -148,6 +148,12 @@
       "agent": "james",
       "client": "Robinson",
       "title": "Write the offer on 992 Iroquois Cir for Ashley Robinson (BRBC signed 7/5)",
+      "done": false
+    },
+    {
+      "agent": "sara",
+      "client": "433 Hwy 4",
+      "title": "Watch for Jim's signed ETA — he signs Fri 7/10 before leaving for Idaho; file in Ex when back",
       "done": false
     }
   ],
@@ -968,7 +974,8 @@
         "Buyer-signed disclosure set received 7/6; MU-PA + NHD sig pages + FHDS signed 7/6 (Authentisign) — file the sets in Ex",
         "Loan contingency runs to Tue 7/14 (25-day)",
         "COE 8/10/2026 — final walkthrough 8/5",
-        "LISTING EXTENDED to 8/18/2026 via MOD — covers through COE 8/10 ✅"
+        "LISTING EXTENDED to 8/18/2026 via MOD — covers through COE 8/10 ✅",
+        "Jim Heryford signs the 433 ETA Fri 7/10, then headed to Idaho — get the signature before he travels, file in Ex"
       ]
     },
     {
@@ -1003,10 +1010,10 @@
         "sellerDocs": null
       },
       "correspondence": [],
-      "notes": "New listing. Flyer and prelim ready. Separate from the sold 467 Skyline transaction. Homes.com lead Sharon Hedges (7/3) — James reached out 7/4, no reply yet; following up. PRICE REDUCTION to $89,000 in progress (per Sara 7/6). HOT LEAD Kerstin Breidenthal (Zillow inquiry + 3 Ylopo views 7/8; (408) 612-5906, kerstin.ahlgren@icloud.com) — Sara SPOKE with her 7/8 and texted her the disclosure link. A 'Modification of Terms, Listing Agreement #1' finished signing 7/7 (Authentisign) — likely this price-reduction MOD (Sara to confirm which listing it belongs to).",
+      "notes": "New listing. Flyer and prelim ready. Separate from the sold 467 Skyline transaction. Homes.com lead Sharon Hedges (7/3) — James reached out 7/4, no reply yet; following up. PRICE REDUCTION to $89,000 in progress (per Sara 7/6). HOT LEAD Kerstin Breidenthal (Zillow inquiry + 3 Ylopo views 7/8; (408) 612-5906, kerstin.ahlgren@icloud.com) — Sara SPOKE with her 7/8 and texted her the disclosure link. UPDATE 7/9: Kerstin is TRAVELING for ~2 weeks and wants a showing when she's back (~7/23) — follow-up reminder scheduled for 7/23. A 'Modification of Terms, Listing Agreement #1' finished signing 7/7 (Authentisign) — likely this price-reduction MOD (Sara to confirm which listing it belongs to).",
       "alerts": [
         "Price reduction to 89000 in progress (7/6) — MOT signing completed 7/7, confirm & finish MLS change",
-        "Hot lead Kerstin Breidenthal — Sara spoke with her 7/8 and texted the disclosure link; follow up for feedback/showing"
+        "Kerstin Breidenthal traveling ~2 weeks — wants a SHOWING when back (~7/23); reminder set for 7/23; disclosure link texted 7/8"
       ],
       "clientDocuments": [
         {
