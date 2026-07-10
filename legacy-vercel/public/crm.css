@@ -1168,3 +1168,40 @@ body { overflow: hidden; }
   .app-side-section { padding: 12px 20px 5px; }
   .app-side-nav a { padding: 7px 14px; font-size: 13px; }
 }
+
+/* ============================================================
+   MOBILE BOTTOM NAV — thumb-reachable primary nav on phones.
+   Hidden on desktop; the sidebar stays the desktop nav. The four
+   most-used destinations (Today / Inbox / Deals / Tasks) are always
+   one tap away at the bottom of the screen, honoring the iOS home-bar
+   safe area so nothing sits under the gesture strip.
+   ============================================================ */
+.mobnav { display: none; }
+
+@media (max-width: 760px) {
+  .mobnav {
+    display: flex;
+    position: fixed; left: 0; right: 0; bottom: 0; z-index: 90;
+    background: var(--shell);
+    border-top: 1px solid var(--rule);
+    box-shadow: 0 -2px 14px rgba(20, 18, 15, .07);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  .mobnav-item {
+    flex: 1 1 0; min-width: 0;
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px;
+    background: none; border: none; cursor: pointer;
+    padding: 9px 4px 8px;
+    font-family: var(--mono); font-size: 9px; letter-spacing: .1em; text-transform: uppercase;
+    color: var(--ink-mute);
+    -webkit-tap-highlight-color: transparent;
+  }
+  .mobnav-item svg { width: 22px; height: 22px; display: block; }
+  .mobnav-item.on { color: var(--brass); }
+  .mobnav-item:active { background: var(--linen); }
+
+  /* Reserve space so content and the sidebar foot clear the fixed bar */
+  body { padding-bottom: calc(58px + env(safe-area-inset-bottom, 0px)); }
+  /* Tighten the Command Center gutters on a phone */
+  .cc { padding: 16px 16px 40px; }
+}

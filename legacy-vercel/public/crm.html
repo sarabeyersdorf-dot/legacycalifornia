@@ -1440,6 +1440,28 @@
     </section>
 
   </main>
+
+  <!-- ============ MOBILE BOTTOM NAV (phones only) ============
+       Thumb-reachable primary nav for the four most-used destinations.
+       Hidden on desktop (the sidebar is the desktop nav); shown ≤760px. -->
+  <nav class="mobnav" aria-label="Primary">
+    <button class="mobnav-item on" data-mob="today" onclick="showView(event,'today')" aria-label="Today">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 9h18M8 2v4M16 2v4"/></svg>
+      <span>Today</span>
+    </button>
+    <button class="mobnav-item" data-mob="inbox" onclick="showView(event,'inbox')" aria-label="Inbox">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></svg>
+      <span>Inbox</span>
+    </button>
+    <button class="mobnav-item" data-mob="listings" onclick="showView(event,'listings')" aria-label="Deals">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/></svg>
+      <span>Deals</span>
+    </button>
+    <button class="mobnav-item" data-mob="tasks" onclick="showView(event,'tasks')" aria-label="Tasks">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M8 12l3 3 5-5"/></svg>
+      <span>Tasks</span>
+    </button>
+  </nav>
 </div>
 
 <script>
@@ -1455,6 +1477,11 @@ function showView(e, name) {
   // sync sidebar
   document.querySelectorAll('.app-side-nav a').forEach(a => a.classList.remove('active'));
   if (e && e.target.closest('.app-side-nav')) e.target.classList.add('active');
+  // sync mobile bottom nav (the Command Center drill-down keeps Deals lit)
+  const mobName = (name === 'command') ? 'listings' : name;
+  document.querySelectorAll('.mobnav-item').forEach(b => b.classList.toggle('on', b.getAttribute('data-mob') === mobName));
+  // on a phone, a bottom-nav tap should land at the top of the new view
+  if (e && e.target.closest('.mobnav')) { try { window.scrollTo({ top: 0 }); } catch (_) { window.scrollTo(0, 0); } }
 }
 function selectLead(el) {
   document.querySelectorAll('.lead-row').forEach(r => r.classList.remove('on'));
