@@ -826,6 +826,221 @@
     </section>
 
     <!-- ============================================================
+         COMMAND CENTER — per-deal detail (opened from Deals & Offers).
+         Left: the listing card (drop-a-photo + framed info box).
+         Right: action console (phase 2).
+         ============================================================ -->
+    <style>
+    .cc { padding: 20px 30px 60px; }
+    .cc-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; margin-bottom: 20px; flex-wrap: wrap; }
+    .cc-crumb { font-family: var(--mono); font-size: 10px; letter-spacing: .14em; text-transform: uppercase; color: var(--ink-mute); margin-bottom: 8px; }
+    .cc-crumb a { color: var(--brass); cursor: pointer; }
+    .cc-title { display: flex; align-items: center; gap: 12px; }
+    .cc-title h1 { font-family: var(--serif); font-style: italic; font-weight: 500; font-size: 30px; color: var(--ink); line-height: 1; }
+    .cc-statuschip { font-family: var(--mono); font-size: 10px; letter-spacing: .1em; text-transform: uppercase; padding: 4px 11px; border-radius: 20px; color: var(--shell); background: var(--brass); }
+    .cc-body { display: grid; grid-template-columns: 448px 1fr; gap: 20px; align-items: start; }
+    @media (max-width: 1040px) { .cc-body { grid-template-columns: 1fr; } }
+    .cc-card { background: var(--shell); border: 1px solid var(--rule); border-top: 3px solid var(--brass); border-radius: 14px; overflow: hidden; }
+    .cc-photo { position: relative; height: 224px; background: var(--linen); cursor: pointer; }
+    .cc-photo img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .cc-photo .drop { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 7px; color: var(--ink-faint); font-family: var(--mono); font-size: 11px; letter-spacing: .1em; text-transform: uppercase; border: 2px dashed var(--rule); text-align: center; padding: 0 20px; }
+    .cc-photo .drop .big { font-size: 22px; opacity: .5; }
+    .cc-photo.drag { outline: 3px dashed var(--brass); outline-offset: -8px; }
+    .cc-photo .st-overlay { position: absolute; top: 13px; left: 13px; display: inline-flex; align-items: center; gap: 7px; font-family: var(--mono); font-size: 10px; letter-spacing: .08em; text-transform: uppercase; padding: 6px 11px; border-radius: 20px; color: var(--shell); background: rgba(26,23,20,.72); pointer-events: none; }
+    .cc-photo .st-overlay .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--shell); }
+    .cc-photo .rephoto { position: absolute; bottom: 11px; right: 11px; font-family: var(--mono); font-size: 9px; letter-spacing: .1em; text-transform: uppercase; background: rgba(26,23,20,.66); color: var(--shell); padding: 6px 10px; border-radius: 7px; opacity: 0; transition: opacity .12s; }
+    .cc-photo:hover .rephoto { opacity: 1; }
+    .cc-in { padding: 18px 20px 22px; }
+    .cc-price-row { display: flex; align-items: flex-end; justify-content: space-between; gap: 12px; }
+    .cc-caplab { font-family: var(--mono); font-size: 9.5px; letter-spacing: .12em; text-transform: uppercase; color: var(--ink-mute); }
+    .cc-price { font-family: var(--serif); font-style: italic; font-weight: 600; font-size: 36px; line-height: .95; color: var(--ink); margin-top: 3px; }
+    .cc-price-r { text-align: right; font-size: 12px; color: var(--ink-soft); line-height: 1.55; }
+    .cc-price-r .mono { font-family: var(--mono); color: var(--ink); }
+    .cc-addr { margin-top: 15px; }
+    .cc-addr .name { font-size: 17px; font-weight: 600; color: var(--ink); }
+    .cc-addr .sub { font-size: 13px; color: var(--ink-soft); margin-top: 2px; }
+    .cc-client { display: flex; align-items: center; gap: 11px; margin-top: 15px; padding: 11px 12px; border-radius: 11px; background: var(--linen); border: 1px solid var(--rule-soft); }
+    .cc-client .av { width: 34px; height: 34px; flex: none; border-radius: 50%; background: rgba(184,146,42,.16); color: var(--brass); display: inline-flex; align-items: center; justify-content: center; font-family: var(--mono); font-size: 12px; font-weight: 600; }
+    .cc-client .nm { font-size: 14px; font-weight: 600; color: var(--ink); }
+    .cc-client .rl { font-size: 12px; color: var(--ink-mute); }
+    .cc-facts { display: flex; align-items: center; flex-wrap: wrap; gap: 9px; margin-top: 15px; font-size: 13px; color: var(--ink-soft); }
+    .cc-facts strong { font-weight: 600; color: var(--ink); }
+    .cc-facts .sep { width: 3px; height: 3px; border-radius: 50%; background: var(--ink-faint); }
+    .cc-grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px; }
+    .cc-kv { padding: 10px 12px; border-radius: 10px; background: var(--vellum); border: 1px solid var(--rule-soft); }
+    .cc-kv .k { font-family: var(--mono); font-size: 9.5px; letter-spacing: .1em; text-transform: uppercase; color: var(--ink-mute); }
+    .cc-kv .v { font-family: var(--mono); font-size: 13px; color: var(--ink); margin-top: 3px; }
+    .cc-dates { display: grid; grid-template-columns: repeat(3, 1fr); margin-top: 15px; border: 1px solid var(--rule-soft); border-radius: 11px; overflow: hidden; }
+    .cc-dates > div { padding: 10px 12px; border-right: 1px solid var(--rule-soft); }
+    .cc-dates > div:last-child { border-right: none; }
+    .cc-dates .k { font-family: var(--mono); font-size: 9.5px; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-mute); }
+    .cc-dates .v { font-size: 13px; font-weight: 600; color: var(--ink); margin-top: 3px; }
+    .cc-dates .coe { background: rgba(184,146,42,.08); }
+    .cc-dates .coe .k, .cc-dates .coe .v { color: var(--brass); }
+    .cc-comm { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 12px; padding: 12px 14px; border-radius: 11px; background: var(--ink); color: var(--shell); }
+    .cc-comm .k { font-family: var(--mono); font-size: 9.5px; letter-spacing: .1em; text-transform: uppercase; color: var(--brass); }
+    .cc-comm .v { font-size: 15px; font-weight: 600; margin-top: 2px; }
+    .cc-comm .hid { font-family: var(--mono); font-size: 9px; letter-spacing: .06em; text-transform: uppercase; color: var(--brass); background: rgba(255,255,255,.08); padding: 4px 8px; border-radius: 6px; }
+    .cc-siderow { display: flex; align-items: center; gap: 9px; margin-top: 15px; flex-wrap: wrap; }
+    .cc-pill { font-size: 12px; font-weight: 600; padding: 4px 11px; border-radius: 20px; border: 1px solid var(--rule); color: var(--ink-soft); background: var(--vellum); }
+    .cc-pill.sell { background: #E8F0EA; color: #2E5C3D; border-color: #BFD8C6; }
+    .cc-pill.buy { background: #F6EFE8; color: #6B4A2B; border-color: #E6D2C3; }
+    .cc-links { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--rule-soft); }
+    .cc-links a { display: flex; align-items: center; justify-content: space-between; padding: 10px 12px; border-radius: 10px; background: var(--vellum); border: 1px solid var(--rule-soft); font-size: 13px; color: var(--ink); cursor: pointer; }
+    .cc-links a:hover { border-color: var(--brass); }
+    .cc-links a .ar { color: var(--brass); }
+    .cc-console { background: var(--shell); border: 1px solid var(--rule); border-radius: 14px; padding: 26px; color: var(--ink-mute); font-style: italic; min-height: 220px; }
+    </style>
+    <section class="crm-view" data-view="command">
+      <div class="cc" data-cc-root>
+        <div class="cur-empty">Open a listing from Deals &amp; Offers.</div>
+      </div>
+    </section>
+    <script>
+    /* Command Center — per-deal detail. window.openCommandCenter(deal) renders
+       the listing card (drop-a-photo + framed info box) and shows the view.
+       Phase 1: left card + photo upload. */
+    (function () {
+      'use strict';
+      var root = document.querySelector('.cc[data-cc-root]');
+      if (!root) return;
+      function esc(s){ return (s==null?'':String(s)).replace(/[&<>"]/g,function(c){return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]);}); }
+      function fmtUSD(n){ if(n==null||n==='') return '—'; var v=Math.abs(+n); if(v>=1e6) return '$'+(+n/1e6).toFixed(v>=1e7?1:2)+'M'; if(v>=1e3) return '$'+Math.round(+n/1e3)+'K'; return '$'+Math.round(+n); }
+      function fmtFull(n){ if(n==null||n==='') return '—'; return '$'+Math.round(+n).toLocaleString('en-US'); }
+      function fmtDate(d){ if(!d) return null; try{ var x=new Date(d); if(isNaN(x)) return null; return x.toLocaleDateString('en-US',{month:'short',day:'numeric'}); }catch(e){ return null; } }
+      function initials(name){ var p=String(name||'').trim().split(/\s+/); return ((p[0]||'')[0]||'')+((p[1]||'')[0]||'')||'?'; }
+      function daysTo(d){ if(!d) return null; try{ var x=new Date(d); if(isNaN(x)) return null; return Math.round((x.getTime()-Date.now())/86400000); }catch(e){ return null; } }
+
+      function statusInfo(deal){
+        var s=deal.stage, side=deal.side;
+        if(s==='pending'){ var dtc=daysTo(deal.coe_date); return { chip:'In Escrow', overlay: dtc==null?'In escrow':(dtc>=0?'In escrow · '+dtc+' day'+(dtc===1?'':'s')+' to close':'Closing overdue') }; }
+        if(s==='offer'){ var t = side==='buyer'?'Offer out':'Offer in'; return { chip:t, overlay:t }; }
+        if(s==='preparing') return { chip:'Preparing', overlay:'Preparing to list' };
+        if(s==='closed') return { chip:'Closed', overlay:'Closed' };
+        return { chip:'On Market', overlay:'On the market' };
+      }
+
+      var current = null; // the deal being shown (a live reference into listings state)
+
+      function render(deal){
+        current = deal;
+        var meta = deal.meta || {};
+        var isSell = deal.side!=='buyer';
+        var isListingStage = deal.stage==='listing' || deal.stage==='preparing';
+        var price = isListingStage ? (deal.list_price!=null?deal.list_price:deal.sale_price) : (deal.sale_price!=null?deal.sale_price:deal.list_price);
+        var priceLab = isListingStage ? 'List price' : (deal.side==='buyer' ? 'Purchase price' : 'Sale price');
+        var st = statusInfo(deal);
+        var perSqft = (price && meta.sqft) ? '<div><span class="mono">$'+Math.round(+price/+meta.sqft).toLocaleString('en-US')+'</span> / sqft</div>' : '';
+        var facts = [];
+        if(meta.beds!=null) facts.push('<span><strong>'+esc(meta.beds)+'</strong> bd</span>');
+        if(meta.baths!=null) facts.push('<span><strong>'+esc(meta.baths)+'</strong> ba</span>');
+        if(meta.sqft!=null) facts.push('<span><strong>'+Number(meta.sqft).toLocaleString('en-US')+'</strong> sqft</span>');
+        if(meta.lotAcres!=null) facts.push('<span><strong>'+esc(meta.lotAcres)+'</strong> ac</span>');
+        if(meta.yearBuilt!=null) facts.push('<span>Built <strong>'+esc(meta.yearBuilt)+'</strong></span>');
+        var factsHtml = facts.join('<span class="sep"></span>');
+        // dates
+        var dl=fmtDate(meta.dateListed), coe=fmtDate(deal.coe_date), exp=fmtDate(meta.expiration);
+        var datesHtml = (dl||coe||exp) ? ('<div class="cc-dates">'
+          + '<div><div class="k">Listed</div><div class="v">'+(dl||'—')+'</div></div>'
+          + '<div class="coe"><div class="k">COE</div><div class="v">'+(coe||'—')+'</div></div>'
+          + '<div><div class="k">Expires</div><div class="v">'+(exp||'—')+'</div></div></div>') : '';
+        // commission
+        var commHtml='';
+        if(meta.commission){ var pct=parseFloat(String(meta.commission)); var dollars=(price&&!isNaN(pct))?(' <span style="font-size:12px;font-weight:500;color:var(--ink-mute);">· '+esc(String(meta.commission).trim())+'</span>'):' '+esc(String(meta.commission));
+          var cval=(price&&!isNaN(pct))? fmtFull(+price*pct/100) : esc(String(meta.commission));
+          commHtml='<div class="cc-comm"><div><div class="k">Commission · internal only</div><div class="v">'+cval+dollars+'</div></div><span class="hid">Hidden from portal</span></div>'; }
+        // client
+        var clientHtml='';
+        if(meta.client){ clientHtml='<div class="cc-client"><span class="av">'+esc(initials(meta.client))+'</span><div><div class="nm">'+esc(meta.client)+'</div><div class="rl">'+(isSell?'Seller':'Buyer')+'</div></div></div>'; }
+        // links
+        var links=[];
+        links.push('<a data-cc-portal>'+(deal.side==='buyer'?'Buyer':'Seller')+' portal <span class="ar">&#8599;</span></a>');
+        if(meta.disclosurePackage) links.push('<a href="'+esc(meta.disclosurePackage)+'" target="_blank" rel="noopener">Disclosures <span class="ar">&#8599;</span></a>');
+        if(deal.video_url) links.push('<a href="'+esc(deal.video_url)+'" target="_blank" rel="noopener">Video tour <span class="ar">&#8599;</span></a>');
+        if(deal.tour_url) links.push('<a href="'+esc(deal.tour_url)+'" target="_blank" rel="noopener">3D tour <span class="ar">&#8599;</span></a>');
+        // photo
+        var photoInner = deal.photo_url
+          ? '<img src="'+esc(deal.photo_url)+'" alt=""><span class="rephoto">Replace photo</span>'
+          : '<div class="drop"><span class="big">&#8682;</span>Drop a photo of the home<br>or click to choose</div>';
+
+        root.innerHTML = ''
+        + '<div class="cc-head"><div>'
+        +   '<div class="cc-crumb"><a data-cc-back>Deals &amp; Offers</a> / '+esc(deal.address||deal.source_key)+'</div>'
+        +   '<div class="cc-title"><h1>Command Center</h1><span class="cc-statuschip">'+esc(st.chip)+'</span></div>'
+        + '</div></div>'
+        + '<div class="cc-body">'
+        +   '<div class="cc-card">'
+        +     '<div class="cc-photo" data-cc-photo>'+photoInner
+        +       '<span class="st-overlay"><span class="dot"></span>'+esc(st.overlay)+'</span>'
+        +       '<input type="file" accept="image/*" data-cc-file style="display:none;">'
+        +     '</div>'
+        +     '<div class="cc-in">'
+        +       '<div class="cc-price-row"><div><div class="cc-caplab">'+priceLab+'</div><div class="cc-price">'+fmtUSD(price)+'</div></div>'
+        +         '<div class="cc-price-r">'+perSqft+'<div>'+(isSell?'Sell side':'Buy side')+'</div></div></div>'
+        +       '<div class="cc-addr"><div class="name">'+esc(deal.address||'—')+'</div>'+(deal.city?'<div class="sub">'+esc(deal.city)+'</div>':'')+'</div>'
+        +       clientHtml
+        +       (factsHtml?'<div class="cc-facts">'+factsHtml+'</div>':'')
+        +       '<div class="cc-grid2"><div class="cc-kv"><div class="k">MLS #</div><div class="v">'+esc(deal.mls||'—')+'</div></div>'
+        +         '<div class="cc-kv"><div class="k">APN</div><div class="v">'+esc(meta.apn||'—')+'</div></div></div>'
+        +       datesHtml
+        +       commHtml
+        +       '<div class="cc-siderow"><span class="cc-caplab">Side</span><span class="cc-pill '+(isSell?'sell':'buy')+'">'+(isSell?'Selling':'Buying')+'</span>'
+        +         '<span class="cc-caplab" style="margin-left:6px;">Agent</span><span class="cc-pill">'+(deal.agent==='james'?'James Beyersdorf':'Sara Cooper')+'</span></div>'
+        +       '<div class="cc-links">'+links.join('')+'</div>'
+        +     '</div>'
+        +   '</div>'
+        +   '<div class="cc-console">Action console — messaging, portal toggles, schedule &amp; contingencies land here next.</div>'
+        + '</div>';
+
+        wirePhoto();
+      }
+
+      // ---- photo drop / upload ------------------------------------------
+      function wirePhoto(){
+        var zone = root.querySelector('[data-cc-photo]');
+        var file = root.querySelector('[data-cc-file]');
+        if(!zone||!file) return;
+        zone.addEventListener('click', function(){ file.click(); });
+        zone.addEventListener('dragover', function(e){ e.preventDefault(); zone.classList.add('drag'); });
+        zone.addEventListener('dragleave', function(){ zone.classList.remove('drag'); });
+        zone.addEventListener('drop', function(e){ e.preventDefault(); zone.classList.remove('drag'); if(e.dataTransfer.files&&e.dataTransfer.files[0]) handleFile(e.dataTransfer.files[0]); });
+        file.addEventListener('change', function(){ if(file.files&&file.files[0]) handleFile(file.files[0]); });
+      }
+      function setBusy(msg){ var z=root.querySelector('[data-cc-photo]'); if(!z) return; var d=z.querySelector('.drop'); if(d){ d.innerHTML='<span class="big">&#8987;</span>'+esc(msg); } else { var r=z.querySelector('.rephoto'); if(r) r.textContent=msg; } }
+      function handleFile(f){
+        if(!/^image\//.test(f.type)){ alert('Please choose an image file.'); return; }
+        setBusy('Uploading…');
+        var img=new Image(), url=URL.createObjectURL(f);
+        img.onload=function(){
+          URL.revokeObjectURL(url);
+          var max=1280, w=img.width, h=img.height;
+          if(w>max){ h=Math.round(h*max/w); w=max; }
+          var c=document.createElement('canvas'); c.width=w; c.height=h;
+          c.getContext('2d').drawImage(img,0,0,w,h);
+          var data=c.toDataURL('image/jpeg',0.85);
+          fetch('/api/crm/deal-photo',{method:'POST',credentials:'include',headers:{'Content-Type':'application/json'},body:JSON.stringify({source_key:current.source_key,image:data})})
+            .then(function(r){return r.json().then(function(j){return {ok:r.ok,j:j};});})
+            .then(function(res){
+              if(res.ok&&res.j&&res.j.url){ current.photo_url=res.j.url; render(current); if(typeof window.__renderDeals==='function') window.__renderDeals(); }
+              else { alert((res.j&&res.j.error)||'Upload failed.'); render(current); }
+            }).catch(function(){ alert('Network error uploading photo.'); render(current); });
+        };
+        img.onerror=function(){ URL.revokeObjectURL(url); alert('Could not read that image.'); render(current); };
+        img.src=url;
+      }
+
+      // back to the grid + portal link
+      root.addEventListener('click', function(e){
+        if(e.target.closest('[data-cc-back]')){ e.preventDefault(); if(typeof window.showView==='function') window.showView(null,'listings'); return; }
+        var portal=e.target.closest('[data-cc-portal]');
+        if(portal && current){ e.preventDefault(); e.stopPropagation(); var u='/seller.html?deal='+encodeURIComponent(current.source_key); var w=window.open(u,'_blank','noopener'); if(!w) location.href=u; }
+      });
+
+      window.openCommandCenter=function(deal){ if(!deal) return; render(deal); if(typeof window.showView==='function') window.showView(null,'command'); };
+    })();
+    </script>
+
+    <!-- ============================================================
          LISTINGS ROSTER — all brokerage sell-side listings, filterable
          by agent, with a Preparing-to-list section for future listings.
          ============================================================ -->
@@ -1873,8 +2088,8 @@ function selectLead(el) {
   }
   function counts() {
     if (!state.data) return;
-    set('[data-tsk-c-open]', state.data.open); set('[data-tsk-c-done]', state.data.done);
-    document.querySelectorAll('[data-roster-tasks]').forEach(function (e) { e.textContent = String(state.data.open); });
+    set('[data-tsk-c-open]', state.data.open || 0); set('[data-tsk-c-done]', state.data.done || 0);
+    document.querySelectorAll('[data-roster-tasks]').forEach(function (e) { e.textContent = String(state.data.open || 0); });
   }
   function item(t) {
     var who = state.data.broker ? '<span class="tsk-who">' + (t.agent === 'james' ? 'James' : t.agent === 'both' ? 'Both' : 'Me') + '</span>' : '';
@@ -1994,17 +2209,30 @@ function selectLead(el) {
     var accept = state.tab === 'offers'
       ? '<button class="lst-accept" data-accept="' + esc(d.source_key || '') + '">Mark accepted → escrow</button>'
       : '';
-    return '<div class="lst-card"' + (url ? ' data-portal="' + esc(url) + '" role="link" tabindex="0"' : '') + '>' + ph + '<div class="bd">' +
+    return '<div class="lst-card" data-source-key="' + esc(d.source_key || '') + '" role="link" tabindex="0">' + ph + '<div class="bd">' +
       '<div class="pr">' + esc(fmtUSD(d.price)) + '</div>' +
       '<div class="ad">' + esc(d.address || '') + (d.city ? ' · ' + esc(d.city) : '') + '</div>' +
       '<div class="mt"><span class="lst-badge ' + state.tab + '">' + badge(state.tab) + '</span>' + sideBadge +
         '<span class="lst-badge">' + (d.agent === 'james' ? 'James' : 'Sara') + '</span>' + tour + '</div>' +
       (d.coe_date ? '<div style="font-size:11px;color:var(--ink-mute);">COE ' + esc(d.coe_date) + '</div>' : '') +
-      '<span class="lk">Open ' + (buying ? 'buyer' : 'seller') + ' portal ↗</span>' +
+      '<span class="lk">Open command center →</span>' +
       accept +
       '</div></div>';
   }
-  function openPortal(url) { if (!url) return; var w = window.open(url, '_blank', 'noopener'); if (!w) location.href = url; }
+  // Find the loaded deal (a live reference so a photo upload updates the grid too).
+  function dealByKey(k) {
+    if (!state.data) return null;
+    var all = ['offers', 'active', 'pending', 'preparing', 'closed'];
+    for (var i = 0; i < all.length; i++) {
+      var arr = state.data[all[i]] || [];
+      for (var j = 0; j < arr.length; j++) if (arr[j].source_key === k) return arr[j];
+    }
+    return null;
+  }
+  function openCard(cardEl) {
+    var deal = dealByKey(cardEl.getAttribute('data-source-key'));
+    if (deal && typeof window.openCommandCenter === 'function') window.openCommandCenter(deal);
+  }
   async function acceptOffer(sourceKey, btn) {
     if (!sourceKey) return;
     btn.disabled = true; btn.textContent = 'Moving…';
@@ -2049,11 +2277,14 @@ function selectLead(el) {
                  : 'No ' + state.tab + ' deals.';
     grid.innerHTML = rows.length ? rows.map(card).join('') : '<div class="cur-empty">' + emptyMsg + '</div>';
   }
+  // Let the Command Center re-render the grid after it mutates a deal (e.g. a
+  // photo upload) so the card reflects the change without a re-fetch.
+  window.__renderDeals = render;
   root.addEventListener('click', function (e) {
     var acc = e.target.closest('[data-accept]');
     if (acc) { e.stopPropagation(); acceptOffer(acc.getAttribute('data-accept'), acc); return; }
-    var cardEl = e.target.closest('.lst-card[data-portal]');
-    if (cardEl) { openPortal(cardEl.getAttribute('data-portal')); return; }
+    var cardEl = e.target.closest('.lst-card[data-source-key]');
+    if (cardEl) { openCard(cardEl); return; }
     var t = e.target.closest('[data-lst]'); if (!t) return;
     state.tab = t.getAttribute('data-lst');
     root.querySelectorAll('[data-lst]').forEach(function (b) { b.classList.toggle('on', b === t); });
@@ -2061,8 +2292,8 @@ function selectLead(el) {
   });
   root.addEventListener('keydown', function (e) {
     if (e.key !== 'Enter' && e.key !== ' ') return;
-    var cardEl = e.target.closest('.lst-card[data-portal]');
-    if (cardEl) { e.preventDefault(); openPortal(cardEl.getAttribute('data-portal')); }
+    var cardEl = e.target.closest('.lst-card[data-source-key]');
+    if (cardEl) { e.preventDefault(); openCard(cardEl); }
   });
   // Lazy-load + set tab when the Listings view opens (roster Active/Pending).
   document.addEventListener('click', function (e) {

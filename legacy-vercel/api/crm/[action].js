@@ -38,6 +38,7 @@ import briefingFeedback from '../_lib/handlers/crm-briefing-feedback.js';
 import briefingCalendar from '../_lib/handlers/crm-briefing-calendar.js';
 import dealStage        from '../_lib/handlers/crm-deal-stage.js';
 import reviewQueue      from '../_lib/handlers/crm-review-queue.js';
+import dealPhoto        from '../_lib/handlers/crm-deal-photo.js';
 
 const TABLE = {
   'morning-brief':   morningBrief,
@@ -63,7 +64,8 @@ const TABLE = {
   'briefing-feedback': briefingFeedback,
   'briefing-calendar': briefingCalendar,
   'deal-stage':        dealStage,
-  'review-queue':      reviewQueue
+  'review-queue':      reviewQueue,
+  'deal-photo':        dealPhoto
 };
 
 export default async function handler(req, res) {

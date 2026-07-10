@@ -123,9 +123,9 @@ export default async function handler(req, res) {
   try {
     const supa = adminClient();
     const BASE      = 'source_key, address, city, stage, side, agent, list_price, sale_price, coe_date, photo_url, video_url, matterport_url';
-    const COLS_FULL = BASE + ', mls_number, listing_meta, stage_override';
-    const COLS_MLS  = BASE + ', mls_number, stage_override';
-    const COLS      = BASE;   // ultimate fallback — no stage_override (pre-024)
+    const COLS_FULL = BASE + ', mls_number, listing_meta, stage_override, photo_override';
+    const COLS_MLS  = BASE + ', mls_number, stage_override, photo_override';
+    const COLS      = BASE;   // ultimate fallback — no stage_override/photo_override (pre-024/026)
     // Include buyer-side deals too — a purchase we represent is a live
     // transaction that needs a client portal, and Sara expects to see it under
     // the in-escrow list. It's tagged by `side` so the card can say Buying vs
@@ -196,10 +196,11 @@ export default async function handler(req, res) {
     let photosMatched = 0;
     const buckets = { offers: [], active: [], pending: [], closed: [], preparing: [] };
     for (const d of (data || [])) {
-      // Photo source order: explicit deals.json photo → MetroList/IDX (by MLS
-      // or address) → the branded YouTube tour's thumbnail. The last one needs
-      // no MetroList config, so a listing with a video tour always has an image.
-      const photo = d.photo_url || idxPhotoFor(d) || youtubeThumb(d.video_url);
+      // Photo source order: agent's uploaded photo (photo_override) → explicit
+      // deals.json photo → MetroList/IDX (by MLS or address) → the branded
+      // YouTube tour's thumbnail. The upload + video paths need no MetroList
+      // config, so a listing with either always has an image.
+      const photo = d.photo_override || d.photo_url || idxPhotoFor(d) || youtubeThumb(d.video_url);
       if (photo) photosMatched++;
       // Effective stage. The agent's stage_override (set from the Deals view)
       // only applies while deals.json still has the deal at 'offer' — so
@@ -219,6 +220,8 @@ export default async function handler(req, res) {
         mls:        d.mls_number || null,
         meta:       d.listing_meta || null,   // client, apn, beds/baths, sqft, dates, disclosure, video
         photo_url:  photo,
+        video_url:  d.video_url || null,        // for the Command Center "Video tour" link
+        tour_url:   d.matterport_url || null,    // "3D tour" link
         has_video:  !!d.video_url,
         has_tour:   !!d.matterport_url,
         stage:      stage
