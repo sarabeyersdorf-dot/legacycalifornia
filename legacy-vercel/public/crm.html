@@ -1416,6 +1416,11 @@
     .rost-card:hover { border-color: var(--brass); box-shadow: 0 4px 16px rgba(0,0,0,.06); transform: translateY(-1px); }
     .rost-card:focus-visible { outline: 2px solid var(--brass); outline-offset: 2px; }
     .rost-open { font-family: var(--mono); font-size: 10px; letter-spacing: .1em; text-transform: uppercase; color: var(--brass); margin-top: 8px; }
+    /* Inline "replace/add photo" button on any listing card photo */
+    .ph-wrap { position: relative; }
+    .ph-up { position: absolute; bottom: 8px; right: 8px; z-index: 2; font-family: var(--mono); font-size: 9px; letter-spacing: .08em; text-transform: uppercase; padding: 6px 10px; border-radius: 7px; border: none; background: rgba(26,23,20,.72); color: var(--shell); cursor: pointer; opacity: .92; }
+    .ph-up:hover { background: rgba(26,23,20,.92); opacity: 1; }
+    .ph-up:disabled { opacity: .6; cursor: default; }
     .rost-card .ph { width: 100%; aspect-ratio: 16/10; object-fit: cover; background: var(--vellum); display: block; }
     .rost-card .ph-empty { width: 100%; aspect-ratio: 16/10; background: var(--linen); display: flex; align-items: center; justify-content: center; font-family: var(--mono); font-size: 10px; letter-spacing: .14em; text-transform: uppercase; color: var(--ink-faint); }
     .rost-bd { padding: 14px 16px; display: flex; flex-direction: column; gap: 5px; }
@@ -2581,7 +2586,7 @@ function selectLead(el) {
   }
   function badge(tab) { return tab === 'offers' ? 'Offer out' : tab === 'active' ? 'On market' : tab === 'pending' ? 'In escrow' : tab === 'preparing' ? 'Preparing to list' : 'Closed'; }
   function card(d) {
-    var ph = d.photo_url ? '<img class="ph" src="' + esc(d.photo_url) + '" alt="">' : '<div class="ph-empty">No photo yet</div>';
+    var ph = '<div class="ph-wrap">' + (d.photo_url ? '<img class="ph" src="' + esc(d.photo_url) + '" alt="">' : '<div class="ph-empty">No photo yet</div>') + '<button class="ph-up" data-upload="' + esc(d.source_key || '') + '">' + (d.photo_url ? 'Replace photo' : 'Add photo') + '</button></div>';
     var tour = (d.has_video ? '<span class="lst-badge">Video</span>' : '') + (d.has_tour ? '<span class="lst-badge">3D tour</span>' : '');
     var buying = d.side === 'buyer';
     // An offer's side tells the story: a buyer-side offer is one we WROTE for a
@@ -2671,6 +2676,21 @@ function selectLead(el) {
   // photo upload) so the card reflects the change without a re-fetch.
   window.__renderDeals = render;
   root.addEventListener('click', function (e) {
+    var up = e.target.closest('[data-upload]');
+    if (up) {
+      e.preventDefault(); e.stopPropagation();
+      var ukey = up.getAttribute('data-upload');
+      if (!ukey || !window.LegacyPhoto) return;
+      window.LegacyPhoto.pick().then(function (f) {
+        if (!f) return;
+        var orig = up.textContent; up.textContent = 'Uploading…'; up.disabled = true;
+        window.LegacyPhoto.upload(ukey, f).then(function (photoUrl) {
+          var dd = dealByKey(ukey); if (dd) dd.photo_url = photoUrl; render();
+          if (window.Legacy && window.Legacy.toast) window.Legacy.toast('Photo updated.', true);
+        }).catch(function (err) { up.textContent = orig; up.disabled = false; alert((err && err.message) || 'Upload failed.'); });
+      });
+      return;
+    }
     var acc = e.target.closest('[data-accept]');
     if (acc) { e.stopPropagation(); acceptOffer(acc.getAttribute('data-accept'), acc); return; }
     var cardEl = e.target.closest('.lst-card[data-source-key]');
@@ -2682,6 +2702,7 @@ function selectLead(el) {
   });
   root.addEventListener('keydown', function (e) {
     if (e.key !== 'Enter' && e.key !== ' ') return;
+    if (e.target.closest('[data-upload]')) return;
     var cardEl = e.target.closest('.lst-card[data-source-key]');
     if (cardEl) { e.preventDefault(); openCard(cardEl); }
   });
@@ -2728,7 +2749,7 @@ function selectLead(el) {
   }
   function card(d) {
     var m = d.meta || {};
-    var ph = d.photo_url ? '<img class="ph" src="' + esc(d.photo_url) + '" alt="">' : '<div class="ph-empty">No photo yet</div>';
+    var ph = '<div class="ph-wrap">' + (d.photo_url ? '<img class="ph" src="' + esc(d.photo_url) + '" alt="">' : '<div class="ph-empty">No photo yet</div>') + '<button class="ph-up" data-upload="' + esc(d.source_key || '') + '">' + (d.photo_url ? 'Replace photo' : 'Add photo') + '</button></div>';
     var f = facts(m);
     var metaBits = [];
     if (d.mls) metaBits.push('MLS ' + esc(d.mls));
@@ -2785,6 +2806,21 @@ function selectLead(el) {
     }).catch(function () { state.loading = false; if (!state.data) { var g = root.querySelector('[data-rost-grid]'); if (g) g.innerHTML = '<div class="cur-empty">Could not load listings — try again.</div>'; } });
   }
   root.addEventListener('click', function (e) {
+    var up = e.target.closest('[data-upload]');
+    if (up) {
+      e.preventDefault(); e.stopPropagation();
+      var ukey = up.getAttribute('data-upload');
+      if (!ukey || !window.LegacyPhoto) return;
+      window.LegacyPhoto.pick().then(function (f) {
+        if (!f) return;
+        var orig = up.textContent; up.textContent = 'Uploading…'; up.disabled = true;
+        window.LegacyPhoto.upload(ukey, f).then(function (photoUrl) {
+          var dd = dealByKey(ukey); if (dd) dd.photo_url = photoUrl; render();
+          if (window.Legacy && window.Legacy.toast) window.Legacy.toast('Photo updated.', true);
+        }).catch(function (err) { up.textContent = orig; up.disabled = false; alert((err && err.message) || 'Upload failed.'); });
+      });
+      return;
+    }
     // Open Portal / Disclosures / Video reliably (window.open with a same-tab
     // fallback) rather than relying on target=_blank, which webviews can drop.
     var link = e.target.closest('.rost-links a[href]');
@@ -2798,6 +2834,7 @@ function selectLead(el) {
   });
   root.addEventListener('keydown', function (e) {
     if (e.key !== 'Enter' && e.key !== ' ') return;
+    if (e.target.closest('[data-upload]')) return;
     var openEl = e.target.closest('.rost-card[data-source-key]');
     if (openEl) { e.preventDefault(); openRosterCard(openEl); }
   });
@@ -2838,6 +2875,48 @@ function selectLead(el) {
     }).catch(function () {});
   }
   document.addEventListener('click', function (e) { if (e.target.closest('[onclick*="\'settings\'"]')) setTimeout(load, 0); });
+})();
+</script>
+<script>
+/* Shared listing-photo uploader — lets any listing card replace its photo
+   (including ones currently pulled from a video thumbnail) via the same
+   /api/crm/deal-photo endpoint the Command Center uses. Resizes client-side to
+   a ~1280px JPEG before upload; the stored photo_override outranks the video. */
+(function () {
+  'use strict';
+  window.LegacyPhoto = {
+    // Open a native file picker; resolves the chosen File (or null if cancelled).
+    pick: function () {
+      return new Promise(function (resolve) {
+        var i = document.createElement('input');
+        i.type = 'file'; i.accept = 'image/*'; i.style.display = 'none';
+        document.body.appendChild(i);
+        i.addEventListener('change', function () { var f = (i.files && i.files[0]) || null; document.body.removeChild(i); resolve(f); });
+        i.click();
+      });
+    },
+    // Resize a File to a JPEG data URL and POST it for a deal; resolves the URL.
+    upload: function (sourceKey, file) {
+      return new Promise(function (resolve, reject) {
+        if (!file || !/^image\//.test(file.type)) { reject(new Error('Please choose an image file.')); return; }
+        var img = new Image(), url = URL.createObjectURL(file);
+        img.onload = function () {
+          URL.revokeObjectURL(url);
+          var max = 1280, w = img.width, h = img.height;
+          if (w > max) { h = Math.round(h * max / w); w = max; }
+          var c = document.createElement('canvas'); c.width = w; c.height = h;
+          c.getContext('2d').drawImage(img, 0, 0, w, h);
+          var data = c.toDataURL('image/jpeg', 0.85);
+          fetch('/api/crm/deal-photo', { method: 'POST', credentials: 'include', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ source_key: sourceKey, image: data }) })
+            .then(function (r) { return r.json().then(function (j) { return { ok: r.ok, j: j }; }); })
+            .then(function (res) { if (res.ok && res.j && res.j.url) resolve(res.j.url); else reject(new Error((res.j && res.j.error) || 'Upload failed.')); })
+            .catch(function () { reject(new Error('Network error uploading photo.')); });
+        };
+        img.onerror = function () { URL.revokeObjectURL(url); reject(new Error('Could not read that image.')); };
+        img.src = url;
+      });
+    }
+  };
 })();
 </script>
 <script src="/legacy-client.js" defer></script>
