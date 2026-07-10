@@ -970,6 +970,19 @@
     .cc-phone-h { font-family: var(--mono); font-size: 9.5px; letter-spacing: .1em; text-transform: uppercase; color: var(--ink-mute); margin-bottom: 8px; }
     .cc-phone-h em { font-style: normal; text-transform: none; letter-spacing: 0; font-size: 11px; color: var(--ink-faint); }
     .cc-phone-btns { display: flex; gap: 8px; flex-wrap: wrap; }
+    /* Client portal visibility toggles */
+    .cc-vrow { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 9px 0; border-bottom: 1px solid var(--rule-soft); }
+    .cc-vrow:last-of-type { border-bottom: none; }
+    .cc-vlab { min-width: 0; }
+    .cc-vkind { display: block; font-family: var(--mono); font-size: 8.5px; letter-spacing: .1em; text-transform: uppercase; color: var(--ink-mute); margin-bottom: 2px; }
+    .cc-vname { font-size: 13px; color: var(--ink); }
+    .cc-vtog { flex: none; display: inline-flex; align-items: center; gap: 7px; cursor: pointer; background: var(--vellum); border: 1px solid var(--rule); border-radius: 20px; padding: 4px 11px 4px 5px; font-family: var(--mono); font-size: 9px; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-mute); }
+    .cc-vtog .knob { width: 14px; height: 14px; border-radius: 50%; background: var(--ink-faint); transition: background .14s; }
+    .cc-vtog.on { background: #E8F0EA; border-color: #BFD8C6; color: #2E5C3D; }
+    .cc-vtog.on .knob { background: #2E5C3D; }
+    .cc-vtog:disabled { opacity: .5; cursor: default; }
+    .cc-vhint { margin-top: 10px; font-size: 11px; color: var(--ink-mute); line-height: 1.5; }
+    .cc-vhint.warn { color: #A23B26; }
     </style>
     <section class="crm-view" data-view="command">
       <div class="cc" data-cc-root>
@@ -1022,7 +1035,9 @@
         +     (deal.video_url?'<a class="cc-btn ghost" href="'+esc(deal.video_url)+'" target="_blank" rel="noopener">Video</a>':'')
         +   '</div></div>'
         +   '<div class="cc-con-sec"><div class="cc-caplab">What '+who+' sees now</div>'
-        +     '<div class="cc-see">'+esc(statusInfo(deal).overlay)+' &middot; '+esc(deal.address||'')+'. Portal-visibility controls land here next.</div></div>'
+        +     '<div class="cc-see">'+esc(statusInfo(deal).overlay)+' &middot; '+esc(deal.address||'')+'.</div></div>'
+        +   '<div class="cc-con-sec"><div class="cc-caplab">Client portal visibility</div>'
+        +     '<div class="cc-vis" data-cc-vis><div class="cc-msg-load">Loading…</div></div></div>'
         +   '<div class="cc-con-sec"><div class="cc-caplab">Client &amp; messages</div>'
         +     '<div class="cc-msg" data-cc-msg><div class="cc-msg-load">Loading client…</div></div></div>'
         + '</div>';
@@ -1102,6 +1117,7 @@
 
         wirePhoto();
         loadDealClient(deal);
+        loadDealVisibility(deal);
       }
 
       // ---- photo drop / upload ------------------------------------------
@@ -1189,6 +1205,68 @@
             msg.channel = (msg.client && msg.client.phone) ? 'sms' : 'email';
             renderMsgPanel(deal);
           }).catch(function(){ if(msg.key===deal.source_key) box.innerHTML='<div class="cc-msg-load">Network error loading the client.</div>'; });
+      }
+
+      // ---- client portal visibility: per-item internal<->client toggles ----
+      // Lists the deal's client-linked items (tasks/showings/appointments) and
+      // flips each between private and shared-to-portal via POST /api/crm/
+      // visibility, which carries the binding wire-fraud guard.
+      var vis = { key:null, items:[], hasClient:false };
+
+      function loadDealVisibility(deal){
+        var box = root.querySelector('[data-cc-vis]');
+        if(!box) return;
+        vis.key = deal.source_key; vis.items = []; vis.hasClient = false;
+        box.innerHTML = '<div class="cc-msg-load">Loading…</div>';
+        fetch('/api/crm/deal-visibility?deal='+encodeURIComponent(deal.source_key),{credentials:'include'})
+          .then(function(r){ return r.json().then(function(j){ return {ok:r.ok,j:j}; }); })
+          .then(function(res){
+            if(vis.key !== deal.source_key) return;
+            if(!res.ok){ box.innerHTML = '<div class="cc-msg-load">Couldn’t load visibility'+((res.j&&res.j.error)?' — '+esc(res.j.error):'')+'.</div>'; return; }
+            vis.items = res.j.items || [];
+            vis.hasClient = !!res.j.has_client;
+            renderVisPanel();
+          }).catch(function(){ if(vis.key===deal.source_key) box.innerHTML='<div class="cc-msg-load">Network error loading visibility.</div>'; });
+      }
+
+      function renderVisPanel(){
+        var box = root.querySelector('[data-cc-vis]');
+        if(!box) return;
+        if(!vis.hasClient){ box.innerHTML = '<div class="cc-msg-load">Link a client (in Client &amp; messages, below) to share items to their portal.</div>'; return; }
+        if(!vis.items.length){ box.innerHTML = '<div class="cc-msg-load">Nothing to share yet. Appointments and showings tied to this client show here to toggle on. Documents &amp; compliance tasks are set from your daily briefing.</div>'; return; }
+        var kindLab = { task:'Task', tour:'Showing', appointment:'Appointment' };
+        var rows = vis.items.map(function(it, i){
+          var on = it.visibility === 'client';
+          return '<div class="cc-vrow"><div class="cc-vlab"><span class="cc-vkind">'+esc(kindLab[it.kind]||it.kind)+'</span>'
+            + '<span class="cc-vname">'+esc(it.label)+(it.sub?' · '+esc(it.sub):'')+'</span></div>'
+            + '<button class="cc-vtog'+(on?' on':'')+'" data-vis-i="'+i+'" role="switch" aria-checked="'+(on?'true':'false')+'">'
+            + '<span class="knob"></span><span>'+(on?'Shared':'Private')+'</span></button></div>';
+        }).join('');
+        box.innerHTML = rows + '<div class="cc-vhint" data-cc-vhint>Shared items appear in the client’s portal. Wire or payment language is blocked from sharing.</div>';
+        box.querySelectorAll('[data-vis-i]').forEach(function(b){
+          b.addEventListener('click', function(){ doToggleVis(parseInt(b.getAttribute('data-vis-i'),10), b); });
+        });
+      }
+
+      function doToggleVis(i, btn){
+        var it = vis.items[i]; if(!it) return;
+        var target = it.visibility === 'client' ? 'internal' : 'client';
+        var hint = root.querySelector('[data-cc-vhint]');
+        btn.disabled = true;
+        fetch('/api/crm/visibility',{method:'POST',credentials:'include',headers:{'Content-Type':'application/json'},body:JSON.stringify({ kind: it.kind, id: it.id, visibility: target })})
+          .then(function(r){ return r.json().then(function(j){ return {ok:r.ok,j:j}; }); })
+          .then(function(res){
+            btn.disabled = false;
+            if(!res.ok){
+              // wire-guard 409 or other refusal — surface it, leave the toggle unchanged
+              if(hint){ hint.className='cc-vhint warn'; hint.textContent = (res.j&&res.j.error) || 'Could not change visibility.'; }
+              return;
+            }
+            it.visibility = target;
+            renderVisPanel();
+            var h = root.querySelector('[data-cc-vhint]');
+            if(h && target==='internal'){ h.textContent = 'Item hidden from the client’s portal.'; }
+          }).catch(function(){ btn.disabled=false; if(hint){ hint.className='cc-vhint warn'; hint.textContent='Network error changing visibility.'; } });
       }
 
       function renderMsgPanel(deal){

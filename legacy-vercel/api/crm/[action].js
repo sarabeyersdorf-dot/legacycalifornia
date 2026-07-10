@@ -10,6 +10,7 @@
 //   POST  /api/crm/note           → agent-only note on a lead
 //   POST  /api/crm/link-deal-party → link a client (lead) to their deal
 //   GET   /api/crm/deal-client     → a deal's linked client(s) + message thread
+//   GET   /api/crm/deal-visibility → a deal's client-toggleable portal items
 //   GET   /api/crm/sequences      → drip sequences for the Sequences tab
 //   GET   /api/crm/calendar       → week of tours/appointments for the Calendar tab
 //
@@ -41,6 +42,7 @@ import dealStage        from '../_lib/handlers/crm-deal-stage.js';
 import reviewQueue      from '../_lib/handlers/crm-review-queue.js';
 import dealPhoto        from '../_lib/handlers/crm-deal-photo.js';
 import dealClient       from '../_lib/handlers/crm-deal-client.js';
+import dealVisibility    from '../_lib/handlers/crm-deal-visibility.js';
 
 const TABLE = {
   'morning-brief':   morningBrief,
@@ -68,7 +70,8 @@ const TABLE = {
   'deal-stage':        dealStage,
   'review-queue':      reviewQueue,
   'deal-photo':        dealPhoto,
-  'deal-client':       dealClient
+  'deal-client':       dealClient,
+  'deal-visibility':   dealVisibility
 };
 
 export default async function handler(req, res) {
