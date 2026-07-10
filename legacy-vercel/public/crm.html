@@ -1439,7 +1439,10 @@
     .rost-agents { display: flex; gap: 6px; align-items: center; }
     .rost-agents .lbl { font-family: var(--mono); font-size: 9px; letter-spacing: .14em; text-transform: uppercase; color: var(--ink-mute); margin-right: 2px; }
     .rost-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 18px; }
-    .rost-card { background: var(--shell); border: 1px solid var(--rule); overflow: hidden; display: flex; flex-direction: column; }
+    .rost-card { background: var(--shell); border: 1px solid var(--rule); overflow: hidden; display: flex; flex-direction: column; cursor: pointer; transition: border-color .12s, box-shadow .12s, transform .12s; }
+    .rost-card:hover { border-color: var(--brass); box-shadow: 0 4px 16px rgba(0,0,0,.06); transform: translateY(-1px); }
+    .rost-card:focus-visible { outline: 2px solid var(--brass); outline-offset: 2px; }
+    .rost-open { font-family: var(--mono); font-size: 10px; letter-spacing: .1em; text-transform: uppercase; color: var(--brass); margin-top: 8px; }
     .rost-card .ph { width: 100%; aspect-ratio: 16/10; object-fit: cover; background: var(--vellum); display: block; }
     .rost-card .ph-empty { width: 100%; aspect-ratio: 16/10; background: var(--linen); display: flex; align-items: center; justify-content: center; font-family: var(--mono); font-size: 10px; letter-spacing: .14em; text-transform: uppercase; color: var(--ink-faint); }
     .rost-bd { padding: 14px 16px; display: flex; flex-direction: column; gap: 5px; }
@@ -2763,15 +2766,30 @@ function selectLead(el) {
     if (d.source_key) links.push('<a href="/seller.html?deal=' + encodeURIComponent(d.source_key) + '" target="_blank" rel="noopener">Portal ↗</a>');
     if (m.disclosurePackage) links.push('<a href="' + esc(m.disclosurePackage) + '" target="_blank" rel="noopener">Disclosures ↗</a>');
     if (d.has_video) links.push('<a href="/seller.html?deal=' + encodeURIComponent(d.source_key) + '" target="_blank" rel="noopener">Video ↗</a>');
-    return '<div class="rost-card">' + ph + '<div class="rost-bd">' +
+    return '<div class="rost-card" data-source-key="' + esc(d.source_key || '') + '" role="link" tabindex="0">' + ph + '<div class="rost-bd">' +
       '<div class="rost-top"><span class="rost-price">' + esc(fmtUSD(d.list_price || d.price)) + '</span>' +
         '<span class="lst-badge">' + (d.agent === 'james' ? 'James' : 'Sara') + '</span></div>' +
       '<div class="rost-addr">' + esc(d.address || '') + (d.city ? ' · ' + esc(d.city) : '') + '</div>' +
       (m.client ? '<div class="rost-client">' + esc(m.client) + '</div>' : '') +
       (f ? '<div class="rost-facts">' + esc(f) + '</div>' : '') +
       (metaBits.length ? '<div class="rost-metaline">' + metaBits.join(' &nbsp;·&nbsp; ') + '</div>' : '') +
+      '<div class="rost-open">Open command center →</div>' +
       (links.length ? '<div class="rost-links">' + links.join('') + '</div>' : '') +
       '</div></div>';
+  }
+  // Find a loaded roster deal by source_key so a card can open its Command Center.
+  function dealByKey(k) {
+    if (!state.data) return null;
+    var b = ['active', 'pending', 'preparing', 'closed', 'offers'];
+    for (var i = 0; i < b.length; i++) {
+      var arr = state.data[b[i]] || [];
+      for (var j = 0; j < arr.length; j++) if (arr[j].source_key === k) return arr[j];
+    }
+    return null;
+  }
+  function openRosterCard(el) {
+    var d = dealByKey(el.getAttribute('data-source-key'));
+    if (d && typeof window.openCommandCenter === 'function') window.openCommandCenter(d);
   }
   function counts() {
     ['active', 'preparing', 'pending', 'closed'].forEach(function (t) {
@@ -2798,10 +2816,17 @@ function selectLead(el) {
     // fallback) rather than relying on target=_blank, which webviews can drop.
     var link = e.target.closest('.rost-links a[href]');
     if (link) { e.preventDefault(); var u = link.getAttribute('href'); var w = window.open(u, '_blank', 'noopener'); if (!w) location.href = u; return; }
+    var openEl = e.target.closest('.rost-card[data-source-key]');
+    if (openEl) { openRosterCard(openEl); return; }
     var t = e.target.closest('[data-rost]');
     if (t) { state.tab = t.getAttribute('data-rost'); root.querySelectorAll('[data-rost]').forEach(function (b) { b.classList.toggle('on', b === t); }); render(); return; }
     var a = e.target.closest('[data-rost-agent]');
     if (a) { state.agent = a.getAttribute('data-rost-agent'); root.querySelectorAll('[data-rost-agent]').forEach(function (b) { b.classList.toggle('on', b === a); }); render(); return; }
+  });
+  root.addEventListener('keydown', function (e) {
+    if (e.key !== 'Enter' && e.key !== ' ') return;
+    var openEl = e.target.closest('.rost-card[data-source-key]');
+    if (openEl) { e.preventDefault(); openRosterCard(openEl); }
   });
   // Sidebar "Preparing to list" jumps straight to that tab; either sidebar entry
   // (re)loads the roster so it's current after a sync.

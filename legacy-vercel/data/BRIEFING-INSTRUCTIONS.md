@@ -191,6 +191,30 @@ A value can also carry a link: `{ "status": "signed", "url": "…" }`. Use this
 only when Sara is tracking document *status*; for "just show the client the
 files," use `clientDocuments` above.
 
+## 3b. Portal visibility — what you own vs. the CRM's live toggles
+
+There are two ways things reach a client's portal, and they don't overlap —
+stay in your lane so nothing gets clobbered:
+
+- **You (Cowork) own DOCUMENTS.** `clientDocuments` (§3) and the `docs`
+  checklist are yours. Sara asks you to add/rename/remove files; you write them
+  to `deals.json`. The CRM does not touch documents.
+- **Sara owns per-item visibility, live in the CRM.** Inside a deal's Command
+  Center she flips individual **appointments, showings, and tasks** between
+  Private and Shared with a toggle (backed by `/api/crm/visibility`, which
+  refuses to share anything containing wire/payment language). That's a
+  real-time agent action — **not** something you set from `deals.json`.
+
+Two things that follow, so you don't fight the CRM:
+
+- **Don't try to mark briefing items "client-visible" from `deals.json`.** The
+  `tasks` you write (§4) are rebuilt from scratch on every sync and land
+  **internal by default with no client link** — that's intended. If Sara wants a
+  task or appointment shown to a client, she toggles it in the Command Center;
+  a value you write here would be wiped on the next sync anyway.
+- **Never put wire/payment/banking details in `notes`, `tasks`, or anything
+  client-facing.** Wire instructions go by phone through the title company only.
+
 ## 4. Tasks / compliance — the top-level `"tasks"` array
 
 Sara's daily task & compliance checklist. Shows on the CRM **Tasks** tab and at
