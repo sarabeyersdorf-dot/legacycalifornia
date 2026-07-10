@@ -214,7 +214,9 @@ export default async function handler(req, res) {
     // "matterport"), with a property-photo and YouTube-thumbnail fallback so a
     // real client never sees a stock or blank hero. Fail-soft.
     const videoId = extractYouTubeId(deal.video_url);
-    let heroPhoto = deal.photo_url || null;
+    // The agent's uploaded photo (photo_override) wins over everything — same
+    // priority as the CRM listing card — so a replaced photo binds here too.
+    let heroPhoto = deal.photo_override || deal.photo_url || null;
     try {
       if (!heroPhoto && deal.property_id) {
         const { data: prop } = await supa.from('properties').select('photos').eq('id', deal.property_id).maybeSingle();

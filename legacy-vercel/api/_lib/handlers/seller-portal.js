@@ -508,9 +508,26 @@ export default async function handler(req, res) {
 
     // 13. Listing hero strings
     const dayOnMarket = daysBetween(listing.created_at) || 0;
-    // Real MLS photo first; fall back to the YouTube tour's thumbnail (4:3
-    // hqdefault fits the hero) so a listing with a video tour is never a blank box.
-    const photo = (listing.photos && listing.photos[0])
+    // The agent's uploaded deal photo (photo_override) wins over MLS/video, so a
+    // replaced photo binds on the on-market portal too. Match the deal to this
+    // listing by MLS number, then exact address. Fail-soft.
+    let dealPhotoOverride = null;
+    try {
+      if (listing.mls_number) {
+        const { data } = await supa.from('deals').select('photo_override')
+          .eq('mls_number', String(listing.mls_number)).not('photo_override', 'is', null).limit(1);
+        dealPhotoOverride = (data && data[0] && data[0].photo_override) || null;
+      }
+      if (!dealPhotoOverride && listing.address) {
+        const { data } = await supa.from('deals').select('photo_override')
+          .eq('address', listing.address).not('photo_override', 'is', null).limit(1);
+        dealPhotoOverride = (data && data[0] && data[0].photo_override) || null;
+      }
+    } catch (_) { /* never break the portal over a photo */ }
+    // Uploaded deal photo first; then real MLS photo; then the YouTube tour's
+    // thumbnail (4:3 hqdefault) so a listing with a video tour is never blank.
+    const photo = dealPhotoOverride
+      || (listing.photos && listing.photos[0])
       || (ytThumbId ? `https://img.youtube.com/vi/${ytThumbId}/hqdefault.jpg` : null);
     const headline    = `${listing.address || 'Your home'}.`;
     const headline_em = dayOnMarket > 0 && pv7 > 0
