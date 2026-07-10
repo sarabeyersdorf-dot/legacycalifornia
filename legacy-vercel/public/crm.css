@@ -123,6 +123,13 @@
 .lead-meta .badge.hot { background: rgba(184,90,62,0.12); color: var(--hot); }
 .lead-meta .badge.warm { background: rgba(201,158,90,0.18); color: #8a6a30; }
 .lead-meta .badge.brass { background: var(--brass); color: var(--shell); }
+/* Pipeline-status pill on a roster row — mirrors the contact card's stage. */
+.lead-meta .badge.st { border: 1px solid var(--rule); background: transparent; color: var(--ink-mute); }
+.lead-meta .badge.st-active,
+.lead-meta .badge.st-signed        { background: #E8F0EA; color: #2E5C3D; border-color: #BFD8C6; }
+.lead-meta .badge.st-under_contract { background: #F3EAD6; color: #7C5A16; border-color: #E0CFA0; }
+.lead-meta .badge.st-closed        { background: #1A1714; color: #FAF6EC; border-color: #1A1714; }
+.lead-meta .badge.st-sphere        { background: var(--vellum); color: var(--ink-mute); }
 .lead-meta .score { color: var(--brass); font-weight: 600; }
 
 .lead-list-search {

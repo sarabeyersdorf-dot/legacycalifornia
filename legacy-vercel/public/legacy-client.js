@@ -864,7 +864,10 @@
     if (drafts.length === 0) {
       const empty = document.createElement('article');
       empty.className = 'need-card';
-      empty.innerHTML = `<div class="nc-body"><p style="opacity:.7;font-style:italic;">All drafts approved. Sara, take the morning off.</p></div>`;
+      // Include the .nc-rank cell — without it the lone .nc-body lands in the
+      // 56px rank column of the card's 2-col grid and the text wraps one word
+      // per line.
+      empty.innerHTML = `<div class="nc-rank">✓</div><div class="nc-body"><p style="opacity:.7;font-style:italic;">All drafts approved. Sara, take the morning off.</p></div>`;
       needs.appendChild(empty);
       return;
     }
@@ -1473,6 +1476,19 @@
     if (lead.lead_type === 'land')   return 'Land · James';
     return (lead.lead_type || 'lead').replace(/^./, (c) => c.toUpperCase());
   }
+  // Pipeline-status pill for a roster row — the SAME stage the contact card
+  // header shows (pipeline_stage is derived from the side stages server-side,
+  // so this stays in sync when you change a contact's status). Legacy stage
+  // keys are normalized first.
+  const PIPE_STATUS_LABEL = {
+    new: 'New', nurture: 'Nurture', consult: 'Consult', signed: 'Signed',
+    active: 'Active', under_contract: 'In Escrow', closed: 'Closed', sphere: 'Sphere'
+  };
+  function statusBadge(lead) {
+    const stage = STAGE_NORM[lead.pipeline_stage] || lead.pipeline_stage || 'new';
+    const label = PIPE_STATUS_LABEL[stage] || 'New';
+    return `<span class="badge st st-${escHtml(stage)}">${escHtml(label)}</span>`;
+  }
   function avatarClassFor(temperature) {
     if (temperature === 'hot')  return 'avatar avatar-sm hot';
     if (temperature === 'warm') return 'avatar avatar-sm warm';
@@ -1563,8 +1579,9 @@
           </div>
           <p class="lead-preview">${preview}</p>
           <div class="lead-meta">
+            ${statusBadge(l)}
             ${tempBadge(l.temperature)}
-            <span class="badge">${escHtml(leadTypeLabel(l))}</span>
+            ${(l.lead_type === 'buyer' || l.lead_type === 'seller' || l.lead_type === 'land') ? `<span class="badge">${escHtml(leadTypeLabel(l))}</span>` : ''}
             <span class="score">${l.score == null ? '—' : l.score}</span>
           </div>
         </div>
@@ -1710,6 +1727,9 @@
     state.segmentBrowse = true;
     state.rosterSearch  = '';
     state.search        = '';
+    // Deselect — otherwise clicking the contact that was already open would
+    // early-return in selectLeadId and never replace this pane's prompt.
+    state.selectedLeadId = null;
     document.querySelectorAll('[data-global-search]').forEach((b) => { b.value = ''; });
     document.querySelectorAll('[data-filter]').forEach((c) => c.classList.toggle('on', c.getAttribute('data-filter') === 'all'));
     paintLeadList();
@@ -2191,6 +2211,22 @@
         saveBtn.disabled = false; saveBtn.textContent = 'Save contact';
         msgEl.style.color = '#2E5C3D';
         msgEl.textContent = ((r.json && r.json.warning) ? 'Saved (run pending migration).' : 'Saved.') + linkMsg;
+        // Sync the roster row so its status pill + kanban placement update
+        // without a reload (pipeline_stage is server-derived from the side
+        // stages — one source of truth).
+        const sl = state.leadsById && state.leadsById.get(lead.id);
+        if (sl) {
+          sl.contact_type = patch.contact_type;
+          sl.buyer_stage  = patch.buyer_stage;
+          sl.seller_stage = patch.seller_stage;
+          if (patch.first_name !== undefined) sl.first_name = patch.first_name;
+          if (patch.last_name  !== undefined) sl.last_name  = patch.last_name;
+          if (patch.phone !== undefined) sl.phone = patch.phone;
+          if (patch.email !== undefined) sl.email = patch.email;
+          const upd = (r.json && r.json.lead) || {};
+          if (upd.pipeline_stage != null) sl.pipeline_stage = upd.pipeline_stage;
+          if (typeof paintLeadList === 'function') paintLeadList();
+        }
         selectLeadId(lead.id, true); // force refresh so header pills reflect the change
       });
     }
