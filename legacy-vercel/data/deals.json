@@ -1,5 +1,5 @@
 {
-  "version": "1.29",
+  "version": "1.30",
   "lastUpdated": "2026-07-10",
   "updatedBy": "Claude",
   "tasks": [
@@ -84,7 +84,8 @@
       "agent": "james",
       "client": "Sheep Ranch",
       "title": "Escrow P-698773 cancellation — chase the SELLER signature so Placer can close out",
-      "done": false
+      "done": true,
+      "note": "chased 7/10 — Sean said he would sign, has not come through yet; keep following up"
     },
     {
       "agent": "sara",
@@ -118,13 +119,15 @@
       "agent": "sara",
       "client": "433 Hwy 4",
       "title": "Watch for buyer's signed reply to the seller RR response + CR1 (sent to Neriah/Melissa 7/8) — file fully executed set in Ex when back",
-      "done": false
+      "done": true,
+      "note": "done 7/9 — executed Seller Response & Buyer Reply to RR1 received from Neriah and filed in Ex"
     },
     {
       "agent": "sara",
       "client": "Rathburn",
       "title": "Chase Lilia's signature on the 14281 Cobb Ln listing agreement (sent 7/7 at 999k)",
-      "done": false
+      "done": true,
+      "note": "chased 7/10 — awaiting Lilia's signature"
     },
     {
       "agent": "sara",
@@ -148,12 +151,32 @@
       "agent": "james",
       "client": "Robinson",
       "title": "Write the offer on 992 Iroquois Cir for Ashley Robinson (BRBC signed 7/5)",
-      "done": false
+      "done": true,
+      "note": "done — offer written at 125000; seller countered 134500; James countering back at 130000 (buyer's highest & best)"
     },
     {
       "agent": "sara",
       "client": "433 Hwy 4",
       "title": "Watch for Jim's signed ETA — he signs Fri 7/10 before leaving for Idaho; file in Ex when back",
+      "done": true,
+      "note": "done 7/10 — ETA No. 1 fully signed 7:43 AM, forwarded to Neriah/Melissa, filed in Ex; extends loan→7/23, appraisal→7/16"
+    },
+    {
+      "agent": "james",
+      "client": "Robinson",
+      "title": "992 Iroquois — BCO at 130000 (buyer's highest & best) countering seller's 134500 — watch for seller response",
+      "done": false
+    },
+    {
+      "agent": "james",
+      "client": "Sheep Ranch",
+      "title": "Escrow P-698773 cancellation — Sean's (seller) signature STILL pending; said he'd sign (chased 7/10) — follow up until Placer can close out",
+      "done": false
+    },
+    {
+      "agent": "sara",
+      "client": "Esperson",
+      "title": "Pursue 512 Gardiner Way LISTING (reduced-commission, Kristin has her own buyer) — home in ACTIVE FORECLOSURE so timing matters; buyer side dead (lending declined)",
       "done": false
     }
   ],
@@ -269,7 +292,7 @@
       "notes": "BUYER-SIDE — Sara represents the BUYERS (James Courtland Hann Jr & Cheri Lynn Hann). Listing agent and SELLER is Aric Glanville (wife Suzette). Buyer has contingency for sale of their property. COE now FRIDAY JUNE 26 (updated 6/23 — Larkspur and Heaton Moor are NOT closing together; HM closes 6/24, Larkspur 6/26). Buyers sign Lender CD. HOA docs received. RPA and SIPA executed. Name-correction addendum (buyer names to match deed: James Courtland Hann Jr & Cheri Lynn Hann) DELIVERED (per Sara 6/24). Appraisal WAIVED. Referral fee: Hana-Sue Drilling (NextHome Utica Properties) earns 25% of Sara's commission for showing Sara's buyer clients while she was traveling. Referral fee agreement SIGNED BY ALL PARTIES and with escrow (as of 6/19/2026). CLOSED (confirmed by Sara 7/5/2026). SIP deposit due back to buyers — awaiting a deposit instruction for escrow release from the buyer's agent; approx 1100 being held back.",
       "alerts": [
         "CLOSED — confirmed by Sara 7/5/2026",
-        "SIP deposit due back — awaiting deposit instruction for escrow release from buyer's agent (~1100 holdback)"
+        "SIP deposit due back (~1100) — escrow release instruction PUSHED 7/10 (same route as Heaton Moor's 7/7); watch for the release to the Hanns"
       ]
     },
     {
@@ -770,12 +793,14 @@
       },
       "docs": {
         "BRBC": "executed (prepared 7/5, James)",
-        "RPA": null
+        "RPA": "offer written & sent at 125000",
+        "sellerCounter1": "received — SCO at 134500",
+        "buyerCounter1": "BCO at 130000 (buyer's highest & best) — countering the 134500"
       },
       "correspondence": [],
-      "notes": "OFFER IN PREPARATION — James's buyer Ashley Robinson. Target: 992 Iroquois Cir, Copperopolis (MLS 226026039, listed 3/5/26 at $135,000; 3bd/2ba manufactured on permanent foundation, 896 sqft, 0.08 ac, own-the-land, vacant, Lake Tulloch launch access). Listing agent Denise Stepps, Coldwell Banker Lake Tulloch. BRBC signed, agent MLS pulled 7/5; no RPA written yet. Docs in _Offers/Buy Side/Robinson.",
+      "notes": "OFFER OUT / NEGOTIATING — James's buyer Ashley Robinson. 992 Iroquois Cir, Copperopolis (MLS 226026039, listed 3/5/26 at $135,000; 3bd/2ba manufactured on permanent foundation, 896 sqft, 0.08 ac, own-the-land, vacant, Lake Tulloch launch access). Listing agent Denise Stepps, Coldwell Banker Lake Tulloch. Offer written at $125,000; seller countered at $134,500; James countering back at $130,000 — Ashley's highest & best (per Sara 7/10). Docs in _Offers/Buy Side/Robinson.",
       "alerts": [
-        "No offer written yet — BRBC + MLS on file; write the RPA when Ashley is ready"
+        "Negotiating — BCO at 130000 (highest & best) vs seller's counter 134500; awaiting seller response"
       ]
     },
     {
@@ -867,7 +892,12 @@
         "overrides": {
           "loan": 25
         },
-        "coe": "2026-08-10"
+        "coe": "2026-08-10",
+        "extensions": {
+          "loan": "2026-07-23",
+          "appraisal": "2026-07-16",
+          "source": "ETA No. 1 executed 2026-07-10 (COE unchanged)"
+        }
       },
       "openEscrowDate": "2026-06-22",
       "closingDate": "2026-08-10",
@@ -894,7 +924,8 @@
         "requestForRepair": "RR1 received 7/7 (Sara required proper RR form from Neriah, not addendum); summary sent to Jim & Yvonne 7/7; SELLER RESPONSE SIGNED (Jim 7/7, Yvonne 7/8) — Seller Response & Buyer Reply to RR #1 + CR1 sent to Neriah/Melissa 7/8 AM, awaiting BUYER reply",
         "homeInspectionReport": "Dawson home inspection report + summary (Inner Vision) filed in Ex 7/8; DocuSign '433 E Hwy 4 - Home inspection' completed by all parties 7/8 (via Melissa)",
         "homeInspection": "CONFIRMED 7/2 9AM — Norm Cucuzza/Inner Vision (Jim confirmed dog sitter 6/25)",
-        "roofInspection": "COMPLETED Mon 6/22/2026 (Paris Scott) — WRITTEN ROOF REPORT RECEIVED (per Sara 6/29)"
+        "roofInspection": "COMPLETED Mon 6/22/2026 (Paris Scott) — WRITTEN ROOF REPORT RECEIVED (per Sara 6/29)",
+        "ETA1": "EXECUTED 7/10 by all parties (Authentisign 7:43 AM; Jim signed before leaving for Idaho) — extends LOAN contingency to 7/23 and APPRAISAL to 7/16, COE unchanged 8/10; forwarded to Neriah/Melissa 7/10, FILED in Ex"
       },
       "clientDocuments": [
         {
@@ -969,13 +1000,12 @@
       "correspondence": [],
       "notes": "UNDER CONTRACT / ACCEPTED 6/19/2026. Sellers James R & Yvonne Heryford (Gold Electric). Buyer Elizabeth Tara Dawson (Neriah Davis, RE/MAX Gold). Seller Counter Offer No. 1 executed 6/19 at $1,300,000, 2.5% buyer-broker comp, loan contingency 25 days, COE 8/10/2026. Escrow opens Mon 6/22 with Ashley Cuslidge at Placer Title; Placer to order home warranty and NHD report upon opening. Sold on RPA + TOPA (House + Yoga/Good Karma Wellness). Key dates from acceptance: deposit $12k by 6/24; seller docs delivered 6/26; buyer inspection/appraisal/title/insurance contingencies 7/6; loan contingency 7/14; final walkthrough 8/5; COE 8/10. Sun 6/28: 11 AM property markers/boundary walk (satisfies counter item 4), then 12 PM buyer + her contractor access the home with buyer's agent Neriah present — Jim need not stay for the home-access portion. Buyer inspections: general home inspection 7/2 at 9 AM (requested) by Norm Cucuzza, Inner Vision Home Inspections — Jim H confirming with dog sitter, will verify by 6/24; roof inspection by Paris Scott (original roofer) — Neriah awaiting a date. SWPI well production & bacterial testing via Sierra Water/Rob Dunn. SELLER DELIVERABLES owed to Sara: well production test (GPM) + bacterial test from Rob Dunn (in process), update on the replaced well pump, and confirmation of sprinkler fixes — Jim will send when ready (per Sara 7/5). Per Addendum A, seller must complete all Section 1 items from Lawson Pest report (1/28/2026) up to $5,697. Seller to schedule (via Sara) a property boundary/corner walkthrough with buyer's agent and/or buyer (per counter offer item 4). Seller-facing timeline generated 6/20 (433_Hwy4_Seller_Timeline.html in __Pending offer folder).",
       "alerts": [
-        "RR NEGOTIATION IN FINAL LAP — sellers signed RR1 response (Jim 7/7, Yvonne 7/8), package w/ CR1 sent to Neriah 7/8 AM; awaiting buyer's signed reply, then file executed set in Ex",
+        "RR RESOLVED ✅ — executed Seller Response & Buyer Reply to RR1 + CR1 received from Neriah 7/9, filed in Ex",
+        "ETA No. 1 EXECUTED 7/10 ✅ — loan contingency now 7/23, appraisal 7/16, COE unchanged 8/10; filed in Ex",
         "TENANT EXTENSION NOW IN WRITING ✅ — Generic Addendum 2 executed by all parties 7/7 (Glide), filed in Ex",
-        "Buyer-signed disclosure set received 7/6; MU-PA + NHD sig pages + FHDS signed 7/6 (Authentisign) — file the sets in Ex",
-        "Loan contingency runs to Tue 7/14 (25-day)",
+        "Buyer-signed disclosure set received 7/6; MU-PA + NHD sig pages + FHDS signed 7/6 (Authentisign) — still to FILE the sets in Ex",
         "COE 8/10/2026 — final walkthrough 8/5",
-        "LISTING EXTENDED to 8/18/2026 via MOD — covers through COE 8/10 ✅",
-        "Jim Heryford signs the 433 ETA Fri 7/10, then headed to Idaho — get the signature before he travels, file in Ex"
+        "LISTING EXTENDED to 8/18/2026 via MOD — covers through COE 8/10 ✅"
       ]
     },
     {
@@ -1012,7 +1042,7 @@
       "correspondence": [],
       "notes": "New listing. Flyer and prelim ready. Separate from the sold 467 Skyline transaction. Homes.com lead Sharon Hedges (7/3) — James reached out 7/4, no reply yet; following up. PRICE REDUCTION to $89,000 in progress (per Sara 7/6). HOT LEAD Kerstin Breidenthal (Zillow inquiry + 3 Ylopo views 7/8; (408) 612-5906, kerstin.ahlgren@icloud.com) — Sara SPOKE with her 7/8 and texted her the disclosure link. UPDATE 7/9: Kerstin is TRAVELING for ~2 weeks and wants a showing when she's back (~7/23) — follow-up reminder scheduled for 7/23. A 'Modification of Terms, Listing Agreement #1' finished signing 7/7 (Authentisign) — likely this price-reduction MOD (Sara to confirm which listing it belongs to).",
       "alerts": [
-        "Price reduction to 89000 in progress (7/6) — MOT signing completed 7/7, confirm & finish MLS change",
+        "Price reduction to 89000 COMPLETE ✅ — MOT confirmed & MLS price change finished 7/10",
         "Kerstin Breidenthal traveling ~2 weeks — wants a SHOWING when back (~7/23); reminder set for 7/23; disclosure link texted 7/8"
       ],
       "clientDocuments": [
@@ -1124,7 +1154,7 @@
       "correspondence": [],
       "notes": "Listing agreement executed. Prelim and disclosures received. Showing was requested for Wed 6/24 1:00 PM by agent Loretta Kilpatrick — CANCELED by the agent (per Sara 6/25). Escrow P-698773 cancellation: buyer SIGNED 7/7; now awaiting SELLER signature so Placer can close it out.",
       "alerts": [
-        "Escrow P-698773 cancellation — buyer signed 7/7; SELLER signature now pending"
+        "Escrow P-698773 cancellation — buyer signed 7/7; SELLER (Sean) signature still pending — said he'd sign, chased 7/10"
       ],
       "clientDocuments": [
         {
@@ -1213,10 +1243,11 @@
         "transactionDocs": "received"
       },
       "correspondence": [],
-      "notes": "LITIGATION — Mediation filed April 1, 2026. Commission dispute case active. All evidence and communications documented. Attorney Mike Fluetsch reviewed materials 6/21/2026 and found a VIABLE commission claim. Sara is RETAINING Mike for the case (confirmed 6/22/2026). ON HOLD (per Sara 7/3): Sara asked Mike to POSTPONE until she has the funds for the $10k retainer (funding after the next escrow closes).",
+      "notes": "LITIGATION — Mediation filed April 1, 2026. Commission dispute case active. All evidence and communications documented. Attorney Mike Fluetsch reviewed materials 6/21/2026 and found a VIABLE commission claim. Sara is RETAINING Mike for the case (confirmed 6/22/2026). ON HOLD (per Sara 7/3): Sara asked Mike to POSTPONE until she has the funds for the $10k retainer (funding after the next escrow closes). INSURANCE: Coterie claim BM-PL-26-00016 (claimant Hovey Wineries) transferred to adjuster Emmanuel Isaac 7/8; Sara replied 7/9 — mediation months ago was unsuccessful (Hovey offered to drop their 93k claim if Sara dropped hers). Awaiting adjuster's response.",
       "alerts": [
         "ACTIVE MEDIATION — Filed April 1, 2026. Commission case in progress.",
-        "ON HOLD — Sara asked Mike Fluetsch to postpone until retainer funds available (next closing); then send full docs for deeper review"
+        "ON HOLD — Sara asked Mike Fluetsch to postpone until retainer funds available (next closing); then send full docs for deeper review",
+        "Coterie adjuster Emmanuel Isaac active on claim BM-PL-26-00016 — Sara replied 7/9, awaiting his response; loop in Mike before agreeing to anything"
       ]
     },
     {
@@ -1238,9 +1269,9 @@
         "listingAgreement": "SENT to Lilia 2026-07-07 — awaiting her signature"
       },
       "correspondence": [],
-      "notes": "Preparing to list — Lilia Rathburn's home (FUB person #1012). Listing appointment 7/6 went well; LA prepared at 999000 and sent to Lilia 7/7.",
+      "notes": "Preparing to list — Lilia Rathburn's home (FUB person #1012). Listing appointment 7/6 went well; LA prepared at 999000 and sent to Lilia 7/7. Chased 7/10.",
       "alerts": [
-        "LA sent to Lilia 7/7 at 999000 — awaiting signature"
+        "LA sent to Lilia 7/7 at 999000 — chased 7/10, awaiting signature"
       ]
     },
     {
@@ -1631,11 +1662,10 @@
       },
       "docs": {},
       "correspondence": [],
-      "notes": "FUB Realtor.com lead (received 6/29/2026). BUYER side: OFFER SENT on 2936 E Highway 4, Murphys, CA 95247 (per Sara 7/3) — Kristin doesn't want to sign until Mon/Tue, but the offer EXPIRES Fri 7/3, so Sara must RESEND the offer with a new expiration early next week. LISTING side: Sara doing a CMA (6/29) on Kristin's own home at 512 Gardiner Way, Rio Vista, CA 94571. Kristin says she already has a BUYER for 512 Gardiner Way, so this would likely be a REDUCED-COMMISSION 'handle the paperwork' listing. NOTE: 2936 E Highway 4 is a DIFFERENT property from Sara's 433 E Highway 4 listing.",
+      "notes": "FUB Realtor.com lead (received 6/29/2026). BUYER SIDE DEAD (7/10): lender Kim Hesser says Kristin has too many missed mortgage payments and she cannot lend to her — 2936 E Hwy 4 purchase off. LISTING side STILL LIVE: 512 Gardiner Way, Rio Vista, CA 94571 is in ACTIVE FORECLOSURE — Sara still trying for the listing; Kristin says she already has a BUYER, so likely a REDUCED-COMMISSION 'handle the paperwork' listing. CMA sent earlier. NOTE: 2936 E Highway 4 is a DIFFERENT property from Sara's 433 E Highway 4 listing.",
       "alerts": [
-        "Offer on 2936 E Hwy 4 EXPIRED Fri 7/3 — RESEND with new expiration Mon 7/6 (Kristin signs Mon/Tue) — on Sara's tasks",
-        "CMA in progress for 512 Gardiner Way, Rio Vista — likely reduced-commission paperwork deal (Kristin has her own buyer)",
-        "Buyer interest: 2936 E Hwy 4 Murphys (NOT Sara's 433) — running numbers"
+        "BUYER SIDE DEAD (7/10) — Kim Hesser: too many missed mortgage payments, cannot lend",
+        "512 Gardiner Way in ACTIVE FORECLOSURE — pursue the reduced-commission listing quickly (Kristin has her own buyer)"
       ]
     }
   ]
