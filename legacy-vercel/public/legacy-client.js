@@ -2020,6 +2020,10 @@
             </div>
             <div class="ld-head-meta">${escHtml(metaBits.join(' · '))}</div>
             ${contactEditorHtml}
+            ${lead.notes ? `<div class="lp-leadnote" style="margin-top:12px;padding:11px 14px;background:var(--shell);border:1px solid var(--rule);border-left:3px solid var(--brass);border-radius:8px;max-width:600px;">
+              <div style="font-family:var(--mono);font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-mute);margin-bottom:5px;">Lead notes</div>
+              <div style="font-size:13.5px;line-height:1.5;color:var(--ink);white-space:pre-wrap;">${escHtml(lead.notes)}</div>
+            </div>` : ''}
           </div>
         </div>
         <div class="ld-head-actions">
