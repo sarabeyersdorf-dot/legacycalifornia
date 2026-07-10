@@ -946,6 +946,11 @@
     .cc-hint.ok { color: #2E5C3D; }
     .cc-link-form { margin-top: 10px; display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
     .cc-link-form .full { grid-column: 1 / -1; }
+    /* "From your phone" bridge — native sms:/tel: while the Twilio line is pending */
+    .cc-phone { margin-top: 12px; border-top: 1px dashed var(--rule-soft); padding-top: 12px; }
+    .cc-phone-h { font-family: var(--mono); font-size: 9.5px; letter-spacing: .1em; text-transform: uppercase; color: var(--ink-mute); margin-bottom: 8px; }
+    .cc-phone-h em { font-style: normal; text-transform: none; letter-spacing: 0; font-size: 11px; color: var(--ink-faint); }
+    .cc-phone-btns { display: flex; gap: 8px; flex-wrap: wrap; }
     </style>
     <section class="crm-view" data-view="command">
       <div class="cc" data-cc-root>
@@ -1134,6 +1139,11 @@
 
       function fmtDateTime(d){ if(!d) return null; try{ var x=new Date(d); if(isNaN(x)) return null; return x.toLocaleDateString('en-US',{month:'short',day:'numeric'})+' '+x.toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'}); }catch(e){ return null; } }
       function sentOk(status){ return status==='sent'||status==='delivered'||status==='approved'; }
+      // Native deep links so Sara can text/call from her own phone with one tap —
+      // works today, no Twilio. iOS wants sms:NUM&body=…, Android sms:NUM?body=…
+      function isIOS(){ try{ return /iP(hone|ad|od)/.test(navigator.platform||'') || (/Mac/.test(navigator.platform||'') && 'ontouchend' in document); }catch(e){ return false; } }
+      function telHref(phone){ return 'tel:'+String(phone||'').replace(/[^\d+]/g,''); }
+      function smsHref(phone, body){ var num=String(phone||'').replace(/[^\d+]/g,''); var sep=isIOS()?'&':'?'; return 'sms:'+num+(body?(sep+'body='+encodeURIComponent(body)):''); }
 
       function threadBubble(m){
         var cls = m.direction==='inbound' ? 'in' : 'out';
@@ -1192,7 +1202,17 @@
              + '<textarea class="cc-fld" data-cc-body placeholder="Write to '+esc((c.first_name||c.name))+'…" maxlength="4000"></textarea>'
              + '<div class="cc-send-row">'+hint+'<button class="cc-btn" data-cc-send>Send</button></div></div>')
           : '<div class="cc-msg-load">No reachable phone or email on this client. Add contact info on their lead to message them.</div>';
-        box.innerHTML = head + '<div class="cc-thread" data-cc-thread>'+thread+'</div>' + compose;
+        // "From your phone" bridge — one-tap text/call from Sara's own number,
+        // no Twilio. Logging is manual (we can't see what she sends in Messages).
+        var phoneZone = c.phone
+          ? ('<div class="cc-phone"><div class="cc-phone-h">From your phone <em>· your number, not the Legacy line</em></div>'
+             + '<div class="cc-phone-btns">'
+             + '<button class="cc-btn ghost" data-cc-sms>Text in Messages</button>'
+             + '<a class="cc-btn ghost" href="'+esc(telHref(c.phone))+'">Call</a>'
+             + '<button class="cc-btn ghost" data-cc-logtext>Log this text</button>'
+             + '</div></div>')
+          : '';
+        box.innerHTML = head + '<div class="cc-thread" data-cc-thread>'+thread+'</div>' + compose + phoneZone;
         var t = box.querySelector('[data-cc-thread]'); if(t) t.scrollTop = t.scrollHeight;
         wireCompose(deal);
       }
@@ -1204,6 +1224,38 @@
         });
         var send = box.querySelector('[data-cc-send]');
         if(send) send.addEventListener('click', function(){ doSend(deal, send); });
+        // "From your phone": open native Messages pre-filled with the draft.
+        var smsBtn = box.querySelector('[data-cc-sms]');
+        if(smsBtn) smsBtn.addEventListener('click', function(){
+          if(!msg.client || !msg.client.phone) return;
+          var b = box.querySelector('[data-cc-body]'); var draft = b ? b.value.trim() : '';
+          window.location.href = smsHref(msg.client.phone, draft);
+        });
+        var logBtn = box.querySelector('[data-cc-logtext]');
+        if(logBtn) logBtn.addEventListener('click', function(){ doLogText(deal, logBtn); });
+      }
+
+      // Record a text Sara sent from her own phone (no dispatch) so the deal
+      // thread stays complete. Uses the compose draft as the logged body.
+      function doLogText(deal, btn){
+        var box = root.querySelector('[data-cc-msg]'); if(!box || !msg.client) return;
+        var bodyEl = box.querySelector('[data-cc-body]');
+        var text = bodyEl ? bodyEl.value.trim() : '';
+        var hintEl = box.querySelector('[data-cc-hint]');
+        var warn = function(t){ if(hintEl){ hintEl.className='cc-hint warn'; hintEl.textContent=t; } };
+        if(!text){ warn('Type the text you sent, then log it.'); if(bodyEl) bodyEl.focus(); return; }
+        if(msg.busy) return; msg.busy=true;
+        btn.disabled=true; var orig=btn.textContent; btn.textContent='Logging…';
+        fetch('/api/crm/message',{method:'POST',credentials:'include',headers:{'Content-Type':'application/json'},body:JSON.stringify({ lead_id: msg.client.lead_id, channel:'sms', body:text, log_only:true })})
+          .then(function(r){ return r.json().then(function(j){ return {ok:r.ok,j:j}; }); })
+          .then(function(res){
+            msg.busy=false; btn.disabled=false; btn.textContent=orig;
+            if(!res.ok){ warn((res.j&&res.j.error)||'Could not log the text.'); return; }
+            msg.thread.push({ direction:'outbound', channel:'sms', body:text, status:'sent', created_at:new Date().toISOString() });
+            renderMsgPanel(deal);
+            var h = root.querySelector('[data-cc-msg] [data-cc-hint]');
+            if(h){ h.className='cc-hint ok'; h.textContent='Logged to the thread.'; }
+          }).catch(function(){ msg.busy=false; btn.disabled=false; btn.textContent=orig; warn('Network error logging.'); });
       }
 
       function doSend(deal, btn){

@@ -11,6 +11,10 @@
 //     channel:  'email' | 'sms', required
 //     body:     string,      required (trimmed, max 4000 chars)
 //     subject:  string       required for email; ignored for sms
+//     log_only: boolean      optional — record a message the agent already sent
+//               from their OWN phone/email (Command Center "text from my phone"
+//               bridge). No provider dispatch; the row lands 'sent' so the deal
+//               thread keeps the record even while the Twilio line is pending.
 //   }
 //
 // Auth: server-side. Only Sara/James/admin can send.
@@ -62,6 +66,7 @@ export default async function handler(req, res) {
     const channel = body?.channel;
     const text    = typeof body?.body    === 'string' ? body.body.trim()    : '';
     const subject = typeof body?.subject === 'string' ? body.subject.trim() : '';
+    const logOnly = body?.log_only === true;
 
     // ---- Validation ----------------------------------------------------
     if (!lead_id) return fail(res, 400, 'lead_id required');
@@ -104,8 +109,16 @@ export default async function handler(req, res) {
     }).select().single();
     if (insErr) return fail(res, 500, `messages insert: ${insErr.message}`);
 
-    // ---- Dispatch via the right provider ------------------------------
+    // ---- Dispatch via the right provider (or, for log_only, skip it) --
+    // log_only records a message the agent ALREADY sent from their own
+    // phone/email — the Command Center "text from my phone" bridge. There's
+    // nothing to dispatch, so it lands 'sent' directly. Keeps the deal thread
+    // complete while the business Twilio line is in compliance review.
     let providerResult, sentPatch;
+    if (logOnly) {
+      sentPatch = { status: 'sent' };
+      providerResult = { logged: true, via: 'personal' };
+    } else {
     try {
       if (channel === 'sms') {
         providerResult = await sendSMS({ to: lead.phone, body: text });
@@ -134,6 +147,7 @@ export default async function handler(req, res) {
       await supa.from('messages').update({ status: 'failed' }).eq('id', row.id);
       return fail(res, 502, `send failed: ${sendErr.message}`);
     }
+    }
 
     // ---- Stamp status + update lead.last_contact_at -------------------
     await supa.from('messages').update(sentPatch).eq('id', row.id);
@@ -147,14 +161,15 @@ export default async function handler(req, res) {
         lead_id,
         event_type: 'message_sent',
         source:     channel === 'sms' ? 'twilio' : 'mailerlite',
-        event_data: { message_id: row.id, channel, manual: true, sent_by: sentBy }
+        event_data: { message_id: row.id, channel, manual: true, sent_by: sentBy, ...(logOnly ? { logged: true, via: 'personal_phone' } : {}) }
       });
     }
 
     return ok(res, {
       message_id: row.id,
       status:     sentPatch.status,
-      provider:   providerResult
+      provider:   providerResult,
+      logged:     logOnly
     });
   } catch (e) {
     return fail(res, 500, e.message);
