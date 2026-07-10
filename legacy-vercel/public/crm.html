@@ -1859,6 +1859,9 @@ function selectLead(el) {
   function set(sel, v) { var el = root.querySelector(sel); if (el) el.textContent = String(v); }
   function ensure() { if (loaded) return; loaded = true; load(); }
   document.addEventListener('click', function (e) { if (e.target.closest('[onclick*="\'tasks\'"]')) setTimeout(ensure, 0); });
+  // Load on page start too — so the Tasks count in the Daily nav is populated on
+  // refresh, not just after the Tasks tab is first opened.
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', ensure); else ensure();
 
   function load() {
     var url = '/api/crm/tasks' + (state.scope !== 'all' ? ('?scope=' + state.scope) : '');

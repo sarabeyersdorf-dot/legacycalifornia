@@ -116,13 +116,14 @@ export default async function handler(req, res) {
       supa.from('leads')      .select('id', { count: 'exact', head: true }).in('pipeline_stage', ['closed','close']).gte('updated_at', ninetyAgo)
     ]);
 
-    // Real deals in motion — the escrow/listing deals from deals.json (the
-    // deals table), NOT leads. Scoped per agent: James sees his deals; the
+    // "Deals in motion" = live transactions only: open OFFERS + in-escrow
+    // (PENDING). On-market listings are NOT deals in motion — they live in the
+    // Deals & Offers view. Scoped per agent: James sees his deals; the
     // broker-owner (Sara / admin) sees the whole brokerage.
     let dealsQ = supa
       .from('deals')
       .select('source_key, address, city, stage, side, agent, list_price, sale_price, coe_date')
-      .in('stage', ['pending', 'listing'])
+      .in('stage', ['offer', 'pending'])
       .order('coe_date', { ascending: true, nullsFirst: false })
       .limit(8);
     if (profile.role === 'agent_james') dealsQ = dealsQ.eq('agent', 'james');
@@ -325,7 +326,9 @@ function shapeDealsInMotion(deals) {
   const sideLabel = (s) => (s === 'both' ? 'Dual agency' : (s === 'buyer' ? 'Buy-side' : 'Sell-side'));
   return deals.map((d) => {
     const inEscrow = d.stage === 'pending';
-    const trackIdx = inEscrow ? 2 : 0;
+    const isOffer  = d.stage === 'offer';
+    // Offer = step 1 on the track, escrow = step 2.
+    const trackIdx = inEscrow ? 2 : (isOffer ? 1 : 0);
     const price = d.sale_price || d.list_price || null;
     const coe = d.coe_date ? new Date(d.coe_date) : null;
     const daysToCoe = coe ? Math.round((coe.getTime() - Date.now()) / 86400000) : null;
@@ -333,7 +336,7 @@ function shapeDealsInMotion(deals) {
       ? (daysToCoe == null ? 'In escrow'
           : daysToCoe >= 0 ? `In escrow · ${daysToCoe} day${daysToCoe === 1 ? '' : 's'} to close`
           : 'Closing overdue')
-      : 'On market';
+      : (isOffer ? (d.side === 'buyer' ? 'Offer out' : 'Offer in') : 'On market');
     const agentName = d.agent === 'james' ? 'James' : 'Sara';
     return {
       lead_id:     d.source_key,
