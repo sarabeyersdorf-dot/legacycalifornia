@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MLS Search</title>
+<!-- Chrome-free iHomefinder (Kestrel) search — the SAME live IDX search the
+     public site uses (see listings.html / idx.html), embedded via iframe in the
+     CRM's Curated view so it's isolated from the CRM's single-page routing. -->
+<link rel="stylesheet" href="idx-theme.css">
+<style>
+  html, body { margin: 0; background: #fff; }
+  body { font-family: 'DM Sans', system-ui, sans-serif; color: #1A1714; }
+  .idx-embed { padding: 12px 14px 24px; }
+</style>
+<script src="https://kestrel.idxhome.com/ihf-kestrel.js"></script>
+<script>
+  window.ihfKestrel = window.ihfKestrel || {};
+  ihfKestrel.config = {
+    platform: "custom",
+    activationToken: "d77ab7ae-7afe-403d-89cf-61bd60bbf806",
+  };
+</script>
+</head>
+<body data-screen-label="MLS Search">
+<div class="idx-embed">
+  <script>
+    document.currentScript.replaceWith(ihfKestrel.render());
+  </script>
+</div>
+</body>
+</html>

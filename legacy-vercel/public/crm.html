@@ -659,6 +659,10 @@
     .cur { padding: 22px 36px 60px; }
     .cur-head { display:flex; justify-content:space-between; align-items:flex-end; gap:16px; margin-bottom:22px; flex-wrap:wrap; }
     .cur-grid { display:grid; grid-template-columns:262px 1fr; gap:24px; align-items:start; }
+    .cur-idx { margin-bottom:22px; background:var(--shell); border:1px solid var(--rule); border-radius:12px; overflow:hidden; }
+    .cur-idx-h { font-family:var(--mono); font-size:10px; letter-spacing:.1em; text-transform:uppercase; color:var(--ink); padding:12px 16px; border-bottom:1px solid var(--rule-soft); }
+    .cur-idx-h span { color:var(--ink-mute); text-transform:none; letter-spacing:0; font-size:11px; }
+    .cur-idx-frame { width:100%; height:760px; border:0; display:block; background:#fff; }
     .cur-side { position:sticky; top:12px; }
     .cur-side-h { font-family:var(--mono); font-size:10px; letter-spacing:.18em; text-transform:uppercase; color:var(--brass); margin:0 0 10px; }
     .cur-colls, .cur-saved { display:flex; flex-direction:column; gap:6px; }
@@ -733,6 +737,10 @@
             <div class="cur-saved" data-cur-saved></div>
           </aside>
           <div class="cur-main" data-cur-main>
+            <div class="cur-idx" data-cur-idx>
+              <div class="cur-idx-h">Search the MLS <span>· the same live iHomefinder search your website visitors use</span></div>
+              <iframe class="cur-idx-frame" src="/curate-idx.html" title="MLS search" loading="lazy"></iframe>
+            </div>
             <div class="cur-placeholder" data-cur-placeholder>Pick a collection on the left, or start a new one, to begin curating. Every collection is hand-built — nothing reaches a client you didn't choose.</div>
             <div data-cur-editor style="display:none;"></div>
           </div>
