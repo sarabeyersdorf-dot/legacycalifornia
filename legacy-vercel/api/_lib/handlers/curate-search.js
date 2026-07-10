@@ -11,6 +11,7 @@
 import { adminClient } from '../supabase.js';
 import { getCallerProfile, isAgent } from '../auth.js';
 import { handleOptions, ok, fail } from '../cors.js';
+import { isConfigured as mlsConfigured, apiGet as mlsGet, shape as mlsShape } from '../../_metrolist.js';
 
 // ---- label maps ------------------------------------------------------------
 export const PTYPE_LABEL = {
@@ -171,6 +172,91 @@ function filtersFromQuery(qy) {
   return { ...qy, status: arr(qy.status), property_type: arr(qy.property_type) };
 }
 
+// ---- live MetroList (RESO) fallback ----------------------------------------
+// The properties table is fed by the iHomefinder sync, which may not be
+// populating. MetroList is the live feed the public site already runs on, so
+// when properties returns nothing we search MetroList directly. Only standard
+// RESO Data Dictionary fields (see _metrolist.js header) are used.
+
+// MetroList photo hosts block hotlinking, so route through the same-origin proxy
+// the public site uses (mirrors crm-listings.js).
+const MLS_PHOTO_HOSTS = /(^|\.)(metrolistmls\.com|flexmls\.com)$/i;
+function proxyPhoto(u) {
+  if (!u) return u;
+  try { if (MLS_PHOTO_HOSTS.test(new URL(u).hostname)) return `/api/photo?url=${encodeURIComponent(u)}`; } catch (_) {}
+  return u;
+}
+const RESO_STATUS = { active: 'Active', pending: 'Pending', sold: 'Sold' };
+function odataFilter(f) {
+  const q = (s) => String(s).replace(/'/g, "''");
+  const parts = [];
+  const statuses = (Array.isArray(f.status) && f.status.length)
+    ? [...new Set(f.status.map((s) => STATUS_UI_MAP[s] ?? s).filter(Boolean))]
+    : ['active', 'pending'];
+  const reso = [...new Set(statuses.map((s) => RESO_STATUS[s]).filter(Boolean))];
+  if (reso.length) parts.push('(' + reso.map((s) => `MlsStatus eq '${s}'`).join(' or ') + ')');
+  if (num(f.price_min) != null) parts.push(`ListPrice ge ${num(f.price_min)}`);
+  if (num(f.price_max) != null) parts.push(`ListPrice le ${num(f.price_max)}`);
+  if (num(f.beds_min)  != null) parts.push(`BedroomsTotal ge ${num(f.beds_min)}`);
+  if (num(f.baths_min) != null) parts.push(`BathroomsTotalInteger ge ${num(f.baths_min)}`);
+  if (num(f.sqft_min)  != null) parts.push(`LivingArea ge ${num(f.sqft_min)}`);
+  if (num(f.sqft_max)  != null) parts.push(`LivingArea le ${num(f.sqft_max)}`);
+  if (num(f.year_min)  != null) parts.push(`YearBuilt ge ${num(f.year_min)}`);
+  if (num(f.year_max)  != null) parts.push(`YearBuilt le ${num(f.year_max)}`);
+  if (str(f.city)) parts.push(`City eq '${q(str(f.city))}'`);
+  if (str(f.zip))  parts.push(`PostalCode eq '${q(str(f.zip))}'`);
+  return parts.join(' and ');
+}
+function sortToOData(sort) {
+  return ({
+    price_asc:  'ListPrice asc',
+    price_desc: 'ListPrice desc',
+    beds_desc:  'BedroomsTotal desc',
+    newest:     'ModificationTimestamp desc'
+  })[sort] || 'ModificationTimestamp desc';
+}
+function mlsToCard(s) {
+  const price = s.price ?? null, sqft = s.sqft ?? null;
+  const ppsf = (price && sqft) ? Math.round(price / sqft) : null;
+  const photos = (s.photos || []).map(proxyPhoto).filter(Boolean);
+  const status = ({ Active: 'active', Pending: 'pending', Sold: 'sold', Closed: 'sold' })[s.status] || String(s.status || '').toLowerCase();
+  return {
+    id: s.id, mls_number: s.id, address: s.address || '', city: s.city || '', state: s.state || 'CA', zip: s.zip || '',
+    price, price_label: fmtUSDfull(price), price_compact: fmtUSD(price),
+    beds: s.beds ?? null, baths: s.baths ?? null, sqft, lot_acres: s.lotAcres ?? null, year_built: s.yearBuilt ?? null,
+    property_type: null, property_type_label: s.type || '—',
+    status, status_label: STATUS_LABEL[status] || s.status || '',
+    ppsf, ppsf_label: ppsf ? `$${ppsf}/sqft` : '',
+    photo: photos[0] || null, photos
+  };
+}
+async function metrolistSearch(f) {
+  const limit  = Math.min(Math.max(parseInt(f.limit ?? 60, 10) || 60, 1), 100);
+  const offset = Math.max(parseInt(f.offset ?? 0, 10) || 0, 0);
+  const data = await mlsGet('/Property', {
+    '$filter':  odataFilter(f),
+    '$top':     limit,
+    '$skip':    offset,
+    '$orderby': sortToOData(f.sort),
+    '$expand':  'Media',
+    '$count':   'true',
+    '$select':  'ListingId,ListPrice,BedroomsTotal,BathroomsTotalInteger,LivingArea,LotSizeAcres,YearBuilt,UnparsedAddress,StreetNumber,StreetName,StreetSuffix,City,StateOrProvince,PostalCode,MlsStatus,PropertyType,PublicRemarks'
+  });
+  let cards = (data.value || []).map((p) => mlsToCard(mlsShape(p)));
+  // Filters OData can't express here — apply in JS.
+  const lotMin = num(f.lot_acres_min), lotMax = num(f.lot_acres_max), ppsfMax = num(f.ppsf_max);
+  const kw = str(f.keyword).toLowerCase();
+  cards = cards.filter((c) => {
+    if (lotMin != null && !(c.lot_acres != null && c.lot_acres >= lotMin)) return false;
+    if (lotMax != null && !(c.lot_acres != null && c.lot_acres <= lotMax)) return false;
+    if (ppsfMax != null && c.ppsf != null && c.ppsf > ppsfMax) return false;
+    if (kw && `${c.address} ${c.city} ${c.property_type_label}`.toLowerCase().indexOf(kw) < 0) return false;
+    return true;
+  });
+  const count = data['@odata.count'] != null ? data['@odata.count'] : cards.length;
+  return { listings: cards, count, limit, offset };
+}
+
 export default async function handler(req, res) {
   if (handleOptions(req, res)) return;
   if (req.method !== 'GET') return fail(res, 405, 'method_not_allowed');
@@ -181,8 +267,26 @@ export default async function handler(req, res) {
 
   try {
     const supa = adminClient();
-    const result = await runSearch(supa, filtersFromQuery(req.query || {}), {});
-    return ok(res, result);
+    const filters = filtersFromQuery(req.query || {});
+    const result = await runSearch(supa, filters, {});
+
+    // Local properties (iHomefinder sync) is the primary source; when it's empty
+    // fall back to the live MetroList feed the public site runs on.
+    if (result.listings.length) return ok(res, { ...result, source: 'properties' });
+
+    if (mlsConfigured()) {
+      try {
+        const live = await metrolistSearch(filters);
+        return ok(res, { ...live, gaps: result.gaps, source: 'metrolist' });
+      } catch (e) {
+        return ok(res, { listings: [], count: 0, gaps: result.gaps, source: 'metrolist_error', notice: `MLS feed error: ${e.message}` });
+      }
+    }
+
+    return ok(res, {
+      ...result, source: 'none',
+      notice: 'No MLS data source is connected. Curated search reads the properties table (iHomefinder sync) or the live MetroList feed — set the MetroList (METROLIST_*) env vars, or run the iHomefinder sync, to populate it.'
+    });
   } catch (e) {
     return fail(res, 500, e.message);
   }
