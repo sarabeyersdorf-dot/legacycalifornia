@@ -1,5 +1,5 @@
 {
-  "version": "1.27",
+  "version": "1.28",
   "lastUpdated": "2026-07-09",
   "updatedBy": "Claude",
   "tasks": [
@@ -800,7 +800,7 @@
         "title": null
       },
       "docs": {
-        "listingAgreement": null,
+        "listingAgreement": "executed (LA + MOT in _Listings/1111 Dunbar/Seller)",
         "offeringMemo": "received",
         "prelim": "received",
         "certOfTrust": "received",
@@ -809,7 +809,34 @@
       },
       "correspondence": [],
       "notes": "Commercial office building. Offering memo complete. Prelim received. Trust docs and lease amendments on file.",
-      "alerts": []
+      "alerts": [],
+      "clientDocuments": [
+        {
+          "name": "Listing Agreement (Commercial & Residential Income)",
+          "url": "https://legacycalifornia.com/docs/1111-dunbar/listing-agreement.pdf",
+          "note": "Pre-sale — signed at listing"
+        },
+        {
+          "name": "Modification of Terms — Listing Agreement #1",
+          "url": "https://legacycalifornia.com/docs/1111-dunbar/modification-of-terms-1.pdf",
+          "note": "Pre-sale — signed at listing"
+        },
+        {
+          "name": "Trust Advisory",
+          "url": "https://legacycalifornia.com/docs/1111-dunbar/trust-advisory.pdf",
+          "note": "Pre-sale — signed at listing"
+        },
+        {
+          "name": "Exempt Seller Disclosure (ESD)",
+          "url": "https://legacycalifornia.com/docs/1111-dunbar/exempt-seller-disclosure.pdf",
+          "note": "Pre-sale — signed at listing"
+        },
+        {
+          "name": "Transfer Disclosure Statement (TDS)",
+          "url": "https://legacycalifornia.com/docs/1111-dunbar/transfer-disclosure-statement.pdf",
+          "note": "Pre-sale — signed at listing"
+        }
+      ]
     },
     {
       "id": "433-hwy4",
@@ -970,7 +997,7 @@
         "title": null
       },
       "docs": {
-        "listingAgreement": null,
+        "listingAgreement": "executed (LA + MOT in _Listings/467 Skyline/Seller)",
         "flyer": "received",
         "prelim": "received",
         "sellerDocs": null
@@ -980,6 +1007,78 @@
       "alerts": [
         "Price reduction to 89000 in progress (7/6) — MOT signing completed 7/7, confirm & finish MLS change",
         "Hot lead Kerstin Breidenthal — Sara spoke with her 7/8 and texted the disclosure link; follow up for feedback/showing"
+      ],
+      "clientDocuments": [
+        {
+          "name": "Residential Listing Agreement",
+          "url": "https://legacycalifornia.com/docs/467-skyline/residential-listing-agreement.pdf",
+          "note": "Pre-sale — signed at listing"
+        },
+        {
+          "name": "Modification of Terms — Listing Agreement #1",
+          "url": "https://legacycalifornia.com/docs/467-skyline/modification-of-terms-1.pdf",
+          "note": "Pre-sale — signed at listing"
+        },
+        {
+          "name": "Transfer Disclosure Statement (TDS)",
+          "url": "https://legacycalifornia.com/docs/467-skyline/transfer-disclosure-statement.pdf",
+          "note": "Pre-sale — signed at listing"
+        },
+        {
+          "name": "Seller Property Questionnaire (SPQ)",
+          "url": "https://legacycalifornia.com/docs/467-skyline/seller-property-questionnaire.pdf",
+          "note": "Pre-sale — signed at listing"
+        },
+        {
+          "name": "Fire Hardening & Defensible Space Disclosure",
+          "url": "https://legacycalifornia.com/docs/467-skyline/fire-hardening-disclosure.pdf",
+          "note": "Pre-sale — signed at listing"
+        },
+        {
+          "name": "Square Footage & Lot Size Disclosure",
+          "url": "https://legacycalifornia.com/docs/467-skyline/square-footage-lot-size.pdf",
+          "note": "Pre-sale — signed at listing"
+        },
+        {
+          "name": "Solar Advisory & Questionnaire",
+          "url": "https://legacycalifornia.com/docs/467-skyline/solar-advisory.pdf",
+          "note": "Pre-sale — signed at listing"
+        },
+        {
+          "name": "Wooden Balconies & Stairs Addendum",
+          "url": "https://legacycalifornia.com/docs/467-skyline/wooden-balconies-stairs.pdf",
+          "note": "Pre-sale — signed at listing"
+        },
+        {
+          "name": "FIRPTA Affidavit (Non-foreign Status)",
+          "url": "https://legacycalifornia.com/docs/467-skyline/firpta-affidavit.pdf",
+          "note": "Pre-sale — signed at listing"
+        },
+        {
+          "name": "Statewide Buyer & Seller Advisory",
+          "url": "https://legacycalifornia.com/docs/467-skyline/statewide-buyer-seller-advisory.pdf",
+          "note": "Pre-sale — signed at listing"
+        },
+        {
+          "name": "Market Conditions Advisory",
+          "url": "https://legacycalifornia.com/docs/467-skyline/market-conditions-advisory.pdf",
+          "note": "Pre-sale — signed at listing"
+        },
+        {
+          "name": "Disclosure Information Advisory",
+          "url": "https://legacycalifornia.com/docs/467-skyline/disclosure-information-advisory.pdf",
+          "note": "Pre-sale — signed at listing"
+        },
+        {
+          "name": "Water Heater & Smoke Detector Compliance",
+          "url": "https://legacycalifornia.com/docs/467-skyline/water-heater-smoke-detector.pdf",
+          "note": "Pre-sale — signed at listing"
+        },
+        {
+          "name": "Water-Conserving Fixtures & CO Detector Notice",
+          "url": "https://legacycalifornia.com/docs/467-skyline/water-fixtures-co-notice.pdf",
+          "note": "Pre-sale — signed at listing"
+        }
       ]
     },
     {
@@ -1019,6 +1118,28 @@
       "notes": "Listing agreement executed. Prelim and disclosures received. Showing was requested for Wed 6/24 1:00 PM by agent Loretta Kilpatrick — CANCELED by the agent (per Sara 6/25). Escrow P-698773 cancellation: buyer SIGNED 7/7; now awaiting SELLER signature so Placer can close it out.",
       "alerts": [
         "Escrow P-698773 cancellation — buyer signed 7/7; SELLER signature now pending"
+      ],
+      "clientDocuments": [
+        {
+          "name": "Fire Hardening & Defensible Space Disclosure",
+          "url": "https://legacycalifornia.com/docs/9568-sheep-ranch/fire-hardening-disclosure.pdf",
+          "note": "Pre-sale — signed at listing"
+        },
+        {
+          "name": "Square Footage & Lot Size Disclosure",
+          "url": "https://legacycalifornia.com/docs/9568-sheep-ranch/square-footage-lot-size.pdf",
+          "note": "Pre-sale — signed at listing"
+        },
+        {
+          "name": "Water-Conserving Fixtures & CO Detector Notice",
+          "url": "https://legacycalifornia.com/docs/9568-sheep-ranch/water-fixtures-co-notice.pdf",
+          "note": "Pre-sale — signed at listing"
+        },
+        {
+          "name": "Water Heater & Smoke Detector Compliance",
+          "url": "https://legacycalifornia.com/docs/9568-sheep-ranch/water-heater-smoke-detector.pdf",
+          "note": "Pre-sale — signed at listing"
+        }
       ]
     },
     {
@@ -1290,6 +1411,43 @@
         "Active listing — expires 12/18/2026",
         "Escrow pre-opened with Ashley at Placer Title; prelim received 6/29 (P-708410)",
         "1 inquiry from ListTrac (6/28) — Sara following up"
+      ],
+      "clientDocuments": [
+        {
+          "name": "Residential Listing Agreement",
+          "url": "https://legacycalifornia.com/docs/preparing-324-augusta/residential-listing-agreement.pdf",
+          "note": "Pre-sale — signed at listing"
+        },
+        {
+          "name": "Statewide Buyer & Seller Advisory",
+          "url": "https://legacycalifornia.com/docs/preparing-324-augusta/statewide-buyer-seller-advisory.pdf",
+          "note": "Pre-sale — signed at listing"
+        },
+        {
+          "name": "Market Conditions Advisory",
+          "url": "https://legacycalifornia.com/docs/preparing-324-augusta/market-conditions-advisory.pdf",
+          "note": "Pre-sale — signed at listing"
+        },
+        {
+          "name": "Disclosure Information Advisory",
+          "url": "https://legacycalifornia.com/docs/preparing-324-augusta/disclosure-information-advisory.pdf",
+          "note": "Pre-sale — signed at listing"
+        },
+        {
+          "name": "Calaveras Regional Advisory",
+          "url": "https://legacycalifornia.com/docs/preparing-324-augusta/calaveras-regional-advisory.pdf",
+          "note": "Pre-sale — signed at listing"
+        },
+        {
+          "name": "Water Heater & Smoke Detector Compliance",
+          "url": "https://legacycalifornia.com/docs/preparing-324-augusta/water-heater-smoke-detector.pdf",
+          "note": "Pre-sale — signed at listing"
+        },
+        {
+          "name": "Water-Conserving Fixtures & CO Detector Notice",
+          "url": "https://legacycalifornia.com/docs/preparing-324-augusta/water-fixtures-co-notice.pdf",
+          "note": "Pre-sale — signed at listing"
+        }
       ]
     },
     {
