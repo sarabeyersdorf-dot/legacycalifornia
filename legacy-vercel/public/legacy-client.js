@@ -442,7 +442,19 @@
     return (s || '').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
   }
 
+  // Signed-in agent's first name (this IIFE's scope) — the Today brief speaks
+  // to whoever's logged in, not a hardcoded Sara.
+  let agentFirst = 'Sara';
+  function agentFirstFrom(session) {
+    const full = ((session && session.profile && session.profile.display_name) || '').trim();
+    if (full) return full.split(/\s+/)[0];
+    const role = (session && session.profile && session.profile.role) || '';
+    return /james/i.test(role) ? 'James' : 'Sara';
+  }
+
   async function wireCrmPage(session) {
+    // Establish the signed-in agent up front so every render speaks as them.
+    agentFirst = agentFirstFrom(session);
     // Run all loaders in parallel
     const [briefRes, inboxRes, pipelineRes, metricsRes] = await Promise.all([
       api('/api/crm/morning-brief', { method: 'GET' }),
@@ -867,7 +879,7 @@
       // Include the .nc-rank cell — without it the lone .nc-body lands in the
       // 56px rank column of the card's 2-col grid and the text wraps one word
       // per line.
-      empty.innerHTML = `<div class="nc-rank">✓</div><div class="nc-body"><p style="opacity:.7;font-style:italic;">All drafts approved. Sara, take the morning off.</p></div>`;
+      empty.innerHTML = `<div class="nc-rank">✓</div><div class="nc-body"><p style="opacity:.7;font-style:italic;">All drafts approved. ${escapeHtml(agentFirst)}, take the morning off.</p></div>`;
       needs.appendChild(empty);
       return;
     }
@@ -1495,6 +1507,16 @@
     return 'avatar avatar-sm';
   }
 
+  // The brokerage's agents. Comms surfaces (brief, drafts, sent bubbles,
+  // "Send as X") reference these instead of a hardcoded Sara — the Today brief
+  // follows whoever is signed in; a lead's drafts/messages follow the agent who
+  // owns that lead.
+  const AGENTS = {
+    sara:  { key: 'sara',  first: 'Sara',  full: 'Sara Cooper',      initials: 'SC', headshot: 'art/sara-headshot.png' },
+    james: { key: 'james', first: 'James', full: 'James Beyersdorf', initials: 'JB', headshot: 'art/james-headshot.png' }
+  };
+  function agentInfo(key) { return AGENTS[key] || AGENTS.sara; }
+
   const state = {
     leads: [],
     leadsById: new Map(),
@@ -1760,6 +1782,9 @@
     const appts    = payload.appointments || [];
 
     const initials = initialsOf(lead.first_name, lead.last_name, lead.email);
+    // Comms on this lead speak as the agent who owns it (assigned_agent), so a
+    // James lead never shows Sara's name/headshot and vice-versa.
+    const leadAgent = agentInfo(lead.assigned_agent);
     const daysInPipeline = lead.created_at
       ? Math.max(0, Math.floor((Date.now() - new Date(lead.created_at).getTime()) / 86400000))
       : 0;
@@ -1842,7 +1867,7 @@
         </div>
         <div class="ai-draft-body">
           <div class="ai-from">
-            <div class="avatar avatar-sm"><img src="art/sara-headshot.png" alt="Sara"></div>
+            <div class="avatar avatar-sm"><img src="${escHtml(leadAgent.headshot)}" alt="${escHtml(leadAgent.first)}"></div>
             <div>
               <div class="ld">From <strong>you</strong> · to <strong>${escHtml(fullName(lead))}</strong></div>
               <div class="sub">${pendingDraft.channel === 'sms' ? 'SMS' : 'Email'} · Will send only after you approve</div>
@@ -1855,7 +1880,7 @@
           <div class="ai-foot-l"><span><strong>Channel:</strong> ${pendingDraft.channel === 'sms' ? 'SMS' : 'Email'}</span></div>
           <div class="ai-foot-r">
             <button class="btn btn-ghost btn-sm" data-detail-action="edit">Edit</button>
-            <button class="btn btn-brass btn-sm" data-detail-action="approve">Send as Sara →</button>
+            <button class="btn btn-brass btn-sm" data-detail-action="approve">Send as ${escHtml(leadAgent.first)} →</button>
           </div>
         </div>
         <div data-detail-result style="font-size:13px;margin-top:8px;min-height:18px;"></div>
@@ -1865,8 +1890,8 @@
       ? `<div style="padding:16px;opacity:.55;font-style:italic;">No conversation yet.</div>`
       : otherMessages.map((m) => {
           const them = m.direction === 'inbound';
-          const who  = them ? fullName(lead) : 'Sara Cooper';
-          const init = them ? initials : 'SC';
+          const who  = them ? fullName(lead) : leadAgent.full;
+          const init = them ? initials : leadAgent.initials;
           return `
             <div class="msg-bubble ${them ? 'them' : 'us'}">
               <div class="avatar avatar-sm">${escHtml(init)}</div>
@@ -2406,7 +2431,7 @@
         <h3>Assigned</h3>
         <div class="handoff">
           <div class="a">
-            <div class="avatar avatar-sm" style="background: var(--brass); color: var(--shell); font-family: var(--serif); font-style: italic;">${assigned === 'james' ? 'JS' : 'SC'}</div>
+            <div class="avatar avatar-sm" style="background: var(--brass); color: var(--shell); font-family: var(--serif); font-style: italic;">${AGENTS[assigned] ? AGENTS[assigned].initials : '—'}</div>
             <span class="lab">${escHtml(assigned.replace(/^./, (c) => c.toUpperCase()))}</span>
           </div>
         </div>
@@ -2481,7 +2506,7 @@
         resultEl.style.color = '#9B2C2C';
         resultEl.textContent = (r.json && r.json.error) || 'Send failed.';
         approveBtn.disabled = false;
-        approveBtn.textContent = 'Send as Sara →';
+        approveBtn.textContent = `Send as ${agentInfo(lead.assigned_agent).first} →`;
       }
     });
   }

@@ -17,11 +17,20 @@ import { getCallerProfile, isAgent } from '../auth.js';
 import { anthropicMessage } from '../anthropic.js';
 import { handleOptions, ok, fail } from '../cors.js';
 
-const SARA_SYSTEM = `You are writing a one-paragraph morning brief for Sara Cooper, Broker-Owner of Legacy Properties in Angels Camp, CA.
-Voice: warm, direct, conversational. Like a smart assistant who reads her data.
+// Agent-aware brief voice — the narrative addresses whoever is signed in, in
+// their own second person, never a hardcoded name. James must never read a
+// brief written as Sara.
+function briefSystem(agentKey) {
+  const who = agentKey === 'james'
+    ? 'James Beyersdorf, an agent at Legacy Properties in Angels Camp, CA'
+    : 'Sara Cooper, Broker-Owner of Legacy Properties in Angels Camp, CA';
+  return `You are writing a one-paragraph morning brief for ${who}.
+Write in the second person ("you") — this is their own brief. Never sign it or refer to them in the third person; never mention the other agent by name.
+Voice: warm, direct, conversational. Like a smart assistant who reads their data.
 Short sentences. No exclamation points. No filler. Lead with the most important signal.
 Never invent details — only reference numbers and names provided.
 Output plain prose only, 3-5 sentences, no markdown.`;
+}
 
 export default async function handler(req, res) {
   if (handleOptions(req, res)) return;
@@ -208,7 +217,7 @@ Snapshot for ${agent === 'sara' ? 'Sara' : 'James'}:
   ${ctx.open_offer_count} open offer(s) in negotiation
 Write the brief paragraph now. Lead with the most important signal.`;
       const { text } = await anthropicMessage({
-        system: SARA_SYSTEM,
+        system: briefSystem(agent),
         messages: [{ role: 'user', content: userPrompt }],
         max_tokens: 400,
         temperature: 0.6
