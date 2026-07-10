@@ -7,8 +7,27 @@
 <link rel="stylesheet" href="legacy.css">
 <link rel="stylesheet" href="crm.css">
 <link rel="stylesheet" href="legacy-app.css">
+<!-- Installable home-screen app (PWA). Android/Chrome reads the manifest +
+     service worker; iOS/Safari reads the apple-* tags + apple-touch-icon. -->
+<link rel="manifest" href="/manifest.webmanifest">
+<meta name="theme-color" content="#FAF6EC">
+<link rel="icon" type="image/png" href="/art/legacy-icon-192.png">
+<link rel="apple-touch-icon" href="/art/legacy-icon-180.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Legacy Desk">
 </head>
 <body data-screen-label="Agent CRM" class="lp-restyle">
+<script>
+  /* Register the service worker so the CRM is installable to the home screen.
+     The worker caches nothing (see sw.js) — the CRM stays live. Fails quietly
+     on browsers without SW support or when served over http (dev). */
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', function () {
+      navigator.serviceWorker.register('/sw.js').catch(function () {});
+    });
+  }
+</script>
 
 <div class="app">
   <!-- ============ SIDEBAR ============ -->
