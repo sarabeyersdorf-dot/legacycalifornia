@@ -86,14 +86,18 @@ export default async function handler(req, res) {
     const sentBy = profile.role === 'agent_james' ? 'james' : 'sara';
     const nowIso = new Date().toISOString();
 
-    // ---- Insert the messages row (pending_send while we await provider) -
+    // ---- Insert the messages row (transient status while we await provider)
+    // Must be a value in the messages.status CHECK ('draft' | 'pending_approval'
+    // | 'approved' | 'sent' | 'delivered' | 'failed') — 'queued' is NOT allowed
+    // and would 500 the insert. We land it 'draft' (the column default) and
+    // immediately stamp it 'sent'/'failed' below once the provider responds.
     const { data: row, error: insErr } = await supa.from('messages').insert({
       lead_id,
       direction:    'outbound',
       channel,
       body:         text,
       subject:      channel === 'email' ? subject : null,
-      status:       'queued',
+      status:       'draft',
       ai_generated: false,
       approved_by:  sentBy,
       approved_at:  nowIso

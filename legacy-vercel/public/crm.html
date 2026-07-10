@@ -913,6 +913,39 @@
     .cc-step.on .lb { color: var(--ink); font-weight: 600; }
     .cc-qa { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
     .cc-see { margin-top: 8px; padding: 12px 14px; border-radius: 10px; background: var(--linen); border: 1px solid var(--rule-soft); font-size: 13px; color: var(--ink-soft); }
+    /* In-console messaging (right column) — the deal's linked client + thread */
+    .cc-msg { margin-top: 10px; }
+    .cc-msg-load { padding: 12px 14px; border-radius: 10px; background: var(--linen); border: 1px solid var(--rule-soft); font-size: 13px; color: var(--ink-mute); font-style: italic; }
+    .cc-cl { display: flex; align-items: center; gap: 11px; margin-top: 10px; }
+    .cc-cl .av { width: 32px; height: 32px; flex: none; border-radius: 50%; background: rgba(184,146,42,.16); color: var(--brass); display: inline-flex; align-items: center; justify-content: center; font-family: var(--mono); font-size: 12px; font-weight: 600; }
+    .cc-cl .nm { font-size: 14px; font-weight: 600; color: var(--ink); }
+    .cc-cl .rl { font-size: 12px; color: var(--ink-mute); text-transform: capitalize; }
+    .cc-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+    .cc-chip { font-family: var(--mono); font-size: 10px; letter-spacing: .04em; padding: 4px 9px; border-radius: 7px; background: var(--vellum); border: 1px solid var(--rule-soft); color: var(--ink-soft); }
+    .cc-chip.warn { background: #FBEDEA; border-color: #E8C9C1; color: #A23B26; }
+    .cc-thread { margin-top: 12px; max-height: 260px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; padding-right: 2px; }
+    .cc-thread .empty { font-size: 13px; color: var(--ink-mute); font-style: italic; padding: 6px 2px; }
+    .cc-bub { max-width: 84%; padding: 9px 12px; border-radius: 12px; font-size: 13px; line-height: 1.45; white-space: pre-wrap; word-break: break-word; }
+    .cc-bub.in { align-self: flex-start; background: var(--linen); border: 1px solid var(--rule-soft); color: var(--ink); border-bottom-left-radius: 4px; }
+    .cc-bub.out { align-self: flex-end; background: var(--ink); color: var(--shell); border-bottom-right-radius: 4px; }
+    .cc-bub .subj { font-weight: 600; margin-bottom: 3px; }
+    .cc-bub .m { display: block; margin-top: 5px; font-family: var(--mono); font-size: 8.5px; letter-spacing: .04em; text-transform: uppercase; opacity: .62; }
+    .cc-bub.out.failed { background: #FBEDEA; color: #A23B26; border: 1px solid #E8C9C1; }
+    .cc-compose { margin-top: 12px; border-top: 1px solid var(--rule-soft); padding-top: 12px; }
+    .cc-seg { display: inline-flex; gap: 4px; margin-bottom: 8px; }
+    .cc-seg button { font-family: var(--mono); font-size: 9.5px; letter-spacing: .08em; text-transform: uppercase; padding: 6px 12px; border-radius: 8px; border: 1px solid var(--rule); background: var(--vellum); color: var(--ink-soft); cursor: pointer; }
+    .cc-seg button.on { background: var(--ink); color: var(--shell); border-color: var(--ink); }
+    .cc-seg button:disabled { opacity: .4; cursor: not-allowed; }
+    .cc-fld { width: 100%; box-sizing: border-box; font-family: var(--sans, inherit); font-size: 13px; color: var(--ink); background: var(--shell); border: 1px solid var(--rule); border-radius: 9px; padding: 9px 11px; }
+    .cc-fld:focus { outline: none; border-color: var(--brass); }
+    textarea.cc-fld { resize: vertical; min-height: 62px; line-height: 1.45; }
+    .cc-compose .cc-fld + .cc-fld { margin-top: 8px; }
+    .cc-send-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-top: 9px; flex-wrap: wrap; }
+    .cc-hint { font-size: 11px; color: var(--ink-mute); }
+    .cc-hint.warn { color: #A23B26; }
+    .cc-hint.ok { color: #2E5C3D; }
+    .cc-link-form { margin-top: 10px; display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .cc-link-form .full { grid-column: 1 / -1; }
     </style>
     <section class="crm-view" data-view="command">
       <div class="cc" data-cc-root>
@@ -965,7 +998,9 @@
         +     (deal.video_url?'<a class="cc-btn ghost" href="'+esc(deal.video_url)+'" target="_blank" rel="noopener">Video</a>':'')
         +   '</div></div>'
         +   '<div class="cc-con-sec"><div class="cc-caplab">What '+who+' sees now</div>'
-        +     '<div class="cc-see">'+esc(statusInfo(deal).overlay)+' &middot; '+esc(deal.address||'')+'. Messaging &amp; portal-visibility controls land here next.</div></div>'
+        +     '<div class="cc-see">'+esc(statusInfo(deal).overlay)+' &middot; '+esc(deal.address||'')+'. Portal-visibility controls land here next.</div></div>'
+        +   '<div class="cc-con-sec"><div class="cc-caplab">Client &amp; messages</div>'
+        +     '<div class="cc-msg" data-cc-msg><div class="cc-msg-load">Loading client…</div></div></div>'
         + '</div>';
       }
 
@@ -1042,6 +1077,7 @@
         + '</div>';
 
         wirePhoto();
+        loadDealClient(deal);
       }
 
       // ---- photo drop / upload ------------------------------------------
@@ -1089,6 +1125,154 @@
         var sched=e.target.closest('[data-cc-schedule]');
         if(sched){ e.preventDefault(); if(typeof window.showView==='function') window.showView(null,'cal'); return; }
       });
+
+      // ---- in-console messaging: the deal's linked client + thread -------
+      // Surfaces the deal's real linked client (deal_parties → leads) so Sara
+      // can text/email them without leaving the Command Center. Sending reuses
+      // POST /api/crm/message; reading uses GET /api/crm/deal-client.
+      var msg = { key:null, client:null, thread:[], parties:[], channel:'sms', busy:false };
+
+      function fmtDateTime(d){ if(!d) return null; try{ var x=new Date(d); if(isNaN(x)) return null; return x.toLocaleDateString('en-US',{month:'short',day:'numeric'})+' '+x.toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'}); }catch(e){ return null; } }
+      function sentOk(status){ return status==='sent'||status==='delivered'||status==='approved'; }
+
+      function threadBubble(m){
+        var cls = m.direction==='inbound' ? 'in' : 'out';
+        if(m.direction==='outbound' && m.status && !sentOk(m.status)) cls += ' failed';
+        var subj = (m.channel==='email' && m.subject) ? '<span class="subj">'+esc(m.subject)+'</span>' : '';
+        var when = fmtDateTime(m.created_at);
+        var meta = (m.channel||'').toUpperCase() + (when?' · '+when:'') + (m.direction==='outbound' && m.status && !sentOk(m.status) ? ' · '+esc(m.status) : '');
+        return '<div class="cc-bub '+cls+'">'+subj+esc(m.body||'')+'<span class="m">'+esc(meta)+'</span></div>';
+      }
+
+      function loadDealClient(deal){
+        var box = root.querySelector('[data-cc-msg]');
+        if(!box) return;
+        msg.key = deal.source_key; msg.client=null; msg.thread=[]; msg.parties=[];
+        box.innerHTML = '<div class="cc-msg-load">Loading client…</div>';
+        fetch('/api/crm/deal-client?deal='+encodeURIComponent(deal.source_key),{credentials:'include'})
+          .then(function(r){ return r.json().then(function(j){ return {ok:r.ok,j:j}; }); })
+          .then(function(res){
+            if(msg.key !== deal.source_key) return;   // a different deal opened meanwhile
+            if(!res.ok){ box.innerHTML = '<div class="cc-msg-load">Couldn’t load the client'+((res.j&&res.j.error)?' — '+esc(res.j.error):'')+'.</div>'; return; }
+            msg.client  = res.j.client || null;
+            msg.thread  = res.j.thread || [];
+            msg.parties = res.j.parties || [];
+            msg.channel = (msg.client && msg.client.phone) ? 'sms' : 'email';
+            renderMsgPanel(deal);
+          }).catch(function(){ if(msg.key===deal.source_key) box.innerHTML='<div class="cc-msg-load">Network error loading the client.</div>'; });
+      }
+
+      function renderMsgPanel(deal){
+        var box = root.querySelector('[data-cc-msg]');
+        if(!box) return;
+        if(!msg.client){ box.innerHTML = linkFormHtml(deal); wireLinkForm(deal); return; }
+        var c = msg.client;
+        var chips = [];
+        if(c.phone) chips.push('<span class="cc-chip">'+esc(c.phone)+'</span>');
+        if(c.email) chips.push('<span class="cc-chip">'+esc(c.email)+'</span>');
+        if(msg.parties.length>1) chips.push('<span class="cc-chip">+'+(msg.parties.length-1)+' co-client'+(msg.parties.length-1===1?'':'s')+'</span>');
+        if(c.sms_opt_out)   chips.push('<span class="cc-chip warn">SMS opt-out</span>');
+        if(c.email_opt_out) chips.push('<span class="cc-chip warn">Email opt-out</span>');
+        var head = '<div class="cc-cl"><span class="av">'+esc(initials(c.name))+'</span><div><div class="nm">'+esc(c.name)+'</div><div class="rl">'+esc(c.role||'client')+'</div></div></div>'
+                 + (chips.length?'<div class="cc-chips">'+chips.join('')+'</div>':'');
+        var thread = msg.thread.length ? msg.thread.map(threadBubble).join('') : '<div class="empty">No messages yet — start the thread below.</div>';
+        var canSms = !!c.phone && !c.sms_opt_out;
+        var canEmail = !!c.email && !c.email_opt_out;
+        if(msg.channel==='sms' && !canSms && canEmail) msg.channel='email';
+        if(msg.channel==='email' && !canEmail && canSms) msg.channel='sms';
+        var seg = '<div class="cc-seg">'
+          + '<button data-cc-ch="sms" class="'+(msg.channel==='sms'?'on':'')+'"'+(canSms?'':' disabled')+'>Text</button>'
+          + '<button data-cc-ch="email" class="'+(msg.channel==='email'?'on':'')+'"'+(canEmail?'':' disabled')+'>Email</button></div>';
+        var subjFld = msg.channel==='email' ? '<input class="cc-fld" data-cc-subj placeholder="Subject" maxlength="200">' : '';
+        var hint = msg.channel==='sms'
+          ? '<span class="cc-hint" data-cc-hint>Sends as SMS from Legacy’s line · max 320 chars.</span>'
+          : '<span class="cc-hint" data-cc-hint>Sends a branded email from Legacy Properties.</span>';
+        var compose = (canSms||canEmail)
+          ? ('<div class="cc-compose">'+seg+subjFld
+             + '<textarea class="cc-fld" data-cc-body placeholder="Write to '+esc((c.first_name||c.name))+'…" maxlength="4000"></textarea>'
+             + '<div class="cc-send-row">'+hint+'<button class="cc-btn" data-cc-send>Send</button></div></div>')
+          : '<div class="cc-msg-load">No reachable phone or email on this client. Add contact info on their lead to message them.</div>';
+        box.innerHTML = head + '<div class="cc-thread" data-cc-thread>'+thread+'</div>' + compose;
+        var t = box.querySelector('[data-cc-thread]'); if(t) t.scrollTop = t.scrollHeight;
+        wireCompose(deal);
+      }
+
+      function wireCompose(deal){
+        var box = root.querySelector('[data-cc-msg]'); if(!box) return;
+        box.querySelectorAll('[data-cc-ch]').forEach(function(b){
+          b.addEventListener('click', function(){ if(b.disabled) return; msg.channel=b.getAttribute('data-cc-ch'); renderMsgPanel(deal); });
+        });
+        var send = box.querySelector('[data-cc-send]');
+        if(send) send.addEventListener('click', function(){ doSend(deal, send); });
+      }
+
+      function doSend(deal, btn){
+        var box = root.querySelector('[data-cc-msg]'); if(!box || !msg.client) return;
+        var bodyEl = box.querySelector('[data-cc-body]');
+        var subjEl = box.querySelector('[data-cc-subj]');
+        var hintEl = box.querySelector('[data-cc-hint]');
+        var text = bodyEl ? bodyEl.value.trim() : '';
+        var subject = subjEl ? subjEl.value.trim() : '';
+        var warn = function(t){ if(hintEl){ hintEl.className='cc-hint warn'; hintEl.textContent=t; } };
+        if(!text){ warn('Write a message first.'); if(bodyEl) bodyEl.focus(); return; }
+        if(msg.channel==='email' && !subject){ warn('Email needs a subject.'); if(subjEl) subjEl.focus(); return; }
+        if(msg.channel==='sms' && text.length>320){ warn('That’s over the 320-character SMS limit.'); return; }
+        if(msg.busy) return; msg.busy=true;
+        btn.disabled=true; var orig=btn.textContent; btn.textContent='Sending…';
+        var payload = { lead_id: msg.client.lead_id, channel: msg.channel, body: text };
+        if(msg.channel==='email') payload.subject = subject;
+        fetch('/api/crm/message',{method:'POST',credentials:'include',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)})
+          .then(function(r){ return r.json().then(function(j){ return {ok:r.ok,j:j}; }); })
+          .then(function(res){
+            msg.busy=false; btn.disabled=false; btn.textContent=orig;
+            if(!res.ok){ warn((res.j&&res.j.error)||'Send failed.'); return; }
+            var status = (res.j && res.j.status) || 'sent';
+            msg.thread.push({ direction:'outbound', channel:msg.channel, body:text, subject:msg.channel==='email'?subject:null, status:status, created_at:new Date().toISOString() });
+            renderMsgPanel(deal);   // clears the box + shows the new bubble
+            if(!sentOk(status)){
+              var h = root.querySelector('[data-cc-msg] [data-cc-hint]');
+              if(h){ h.className='cc-hint warn'; h.textContent = msg.channel==='sms'
+                ? 'Logged, but not delivered — the SMS line isn’t live yet (Twilio compliance pending).'
+                : 'Logged, but the email didn’t send — no email provider is configured.'; }
+            }
+          }).catch(function(){ msg.busy=false; btn.disabled=false; btn.textContent=orig; warn('Network error sending.'); });
+      }
+
+      // ---- link a client when none is on the deal yet --------------------
+      function linkFormHtml(deal){
+        var roleLabel = deal.side!=='buyer' ? 'Seller' : 'Buyer';
+        return '<div class="cc-msg-load">No client is linked to this deal yet. Link one to message them and open their portal.</div>'
+          + '<div class="cc-link-form">'
+          + '<input class="cc-fld" data-lk="first_name" placeholder="First name">'
+          + '<input class="cc-fld" data-lk="last_name" placeholder="Last name">'
+          + '<input class="cc-fld full" data-lk="email" type="email" placeholder="Email (required)">'
+          + '<input class="cc-fld full" data-lk="phone" placeholder="Phone (for texting)">'
+          + '</div>'
+          + '<div class="cc-send-row"><span class="cc-hint" data-lk-hint>Links as '+esc(roleLabel)+' · no email is sent.</span>'
+          + '<button class="cc-btn" data-lk-go>Link client</button></div>';
+      }
+      function wireLinkForm(deal){
+        var box = root.querySelector('[data-cc-msg]'); if(!box) return;
+        var go = box.querySelector('[data-lk-go]');
+        if(go) go.addEventListener('click', function(){ doLink(deal, go); });
+      }
+      function doLink(deal, btn){
+        var box = root.querySelector('[data-cc-msg]'); if(!box) return;
+        var get = function(k){ var el=box.querySelector('[data-lk="'+k+'"]'); return el?el.value.trim():''; };
+        var hint = box.querySelector('[data-lk-hint]');
+        var warn = function(t){ if(hint){ hint.className='cc-hint warn'; hint.textContent=t; } };
+        var email = get('email');
+        if(!email){ warn('Email is required to link a client.'); return; }
+        var payload = { deal: deal.source_key, email: email, first_name: get('first_name')||null, last_name: get('last_name')||null, phone: get('phone')||null, role: deal.side!=='buyer' ? 'seller' : 'buyer' };
+        btn.disabled=true; var orig=btn.textContent; btn.textContent='Linking…';
+        fetch('/api/crm/link-deal-party',{method:'POST',credentials:'include',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)})
+          .then(function(r){ return r.json().then(function(j){ return {ok:r.ok,j:j}; }); })
+          .then(function(res){
+            btn.disabled=false; btn.textContent=orig;
+            if(!res.ok){ warn((res.j&&res.j.error)||'Could not link the client.'); return; }
+            loadDealClient(deal);   // reload → now shows the client + compose
+          }).catch(function(){ btn.disabled=false; btn.textContent=orig; warn('Network error linking.'); });
+      }
 
       window.openCommandCenter=function(deal){ if(!deal) return; render(deal); if(typeof window.showView==='function') window.showView(null,'command'); };
     })();
