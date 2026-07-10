@@ -3243,8 +3243,18 @@
 
   // ---- Calendar (agenda + full-day scrollable week) ----------------------
   const CAL_ROW_H = 48; // px per hour — must match .calw-hour / .calw-line in crm.css
+  // Per-deal colour palette (muted, matches the site). Assigned by deal order so
+  // each deal — in-escrow ones first — gets its own distinct colour.
+  const DEAL_PALETTE = [
+    { border: '#8C6E3D', bg: '#F3EAD6' }, { border: '#2E5C3D', bg: '#E4EFE7' },
+    { border: '#7C5A16', bg: '#F3E7CE' }, { border: '#4A3B7C', bg: '#EAE6F3' },
+    { border: '#8A3B2B', bg: '#F6E6E1' }, { border: '#2B6B6B', bg: '#DEEEEE' },
+    { border: '#6B4A2B', bg: '#EFE3D6' }, { border: '#5C6B2E', bg: '#EDF0DE' },
+    { border: '#7C2E5A', bg: '#F3DEEC' }, { border: '#3A5A8C', bg: '#DEE7F3' }
+  ];
+  function dealColorFor(key) { return (key && cal.dealColor[key]) || null; }
   const CAL_MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-  const cal = { week: 0, view: 'agenda', days: [], events: [], label: '' };
+  const cal = { week: 0, view: 'agenda', days: [], events: [], label: '', deals: [], dealFilter: '', dealColor: {} };
   const evByKey = (key) => cal.events.find((e) => `${e.source}:${e.id}` === key);
   const monthName = (d) => { const m = /^\d{4}-(\d{2})-\d{2}$/.exec(d || ''); return m ? CAL_MONTHS[+m[1] - 1] : ''; };
 
@@ -3255,6 +3265,10 @@
     const data = await getJSON(`/api/crm/calendar?week=${cal.week}`);
     if (!data || !Array.isArray(data.days)) return;
     cal.days = data.days; cal.events = data.events || []; cal.label = data.week_label || '';
+    cal.deals = data.deals || [];
+    cal.dealColor = {};
+    cal.deals.forEach((d, i) => { cal.dealColor[d.key] = DEAL_PALETTE[i % DEAL_PALETTE.length]; });
+    populateDealFilter();
     const title = document.querySelector('[data-cal-title]');
     if (title) title.textContent = cal.label;
     // Keep the nav/tab "this week" badge accurate. It's otherwise set from a
@@ -3266,27 +3280,61 @@
     }
     renderCalendar();
   }
+  function stageShort(s) { return s === 'pending' ? 'in escrow' : s === 'offer' ? 'offer' : s === 'listing' ? 'on market' : s === 'preparing' ? 'preparing' : (s || ''); }
+  // Events shown under the current "view by deal" filter.
+  function visibleEvents() { return cal.dealFilter ? cal.events.filter((e) => e.deal_key === cal.dealFilter) : cal.events; }
+
+  // (Re)build the by-deal dropdown from the loaded deals, preserving selection.
+  function populateDealFilter() {
+    const sel = document.querySelector('[data-cal-deal]');
+    if (!sel) return;
+    if (cal.dealFilter && !cal.deals.some((d) => d.key === cal.dealFilter)) cal.dealFilter = '';
+    let html = '<option value="">All deals</option>';
+    cal.deals.forEach((d) => {
+      const label = (d.address || d.key) + (d.stage ? ' · ' + stageShort(d.stage) : '');
+      html += `<option value="${esc(d.key)}"${d.key === cal.dealFilter ? ' selected' : ''}>${esc(label)}</option>`;
+    });
+    sel.innerHTML = html;
+  }
+
+  // Colour legend — one swatch per deal that has events in the current view.
+  function renderLegend() {
+    const el = document.querySelector('[data-cal-legend]');
+    if (!el) return;
+    const order = [], seen = {};
+    visibleEvents().forEach((e) => { if (e.deal_key && !seen[e.deal_key]) { seen[e.deal_key] = 1; order.push(e.deal_key); } });
+    el.innerHTML = order.map((k) => {
+      const c = cal.dealColor[k]; const d = cal.deals.find((x) => x.key === k);
+      const label = (d && d.address) || k;
+      return `<span class="lg${cal.dealFilter === k ? ' on' : ''}" data-legend-deal="${esc(k)}"><span class="sw" style="background:${c ? c.border : '#8C6E3D'}"></span>${esc(label)}</span>`;
+    }).join('');
+  }
+
   function renderCalendar() {
     const agendaEl = document.querySelector('[data-cal-agenda]');
     const weekEl = document.querySelector('[data-cal-week]');
     if (!agendaEl || !weekEl) return;
+    renderLegend();
     document.querySelectorAll('[data-cal-view]').forEach((b) => b.classList.toggle('on', b.getAttribute('data-cal-view') === cal.view));
     if (cal.view === 'week') { agendaEl.style.display = 'none'; weekEl.style.display = ''; renderWeek(weekEl); }
     else { weekEl.style.display = 'none'; agendaEl.style.display = ''; renderAgenda(agendaEl); }
   }
   function renderAgenda(root) {
-    if (!cal.events.length) {
-      root.innerHTML = '<div class="cal-ag-empty">Nothing scheduled this week.<br><span style="font-size:12px;">Use “+ New event” to add a tour, call, or block.</span></div>';
+    const evList = visibleEvents();
+    if (!evList.length) {
+      const none = cal.dealFilter ? 'No events for this deal this week.' : 'Nothing scheduled this week.';
+      root.innerHTML = `<div class="cal-ag-empty">${none}<br><span style="font-size:12px;">Use “+ New event” to add a tour, listing appt, showing, inspection, or block.</span></div>`;
       return;
     }
     const byDay = {};
-    cal.events.forEach((e) => { (byDay[e.day] = byDay[e.day] || []).push(e); });
+    evList.forEach((e) => { (byDay[e.day] = byDay[e.day] || []).push(e); });
     let html = '';
     cal.days.forEach((d, i) => {
       const evs = byDay[i];
       if (!evs || !evs.length) return;
       html += `<div class="cal-ag-day"><div class="cal-ag-dayhead${d.is_today ? ' today' : ''}"><span class="cal-ag-dow">${esc(d.dow)}</span><span class="cal-ag-date">${esc(monthName(d.date))} ${esc(d.num)}</span></div>`;
       evs.forEach((e) => {
+        const c = dealColorFor(e.deal_key);
         // Events tied to a client get a visibility toggle: flip it on to add
         // the event to what that client sees in their portal.
         const toggle = e.lead_id ? `<label class="lp-toggle cal-ag-toggle" title="${e.shared ? 'Shown in the client’s portal' : 'Add this to what the client sees'}" onclick="event.stopPropagation()">
@@ -3294,10 +3342,14 @@
             <span class="lp-toggle-track"></span>
             <span class="lp-toggle-cap">${e.shared ? 'Visible' : 'Private'}</span>
           </label>` : '';
-        html += `<div class="cal-ag-row" data-ev-key="${esc(e.source)}:${esc(e.id)}">
+        const subBits = [];
+        if (e.sub) subBits.push(esc(e.sub));
+        if (e.deal_address && (!e.sub || String(e.sub).indexOf(e.deal_address) < 0)) subBits.push(esc(e.deal_address));
+        const subHtml = subBits.length ? `<span class="cal-ag-sub">${subBits.join(' · ')}</span>` : '';
+        html += `<div class="cal-ag-row" data-ev-key="${esc(e.source)}:${esc(e.id)}"${c ? ` style="border-left:3px solid ${c.border};padding-left:11px;"` : ''}>
           <span class="cal-ag-time">${esc(e.time_label)}–${esc(e.end_label)}</span>
-          <span class="cal-ag-dot ${esc(e.cls)}"></span>
-          <span class="cal-ag-title">${esc(e.title)}${e.sub ? `<span class="cal-ag-sub">${esc(e.sub)}</span>` : ''}</span>
+          <span class="cal-ag-dot ${esc(e.cls)}"${c ? ` style="background:${c.border}"` : ''}></span>
+          <span class="cal-ag-title">${esc(e.title)}${subHtml}</span>
           <span class="cal-ag-kind">${esc(e.kind_label || '')}</span>
           ${toggle}
         </div>`;
@@ -3335,17 +3387,19 @@
     }
     root.innerHTML = `<div class="calw-head"><div class="corner"></div>${heads}</div>
       <div class="calw-body"><div class="calw-grid"><div class="calw-times">${times}</div>${cols}</div></div>`;
-    cal.events.forEach((e) => {
+    visibleEvents().forEach((e) => {
       const col = root.querySelector(`[data-cal-col="${e.day}"]`);
       if (!col) return;
+      const c = dealColorFor(e.deal_key);
       const el = document.createElement('div');
-      el.className = `calw-ev ${['tour', 'call', 'block', 'open'].includes(e.cls) ? e.cls : 'tour'}`;
+      el.className = `calw-ev ${c ? 'deal' : (['tour', 'call', 'block', 'open'].includes(e.cls) ? e.cls : 'tour')}`;
       el.style.top = `${Math.round((e.hour * 60 + e.minute) * (CAL_ROW_H / 60))}px`;
       // Floor the height so a short (e.g. 30-min) event still fits its time +
       // title instead of clipping them; longer events grow with their duration.
       el.style.height = `${Math.max(42, Math.round(e.duration_minutes * (CAL_ROW_H / 60)))}px`;
+      if (c) { el.style.background = c.bg; el.style.borderLeftColor = c.border; }
       el.setAttribute('data-ev-key', `${e.source}:${e.id}`);
-      el.title = `${e.time_label} · ${e.title}`;
+      el.title = `${e.time_label} · ${e.title}${e.deal_address ? ' · ' + e.deal_address : ''}`;
       el.innerHTML = `<span class="t">${esc(e.time_label)}</span><span class="ti">${esc(e.title)}</span>`;
       col.appendChild(el);
     });
@@ -3361,6 +3415,18 @@
     if (today) today.addEventListener('click', () => loadCalendar(0));
     document.querySelectorAll('[data-cal-view]').forEach((b) => {
       b.addEventListener('click', () => { cal.view = b.getAttribute('data-cal-view'); renderCalendar(); });
+    });
+    // View-by-deal dropdown → filter the calendar to one deal.
+    const dealSel = document.querySelector('[data-cal-deal]');
+    if (dealSel) dealSel.addEventListener('change', () => { cal.dealFilter = dealSel.value || ''; renderCalendar(); });
+    // Clicking a legend swatch toggles that deal as the filter.
+    const legend = document.querySelector('[data-cal-legend]');
+    if (legend) legend.addEventListener('click', (e) => {
+      const it = e.target.closest('[data-legend-deal]'); if (!it) return;
+      const k = it.getAttribute('data-legend-deal');
+      cal.dealFilter = (cal.dealFilter === k) ? '' : k;
+      const sel = document.querySelector('[data-cal-deal]'); if (sel) sel.value = cal.dealFilter;
+      renderCalendar();
     });
   }
 

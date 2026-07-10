@@ -238,8 +238,44 @@ async function listWeek(req, res, supa) {
     });
   }
 
+  // ---- Tie each event to its deal (for colour-coding + the by-deal filter) --
+  // Events carry a lead_id; deal_parties maps that lead to a deal. Resolve in
+  // two small batched queries, then stamp deal_key/deal_address on each event.
+  const evLeadIds = [...new Set(events.map((e) => e.lead_id).filter(Boolean))];
+  if (evLeadIds.length) {
+    const { data: parties } = await supa.from('deal_parties').select('lead_id, deal_id').in('lead_id', evLeadIds);
+    const dealIds = [...new Set((parties || []).map((p) => p.deal_id).filter(Boolean))];
+    if (dealIds.length) {
+      const { data: dRows } = await supa.from('deals').select('id, source_key, address, stage').in('id', dealIds);
+      const dealById = new Map((dRows || []).map((d) => [d.id, d]));
+      const leadToDeal = new Map();
+      for (const p of (parties || [])) {
+        const d = dealById.get(p.deal_id);
+        if (d && d.source_key && !leadToDeal.has(p.lead_id)) leadToDeal.set(p.lead_id, d);
+      }
+      for (const e of events) {
+        const d = e.lead_id ? leadToDeal.get(e.lead_id) : null;
+        if (d) { e.deal_key = d.source_key; e.deal_address = d.address || null; e.deal_stage = d.stage || null; }
+      }
+    }
+  }
+
+  // The dropdown's deal list — the agent's live (non-closed) transactions, so a
+  // deal can be picked even in a week where it has no events. In-escrow first so
+  // those get the leading (most distinct) colours.
+  const STAGE_ORDER = { pending: 0, offer: 1, listing: 2, preparing: 3 };
+  let deals = [];
+  const { data: dealList } = await supa.from('deals')
+    .select('source_key, address, stage')
+    .in('side', ['listing', 'seller', 'both', 'buyer'])
+    .in('stage', ['pending', 'offer', 'listing', 'preparing']);
+  deals = (dealList || [])
+    .filter((d) => d.source_key)
+    .map((d) => ({ key: d.source_key, address: d.address || d.source_key, stage: d.stage }))
+    .sort((a, b) => (STAGE_ORDER[a.stage] ?? 9) - (STAGE_ORDER[b.stage] ?? 9) || String(a.address).localeCompare(String(b.address)));
+
   events.sort((x, y) => (x.day - y.day) || (x.hour * 60 + x.minute) - (y.hour * 60 + y.minute));
-  return ok(res, { week_offset: weekOffset, week_label: weekLabel, days, events });
+  return ok(res, { week_offset: weekOffset, week_label: weekLabel, days, events, deals });
 }
 
 // ---------------------------------------------------------------------------

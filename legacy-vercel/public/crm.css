@@ -541,6 +541,24 @@
 .calw-ev.block { background: var(--vellum); color: var(--ink-mute); border-left-color: var(--rule-strong); }
 .calw-ev.block .t { color: var(--ink-faint); }
 .calw-ev.block .ti { font-style: normal; font-family: var(--mono); font-size: 10px; }
+/* Deal-coloured events (colour set inline per deal) read on a light tint */
+.calw-ev.deal { color: #1A1714; }
+.calw-ev.deal .t { color: rgba(26,23,20,0.6); }
+.calw-ev.deal .ti { color: #1A1714; font-style: italic; font-family: var(--serif); }
+
+/* View-by-deal dropdown */
+.cal-deal-select {
+  font-family: var(--mono); font-size: 10.5px; letter-spacing: 0.06em;
+  color: var(--ink); background: var(--shell);
+  border: 1px solid var(--rule); border-radius: 8px; padding: 8px 10px; cursor: pointer; max-width: 220px;
+}
+.cal-deal-select:focus { outline: none; border-color: var(--brass); }
+/* Colour legend — one swatch per deal that has events this week */
+.cal-legend { display: flex; flex-wrap: wrap; gap: 8px 14px; margin: 14px 0 4px; }
+.cal-legend:empty { display: none; }
+.cal-legend .lg { display: inline-flex; align-items: center; gap: 7px; font-size: 12px; color: var(--ink-soft); }
+.cal-legend .lg .sw { width: 11px; height: 11px; border-radius: 3px; flex: none; }
+.cal-legend .lg.on { color: var(--ink); font-weight: 600; }
 
 /* Calendar legend / availability strip */
 .cal-strip {

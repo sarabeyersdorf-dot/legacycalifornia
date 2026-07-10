@@ -388,7 +388,8 @@
             </div>
             <button class="btn btn-ghost btn-xs" data-cal-today>Today</button>
           </div>
-          <div style="display: flex; gap: 12px; align-items: center;">
+          <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
+            <select class="cal-deal-select" data-cal-deal aria-label="View by deal"><option value="">All deals</option></select>
             <div class="cal-view-toggle">
               <button class="on" data-cal-view="agenda">Agenda</button>
               <button data-cal-view="week">Week</button>
@@ -397,6 +398,7 @@
           </div>
         </div>
 
+        <div class="cal-legend" data-cal-legend></div>
         <div class="cal-agenda" data-cal-agenda></div>
         <div class="cal-week" data-cal-week style="display:none;"></div>
       </div>
