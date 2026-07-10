@@ -3257,6 +3257,13 @@
     cal.days = data.days; cal.events = data.events || []; cal.label = data.week_label || '';
     const title = document.querySelector('[data-cal-title]');
     if (title) title.textContent = cal.label;
+    // Keep the nav/tab "this week" badge accurate. It's otherwise set from a
+    // separate counts call that can read 0 while the week actually has events;
+    // the calendar itself is the source of truth for the current week.
+    if (cal.week === 0) {
+      document.querySelectorAll('[data-roster-calendar],[data-roster-calendar-week]')
+        .forEach((el) => { el.textContent = String(cal.events.length); });
+    }
     renderCalendar();
   }
   function renderCalendar() {
@@ -3334,7 +3341,9 @@
       const el = document.createElement('div');
       el.className = `calw-ev ${['tour', 'call', 'block', 'open'].includes(e.cls) ? e.cls : 'tour'}`;
       el.style.top = `${Math.round((e.hour * 60 + e.minute) * (CAL_ROW_H / 60))}px`;
-      el.style.height = `${Math.max(18, Math.round(e.duration_minutes * (CAL_ROW_H / 60)))}px`;
+      // Floor the height so a short (e.g. 30-min) event still fits its time +
+      // title instead of clipping them; longer events grow with their duration.
+      el.style.height = `${Math.max(42, Math.round(e.duration_minutes * (CAL_ROW_H / 60)))}px`;
       el.setAttribute('data-ev-key', `${e.source}:${e.id}`);
       el.title = `${e.time_label} · ${e.title}`;
       el.innerHTML = `<span class="t">${esc(e.time_label)}</span><span class="ti">${esc(e.title)}</span>`;

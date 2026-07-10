@@ -2681,13 +2681,14 @@ function selectLead(el) {
       e.preventDefault(); e.stopPropagation();
       var ukey = up.getAttribute('data-upload');
       if (!ukey || !window.LegacyPhoto) return;
-      window.LegacyPhoto.pick().then(function (f) {
-        if (!f) return;
-        var orig = up.textContent; up.textContent = 'Uploading…'; up.disabled = true;
-        window.LegacyPhoto.upload(ukey, f).then(function (photoUrl) {
+      var orig = up.textContent;
+      window.LegacyPhoto.start(ukey, {
+        onBusy: function () { up.textContent = 'Uploading…'; up.disabled = true; },
+        onDone: function (err, photoUrl) {
+          if (err) { up.textContent = orig; up.disabled = false; alert((err && err.message) || 'Upload failed.'); return; }
           var dd = dealByKey(ukey); if (dd) dd.photo_url = photoUrl; render();
           if (window.Legacy && window.Legacy.toast) window.Legacy.toast('Photo updated.', true);
-        }).catch(function (err) { up.textContent = orig; up.disabled = false; alert((err && err.message) || 'Upload failed.'); });
+        }
       });
       return;
     }
@@ -2811,13 +2812,14 @@ function selectLead(el) {
       e.preventDefault(); e.stopPropagation();
       var ukey = up.getAttribute('data-upload');
       if (!ukey || !window.LegacyPhoto) return;
-      window.LegacyPhoto.pick().then(function (f) {
-        if (!f) return;
-        var orig = up.textContent; up.textContent = 'Uploading…'; up.disabled = true;
-        window.LegacyPhoto.upload(ukey, f).then(function (photoUrl) {
+      var orig = up.textContent;
+      window.LegacyPhoto.start(ukey, {
+        onBusy: function () { up.textContent = 'Uploading…'; up.disabled = true; },
+        onDone: function (err, photoUrl) {
+          if (err) { up.textContent = orig; up.disabled = false; alert((err && err.message) || 'Upload failed.'); return; }
           var dd = dealByKey(ukey); if (dd) dd.photo_url = photoUrl; render();
           if (window.Legacy && window.Legacy.toast) window.Legacy.toast('Photo updated.', true);
-        }).catch(function (err) { up.textContent = orig; up.disabled = false; alert((err && err.message) || 'Upload failed.'); });
+        }
       });
       return;
     }
@@ -2881,41 +2883,69 @@ function selectLead(el) {
 /* Shared listing-photo uploader — lets any listing card replace its photo
    (including ones currently pulled from a video thumbnail) via the same
    /api/crm/deal-photo endpoint the Command Center uses. Resizes client-side to
-   a ~1280px JPEG before upload; the stored photo_override outranks the video. */
+   a ~1280px JPEG before upload; the stored photo_override outranks the video.
+   Uses ONE persistent, off-screen file input clicked synchronously in the
+   click handler — display:none inputs are blocked from opening the picker on
+   some browsers, which is why an earlier version "didn't open". */
 (function () {
   'use strict';
+  var input = null, pending = null;
+
+  function ensureInput() {
+    if (input) return input;
+    input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'image/*';
+    // Off-screen (NOT display:none) so the native picker reliably opens.
+    input.style.cssText = 'position:fixed;left:-9999px;top:0;width:1px;height:1px;opacity:0;';
+    document.body.appendChild(input);
+    input.addEventListener('change', function () {
+      var file = input.files && input.files[0];
+      var p = pending; pending = null;
+      input.value = '';           // allow re-picking the same file later
+      if (!file || !p) return;
+      if (p.onBusy) p.onBusy();
+      resizeUpload(p.key, file).then(function (url) { if (p.onDone) p.onDone(null, url); })
+        .catch(function (err) { if (p.onDone) p.onDone(err || new Error('Upload failed.')); });
+    });
+    return input;
+  }
+
+  // Resize a File to a JPEG data URL and POST it for a deal; resolves the URL.
+  function resizeUpload(sourceKey, file) {
+    return new Promise(function (resolve, reject) {
+      if (!file || !/^image\//.test(file.type)) { reject(new Error('Please choose an image file.')); return; }
+      var img = new Image(), url = URL.createObjectURL(file);
+      img.onload = function () {
+        URL.revokeObjectURL(url);
+        var max = 1280, w = img.width, h = img.height;
+        if (w > max) { h = Math.round(h * max / w); w = max; }
+        var c = document.createElement('canvas'); c.width = w; c.height = h;
+        c.getContext('2d').drawImage(img, 0, 0, w, h);
+        var data = c.toDataURL('image/jpeg', 0.85);
+        fetch('/api/crm/deal-photo', { method: 'POST', credentials: 'include', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ source_key: sourceKey, image: data }) })
+          .then(function (r) { return r.json().then(function (j) { return { ok: r.ok, j: j }; }); })
+          .then(function (res) { if (res.ok && res.j && res.j.url) resolve(res.j.url); else reject(new Error((res.j && res.j.error) || 'Upload failed.')); })
+          .catch(function () { reject(new Error('Network error uploading photo.')); });
+      };
+      img.onerror = function () { URL.revokeObjectURL(url); reject(new Error('Could not read that image.')); };
+      img.src = url;
+    });
+  }
+
   window.LegacyPhoto = {
-    // Open a native file picker; resolves the chosen File (or null if cancelled).
-    pick: function () {
-      return new Promise(function (resolve) {
-        var i = document.createElement('input');
-        i.type = 'file'; i.accept = 'image/*'; i.style.display = 'none';
-        document.body.appendChild(i);
-        i.addEventListener('change', function () { var f = (i.files && i.files[0]) || null; document.body.removeChild(i); resolve(f); });
-        i.click();
-      });
+    // Open the picker for a deal and run callbacks. MUST be called directly from
+    // a click handler so the picker opens (transient user activation).
+    //   opts.onBusy()            — fired when a file is chosen (show "Uploading…")
+    //   opts.onDone(err, url)    — fired after upload (err set on failure)
+    start: function (sourceKey, opts) {
+      opts = opts || {};
+      pending = { key: sourceKey, onDone: opts.onDone, onBusy: opts.onBusy };
+      var el = ensureInput();
+      el.value = '';
+      el.click();     // synchronous — inside the user gesture
     },
-    // Resize a File to a JPEG data URL and POST it for a deal; resolves the URL.
-    upload: function (sourceKey, file) {
-      return new Promise(function (resolve, reject) {
-        if (!file || !/^image\//.test(file.type)) { reject(new Error('Please choose an image file.')); return; }
-        var img = new Image(), url = URL.createObjectURL(file);
-        img.onload = function () {
-          URL.revokeObjectURL(url);
-          var max = 1280, w = img.width, h = img.height;
-          if (w > max) { h = Math.round(h * max / w); w = max; }
-          var c = document.createElement('canvas'); c.width = w; c.height = h;
-          c.getContext('2d').drawImage(img, 0, 0, w, h);
-          var data = c.toDataURL('image/jpeg', 0.85);
-          fetch('/api/crm/deal-photo', { method: 'POST', credentials: 'include', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ source_key: sourceKey, image: data }) })
-            .then(function (r) { return r.json().then(function (j) { return { ok: r.ok, j: j }; }); })
-            .then(function (res) { if (res.ok && res.j && res.j.url) resolve(res.j.url); else reject(new Error((res.j && res.j.error) || 'Upload failed.')); })
-            .catch(function () { reject(new Error('Network error uploading photo.')); });
-        };
-        img.onerror = function () { URL.revokeObjectURL(url); reject(new Error('Could not read that image.')); };
-        img.src = url;
-      });
-    }
+    upload: resizeUpload
   };
 })();
 </script>
