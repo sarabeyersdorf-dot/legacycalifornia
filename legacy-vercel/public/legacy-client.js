@@ -3432,12 +3432,18 @@
   function mondayOf(dt) { const x = new Date(dt); const day = (x.getDay() + 6) % 7; x.setDate(x.getDate() - day); x.setHours(0, 0, 0, 0); return x; }
 
   function openEventCreate() {
-    const m = modalShell('Add to calendar', 'A tour is tied to a client; a call, block, or open house is just an event.');
+    const m = modalShell('Add to calendar', 'A tour is tied to a client; a listing appt, showing, follow-up, inspection, call, or block is a general event (add a client email to share it to their portal).');
     m.body.innerHTML = `
       <div style="display:flex;flex-direction:column;gap:10px;">
         <div><label style="${M_LAB}">Event type</label><select data-f-kind style="${M_INPUT}">
-          <option value="tour">Client tour</option><option value="call">Call</option>
-          <option value="block">Block / personal</option><option value="open">Open house</option>
+          <option value="tour">Client tour</option>
+          <option value="listing_appt">Listing appt</option>
+          <option value="showing">Showing</option>
+          <option value="follow_up">Follow-up</option>
+          <option value="inspection">Inspection</option>
+          <option value="call">Call</option>
+          <option value="block">Block / personal</option>
+          <option value="open">Open house</option>
           <option value="meeting">Meeting</option></select></div>
         <div data-tour-fields style="display:flex;flex-direction:column;gap:10px;">
           <div><label style="${M_LAB}">Client email</label><input data-f-email type="email" placeholder="client@example.com" style="${M_INPUT}"></div>
@@ -3448,8 +3454,19 @@
           <div><label style="${M_LAB}">Tour type</label><select data-f-type style="${M_INPUT}"><option value="in_person">In person</option><option value="video">Video</option></select></div>
           <label style="display:flex;align-items:flex-start;gap:8px;font-size:13px;color:#3A332B;line-height:1.4;"><input data-f-invite type="checkbox" style="margin-top:3px;"> Email the client a calendar invite now</label>
         </div>
-        <div data-appt-fields style="display:none;">
-          <label style="${M_LAB}">Title</label><input data-f-title placeholder="e.g. Lender call · Rivera" style="${M_INPUT}">
+        <div data-appt-fields style="display:none;flex-direction:column;gap:10px;">
+          <div data-insp-row style="display:none;">
+            <label style="${M_LAB}">Inspection type</label>
+            <select data-f-subkind style="${M_INPUT}">
+              <option value="Home">Home</option>
+              <option value="Pest">Pest</option>
+              <option value="Roof">Roof</option>
+              <option value="Well &amp; Septic">Well &amp; Septic</option>
+              <option value="__other">Other…</option></select>
+            <input data-f-subother placeholder="What kind of inspection?" style="${M_INPUT};display:none;margin-top:8px;">
+          </div>
+          <div><label style="${M_LAB}">Title <span style="text-transform:none;letter-spacing:0;">(optional)</span></label><input data-f-title placeholder="Auto-named from the type if left blank" style="${M_INPUT}"></div>
+          <div><label style="${M_LAB}">Client email <span style="text-transform:none;letter-spacing:0;">(optional · lets you share to their portal)</span></label><input data-f-apptemail type="email" placeholder="client@example.com" style="${M_INPUT}"></div>
         </div>
         <div style="display:flex;gap:10px;">
           <div style="flex:1;"><label style="${M_LAB}">Date</label><input data-f-date type="date" style="${M_INPUT}"></div>
@@ -3465,14 +3482,19 @@
     const kindSel = m.body.querySelector('[data-f-kind]');
     const tourFields = m.body.querySelector('[data-tour-fields]');
     const apptFields = m.body.querySelector('[data-appt-fields]');
+    const inspRow = m.body.querySelector('[data-insp-row]');
+    const subSel = m.body.querySelector('[data-f-subkind]');
+    const subOther = m.body.querySelector('[data-f-subother]');
     const saveBtn = m.body.querySelector('[data-save]');
     const syncKind = () => {
       const isTour = kindSel.value === 'tour';
       tourFields.style.display = isTour ? 'flex' : 'none';
-      apptFields.style.display = isTour ? 'none' : 'block';
+      apptFields.style.display = isTour ? 'none' : 'flex';
+      inspRow.style.display = kindSel.value === 'inspection' ? 'block' : 'none';
       saveBtn.textContent = isTour ? 'Schedule tour' : 'Add event';
     };
     kindSel.addEventListener('change', syncKind); syncKind();
+    subSel.addEventListener('change', () => { subOther.style.display = subSel.value === '__other' ? 'block' : 'none'; });
     m.body.querySelector('[data-cancel]').addEventListener('click', m.close);
     saveBtn.addEventListener('click', async () => {
       const kind = kindSel.value;
@@ -3488,9 +3510,14 @@
           last_name: m.body.querySelector('[data-f-last]').value.trim(), tour_type: m.body.querySelector('[data-f-type]').value,
           send_invite: m.body.querySelector('[data-f-invite]').checked, ...common };
       } else {
+        payload = { kind, ...common };
         const title = m.body.querySelector('[data-f-title]').value.trim();
-        if (!title) { m.err.textContent = 'A title is required.'; return; }
-        payload = { kind, title, ...common };
+        if (title) payload.title = title;   // optional — the server auto-names structured types
+        const email = m.body.querySelector('[data-f-apptemail]').value.trim();
+        if (email) payload.email = email;    // optional — links the lead so it can be shared
+        if (kind === 'inspection') {
+          payload.sub_kind = subSel.value === '__other' ? (subOther.value.trim() || null) : subSel.value;
+        }
       }
       saveBtn.disabled = true; saveBtn.textContent = 'Saving…'; m.err.textContent = '';
       const r = await sendJSON('/api/crm/calendar', 'POST', payload);
@@ -3506,7 +3533,7 @@
     const ed = e.edit || {};
     const isTour = e.source === 'tour';
     const m = modalShell('Edit event', isTour ? 'Reschedule or update this tour.' : 'Update this event.');
-    const apptKinds = [['call', 'Call'], ['block', 'Block / personal'], ['open', 'Open house'], ['meeting', 'Meeting']];
+    const apptKinds = [['listing_appt', 'Listing appt'], ['showing', 'Showing'], ['follow_up', 'Follow-up'], ['inspection', 'Inspection'], ['call', 'Call'], ['block', 'Block / personal'], ['open', 'Open house'], ['meeting', 'Meeting']];
     m.body.innerHTML = `
       <div style="display:flex;flex-direction:column;gap:10px;">
         ${isTour ? `
@@ -3514,6 +3541,7 @@
           <div><label style="${M_LAB}">Tour type</label><select data-f-type style="${M_INPUT}"><option value="in_person"${ed.tour_type !== 'video' ? ' selected' : ''}>In person</option><option value="video"${ed.tour_type === 'video' ? ' selected' : ''}>Video</option></select></div>
         ` : `
           <div><label style="${M_LAB}">Type</label><select data-f-kind style="${M_INPUT}">${apptKinds.map(([v, l]) => `<option value="${v}"${ed.kind === v ? ' selected' : ''}>${l}</option>`).join('')}</select></div>
+          <div data-e-insp style="display:${ed.kind === 'inspection' ? 'block' : 'none'};"><label style="${M_LAB}">Inspection type</label><input data-f-subkind value="${esc(ed.sub_kind || '')}" placeholder="Home / Pest / Roof / Well &amp; Septic / other" style="${M_INPUT}"></div>
           <div><label style="${M_LAB}">Title</label><input data-f-title value="${esc(ed.title || '')}" style="${M_INPUT}"></div>
         `}
         <div style="display:flex;gap:10px;">
@@ -3528,6 +3556,8 @@
         </div>
       </div>`;
     m.body.querySelector('[data-cancel]').addEventListener('click', m.close);
+    const kindSelE = m.body.querySelector('[data-f-kind]');
+    if (kindSelE) kindSelE.addEventListener('change', () => { const ins = m.body.querySelector('[data-e-insp]'); if (ins) ins.style.display = kindSelE.value === 'inspection' ? 'block' : 'none'; });
     const saveBtn = m.body.querySelector('[data-save]');
     saveBtn.addEventListener('click', async () => {
       const date = m.body.querySelector('[data-f-date]').value;
@@ -3540,6 +3570,8 @@
         const t = m.body.querySelector('[data-f-title]').value.trim();
         if (!t) { m.err.textContent = 'A title is required.'; return; }
         payload.title = t;
+        const sk = m.body.querySelector('[data-f-subkind]');
+        if (sk) payload.sub_kind = sk.value.trim() || null;
       }
       saveBtn.disabled = true; saveBtn.textContent = 'Saving…'; m.err.textContent = '';
       const r = await sendJSON('/api/crm/calendar', 'PATCH', payload);
@@ -3563,6 +3595,7 @@
     m.body.innerHTML = `
       <div style="display:flex;flex-direction:column;gap:10px;font-size:14px;color:#1A1714;">
         ${rows.map(([k, v]) => `<div><span style="${M_LAB}">${k}</span><div style="margin-top:2px;">${v}</div></div>`).join('')}
+        ${e.lead_id ? `<label style="display:flex;align-items:center;gap:8px;padding:9px 0;border-top:1px solid #E4DAC4;font-size:13px;color:#1A1714;cursor:pointer;"><input type="checkbox" data-detail-share ${e.shared ? 'checked' : ''}> Show in ${esc(e.client_name || 'the client')}’s portal</label>` : ''}
         <div data-detail-result style="font-size:13px;min-height:18px;"></div>
         <div style="display:flex;gap:10px;margin-top:6px;flex-wrap:wrap;align-items:center;">
           <button type="button" data-act="edit" style="${M_INK}">Edit</button>
@@ -3572,6 +3605,14 @@
         </div>
       </div>`;
     const result = m.body.querySelector('[data-detail-result]');
+    const shareCb = m.body.querySelector('[data-detail-share]');
+    if (shareCb) shareCb.addEventListener('change', async () => {
+      const now = shareCb.checked; shareCb.disabled = true;
+      const r = await sendJSON('/api/crm/visibility', 'POST', { kind: e.source, id: e.id, visibility: now ? 'client' : 'internal' });
+      shareCb.disabled = false;
+      if (r.ok) { e.shared = now; result.style.color = '#2E5C3D'; result.textContent = now ? '✓ Shared to their portal.' : 'Hidden from their portal.'; }
+      else { shareCb.checked = !now; result.style.color = '#9B2C2C'; result.textContent = (r.json && r.json.error) || 'Could not change visibility.'; }
+    });
     m.body.querySelector('[data-act="close"]').addEventListener('click', m.close);
     m.body.querySelector('[data-act="edit"]').addEventListener('click', () => { m.close(); openEventEdit(e); });
     const inviteBtn = m.body.querySelector('[data-act="invite"]');

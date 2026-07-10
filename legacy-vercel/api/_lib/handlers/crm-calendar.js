@@ -21,8 +21,23 @@ const EMAIL_RE = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
 const TZ = 'America/Los_Angeles';
 const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 const DOW = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
-const APPT_KINDS = ['call', 'block', 'open', 'meeting'];
-const KIND_CLS = { call: 'call', block: 'block', open: 'open', meeting: 'call' };
+const APPT_KINDS = ['call', 'block', 'open', 'meeting', 'listing_appt', 'showing', 'follow_up', 'inspection'];
+// Map each kind to one of the four calendar colour classes (tour/call/block/open).
+const KIND_CLS = {
+  call: 'call', block: 'block', open: 'open', meeting: 'call',
+  listing_appt: 'open', showing: 'tour', follow_up: 'call', inspection: 'block'
+};
+// Short human label per kind (the little tag on each event).
+const KIND_LABEL = {
+  call: 'Call', block: 'Block', open: 'Open house', meeting: 'Meeting',
+  listing_appt: 'Listing appt', showing: 'Showing', follow_up: 'Follow-up', inspection: 'Inspection'
+};
+// A sensible default title when the agent doesn't type one — inspections fold in
+// their sub-type ("Home inspection"), everything else uses its kind label.
+function defaultTitle(kind, subKind) {
+  if (kind === 'inspection') return subKind ? `${subKind} inspection` : 'Inspection';
+  return KIND_LABEL[kind] || 'Event';
+}
 const ORGANIZER_EMAIL = process.env.RESEND_REPLY_TO || 'SaraSellsCalifornia@gmail.com';
 const ORGANIZER_NAME = 'Sara Cooper · Legacy Properties';
 
@@ -145,17 +160,22 @@ async function listWeek(req, res, supa) {
   qEnd.setUTCDate(qEnd.getUTCDate() + 2);
   const startISO = qStart.toISOString(), endISO = qEnd.toISOString();
 
-  const [toursRes, apptRes] = await Promise.all([
+  const apptQuery = (cols) => supa.from('appointments').select(cols)
+    .gte('starts_at', startISO).lt('starts_at', endISO)
+    .order('starts_at', { ascending: true });
+  const APPT_COLS    = 'id, lead_id, title, kind, sub_kind, starts_at, duration_minutes, notes, visibility, client_label, leads(first_name,last_name,email)';
+  const APPT_COLS_FB = 'id, lead_id, title, kind, starts_at, duration_minutes, notes, visibility, client_label, leads(first_name,last_name,email)';
+
+  let [toursRes, apptRes] = await Promise.all([
     supa.from('tours')
       .select('id, lead_id, scheduled_at, duration_minutes, tour_type, status, notes, visibility, client_label, leads(first_name,last_name,email), properties(address,city)')
       .gte('scheduled_at', startISO).lt('scheduled_at', endISO).neq('status', 'cancelled')
       .order('scheduled_at', { ascending: true }),
-    supa.from('appointments')
-      .select('id, lead_id, title, kind, starts_at, duration_minutes, notes, visibility, client_label, leads(first_name,last_name,email)')
-      .gte('starts_at', startISO).lt('starts_at', endISO)
-      .order('starts_at', { ascending: true })
+    apptQuery(APPT_COLS)
   ]);
   if (toursRes.error) return fail(res, 500, `tours: ${toursRes.error.message}`);
+  // Degrade gracefully if 027 (sub_kind) hasn't run yet — re-query without it.
+  if (apptRes.error && /sub_kind/i.test(apptRes.error.message || '')) apptRes = await apptQuery(APPT_COLS_FB);
   const apptMissing = apptRes.error && /relation .*appointments.* does not exist/i.test(apptRes.error.message || '');
   if (apptRes.error && !apptMissing) return fail(res, 500, `appointments: ${apptRes.error.message}`);
 
@@ -197,7 +217,7 @@ async function listWeek(req, res, supa) {
     const dur = Number(a.duration_minutes) || 30;
     const end = laParts(new Date(start.getTime() + dur * 60000));
     const lead = a.leads || {};
-    const label = a.kind ? a.kind.charAt(0).toUpperCase() + a.kind.slice(1) : 'Event';
+    const label = KIND_LABEL[a.kind] || (a.kind ? a.kind.charAt(0).toUpperCase() + a.kind.slice(1) : 'Event');
     const who = [lead.first_name, lead.last_name].filter(Boolean).join(' ') || null;
     events.push({
       id: a.id, source: 'appointment', cls: KIND_CLS[a.kind] || 'block', kind: a.kind || 'block',
@@ -206,12 +226,12 @@ async function listWeek(req, res, supa) {
       status: 'confirmed',
       date: dkey(p), day: dayIndex[dkey(p)], hour: p.hour, minute: p.minute, duration_minutes: dur,
       time_label: timeLabel(p.hour, p.minute), end_label: timeLabel(end.hour, end.minute),
-      kind_label: label,
+      kind_label: label, sub_kind: a.sub_kind || null,
       client_email: lead.email || null, client_name: who,
       lead_id: a.lead_id || null, shared: a.visibility === 'client', client_label: a.client_label || null,
       location: null,
       edit: {
-        source: 'appointment', kind: a.kind || 'block', title: a.title || '',
+        source: 'appointment', kind: a.kind || 'block', title: a.title || '', sub_kind: a.sub_kind || null,
         date: dkey(p), time: `${pad2(p.hour)}:${pad2(p.minute)}`,
         duration_minutes: dur, email: lead.email || '', notes: a.notes || ''
       }
@@ -235,22 +255,30 @@ async function createOrInvite(req, res, supa, agent) {
   const notes = typeof body?.notes === 'string' ? body.notes.trim() : null;
   const kind = typeof body?.kind === 'string' ? body.kind.trim().toLowerCase() : 'tour';
 
-  // Appointment (call / block / open / meeting)
+  // Appointment (call / block / open / meeting / listing_appt / showing /
+  // follow_up / inspection). A client email is optional — supplying one links
+  // the event to that lead so it can be shared to their portal.
   if (kind !== 'tour') {
     if (!APPT_KINDS.includes(kind)) return fail(res, 400, `kind must be tour or one of: ${APPT_KINDS.join(', ')}`);
-    const title = typeof body?.title === 'string' ? body.title.trim() : '';
-    if (!title) return fail(res, 400, 'title is required');
+    const subKind = (kind === 'inspection' && typeof body?.sub_kind === 'string') ? (body.sub_kind.trim() || null) : null;
+    let title = typeof body?.title === 'string' ? body.title.trim() : '';
+    if (!title) title = defaultTitle(kind, subKind);   // structured types self-title
     let leadId = null;
     const email = typeof body?.email === 'string' ? body.email.trim().toLowerCase() : '';
     if (email && EMAIL_RE.test(email)) {
       const { data } = await supa.from('leads').select('id').eq('email', email).maybeSingle();
       leadId = data?.id || null;
     }
-    const { data: appt, error } = await supa.from('appointments').insert({
-      title, kind, starts_at: scheduled.toISOString(), duration_minutes: duration, agent, lead_id: leadId, notes
-    }).select('id, title, kind, starts_at, duration_minutes').single();
-    if (error) return fail(res, 500, `appointment create: ${error.message}`);
-    return ok(res, { appointment: appt, source: 'appointment' });
+    const rowBase = { title, kind, starts_at: scheduled.toISOString(), duration_minutes: duration, agent, lead_id: leadId, notes };
+    let ins = await supa.from('appointments').insert({ ...rowBase, sub_kind: subKind })
+      .select('id, title, kind, starts_at, duration_minutes').single();
+    // Degrade gracefully if 027 (sub_kind) hasn't been run yet — the sub-type is
+    // still carried in the derived title, so nothing is lost.
+    if (ins.error && /sub_kind/i.test(ins.error.message || '')) {
+      ins = await supa.from('appointments').insert(rowBase).select('id, title, kind, starts_at, duration_minutes').single();
+    }
+    if (ins.error) return fail(res, 500, `appointment create: ${ins.error.message}`);
+    return ok(res, { appointment: ins.data, source: 'appointment' });
   }
 
   // Client tour
@@ -319,11 +347,19 @@ async function editEvent(req, res, supa) {
       if (!APPT_KINDS.includes(String(body.kind))) return fail(res, 400, `kind must be one of: ${APPT_KINDS.join(', ')}`);
       patch.kind = String(body.kind);
     }
+    if (body.sub_kind !== undefined) {
+      patch.sub_kind = typeof body.sub_kind === 'string' && body.sub_kind.trim() ? body.sub_kind.trim() : null;
+    }
   }
   if (!Object.keys(patch).length) return fail(res, 400, 'no updatable fields provided');
 
   const table = source === 'tour' ? 'tours' : 'appointments';
-  const { data, error } = await supa.from(table).update(patch).eq('id', id).select('id').single();
+  let { data, error } = await supa.from(table).update(patch).eq('id', id).select('id').single();
+  // Degrade gracefully if 027 (sub_kind) hasn't run yet.
+  if (error && /sub_kind/i.test(error.message || '')) {
+    const { sub_kind, ...safe } = patch;
+    ({ data, error } = await supa.from(table).update(safe).eq('id', id).select('id').single());
+  }
   if (error) return fail(res, 500, `${table} update: ${error.message}`);
   if (!data) return fail(res, 404, 'event not found');
   return ok(res, { updated: true, id, source });
