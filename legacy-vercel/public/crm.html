@@ -890,6 +890,29 @@
     .cc-links a:hover { border-color: var(--brass); }
     .cc-links a .ar { color: var(--brass); }
     .cc-console { background: var(--shell); border: 1px solid var(--rule); border-radius: 14px; padding: 26px; color: var(--ink-mute); font-style: italic; min-height: 220px; }
+    /* Action console (right column) */
+    .cc-con { background: var(--shell); border: 1px solid var(--rule); border-radius: 14px; overflow: hidden; }
+    .cc-con-h { padding: 16px 20px; border-bottom: 1px solid var(--rule-soft); font-family: var(--serif); font-style: italic; font-size: 20px; color: var(--ink); }
+    .cc-con-sec { padding: 16px 20px; border-top: 1px solid var(--rule-soft); }
+    .cc-portal { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 16px 20px; flex-wrap: wrap; }
+    .cc-portal-st { display: inline-flex; align-items: center; gap: 7px; font-size: 13px; font-weight: 600; color: #2E5C3D; margin-top: 3px; }
+    .cc-portal-st .live { width: 8px; height: 8px; border-radius: 50%; background: #2E5C3D; }
+    .cc-portal-btns { display: flex; gap: 8px; }
+    .cc-btn { font-family: var(--mono); font-size: 10px; letter-spacing: .1em; text-transform: uppercase; padding: 9px 14px; border-radius: 9px; border: 1px solid var(--ink); background: var(--ink); color: var(--shell); cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; }
+    .cc-btn.ghost { background: var(--vellum); color: var(--ink); border-color: var(--rule); }
+    .cc-btn.ghost:hover { border-color: var(--brass); }
+    .cc-btn:disabled { opacity: .55; cursor: default; }
+    .cc-track { display: flex; align-items: flex-start; gap: 0; margin-top: 12px; }
+    .cc-step { flex: 1; text-align: center; position: relative; }
+    .cc-step .dot { width: 12px; height: 12px; border-radius: 50%; background: var(--rule); border: 2px solid var(--shell); display: inline-block; position: relative; z-index: 1; }
+    .cc-step:not(:last-child)::after { content: ''; position: absolute; top: 5px; left: 50%; width: 100%; height: 2px; background: var(--rule); z-index: 0; }
+    .cc-step.done .dot, .cc-step.on .dot { background: var(--brass); }
+    .cc-step.done::after { background: var(--brass); }
+    .cc-step.on .dot { box-shadow: 0 0 0 4px rgba(184,146,42,.18); }
+    .cc-step .lb { display: block; margin-top: 7px; font-family: var(--mono); font-size: 8.5px; letter-spacing: .06em; text-transform: uppercase; color: var(--ink-mute); }
+    .cc-step.on .lb { color: var(--ink); font-weight: 600; }
+    .cc-qa { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
+    .cc-see { margin-top: 8px; padding: 12px 14px; border-radius: 10px; background: var(--linen); border: 1px solid var(--rule-soft); font-size: 13px; color: var(--ink-soft); }
     </style>
     <section class="crm-view" data-view="command">
       <div class="cc" data-cc-root>
@@ -918,6 +941,32 @@
         if(s==='preparing') return { chip:'Preparing', overlay:'Preparing to list' };
         if(s==='closed') return { chip:'Closed', overlay:'Closed' };
         return { chip:'On Market', overlay:'On the market' };
+      }
+
+      // Action console (right column) — portal, road-to-close, quick actions.
+      function consoleHtml(deal){
+        var meta=deal.meta||{};
+        var steps=['Preparing','On market','Offer','In escrow','Closed'];
+        var idx={preparing:0,listing:1,offer:2,pending:3,closed:4}[deal.stage]; if(idx==null) idx=1;
+        var track=steps.map(function(s,i){ var cls=i<idx?'done':(i===idx?'on':''); return '<div class="cc-step '+cls+'"><span class="dot"></span><span class="lb">'+esc(s)+'</span></div>'; }).join('');
+        var who=meta.client?esc(meta.client):'the client';
+        var portalUrl='/seller.html?deal='+encodeURIComponent(deal.source_key);
+        return ''
+        + '<div class="cc-con">'
+        +   '<div class="cc-con-h">Action console</div>'
+        +   '<div class="cc-portal"><div><div class="cc-caplab">'+(deal.side==='buyer'?'Buyer':'Seller')+' portal</div>'
+        +     '<div class="cc-portal-st"><span class="live"></span>Live · token active</div></div>'
+        +     '<div class="cc-portal-btns"><button class="cc-btn" data-cc-portal>Open &#8599;</button>'
+        +       '<button class="cc-btn ghost" data-cc-copy="'+esc(portalUrl)+'">Copy link</button></div></div>'
+        +   '<div class="cc-con-sec"><div class="cc-caplab">Road to close</div><div class="cc-track">'+track+'</div></div>'
+        +   '<div class="cc-con-sec"><div class="cc-caplab">Quick actions</div><div class="cc-qa">'
+        +     '<button class="cc-btn ghost" data-cc-schedule>Schedule event</button>'
+        +     (meta.disclosurePackage?'<a class="cc-btn ghost" href="'+esc(meta.disclosurePackage)+'" target="_blank" rel="noopener">Disclosures</a>':'')
+        +     (deal.video_url?'<a class="cc-btn ghost" href="'+esc(deal.video_url)+'" target="_blank" rel="noopener">Video</a>':'')
+        +   '</div></div>'
+        +   '<div class="cc-con-sec"><div class="cc-caplab">What '+who+' sees now</div>'
+        +     '<div class="cc-see">'+esc(statusInfo(deal).overlay)+' &middot; '+esc(deal.address||'')+'. Messaging &amp; portal-visibility controls land here next.</div></div>'
+        + '</div>';
       }
 
       var current = null; // the deal being shown (a live reference into listings state)
@@ -989,7 +1038,7 @@
         +       '<div class="cc-links">'+links.join('')+'</div>'
         +     '</div>'
         +   '</div>'
-        +   '<div class="cc-console">Action console — messaging, portal toggles, schedule &amp; contingencies land here next.</div>'
+        +   consoleHtml(deal)
         + '</div>';
 
         wirePhoto();
@@ -1029,11 +1078,16 @@
         img.src=url;
       }
 
-      // back to the grid + portal link
+      // back to the grid + portal link + console actions
       root.addEventListener('click', function(e){
         if(e.target.closest('[data-cc-back]')){ e.preventDefault(); if(typeof window.showView==='function') window.showView(null,'listings'); return; }
         var portal=e.target.closest('[data-cc-portal]');
-        if(portal && current){ e.preventDefault(); e.stopPropagation(); var u='/seller.html?deal='+encodeURIComponent(current.source_key); var w=window.open(u,'_blank','noopener'); if(!w) location.href=u; }
+        if(portal && current){ e.preventDefault(); e.stopPropagation(); var u='/seller.html?deal='+encodeURIComponent(current.source_key); var w=window.open(u,'_blank','noopener'); if(!w) location.href=u; return; }
+        var copy=e.target.closest('[data-cc-copy]');
+        if(copy){ e.preventDefault(); var link=location.origin+copy.getAttribute('data-cc-copy'); var done=function(){ var o=copy.textContent; copy.textContent='Copied ✓'; setTimeout(function(){ copy.textContent=o; },1400); };
+          if(navigator.clipboard&&navigator.clipboard.writeText){ navigator.clipboard.writeText(link).then(done).catch(done); } else { done(); } return; }
+        var sched=e.target.closest('[data-cc-schedule]');
+        if(sched){ e.preventDefault(); if(typeof window.showView==='function') window.showView(null,'cal'); return; }
       });
 
       window.openCommandCenter=function(deal){ if(!deal) return; render(deal); if(typeof window.showView==='function') window.showView(null,'command'); };
