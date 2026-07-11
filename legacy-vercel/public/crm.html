@@ -112,17 +112,13 @@
       </div>
     </div>
 
-    <!-- TAB STRIP -->
-    <div class="crm-tabs">
-      <button class="crm-tab on" onclick="showView(event,'today')">Today <span class="ct" data-roster-today>—</span></button>
-      <button class="crm-tab" onclick="showView(event,'tasks')">Tasks <span class="ct" data-roster-tasks>—</span></button>
-      <button class="crm-tab" onclick="showView(event,'inbox')">Inbox <span class="ct" data-roster-inbox>—</span></button>
-      <button class="crm-tab" onclick="showView(event,'pipe')">Pipeline <span class="ct" data-roster-pipeline>—</span></button>
-      <button class="crm-tab" onclick="showView(event,'cal')">Calendar <span class="ct" data-roster-calendar-week>—</span></button>
-      <button class="crm-tab" onclick="showView(event,'seq')">Sequences</button>
-      <button class="crm-tab" onclick="showView(event,'curate')">Curated</button>
-      <button class="crm-tab" onclick="showView(event,'rep')">Reports</button>
-      <button class="crm-tab" data-broker-tab style="display:none;" onclick="showView(event,'broker')">Broker</button>
+    <!-- BACK + BREADCRUMB (the old tab strip duplicated the sidebar; as an
+         installed PWA there's no browser chrome, so this strip is now the
+         in-app back control + where-am-I crumb) -->
+    <div class="crm-tabs" style="gap:14px;align-items:center;">
+      <button class="crm-tab" data-nav-back style="display:none;">‹ Back</button>
+      <span data-nav-crumb style="font-family:var(--sans);font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-mute);font-weight:600;">Today</span>
+      <button class="crm-tab" data-broker-tab style="display:none;margin-left:auto;" onclick="showView(event,'broker')">Broker</button>
     </div>
 
     <!-- ============================================================
@@ -1517,6 +1513,14 @@
       }
 
       window.openCommandCenter=function(deal){ if(!deal) return; render(deal); if(typeof window.showView==='function') window.showView(null,'command'); };
+      // Open a deal's command center by source_key from anywhere (Today cards,
+      // task links). Fetches the deals feed first if it hasn't loaded yet.
+      window.openDealByKey=function(key){
+        if(!key) return;
+        var go=function(d){ if(d) window.openCommandCenter(d); };
+        var find=function(j){ if(!j) return null; var all=[].concat(j.offers||[],j.active||[],j.pending||[],j.preparing||[],j.closed||[]); return all.filter(function(d){return d.source_key===key;})[0]||null; };
+        fetch('/api/crm/listings',{credentials:'include'}).then(function(r){return r.ok?r.json():null;}).then(function(j){ go(find(j)); });
+      };
     })();
     </script>
 
@@ -1663,8 +1667,27 @@
 </div>
 
 <script>
-function showView(e, name) {
+var VIEW_LABELS = { today:'Today', tasks:'Tasks', inbox:'Leads & inbox', pipe:'Pipeline', cal:'Calendar', seq:'Sequences', curate:'Curated', rep:'Reports', broker:'Broker', listings:'Deals & offers', command:'Deal command center', people:'Roster' };
+window.__viewStack = window.__viewStack || [];
+function navBack() {
+  var prev = window.__viewStack.pop();
+  if (prev) showView(null, prev, true);
+}
+function showView(e, name, fromBack) {
   if (e) e.preventDefault();
+  // History stack (installed-PWA back control). Pushing only on forward moves.
+  try {
+    var cur = document.querySelector('.crm-view.on');
+    var curName = cur && cur.getAttribute('data-view');
+    if (!fromBack && curName && curName !== name) {
+      window.__viewStack.push(curName);
+      if (window.__viewStack.length > 25) window.__viewStack.shift();
+    }
+    var bk = document.querySelector('[data-nav-back]');
+    if (bk) bk.style.display = window.__viewStack.length ? '' : 'none';
+    var crumb = document.querySelector('[data-nav-crumb]');
+    if (crumb) crumb.textContent = VIEW_LABELS[name] || name;
+  } catch (_) {}
   document.querySelectorAll('.crm-tab').forEach(t => t.classList.remove('on'));
   document.querySelectorAll('.crm-view').forEach(v => v.classList.remove('on'));
   // pair tab/view by name
@@ -1686,6 +1709,9 @@ function showView(e, name) {
   // modules used to sniff specific click targets and missed entry paths.
   try { document.dispatchEvent(new CustomEvent('crm:view', { detail: { name } })); } catch (_) {}
 }
+document.addEventListener('click', function (e) {
+  if (e.target.closest('[data-nav-back]')) { e.preventDefault(); navBack(); }
+});
 function selectLead(el) {
   document.querySelectorAll('.lead-row').forEach(r => r.classList.remove('on'));
   el.classList.add('on');
@@ -2774,7 +2800,7 @@ function selectLead(el) {
   }
   function item(t) {
     var who = state.data.broker ? '<span class="tsk-who">' + (t.agent === 'james' ? 'James' : t.agent === 'both' ? 'Both' : 'Me') + '</span>' : '';
-    var badge = t.client ? '<span class="tsk-badge ' + (t.agent === 'james' ? 'james' : t.agent === 'sara' ? 'sara' : '') + '">' + esc(t.client) + '</span>' : '';
+    var badge = t.client ? '<span class="tsk-badge ' + (t.agent === 'james' ? 'james' : t.agent === 'sara' ? 'sara' : '') + '" data-open-person="' + esc(t.client) + '" style="cursor:pointer;text-decoration:underline;text-decoration-color:rgba(0,0,0,.25);text-underline-offset:2px;" title="Open ' + esc(t.client) + '">' + esc(t.client) + '</span>' : '';
     var sub = (t.sub || t.due_label) ? '<div style="font-size:12px;color:var(--ink-mute);margin-top:2px;">' + esc([t.sub, t.due_label].filter(Boolean).join(' · ')) + '</div>' : '';
     var note = t.note ? '<div class="tsk-note">' + esc(t.note) + '</div>' : '';   // from the briefing (Cowork)
     var flag = '<button class="tsk-flag' + (t.attention ? ' on' : '') + '" data-tsk-flag title="Flag this for the briefing">⚑</button>';

@@ -519,6 +519,13 @@
     });
   }
 
+  document.addEventListener('click', (e) => {
+    const dl = e.target.closest('[data-open-deal]');
+    if (dl && typeof window.openDealByKey === 'function') { window.openDealByKey(dl.getAttribute('data-open-deal')); return; }
+    const pp = e.target.closest('[data-open-person]');
+    if (pp && typeof window.openPeople === 'function') { window.openPeople(pp.getAttribute('data-open-person')); }
+  });
+
   function emptyPanel(msg) {
     return `<div style="grid-column:1/-1;padding:24px;text-align:left;opacity:.55;font-style:italic;font-size:14px;">${escapeHtml(msg)}</div>`;
   }
@@ -716,7 +723,7 @@
       }).join('');
       const addressLine = d.address ? `${escapeHtml(d.address)}${d.city ? ' · ' + escapeHtml(d.city) : ''}` : escapeHtml(d.lead_name);
       return `
-        <article class="deal">
+        <article class="deal" data-open-deal="${escapeHtml(d.lead_id || '')}" style="cursor:pointer;" title="Open this deal's command center" role="link" tabindex="0">
           <div class="deal-h">
             <span class="deal-stage">${escapeHtml(d.stage_label)}</span>
             <span class="deal-amt">${escapeHtml(fmtUsdBrief(d.amount))}</span>
@@ -779,6 +786,17 @@
     });
   }
 
+  // Jump to the lead list pre-searched to a person's name (used by task badges,
+  // day-list rows, anywhere a client name appears).
+  window.openPeople = function (name) {
+    if (typeof window.showView === 'function') window.showView(null, 'inbox');
+    const box = document.querySelector('[data-global-search]');
+    if (box && name) {
+      box.value = name;
+      box.dispatchEvent(new Event('input', { bubbles: true }));
+    }
+  };
+
   function paintHours(items) {
     const body = document.querySelector('[data-hours-body]');
     if (!body) return;
@@ -798,7 +816,7 @@
       row.className = 'hr-row';
       row.innerHTML = `
         <span class="hr-time">${escapeHtml(h.time)}</span>
-        <div class="hr-card${h.brass ? ' hr-card-brass' : ''}${h.past ? ' hr-card-soft' : ''}">
+        <div class="hr-card${h.brass ? ' hr-card-brass' : ''}${h.past ? ' hr-card-soft' : ''}" ${h.client ? `data-open-person="${escapeHtml(h.client)}" style="cursor:pointer;" title="Open ${escapeHtml(h.client)}"` : ''}>
           <span class="label-cap">${escapeHtml(h.kind)}</span>
           <strong>${escapeHtml(h.title)}</strong>
           <span class="hr-sub">${escapeHtml(h.sub)}</span>

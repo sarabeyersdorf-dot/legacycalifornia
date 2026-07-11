@@ -482,6 +482,7 @@ function shapeHours(tours, now) {
       kind:     'Showing',
       title:    addr ? `${leadName} — ${addr}` : `${leadName} tour`,
       sub:      `${t.duration_minutes || 45} min · ${t.tour_type || 'in_person'}${t.status ? ' · ' + t.status : ''}`,
+      client:   [lead.first_name, lead.last_name].filter(Boolean).join(' ') || null,
       past:     isPast,
       brass:    !isPast && new Date(t.scheduled_at).toDateString() === now.toDateString()
     };
