@@ -17,7 +17,7 @@
 import { adminClient } from '../supabase.js';
 import { getCallerProfile, isAgent } from '../auth.js';
 import { handleOptions, readJson, ok, fail } from '../cors.js';
-import { shapeListing } from './curate-search.js';
+import { shapeListing, runSearch } from './curate-search.js';
 
 const agentKey = (profile) => (profile.role === 'agent_james' ? 'james' : 'sara');
 const NOTE_STYLES = ['sticky', 'highlight', 'banner'];
@@ -106,6 +106,28 @@ async function getOne(supa, agent, id, res) {
 
   const opens = (events || []).filter((e) => e.event_type === 'open').length;
 
+  // Suggestions: if this collection's client has a saved search, run it and
+  // offer the matches that aren't already in the collection as one-click
+  // adds. Fail-soft — an editor open never breaks on a bad filter set.
+  let suggestions = null;
+  if (c.client_lead_id) {
+    try {
+      const { data: searches } = await supa
+        .from('saved_searches')
+        .select('id, name, filters')
+        .eq('agent', agent).eq('client_lead_id', c.client_lead_id)
+        .order('updated_at', { ascending: false })
+        .limit(1);
+      const search = searches && searches[0];
+      if (search) {
+        const inColl = new Set((cls || []).map((r) => r.property_id));
+        const found = await runSearch(supa, search.filters || {}, { limit: 24 });
+        const fresh = (found.listings || []).filter((l) => !inColl.has(l.id)).slice(0, 6);
+        if (fresh.length) suggestions = { search_id: search.id, search_name: search.name, listings: fresh };
+      }
+    } catch (_) { /* suggestions are a bonus, never a blocker */ }
+  }
+
   return ok(res, {
     collection: {
       id: c.id, title: c.title, status: c.status, share_token: c.share_token,
@@ -118,6 +140,7 @@ async function getOne(supa, agent, id, res) {
     },
     listings,
     reactions: reactions || [],
+    suggestions,
     engagement: { opens, events: (events || []).slice(0, 50) }
   });
 }

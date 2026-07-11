@@ -725,6 +725,17 @@
     .cur-fb .fb.tell_me_more { background:#F3EBD3; color:#7C6A4D; border-color:#E0D3AE; }
     .cur-fb .fb.not_for_me { background:#EDE9E1; color:#6B6459; border-color:#D8D2C5; }
     .cur-fb-c { font-family:var(--serif); font-style:italic; font-size:12px; color:var(--ink-soft); padding:5px 11px 0; }
+    /* saved-search suggestions strip */
+    .cur-suggest { border:1px dashed var(--brass); background:rgba(176,141,87,.06); padding:10px 12px 12px; margin-bottom:12px; }
+    .cur-suggest-h { font-family:var(--mono); font-size:9.5px; letter-spacing:.14em; text-transform:uppercase; color:var(--brass-deep, #8a6b3f); margin-bottom:9px; }
+    .cur-suggest-row { display:flex; gap:10px; overflow-x:auto; padding-bottom:2px; }
+    .cur-sg { flex:0 0 200px; background:#fff; border:1px solid var(--rule); display:flex; flex-direction:column; }
+    .cur-sg img, .cur-sg .noph { width:100%; height:92px; object-fit:cover; display:block; background:var(--vellum); }
+    .cur-sg .noph { display:flex; align-items:center; justify-content:center; font-family:var(--mono); font-size:9px; text-transform:uppercase; color:var(--ink-mute); }
+    .cur-sg .b { padding:7px 9px 4px; }
+    .cur-sg .p { font-family:var(--serif); font-style:italic; font-size:14.5px; color:var(--ink); }
+    .cur-sg .a { font-size:11px; color:var(--ink-soft); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .cur-sg .btn { margin:6px 9px 9px; align-self:flex-start; }
     /* client strip in the collection editor */
     .cur-client { display:flex; align-items:center; gap:12px; flex-wrap:wrap; background:var(--shell); border:1px solid var(--rule); padding:10px 14px; margin-top:4px; }
     .cur-client.none { font-size:12px; color:var(--ink-mute); }
@@ -1969,6 +1980,7 @@ function selectLead(el) {
     var c = state.active;
     var reactions = (data && data.reactions) || [];
     state.reactions = reactions;
+    state.suggestions = (data && data.suggestions) || null;
     var opens = (data && data.engagement && data.engagement.opens) || 0;
     var box = el('[data-cur-editor]');
     box.style.display = 'block';
@@ -2025,10 +2037,25 @@ function selectLead(el) {
       .map(function (r) { return '<div class="cur-fb-c">“' + esc(r.comment) + '” — ' + esc(r.client_label || 'Client') + '</div>'; }).join('');
     return '<div class="cur-fb">' + chips + '</div>' + comments;
   }
+  function renderSuggestions() {
+    var sg = state.suggestions;
+    if (!sg || !sg.listings || !sg.listings.length) return '';
+    return '<div class="cur-suggest">' +
+      '<div class="cur-suggest-h">New matches from saved search “' + esc(sg.search_name) + '” — one click to add</div>' +
+      '<div class="cur-suggest-row">' + sg.listings.map(function (g) {
+        return '<div class="cur-sg">' +
+          (g.photo ? '<img src="' + esc(g.photo) + '" alt="" loading="lazy">' : '<div class="noph">No photo</div>') +
+          '<div class="b"><div class="p">' + esc(g.price_label || '—') + '</div>' +
+          '<div class="a">' + esc(g.address || '') + (g.city ? ', ' + esc(g.city) : '') + '</div></div>' +
+          '<button class="btn btn-ghost btn-sm" data-suggest-add="' + esc(g.id) + '">＋ Add</button>' +
+        '</div>';
+      }).join('') + '</div></div>';
+  }
+
   function renderIncluded() {
     var inc = state.listings.filter(function (l) { return l.included; });
-    if (!inc.length) return '<div class="cur-empty" style="font-size:14px;">No listings picked yet. Use “Add listings” to search and tick homes in.</div>';
-    return '<div class="cur-incl">' + inc.map(function (l) {
+    if (!inc.length) return renderSuggestions() + '<div class="cur-empty" style="font-size:14px;">No listings picked yet. Use “Add listings” to search and tick homes in.</div>';
+    return renderSuggestions() + '<div class="cur-incl">' + inc.map(function (l) {
       var g = l.listing || {};
       return '<div class="cur-card" data-inc="' + esc(l.property_id) + '">' +
         '<div class="cur-card-ph">' +
@@ -2171,6 +2198,15 @@ function selectLead(el) {
     if ((t = e.target.closest('[data-remove]'))) { toggleListing(t.getAttribute('data-remove')); return; }
     if ((t = e.target.closest('[data-chip]'))) { t.classList.toggle('on'); return; }
     if ((t = e.target.closest('[data-preview]'))) { window.open('/collection.html?preview=' + encodeURIComponent(state.active.id), '_blank'); return; }
+    if ((t = e.target.closest('[data-suggest-add]'))) {
+      t.disabled = true; t.textContent = 'Adding…';
+      api('collections', { method: 'POST', body: { op: 'add-listings', collection_id: state.active.id, property_ids: [t.getAttribute('data-suggest-add')] } })
+        .then(function (r) {
+          if (r.ok) { curToast('Added to the collection.', true); openCollection(state.active.id); }
+          else { t.disabled = false; t.textContent = '＋ Add'; curToast((r.j && r.j.error) || 'Could not add it.', false); }
+        });
+      return;
+    }
     if ((t = e.target.closest('[data-schedule]'))) { scheduleModal(); return; }
     if ((t = e.target.closest('[data-push]'))) { pushModal(); return; }
     if ((t = e.target.closest('[data-copylink]'))) { copyLink(t); return; }
