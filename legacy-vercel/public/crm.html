@@ -725,6 +725,15 @@
     .cur-fb .fb.tell_me_more { background:#F3EBD3; color:#7C6A4D; border-color:#E0D3AE; }
     .cur-fb .fb.not_for_me { background:#EDE9E1; color:#6B6459; border-color:#D8D2C5; }
     .cur-fb-c { font-family:var(--serif); font-style:italic; font-size:12px; color:var(--ink-soft); padding:5px 11px 0; }
+    /* client strip in the collection editor */
+    .cur-client { display:flex; align-items:center; gap:12px; flex-wrap:wrap; background:var(--shell); border:1px solid var(--rule); padding:10px 14px; margin-top:4px; }
+    .cur-client.none { font-size:12px; color:var(--ink-mute); }
+    .cur-client .cc-av { width:34px; height:34px; border-radius:50%; background:var(--brass); color:var(--shell); display:flex; align-items:center; justify-content:center; font-family:var(--serif); font-size:16px; flex:none; }
+    .cur-client .cc-info { min-width:140px; }
+    .cur-client .cc-name { font-family:var(--serif); font-size:15px; color:var(--ink); }
+    .cur-client .cc-meta { font-size:11.5px; color:var(--ink-mute); }
+    .cur-client .cc-acts { display:flex; gap:6px; flex-wrap:wrap; margin-left:auto; }
+    .cur-client .cc-acts .btn { text-decoration:none; }
     .cur-row { display:grid; grid-template-columns:64px 1fr auto; gap:12px; background:var(--shell); border:1px solid var(--rule); padding:10px; align-items:center; }
     .cur-row .thumb { width:64px; height:48px; object-fit:cover; background:var(--vellum); }
     .cur-row .pr { font-family:var(--serif); font-style:italic; font-size:18px; color:var(--ink); }
@@ -1970,7 +1979,7 @@ function selectLead(el) {
           '<input class="title-in" data-meta="title" placeholder="Collection title (e.g. Five for Karen)" value="' + esc(c.title || '') + '">' +
           '<textarea data-meta="intro_note" rows="2" placeholder="Intro note — “Hi Karen, five new ones this week…”">' + esc(c.intro_note || '') + '</textarea>' +
           '<textarea data-meta="closing_note" rows="2" placeholder="Closing note — “Tell me which speak to you.”">' + esc(c.closing_note || '') + '</textarea>' +
-          (c.client_name ? '<div class="cur-row" style="grid-template-columns:1fr;background:transparent;border:none;padding:0;font-size:12px;color:var(--ink-mute);">For ' + esc(c.client_name) + (c.client_phone ? ' · ' + esc(c.client_phone) : '') + (c.client_email ? ' · ' + esc(c.client_email) : '') + '</div>' : '') +
+          clientPanel(c) +
         '</div>' +
         '<div class="cur-ed-acts">' +
           '<button class="btn btn-ghost btn-sm" data-preview>Preview as client ↗</button>' +
@@ -2162,6 +2171,7 @@ function selectLead(el) {
     if ((t = e.target.closest('[data-remove]'))) { toggleListing(t.getAttribute('data-remove')); return; }
     if ((t = e.target.closest('[data-chip]'))) { t.classList.toggle('on'); return; }
     if ((t = e.target.closest('[data-preview]'))) { window.open('/collection.html?preview=' + encodeURIComponent(state.active.id), '_blank'); return; }
+    if ((t = e.target.closest('[data-schedule]'))) { scheduleModal(); return; }
     if ((t = e.target.closest('[data-push]'))) { pushModal(); return; }
     if ((t = e.target.closest('[data-copylink]'))) { copyLink(t); return; }
     if ((t = e.target.closest('[data-client]'))) {
@@ -2246,6 +2256,76 @@ function selectLead(el) {
         else m.querySelector('#ncR').textContent = (r.j && r.j.error) || 'Failed.';
       });
     };
+  }
+
+  // The client strip inside an open collection: who it's for, one-tap
+  // call/text/email, share, and a schedule-tour shortcut.
+  function clientPanel(c) {
+    if (!c.client_name) {
+      return '<div class="cur-client none">No client attached yet — attach one to personalize the greeting and enable share &amp; scheduling.</div>';
+    }
+    var tel = (c.client_phone || '').replace(/[^+0-9]/g, '');
+    return '<div class="cur-client">' +
+      '<span class="cc-av">' + esc((c.client_name || '?').charAt(0).toUpperCase()) + '</span>' +
+      '<div class="cc-info">' +
+        '<div class="cc-name">' + esc(c.client_name) + '</div>' +
+        '<div class="cc-meta">' + [c.client_phone ? esc(c.client_phone) : null, c.client_email ? esc(c.client_email) : null].filter(Boolean).join(' · ') + '</div>' +
+      '</div>' +
+      '<div class="cc-acts">' +
+        (tel ? '<a class="btn btn-ghost btn-sm" href="tel:' + esc(tel) + '">Call</a>' : '') +
+        (tel ? '<a class="btn btn-ghost btn-sm" href="sms:' + esc(tel) + '">Text</a>' : '') +
+        (c.client_email ? '<a class="btn btn-ghost btn-sm" href="mailto:' + esc(c.client_email) + '">Email</a>' : '') +
+        '<button class="btn btn-ghost btn-sm" data-push>Share…</button>' +
+        '<button class="btn btn-brass btn-sm" data-schedule>Schedule tour</button>' +
+      '</div>' +
+    '</div>';
+  }
+
+  function scheduleModal() {
+    var c = state.active;
+    if (!c || !c.client_lead_id) { curToast('Attach a client first.', false); return; }
+    var wants = (state.reactions || []).filter(function (r) { return r.reaction === 'want_to_see' || r.reaction === 'love'; })
+      .map(function (r) { return addrOf(r.property_id); }).filter(Boolean)
+      .filter(function (a, i, arr) { return arr.indexOf(a) === i; });
+    var d = new Date(Date.now() + 86400000);
+    var dstr = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+    var m = modal('<h3>Schedule a tour.</h3>' +
+      '<p class="sub">For ' + esc(c.client_name || 'your client') + (wants.length ? ' — they reacted to ' + esc(wants.join(', ')) : '') + '</p>' +
+      '<div style="display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;">' +
+        '<label style="display:flex;flex-direction:column;gap:4px;font-size:11px;">Date <input type="date" id="schD" value="' + dstr + '"></label>' +
+        '<label style="display:flex;flex-direction:column;gap:4px;font-size:11px;">Time <input type="time" id="schT" value="10:00"></label>' +
+        '<label style="display:flex;flex-direction:column;gap:4px;font-size:11px;">Length <select id="schL"><option value="30">30 min</option><option value="60" selected>1 hour</option><option value="90">1.5 hours</option><option value="120">2 hours</option></select></label>' +
+        '<label style="display:flex;flex-direction:column;gap:4px;font-size:11px;">Type <select id="schK"><option value="in_person" selected>In person</option><option value="video">Video</option></select></label>' +
+      '</div>' +
+      '<textarea id="schN" rows="2" style="margin-top:10px;width:100%;">' + esc('Tour — “' + (c.title || 'collection') + '”' + (wants.length ? ': ' + wants.join(', ') : '')) + '</textarea>' +
+      (c.client_email ? '<label style="display:flex;gap:7px;align-items:center;margin-top:8px;font-size:12px;cursor:pointer;"><input type="checkbox" id="schInv"> Email ' + esc(c.client_name || 'the client') + ' a calendar invite</label>' : '') +
+      '<div class="actions"><button class="btn btn-brass btn-sm" id="schGo">Schedule</button><button class="btn-link" id="schX" style="margin-left:auto;">Cancel</button></div>');
+    m.querySelector('#schX').addEventListener('click', m._close);
+    m.querySelector('#schGo').addEventListener('click', function () {
+      var btn = this; btn.disabled = true; btn.textContent = 'Scheduling…';
+      var inv = m.querySelector('#schInv');
+      fetch('/api/crm/calendar', {
+        method: 'POST', credentials: 'include', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          kind: 'tour', lead_id: c.client_lead_id,
+          date: m.querySelector('#schD').value, time: m.querySelector('#schT').value,
+          duration_minutes: parseInt(m.querySelector('#schL').value, 10),
+          tour_type: m.querySelector('#schK').value,
+          notes: m.querySelector('#schN').value,
+          send_invite: !!(inv && inv.checked)
+        })
+      }).then(function (r) { return r.json().then(function (j) { return { ok: r.ok, j: j }; }); })
+        .then(function (r) {
+          if (r.ok && r.j && (r.j.tour || r.j.appointment)) {
+            m._close();
+            curToast('Tour scheduled' + (r.j.invite && !r.j.invite.error ? ' — invite emailed.' : '.'), true);
+          } else {
+            btn.disabled = false; btn.textContent = 'Schedule';
+            curToast((r.j && r.j.error) || 'Could not schedule the tour.', false);
+          }
+        })
+        .catch(function () { btn.disabled = false; btn.textContent = 'Schedule'; curToast('Network error — try again.', false); });
+    });
   }
 
   function pickClient(cb) {
