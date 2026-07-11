@@ -43,6 +43,22 @@ export async function seedDeal(supa, deal) {
 
 export default async function handler(req, res) {
   if (handleOptions(req, res)) return;
+
+  // Read-only key access for the automated morning briefing (same SYNC_SECRET
+  // convention as briefing-feedback / briefing-calendar): pending-proposals
+  // list ONLY. Approve/reject/edit always require a signed-in agent session.
+  const syncSecret = process.env.SYNC_SECRET || process.env.BRIEFING_FEEDBACK_SECRET;
+  if (req.method === 'GET' && req.query?.proposals === 'all' && syncSecret && req.query?.key === syncSecret) {
+    try {
+      const supaK = adminClient();
+      const { data, error } = await supaK.from('deal_timeline_proposals')
+        .select('id, deal_id, item_key, address, change, reason, source, created_at')
+        .eq('status', 'pending').order('created_at', { ascending: true }).limit(50);
+      if (error) return fail(res, 500, error.message);
+      return ok(res, { proposals: data || [] });
+    } catch (e) { return fail(res, 500, e.message); }
+  }
+
   const { user, profile } = await getCallerProfile(req, res);
   if (!user)             return fail(res, 401, 'not authenticated');
   if (!isAgent(profile)) return fail(res, 403, 'agents only');
