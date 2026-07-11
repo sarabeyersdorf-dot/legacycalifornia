@@ -1,6 +1,6 @@
 {
-  "version": "1.30",
-  "lastUpdated": "2026-07-10",
+  "version": "1.31",
+  "lastUpdated": "2026-07-11",
   "updatedBy": "Claude",
   "tasks": [
     {
@@ -42,14 +42,14 @@
       "agent": "sara",
       "client": "Latigo",
       "title": "Complete buyer-agent AVID (only listing agent AVID on file)",
-      "note": "out for signatures 7/9",
+      "note": "out for signatures 7/9; chased 7/11 — awaiting completion, then file in Ex",
       "done": false
     },
     {
       "agent": "james",
       "client": "Wendell",
       "title": "Ping Audry/Brandi for the WRITTEN bankruptcy court-approval notice (21-day noticing ends ~7/9) — it starts every clock",
-      "note": "noticing ends ~Thu 7/9",
+      "note": "noticing ended 7/9; pinged — now awaiting the JUDGE'S sign-off (per Sara 7/11); still no written notice, clocks stay paused",
       "done": false
     },
     {
@@ -105,7 +105,7 @@
       "agent": "sara",
       "client": "Latigo",
       "title": "Appraisal due back Fri 7/10 (per Kim Hesser) — then remove remaining appraisal + loan contingencies and paper the HELOC/conventional financing change",
-      "note": "Kim texted 7/6; Sara texted Mitzi 7/7",
+      "note": "Kim texted 7/6; Sara texted Mitzi 7/7; appraisal NOT back 7/10 — Sara reached out to Kim again 7/11",
       "done": false
     },
     {
@@ -127,7 +127,7 @@
       "client": "Rathburn",
       "title": "Chase Lilia's signature on the 14281 Cobb Ln listing agreement (sent 7/7 at 999k)",
       "done": true,
-      "note": "chased 7/10 — awaiting Lilia's signature"
+      "note": "chased 7/10; 7/11 Sara answered Lilia's questions — she will sign soon"
     },
     {
       "agent": "sara",
@@ -171,6 +171,14 @@
       "agent": "james",
       "client": "Sheep Ranch",
       "title": "Escrow P-698773 cancellation — Sean's (seller) signature STILL pending; said he'd sign (chased 7/10) — follow up until Placer can close out",
+      "done": true,
+      "note": "done — cancellation FULLY SIGNED 7/10 6:27 PM (Authentisign); Sara forwarded to Ashley/Amanda at Placer that evening"
+    },
+    {
+      "agent": "sara",
+      "client": "433 Hwy 4",
+      "title": "Track appraisal status with Neriah/lender — appraisal contingency Thu 7/16 per ETA1",
+      "note": "Neriah reached out to the lender again 7/11",
       "done": false
     },
     {
@@ -500,7 +508,8 @@
         "disclosures": "received",
         "TDS": "executed",
         "SPQ": "executed",
-        "FHDS": "received — filed in EX 7/7"
+        "FHDS": "received — filed in EX 7/7",
+        "ETA1": "executed — filed in EX (extension covering the 7/6 buyer-contingency date; added to deals.json 7/11 per Sara)"
       },
       "clientDocuments": [
         {
@@ -572,7 +581,7 @@
       "notes": "UNDER CONTRACT / ACCEPTED 6/17/2026. James Beyersdorf's deal (buyer-side). Buyer Shomari Turner; seller Rebecca Johnson (a.k.a. Rebecca Turnage); listing agent Allyson Overturf, PMZ Real Estate. Original offer $200k 6/12; SCO1 $205k 6/15 (escrow pre-opened Chicago Title - Veronica Barragan; fire disclosure in NHD); BCO1 $207,000 accepted by seller 6/17, seller to pay buyer-broker comp 3%. Financing: FHA 203(k) rehab loan (~$193k, 96.5% LTV), $4,500 down, $2,500 initial deposit. As-is; buyer waived home warranty. Key dates from acceptance 6/17: deposit $2,500 by 6/22; seller docs ~6/24; all buyer contingencies (17 days) roll to 7/6 (7/4 holiday/weekend); final walk ~7/29; COE 45 days = 8/1 (Sat) rolls to ~8/3. EMD receipt + escrow holder acknowledgement on file. FHA 203(k) rehab loan — lender milestones will drive the timeline. ESCROW/TITLE DISCREPANCY: executed SCO names Chicago Title (Veronica Barragan); a 6/22 amended prelim (reason 'Added Buyer') references Fidelity National Title Order #FSST-5312600364 (Veronica Barragan & Kim McCray) — confirm which company holds escrow.",
       "alerts": [
         "COE ~Aug 3 (45 days; 8/1 is Saturday)",
-        "Buyer contingencies (due 7/6) HANDLED per Sara 7/7 — confirm the CR or extension addendum gets filed in EX",
+        "Buyer contingencies (due 7/6) handled via ETA1 — CONFIRMED filed in EX, reflected in deals.json 7/11 ✅",
         "FHA 203(k) rehab loan — watch lender/appraisal milestones",
         "Escrow/title CONFIRMED: Chicago Title, Order #FSST-5312600364 (Sara 6/24); full NHD report received 6/23"
       ]
@@ -890,13 +899,14 @@
       "timeline": {
         "acceptance": "2026-06-19",
         "overrides": {
-          "loan": 25
+          "loan": 34,
+          "appraisal": 27
         },
         "coe": "2026-08-10",
         "extensions": {
           "loan": "2026-07-23",
           "appraisal": "2026-07-16",
-          "source": "ETA No. 1 executed 2026-07-10 (COE unchanged)"
+          "source": "ETA No. 1 executed 2026-07-10 (COE unchanged); overrides set to 34/27 days from acceptance so the CRM calendar computes the extended ETA dates (7/23 loan, 7/16 appraisal)"
         }
       },
       "openEscrowDate": "2026-06-22",
