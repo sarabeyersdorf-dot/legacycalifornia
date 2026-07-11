@@ -119,7 +119,16 @@ export default async function handler(req, res) {
         }
       } catch (_) {}
 
-      return ok(res, { deal: { id: deal.id, source_key: deal.source_key, address: deal.address, stage: deal.stage, coe_date: deal.coe_date }, items: items || [], proposals: proposals || [], documents, tasks, events });
+      const meta = deal.listing_meta || {};
+      return ok(res, { deal: {
+        id: deal.id, source_key: deal.source_key, address: deal.address, stage: deal.stage,
+        coe_date: deal.coe_date, side: deal.side,
+        list_price: deal.list_price, sale_price: deal.sale_price, mls_number: deal.mls_number,
+        escrow_officer: deal.escrow_officer, title_company: deal.title_company, co_agent: deal.co_agent,
+        commission: meta.commission || null,
+        disclosure_url: meta.disclosurePackage || null,
+        video_url: deal.video_url || null, tour_url: deal.matterport_url || deal.tour_url || null
+      }, items: items || [], proposals: proposals || [], documents, tasks, events });
     }
 
     if (req.method !== 'POST') return fail(res, 405, 'method_not_allowed');

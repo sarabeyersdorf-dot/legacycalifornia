@@ -34,6 +34,29 @@
     render(bar, data);
   }
 
+  // Internal facts the client must never see: price, commission, escrow, links.
+  function infoStrip(d) {
+    var price = d.sale_price || d.list_price;
+    var comm = '';
+    if (d.commission) {
+      var pct = parseFloat(String(d.commission));
+      var val = (price && !isNaN(pct)) ? '$' + Math.round(price * pct / 100).toLocaleString('en-US') + ' (' + String(d.commission).trim() + ')' : String(d.commission);
+      comm = '<span><b style="color:' + GOLD + ';">Commission</b> ' + esc(val) + ' · internal</span>';
+    }
+    var bits = [
+      price ? '<span><b style="color:' + GOLD + ';">' + (d.side === 'buyer' ? 'Purchase' : 'Sale') + '</b> $' + Math.round(price).toLocaleString('en-US') + '</span>' : '',
+      comm,
+      d.mls_number ? '<span><b style="color:' + GOLD + ';">MLS</b> ' + esc(d.mls_number) + '</span>' : '',
+      d.escrow_officer ? '<span><b style="color:' + GOLD + ';">Escrow</b> ' + esc(d.escrow_officer) + (d.title_company ? ' · ' + esc(d.title_company) : '') + '</span>' : '',
+      d.co_agent ? '<span><b style="color:' + GOLD + ';">Co-op</b> ' + esc(d.co_agent) + '</span>' : '',
+      d.disclosure_url ? '<a href="' + esc(d.disclosure_url) + '" target="_blank" rel="noopener" style="color:' + PAPER + ';">Disclosures ↗</a>' : '',
+      d.video_url ? '<a href="' + esc(d.video_url) + '" target="_blank" rel="noopener" style="color:' + PAPER + ';">Video ↗</a>' : '',
+      d.tour_url ? '<a href="' + esc(d.tour_url) + '" target="_blank" rel="noopener" style="color:' + PAPER + ';">3D tour ↗</a>' : ''
+    ].filter(Boolean);
+    if (!bits.length) return '';
+    return '<div style="display:flex;gap:18px;flex-wrap:wrap;align-items:baseline;padding:7px 18px 9px;border-top:1px solid rgba(250,246,236,.12);font-size:12px;color:rgba(250,246,236,.85);">' + bits.join('') + '</div>';
+  }
+
   function chip(label, cls, attrs) {
     return '<button ' + (attrs || '') + ' style="background:transparent;border:1px solid rgba(250,246,236,.35);color:' + PAPER + ';border-radius:5px;padding:7px 13px;font-size:12px;font-weight:600;cursor:pointer;' + (cls || '') + '">' + label + '</button>';
   }
@@ -53,6 +76,7 @@
         chip('Internal notes', '', 'data-ac-toggle="notes"') +
         chip('Open desk', '', 'data-ac-desk') +
       '</div>' +
+      infoStrip(data.deal) +
       '<div data-ac-panel="approvals" style="' + (proposals.length ? '' : 'display:none;') + 'border-top:1px solid rgba(250,246,236,.15);padding:10px 18px;display:' + (proposals.length ? 'flex' : 'none') + ';flex-direction:column;gap:8px;">' +
         proposals.map(function (p) {
           return '<div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;font-size:13px;">' +

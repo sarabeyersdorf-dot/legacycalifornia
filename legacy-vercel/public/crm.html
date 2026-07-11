@@ -1135,11 +1135,10 @@
     @media (max-width:720px){ .ppl-row{ grid-template-columns:38px 1fr; } .ppl-meta,.ppl-right{ grid-column:2; } }
     </style>
 
-    <section class="crm-view" data-view="command">
-      <div class="cc" data-cc-root>
-        <div class="cur-empty">Open a listing from Deals &amp; Offers.</div>
-      </div>
-    </section>
+    <!-- Command Center view removed (phase 2): the deal page at
+         /seller.html?deal=<key> — the client's portal with the agent console
+         bar on top — is the single per-deal workspace. The module script
+         below self-disables without [data-cc-root]. -->
     <script>
     /* Command Center — per-deal detail. window.openCommandCenter(deal) renders
        the listing card (drop-a-photo + framed info box) and shows the view.
@@ -1669,14 +1668,8 @@
           }).catch(function(){ btn.disabled=false; btn.textContent=orig; warn('Network error linking.'); });
       }
 
-      window.openCommandCenter=function(deal){ if(!deal) return; render(deal); if(typeof window.showView==='function') window.showView(null,'command'); };
-      // Open a deal's command center by source_key from anywhere (Today cards,
-      // task links). Fetches the deals feed first if it hasn't loaded yet.
-      window.openDealByKey=function(key){
-        if(!key) return;
-        var pu='/seller.html?deal='+encodeURIComponent(key);
-        var pw=window.open(pu,'_blank','noopener'); if(!pw) location.href=pu;
-      };
+      /* openCommandCenter / openDealByKey moved to the global nav script —
+         the deal page (client view + agent console) replaced this module. */
     })();
     </script>
 
@@ -1868,6 +1861,16 @@ function showView(e, name, fromBack) {
 document.addEventListener('click', function (e) {
   if (e.target.closest('[data-nav-back]')) { e.preventDefault(); navBack(); }
 });
+// The deal page (client portal + agent console bar) is THE place to work a
+// deal. Any legacy caller of openCommandCenter lands there too.
+window.openDealByKey = function (key) {
+  if (!key) return;
+  var pu = '/seller.html?deal=' + encodeURIComponent(key);
+  var pw = window.open(pu, '_blank', 'noopener'); if (!pw) location.href = pu;
+};
+window.openCommandCenter = function (deal) {
+  if (deal && deal.source_key) window.openDealByKey(deal.source_key);
+};
 function selectLead(el) {
   document.querySelectorAll('.lead-row').forEach(r => r.classList.remove('on'));
   el.classList.add('on');
@@ -3104,10 +3107,7 @@ function selectLead(el) {
       '<div class="mt"><span class="lst-badge ' + state.tab + '">' + badge(state.tab) + '</span>' + sideBadge +
         '<span class="lst-badge">' + (d.agent === 'james' ? 'James' : 'Sara') + '</span>' + tour + '</div>' +
       (d.coe_date ? '<div style="font-size:11px;color:var(--ink-mute);">COE ' + esc(d.coe_date) + '</div>' : '') +
-      '<span style="display:flex;gap:14px;flex-wrap:wrap;">' +
-        '<span class="lk">Deal page ↗</span>' +
-        '<span class="lk" data-legacy-cc="' + esc(d.source_key || '') + '" title="The old in-CRM command center (retiring soon)" style="color:var(--ink-faint);">Legacy console →</span>' +
-      '</span>' +
+      '<span class="lk">Deal page ↗ · client view + agent console</span>' +
       accept +
       '</div></div>';
   }
@@ -3123,16 +3123,7 @@ function selectLead(el) {
   }
   function openCard(cardEl) {
     var key = cardEl.getAttribute('data-source-key');
-    // The combined deal page (client page + agent console bar) is now the ONE
-    // place to work a deal. The legacy in-CRM console stays reachable from the
-    // card's secondary link during the transition.
-    if (key) {
-      var pu = '/seller.html?deal=' + encodeURIComponent(key);
-      var pw = window.open(pu, '_blank', 'noopener'); if (!pw) location.href = pu;
-      return;
-    }
-    var deal = dealByKey(key);
-    if (deal && typeof window.openCommandCenter === 'function') window.openCommandCenter(deal);
+    if (key && typeof window.openDealByKey === 'function') window.openDealByKey(key);
   }
   async function acceptOffer(sourceKey, btn) {
     if (!sourceKey) return;
@@ -3200,14 +3191,6 @@ function selectLead(el) {
     }
     var acc = e.target.closest('[data-accept]');
     if (acc) { e.stopPropagation(); acceptOffer(acc.getAttribute('data-accept'), acc); return; }
-    // Legacy console → the old in-CRM command view (kept during the transition).
-    var lc = e.target.closest('[data-legacy-cc]');
-    if (lc) {
-      e.stopPropagation();
-      var ld = dealByKey(lc.getAttribute('data-legacy-cc'));
-      if (ld && typeof window.openCommandCenter === 'function') window.openCommandCenter(ld);
-      return;
-    }
     var cardEl = e.target.closest('.lst-card[data-source-key]');
     if (cardEl) { openCard(cardEl); return; }
     var t = e.target.closest('[data-lst]'); if (!t) return;
