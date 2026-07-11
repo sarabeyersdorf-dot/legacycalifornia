@@ -74,7 +74,7 @@
     <div class="app-side-section">Import</div>
     <nav class="app-side-nav">
       <a href="#" data-open-importer>Import Leads (CSV)…</a>
-      <a href="#" data-open-link-deal>Link client to deal…</a>
+      <a href="#" data-open-link-deal title="Tie a client to their deal so their sign-in shows their portal">Grant portal access…</a>
       <a href="#" data-open-listing-media>Listing media…</a>
       <a href="#" data-send-test-email>Send test email…</a>
       <a href="#" data-sign-out>Sign out</a>
@@ -1640,7 +1640,7 @@
           + '<input class="cc-fld full" data-lk="phone" placeholder="Phone (for texting)">'
           + '</div>'
           + '<div class="cc-send-row"><span class="cc-hint" data-lk-hint>Links as '+esc(roleLabel)+' · no email is sent.</span>'
-          + '<button class="cc-btn" data-lk-go>Link client</button></div>';
+          + '<button class="cc-btn" data-lk-go>Grant access</button></div>';
       }
       function wireLinkForm(deal){
         var box = root.querySelector('[data-cc-msg]'); if(!box) return;
@@ -1887,7 +1887,7 @@ function selectLead(el) {
     m.innerHTML = ''
       + '<div style="background:#FAF6EC;max-width:520px;width:100%;padding:28px 32px;color:#1A1714;max-height:90vh;overflow:auto;">'
       + '  <div style="font-family:\'JetBrains Mono\',monospace;font-size:10px;letter-spacing:.22em;text-transform:uppercase;color:#7C6A4D;margin-bottom:8px;">Seller portal</div>'
-      + '  <h2 style="font-family:\'Cormorant Garamond\',serif;font-style:italic;font-weight:500;font-size:28px;margin:0 0 6px;">Link a client to their deal.</h2>'
+      + '  <h2 style="font-family:\'Cormorant Garamond\',serif;font-style:italic;font-weight:500;font-size:28px;margin:0 0 6px;">Grant portal access.</h2>'
       + '  <p style="font-size:13.5px;line-height:1.55;color:#3A332B;margin:0 0 18px;">Ties a client to a transaction so that when they sign in they see only their own portal. Finds or creates their lead by email, then links it to the deal.</p>'
       + '  <form id="leg-linkdeal-form" style="display:flex;flex-direction:column;gap:12px;">'
       + '    <label style="font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:#7C6A4D;display:flex;flex-direction:column;gap:4px;">Deal (source key)'
@@ -1912,7 +1912,8 @@ function selectLead(el) {
       + '      <input name="provision" type="checkbox" checked style="margin-top:3px;">'
       + '      <span>Create their sign-in account now so they can log in immediately (no email is sent). Leave on unless they already have a Legacy account.</span></label>'
       + '    <div style="display:flex;gap:10px;margin-top:6px;">'
-      + '      <button type="submit" id="leg-linkdeal-submit" style="background:#1A1714;color:#FAF6EC;border:none;padding:12px 20px;font-family:\'JetBrains Mono\',monospace;font-size:11px;letter-spacing:.22em;text-transform:uppercase;cursor:pointer;">Link client</button>'
+      + '      <button type="submit" id="leg-linkdeal-submit" style="background:#1A1714;color:#FAF6EC;border:none;padding:12px 20px;font-family:\'JetBrains Mono\',monospace;font-size:11px;letter-spacing:.22em;text-transform:uppercase;cursor:pointer;">Grant access</button>'
+      + '      <button type="button" id="leg-linkdeal-magic" style="background:transparent;color:#1A1714;border:1px solid #1A1714;padding:12px 16px;font:inherit;font-size:13px;font-weight:600;cursor:pointer;" title="Emails the client a passwordless sign-in link">Email sign-in link</button>'
       + '      <button type="button" id="leg-linkdeal-close" style="margin-left:auto;background:transparent;border:none;color:#7C6A4D;cursor:pointer;font-size:13px;">Close</button>'
       + '    </div>'
       + '  </form>'
@@ -1924,6 +1925,24 @@ function selectLead(el) {
     var submit = m.querySelector('#leg-linkdeal-submit');
     var result = m.querySelector('#leg-linkdeal-result');
     function close() { m.style.display = 'none'; }
+    m.querySelector('#leg-linkdeal-magic').onclick = async function () {
+      var btn = this;
+      var emailEl = m.querySelector('[name="email"]');
+      var result = m.querySelector('#leg-linkdeal-result');
+      var email = emailEl && emailEl.value.trim();
+      if (!email) { if (result) { result.style.color = '#9B2C2C'; result.textContent = "Enter the client's email first."; } return; }
+      btn.disabled = true; btn.textContent = 'Sending…';
+      try {
+        var r = await fetch('/api/auth/magic-link', { method: 'POST', credentials: 'include',
+          headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email: email }) });
+        var j = await r.json().catch(function () { return {}; });
+        if (result) {
+          result.style.color = r.ok ? '#2E5C3D' : '#9B2C2C';
+          result.textContent = r.ok ? ('✓ Sign-in link emailed to ' + email + '.') : ('✗ ' + ((j && j.error) || 'Could not send.'));
+        }
+      } catch (_) { if (result) { result.style.color = '#9B2C2C'; result.textContent = 'Network error.'; } }
+      btn.disabled = false; btn.textContent = 'Email sign-in link';
+    };
     m.querySelector('#leg-linkdeal-close').onclick = close;
     m.addEventListener('click', function (e) { if (e.target === m) close(); });
 
@@ -1958,8 +1977,8 @@ function selectLead(el) {
           result.innerHTML = '✓ ' + (body.first_name || 'Client') + ' linked to <strong>'
             + (json.deal && json.deal.address ? json.deal.address : body.deal) + '</strong> as ' + json.party.role + '.<br>'
             + (json.lead && json.lead.created ? 'New lead created. ' : 'Existing lead reused. ') + status;
-          submit.textContent = 'Linked';
-          setTimeout(function () { submit.disabled = false; submit.textContent = 'Link client'; }, 1600);
+          submit.textContent = 'Granted';
+          setTimeout(function () { submit.disabled = false; submit.textContent = 'Grant access'; }, 1600);
         } else {
           result.style.color = '#9B2C2C';
           result.textContent = '✗ ' + ((json && json.error) || ('Failed (' + res.status + ')'));

@@ -2263,8 +2263,7 @@
           <span class="composer-tab on" data-composer-tab="email">Email</span>
           <span class="composer-tab" data-composer-tab="sms">SMS</span>
           <span class="composer-tab" data-composer-tab="portal" title="Shows in the message drawer on their portal / collection pages">Portal</span>
-          <span class="composer-tab" data-composer-tab="note" title="Private note · visible to agents only">Note</span>
-          <span class="composer-tab" data-composer-tab="internal" title="Internal note · visible to agents only">Internal</span>
+          <span class="composer-tab" data-composer-tab="note" title="A note on this contact · agents only">Note</span>
         </div>
         <input data-composer-subject placeholder="Subject" style="width:100%;border:1px solid #D9CFB7;padding:8px 10px;background:#fff;font:inherit;font-size:14px;margin-bottom:6px;">
         <textarea data-composer-body placeholder="Write to ${escHtml(fullName(lead))}…"></textarea>
@@ -2560,10 +2559,19 @@
       return `<div class="stage-step ${cls}"><span class="l">${STAGE_LABELS[s] || s}</span></div>`;
     }).join('');
 
-    // Merge lead_events + lead_notes into a single chronological activity
-    // stream. Notes get a distinct dot style and an "Internal" / "Note"
-    // tag so they're visually separable from automated events.
+    // Notes get their own visible panel (they used to hide as small print in
+    // the activity stream); the stream keeps automated events only.
     const notes  = payload.notes || [];
+    const notesPanelHtml = notes.length ? `
+      <div class="lp-notes-panel" style="background:var(--shell);border:1px solid var(--rule);border-left:3px solid var(--brass);padding:14px 16px;margin-bottom:16px;">
+        <div style="font-family:var(--sans);font-size:11px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-mute);margin-bottom:8px;">Notes · ${notes.length}</div>
+        ${notes.slice(0, 6).map((n) => `
+          <div style="padding:8px 0;border-bottom:1px dashed var(--rule);">
+            <div style="font-family:var(--sans);font-size:14px;line-height:1.55;color:var(--ink);white-space:pre-wrap;">${escHtml((n.body || '').length > 400 ? n.body.slice(0, 400) + '…' : (n.body || ''))}</div>
+            <div style="font-family:var(--sans);font-size:11px;color:var(--ink-mute);margin-top:3px;">${n.is_internal ? 'Internal · agents only' : 'Note'} · ${escHtml(fmtRel(n.created_at))}</div>
+          </div>`).join('')}
+        ${notes.length > 6 ? `<div style="font-family:var(--sans);font-size:12px;color:var(--ink-mute);padding-top:6px;">+${notes.length - 6} older in the activity stream</div>` : ''}
+      </div>` : '';
     const eventsAndNotes = [
       ...events.map((e) => ({ kind: 'event', at: e.created_at, payload: e })),
       ...notes.map((n)  => ({ kind: 'note',  at: n.created_at, payload: n }))
@@ -2675,6 +2683,7 @@
       </div>
       <div class="lp-section">
         <h3>Activity · ${events.length + notes.length} item${(events.length + notes.length) === 1 ? '' : 's'}</h3>
+        ${notesPanelHtml}
         ${activityHtml}
       </div>
       <div class="lp-section">
@@ -2875,9 +2884,8 @@
       sendBtn.title = '';
       sendBtn.textContent = isNote ? 'Save note' : 'Send';
       if (isNote) {
-        const label = next === 'internal' ? 'Internal note · only agents see this' : 'Note · agents only (no client visibility)';
-        bodyEl.placeholder = `${next === 'internal' ? 'Internal' : 'Private'} note about ${fullName(lead)}…`;
-        statusEl.textContent = label;
+        bodyEl.placeholder = `Note about ${fullName(lead)}… (start with "task:" to also create a task)`;
+        statusEl.innerHTML = 'Agents only. <label style="cursor:pointer;"><input type="checkbox" data-note-internal style="vertical-align:-2px;"> Mark internal (extra-sensitive)</label>';
         statusEl.style.color = '';
       } else if (isPortal) {
         statusEl.textContent = 'Portal message · appears in the drawer on their pages within seconds';
@@ -2909,8 +2917,9 @@
 
       let r;
       if (isNote) {
+        const internalCb = composer.querySelector('[data-note-internal]');
         r = await window.Legacy.api('/api/crm/note', {
-          body: { lead_id: lead.id, body: text, is_internal: channel === 'internal' }
+          body: { lead_id: lead.id, body: text, is_internal: !!(internalCb && internalCb.checked) }
         });
       } else {
         r = await window.Legacy.api('/api/crm/message', {
