@@ -1956,33 +1956,50 @@ function selectLead(el) {
       card.appendChild(btn);
     });
   }
-  // Load the iHomefinder (Kestrel) widget script once, then resolve.
-  var kestrelLoading = false;
+  // Load the iHomefinder (Kestrel) widget script once, resolving on its real
+  // onload event (not by polling for a render fn — the stub can exist before the
+  // widget has finished initializing, which yields an empty placeholder).
+  var kestrelState = 0; // 0 none · 1 loading · 2 ready · 3 error
+  var kestrelWaiters = [];
+  function kestrelFlush(ok) { var l = kestrelWaiters.slice(); kestrelWaiters = []; l.forEach(function (f) { try { f(ok); } catch (e) {} }); }
   function loadKestrel(cb) {
-    if (window.ihfKestrel && typeof window.ihfKestrel.render === 'function') { cb(); return; }
     window.ihfKestrel = window.ihfKestrel || {};
     if (!window.ihfKestrel.config) window.ihfKestrel.config = { platform: 'custom', activationToken: 'd77ab7ae-7afe-403d-89cf-61bd60bbf806' };
-    if (!kestrelLoading) {
-      kestrelLoading = true;
-      var sc = document.createElement('script');
-      sc.src = 'https://kestrel.idxhome.com/ihf-kestrel.js'; sc.async = true;
-      document.head.appendChild(sc);
-    }
-    var n = 0;
-    (function wait() { if (window.ihfKestrel && typeof window.ihfKestrel.render === 'function') cb(); else if (n++ < 80) setTimeout(wait, 250); })();
+    if (kestrelState === 2 || (window.ihfKestrel && typeof window.ihfKestrel.render === 'function')) { kestrelState = 2; cb(true); return; }
+    if (kestrelState === 3) { cb(false); return; }
+    kestrelWaiters.push(cb);
+    if (kestrelState === 1) return;
+    kestrelState = 1;
+    var sc = document.createElement('script');
+    sc.src = 'https://kestrel.idxhome.com/ihf-kestrel.js';
+    sc.onload  = function () { kestrelState = 2; kestrelFlush(true); };
+    sc.onerror = function () { kestrelState = 3; kestrelFlush(false); };
+    document.head.appendChild(sc);
   }
   var idxObs = null;
   // Render the widget INLINE (Kestrel refuses to run inside an iframe) into the
-  // Add-listings panel, then watch for cards and overlay the "＋ Add" button.
+  // Add-listings panel. We reproduce the public site's exact call —
+  // document.currentScript.replaceWith(ihfKestrel.render()) run from a real
+  // inline <script> — because render() places its content where the calling
+  // script sits; appendChild(render()) does not populate the same way.
   function mountKestrel() {
     var box = el('[data-idx-embed]');
     if (!box) return;
     box.innerHTML = '<div class="cur-idx-loading">Loading the MLS search…</div>';
-    loadKestrel(function () {
+    loadKestrel(function (ok) {
       var b = el('[data-idx-embed]'); if (!b) return;
+      if (!ok || !window.ihfKestrel || typeof window.ihfKestrel.render !== 'function') {
+        b.innerHTML = '<div class="cur-idx-loading">Could not load the MLS search — check your connection and reopen this tab.</div>';
+        return;
+      }
       b.innerHTML = '';
-      try { b.appendChild(window.ihfKestrel.render()); }
-      catch (e) { b.innerHTML = '<div class="cur-idx-loading">Could not load the MLS search — try reopening this tab.</div>'; return; }
+      var holder = document.createElement('div');
+      b.appendChild(holder);
+      // Inline script: on execution, document.currentScript is this element, and
+      // the widget replaces it in place with the live search — same as the site.
+      var s = document.createElement('script');
+      s.text = 'try{document.currentScript.replaceWith(window.ihfKestrel.render());}catch(e){}';
+      holder.appendChild(s);
       if (idxObs) idxObs.disconnect();
       var t;
       idxObs = new MutationObserver(function () { clearTimeout(t); t = setTimeout(function () { idxDecorate(b); }, 500); });
