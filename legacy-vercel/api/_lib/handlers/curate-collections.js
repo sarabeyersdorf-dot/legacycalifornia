@@ -188,6 +188,53 @@ async function postAction(supa, agent, req, res) {
     return ok(res, { removed: true });
   }
 
+  // Capture a listing the agent picked from the embedded IDX search (scraped
+  // from the card in the browser — no MLS API needed) into the collection.
+  // Upserts a properties row from the scraped fields, then includes it.
+  if (op === 'capture-listing') {
+    if (!b?.collection_id) return fail(res, 400, 'collection_id required');
+    const owned = await ownsCollection(supa, agent, b.collection_id);
+    if (!owned) return fail(res, 404, 'collection not found');
+
+    const L = b?.listing || {};
+    const s = (v) => (typeof v === 'string' && v.trim()) ? v.trim() : null;
+    const intv = (v) => { const n = Math.round(Number(String(v ?? '').replace(/[^0-9.]/g, ''))); return Number.isFinite(n) && n > 0 ? n : null; };
+    const fltv = (v) => { const n = Number(String(v ?? '').replace(/[^0-9.]/g, '')); return Number.isFinite(n) && n > 0 ? n : null; };
+    const mls = s(L.mls_number);
+    const address = s(L.address);
+    if (!mls && !address) return fail(res, 400, 'listing needs at least an MLS number or address');
+    const photo = s(L.photo);
+    // Only columns that won't trip a CHECK (skip property_type / listed_by).
+    const row = {
+      mls_number: mls, address, city: s(L.city), state: s(L.state) || 'CA', zip: s(L.zip),
+      price: intv(L.price), bedrooms: intv(L.beds), bathrooms: fltv(L.baths), sq_ft: intv(L.sqft),
+      status: 'active', ihomefinder_idx_id: mls || null, photos: photo ? [photo] : []
+    };
+
+    let propId = null;
+    if (mls) {
+      const up = await supa.from('properties').upsert(row, { onConflict: 'mls_number' }).select('id').single();
+      if (up.error) return fail(res, 500, `property upsert: ${up.error.message}`);
+      propId = up.data.id;
+    } else {
+      const ex = await supa.from('properties').select('id').eq('address', address).limit(1);
+      if (ex.data && ex.data[0]) { await supa.from('properties').update(row).eq('id', ex.data[0].id); propId = ex.data[0].id; }
+      else {
+        const ins = await supa.from('properties').insert(row).select('id').single();
+        if (ins.error) return fail(res, 500, `property insert: ${ins.error.message}`);
+        propId = ins.data.id;
+      }
+    }
+
+    const { count } = await supa.from('collection_listings').select('id', { count: 'exact', head: true }).eq('collection_id', b.collection_id);
+    const { data: cl, error: clErr } = await supa.from('collection_listings')
+      .upsert({ collection_id: b.collection_id, property_id: propId, included: true, sort_order: count ?? 0 }, { onConflict: 'collection_id,property_id' })
+      .select().single();
+    if (clErr) return fail(res, 500, `collection add: ${clErr.message}`);
+    await touch(supa, b.collection_id);
+    return ok(res, { listing: cl, property_id: propId, address: address || mls });
+  }
+
   return fail(res, 400, `unknown op: ${op}`);
 }
 
