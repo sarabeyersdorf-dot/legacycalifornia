@@ -737,11 +737,7 @@
             <div class="cur-saved" data-cur-saved></div>
           </aside>
           <div class="cur-main" data-cur-main>
-            <div class="cur-idx" data-cur-idx>
-              <div class="cur-idx-h">Search the MLS <span>· open a collection, then click “＋ Add to collection” on any listing to include it</span></div>
-              <iframe class="cur-idx-frame" src="/curate-idx.html" title="MLS search" loading="lazy"></iframe>
-            </div>
-            <div class="cur-placeholder" data-cur-placeholder>Pick a collection on the left, or start a new one, to begin curating. Every collection is hand-built — nothing reaches a client you didn't choose.</div>
+            <div class="cur-placeholder" data-cur-placeholder>Pick a collection on the left, or start a new one, to begin curating. Open it and use “Add listings” to search the MLS and pick homes in.</div>
             <div data-cur-editor style="display:none;"></div>
           </div>
         </div>
@@ -1841,7 +1837,7 @@ function selectLead(el) {
   var state = { loaded: false, collections: [], saved: [], active: null, listings: [], inSet: {}, sub: 'listings', lastFilters: {}, gaps: [] };
 
   // ---- lazy init on tab activation ----------------------------------------
-  function ensureLoaded() { if (state.loaded) return; state.loaded = true; loadCollections(); loadSaved(); setupIdxCapture(); }
+  function ensureLoaded() { if (state.loaded) return; state.loaded = true; loadCollections(); loadSaved(); }
   document.addEventListener('click', function (e) {
     var t = e.target.closest('[onclick*="\'curate\'"]');
     if (t) setTimeout(ensureLoaded, 0);
@@ -2024,9 +2020,8 @@ function selectLead(el) {
 
   function renderSub() {
     var body = el('[data-sub-body]');
-    if (state.sub === 'listings') body.innerHTML = renderIncluded();
-    else body.innerHTML = renderSearchPanel();
-    if (state.sub === 'search') { hydrateFilters(); }
+    if (state.sub === 'listings') { body.innerHTML = renderIncluded(); }
+    else { body.innerHTML = renderSearchPanel(); setupIdxCapture(); }
   }
 
   function renderIncluded() {
@@ -2052,30 +2047,12 @@ function selectLead(el) {
   }
 
   function renderSearchPanel() {
-    return '<div class="cur-filters" data-filters>' +
-        '<div class="cur-chips" data-chip-group="status">' + STATUS_OPTS.map(function (s) { return '<span class="cur-chip' + (s[0] === 'active' ? ' on' : '') + '" data-chip="' + s[0] + '">' + s[1] + '</span>'; }).join('') + '</div>' +
-        '<div class="cur-chips" data-chip-group="property_type">' + PTYPE_OPTS.map(function (s) { return '<span class="cur-chip" data-chip="' + s[0] + '">' + s[1] + '</span>'; }).join('') + '</div>' +
-        '<label>Min price<input data-q="price_min" type="number" placeholder="$"></label>' +
-        '<label>Max price<input data-q="price_max" type="number" placeholder="$"></label>' +
-        '<label>Beds min<input data-q="beds_min" type="number"></label>' +
-        '<label>Baths min<input data-q="baths_min" type="number"></label>' +
-        '<label>Min sqft<input data-q="sqft_min" type="number"></label>' +
-        '<label>Max sqft<input data-q="sqft_max" type="number"></label>' +
-        '<label>Min acres<input data-q="lot_acres_min" type="number" step="0.1"></label>' +
-        '<label>Year from<input data-q="year_min" type="number"></label>' +
-        '<label>City<input data-q="city" type="text"></label>' +
-        '<label>ZIP<input data-q="zip" type="text"></label>' +
-        '<label>Max $/sqft<input data-q="ppsf_max" type="number"></label>' +
-        '<label>Keyword<input data-q="keyword" type="text" placeholder="view, pool, acreage…"></label>' +
-        '<label>Sort<select data-q="sort"><option value="newest">Newest</option><option value="price_asc">Price ↑</option><option value="price_desc">Price ↓</option><option value="beds_desc">Beds ↓</option></select></label>' +
-      '</div>' +
-      '<div class="cur-filter-actions">' +
-        '<button class="btn btn-ink btn-sm" data-run-search>Search listings</button>' +
-        '<button class="btn btn-ghost btn-sm" data-save-search>Save this search…</button>' +
-        '<span class="mono" style="font-size:10px;color:var(--ink-mute);" data-search-count></span>' +
-      '</div>' +
-      '<div class="cur-gaps" data-search-gaps></div>' +
-      '<div class="cur-results" data-search-results></div>';
+    // The real iHomefinder search (same as the public site). It's same-origin,
+    // so setupIdxCapture() overlays a "＋ Add to collection" button on each card.
+    return '<div class="cur-idx" data-cur-idx>' +
+        '<div class="cur-idx-h">Search the MLS <span>· click “＋ Add to collection” on any listing to include it in “' + esc((state.active && state.active.title) || 'this collection') + '”</span></div>' +
+        '<iframe class="cur-idx-frame" src="/curate-idx.html" title="MLS search" loading="lazy"></iframe>' +
+      '</div>';
   }
 
   function hydrateFilters() {
