@@ -161,6 +161,52 @@ export default async function handler(req, res) {
     // the last 24h, grouped by contact, plus a count of items still awaiting
     // triage. Kept OUTSIDE the main Promise.all and fail-soft so the brief still
     // loads if deal_messages hasn't been migrated yet or is empty.
+    // Curated follow-ups — active client collections pushed 3+ days ago with
+    // no reaction since. Surfaced both as data and as an overnight signal so
+    // the Today view shows them without any extra front-end plumbing.
+    // Fail-soft: the brief must load even if the curate tables are missing.
+    result.collection_nudges = [];
+    try {
+      const { data: colls } = await supa
+        .from('curated_collections')
+        .select('id, title, share_token, client_lead_id, updated_at, leads(first_name,last_name)')
+        .eq('status', 'active')
+        .not('client_lead_id', 'is', null)
+        .order('updated_at', { ascending: false })
+        .limit(8);
+      for (const c of (colls || [])) {
+        const { data: pushRows } = await supa.from('messages')
+          .select('created_at')
+          .eq('lead_id', c.client_lead_id).eq('direction', 'outbound')
+          .ilike('body', `%${c.share_token}%`)
+          .order('created_at', { ascending: false }).limit(1);
+        const pushedAt = pushRows && pushRows[0] ? pushRows[0].created_at : null;
+        if (!pushedAt) continue;
+        const days = Math.floor((Date.now() - new Date(pushedAt).getTime()) / 86400000);
+        if (days < 3) continue;
+        const { count: rx } = await supa.from('collection_reactions')
+          .select('id', { count: 'exact', head: true })
+          .eq('collection_id', c.id).gte('created_at', pushedAt);
+        if ((rx || 0) > 0) continue;
+        const { count: opensSince } = await supa.from('collection_events')
+          .select('id', { count: 'exact', head: true })
+          .eq('collection_id', c.id).eq('event_type', 'open').gte('created_at', pushedAt);
+        const clientName = c.leads ? [c.leads.first_name, c.leads.last_name].filter(Boolean).join(' ') : 'Your client';
+        const nudge = {
+          collection_id: c.id, title: c.title || 'collection',
+          client_name: clientName, days_since_push: days,
+          opens_since_push: opensSince || 0, pushed_at: pushedAt
+        };
+        result.collection_nudges.push(nudge);
+        result.signals.unshift({
+          id: `nudge:${c.id}`, lead_id: c.client_lead_id,
+          time_iso: pushedAt, time: `${days}d ago`,
+          body: `${clientName} hasn't reacted to “${nudge.title}” — pushed ${days} days ago${(opensSince || 0) ? ` (opened ${opensSince}× since)` : ' (not opened yet)'} . Worth a nudge.`,
+          tag: 'Follow up'
+        });
+      }
+    } catch (_) { /* nudges are a bonus, never a blocker */ }
+
     result.recent_comms = [];
     result.review_pending_count = 0;
     try {
