@@ -354,5 +354,36 @@
     }).catch(function () {});
 })();
 </script>
+<script src="/client-chat.js"></script>
+<script>
+/* Conversations on the seller portal. Identity = the same ?t portal token (or
+   signed-in session) the page itself uses; the drawer only appears when the
+   API recognizes the client. The header "Message Sara" button opens it too. */
+(function () {
+  var t = new URLSearchParams(location.search).get('t');
+  var qs = t ? '?t=' + encodeURIComponent(t) : '';
+  var base = '/api/seller/messages' + qs;
+  if (!window.LegacyChat) return;
+  fetch(base, { credentials: 'include' }).then(function (r) { return r.ok ? r.json() : null; }).then(function (j) {
+    if (!j || !j.success) return;
+    LegacyChat.init({
+      agentName: 'Sara',
+      fetchThread: function () {
+        return fetch(base, { credentials: 'include' }).then(function (r) { return r.json(); }).then(function (x) { return (x && x.thread) || []; });
+      },
+      sendMessage: function (text) {
+        return fetch(base, { method: 'POST', credentials: 'include', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ body: text }) })
+          .then(function (r) { return r.ok; });
+      }
+    });
+    var hdrBtn = document.getElementById('sell-msg-btn');
+    if (hdrBtn) hdrBtn.addEventListener('click', function (e) {
+      e.preventDefault();
+      var fab = document.querySelector('button[aria-label="Message Sara"]');
+      if (fab) fab.click();
+    });
+  }).catch(function () {});
+})();
+</script>
 </body>
 </html>

@@ -52,7 +52,7 @@ export default async function handler(req, res) {
 
     const SIGNAL_EVENT_TYPES = [
       'property_saved','property_viewed','search_run',
-      'form_submitted','email_opened','sms_replied','score_change'
+      'form_submitted','email_opened','sms_replied','score_change','portal_message'
     ];
 
     const [drafts, toursToday, radioSilence, newToday, openOffers,
@@ -317,7 +317,8 @@ const EVENT_TAG = {
   form_submitted:  'New form',
   email_opened:    'Engagement',
   sms_replied:     'Engagement',
-  score_change:    'Score change'
+  score_change:    'Score change',
+  portal_message:  'Client message'
 };
 
 function eventBody(event, leadName) {
@@ -331,6 +332,7 @@ function eventBody(event, leadName) {
     case 'form_submitted':  return `${leadName} submitted a form${d.source ? ` (${d.source})` : ''}.`;
     case 'email_opened':    return `${leadName} opened your last email${d.opens > 1 ? ` (${d.opens} times)` : ''}.`;
     case 'sms_replied':     return `${leadName} replied to your text.`;
+    case 'portal_message':  return `${leadName} messaged you from their page: “${(d.preview || '').slice(0, 90)}”`;
     case 'score_change': {
       if (d.change === 'stage_change') return `${leadName} moved to ${d.to}${d.from ? ` from ${d.from}` : ''}.`;
       if (d.change === 'reassigned')   return `${leadName} reassigned to ${d.to}${d.from ? ` (was ${d.from})` : ''}.`;

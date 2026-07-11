@@ -390,5 +390,30 @@ body { background: var(--vellum); color: var(--ink); }
   function ehSVG() { return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h14V10"/><path d="M9 14h6M9 17h6"/></svg>'; }
 })();
 </script>
+<script src="/client-chat.js"></script>
+<script>
+/* Conversations: the collection client can message the agent right here.
+   Thread is gated by the same share token as the page; only enabled when a
+   client lead is attached. */
+(function () {
+  var token = (location.pathname.match(/^\/c\/([A-Za-z0-9]+)/) || [])[1]
+    || new URLSearchParams(location.search).get('t') || '';
+  if (!token || !window.LegacyChat) return;
+  var base = '/api/c/' + encodeURIComponent(token);
+  fetch(base + '?thread=1').then(function (r) { return r.json(); }).then(function (j) {
+    if (!j || !j.enabled) return;
+    LegacyChat.init({
+      agentName: 'Sara',
+      fetchThread: function () {
+        return fetch(base + '?thread=1').then(function (r) { return r.json(); }).then(function (x) { return (x && x.thread) || []; });
+      },
+      sendMessage: function (text) {
+        return fetch(base, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ op: 'message', body: text }) })
+          .then(function (r) { return r.ok; });
+      }
+    });
+  }).catch(function () {});
+})();
+</script>
 </body>
 </html>

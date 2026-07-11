@@ -2244,6 +2244,7 @@
         <div class="composer-head">
           <span class="composer-tab on" data-composer-tab="email">Email</span>
           <span class="composer-tab" data-composer-tab="sms">SMS</span>
+          <span class="composer-tab" data-composer-tab="portal" title="Shows in the message drawer on their portal / collection pages">Portal</span>
           <span class="composer-tab" data-composer-tab="note" title="Private note · visible to agents only">Note</span>
           <span class="composer-tab" data-composer-tab="internal" title="Internal note · visible to agents only">Internal</span>
         </div>
@@ -2843,7 +2844,8 @@
       tabs.forEach((t) => t.classList.toggle('on', t.getAttribute('data-composer-tab') === next));
       const isNote = next === 'note' || next === 'internal';
       const isSms  = next === 'sms';
-      subjectEl.style.display = (isNote || isSms) ? 'none' : '';
+      const isPortal = next === 'portal';
+      subjectEl.style.display = (isNote || isSms || isPortal) ? 'none' : '';
       bodyEl.disabled = false;
       bodyEl.style.opacity = '';
       sendBtn.disabled = false;
@@ -2854,6 +2856,9 @@
         bodyEl.placeholder = `${next === 'internal' ? 'Internal' : 'Private'} note about ${fullName(lead)}…`;
         statusEl.textContent = label;
         statusEl.style.color = '';
+      } else if (isPortal) {
+        statusEl.textContent = 'Portal message · appears in the drawer on their pages within seconds';
+        bodyEl.placeholder = `Message ${fullName(lead)} on their portal…`;
       } else if (isSms) {
         if (!lead.phone)            { sendBtn.disabled = true; statusEl.textContent = 'Lead has no phone'; bodyEl.placeholder = `No phone on file for ${fullName(lead)}.`; }
         else if (lead.sms_opt_out)  { sendBtn.disabled = true; statusEl.style.color = '#9B2C2C'; statusEl.textContent = `${fullName(lead)} has opted out of SMS — sending is blocked`; bodyEl.placeholder = 'Channel opted out.'; }

@@ -49,12 +49,16 @@ export default async function handler(req, res) {
     if (!coll)        return fail(res, 404, 'collection not found');
     if (coll.gone)    return fail(res, 410, 'this collection link is no longer active');
 
-    if (req.method === 'GET')  return view(supa, coll, res);
+    if (req.method === 'GET') {
+      if (req.query?.thread === '1') return thread(supa, coll, res);
+      return view(supa, coll, res);
+    }
     if (req.method === 'POST') {
       const b = await readJson(req);
       const op = b?.op;
       if (op === 'react')     return react(supa, coll, b, res);
       if (op === 'event')     return event(supa, coll, b, res);
+      if (op === 'message')   return clientMessage(supa, coll, b, res);
       if (op === 'valuation') return valuation(supa, coll, b, res);
       return fail(res, 400, `unknown op: ${op}`);
     }
@@ -134,6 +138,42 @@ async function alertAgentOnReaction(supa, coll, row) {
       await sendSMS({ to: agent.phone, body: `${title}${cmt}. Open desk: legacycalifornia.vercel.app/crm.html — Legacy` });
     }
   }
+}
+
+
+// ---- Conversations: the collection client's portal-channel thread ----------
+// Gated by the collection's share token; only exists when a client lead is
+// attached; only channel='portal' rows are ever exposed (never SMS/email).
+async function thread(supa, coll, res) {
+  if (!coll.client_lead_id) return ok(res, { thread: [], enabled: false });
+  const { data, error } = await supa.from('messages')
+    .select('id, direction, body, created_at')
+    .eq('lead_id', coll.client_lead_id).eq('channel', 'portal')
+    .order('created_at', { ascending: true }).limit(80);
+  if (error) return fail(res, 500, error.message);
+  return ok(res, { thread: data || [], enabled: true });
+}
+
+async function clientMessage(supa, coll, b, res) {
+  if (!coll.client_lead_id) return fail(res, 400, 'no client attached to this collection');
+  const text = (b?.body || '').toString().trim().slice(0, 2000);
+  if (!text) return fail(res, 400, 'message body required');
+  const { data: row, error } = await supa.from('messages').insert({
+    lead_id: coll.client_lead_id, direction: 'inbound', channel: 'portal',
+    body: text, status: 'delivered', ai_generated: false
+  }).select('id, created_at').single();
+  if (error) return fail(res, 500, error.message);
+  supa.from('lead_events').insert({
+    lead_id: coll.client_lead_id, event_type: 'portal_message', source: 'portal',
+    event_data: { collection_id: coll.id, preview: text.slice(0, 120) }
+  }).then(() => {}, () => {});
+  supa.from('collection_events').insert({ collection_id: coll.id, event_type: 'reaction', meta: { message: true } }).then(() => {}, () => {});
+  try {
+    const agent = await agentIdentity(supa, coll.agent);
+    const who = coll.leads?.first_name || 'A client';
+    if (agent.phone) await sendSMS({ to: agent.phone, body: `${who} messaged you from “${coll.title || 'their collection'}”: “${text.slice(0, 140)}” — Legacy` });
+  } catch (_) { /* never block the client */ }
+  return ok(res, { sent: true, id: row.id, created_at: row.created_at });
 }
 
 // ---- POST event (view / dwell) ---------------------------------------------

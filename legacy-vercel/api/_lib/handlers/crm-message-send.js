@@ -70,7 +70,7 @@ export default async function handler(req, res) {
 
     // ---- Validation ----------------------------------------------------
     if (!lead_id) return fail(res, 400, 'lead_id required');
-    if (!['email', 'sms'].includes(channel)) return fail(res, 400, "channel must be 'email' or 'sms'");
+    if (!['email', 'sms', 'portal'].includes(channel)) return fail(res, 400, "channel must be 'email', 'sms', or 'portal'");
     if (!text) return fail(res, 400, 'body is required');
     if (text.length > MAX_BODY) return fail(res, 413, `body exceeds ${MAX_BODY} chars`);
     if (channel === 'email' && !subject) return fail(res, 400, 'subject is required for email');
@@ -115,7 +115,12 @@ export default async function handler(req, res) {
     // nothing to dispatch, so it lands 'sent' directly. Keeps the deal thread
     // complete while the business Twilio line is in compliance review.
     let providerResult, sentPatch;
-    if (logOnly) {
+    if (channel === 'portal') {
+      // Portal messages have no external provider — the row IS the delivery.
+      // The client's page polls the thread and shows it within seconds.
+      sentPatch = { status: 'sent' };
+      providerResult = { via: 'portal' };
+    } else if (logOnly) {
       sentPatch = { status: 'sent' };
       providerResult = { logged: true, via: 'personal' };
     } else {

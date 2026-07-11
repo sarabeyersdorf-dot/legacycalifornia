@@ -10,9 +10,11 @@
 // Counts as ONE serverless function on Vercel.
 
 import listingPortal from '../_lib/handlers/seller-portal.js';
+import sellerMessages from '../_lib/handlers/seller-messages.js';
 
 const TABLE = {
-  'listing': listingPortal
+  'listing': listingPortal,
+  'messages': sellerMessages
 };
 
 export default async function handler(req, res) {
