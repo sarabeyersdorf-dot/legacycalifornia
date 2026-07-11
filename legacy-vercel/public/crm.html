@@ -556,6 +556,16 @@
           </div>
         </div>
 
+        <!-- LEAD HYGIENE — triage the noise out of the pipeline -->
+        <div data-hygiene-card style="display:none;border:1px solid var(--rule);background:var(--shell);padding:16px 18px;margin-bottom:18px;">
+          <div style="display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;">
+            <span class="eyebrow">Lead hygiene</span>
+            <span data-hyg-summary style="font-size:13px;color:var(--ink-soft);"></span>
+          </div>
+          <div data-hyg-buckets style="display:flex;gap:12px;flex-wrap:wrap;margin-top:12px;"></div>
+          <div style="font-size:11px;color:var(--ink-mute);margin-top:10px;">Archiving flips a lead's status to <b>archived</b> — it disappears from the active pipeline but is never deleted, and can be restored from the lead's profile.</div>
+        </div>
+
         <div class="rep-kpi" data-rep-kpi>
           <div class="kpi-card">
             <span class="l">Closed volume · trailing 12 mo</span>

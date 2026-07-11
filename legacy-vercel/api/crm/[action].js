@@ -44,8 +44,10 @@ import dealPhoto        from '../_lib/handlers/crm-deal-photo.js';
 import dealClient       from '../_lib/handlers/crm-deal-client.js';
 import dealVisibility    from '../_lib/handlers/crm-deal-visibility.js';
 import dealNotes         from '../_lib/handlers/crm-deal-notes.js';
+import leadHygiene       from '../_lib/handlers/crm-lead-hygiene.js';
 
 const TABLE = {
+  'lead-hygiene':    leadHygiene,
   'morning-brief':   morningBrief,
   'inbox':           inbox,
   'pipeline':        pipeline,

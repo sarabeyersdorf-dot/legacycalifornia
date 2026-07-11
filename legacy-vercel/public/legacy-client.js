@@ -472,6 +472,7 @@
       paintReportsFunnel(briefRes.json.funnel || null);
     }
     if (inboxRes.ok)    paintQuietAsks(inboxRes.json.messages || []);
+    loadLeadHygiene();
     if (pipelineRes.ok) paintPipelineStats(pipelineRes.json);
     if (metricsRes.ok)  paintCrmMetrics(metricsRes.json);
   }
@@ -479,6 +480,45 @@
   // ---------------------------------------------------------------------------
   // Today-view panels (signals, active deals, hours, reports funnel)
   // ---------------------------------------------------------------------------
+  // ---- Lead hygiene (Reports view) ---------------------------------------
+  async function loadLeadHygiene() {
+    const card = document.querySelector('[data-hygiene-card]');
+    if (!card) return;
+    const r = await api('/api/crm/lead-hygiene', { method: 'GET' });
+    if (!r.ok) return;
+    const d = r.json || {};
+    const b = d.buckets || {};
+    const noisy = (b.dormant?.count || 0) + (b.no_contact_info?.count || 0);
+    if (!noisy) return; // clean book — stay hidden
+    card.style.display = '';
+    document.querySelector('[data-hyg-summary]').textContent =
+      `${d.total_active} active leads — ${noisy} look like noise (${b.dormant?.count || 0} dormant ${d.days}+ days, ${b.no_contact_info?.count || 0} with no contact info).`;
+    const wrap = document.querySelector('[data-hyg-buckets]');
+    const bucketHtml = (key, label, bb) => {
+      if (!bb || !bb.count) return '';
+      const sample = (bb.sample || []).map((l) => escapeHtml(l.name)).slice(0, 3).join(', ');
+      return `<div style="flex:1 1 260px;border:1px solid var(--rule);background:#fff;padding:12px 14px;">
+        <div style="font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-mute);">${label}</div>
+        <div style="font-size:26px;font-family:var(--serif);margin:4px 0 2px;">${bb.count}${bb.capped ? '+' : ''}</div>
+        <div style="font-size:11.5px;color:var(--ink-soft);">${sample ? 'e.g. ' + sample : ''}</div>
+        <button class="btn btn-ghost btn-sm" data-hyg-archive="${key}" style="margin-top:10px;">Archive these ${bb.count}${bb.capped ? '+' : ''}</button>
+      </div>`;
+    };
+    wrap.innerHTML =
+      bucketHtml('dormant', `Dormant · no contact in ${d.days}+ days`, b.dormant) +
+      bucketHtml('no_contact_info', 'No email or phone on file', b.no_contact_info);
+    wrap.querySelectorAll('[data-hyg-archive]').forEach((btn) => {
+      btn.addEventListener('click', async () => {
+        const bucket = btn.getAttribute('data-hyg-archive');
+        if (!confirm(`Archive this whole bucket? They leave the active pipeline but are never deleted.`)) return;
+        btn.disabled = true; btn.textContent = 'Archiving…';
+        const rr = await api('/api/crm/lead-hygiene', { method: 'POST', body: { action: 'archive', bucket } });
+        if (rr.ok) { btn.textContent = `Archived ${rr.json.archived}`; setTimeout(loadLeadHygiene, 800); }
+        else { btn.disabled = false; btn.textContent = 'Archive failed — retry'; }
+      });
+    });
+  }
+
   function emptyPanel(msg) {
     return `<div style="grid-column:1/-1;padding:24px;text-align:left;opacity:.55;font-style:italic;font-size:14px;">${escapeHtml(msg)}</div>`;
   }

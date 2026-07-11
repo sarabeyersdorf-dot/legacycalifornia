@@ -85,7 +85,7 @@ export default async function handler(req, res) {
       // Roster counts
       supa.from('leads')     .select('id', { count: 'exact', head: true }).eq('status', 'active'),
       supa.from('leads')     .select('id', { count: 'exact', head: true }).eq('status', 'active').in('pipeline_stage', ['closed','close']),
-      supa.from('leads')     .select('id', { count: 'exact', head: true }).eq('status', 'archived'),
+      supa.from('leads')     .select('id', { count: 'exact', head: true }).eq('status', 'archived').in('pipeline_stage', ['closed','close']),
       supa.from('properties').select('id', { count: 'exact', head: true }).eq('status', 'active'),
       supa.from('tours')     .select('id', { count: 'exact', head: true }).gte('scheduled_at', now.toISOString()).lte('scheduled_at', weekAhead),
       // Overnight signals — last 24h of high-signal events
