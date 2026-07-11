@@ -50,7 +50,14 @@ create table if not exists public.deal_timeline_proposals (
 create index if not exists deal_timeline_proposals_status_idx on public.deal_timeline_proposals (status);
 create index if not exists deal_timeline_proposals_deal_idx on public.deal_timeline_proposals (deal_id);
 
--- RLS on, no anon policies: only the service-role API (Vercel functions) can
--- touch these — same posture as the rest of the schema.
+-- RLS + the project's standard agent policy (matches agent_tasks in 013):
+-- the deployed API key authenticates as an agent-role JWT, not a true
+-- service-role bypass, so each table needs the explicit policy.
 alter table public.deal_timeline_items     enable row level security;
 alter table public.deal_timeline_proposals enable row level security;
+drop policy if exists deal_timeline_items_agent_all on public.deal_timeline_items;
+create policy deal_timeline_items_agent_all on public.deal_timeline_items
+  for all using (public.current_role_is_agent()) with check (public.current_role_is_agent());
+drop policy if exists deal_timeline_proposals_agent_all on public.deal_timeline_proposals;
+create policy deal_timeline_proposals_agent_all on public.deal_timeline_proposals
+  for all using (public.current_role_is_agent()) with check (public.current_role_is_agent());
