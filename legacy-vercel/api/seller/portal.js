@@ -276,8 +276,52 @@ export default async function handler(req, res) {
           docsKpi
         ];
 
-    // Road to closing (built from the dates we hold; enrich later via deal_milestones)
-    const road = [];
+    // Road to closing. Preferred source: the curated deal_timeline_items —
+    // the plain-English contractual timeline the agent approves updates to
+    // (seeded from the CA RPA template, dates per contract). Falls back to
+    // the original date-heuristic road when a deal hasn't been seeded yet.
+    let road = [];
+    let timelineTasks = null;
+    try {
+      const { data: tlItems } = await supa
+        .from('deal_timeline_items')
+        .select('*')
+        .eq('deal_id', deal.id).eq('client_visible', true)
+        .order('sort_order').order('due_date', { ascending: true, nullsFirst: false });
+      if (tlItems && tlItems.length) {
+        const OWNER_LABEL = { seller: 'your side', buyer: "the buyer's side", escrow: 'escrow', agent: 'Sara', both: 'everyone' };
+        const dayLabel = (d) => d ? new Date(String(d).slice(0, 10) + 'T12:00:00Z')
+          .toLocaleDateString('en-US', { month: 'short', day: 'numeric', timeZone: 'UTC' }) : '';
+        let nextMarked = false;
+        road = tlItems.map((it) => {
+          let status = '';
+          if (it.status === 'done') status = 'done';
+          else if (it.status === 'action') status = 'key';
+          else if (!nextMarked && it.status === 'upcoming') { status = 'next'; nextMarked = true; }
+          const bits = [];
+          if (it.plain)  bits.push(sanitize(it.plain));
+          if (it.detail) bits.push(sanitize(it.detail));
+          if (it.status === 'done') bits.push('Done.');
+          else if (it.status === 'waived') bits.push('Waived — not needed for this sale.');
+          else if (it.due_date) bits.push(`Expected ${dayLabel(it.due_date)} — ${OWNER_LABEL[it.owner] || it.owner}.`);
+          return {
+            date: dayLabel(it.status === 'done' && it.done_at ? it.done_at : it.due_date),
+            label: sanitize(it.title),
+            description: bits.join(' '),
+            status
+          };
+        });
+        timelineTasks = tlItems
+          .filter((it) => ['seller', 'both'].includes(it.owner) && ['upcoming', 'action'].includes(it.status))
+          .map((it) => ({
+            label: sanitize(it.title),
+            when: it.status === 'action' ? 'Needs you now' : (it.due_date ? `Due ${dayLabel(it.due_date)}` : 'When ready'),
+            status: 'open'
+          }));
+      }
+    } catch (_) { /* table may not exist yet — fall through to the heuristic road */ }
+
+    if (!road.length) {
     if (open) road.push({ date: fmtDate(open), label: 'Escrow opened', status: 'done',
                           description: [deal.title_company, deal.escrow_officer].filter(Boolean).join(' · ') || 'Escrow opened.' });
     if (docs.some((d) => /inspection/i.test(d.name) && (d.status === 'signed' || d.status === 'on_file')))
@@ -290,6 +334,7 @@ export default async function handler(req, res) {
       road.push({ date: fmtDate(walk), label: 'Final walk-through', status: 'upcoming', description: 'A final look before closing.' });
       road.push({ date: fmtDate(coe), label: 'Close of escrow', status: 'key', description: 'Deed records and proceeds release.' });
     }
+    } // end heuristic fallback
 
     // Fold agent-shared events (inspections, appraisals, meetings) into the
     // timeline in date order, ahead of the close-of-escrow marker.
@@ -303,9 +348,10 @@ export default async function handler(req, res) {
 
     // What I need from you = docs the client still owes a signature on,
     // plus any tasks the agent explicitly shared with this client.
-    const tasks = docs
-      .filter((d) => d.status === 'to_sign' || d.status === 'with_seller' || d.status === 'pending')
-      .map((d) => ({ label: `Sign ${d.name}`, when: DOC_STATUS_LABEL[d.status] || 'Open', status: 'open' }))
+    const tasks = (timelineTasks || [])
+      .concat(docs
+        .filter((d) => d.status === 'to_sign' || d.status === 'with_seller' || d.status === 'pending')
+        .map((d) => ({ label: `Sign ${d.name}`, when: DOC_STATUS_LABEL[d.status] || 'Open', status: 'open' })))
       .concat(sharedTasks);
 
     // Team from the deal's contact columns
