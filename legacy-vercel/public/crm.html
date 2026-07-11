@@ -717,6 +717,14 @@
     .cur-card .cur-incl-ed .r2 { gap:8px; row-gap:5px; font-size:9px; }
     .cur-card .cur-incl-ed select { font-size:11px; padding:3px 5px; }
     .cur-card .cur-incl-ed input[type=text] { font-size:12px; padding:6px 8px; }
+    /* client feedback on a card */
+    .cur-fb { display:flex; flex-wrap:wrap; gap:5px; padding:8px 11px 0; }
+    .cur-fb .fb { font-family:var(--mono); font-size:8.5px; letter-spacing:.09em; text-transform:uppercase; padding:3px 8px; border-radius:9px; border:1px solid transparent; }
+    .cur-fb .fb.love { background:#F6E3E8; color:#5A0E24; border-color:#E4C3CD; }
+    .cur-fb .fb.want_to_see { background:#E7EFE4; color:#2E5C3D; border-color:#C9DCC5; }
+    .cur-fb .fb.tell_me_more { background:#F3EBD3; color:#7C6A4D; border-color:#E0D3AE; }
+    .cur-fb .fb.not_for_me { background:#EDE9E1; color:#6B6459; border-color:#D8D2C5; }
+    .cur-fb-c { font-family:var(--serif); font-style:italic; font-size:12px; color:var(--ink-soft); padding:5px 11px 0; }
     .cur-row { display:grid; grid-template-columns:64px 1fr auto; gap:12px; background:var(--shell); border:1px solid var(--rule); padding:10px; align-items:center; }
     .cur-row .thumb { width:64px; height:48px; object-fit:cover; background:var(--vellum); }
     .cur-row .pr { font-family:var(--serif); font-style:italic; font-size:18px; color:var(--ink); }
@@ -1951,6 +1959,7 @@ function selectLead(el) {
     el('[data-cur-placeholder]').style.display = 'none';
     var c = state.active;
     var reactions = (data && data.reactions) || [];
+    state.reactions = reactions;
     var opens = (data && data.engagement && data.engagement.opens) || 0;
     var box = el('[data-cur-editor]');
     box.style.display = 'block';
@@ -1971,7 +1980,10 @@ function selectLead(el) {
           '<button class="btn-link" data-delete style="font-size:11px;color:var(--ink-faint);align-self:flex-start;">Delete</button>' +
         '</div>' +
       '</div>' +
-      (reactions.length ? '<div class="cur-gaps">Client engagement: ' + reactions.slice(0, 6).map(function (x) { return esc((x.client_label || 'Client')) + ' — ' + esc(x.reaction.replace(/_/g, ' ')); }).join(' · ') + '</div>' : '') +
+      (reactions.length ? '<div class="cur-gaps">Client engagement: ' + reactions.slice(0, 6).map(function (x) {
+        var addr = addrOf(x.property_id);
+        return esc((x.client_label || 'Client')) + ' — ' + esc(x.reaction.replace(/_/g, ' ')) + (addr ? ' · ' + esc(addr) : '') + (x.comment ? ' (“' + esc(x.comment) + '”)' : '');
+      }).join(' · ') + '</div>' : '') +
       '<div class="cur-subtabs">' +
         '<button class="cur-subtab' + (state.sub === 'listings' ? ' on' : '') + '" data-sub="listings">In this collection (' + state.listings.filter(function (l) { return l.included; }).length + ')</button>' +
         '<button class="cur-subtab' + (state.sub === 'search' ? ' on' : '') + '" data-sub="search">Add listings</button>' +
@@ -1989,6 +2001,21 @@ function selectLead(el) {
     }
   }
 
+  function addrOf(pid) {
+    var m = state.listings.filter(function (l) { return l.property_id === pid; })[0];
+    return m && m.listing ? (m.listing.address || m.listing.mls_number || '') : '';
+  }
+  var FB_LABEL = { love: '♥ Loves it', want_to_see: 'Wants to see it', tell_me_more: 'Tell me more', not_for_me: 'Not for me' };
+  function fbChips(pid) {
+    var rs = (state.reactions || []).filter(function (r) { return r.property_id === pid; });
+    if (!rs.length) return '';
+    var seen = {};
+    var chips = rs.filter(function (r) { if (seen[r.reaction]) return false; seen[r.reaction] = 1; return true; })
+      .map(function (r) { return '<span class="fb ' + esc(r.reaction) + '">' + (FB_LABEL[r.reaction] || esc(r.reaction)) + '</span>'; }).join('');
+    var comments = rs.filter(function (r) { return r.comment; }).slice(0, 2)
+      .map(function (r) { return '<div class="cur-fb-c">“' + esc(r.comment) + '” — ' + esc(r.client_label || 'Client') + '</div>'; }).join('');
+    return '<div class="cur-fb">' + chips + '</div>' + comments;
+  }
   function renderIncluded() {
     var inc = state.listings.filter(function (l) { return l.included; });
     if (!inc.length) return '<div class="cur-empty" style="font-size:14px;">No listings picked yet. Use “Add listings” to search and tick homes in.</div>';
@@ -2004,6 +2031,7 @@ function selectLead(el) {
           '<div class="ad" title="' + esc((g.address || '') + (g.city ? ', ' + g.city : '')) + '">' + esc(g.address || '') + (g.city ? ', ' + esc(g.city) : '') + '</div>' +
           '<div class="sp">' + [g.beds != null ? g.beds + ' bd' : '', g.baths != null ? g.baths + ' ba' : '', g.sqft ? g.sqft.toLocaleString() + ' sqft' : ''].filter(Boolean).join(' · ') + '</div>' +
         '</div>' +
+        fbChips(l.property_id) +
         '<div class="cur-incl-ed">' +
           '<textarea data-f="agent_note" rows="2" placeholder="Your note to the client about this home…">' + esc(l.agent_note || '') + '</textarea>' +
           '<div class="r2">' +

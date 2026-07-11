@@ -55,10 +55,11 @@ body { background: var(--vellum); color: var(--ink); }
 /* Agent note styles */
 .anote { margin-top: 16px; animation: rise 0.7s ease both; }
 .anote.sticky {
-  background: #FBF3C9; color: #40381F; padding: 16px 18px; font-family: var(--serif); font-style: italic;
-  font-size: 16px; line-height: 1.45; transform: rotate(-0.7deg); box-shadow: 0 6px 16px rgba(27,24,19,0.12);
-  border: 1px solid rgba(140,110,61,0.25);
+  background: #FBF3C9; color: #40381F; padding: 18px 20px 14px; font-family: var(--serif); font-style: italic;
+  font-size: 17px; line-height: 1.45; transform: rotate(-1.1deg); box-shadow: 0 10px 22px rgba(27,24,19,0.18);
+  border: 1px solid rgba(140,110,61,0.3); max-width: 520px;
 }
+.anote.highlight .who { display:block; font-family: var(--mono); font-style: normal; font-size: 9px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--ink-mute); margin-top: 8px; }
 .anote.sticky .who { display:block; transform: rotate(0.7deg); font-family: var(--mono); font-style: normal; font-size: 9px; letter-spacing: 0.16em; text-transform: uppercase; color: #8a7a3a; margin-top: 8px; }
 .anote.highlight {
   background: var(--shell); border-left: 3px solid var(--brass); padding: 15px 18px;
@@ -201,13 +202,18 @@ body { background: var(--vellum); color: var(--ink); }
     if (l.lot_acres) specs.push('<span><strong>' + esc(l.lot_acres) + '</strong>ac</span>');
     if (l.property_type_label) specs.push('<span>' + esc(l.property_type_label) + '</span>');
 
+    // The chosen style dresses up whatever the agent wrote: the full note if
+    // there is one, otherwise the short "why I picked it" line — so picking
+    // "Sticky note" or "Ribbon banner" always shows up for the client instead
+    // of silently rendering nothing when only the short field is filled.
     var note = '';
-    if (l.agent_note) {
-      if (l.note_style === 'highlight') note = '<div class="anote highlight">' + esc(l.agent_note) + '</div>';
-      else if (l.note_style === 'banner') note = '<div class="anote banner"><span class="ribbon">' + esc((AGENT.name || '').split(' ')[0]) + '’s Pick</span><span class="txt">' + esc(l.agent_note) + '</span></div>';
-      else note = '<div class="anote sticky">' + esc(l.agent_note) + '<span class="who">— ' + esc((AGENT.name || '').split(' ')[0]) + '</span></div>';
+    var noteBody = l.agent_note || l.why_note || '';
+    if (noteBody) {
+      if (l.note_style === 'highlight') note = '<div class="anote highlight">' + esc(noteBody) + '<span class="who">— ' + esc((AGENT.name || '').split(' ')[0]) + '</span></div>';
+      else if (l.note_style === 'banner') note = '<div class="anote banner"><span class="ribbon">' + esc((AGENT.name || '').split(' ')[0]) + '’s Pick</span><span class="txt">' + esc(noteBody) + '</span></div>';
+      else note = '<div class="anote sticky">' + esc(noteBody) + '<span class="who">— ' + esc((AGENT.name || '').split(' ')[0]) + '</span></div>';
     }
-    var why = l.why_note ? '<div class="why">Why I picked it · ' + esc(l.why_note) + '</div>' : '';
+    var why = (l.why_note && l.agent_note) ? '<div class="why">Why I picked it · ' + esc(l.why_note) + '</div>' : '';
     var prio = l.priority ? '<span class="prio">See this one first</span><br>' : '';
 
     return '<div class="card2" data-card="' + esc(l.id) + '">' + prio + gal +
