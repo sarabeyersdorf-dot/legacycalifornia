@@ -115,21 +115,36 @@
   function scrapeDetail() {
     var idm = location.search.match(/[?&]id=([A-Za-z0-9]+)/);
     var mls = idm ? idm[1].split('_')[0] : null;
-    var tm = (document.title || '').match(/^(.*?)\s+([A-Za-z .'-]+),\s*([A-Z]{2})\s+(\d{5})/);
     var root = widgetRoots()[0];
-    var text = root ? (root.textContent || '') : '';
-    var priceM = text.match(/\$[\d,]{4,}/);
+    // Address comes as two elements: .listing-address-1 ("467 Skyline Drive")
+    // and .listing-address-2 ("Arnold, CA 95223"). The document title mashes
+    // them together with no comma, so it can't be split reliably.
+    var street = root ? txt(root, '.listing-address-1') : null;
+    var line2 = (root ? txt(root, '.listing-address-2') : null) || '';
+    var cm = line2.match(/^(.*?),\s*([A-Z]{2})\s+(\d{5})/);
+    // The detail layout has semantic containers (.bedrooms, .bathrooms,
+    // .square-feet, .list-price) whose text is "<value><label>", e.g.
+    // "1Bedrooms" / "110Square Feet" / "List Price$89,500". Never regex the
+    // whole shadow text — it concatenates without spaces, so "Listing
+    // #2260716031Bedrooms" would bleed the MLS# into the bed count.
+    function field(sel, re) {
+      if (!root) return null;
+      var n = root.querySelector(sel);
+      if (!n) return null;
+      var x = (n.textContent || '').match(re);
+      return x ? x[1].replace(/,/g, '') : null;
+    }
     var img = root ? root.querySelector('img') : null;
     return {
-      mls_number: mls,
-      address: tm ? tm[1].trim() : (document.title || '').trim() || null,
-      city: tm ? tm[2].trim() : null,
-      state: tm ? tm[3] : 'CA',
-      zip: tm ? tm[4] : null,
-      price: priceM ? priceM[0] : null,
-      beds: num(text.match(/(\d+)\s*Bedrooms?/i) ? text.match(/(\d+)\s*Bedrooms?/i)[1] : null),
-      baths: num(text.match(/(\d+(?:\.\d+)?)\s*(?:full\s*)?Bathrooms?/i) ? text.match(/(\d+(?:\.\d+)?)\s*(?:full\s*)?Bathrooms?/i)[1] : null),
-      sqft: null,
+      mls_number: mls || (field('.listing-number', /#\s*([A-Za-z0-9-]+)/) || null),
+      address: street || (document.title || '').trim() || null,
+      city: cm ? cm[1].trim() : null,
+      state: cm ? cm[2] : 'CA',
+      zip: cm ? cm[3] : null,
+      price: field('.list-price', /(\$[\d,]{3,})/),
+      beds: field('.bedrooms', /^\s*(\d{1,2})/),
+      baths: field('.bathrooms', /^\s*(\d{1,2}(?:\.\d+)?)/),
+      sqft: field('.square-feet', /^\s*([\d,]{2,})/),
       photo: img ? (img.currentSrc || img.getAttribute('src') || null) : null
     };
   }
