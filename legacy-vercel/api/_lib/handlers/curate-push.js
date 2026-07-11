@@ -85,6 +85,7 @@ export default async function handler(req, res) {
       if (!provider) return fail(res, 502, 'no email provider configured — set RESEND_API_KEY');
       bodyText = msg.text;
       providerResult = await provider.send({
+        agent: agent,
         to,
         toName: lead ? [lead.first_name, lead.last_name].filter(Boolean).join(' ') || null : (b?.to_name || null),
         subject: msg.subject,

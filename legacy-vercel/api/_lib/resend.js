@@ -17,6 +17,23 @@ const FROM_EMAIL        = process.env.RESEND_FROM_EMAIL || 'onboarding@resend.de
 const FROM_NAME         = process.env.RESEND_FROM_NAME  || 'Sara Cooper · Legacy Properties';
 const REPLY_TO          = process.env.RESEND_REPLY_TO   || 'SaraSellsCalifornia@gmail.com';
 
+// Per-agent senders. When the signed-in agent is known, callers pass
+// agent:'sara'|'james' and the matching env pair wins; anything unset falls
+// back to the global default above. (The agent-specific address must be
+// verified in Resend — e.g. james@send.legacycalifornia.com — or Resend
+// rejects the send.)
+//   RESEND_FROM_EMAIL_SARA / RESEND_FROM_NAME_SARA / RESEND_REPLY_TO_SARA
+//   RESEND_FROM_EMAIL_JAMES / RESEND_FROM_NAME_JAMES / RESEND_REPLY_TO_JAMES
+export function senderFor(agent) {
+  const key = agent === 'james' ? 'JAMES' : agent === 'sara' ? 'SARA' : null;
+  if (!key) return { fromEmail: FROM_EMAIL, fromName: FROM_NAME, replyTo: REPLY_TO };
+  return {
+    fromEmail: process.env[`RESEND_FROM_EMAIL_${key}`] || FROM_EMAIL,
+    fromName:  process.env[`RESEND_FROM_NAME_${key}`]  || (key === 'JAMES' ? 'James Beyersdorf · Legacy Properties' : FROM_NAME),
+    replyTo:   process.env[`RESEND_REPLY_TO_${key}`]   || REPLY_TO
+  };
+}
+
 const API_URL = 'https://api.resend.com/emails';
 
 export function resendConfigured() {
@@ -27,16 +44,17 @@ export function resendConfigured() {
  * Send a single transactional email via Resend.
  * @returns {{ skipped?: boolean, id?: string, via: 'resend' }}
  */
-export async function sendEmail({ to, toName, subject, html, text, attachments }) {
+export async function sendEmail({ to, toName, subject, html, text, attachments, agent }) {
+  const sender = senderFor(agent);
   if (!resendConfigured()) return { skipped: true, reason: 'RESEND_API_KEY not set', via: 'resend' };
   if (!to)      throw new Error('sendEmail: `to` required');
   if (!subject) throw new Error('sendEmail: `subject` required');
   if (!html && !text) throw new Error('sendEmail: either `html` or `text` required');
 
   const body = {
-    from:      `${FROM_NAME} <${FROM_EMAIL}>`,
+    from:      `${sender.fromName} <${sender.fromEmail}>`,
     to:        [toName ? `${toName} <${to}>` : to],
-    reply_to:  REPLY_TO,
+    reply_to:  sender.replyTo,
     subject,
     html:      html || `<pre style="font-family:Georgia,serif;font-size:15px;line-height:1.55;white-space:pre-wrap;">${escapeHtml(text || '')}</pre>`,
     text:      text || stripHtml(html)

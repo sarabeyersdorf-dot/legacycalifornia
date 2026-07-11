@@ -76,6 +76,7 @@ export default async function handler(req, res) {
       const provider = pickEmailProvider();
       if (!provider) throw new Error('no email provider configured — set RESEND_API_KEY or SENDGRID_API_KEY');
       const r = await provider.send({
+        agent:   (profile.role === 'agent_james' ? 'james' : 'sara'),
         to:      lead.email,
         toName:  [lead.first_name, lead.last_name].filter(Boolean).join(' ') || null,
         subject: updated.subject || 'A note from Legacy Properties',
