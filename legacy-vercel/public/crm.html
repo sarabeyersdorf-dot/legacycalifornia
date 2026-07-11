@@ -717,6 +717,7 @@
     .cur-card .cur-incl-ed .r2 { gap:8px; row-gap:5px; font-size:9px; }
     .cur-card .cur-incl-ed select { font-size:11px; padding:3px 5px; }
     .cur-card .cur-incl-ed input[type=text] { font-size:12px; padding:6px 8px; }
+    .cur-eng { font-family:var(--mono); font-size:8.5px; letter-spacing:.09em; text-transform:uppercase; color:var(--brass-deep, #8a6b3f); padding:7px 11px 0; }
     /* client feedback on a card */
     .cur-fb { display:flex; flex-wrap:wrap; gap:5px; padding:8px 11px 0; }
     .cur-fb .fb { font-family:var(--mono); font-size:8.5px; letter-spacing:.09em; text-transform:uppercase; padding:3px 8px; border-radius:9px; border:1px solid transparent; }
@@ -1981,6 +1982,7 @@ function selectLead(el) {
     var reactions = (data && data.reactions) || [];
     state.reactions = reactions;
     state.suggestions = (data && data.suggestions) || null;
+    state.perListing = (data && data.engagement && data.engagement.per_listing) || {};
     var opens = (data && data.engagement && data.engagement.opens) || 0;
     var box = el('[data-cur-editor]');
     box.style.display = 'block';
@@ -2027,6 +2029,16 @@ function selectLead(el) {
     return m && m.listing ? (m.listing.address || m.listing.mls_number || '') : '';
   }
   var FB_LABEL = { love: '♥ Loves it', want_to_see: 'Wants to see it', tell_me_more: 'Tell me more', not_for_me: 'Not for me' };
+  function engLine(pid) {
+    var e = (state.perListing || {})[pid];
+    if (!e || !e.views) return '';
+    var t = '';
+    if (e.dwell_ms >= 1000) {
+      var secs = Math.round(e.dwell_ms / 1000);
+      t = ' · ' + (secs >= 60 ? Math.round(secs / 60) + 'm' : secs + 's') + ' reading';
+    }
+    return '<div class="cur-eng">Client viewed ' + e.views + '×' + t + '</div>';
+  }
   function fbChips(pid) {
     var rs = (state.reactions || []).filter(function (r) { return r.property_id === pid; });
     if (!rs.length) return '';
@@ -2067,6 +2079,7 @@ function selectLead(el) {
           '<div class="ad" title="' + esc((g.address || '') + (g.city ? ', ' + g.city : '')) + '">' + esc(g.address || '') + (g.city ? ', ' + esc(g.city) : '') + '</div>' +
           '<div class="sp">' + [g.beds != null ? g.beds + ' bd' : '', g.baths != null ? g.baths + ' ba' : '', g.sqft ? g.sqft.toLocaleString() + ' sqft' : ''].filter(Boolean).join(' · ') + '</div>' +
         '</div>' +
+        engLine(l.property_id) +
         fbChips(l.property_id) +
         '<div class="cur-incl-ed">' +
           '<textarea data-f="agent_note" rows="2" placeholder="Your note to the client about this home…">' + esc(l.agent_note || '') + '</textarea>' +

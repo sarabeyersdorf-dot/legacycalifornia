@@ -106,6 +106,16 @@ async function getOne(supa, agent, id, res) {
 
   const opens = (events || []).filter((e) => e.event_type === 'open').length;
 
+  // Per-listing engagement: how many times the client opened each home and
+  // how long they lingered — the tell of what they're circling.
+  const perListing = {};
+  for (const e of (events || [])) {
+    if (!e.property_id) continue;
+    const b = perListing[e.property_id] || (perListing[e.property_id] = { views: 0, dwell_ms: 0 });
+    if (e.event_type === 'listing_view') b.views += 1;
+    if (e.event_type === 'dwell' && Number.isFinite(+e.dwell_ms)) b.dwell_ms += +e.dwell_ms;
+  }
+
   // Suggestions: if this collection's client has a saved search, run it and
   // offer the matches that aren't already in the collection as one-click
   // adds. Fail-soft — an editor open never breaks on a bad filter set.
@@ -141,7 +151,7 @@ async function getOne(supa, agent, id, res) {
     listings,
     reactions: reactions || [],
     suggestions,
-    engagement: { opens, events: (events || []).slice(0, 50) }
+    engagement: { opens, per_listing: perListing, events: (events || []).slice(0, 50) }
   });
 }
 
