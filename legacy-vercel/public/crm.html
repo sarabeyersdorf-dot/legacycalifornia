@@ -2978,7 +2978,11 @@ function selectLead(el) {
   }
   function item(t) {
     var who = state.data.broker ? '<span class="tsk-who">' + (t.agent === 'james' ? 'James' : t.agent === 'both' ? 'Both' : 'Me') + '</span>' : '';
-    var badge = t.client ? '<span class="tsk-badge ' + (t.agent === 'james' ? 'james' : t.agent === 'sara' ? 'sara' : '') + '" data-open-person="' + esc(t.client) + '" style="cursor:pointer;text-decoration:underline;text-decoration-color:rgba(0,0,0,.25);text-underline-offset:2px;" title="Open ' + esc(t.client) + '">' + esc(t.client) + '</span>' : '';
+    var dm = null;
+    try { dm = window.LegacyDealColors ? window.LegacyDealColors.match((t.source_key || '') + ' ' + (t.title || '') + ' ' + (t.client || '')) : null; } catch (_) {}
+    var badgeStyle = 'cursor:pointer;text-decoration:underline;text-decoration-color:rgba(0,0,0,.25);text-underline-offset:2px;' + (dm ? 'background:' + dm.color.bg + ';color:' + dm.color.border + ';' : '');
+    var badge = t.client ? '<span class="tsk-badge ' + (t.agent === 'james' ? 'james' : t.agent === 'sara' ? 'sara' : '') + '" data-open-person="' + esc(t.client) + '" style="' + badgeStyle + '" title="Open ' + esc(t.client) + '">' + esc(t.client) + '</span>' : '';
+    var railStyle = dm ? ' style="border-left:4px solid ' + dm.color.border + ';"' : '';
     var sub = (t.sub || t.due_label) ? '<div style="font-size:12px;color:var(--ink-mute);margin-top:2px;">' + esc([t.sub, t.due_label].filter(Boolean).join(' · ')) + '</div>' : '';
     var note = t.note ? '<div class="tsk-note">' + esc(t.note) + '</div>' : '';   // from the briefing (Cowork)
     var flag = '<button class="tsk-flag' + (t.attention ? ' on' : '') + '" data-tsk-flag title="Flag this for the briefing">⚑</button>';
