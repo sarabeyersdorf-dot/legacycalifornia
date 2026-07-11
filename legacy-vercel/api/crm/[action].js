@@ -46,10 +46,12 @@ import dealVisibility    from '../_lib/handlers/crm-deal-visibility.js';
 import dealNotes         from '../_lib/handlers/crm-deal-notes.js';
 import leadHygiene       from '../_lib/handlers/crm-lead-hygiene.js';
 import timeline          from '../_lib/handlers/crm-timeline.js';
+import roster            from '../_lib/handlers/crm-roster.js';
 
 const TABLE = {
   'lead-hygiene':    leadHygiene,
   'timeline':        timeline,
+  'roster':          roster,
   'morning-brief':   morningBrief,
   'inbox':           inbox,
   'pipeline':        pipeline,

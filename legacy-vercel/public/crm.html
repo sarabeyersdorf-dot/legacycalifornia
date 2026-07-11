@@ -52,10 +52,10 @@
 
     <div class="app-side-section">Roster</div>
     <nav class="app-side-nav">
-      <a href="#" onclick="showView(event,'inbox')" data-roster-nav="all">Leads <span class="pill" data-roster-leads>—</span></a>
-      <a href="#" onclick="showView(event,'inbox')" data-roster-nav="clients">Clients <span class="pill" data-roster-clients>—</span></a>
-      <a href="#" onclick="showView(event,'inbox')" data-roster-nav="past">Past clients <span class="pill" data-roster-past>—</span></a>
-      <a href="#" onclick="showView(event,'inbox')" data-roster-nav="sphere">Sphere</a>
+      <a href="#" onclick="showView(event,'people')" data-people-bucket="leads">Leads <span class="pill" data-roster-leads>—</span></a>
+      <a href="#" onclick="showView(event,'people')" data-people-bucket="clients">Clients <span class="pill" data-roster-clients>—</span></a>
+      <a href="#" onclick="showView(event,'people')" data-people-bucket="past">Past clients <span class="pill" data-roster-past>—</span></a>
+      <a href="#" onclick="showView(event,'people')" data-people-bucket="sphere">Sphere <span class="pill" data-roster-sphere>—</span></a>
     </nav>
 
     <div class="app-side-section">Deals &amp; offers</div>
@@ -1047,6 +1047,83 @@
     .cc-doc-h.out { color: #8A2C3B; }
     .cc-empty { font-family: var(--sans); font-size: 13px; color: var(--ink-mute); padding: 6px 0; }
     </style>
+    <!-- PEOPLE / ROSTER VIEW — browsable lists behind Leads/Clients/Past/Sphere -->
+    <section class="crm-view" data-view="people">
+      <div style="max-width:1100px;">
+        <div style="display:flex;align-items:baseline;gap:16px;flex-wrap:wrap;margin-bottom:16px;">
+          <h1 class="h-section" style="font-size:32px;" data-people-title>Leads.</h1>
+          <span data-people-count style="font-family:var(--sans);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-mute);font-weight:600;"></span>
+          <input data-people-q placeholder="Search this list…" style="margin-left:auto;min-width:220px;font:inherit;font-size:14px;padding:9px 12px;border:1px solid var(--rule);background:var(--shell);">
+        </div>
+        <div style="display:flex;gap:8px;margin-bottom:14px;">
+          <button class="feed-chip" data-people-tab="leads">Leads</button>
+          <button class="feed-chip" data-people-tab="clients">Clients</button>
+          <button class="feed-chip" data-people-tab="past">Past clients</button>
+          <button class="feed-chip" data-people-tab="sphere">Sphere</button>
+        </div>
+        <div data-people-list style="background:var(--shell);border:1px solid var(--rule);"></div>
+      </div>
+    </section>
+    <script>
+    (function(){
+      'use strict';
+      var view = document.querySelector('.crm-view[data-view="people"]');
+      if(!view) return;
+      var esc = function(x){ return (x==null?'':String(x)).replace(/[&<>"]/g,function(c){return({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]);}); };
+      var st = { bucket:'leads', q:'', loading:false };
+      var TITLES = { leads:'Leads.', clients:'Clients.', past:'Past clients.', sphere:'Sphere.' };
+      var PILL = { leads:'[data-roster-leads]', clients:'[data-roster-clients]', past:'[data-roster-past]', sphere:'[data-roster-sphere]' };
+      function load(){
+        if(st.loading) return; st.loading = true;
+        var list = view.querySelector('[data-people-list]');
+        list.innerHTML = '<div style="padding:28px;font-family:var(--sans);font-size:14px;color:var(--ink-mute);">Loading…</div>';
+        fetch('/api/crm/roster?bucket='+st.bucket+'&q='+encodeURIComponent(st.q),{credentials:'include'})
+          .then(function(r){ return r.ok?r.json():null; })
+          .then(function(j){
+            st.loading = false;
+            if(!j){ list.innerHTML = '<div style="padding:28px;font-family:var(--sans);color:var(--ink-mute);">Could not load — try again.</div>'; return; }
+            view.querySelector('[data-people-title]').textContent = TITLES[st.bucket];
+            view.querySelector('[data-people-count]').textContent = j.count + (j.count===1?' person':' people') + (st.q?' matching “'+st.q+'”':'');
+            // sidebar pill parity: the pill shows what this list shows
+            if(!st.q){ var pill = document.querySelector(PILL[st.bucket]); if(pill) pill.textContent = String(j.count); }
+            view.querySelectorAll('[data-people-tab]').forEach(function(b){ b.classList.toggle('on', b.getAttribute('data-people-tab')===st.bucket); });
+            var rows = (j.people||[]).map(function(pp){
+              var temp = pp.temperature ? '<span class="ppl-temp '+esc(pp.temperature)+'">'+esc(pp.temperature)+'</span>' : '';
+              var last = pp.last_contact_at ? new Date(pp.last_contact_at).toLocaleDateString('en-US',{month:'short',day:'numeric'}) : '—';
+              return '<div class="ppl-row" data-open-person="'+esc(pp.name)+'" role="link" tabindex="0">'
+                + '<span class="ppl-av">'+esc((pp.name||'?').charAt(0).toUpperCase())+'</span>'
+                + '<span class="ppl-name">'+esc(pp.name)+temp+'</span>'
+                + '<span class="ppl-meta">'+esc(pp.email||'')+(pp.phone?' · '+esc(pp.phone):'')+'</span>'
+                + '<span class="ppl-right">'+esc(pp.stage||pp.journey||'')+' · last '+esc(last)+'</span>'
+                + '</div>';
+            }).join('');
+            list.innerHTML = rows || '<div style="padding:28px;font-family:var(--sans);font-size:14px;color:var(--ink-mute);">Nobody in this list yet.</div>';
+          }).catch(function(){ st.loading=false; });
+      }
+      document.addEventListener('click', function(e){
+        var nav = e.target.closest('[data-people-bucket]');
+        if(nav){ st.bucket = nav.getAttribute('data-people-bucket'); st.q=''; var qi=view.querySelector('[data-people-q]'); if(qi) qi.value=''; setTimeout(load,0); return; }
+        var tab = e.target.closest('[data-people-tab]');
+        if(tab && view.contains(tab)){ st.bucket = tab.getAttribute('data-people-tab'); load(); }
+      });
+      document.addEventListener('crm:view', function(ev){ if(ev.detail && ev.detail.name==='people') load(); });
+      var qt; view.querySelector('[data-people-q]').addEventListener('input', function(){ clearTimeout(qt); var v=this.value; qt=setTimeout(function(){ st.q=v.trim(); load(); },350); });
+    })();
+    </script>
+    <style>
+    .ppl-row { display:grid; grid-template-columns:38px minmax(140px,1.2fr) minmax(160px,1.6fr) auto; gap:12px; align-items:center; padding:11px 16px; border-bottom:1px solid var(--rule); font-family:var(--sans); font-size:14px; cursor:pointer; }
+    .ppl-row:hover { background:var(--linen); }
+    .ppl-row:last-child { border-bottom:none; }
+    .ppl-av { width:30px; height:30px; border-radius:50%; background:var(--brass); color:var(--shell); display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:600; }
+    .ppl-name { font-weight:600; color:var(--ink); display:flex; gap:8px; align-items:center; }
+    .ppl-meta { color:var(--ink-mute); font-size:13px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+    .ppl-right { font-size:11.5px; color:var(--ink-mute); text-transform:capitalize; }
+    .ppl-temp { font-size:10px; font-weight:600; letter-spacing:.06em; text-transform:uppercase; padding:2px 7px; border-radius:10px; background:var(--linen); color:var(--ink-mute); }
+    .ppl-temp.hot { background:#F6E3E8; color:#8A2C3B; }
+    .ppl-temp.warm { background:#F3EBD3; color:#8C6B2E; }
+    @media (max-width:720px){ .ppl-row{ grid-template-columns:38px 1fr; } .ppl-meta,.ppl-right{ grid-column:2; } }
+    </style>
+
     <section class="crm-view" data-view="command">
       <div class="cc" data-cc-root>
         <div class="cur-empty">Open a listing from Deals &amp; Offers.</div>
