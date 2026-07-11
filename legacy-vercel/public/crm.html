@@ -62,7 +62,7 @@
     <nav class="app-side-nav">
       <a href="#" onclick="showView(event,'listings')" data-lst-nav="offers">Offers <span class="pill" data-roster-offers>—</span></a>
       <a href="#" onclick="showView(event,'listings')" data-lst-nav="pending">In escrow <span class="pill" data-roster-pending>—</span></a>
-      <a href="#" onclick="showView(event,'listings')" title="Each deal card has a 'Seller portal ↗' link straight to the client page">Seller portals</a>
+      <a href="#" onclick="showView(event,'listings')" data-portal-mode data-lst-nav="pending" title="Click any deal to open its client-facing portal">Seller portals</a>
     </nav>
 
     <div class="app-side-section">Listings</div>
@@ -869,6 +869,7 @@
     @media (max-width: 900px) { .lst { padding: 18px; } }
     </style>
     <section class="crm-view" data-view="listings">
+      <div data-portal-hint style="display:none;background:var(--shell);border:1px solid var(--brass);border-left:4px solid var(--brass);padding:10px 16px;margin-bottom:14px;font-family:var(--sans);font-size:13.5px;color:var(--ink);">Portal mode — click any deal to open its <b>client-facing seller portal</b> in a new tab. Use Offers / In escrow in the sidebar to go back to the command center.</div>
       <div class="lst">
         <div class="cur-head"><div>
           <span class="label-cap" style="color:var(--brass);">Your deals and offers</span>
@@ -1679,6 +1680,11 @@ function showView(e, name) {
   document.querySelectorAll('.mobnav-item').forEach(b => b.classList.toggle('on', b.getAttribute('data-mob') === mobName));
   // on a phone, a bottom-nav tap should land at the top of the new view
   if (e && e.target.closest('.mobnav')) { try { window.scrollTo({ top: 0 }); } catch (_) { window.scrollTo(0, 0); } }
+  // Announce the switch so every lazy module self-loads no matter HOW the view
+  // was reached (sidebar, top tab, mobile nav, programmatic). This is the
+  // permanent fix for "the view opens blank until I click away and back":
+  // modules used to sniff specific click targets and missed entry paths.
+  try { document.dispatchEvent(new CustomEvent('crm:view', { detail: { name } })); } catch (_) {}
 }
 function selectLead(el) {
   document.querySelectorAll('.lead-row').forEach(r => r.classList.remove('on'));
@@ -1899,6 +1905,7 @@ function selectLead(el) {
 
   // ---- lazy init on tab activation ----------------------------------------
   function ensureLoaded() { if (state.loaded) return; state.loaded = true; loadCollections(); loadSaved(); }
+  document.addEventListener('crm:view', function (ev) { if (ev.detail && ev.detail.name === 'curate') ensureLoaded(); });
   document.addEventListener('click', function (e) {
     var t = e.target.closest('[onclick*="\'curate\'"]');
     if (t) setTimeout(ensureLoaded, 0);
@@ -2907,7 +2914,13 @@ function selectLead(el) {
     return null;
   }
   function openCard(cardEl) {
-    var deal = dealByKey(cardEl.getAttribute('data-source-key'));
+    var key = cardEl.getAttribute('data-source-key');
+    if (state.portalMode && key) {
+      var pu = '/seller.html?deal=' + encodeURIComponent(key);
+      var pw = window.open(pu, '_blank', 'noopener'); if (!pw) location.href = pu;
+      return;
+    }
+    var deal = dealByKey(key);
     if (deal && typeof window.openCommandCenter === 'function') window.openCommandCenter(deal);
   }
   async function acceptOffer(sourceKey, btn) {
@@ -2998,11 +3011,18 @@ function selectLead(el) {
     var cardEl = e.target.closest('.lst-card[data-source-key]');
     if (cardEl) { e.preventDefault(); openCard(cardEl); }
   });
-  // Lazy-load + set tab when the Listings view opens (roster Active/Pending).
+  // Load whenever the view is shown, however it was reached.
+  document.addEventListener('crm:view', function (ev) { if (ev.detail && ev.detail.name === 'listings') ensure(); });
+  // Tab presets + portal mode from the sidebar items.
   document.addEventListener('click', function (e) {
     var nav = e.target.closest('[data-lst-nav]') || e.target.closest('[onclick*="\'listings\'"]');
     if (!nav) return;
     ensure();
+    // "Seller portals" flips portal mode: clicking a deal card then opens the
+    // CLIENT-facing portal directly instead of the command center.
+    state.portalMode = !!nav.hasAttribute && nav.hasAttribute('data-portal-mode');
+    var hint = root.querySelector('[data-portal-hint]');
+    if (hint) hint.style.display = state.portalMode ? '' : 'none';
     var want = nav.getAttribute && nav.getAttribute('data-lst-nav');
     if (want) { state.tab = want; root.querySelectorAll('[data-lst]').forEach(function (b) { b.classList.toggle('on', b.getAttribute('data-lst') === want); }); setTimeout(render, 0); }
   });

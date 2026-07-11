@@ -1236,3 +1236,32 @@ body { overflow: hidden; }
   /* Tighten the Command Center gutters on a phone */
   .cc { padding: 16px 16px 40px; }
 }
+
+
+/* ===========================================================================
+   Italic-serif retirement (2026-07): every UI text role that still used the
+   old italic serif moves to upright Inter. Fraunces (roman) remains only on
+   the Today greeting and section headings. Appended last so it wins cascade.
+   =========================================================================== */
+.ld-head h2,
+.lp-score .v, .lp-home-p,
+.pipe-stats div .v,
+.kan-col-h .sum, .kan-card .home,
+.cal-h-title, .cal-day-head .num, .cal-event .ti, .cal-ag-date,
+.calw-dayhead .num, .calw-ev .ti, .calw-ev.deal .ti,
+.avail-card h3, .avail-row .hrs,
+.seq-row .name, .seq-row .stat strong, .seq-editor-card h3,
+.seq-step-num, .seq-step-snip,
+.kpi-card .v, .rep-card h3, .funnel-step .v,
+.income-row .home, .income-row .v {
+  font-family: var(--sans);
+  font-style: normal;
+}
+.seq-editor-card h3, .cal-h-title, .rep-card h3, .avail-card h3, .ld-head h2 { font-weight: 600; letter-spacing: -0.01em; }
+.kpi-card .v, .lp-score .v { font-weight: 500; letter-spacing: -0.02em; }
+.pipe-stats div .v, .seq-row .stat strong, .funnel-step .v, .income-row .v,
+.cal-day-head .num, .calw-dayhead .num, .cal-ag-date { font-weight: 600; }
+.seq-row .name, .kan-card .home, .lp-home-p, .avail-row .hrs, .cal-event .ti, .calw-ev .ti { font-weight: 500; }
+.seq-step-snip { font-size: 14.5px; color: var(--ink); }
+.seq-step-when, .seq-step-ch { font-family: var(--sans); font-size: 10.5px; font-weight: 600; letter-spacing: .09em; }
+.cal-ag-empty { font-family: var(--sans); font-style: normal; }
