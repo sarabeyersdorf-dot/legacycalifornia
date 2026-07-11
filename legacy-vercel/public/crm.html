@@ -867,7 +867,7 @@
     @media (max-width: 900px) { .lst { padding: 18px; } }
     </style>
     <section class="crm-view" data-view="listings">
-      <div data-portal-hint style="display:none;background:var(--shell);border:1px solid var(--brass);border-left:4px solid var(--brass);padding:10px 16px;margin-bottom:14px;font-family:var(--sans);font-size:13.5px;color:var(--ink);">Portal mode — click any deal to open its <b>client-facing seller portal</b> in a new tab. Use Offers / In escrow in the sidebar to go back to the command center.</div>
+      <div data-portal-hint style="display:none;background:var(--shell);border:1px solid var(--brass);border-left:4px solid var(--brass);padding:10px 16px;margin-bottom:14px;font-family:var(--sans);font-size:13.5px;color:var(--ink);">Click any deal to open its <b>deal page</b> — the client's view with your agent console on top. The old in-CRM console is under each card's “Legacy console” link while it retires.</div>
       <div class="lst">
         <div class="cur-head"><div>
           <span class="label-cap" style="color:var(--brass);">Your deals and offers</span>
@@ -1674,9 +1674,8 @@
       // task links). Fetches the deals feed first if it hasn't loaded yet.
       window.openDealByKey=function(key){
         if(!key) return;
-        var go=function(d){ if(d) window.openCommandCenter(d); };
-        var find=function(j){ if(!j) return null; var all=[].concat(j.offers||[],j.active||[],j.pending||[],j.preparing||[],j.closed||[]); return all.filter(function(d){return d.source_key===key;})[0]||null; };
-        fetch('/api/crm/listings',{credentials:'include'}).then(function(r){return r.ok?r.json():null;}).then(function(j){ go(find(j)); });
+        var pu='/seller.html?deal='+encodeURIComponent(key);
+        var pw=window.open(pu,'_blank','noopener'); if(!pw) location.href=pu;
       };
     })();
     </script>
@@ -3106,8 +3105,8 @@ function selectLead(el) {
         '<span class="lst-badge">' + (d.agent === 'james' ? 'James' : 'Sara') + '</span>' + tour + '</div>' +
       (d.coe_date ? '<div style="font-size:11px;color:var(--ink-mute);">COE ' + esc(d.coe_date) + '</div>' : '') +
       '<span style="display:flex;gap:14px;flex-wrap:wrap;">' +
-        '<span class="lk">Command center →</span>' +
-        (url ? '<span class="lk" data-portal-open="' + esc(d.source_key) + '" title="Open the client-facing seller portal">Seller portal ↗</span>' : '') +
+        '<span class="lk">Deal page ↗</span>' +
+        '<span class="lk" data-legacy-cc="' + esc(d.source_key || '') + '" title="The old in-CRM command center (retiring soon)" style="color:var(--ink-faint);">Legacy console →</span>' +
       '</span>' +
       accept +
       '</div></div>';
@@ -3124,7 +3123,10 @@ function selectLead(el) {
   }
   function openCard(cardEl) {
     var key = cardEl.getAttribute('data-source-key');
-    if (state.portalMode && key) {
+    // The combined deal page (client page + agent console bar) is now the ONE
+    // place to work a deal. The legacy in-CRM console stays reachable from the
+    // card's secondary link during the transition.
+    if (key) {
       var pu = '/seller.html?deal=' + encodeURIComponent(key);
       var pw = window.open(pu, '_blank', 'noopener'); if (!pw) location.href = pu;
       return;
@@ -3198,13 +3200,12 @@ function selectLead(el) {
     }
     var acc = e.target.closest('[data-accept]');
     if (acc) { e.stopPropagation(); acceptOffer(acc.getAttribute('data-accept'), acc); return; }
-    // "Seller portal ↗" goes straight to the CLIENT-facing page — not the
-    // command center. window.open with a same-tab fallback (popup blockers).
-    var pl = e.target.closest('[data-portal-open]');
-    if (pl) {
+    // Legacy console → the old in-CRM command view (kept during the transition).
+    var lc = e.target.closest('[data-legacy-cc]');
+    if (lc) {
       e.stopPropagation();
-      var pu = '/seller.html?deal=' + encodeURIComponent(pl.getAttribute('data-portal-open'));
-      var pw = window.open(pu, '_blank', 'noopener'); if (!pw) location.href = pu;
+      var ld = dealByKey(lc.getAttribute('data-legacy-cc'));
+      if (ld && typeof window.openCommandCenter === 'function') window.openCommandCenter(ld);
       return;
     }
     var cardEl = e.target.closest('.lst-card[data-source-key]');
