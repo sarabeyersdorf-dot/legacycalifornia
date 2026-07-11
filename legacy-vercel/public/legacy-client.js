@@ -456,6 +456,7 @@
     // Establish the signed-in agent up front so every render speaks as them.
     agentFirst = agentFirstFrom(session);
     // Run all loaders in parallel
+    window.LegacyDealColors.ready();
     const [briefRes, inboxRes, pipelineRes, metricsRes] = await Promise.all([
       api('/api/crm/morning-brief', { method: 'GET' }),
       api('/api/crm/inbox?filter=awaiting_reply&limit=20', { method: 'GET' }),
@@ -519,6 +520,12 @@
     });
   }
 
+  document.addEventListener('lgc:dealcolors', () => {
+    document.querySelectorAll('[data-open-deal]').forEach((el) => {
+      const c = window.LegacyDealColors.get(el.getAttribute('data-open-deal'));
+      if (c) el.style.borderLeft = '5px solid ' + c.border;
+    });
+  });
   document.addEventListener('click', (e) => {
     const dl = e.target.closest('[data-open-deal]');
     if (dl && typeof window.openDealByKey === 'function') { window.openDealByKey(dl.getAttribute('data-open-deal')); return; }
@@ -722,8 +729,9 @@
         return `<span class="${cls}">${escapeHtml(step.label)}</span>`;
       }).join('');
       const addressLine = d.address ? `${escapeHtml(d.address)}${d.city ? ' · ' + escapeHtml(d.city) : ''}` : escapeHtml(d.lead_name);
+      const dc = window.LegacyDealColors ? window.LegacyDealColors.get(d.lead_id) : null;
       return `
-        <article class="deal" data-open-deal="${escapeHtml(d.lead_id || '')}" style="cursor:pointer;" title="Open this deal's command center" role="link" tabindex="0">
+        <article class="deal" data-open-deal="${escapeHtml(d.lead_id || '')}" style="cursor:pointer;${dc ? `border-left:5px solid ${dc.border};` : ''}" title="Open this deal's command center" role="link" tabindex="0">
           <div class="deal-h">
             <span class="deal-stage">${escapeHtml(d.stage_label)}</span>
             <span class="deal-amt">${escapeHtml(fmtUsdBrief(d.amount))}</span>
@@ -785,6 +793,71 @@
       });
     });
   }
+
+  // ---- Stable per-deal colors (dark pastels) -------------------------------
+  // One deal = one color, everywhere, forever: slot = hash(source_key), with
+  // deterministic probing so ACTIVE deals (escrow/offer) never share a color.
+  // Exposed as window.LegacyDealColors for every module + page.
+  const LGC_DEAL_PALETTE = [
+    { name: 'wine',     border: '#7A2F3E', bg: '#F2E2E6' },
+    { name: 'pine',     border: '#2E5C3D', bg: '#E2EEE6' },
+    { name: 'indigo',   border: '#4A3B7C', bg: '#E8E4F2' },
+    { name: 'ochre',    border: '#8C6B2E', bg: '#F2EAD6' },
+    { name: 'teal',     border: '#2B6B6B', bg: '#DCEDED' },
+    { name: 'clay',     border: '#8A4A2B', bg: '#F4E6DD' },
+    { name: 'slate',    border: '#3A5A8C', bg: '#E0E8F4' },
+    { name: 'mulberry', border: '#7C2E5A', bg: '#F2DFEA' },
+    { name: 'olive',    border: '#5C6B2E', bg: '#ECF0DC' },
+    { name: 'umber',    border: '#6B4A2B', bg: '#EFE6DA' },
+    { name: 'storm',    border: '#44546B', bg: '#E3E8EF' },
+    { name: 'moss',     border: '#3D6B4F', bg: '#E0EEE6' }
+  ];
+  function lgcDealHash(k) { let v = 0; for (let i = 0; i < k.length; i++) v = (v * 31 + k.charCodeAt(i)) % 997; return v % 12; }
+  window.LegacyDealColors = (function () {
+    let map = null, index = null, pending = null;
+    function assign(list) {
+      const taken = new Array(12).fill(false), m = {};
+      const act  = list.filter((d) => d.active).sort((a, b) => (a.key < b.key ? -1 : 1));
+      const rest = list.filter((d) => !d.active).sort((a, b) => (a.key < b.key ? -1 : 1));
+      for (const d of act) {
+        let slot = lgcDealHash(d.key), tries = 0;
+        while (taken[slot] && tries < 12) { slot = (slot + 1) % 12; tries++; }
+        taken[slot] = true; m[d.key] = LGC_DEAL_PALETTE[slot];
+      }
+      for (const d of rest) m[d.key] = LGC_DEAL_PALETTE[lgcDealHash(d.key)];
+      return m;
+    }
+    function load() {
+      if (pending) return pending;
+      pending = fetch('/api/crm/listings', { credentials: 'include' })
+        .then((r) => (r.ok ? r.json() : null))
+        .then((j) => {
+          const all = [].concat(j?.pending || [], j?.offers || [], j?.active || [], j?.preparing || [], j?.closed || []);
+          index = all.filter((d) => d.source_key).map((d) => ({
+            key: d.source_key,
+            street: (d.address || '').split(',')[0].trim().toLowerCase(),
+            active: d.stage === 'pending' || d.stage === 'offer'
+          }));
+          map = assign(index);
+          document.dispatchEvent(new CustomEvent('lgc:dealcolors'));
+          return map;
+        }).catch(() => (map = {}));
+      return pending;
+    }
+    return {
+      ready: load,
+      get(key) { if (!key) return null; if (map && map[key]) return map[key]; return LGC_DEAL_PALETTE[lgcDealHash(key)]; },
+      match(text) {
+        if (!index || !text) return null;
+        const t = String(text).toLowerCase();
+        for (const d of index) {
+          if (d.key && t.includes(d.key.toLowerCase())) return { key: d.key, color: this.get(d.key) };
+          if (d.street && d.street.length > 5 && t.includes(d.street)) return { key: d.key, color: this.get(d.key) };
+        }
+        return null;
+      }
+    };
+  })();
 
   // Jump to the lead list pre-searched to a person's name (used by task badges,
   // day-list rows, anywhere a client name appears).
@@ -3504,7 +3577,8 @@
     cal.days = data.days; cal.events = data.events || []; cal.label = data.week_label || '';
     cal.deals = data.deals || [];
     cal.dealColor = {};
-    cal.deals.forEach((d, i) => { cal.dealColor[d.key] = DEAL_PALETTE[i % DEAL_PALETTE.length]; });
+    await window.LegacyDealColors.ready();
+    cal.deals.forEach((d) => { cal.dealColor[d.key] = window.LegacyDealColors.get(d.key) || DEAL_PALETTE[0]; });
     populateDealFilter();
     const title = document.querySelector('[data-cal-title]');
     if (title) title.textContent = cal.label;

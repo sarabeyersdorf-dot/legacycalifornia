@@ -1281,6 +1281,10 @@
         loadDealVisibility(deal);
         loadDealNotes(deal);
         loadDealExtras(deal);
+        try {
+          var dcol = window.LegacyDealColors && window.LegacyDealColors.get(deal.source_key);
+          if (dcol) { root.style.borderTop = '5px solid ' + dcol.border; root.style.paddingTop = '14px'; }
+        } catch (_) {}
       }
 
       // ---- documents / timeline / linked items panels ----------------------
@@ -2948,6 +2952,7 @@ function selectLead(el) {
   'use strict';
   var root = document.querySelector('.crm-view[data-view="tasks"]');
   if (!root) return;
+  document.addEventListener('lgc:dealcolors', function () { try { render(); } catch (_) {} });
   var esc = function (s) { return (s == null ? '' : String(s)).replace(/[&<>"]/g, function (c) { return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]); }); };
   var state = { data: null, view: 'open', scope: 'all' }, loaded = false;
   function set(sel, v) { var el = root.querySelector(sel); if (el) el.textContent = String(v); }
@@ -2963,6 +2968,7 @@ function selectLead(el) {
       state.data = j;
       if (j.broker) { var sc = root.querySelector('[data-tsk-scope]'); if (sc) sc.style.display = 'flex'; }
       counts(); render();
+      if (window.LegacyDealColors) window.LegacyDealColors.ready();
     }).catch(function () { var l = root.querySelector('[data-tsk-list]'); if (l) l.innerHTML = '<div class="cur-empty">Could not load tasks.</div>'; });
   }
   function counts() {
@@ -2979,7 +2985,7 @@ function selectLead(el) {
     var by = t.agent_note_by ? '<span class="tsk-note-by">— ' + esc(t.agent_note_by === 'james' ? 'James' : 'Sara') + '</span>' : '';
     // Note back to the briefing — Cowork reads this and tunes the next agenda.
     var fb = '<div class="tsk-feedback"><input class="tsk-note-in" data-tsk-note placeholder="Note back to the briefing…" value="' + esc(t.agent_note || '') + '">' + by + '</div>';
-    return '<div class="tsk-item' + (t.done ? ' done' : '') + (t.attention ? ' flagged' : '') + '" data-tid="' + esc(t.id) + '">' +
+    return '<div class="tsk-item' + (t.done ? ' done' : '') + (t.attention ? ' flagged' : '') + '"' + railStyle + ' data-tid="' + esc(t.id) + '">' +
       '<input type="checkbox" data-tsk-check ' + (t.done ? 'checked' : '') + '>' +
       '<div class="tsk-body"><div class="tsk-line">' + badge + '<span class="tsk-title">' + esc(t.title) + '</span>' + who + flag + '</div>' + sub + note + fb + '</div></div>';
   }
@@ -3088,7 +3094,8 @@ function selectLead(el) {
     var accept = state.tab === 'offers'
       ? '<button class="lst-accept" data-accept="' + esc(d.source_key || '') + '">Mark accepted → escrow</button>'
       : '';
-    return '<div class="lst-card" data-source-key="' + esc(d.source_key || '') + '" role="link" tabindex="0">' + ph + '<div class="bd">' +
+    var lc = (window.LegacyDealColors && window.LegacyDealColors.get(d.source_key)) || null;
+    return '<div class="lst-card" data-source-key="' + esc(d.source_key || '') + '"' + (lc ? ' style="border-top:5px solid ' + lc.border + ';"' : '') + ' role="link" tabindex="0">' + ph + '<div class="bd">' +
       '<div class="pr">' + esc(fmtUSD(d.price)) + '</div>' +
       '<div class="ad">' + esc(d.address || '') + (d.city ? ' · ' + esc(d.city) : '') + '</div>' +
       '<div class="mt"><span class="lst-badge ' + state.tab + '">' + badge(state.tab) + '</span>' + sideBadge +
