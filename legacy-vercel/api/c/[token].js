@@ -90,7 +90,50 @@ async function react(supa, coll, b, res) {
     collection_id: coll.id, property_id: row.property_id,
     event_type: 'reaction', meta: { reaction: row.reaction }
   }).then(() => {}, () => {});
+
+  // Close the loop: a hot reaction becomes a task on the agent's list and a
+  // text to their phone, instead of waiting silently for the collection to be
+  // re-opened. Fail-soft — the client's tap must always succeed.
+  try { await alertAgentOnReaction(supa, coll, row); } catch (_) { /* never block the client */ }
+
   return ok(res, { recorded: true });
+}
+
+
+// A "want to see" or "tell me more" is a buyer raising their hand. Create a
+// task (deduped per collection+property+reaction via source_key) and text the
+// agent. "love" gets a task only; "not_for_me" just shows in the CRM feed.
+async function alertAgentOnReaction(supa, coll, row) {
+  if (row.reaction === 'not_for_me') return;
+
+  let addr = null;
+  if (row.property_id) {
+    const { data: prop } = await supa.from('properties').select('address, city').eq('id', row.property_id).maybeSingle();
+    if (prop) addr = [prop.address, prop.city].filter(Boolean).join(', ');
+  }
+  const who = row.client_label || coll.leads?.first_name || 'Your client';
+  const what = addr || `a home in “${coll.title || 'their collection'}”`;
+  const VERB = { love: 'loves', want_to_see: 'wants to see', tell_me_more: 'asked for more on' };
+  const title = `${who} ${VERB[row.reaction] || 'reacted to'} ${what}`;
+
+  const sourceKey = `curate-reaction:${coll.id}:${row.property_id || 'none'}:${row.reaction}`;
+  const { data: existing } = await supa.from('agent_tasks').select('id').eq('source_key', sourceKey).limit(1);
+  if (!existing || !existing.length) {
+    await supa.from('agent_tasks').insert({
+      agent: coll.agent, client: who, title,
+      sub: `Curated · “${coll.title || 'collection'}”`,
+      note: row.comment || null,
+      due_label: 'Today', done: false, source_key: sourceKey
+    });
+  }
+
+  if (row.reaction === 'want_to_see' || row.reaction === 'tell_me_more') {
+    const agent = await agentIdentity(supa, coll.agent);
+    if (agent.phone) {
+      const cmt = row.comment ? ` — “${row.comment.slice(0, 120)}”` : '';
+      await sendSMS({ to: agent.phone, body: `${title}${cmt}. Open desk: legacycalifornia.vercel.app/crm.html — Legacy` });
+    }
+  }
 }
 
 // ---- POST event (view / dwell) ---------------------------------------------
