@@ -662,7 +662,8 @@
     .cur-idx { margin-bottom:22px; background:var(--shell); border:1px solid var(--rule); border-radius:12px; overflow:hidden; }
     .cur-idx-h { font-family:var(--mono); font-size:10px; letter-spacing:.1em; text-transform:uppercase; color:var(--ink); padding:12px 16px; border-bottom:1px solid var(--rule-soft); }
     .cur-idx-h span { color:var(--ink-mute); text-transform:none; letter-spacing:0; font-size:11px; }
-    .cur-idx-frame { width:100%; height:760px; border:0; display:block; background:#fff; }
+    .cur-idx-embed { display:block; background:#fff; min-height:420px; padding:8px 12px 20px; }
+    .cur-idx-loading { padding:48px 16px; text-align:center; color:var(--ink-mute); font-style:italic; font-size:13px; }
     .cur-side { position:sticky; top:12px; }
     .cur-side-h { font-family:var(--mono); font-size:10px; letter-spacing:.18em; text-transform:uppercase; color:var(--brass); margin:0 0 10px; }
     .cur-colls, .cur-saved { display:flex; flex-direction:column; gap:6px; }
@@ -1877,11 +1878,11 @@ function selectLead(el) {
   }
 
   // ---- pick-from-IDX capture ----------------------------------------------
-  // The embedded IDX search (curate-idx.html) is same-origin, so we can reach
-  // into its document, overlay an "Add" button on each listing card, and read
-  // the card's photo/price/address/MLS straight from the DOM when clicked — no
-  // MLS API and no typing. The markup is iHomefinder's, so cards are found by
-  // content signature (has an image + a "$price" + an "MLS#"), not fixed classes.
+  // The IDX search is embedded INLINE (mountKestrel), so it lives in the CRM's
+  // own document. We overlay an "Add" button on each listing card and read the
+  // card's photo/price/address/MLS straight from the DOM when clicked — no MLS
+  // API and no typing. The markup is iHomefinder's, so cards are found by content
+  // signature (has an image + a "$price" + an "MLS#"), not fixed classes.
   function curToast(msg, good) {
     if (window.Legacy && window.Legacy.toast) { window.Legacy.toast(msg, !!good); return; }
     var t = document.createElement('div');
@@ -1889,8 +1890,8 @@ function selectLead(el) {
     t.style.cssText = 'position:fixed;left:50%;bottom:26px;transform:translateX(-50%);z-index:100000;background:' + (good ? '#2E5C3D' : '#8A3B2B') + ';color:#FAF6EC;padding:11px 18px;border-radius:10px;font-size:13px;box-shadow:0 6px 24px rgba(0,0,0,.3);';
     document.body.appendChild(t); setTimeout(function () { t.remove(); }, 2600);
   }
-  function idxFindCards(doc) {
-    var out = [], all = doc.querySelectorAll('*');
+  function idxFindCards(rootEl) {
+    var out = [], all = rootEl.querySelectorAll('*');
     for (var i = 0; i < all.length && out.length < 120; i++) {
       var n = all[i], txt = n.textContent || '';
       if (!/MLS#?\s*[A-Za-z0-9]/i.test(txt) || !/\$[\d,]{3,}/.test(txt)) continue;
@@ -1942,12 +1943,12 @@ function selectLead(el) {
       } else { btn.textContent = orig; btn.disabled = false; curToast((r.j && r.j.error) || 'Could not add.', false); }
     });
   }
-  function idxDecorate(doc) {
-    idxFindCards(doc).forEach(function (card) {
+  function idxDecorate(rootEl) {
+    idxFindCards(rootEl).forEach(function (card) {
       if (card.getAttribute('data-cur-dec')) return;
       card.setAttribute('data-cur-dec', '1');
-      try { if (doc.defaultView.getComputedStyle(card).position === 'static') card.style.position = 'relative'; } catch (e) {}
-      var btn = doc.createElement('button');
+      try { if (getComputedStyle(card).position === 'static') card.style.position = 'relative'; } catch (e) {}
+      var btn = document.createElement('button');
       btn.type = 'button'; btn.textContent = '＋ Add to collection';
       btn.setAttribute('data-cur-addbtn', '1');
       btn.style.cssText = 'position:absolute;top:8px;left:8px;z-index:99999;background:#1A1714;color:#FAF6EC;border:none;border-radius:8px;padding:8px 12px;font-family:monospace;font-size:11px;letter-spacing:.05em;text-transform:uppercase;cursor:pointer;box-shadow:0 2px 10px rgba(0,0,0,.35);';
@@ -1955,21 +1956,39 @@ function selectLead(el) {
       card.appendChild(btn);
     });
   }
+  // Load the iHomefinder (Kestrel) widget script once, then resolve.
+  var kestrelLoading = false;
+  function loadKestrel(cb) {
+    if (window.ihfKestrel && typeof window.ihfKestrel.render === 'function') { cb(); return; }
+    window.ihfKestrel = window.ihfKestrel || {};
+    if (!window.ihfKestrel.config) window.ihfKestrel.config = { platform: 'custom', activationToken: 'd77ab7ae-7afe-403d-89cf-61bd60bbf806' };
+    if (!kestrelLoading) {
+      kestrelLoading = true;
+      var sc = document.createElement('script');
+      sc.src = 'https://kestrel.idxhome.com/ihf-kestrel.js'; sc.async = true;
+      document.head.appendChild(sc);
+    }
+    var n = 0;
+    (function wait() { if (window.ihfKestrel && typeof window.ihfKestrel.render === 'function') cb(); else if (n++ < 80) setTimeout(wait, 250); })();
+  }
   var idxObs = null;
-  function setupIdxCapture() {
-    var frame = el('.cur-idx-frame');
-    if (!frame) return;
-    function attach() {
-      var doc; try { doc = frame.contentDocument || (frame.contentWindow && frame.contentWindow.document); } catch (e) { return; }
-      if (!doc || !doc.body) { setTimeout(attach, 600); return; }
-      idxDecorate(doc);
+  // Render the widget INLINE (Kestrel refuses to run inside an iframe) into the
+  // Add-listings panel, then watch for cards and overlay the "＋ Add" button.
+  function mountKestrel() {
+    var box = el('[data-idx-embed]');
+    if (!box) return;
+    box.innerHTML = '<div class="cur-idx-loading">Loading the MLS search…</div>';
+    loadKestrel(function () {
+      var b = el('[data-idx-embed]'); if (!b) return;
+      b.innerHTML = '';
+      try { b.appendChild(window.ihfKestrel.render()); }
+      catch (e) { b.innerHTML = '<div class="cur-idx-loading">Could not load the MLS search — try reopening this tab.</div>'; return; }
       if (idxObs) idxObs.disconnect();
       var t;
-      idxObs = new MutationObserver(function () { clearTimeout(t); t = setTimeout(function () { idxDecorate(doc); }, 500); });
-      idxObs.observe(doc.body, { childList: true, subtree: true });
-    }
-    frame.addEventListener('load', attach);
-    attach();
+      idxObs = new MutationObserver(function () { clearTimeout(t); t = setTimeout(function () { idxDecorate(b); }, 500); });
+      idxObs.observe(b, { childList: true, subtree: true });
+      setTimeout(function () { idxDecorate(b); }, 900);
+    });
   }
 
   // ---- open / render a collection -----------------------------------------
@@ -2021,7 +2040,7 @@ function selectLead(el) {
   function renderSub() {
     var body = el('[data-sub-body]');
     if (state.sub === 'listings') { body.innerHTML = renderIncluded(); }
-    else { body.innerHTML = renderSearchPanel(); setupIdxCapture(); }
+    else { body.innerHTML = renderSearchPanel(); mountKestrel(); }
   }
 
   function renderIncluded() {
@@ -2047,11 +2066,13 @@ function selectLead(el) {
   }
 
   function renderSearchPanel() {
-    // The real iHomefinder search (same as the public site). It's same-origin,
-    // so setupIdxCapture() overlays a "＋ Add to collection" button on each card.
+    // The real iHomefinder (Kestrel) search — the SAME live IDX search the public
+    // site uses. Kestrel refuses to render inside an iframe, so mountKestrel()
+    // embeds it INLINE here; idxDecorate() then overlays a "＋ Add to collection"
+    // button on every rendered card.
     return '<div class="cur-idx" data-cur-idx>' +
         '<div class="cur-idx-h">Search the MLS <span>· click “＋ Add to collection” on any listing to include it in “' + esc((state.active && state.active.title) || 'this collection') + '”</span></div>' +
-        '<iframe class="cur-idx-frame" src="/curate-idx.html" title="MLS search" loading="lazy"></iframe>' +
+        '<div class="cur-idx-embed" data-idx-embed></div>' +
       '</div>';
   }
 
