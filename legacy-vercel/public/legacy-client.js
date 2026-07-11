@@ -466,6 +466,7 @@
     if (briefRes.ok) {
       paintMorningBrief(briefRes.json, session);
       paintSignals(briefRes.json.signals || []);
+      paintTimelineApprovals(briefRes.json.timeline_approvals || []);
       paintActiveDeals(briefRes.json.active_deals || []);
       paintRecentComms(briefRes.json);
       paintHours(briefRes.json.hours || []);
@@ -521,6 +522,46 @@
 
   function emptyPanel(msg) {
     return `<div style="grid-column:1/-1;padding:24px;text-align:left;opacity:.55;font-style:italic;font-size:14px;">${escapeHtml(msg)}</div>`;
+  }
+
+  // Timeline proposals: prepend approval cards to the signals grid. Approving
+  // applies the change to the seller-facing timeline; dismissing discards it.
+  function paintTimelineApprovals(props) {
+    const grid = document.querySelector('[data-signal-grid]');
+    if (!grid || !props.length) return;
+    const changeLabel = (c) => {
+      if (!c) return 'update';
+      if (c.status === 'done')   return 'mark done';
+      if (c.status === 'action') return 'flag as “needs you”';
+      if (c.status === 'waived') return 'mark waived';
+      return 'update';
+    };
+    const html = props.map((p) => `
+      <article class="signal" data-tlprop="${escapeHtml(p.id)}" style="border-left:3px solid var(--brass);">
+        <span class="sig-time">${escapeHtml(p.address || 'Deal')}</span>
+        <p><b>${escapeHtml((p.item_key || '').replace(/^custom:/, '').replace(/_/g, ' '))}</b> — ${escapeHtml(changeLabel(p.change))}.<br>
+        <span style="opacity:.75;">${escapeHtml(p.reason || '')}</span></p>
+        <span class="sig-tag">Timeline · awaiting your OK</span>
+        <span style="display:flex;gap:8px;margin-top:8px;">
+          <button class="btn btn-brass btn-sm" data-tl-approve="${escapeHtml(p.id)}">Approve</button>
+          <button class="btn btn-ghost btn-sm" data-tl-reject="${escapeHtml(p.id)}">Dismiss</button>
+        </span>
+      </article>`).join('');
+    grid.insertAdjacentHTML('afterbegin', html);
+    grid.querySelectorAll('[data-tl-approve],[data-tl-reject]').forEach((btn) => {
+      btn.addEventListener('click', async () => {
+        const approve = btn.hasAttribute('data-tl-approve');
+        const id = btn.getAttribute(approve ? 'data-tl-approve' : 'data-tl-reject');
+        btn.disabled = true; btn.textContent = approve ? 'Applying…' : 'Dismissing…';
+        const r = await api('/api/crm/timeline', { body: { op: approve ? 'approve' : 'reject', proposal_id: id } });
+        const card = grid.querySelector(`[data-tlprop="${id}"]`);
+        if (r.ok && card) {
+          card.style.opacity = '.45';
+          card.querySelectorAll('button').forEach((b) => b.remove());
+          card.insertAdjacentHTML('beforeend', `<span class="sig-tag">${approve ? '✓ Applied — seller page updated' : 'Dismissed'}</span>`);
+        } else if (!r.ok) { btn.disabled = false; btn.textContent = approve ? 'Approve' : 'Dismiss'; }
+      });
+    });
   }
 
   function paintSignals(signals) {

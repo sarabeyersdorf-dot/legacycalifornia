@@ -1,69 +1,172 @@
 {
   "rewrites": [
-    { "source": "/c/:token", "destination": "/collection.html" },
-    { "source": "/my-listing", "destination": "/my-listing.html" },
-    { "source": "/listing", "destination": "/listing.html" },
-    { "source": "/listing/:path*", "destination": "/listing.html" },
-    { "source": "/listing-report", "destination": "/listing-report.html" },
-    { "source": "/listing-report/:path*", "destination": "/listing-report.html" },
-    { "source": "/open-home-report", "destination": "/open-home-report.html" },
-    { "source": "/open-home-report/:path*", "destination": "/open-home-report.html" },
-    { "source": "/agent", "destination": "/agent.html" },
-    { "source": "/agent/:path*", "destination": "/agent.html" },
-    { "source": "/office", "destination": "/office.html" },
-    { "source": "/office/:path*", "destination": "/office.html" }
+    {
+      "source": "/c/:token",
+      "destination": "/collection.html"
+    },
+    {
+      "source": "/my-listing",
+      "destination": "/my-listing.html"
+    },
+    {
+      "source": "/listing",
+      "destination": "/listing.html"
+    },
+    {
+      "source": "/listing/:path*",
+      "destination": "/listing.html"
+    },
+    {
+      "source": "/listing-report",
+      "destination": "/listing-report.html"
+    },
+    {
+      "source": "/listing-report/:path*",
+      "destination": "/listing-report.html"
+    },
+    {
+      "source": "/open-home-report",
+      "destination": "/open-home-report.html"
+    },
+    {
+      "source": "/open-home-report/:path*",
+      "destination": "/open-home-report.html"
+    },
+    {
+      "source": "/agent",
+      "destination": "/agent.html"
+    },
+    {
+      "source": "/agent/:path*",
+      "destination": "/agent.html"
+    },
+    {
+      "source": "/office",
+      "destination": "/office.html"
+    },
+    {
+      "source": "/office/:path*",
+      "destination": "/office.html"
+    }
   ],
   "redirects": [
-    { "source": "/listings", "destination": "/property-search.html", "permanent": true },
-    { "source": "/listings.html", "destination": "/property-search.html", "permanent": true },
-    { "source": "/open-houses", "destination": "/open-home-listings.html", "permanent": true },
-    { "source": "/open-houses.html", "destination": "/open-home-listings.html", "permanent": true }
+    {
+      "source": "/listings",
+      "destination": "/property-search.html",
+      "permanent": true
+    },
+    {
+      "source": "/listings.html",
+      "destination": "/property-search.html",
+      "permanent": true
+    },
+    {
+      "source": "/open-houses",
+      "destination": "/open-home-listings.html",
+      "permanent": true
+    },
+    {
+      "source": "/open-houses.html",
+      "destination": "/open-home-listings.html",
+      "permanent": true
+    }
   ],
   "headers": [
     {
       "source": "/api/crm/briefing-(calendar|feedback)",
       "headers": [
-        { "key": "Cache-Control", "value": "private, no-store, no-cache, must-revalidate" },
-        { "key": "CDN-Cache-Control", "value": "no-store" },
-        { "key": "Vercel-CDN-Cache-Control", "value": "no-store" }
+        {
+          "key": "Cache-Control",
+          "value": "private, no-store, no-cache, must-revalidate"
+        },
+        {
+          "key": "CDN-Cache-Control",
+          "value": "no-store"
+        },
+        {
+          "key": "Vercel-CDN-Cache-Control",
+          "value": "no-store"
+        }
       ]
     },
     {
       "source": "/api/photo",
       "headers": [
-        { "key": "Cache-Control", "value": "public, max-age=86400, s-maxage=604800, immutable" }
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=86400, s-maxage=604800, immutable"
+        }
       ]
     },
     {
       "source": "/api/listings(.*)",
       "headers": [
-        { "key": "Cache-Control", "value": "public, s-maxage=900, stale-while-revalidate=1800" }
+        {
+          "key": "Cache-Control",
+          "value": "public, s-maxage=900, stale-while-revalidate=1800"
+        }
       ]
     },
     {
       "source": "/api/listing(.*)",
       "headers": [
-        { "key": "Cache-Control", "value": "public, s-maxage=900, stale-while-revalidate=1800" }
+        {
+          "key": "Cache-Control",
+          "value": "public, s-maxage=900, stale-while-revalidate=1800"
+        }
       ]
     },
     {
       "source": "/api/(crm|me|seller|auth|ai|sequences|curate|c|leads|fub|cron|idx)(.*)",
       "headers": [
-        { "key": "Cache-Control", "value": "private, no-store, max-age=0" },
-        { "key": "Vary", "value": "Cookie" }
+        {
+          "key": "Cache-Control",
+          "value": "private, no-store, max-age=0"
+        },
+        {
+          "key": "Vary",
+          "value": "Cookie"
+        }
       ]
     }
   ],
   "functions": {
-    "api/*.js": { "memory": 256, "maxDuration": 10 },
-    "api/idx/[action].js": { "memory": 512, "maxDuration": 60 },
-    "api/sequences/[action].js": { "memory": 256, "maxDuration": 60 },
-    "api/cron/flag-matches.js": { "maxDuration": 60 }
+    "api/*.js": {
+      "memory": 256,
+      "maxDuration": 10
+    },
+    "api/idx/[action].js": {
+      "memory": 512,
+      "maxDuration": 60
+    },
+    "api/sequences/[action].js": {
+      "memory": 256,
+      "maxDuration": 60
+    },
+    "api/cron/flag-matches.js": {
+      "maxDuration": 60
+    }
   },
   "crons": [
-    { "path": "/api/cron/sync-deals", "schedule": "0 * * * *" },
-    { "path": "/api/idx/sync", "schedule": "0 */3 * * *" },
-    { "path": "/api/cron/flag-matches", "schedule": "15 */3 * * *" },
-    { "path": "/api/sequences/cron", "schedule": "0 * * * *" }
+    {
+      "path": "/api/cron/sync-deals",
+      "schedule": "0 * * * *"
+    },
+    {
+      "path": "/api/idx/sync",
+      "schedule": "0 */3 * * *"
+    },
+    {
+      "path": "/api/cron/flag-matches",
+      "schedule": "15 */3 * * *"
+    },
+    {
+      "path": "/api/sequences/cron",
+      "schedule": "0 * * * *"
+    },
+    {
+      "path": "/api/cron/timeline-scan",
+      "schedule": "30 13 * * *"
+    }
   ]
 }

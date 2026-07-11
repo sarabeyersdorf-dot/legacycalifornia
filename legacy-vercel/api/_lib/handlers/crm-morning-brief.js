@@ -207,6 +207,19 @@ export default async function handler(req, res) {
       }
     } catch (_) { /* nudges are a bonus, never a blocker */ }
 
+    // Timeline updates awaiting approval — filed by the daily scan / Cowork,
+    // applied to the seller-facing timeline ONLY when the agent approves.
+    result.timeline_approvals = [];
+    try {
+      const { data: props } = await supa
+        .from('deal_timeline_proposals')
+        .select('id, deal_id, item_key, address, change, reason, source, created_at')
+        .eq('status', 'pending')
+        .order('created_at', { ascending: true })
+        .limit(12);
+      result.timeline_approvals = props || [];
+    } catch (_) { /* table may not exist yet — brief must load */ }
+
     result.recent_comms = [];
     result.review_pending_count = 0;
     try {

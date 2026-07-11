@@ -205,6 +205,70 @@ function emptyPortal(user, profile) {
 // ---------------------------------------------------------------------------
 // Main handler
 // ---------------------------------------------------------------------------
+
+// ---------------------------------------------------------------------------
+// Escrow timeline → paint-ready "road", "tasks", "team", "kpis" sections.
+// Items come from deal_timeline_items (the agent-approved state — proposals
+// pending approval are invisible to clients).
+// ---------------------------------------------------------------------------
+const fmtDayLabel = (d) => {
+  if (!d) return 'TBD';
+  const dt = new Date(String(d).slice(0, 10) + 'T12:00:00Z');
+  return dt.toLocaleDateString('en-US', { month: 'short', day: 'numeric', timeZone: 'UTC' }).toUpperCase();
+};
+
+async function timelineSections(supa, deal) {
+  const { data: items } = await supa
+    .from('deal_timeline_items')
+    .select('*')
+    .eq('deal_id', deal.id).eq('client_visible', true)
+    .order('sort_order').order('due_date', { ascending: true, nullsFirst: false });
+  const rows = items || [];
+  const OWNER_LABEL = { seller: 'your side', buyer: "buyer's side", escrow: 'escrow', agent: 'Sara', both: 'everyone' };
+
+  let nextMarked = false;
+  const road = rows.map((it) => {
+    let status = '';
+    if (it.status === 'done') status = 'done';
+    else if (it.status === 'action') status = 'key';
+    else if (!nextMarked && ['upcoming'].includes(it.status)) { status = 'next'; nextMarked = true; }
+    const bits = [];
+    if (it.plain) bits.push(it.plain);
+    if (it.detail) bits.push(it.detail);
+    if (it.status !== 'done' && it.due_date) bits.push(`Expected ${fmtDayLabel(it.due_date)} · ${OWNER_LABEL[it.owner] || it.owner}.`);
+    if (it.status === 'done') bits.push('Done.');
+    if (it.status === 'waived') bits.push('Waived — not needed for this sale.');
+    return {
+      date: fmtDayLabel(it.status === 'done' && it.done_at ? it.done_at : it.due_date),
+      label: it.title,
+      description: bits.join(' '),
+      status
+    };
+  });
+
+  const tasks = rows
+    .filter((it) => ['seller', 'both'].includes(it.owner) && ['upcoming', 'action'].includes(it.status))
+    .map((it) => ({
+      label: it.title,
+      when: it.status === 'action' ? 'Needs you now' : (it.due_date ? `Due ${fmtDayLabel(it.due_date)}` : 'When ready')
+    }));
+
+  const team = [
+    { name: 'Sara Cooper', sub: 'Your agent · Legacy Properties', access: '209.559.4966' },
+    deal.escrow_officer ? { name: deal.escrow_officer, sub: `Escrow · ${deal.title_company || 'Title company'}`, access: 'Via Sara' } : null
+  ].filter(Boolean);
+
+  const doneCount = rows.filter((it) => it.status === 'done').length;
+  const kpis = [
+    { label: 'Sale price', value: fmtUSDFull(deal.sale_price || deal.list_price), change: '' },
+    { label: 'Close of escrow', value: deal.coe_date ? fmtDayLabel(deal.coe_date) : 'TBD', change: '' },
+    { label: 'Steps complete', value: `${doneCount} of ${rows.length}`, change: '' },
+    { label: 'Escrow', value: deal.title_company || '—', change: deal.escrow_officer || '' }
+  ];
+
+  return { road, tasks, team, kpis };
+}
+
 export default async function handler(req, res) {
   if (handleOptions(req, res)) return;
   if (req.method !== 'GET') return fail(res, 405, 'method_not_allowed');
@@ -221,6 +285,35 @@ export default async function handler(req, res) {
     }
 
     const supa = adminClient();
+
+    // Agent preview of a specific deal's escrow timeline:
+    // /seller.html?deal=<source_key> → /api/seller/portal?deal=<source_key>
+    if (isAgent(profile) && req.query?.deal) {
+      const { data: deal } = await supa.from('deals').select('*').eq('source_key', req.query.deal).maybeSingle();
+      if (!deal) return fail(res, 404, 'deal not found');
+      const tl = await timelineSections(supa, deal);
+      const client = deal.listing_meta?.client || 'Your clients';
+      return ok(res, { portal: {
+        seller: { initials: 'P', name: String(client), meta: 'ESCROW · AGENT PREVIEW' },
+        listing: {
+          photo: deal.photo_override || deal.photo_url || null,
+          badge: 'In escrow',
+          headline_em: 'The road to closing.',
+          headline_rest: '',
+          address: [deal.address, deal.city].filter(Boolean).join(', '),
+          price: fmtUSDFull(deal.sale_price || deal.list_price),
+          price_sub: deal.coe_date ? `Close of escrow ${fmtDate(deal.coe_date)}` : '',
+          listed_since: ''
+        },
+        sara_note: {
+          head: 'A note from Sara',
+          body: 'This is the live transaction timeline your sellers see — every step, in plain English, updated as things complete.',
+          sign: '— Sara · (209) 559-4966'
+        },
+        road: tl.road, tasks: tl.tasks, team: tl.team,
+        documents: [], kpis: tl.kpis
+      } });
+    }
 
     // 1. Resolve the seller's lead
     let lead = null;
@@ -614,6 +707,29 @@ export default async function handler(req, res) {
       sharing,
       media
     };
+
+    // 15. Escrow timeline — when this listing has a live deal, the portal grows
+    // "The road to closing", "what we need from you", and the escrow team.
+    // Fail-soft: the portal never breaks if the timeline tables aren't there.
+    try {
+      let deal = null;
+      if (listing.mls_number) {
+        const { data } = await supa.from('deals').select('*').eq('mls_number', String(listing.mls_number)).limit(1);
+        deal = (data && data[0]) || null;
+      }
+      if (!deal && listing.address) {
+        const { data } = await supa.from('deals').select('*').ilike('address', listing.address).limit(1);
+        deal = (data && data[0]) || null;
+      }
+      if (deal) {
+        const tl = await timelineSections(supa, deal);
+        if (tl.road.length) {
+          portal.road  = tl.road;
+          portal.tasks = tl.tasks;
+          portal.team  = tl.team;
+        }
+      }
+    } catch (_) { /* timeline is additive, never a blocker */ }
 
     return ok(res, { portal });
   } catch (e) {
