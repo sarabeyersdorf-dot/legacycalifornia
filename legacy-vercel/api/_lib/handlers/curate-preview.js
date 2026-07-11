@@ -45,7 +45,7 @@ export default async function handler(req, res) {
     const lead = coll.leads || null;
     const firstName = lead?.first_name || '';
     const sms   = buildPushMessage({ coll, agent: agentRow, channel: 'sms',   firstName });
-    const email = buildPushMessage({ coll, agent: agentRow, channel: 'email', firstName });
+    const email = buildPushMessage({ coll, agent: agentRow, channel: 'email', firstName, listings: payload.listings || [] });
 
     return ok(res, {
       ...payload,

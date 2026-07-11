@@ -14,7 +14,7 @@ import { sendSMS } from '../twilio.js';
 import { sendEmail as sendEmailResend, resendConfigured } from '../resend.js';
 import { sendEmail as sendEmailSendgrid, sendgridConfigured } from '../sendgrid.js';
 import { handleOptions, readJson, ok, fail } from '../cors.js';
-import { buildPushMessage, agentIdentity } from '../collection-render.js';
+import { buildPushMessage, agentIdentity, buildClientPayload } from '../collection-render.js';
 
 const agentKey = (profile) => (profile.role === 'agent_james' ? 'james' : 'sara');
 
@@ -64,8 +64,10 @@ export default async function handler(req, res) {
     const to = b?.to || (channel === 'sms' ? lead?.phone : lead?.email);
     if (!to) return fail(res, 422, channel === 'sms' ? 'no phone on file for this client' : 'no email on file for this client');
 
-    // Build the EXACT message the preview shows — one source of truth.
-    const msg = buildPushMessage({ coll, agent: agentRow, channel, firstName, message: b?.message, subject: b?.subject });
+    // Build the EXACT message the preview shows — one source of truth. The
+    // client payload supplies the shaped listings for the email's photo cards.
+    const payload = channel === 'email' ? await buildClientPayload(supa, coll) : null;
+    const msg = buildPushMessage({ coll, agent: agentRow, channel, firstName, message: b?.message, subject: b?.subject, listings: payload?.listings || [] });
     const link = msg.link;
 
     // Flip to active so the link is live
