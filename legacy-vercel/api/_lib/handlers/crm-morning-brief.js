@@ -122,7 +122,7 @@ export default async function handler(req, res) {
     // broker-owner (Sara / admin) sees the whole brokerage.
     let dealsQ = supa
       .from('deals')
-      .select('source_key, address, city, stage, side, agent, list_price, sale_price, coe_date')
+      .select('source_key, address, city, stage, side, agent, list_price, sale_price, coe_date, listing_meta')
       .in('stage', ['offer', 'pending'])
       .order('coe_date', { ascending: true, nullsFirst: false })
       .limit(8);

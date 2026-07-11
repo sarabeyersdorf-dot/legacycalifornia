@@ -473,7 +473,10 @@
         "Confirm appraisal type: ordered FHA, may need FHA 203K",
         "Septic inspection complete — CLEAN",
         "7/20 is escrow placeholder only — not a firm COE"
-      ]
+      ],
+      "listing": {
+        "commission": "3%"
+      }
     },
     {
       "id": "8235-baldwin",
@@ -584,7 +587,10 @@
         "Buyer contingencies (due 7/6) handled via ETA1 — CONFIRMED filed in EX, reflected in deals.json 7/11 ✅",
         "FHA 203(k) rehab loan — watch lender/appraisal milestones",
         "Escrow/title CONFIRMED: Chicago Title, Order #FSST-5312600364 (Sara 6/24); full NHD report received 6/23"
-      ]
+      ],
+      "listing": {
+        "commission": "3%"
+      }
     },
     {
       "id": "7230-latigo",
@@ -747,7 +753,10 @@
         "Vehicle/trailer addendum + EMD Addendum #2 still awaiting SELLER signatures via Mitzi (chased 7/6)",
         "Sara's buyer's-agent AVID out for signatures 7/9",
         "Final walkthrough ~7/15 (not yet scheduled); COE Mon 7/20"
-      ]
+      ],
+      "listing": {
+        "commission": "3%"
+      }
     },
     {
       "id": "offer-6240-michel",

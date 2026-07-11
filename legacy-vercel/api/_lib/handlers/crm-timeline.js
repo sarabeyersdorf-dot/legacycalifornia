@@ -48,7 +48,8 @@ export default async function handler(req, res) {
   // convention as briefing-feedback / briefing-calendar): pending-proposals
   // list ONLY. Approve/reject/edit always require a signed-in agent session.
   const syncSecret = process.env.SYNC_SECRET || process.env.BRIEFING_FEEDBACK_SECRET;
-  if (req.method === 'GET' && req.query?.proposals === 'all' && syncSecret && req.query?.key === syncSecret) {
+  const hasKey = syncSecret && req.query?.key === syncSecret;
+  if (req.method === 'GET' && req.query?.proposals === 'all' && hasKey) {
     try {
       const supaK = adminClient();
       const { data, error } = await supaK.from('deal_timeline_proposals')
@@ -56,6 +57,42 @@ export default async function handler(req, res) {
         .eq('status', 'pending').order('created_at', { ascending: true }).limit(50);
       if (error) return fail(res, 500, error.message);
       return ok(res, { proposals: data || [] });
+    } catch (e) { return fail(res, 500, e.message); }
+  }
+  // Key-gated READ of one deal's items (the briefing reconciles executed docs
+  // in the Dropbox file against the timeline) …
+  if (req.method === 'GET' && req.query?.source_key && hasKey) {
+    try {
+      const supaK = adminClient();
+      const { data: deal } = await supaK.from('deals').select('id, source_key, address, stage, coe_date').eq('source_key', req.query.source_key).maybeSingle();
+      if (!deal) return fail(res, 404, 'deal not found');
+      const { data: items } = await supaK.from('deal_timeline_items').select('id, key, kind, title, owner, due_date, status, done_at').eq('deal_id', deal.id).order('sort_order');
+      return ok(res, { deal, items: items || [] });
+    } catch (e) { return fail(res, 500, e.message); }
+  }
+  // … and key-gated PROPOSE only (source forced to 'cowork'; approval stays a
+  // signed-in-agent action, so nothing client-facing changes without Sara).
+  if (req.method === 'POST' && hasKey) {
+    try {
+      const supaK = adminClient();
+      const b = await readJson(req);
+      if (b?.op !== 'propose') return fail(res, 403, 'key access allows op:propose only');
+      if (!b?.deal_id || !b?.change) return fail(res, 400, 'deal_id and change required');
+      let item = null;
+      if (b.item_id) ({ data: item } = await supaK.from('deal_timeline_items').select('*').eq('id', b.item_id).maybeSingle());
+      else if (b.item_key) ({ data: item } = await supaK.from('deal_timeline_items').select('*').eq('deal_id', b.deal_id).eq('key', b.item_key).maybeSingle());
+      if (!item) return fail(res, 404, 'timeline item not found');
+      const { count } = await supaK.from('deal_timeline_proposals').select('id', { count: 'exact', head: true }).eq('item_id', item.id).eq('status', 'pending');
+      if (count > 0) return ok(res, { deduped: true });
+      const { data: deal } = await supaK.from('deals').select('address, city').eq('id', b.deal_id).maybeSingle();
+      const { data, error } = await supaK.from('deal_timeline_proposals').insert({
+        deal_id: b.deal_id, item_id: item.id, item_key: item.key,
+        address: deal ? [deal.address, deal.city].filter(Boolean).join(', ') : null,
+        change: pick(b.change, ITEM_FIELDS), reason: (b.reason || '').toString().slice(0, 500) || null,
+        source: 'cowork'
+      }).select('id').single();
+      if (error) return fail(res, 500, error.message);
+      return ok(res, { proposal: data });
     } catch (e) { return fail(res, 500, e.message); }
   }
 
