@@ -89,8 +89,11 @@ function parseDateTime(date, time) {
 function icsStamp(d) {
   return `${d.getUTCFullYear()}${pad2(d.getUTCMonth() + 1)}${pad2(d.getUTCDate())}T${pad2(d.getUTCHours())}${pad2(d.getUTCMinutes())}${pad2(d.getUTCSeconds())}Z`;
 }
-function buildICS({ uid, start, end, summary, description, location, attendeeEmail, attendeeName, stamp }) {
+function buildICS({ uid, start, end, summary, description, location, attendeeEmail, attendeeName, attendees = [], stamp }) {
   const esc = (s) => String(s || '').replace(/([,;\\])/g, '\\$1').replace(/\n/g, '\\n');
+  const att = [];
+  if (attendeeEmail) att.push({ email: attendeeEmail, name: attendeeName });
+  for (const a of attendees) if (a && a.email && !att.some((x) => x.email === a.email)) att.push(a);
   return [
     'BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//Legacy Properties//Calendar//EN', 'METHOD:REQUEST', 'CALSCALE:GREGORIAN',
     'BEGIN:VEVENT',
@@ -102,7 +105,7 @@ function buildICS({ uid, start, end, summary, description, location, attendeeEma
     description ? `DESCRIPTION:${esc(description)}` : null,
     location ? `LOCATION:${esc(location)}` : null,
     `ORGANIZER;CN=${esc(ORGANIZER_NAME)}:mailto:${ORGANIZER_EMAIL}`,
-    attendeeEmail ? `ATTENDEE;CN=${esc(attendeeName || attendeeEmail)};RSVP=TRUE:mailto:${attendeeEmail}` : null,
+    ...att.map((a) => `ATTENDEE;CN=${esc(a.name || a.email)};RSVP=TRUE:mailto:${a.email}`),
     'STATUS:CONFIRMED', 'END:VEVENT', 'END:VCALENDAR'
   ].filter(Boolean).join('\r\n');
 }
@@ -133,6 +136,8 @@ export default async function handler(req, res) {
 // ---------------------------------------------------------------------------
 async function listWeek(req, res, supa) {
   const weekOffset = parseInt(req.query?.week, 10) || 0;
+  // span: how many weeks in one payload (month grid asks for 5).
+  const span = Math.min(Math.max(parseInt(req.query?.span, 10) || 1, 1), 6);
   const now = new Date();
   const today = laParts(now);
   const dowIdx = Math.max(0, DOW.indexOf(today.dow));
@@ -140,15 +145,15 @@ async function listWeek(req, res, supa) {
   const todayKey = dkey(today);
 
   const days = [];
-  for (let i = 0; i < 7; i++) {
+  for (let i = 0; i < span * 7; i++) {
     const dt = ymdShift(monday.y, monday.m, monday.d, i);
-    days.push({ dow: DOW[i], num: dt.d, date: dkey(dt), is_today: dkey(dt) === todayKey });
+    days.push({ dow: DOW[i % 7], num: dt.d, month: dt.m, date: dkey(dt), is_today: dkey(dt) === todayKey });
   }
   const dayIndex = {};
   days.forEach((d, i) => { dayIndex[d.date] = i; });
 
   const first = ymdShift(monday.y, monday.m, monday.d, 0);
-  const last = ymdShift(monday.y, monday.m, monday.d, 6);
+  const last = ymdShift(monday.y, monday.m, monday.d, span * 7 - 1);
   const range = first.m === last.m
     ? `${MONTHS[first.m - 1]} ${first.d} – ${last.d}, ${last.y}`
     : `${MONTHS[first.m - 1]} ${first.d} – ${MONTHS[last.m - 1]} ${last.d}, ${last.y}`;
@@ -314,7 +319,11 @@ async function createOrInvite(req, res, supa, agent) {
       ins = await supa.from('appointments').insert(rowBase).select('id, title, kind, starts_at, duration_minutes').single();
     }
     if (ins.error) return fail(res, 500, `appointment create: ${ins.error.message}`);
-    return ok(res, { appointment: ins.data, source: 'appointment' });
+    let invite = null;
+    if (body?.send_invite && leadId) {
+      invite = await inviteForEvent(supa, 'appointment', ins.data.id, body?.invitees || []).catch((e) => ({ error: e.message }));
+    }
+    return ok(res, { appointment: ins.data, source: 'appointment', invite });
   }
 
   // Client tour
@@ -351,7 +360,7 @@ async function createOrInvite(req, res, supa, agent) {
 
   let invite = null;
   if (body?.send_invite && lead.email) {
-    invite = await inviteForEvent(supa, 'tour', tour.id).catch((e) => ({ error: e.message }));
+    invite = await inviteForEvent(supa, 'tour', tour.id, body?.invitees || []).catch((e) => ({ error: e.message }));
   }
   return ok(res, { tour, source: 'tour', lead: { id: lead.id, email: lead.email }, invite });
 }
@@ -432,7 +441,7 @@ async function sendInvite(req, res, supa, body) {
   return ok(res, result);
 }
 
-async function inviteForEvent(supa, source, id) {
+async function inviteForEvent(supa, source, id, extraInvitees = []) {
   const stamp = new Date();
   let start, dur, summary, location = null, email, name, description;
 
@@ -463,9 +472,23 @@ async function inviteForEvent(supa, source, id) {
   const end = new Date(start.getTime() + dur * 60000);
   const p = laParts(start);
   const whenText = `${DOW[(new Date(start).getUTCDay() + 6) % 7]}, ${MONTHS[p.m - 1]} ${p.d} at ${timeLabel(p.hour, p.minute)} (Pacific)`;
+  // Both agents ride along as attendees so the .ics lands on their external
+  // calendars too; extra invitees (TCs, lenders, co-op agents) are attendees
+  // AND receive the invite email.
+  let agentAttendees = [];
+  try {
+    const { data: ags } = await supa.from('agents').select('name, email').in('agent_key', ['sara', 'james']);
+    agentAttendees = (ags || []).filter((a) => a.email).map((a) => ({ email: a.email, name: a.name }));
+  } catch (_) {}
+  const invitees = (extraInvitees || [])
+    .map((e) => String(e || '').trim().toLowerCase())
+    .filter((e) => EMAIL_RE.test(e) && e !== (email || '').toLowerCase())
+    .slice(0, 8)
+    .map((e) => ({ email: e }));
   const ics = buildICS({
     uid: `${source}-${id}@legacycalifornia`, start, end, stamp,
-    summary, description, location, attendeeEmail: email, attendeeName: name
+    summary, description, location, attendeeEmail: email, attendeeName: name,
+    attendees: [...invitees, ...agentAttendees]
   });
 
   if (!resendConfigured()) {
@@ -478,9 +501,14 @@ async function inviteForEvent(supa, source, id) {
     <p>The calendar invite is attached — open it to add this to your calendar. If anything changes, just reply or call me at (209) 559-4966.</p>
     <p>— Sara Cooper<br>Legacy Properties</p>
   </div>`;
+  const attachment = [{ filename: 'invite.ics', content: Buffer.from(ics, 'utf8').toString('base64') }];
   const emailRes = await sendEmail({
     to: email, toName: name, subject: `Invite: ${summary} — ${whenText}`,
-    html, attachments: [{ filename: 'invite.ics', content: Buffer.from(ics, 'utf8').toString('base64') }]
+    html, attachments: attachment
   });
-  return { invited: !emailRes.skipped, to: email, when: whenText, email: emailRes };
+  // Extra invitees get the same invite (fail-soft per recipient).
+  for (const inv of invitees) {
+    try { await sendEmail({ to: inv.email, subject: `Invite: ${summary} — ${whenText}`, html, attachments: attachment }); } catch (_) {}
+  }
+  return { invited: !emailRes.skipped, to: email, also_invited: invitees.map((i) => i.email), when: whenText, email: emailRes };
 }

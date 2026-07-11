@@ -390,6 +390,7 @@
             <div class="cal-view-toggle">
               <button class="on" data-cal-view="agenda">Agenda</button>
               <button data-cal-view="week">Week</button>
+              <button data-cal-view="month">Month</button>
             </div>
             <button class="btn btn-ink btn-sm" data-cal-new>+ New event</button>
           </div>
@@ -398,6 +399,7 @@
         <div class="cal-legend" data-cal-legend></div>
         <div class="cal-agenda" data-cal-agenda></div>
         <div class="cal-week" data-cal-week style="display:none;"></div>
+            <div data-cal-month style="display:none;"></div>
       </div>
     </section>
 
@@ -1029,6 +1031,15 @@
     .cc-vtog:disabled { opacity: .5; cursor: default; }
     .cc-vhint { margin-top: 10px; font-size: 11px; color: var(--ink-mute); line-height: 1.5; }
     .cc-vhint.warn { color: #A23B26; }
+    .calm-grid { display:grid; grid-template-columns:repeat(7,1fr); gap:1px; background:var(--rule); border:1px solid var(--rule); }
+    .calm-cell { background:var(--shell); min-height:96px; padding:6px 7px; font-family:var(--sans); }
+    .calm-cell.other { background:var(--linen); opacity:.75; }
+    .calm-cell.today { outline:2px solid var(--brass); outline-offset:-2px; }
+    .calm-num { font-size:11px; font-weight:600; color:var(--ink-mute); }
+    .calm-cell.today .calm-num { color:var(--brass); }
+    .calm-ev { display:block; font-size:10.5px; line-height:1.35; padding:2px 5px; margin-top:3px; border-radius:3px; border-left:3px solid var(--brass); background:var(--linen); color:var(--ink); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; cursor:pointer; }
+    .calm-more { font-size:10px; color:var(--ink-mute); margin-top:2px; }
+    .calm-head { display:grid; grid-template-columns:repeat(7,1fr); font-family:var(--sans); font-size:10.5px; font-weight:600; letter-spacing:.08em; text-transform:uppercase; color:var(--ink-mute); padding:0 1px 6px; }
     .cc-extras { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 14px; margin-top: 16px; }
     .cc-panel { background: var(--shell); border: 1px solid var(--rule); padding: 16px 18px; }
     .cc-tl-item { display: flex; gap: 10px; align-items: baseline; padding: 6px 0; border-bottom: 1px dashed var(--rule); font-family: var(--sans); font-size: 13.5px; }

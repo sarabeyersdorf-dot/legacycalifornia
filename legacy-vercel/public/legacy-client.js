@@ -2288,7 +2288,12 @@
 
     // Schedule → jump to the Calendar view (booking lives there).
     const schedBtn = detailEl.querySelector('[data-detail-action="schedule"]');
-    if (schedBtn) schedBtn.addEventListener('click', () => { if (typeof window.showView === 'function') window.showView(null, 'cal'); });
+    if (schedBtn) schedBtn.addEventListener('click', () => {
+      if (typeof window.showView === 'function') window.showView(null, 'cal');
+      if (typeof window.__openEventCreate === 'function') {
+        window.__openEventCreate({ name: fullName(lead), email: lead.email || '', kind: 'tour' });
+      }
+    });
 
     // Copy the client's private, no-login portal link.
     const portalBtn = detailEl.querySelector('[data-detail-action="portal-link"]');
@@ -3485,7 +3490,7 @@
     if (offset != null) cal.week = offset;
     const agendaEl = document.querySelector('[data-cal-agenda]');
     if (!agendaEl) return;
-    const data = await getJSON(`/api/crm/calendar?week=${cal.week}`);
+    const data = await getJSON(`/api/crm/calendar?week=${cal.week}&span=${cal.view === 'month' ? 5 : 1}`);
     if (!data || !Array.isArray(data.days)) return;
     cal.days = data.days; cal.events = data.events || []; cal.label = data.week_label || '';
     cal.deals = data.deals || [];
@@ -3533,10 +3538,32 @@
     }).join('');
   }
 
+  function renderMonth() {
+    const el = document.querySelector('[data-cal-month]');
+    if (!el) return;
+    const byDate = {};
+    visibleEvents().forEach((ev) => { (byDate[ev.date] = byDate[ev.date] || []).push(ev); });
+    const cells = cal.days.map((d) => {
+      const evs = byDate[d.date] || [];
+      const shown = evs.slice(0, 3).map((ev) => {
+        const c = dealColorFor(ev.deal_key);
+        return `<span class="calm-ev" data-ev-key="${esc(ev.source + ':' + ev.id)}" style="${c ? `border-left-color:${c.border};background:${c.bg};` : ''}" title="${esc(ev.title || '')}">${esc((ev.time_label ? ev.time_label + ' ' : '') + (ev.title || ''))}</span>`;
+      }).join('');
+      const more = evs.length > 3 ? `<span class="calm-more">+${evs.length - 3} more</span>` : '';
+      const thisMonth = cal.days[7] ? d.month === cal.days[7].month : true;
+      return `<div class="calm-cell${d.is_today ? ' today' : ''}${thisMonth ? '' : ' other'}"><span class="calm-num">${d.num}</span>${shown}${more}</div>`;
+    }).join('');
+    el.innerHTML = `<div class="calm-head">${['Mon','Tue','Wed','Thu','Fri','Sat','Sun'].map((d) => `<span>${d}</span>`).join('')}</div><div class="calm-grid">${cells}</div>`;
+  }
+
   function renderCalendar() {
     const agendaEl = document.querySelector('[data-cal-agenda]');
     const weekEl = document.querySelector('[data-cal-week]');
+    const monthEl = document.querySelector('[data-cal-month]');
     if (!agendaEl || !weekEl) return;
+    if (monthEl) monthEl.style.display = cal.view === 'month' ? '' : 'none';
+    if (cal.view === 'month') { agendaEl.style.display = 'none'; weekEl.style.display = 'none'; renderLegend(); renderMonth(); return; }
+    agendaEl.style.display = ''; weekEl.style.display = '';
     renderLegend();
     document.querySelectorAll('[data-cal-view]').forEach((b) => b.classList.toggle('on', b.getAttribute('data-cal-view') === cal.view));
     if (cal.view === 'week') { agendaEl.style.display = 'none'; weekEl.style.display = ''; renderWeek(weekEl); }
@@ -3633,11 +3660,21 @@
     const prev = document.querySelector('[data-cal-prev]');
     const next = document.querySelector('[data-cal-next]');
     const today = document.querySelector('[data-cal-today]');
-    if (prev)  prev.addEventListener('click', () => loadCalendar(cal.week - 1));
-    if (next)  next.addEventListener('click', () => loadCalendar(cal.week + 1));
+    const step = () => (cal.view === 'month' ? 5 : 1);
+    if (prev)  prev.addEventListener('click', () => loadCalendar(cal.week - step()));
+    if (next)  next.addEventListener('click', () => loadCalendar(cal.week + step()));
     if (today) today.addEventListener('click', () => loadCalendar(0));
     document.querySelectorAll('[data-cal-view]').forEach((b) => {
-      b.addEventListener('click', () => { cal.view = b.getAttribute('data-cal-view'); renderCalendar(); });
+      b.addEventListener('click', () => {
+        const wasMonth = cal.view === 'month';
+        cal.view = b.getAttribute('data-cal-view');
+        document.querySelectorAll('[data-cal-view]').forEach((x) => x.classList.toggle('on', x === b));
+        const isMonth = cal.view === 'month';
+        if (isMonth !== wasMonth) { loadCalendar(cal.week); return; }   // span changes → refetch
+        const a = document.querySelector('[data-cal-agenda]'), w = document.querySelector('[data-cal-week]');
+        if (a) a.style.display = ''; if (w) w.style.display = '';
+        renderCalendar();
+      });
     });
     // View-by-deal dropdown → filter the calendar to one deal.
     const dealSel = document.querySelector('[data-cal-deal]');
@@ -3729,7 +3766,8 @@
   // ---- Calendar create / edit / detail modals ---------------------------
   function mondayOf(dt) { const x = new Date(dt); const day = (x.getDay() + 6) % 7; x.setDate(x.getDate() - day); x.setHours(0, 0, 0, 0); return x; }
 
-  function openEventCreate() {
+  function openEventCreate(prefill) {
+    prefill = prefill || {};
     const m = modalShell('Add to calendar', 'A tour is tied to a client; a listing appt, showing, follow-up, inspection, call, or block is a general event (add a client email to share it to their portal).');
     m.body.innerHTML = `
       <div style="display:flex;flex-direction:column;gap:10px;">
@@ -3743,6 +3781,10 @@
           <option value="block">Block / personal</option>
           <option value="open">Open house</option>
           <option value="meeting">Meeting</option></select></div>
+        <div><label style="${M_LAB}">Client</label>
+          <input data-f-clientsearch placeholder="Search your contacts by name, email, phone…" style="${M_INPUT}" autocomplete="off">
+          <div data-f-clientresults style="position:relative;"></div>
+        </div>
         <div data-tour-fields style="display:flex;flex-direction:column;gap:10px;">
           <div><label style="${M_LAB}">Client email</label><input data-f-email type="email" placeholder="client@example.com" style="${M_INPUT}"></div>
           <div style="display:flex;gap:10px;">
@@ -3771,6 +3813,8 @@
           <div style="flex:0 0 120px;"><label style="${M_LAB}">Time</label><input data-f-time type="time" style="${M_INPUT}"></div>
           <div style="flex:0 0 110px;"><label style="${M_LAB}">Minutes</label><input data-f-dur type="number" min="15" step="15" value="30" style="${M_INPUT}"></div>
         </div>
+        <div><label style="${M_LAB}">Link to deal <span style="text-transform:none;letter-spacing:0;">(optional)</span></label><select data-f-deal style="${M_INPUT}"><option value="">No deal</option></select></div>
+        <div><label style="${M_LAB}">Additional invitees <span style="text-transform:none;letter-spacing:0;">(comma-separated emails — TC, lender, co-op agent; both agents are included automatically)</span></label><input data-f-invitees placeholder="tc@title.com, lender@bank.com" style="${M_INPUT}"></div>
         <div><label style="${M_LAB}">Notes</label><textarea data-f-notes rows="2" style="${M_INPUT}"></textarea></div>
         <div style="display:flex;gap:10px;margin-top:8px;align-items:center;">
           <button type="button" data-save style="${M_INK}">Add event</button>
@@ -3792,6 +3836,48 @@
       saveBtn.textContent = isTour ? 'Schedule tour' : 'Add event';
     };
     kindSel.addEventListener('change', syncKind); syncKind();
+
+    // Client search → fills the email/name fields (tour AND general events).
+    const csIn = m.body.querySelector('[data-f-clientsearch]');
+    const csRes = m.body.querySelector('[data-f-clientresults]');
+    const applyClient = (name, email) => {
+      csIn.value = name + (email ? ` <${email}>` : '');
+      const parts = name.split(/\s+/);
+      m.body.querySelector('[data-f-email]').value = email || '';
+      m.body.querySelector('[data-f-first]').value = parts[0] || '';
+      m.body.querySelector('[data-f-last]').value = parts.slice(1).join(' ') || '';
+      const ae = m.body.querySelector('[data-f-apptemail]'); if (ae) ae.value = email || '';
+      csRes.innerHTML = '';
+    };
+    let csT;
+    csIn.addEventListener('input', () => {
+      clearTimeout(csT);
+      const q = csIn.value.trim();
+      if (q.length < 2) { csRes.innerHTML = ''; return; }
+      csT = setTimeout(async () => {
+        const r = await window.Legacy.api('/api/crm/roster?bucket=leads&q=' + encodeURIComponent(q) + '&limit=8', { method: 'GET' });
+        const people = (r.ok && r.json && r.json.people) || [];
+        csRes.innerHTML = people.length ? `<div style="position:absolute;z-index:50;left:0;right:0;background:#fff;border:1px solid #D9CFB7;max-height:200px;overflow:auto;">${people.map((pp) => `<div data-cs-pick data-cs-name="${escHtml(pp.name)}" data-cs-email="${escHtml(pp.email || '')}" style="padding:8px 12px;cursor:pointer;font-size:13.5px;border-bottom:1px solid #EFE7D6;">${escHtml(pp.name)} <span style="color:#7A6F60;font-size:12px;">${escHtml(pp.email || pp.phone || '')}</span></div>`).join('')}</div>` : '';
+      }, 300);
+    });
+    csRes.addEventListener('click', (e) => {
+      const pick = e.target.closest('[data-cs-pick]');
+      if (pick) applyClient(pick.getAttribute('data-cs-name'), pick.getAttribute('data-cs-email'));
+    });
+
+    // Deal linking → stamps the notes so the command center picks it up.
+    const dealSel = m.body.querySelector('[data-f-deal]');
+    fetch('/api/crm/listings', { credentials: 'include' }).then((r) => r.ok ? r.json() : null).then((j) => {
+      if (!j || !dealSel) return;
+      const all = [].concat(j.pending || [], j.offers || [], j.active || [], j.preparing || []);
+      dealSel.innerHTML = '<option value="">No deal</option>' + all.map((d) =>
+        `<option value="${escHtml(d.source_key || '')}" data-addr="${escHtml(d.address || '')}">${escHtml(d.address || d.source_key)}${d.stage ? ' · ' + escHtml(d.stage) : ''}</option>`).join('');
+      if (prefill.deal) dealSel.value = prefill.deal;
+    }).catch(() => {});
+
+    // Prefill from a client page ("Schedule" on a lead) or a deal.
+    if (prefill.name || prefill.email) applyClient(prefill.name || prefill.email, prefill.email || '');
+    if (prefill.kind) { kindSel.value = prefill.kind; syncKind(); }
     subSel.addEventListener('change', () => { subOther.style.display = subSel.value === '__other' ? 'block' : 'none'; });
     m.body.querySelector('[data-cancel]').addEventListener('click', m.close);
     saveBtn.addEventListener('click', async () => {
@@ -3799,7 +3885,14 @@
       const date = m.body.querySelector('[data-f-date]').value;
       const time = m.body.querySelector('[data-f-time]').value;
       if (!date || !time) { m.err.textContent = 'Pick a date and time.'; return; }
-      const common = { date, time, duration_minutes: parseInt(m.body.querySelector('[data-f-dur]').value, 10) || 30, notes: m.body.querySelector('[data-f-notes]').value.trim() };
+      let notesVal = m.body.querySelector('[data-f-notes]').value.trim();
+      const dealSelEl = m.body.querySelector('[data-f-deal]');
+      if (dealSelEl && dealSelEl.value) {
+        const opt = dealSelEl.options[dealSelEl.selectedIndex];
+        notesVal = (notesVal ? notesVal + '\n' : '') + `[deal:${dealSelEl.value} · ${opt ? opt.getAttribute('data-addr') || '' : ''}]`;
+      }
+      const inviteesRaw = (m.body.querySelector('[data-f-invitees]').value || '').split(',').map((x) => x.trim()).filter(Boolean);
+      const common = { date, time, duration_minutes: parseInt(m.body.querySelector('[data-f-dur]').value, 10) || 30, notes: notesVal, invitees: inviteesRaw };
       let payload;
       if (kind === 'tour') {
         const email = m.body.querySelector('[data-f-email]').value.trim();
@@ -3934,10 +4027,12 @@
     if (e.target.closest('[data-seq-new]'))  { e.preventDefault(); openSeqModal(null); return; }
     if (e.target.closest('[data-seq-edit]')) { e.preventDefault(); openSeqModal(seqState.list.find((x) => String(x.id) === seqState.selectedId) || null); return; }
     if (e.target.closest('[data-cal-new]'))  { e.preventDefault(); openEventCreate(); return; }
+    /* exposed for client-page prefill */
     const row = e.target.closest('[data-ev-key]');
     if (row) { e.preventDefault(); openEventDetail(evByKey(row.getAttribute('data-ev-key'))); }
   });
 
+  window.__openEventCreate = openEventCreate;
   document.addEventListener('DOMContentLoaded', () => {
     loadSequences();
     wireCalendarChrome();
