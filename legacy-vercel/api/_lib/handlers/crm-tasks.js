@@ -16,12 +16,49 @@ const isBroker  = (p) => p?.role === 'agent_sara' || p?.role === 'admin';
 
 export default async function handler(req, res) {
   if (handleOptions(req, res)) return;
+  if (req.method === 'POST') return bulkSync(req, res);
   const { user, profile } = await getCallerProfile(req, res);
   if (!user)             return fail(res, 401, 'not authenticated');
   if (!isAgent(profile)) return fail(res, 403, 'agents only');
   if (req.method === 'GET')   return list(req, res, profile);
   if (req.method === 'PATCH') return toggle(req, res, profile);
   return fail(res, 405, 'method_not_allowed');
+}
+
+// POST /api/crm/tasks?key=<SYNC_SECRET> — bulk sync from the automated morning
+// briefing. Insert-only, deduped by stable source_key ('brief:<item-id>'), so
+// the same action tomorrow doesn't duplicate, and a task Sara checked off stays
+// done (the briefing already excludes done=true items when composing the day).
+// This makes agent_tasks the single task store: the HTML checklist and
+// deals.json task arrays become views, not sources.
+export async function bulkSync(req, res) {
+  const secret = process.env.SYNC_SECRET || process.env.BRIEFING_FEEDBACK_SECRET;
+  if (!secret || req.query?.key !== secret) return fail(res, 401, 'bad key');
+  const supa = adminClient();
+  const b = await readJson(req);
+  const rows = Array.isArray(b?.tasks) ? b.tasks.slice(0, 60) : [];
+  const clean = rows
+    .filter((r) => r && typeof r.title === 'string' && r.title.trim() && typeof r.source_key === 'string' && r.source_key.trim())
+    .map((r) => ({
+      agent: ['sara', 'james', 'both'].includes(r.agent) ? r.agent : 'sara',
+      client: (r.client || '').toString().slice(0, 120) || null,
+      title: r.title.toString().slice(0, 200),
+      sub: (r.sub || '').toString().slice(0, 120) || null,
+      note: (r.note || '').toString().slice(0, 600) || null,
+      due_label: (r.due_label || 'Today').toString().slice(0, 40),
+      done: false,
+      source_key: r.source_key.toString().slice(0, 120)
+    }));
+  if (!clean.length) return ok(res, { created: 0, skipped: rows.length });
+  const keys = clean.map((r) => r.source_key);
+  const { data: existing } = await supa.from('agent_tasks').select('source_key').in('source_key', keys);
+  const have = new Set((existing || []).map((e) => e.source_key));
+  const fresh = clean.filter((r) => !have.has(r.source_key));
+  if (fresh.length) {
+    const { error } = await supa.from('agent_tasks').insert(fresh);
+    if (error) return fail(res, 500, error.message);
+  }
+  return ok(res, { created: fresh.length, already_present: have.size });
 }
 
 async function list(req, res, profile) {
