@@ -3978,7 +3978,7 @@
       csT = setTimeout(async () => {
         const r = await window.Legacy.api('/api/crm/roster?bucket=leads&q=' + encodeURIComponent(q) + '&limit=8', { method: 'GET' });
         const people = (r.ok && r.json && r.json.people) || [];
-        csRes.innerHTML = people.length ? `<div style="position:absolute;z-index:50;left:0;right:0;background:#fff;border:1px solid #D9CFB7;max-height:200px;overflow:auto;">${people.map((pp) => `<div data-cs-pick data-cs-name="${escHtml(pp.name)}" data-cs-email="${escHtml(pp.email || '')}" style="padding:8px 12px;cursor:pointer;font-size:13.5px;border-bottom:1px solid #EFE7D6;">${escHtml(pp.name)} <span style="color:#7A6F60;font-size:12px;">${escHtml(pp.email || pp.phone || '')}</span></div>`).join('')}</div>` : '';
+        csRes.innerHTML = people.length ? `<div style="position:absolute;z-index:50;left:0;right:0;background:#fff;border:1px solid #D9CFB7;max-height:200px;overflow:auto;">${people.map((pp) => `<div data-cs-pick data-cs-name="${esc(pp.name)}" data-cs-email="${esc(pp.email || '')}" style="padding:8px 12px;cursor:pointer;font-size:13.5px;border-bottom:1px solid #EFE7D6;">${esc(pp.name)} <span style="color:#7A6F60;font-size:12px;">${esc(pp.email || pp.phone || '')}</span></div>`).join('')}</div>` : '';
       }, 300);
     });
     csRes.addEventListener('click', (e) => {
@@ -3992,7 +3992,7 @@
       if (!j || !dealSel) return;
       const all = [].concat(j.pending || [], j.offers || [], j.active || [], j.preparing || []);
       dealSel.innerHTML = '<option value="">No deal</option>' + all.map((d) =>
-        `<option value="${escHtml(d.source_key || '')}" data-addr="${escHtml(d.address || '')}">${escHtml(d.address || d.source_key)}${d.stage ? ' · ' + escHtml(d.stage) : ''}</option>`).join('');
+        `<option value="${esc(d.source_key || '')}" data-addr="${esc(d.address || '')}">${esc(d.address || d.source_key)}${d.stage ? ' · ' + esc(d.stage) : ''}</option>`).join('');
       if (prefill.deal) dealSel.value = prefill.deal;
     }).catch(() => {});
 
