@@ -62,7 +62,7 @@
     <nav class="app-side-nav">
       <a href="#" onclick="showView(event,'listings')" data-lst-nav="offers">Offers <span class="pill" data-roster-offers>—</span></a>
       <a href="#" onclick="showView(event,'listings')" data-lst-nav="pending">In escrow <span class="pill" data-roster-pending>—</span></a>
-      <a href="#" onclick="showView(event,'listings')" title="Pick a listing to open its seller portal">Seller portals</a>
+      <a href="#" onclick="showView(event,'listings')" title="Each deal card has a 'Seller portal ↗' link straight to the client page">Seller portals</a>
     </nav>
 
     <div class="app-side-section">Listings</div>
@@ -2888,7 +2888,10 @@ function selectLead(el) {
       '<div class="mt"><span class="lst-badge ' + state.tab + '">' + badge(state.tab) + '</span>' + sideBadge +
         '<span class="lst-badge">' + (d.agent === 'james' ? 'James' : 'Sara') + '</span>' + tour + '</div>' +
       (d.coe_date ? '<div style="font-size:11px;color:var(--ink-mute);">COE ' + esc(d.coe_date) + '</div>' : '') +
-      '<span class="lk">Open command center →</span>' +
+      '<span style="display:flex;gap:14px;flex-wrap:wrap;">' +
+        '<span class="lk">Command center →</span>' +
+        (url ? '<span class="lk" data-portal-open="' + esc(d.source_key) + '" title="Open the client-facing seller portal">Seller portal ↗</span>' : '') +
+      '</span>' +
       accept +
       '</div></div>';
   }
@@ -2972,6 +2975,15 @@ function selectLead(el) {
     }
     var acc = e.target.closest('[data-accept]');
     if (acc) { e.stopPropagation(); acceptOffer(acc.getAttribute('data-accept'), acc); return; }
+    // "Seller portal ↗" goes straight to the CLIENT-facing page — not the
+    // command center. window.open with a same-tab fallback (popup blockers).
+    var pl = e.target.closest('[data-portal-open]');
+    if (pl) {
+      e.stopPropagation();
+      var pu = '/seller.html?deal=' + encodeURIComponent(pl.getAttribute('data-portal-open'));
+      var pw = window.open(pu, '_blank', 'noopener'); if (!pw) location.href = pu;
+      return;
+    }
     var cardEl = e.target.closest('.lst-card[data-source-key]');
     if (cardEl) { openCard(cardEl); return; }
     var t = e.target.closest('[data-lst]'); if (!t) return;
