@@ -795,6 +795,18 @@
   transition: background .15s, transform .15s;
 }
 .need-card:hover { background: var(--linen); }
+/* Decision-queue variants: maroon = approval, green = client, gold = deadline */
+.need-card.q-dec { border-left: 4px solid #5A0E24; }
+.need-card.q-cli { border-left: 4px solid #2E5C3D; }
+.need-card.q-dl  { border-left: 4px solid var(--brass); }
+.need-card .nc-body h3 { font-size: 19px; }
+.need-card .nc-body p { font-size: 15px; line-height: 1.6; color: var(--ink); }
+.live-stamp { font-family: var(--mono); font-size: 10px; letter-spacing: .14em; text-transform: uppercase; color: #2E5C3D; margin-left: 14px; display: inline-flex; align-items: center; gap: 6px; }
+.live-dot { width: 7px; height: 7px; border-radius: 50%; background: #2E5C3D; display: inline-block; animation: lgcPulse 2.4s ease-in-out infinite; }
+@keyframes lgcPulse { 0%, 100% { opacity: 1; } 50% { opacity: .3; } }
+.feed-chips { display: flex; gap: 8px; margin: 0 0 12px; }
+.feed-chip { font-family: var(--mono); font-size: 10px; letter-spacing: .12em; text-transform: uppercase; padding: 6px 14px; border: 1px solid var(--rule); background: var(--shell); color: var(--ink-mute); cursor: pointer; }
+.feed-chip.on { background: var(--ink); color: var(--shell); border-color: var(--ink); }
 .need-card-hot {
   border-left: 3px solid var(--brass);
 }
@@ -943,10 +955,10 @@
 }
 .sig-time {
   font-family: var(--mono); font-size: 10px; letter-spacing: 0.16em;
-  text-transform: uppercase; color: var(--ink-faint);
+  text-transform: uppercase; color: var(--ink-mute);
 }
 .signal p {
-  font-size: 14px; line-height: 1.55; color: var(--ink);
+  font-size: 15px; line-height: 1.6; color: var(--ink);
   margin: 0;
 }
 .signal p strong {

@@ -465,15 +465,14 @@
 
     if (briefRes.ok) {
       paintMorningBrief(briefRes.json, session);
-      paintSignals(briefRes.json.signals || []);
-      paintTimelineApprovals(briefRes.json.timeline_approvals || []);
+      paintLiveFeed(briefRes.json);
       paintActiveDeals(briefRes.json.active_deals || []);
-      paintRecentComms(briefRes.json);
       paintHours(briefRes.json.hours || []);
       paintReportsFunnel(briefRes.json.funnel || null);
     }
-    if (inboxRes.ok)    paintQuietAsks(inboxRes.json.messages || []);
+    paintNeedsQueue(briefRes.ok ? briefRes.json : {}, inboxRes.ok ? (inboxRes.json.messages || []) : []);
     loadLeadHygiene();
+    startTodayPulse();
     if (pipelineRes.ok) paintPipelineStats(pipelineRes.json);
     if (metricsRes.ok)  paintCrmMetrics(metricsRes.json);
   }
@@ -524,44 +523,160 @@
     return `<div style="grid-column:1/-1;padding:24px;text-align:left;opacity:.55;font-style:italic;font-size:14px;">${escapeHtml(msg)}</div>`;
   }
 
-  // Timeline proposals: prepend approval cards to the signals grid. Approving
-  // applies the change to the seller-facing timeline; dismissing discards it.
-  function paintTimelineApprovals(props) {
-    const grid = document.querySelector('[data-signal-grid]');
-    if (!grid || !props.length) return;
-    const changeLabel = (c) => {
-      if (!c) return 'update';
-      if (c.status === 'done')   return 'mark done';
-      if (c.status === 'action') return 'flag as “needs you”';
-      if (c.status === 'waived') return 'mark waived';
-      return 'update';
-    };
-    const html = props.map((p) => `
-      <article class="signal" data-tlprop="${escapeHtml(p.id)}" style="border-left:3px solid var(--brass);">
-        <span class="sig-time">${escapeHtml(p.address || 'Deal')}</span>
-        <p><b>${escapeHtml((p.item_key || '').replace(/^custom:/, '').replace(/_/g, ' '))}</b> — ${escapeHtml(changeLabel(p.change))}.<br>
-        <span style="opacity:.75;">${escapeHtml(p.reason || '')}</span></p>
-        <span class="sig-tag">Timeline · awaiting your OK</span>
-        <span style="display:flex;gap:8px;margin-top:8px;">
-          <button class="btn btn-brass btn-sm" data-tl-approve="${escapeHtml(p.id)}">Approve</button>
-          <button class="btn btn-ghost btn-sm" data-tl-reject="${escapeHtml(p.id)}">Dismiss</button>
-        </span>
-      </article>`).join('');
-    grid.insertAdjacentHTML('afterbegin', html);
-    grid.querySelectorAll('[data-tl-approve],[data-tl-reject]').forEach((btn) => {
-      btn.addEventListener('click', async () => {
-        const approve = btn.hasAttribute('data-tl-approve');
-        const id = btn.getAttribute(approve ? 'data-tl-approve' : 'data-tl-reject');
-        btn.disabled = true; btn.textContent = approve ? 'Applying…' : 'Dismissing…';
-        const r = await api('/api/crm/timeline', { body: { op: approve ? 'approve' : 'reject', proposal_id: id } });
-        const card = grid.querySelector(`[data-tlprop="${id}"]`);
-        if (r.ok && card) {
-          card.style.opacity = '.45';
-          card.querySelectorAll('button').forEach((b) => b.remove());
-          card.insertAdjacentHTML('beforeend', `<span class="sig-tag">${approve ? '✓ Applied — seller page updated' : 'Dismissed'}</span>`);
-        } else if (!r.ok) { btn.disabled = false; btn.textContent = approve ? 'Approve' : 'Dismiss'; }
+  // ---- The decision queue: everything that needs Sara, one ranked list ----
+  // Timeline approvals (maroon), collection nudges (green), then AI drafts.
+  function paintNeedsQueue(brief, drafts) {
+    const needs = $('.needs');
+    if (!needs) return;
+    needs.querySelectorAll('.need-card').forEach(el => el.remove());
+    const approvals = brief.timeline_approvals || [];
+    const nudges = brief.collection_nudges || [];
+    const total = approvals.length + nudges.length + drafts.length;
+
+    const eyebrow = needs.querySelector('.eyebrow');
+    if (eyebrow) eyebrow.textContent = total
+      ? ['Needs you', approvals.length ? `${approvals.length} approval${approvals.length === 1 ? '' : 's'}` : '',
+         drafts.length ? `${drafts.length} draft${drafts.length === 1 ? '' : 's'}` : '',
+         nudges.length ? `${nudges.length} follow-up${nudges.length === 1 ? '' : 's'}` : ''].filter(Boolean).join(' · ')
+      : 'Needs you · clear desk';
+    const h2 = needs.querySelector('.h-section');
+    if (h2) h2.textContent = total ? 'Your decision queue.' : 'Nothing pending.';
+    const greet = $('.tb-greet');
+    if (greet) greet.innerHTML = total
+      ? `${total === 1 ? 'One thing needs' : `${total} things need`} <em>you, ${escapeHtml(agentFirst)}.</em>`
+      : `Clear desk, <em>${escapeHtml(agentFirst)}.</em>`;
+
+    const changeLabel = (c) => !c ? 'update' : c.status === 'done' ? 'mark done'
+      : c.status === 'action' ? 'flag as needs-you' : c.status === 'waived' ? 'mark waived' : 'update';
+
+    approvals.forEach((pr) => {
+      const card = document.createElement('article');
+      card.className = 'need-card q-dec';
+      card.innerHTML = `
+        <div class="nc-rank">✓</div>
+        <div class="nc-body">
+          <div class="nc-meta"><span class="nc-tag" style="color:#5A0E24;">Timeline · ${escapeHtml(pr.address || 'deal')}</span></div>
+          <h3>${escapeHtml((pr.item_key || '').replace(/^custom:/, '').replace(/_/g, ' '))} — ${escapeHtml(changeLabel(pr.change))}</h3>
+          <p>${escapeHtml(pr.reason || '')}</p>
+          <div class="nc-foot"><div class="nc-foot-l"><span>Applies to the seller's page the moment you approve</span></div>
+            <div class="nc-foot-r">
+              <button class="btn btn-ghost btn-sm" data-tl-reject="${escapeHtml(pr.id)}">Dismiss</button>
+              <button class="btn btn-ink btn-sm" data-tl-approve="${escapeHtml(pr.id)}">Approve</button>
+            </div></div>
+          <div data-result style="font-size:13px;margin-top:8px;min-height:18px;"></div>
+        </div>`;
+      needs.appendChild(card);
+      card.querySelectorAll('[data-tl-approve],[data-tl-reject]').forEach((btn) => {
+        btn.addEventListener('click', async () => {
+          const approve = btn.hasAttribute('data-tl-approve');
+          btn.disabled = true; btn.textContent = approve ? 'Applying…' : 'Dismissing…';
+          const r = await api('/api/crm/timeline', { body: { op: approve ? 'approve' : 'reject', proposal_id: pr.id } });
+          const resEl = card.querySelector('[data-result]');
+          if (r.ok) {
+            card.style.opacity = '.5';
+            card.querySelectorAll('button').forEach((b) => { b.disabled = true; });
+            resEl.style.color = '#2E5C3D';
+            resEl.textContent = approve ? '✓ Applied — the seller page is updated.' : 'Dismissed.';
+          } else { btn.disabled = false; btn.textContent = approve ? 'Approve' : 'Dismiss'; resEl.style.color = '#9B2C2C'; resEl.textContent = r.json?.error || 'Failed — try again.'; }
+        });
       });
     });
+
+    nudges.forEach((n) => {
+      const card = document.createElement('article');
+      card.className = 'need-card q-cli';
+      card.innerHTML = `
+        <div class="nc-rank">…</div>
+        <div class="nc-body">
+          <div class="nc-meta"><span class="nc-tag" style="color:#2E5C3D;">Client · curated collection</span></div>
+          <h3>${escapeHtml(n.client_name || 'Your client')} hasn't reacted to “${escapeHtml(n.title)}”</h3>
+          <p>Pushed ${n.days_since_push} days ago${n.opens_since_push ? ` · opened ${n.opens_since_push}× since` : ' · not opened yet'}. Worth a nudge.</p>
+          <div class="nc-foot"><div class="nc-foot-l"></div><div class="nc-foot-r">
+            <button class="btn btn-ghost btn-sm" data-open-curate>Open collection →</button>
+          </div></div>
+        </div>`;
+      needs.appendChild(card);
+      card.querySelector('[data-open-curate]').addEventListener('click', () => {
+        if (typeof window.showView === 'function') window.showView(null, 'curate');
+      });
+    });
+
+    paintQuietAsks(drafts, { embedded: true, queueEmpty: total === 0 });
+  }
+
+  // ---- Live feed: signals + Twilio comms merged, filterable, one stream ----
+  let feedItems = [], feedFilter = 'all';
+  function paintLiveFeed(brief) {
+    const grid = document.querySelector('[data-signal-grid]');
+    if (!grid) return;
+    const comms = document.querySelector('[data-comms-section]');
+    if (comms) comms.style.display = 'none';
+    const sec = grid.closest('.signals');
+    if (sec) {
+      const eb = sec.querySelector('.eyebrow');
+      if (eb) eb.textContent = 'Live feed · signals, texts and calls, portal activity';
+      const h = sec.querySelector('.h-section');
+      if (h) h.textContent = 'What’s happening.';
+      if (!sec.querySelector('.feed-chips')) {
+        const chips = document.createElement('div');
+        chips.className = 'feed-chips';
+        chips.innerHTML = ['all', 'clients', 'deals'].map((k) =>
+          `<button class="feed-chip${k === 'all' ? ' on' : ''}" data-chip-k="${k}">${k}</button>`).join('');
+        grid.parentNode.insertBefore(chips, grid);
+        chips.addEventListener('click', (e) => {
+          const b = e.target.closest('[data-chip-k]'); if (!b) return;
+          feedFilter = b.getAttribute('data-chip-k');
+          chips.querySelectorAll('.feed-chip').forEach((c) => c.classList.toggle('on', c === b));
+          renderFeed();
+        });
+      }
+    }
+    const DEAL_TAGS = /follow up|deadline|coe|deal|offer|escrow/i;
+    feedItems = (brief.signals || []).map((sg) => ({
+      time: sg.time, body: sg.body, tag: sg.tag, ts: sg.time_iso || '',
+      kind: DEAL_TAGS.test(sg.tag || '') ? 'deals' : 'clients'
+    })).concat((brief.recent_comms || []).map((c) => ({
+      time: fmtRelative(c.last_at), ts: c.last_at, kind: 'clients', tag: 'Texts & calls',
+      body: `${c.name} — ${c.texts ? c.texts + ' text' + (c.texts === 1 ? '' : 's') : ''}${c.texts && c.calls ? ' · ' : ''}${c.calls ? c.calls + ' call' + (c.calls === 1 ? '' : 's') : ''} in the last day`
+    })));
+    feedItems.sort((a, b) => String(b.ts).localeCompare(String(a.ts)));
+    renderFeed();
+  }
+  function renderFeed() {
+    const grid = document.querySelector('[data-signal-grid]');
+    if (!grid) return;
+    const items = feedItems.filter((i) => feedFilter === 'all' || i.kind === feedFilter).slice(0, 9);
+    if (!items.length) { grid.innerHTML = emptyPanel('Quiet right now. Signals, texts, and portal activity land here as they happen.'); return; }
+    grid.innerHTML = items.map((i) => `
+      <article class="signal">
+        <span class="sig-time">${escapeHtml(i.time || '')}</span>
+        <p>${escapeHtml(i.body)}</p>
+        <span class="sig-tag">${escapeHtml(i.tag || 'Signal')}</span>
+      </article>`).join('');
+  }
+
+  // ---- Pulse: the page stays alive without a reload ----
+  let pulseLast = Date.now();
+  function startTodayPulse() {
+    const label = document.querySelector('[data-live-stamp]');
+    const tick = () => {
+      if (!label) return;
+      const m = Math.round((Date.now() - pulseLast) / 60000);
+      label.innerHTML = `<span class="live-dot"></span>live · updated ${m < 1 ? 'just now' : m + 'm ago'}`;
+    };
+    tick();
+    setInterval(tick, 30000);
+    setInterval(async () => {
+      try {
+        const [b, i] = await Promise.all([
+          api('/api/crm/morning-brief', { method: 'GET' }),
+          api('/api/crm/inbox?filter=awaiting_reply&limit=20', { method: 'GET' })
+        ]);
+        if (b.ok) { paintLiveFeed(b.json); paintHours(b.json.hours || []); paintActiveDeals(b.json.active_deals || []); }
+        paintNeedsQueue(b.ok ? b.json : {}, i.ok ? (i.json.messages || []) : []);
+        pulseLast = Date.now(); tick();
+      } catch (_) { /* next pulse */ }
+    }, 180000);
   }
 
   function paintSignals(signals) {
@@ -937,23 +1052,23 @@
     }
   }
 
-  function paintQuietAsks(drafts) {
+  function paintQuietAsks(drafts, opts = {}) {
     const needs = $('.needs');
     if (!needs) return;
 
-    // Update section header label + heading
-    const eyebrow = needs.querySelector('.eyebrow');
-    if (eyebrow) eyebrow.textContent = drafts.length
-      ? `Needs you · ${drafts.length} draft${drafts.length === 1 ? '' : 's'} awaiting approval`
-      : 'Needs you · inbox at zero';
-    const h2 = needs.querySelector('.h-section');
-    if (h2) h2.textContent = drafts.length
-      ? (drafts.length === 1 ? 'One quiet ask.' : `${drafts.length} quiet ask${drafts.length === 1 ? '' : 's'}.`)
-      : 'Nothing pending.';
+    if (!opts.embedded) {
+      const eyebrow = needs.querySelector('.eyebrow');
+      if (eyebrow) eyebrow.textContent = drafts.length
+        ? `Needs you · ${drafts.length} draft${drafts.length === 1 ? '' : 's'} awaiting approval`
+        : 'Needs you · inbox at zero';
+      const h2 = needs.querySelector('.h-section');
+      if (h2) h2.textContent = drafts.length
+        ? (drafts.length === 1 ? 'One quiet ask.' : `${drafts.length} quiet ask${drafts.length === 1 ? '' : 's'}.`)
+        : 'Nothing pending.';
+      needs.querySelectorAll('.need-card').forEach(el => el.remove());
+    }
 
-    // Remove all existing .need-card elements (prototype data)
-    needs.querySelectorAll('.need-card').forEach(el => el.remove());
-
+    if (drafts.length === 0 && opts.embedded && !opts.queueEmpty) return;
     if (drafts.length === 0) {
       const empty = document.createElement('article');
       empty.className = 'need-card';
