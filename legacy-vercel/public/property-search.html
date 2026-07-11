@@ -155,20 +155,24 @@
     setTimeout(function () { t.remove(); }, 2600);
   }
 
-  // Find listing cards by content signature (an element with an <img>, a
-  // "$price" and an "MLS#"), keeping the smallest matching element — robust to
-  // iHomefinder's markup, which we can't pin to fixed classes.
+  // Find listing cards by content signature. Grid tiles do NOT show an "MLS#"
+  // (that's only on the detail page), so we key off the two things every card
+  // has: a photo (<img>) and a "$price". Keep the SMALLEST such element — the one
+  // whose children don't each contain both — so we tag individual cards, not the
+  // whole results grid. A length cap avoids matching a big chrome wrapper that
+  // happens to hold one image and one price.
   function findCards() {
     var out = [], all = document.querySelectorAll('body *');
-    for (var i = 0; i < all.length && out.length < 220; i++) {
+    for (var i = 0; i < all.length && out.length < 300; i++) {
       var n = all[i], txt = n.textContent || '';
       if (n === bar || bar.contains(n)) continue;
-      if (!/MLS#?\s*[A-Za-z0-9]/i.test(txt) || !/\$[\d,]{3,}/.test(txt)) continue;
+      if (!/\$[\d,]{3,}/.test(txt)) continue;
       if (!n.querySelector || !n.querySelector('img')) continue;
+      if (txt.length > 1400) continue; // too big to be a single card
       var child = false;
       for (var k = 0; k < n.children.length; k++) {
         var c = n.children[k], ct = c.textContent || '';
-        if (/MLS#?\s*[A-Za-z0-9]/i.test(ct) && /\$[\d,]{3,}/.test(ct) && c.querySelector && c.querySelector('img')) { child = true; break; }
+        if (/\$[\d,]{3,}/.test(ct) && c.querySelector && c.querySelector('img')) { child = true; break; }
       }
       if (!child) out.push(n);
     }
@@ -185,7 +189,14 @@
       var ix = lines.indexOf(cityLine); if (ix > 0) street = lines[ix - 1];
       var cm = cityLine.match(/^(.*?),\s*([A-Z]{2})\s+(\d{5})/); if (cm) { city = cm[1].trim(); zip = cm[3]; }
     }
-    if (!street) street = lines.filter(function (l) { return /^\d+\s+\S+/.test(l) && !/\$/.test(l) && !/MLS/i.test(l); })[0] || null;
+    if (!street) street = lines.filter(function (l) {
+      return /^\d{1,6}\s+[A-Za-z]/.test(l) && !/\$/.test(l) && !/MLS/i.test(l) &&
+             !/\b(bed|bath|sq\s*ft|sqft|acre|days?\b|photo)/i.test(l);
+    })[0] || null;
+    // Always hand the backend at least SOMETHING addressable (it needs an MLS# or
+    // an address); if we couldn't isolate a street line, fall back to the
+    // city/state/zip line so the listing can still be saved.
+    if (!street && cityLine) street = cityLine;
     var img = card.querySelector('img');
     var photo = img ? (img.getAttribute('src') || img.getAttribute('data-src') || img.currentSrc || null) : null;
     if (photo && photo.indexOf('http') !== 0) { try { photo = new URL(photo, location.href).href; } catch (e) {} }
