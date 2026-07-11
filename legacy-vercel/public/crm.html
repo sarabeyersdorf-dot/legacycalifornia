@@ -1029,6 +1029,23 @@
     .cc-vtog:disabled { opacity: .5; cursor: default; }
     .cc-vhint { margin-top: 10px; font-size: 11px; color: var(--ink-mute); line-height: 1.5; }
     .cc-vhint.warn { color: #A23B26; }
+    .cc-extras { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 14px; margin-top: 16px; }
+    .cc-panel { background: var(--shell); border: 1px solid var(--rule); padding: 16px 18px; }
+    .cc-tl-item { display: flex; gap: 10px; align-items: baseline; padding: 6px 0; border-bottom: 1px dashed var(--rule); font-family: var(--sans); font-size: 13.5px; }
+    .cc-tl-item:last-child { border-bottom: none; }
+    .cc-tl-item .d { min-width: 52px; font-size: 11px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--ink-mute); }
+    .cc-tl-item.done .d { color: #2E5C3D; }
+    .cc-tl-item.act .d { color: #8A2C3B; }
+    .cc-tl-item .t { flex: 1; }
+    .cc-tl-item.done .t { color: var(--ink-mute); }
+    .cc-tl-item .s { font-size: 11px; color: var(--ink-mute); }
+    .cc-tl-item.done .s { color: #2E5C3D; }
+    .cc-doc { display: flex; gap: 8px; align-items: baseline; padding: 5px 0; font-family: var(--sans); font-size: 13.5px; }
+    .cc-doc .ok { color: #2E5C3D; } .cc-doc .no { color: var(--ink-faint); } .cc-doc .cal { color: var(--brass); }
+    .cc-doc .st { font-size: 11px; color: var(--ink-mute); }
+    .cc-doc-h { font-family: var(--sans); font-size: 10.5px; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; color: var(--ink-mute); margin: 10px 0 4px; }
+    .cc-doc-h.out { color: #8A2C3B; }
+    .cc-empty { font-family: var(--sans); font-size: 13px; color: var(--ink-mute); padding: 6px 0; }
     </style>
     <section class="crm-view" data-view="command">
       <div class="cc" data-cc-root>
@@ -1164,12 +1181,60 @@
         +     '</div>'
         +   '</div>'
         +   consoleHtml(deal)
+        + '</div>'
+        + '<div class="cc-extras">'
+        +   '<div class="cc-panel"><div class="cc-caplab">Timeline</div><div data-cc-timeline class="cc-tl">Loading…</div></div>'
+        +   '<div class="cc-panel"><div class="cc-caplab">Documents</div><div data-cc-docs>Loading…</div></div>'
+        +   '<div class="cc-panel"><div class="cc-caplab">Tasks &amp; calendar for this deal</div><div data-cc-linked>Loading…</div></div>'
         + '</div>';
 
         wirePhoto();
         loadDealClient(deal);
         loadDealVisibility(deal);
         loadDealNotes(deal);
+        loadDealExtras(deal);
+      }
+
+      // ---- documents / timeline / linked items panels ----------------------
+      function fmtD(d){ if(!d) return 'TBD'; try{ return new Date(String(d).slice(0,10)+'T12:00:00Z').toLocaleDateString('en-US',{month:'short',day:'numeric',timeZone:'UTC'}); }catch(_){ return String(d); } }
+      function loadDealExtras(deal){
+        fetch('/api/crm/timeline?source_key='+encodeURIComponent(deal.source_key),{credentials:'include'})
+          .then(function(r){ return r.ok ? r.json() : null; })
+          .then(function(j){
+            if(!current || current.source_key !== deal.source_key) return;
+            var tl = root.querySelector('[data-cc-timeline]');
+            if (tl) {
+              var items = (j && j.items) || [];
+              tl.innerHTML = items.length ? items.map(function(it){
+                var cls = it.status==='done' ? 'done' : (it.status==='action' ? 'act' : '');
+                return '<div class="cc-tl-item '+cls+'"><span class="d">'+fmtD(it.status==='done'&&it.done_at?it.done_at:it.due_date)+'</span>'
+                  + '<span class="t">'+esc(it.title)+'</span>'
+                  + '<span class="s">'+(it.status==='done'?'✓':(it.status==='action'?'needs you':(it.owner||'')))+'</span></div>';
+              }).join('') : '<div class="cc-empty">No timeline yet — it seeds automatically for escrow deals, or run “seed” from the seller timeline.</div>';
+            }
+            var dx = root.querySelector('[data-cc-docs]');
+            if (dx) {
+              var docs = (j && j.documents) || [];
+              var recv = docs.filter(function(d){ return ['signed','on_file','received'].indexOf(d.status)>=0 || !d.status; });
+              var out  = docs.filter(function(d){ return recv.indexOf(d)<0; });
+              dx.innerHTML = docs.length
+                ? ('<div class="cc-doc-h">On file · '+recv.length+'</div>' + recv.map(function(d){ return '<div class="cc-doc"><span class="ok">✓</span>'+esc(d.name)+'</div>'; }).join('')
+                  + (out.length ? '<div class="cc-doc-h out">Outstanding · '+out.length+'</div>' + out.map(function(d){ return '<div class="cc-doc"><span class="no">○</span>'+esc(d.name)+' <span class="st">'+esc(d.status||'')+'</span></div>'; }).join('') : ''))
+                : '<div class="cc-empty">No documents recorded for this deal yet.</div>';
+            }
+            var lk = root.querySelector('[data-cc-linked]');
+            if (lk) {
+              var tasks = (j && j.tasks) || [], evs = (j && j.events) || [];
+              var th = tasks.length ? tasks.map(function(t){
+                return '<div class="cc-doc"><span class="'+(t.done?'ok':'no')+'">'+(t.done?'✓':'○')+'</span>'+esc(t.title)+(t.due_label?' <span class="st">'+esc(t.due_label)+'</span>':'')+'</div>';
+              }).join('') : '';
+              var eh = evs.length ? evs.map(function(ev){
+                var dt = new Date(ev.at);
+                return '<div class="cc-doc"><span class="cal">▸</span>'+esc(dt.toLocaleDateString('en-US',{month:'short',day:'numeric'}))+' '+esc(dt.toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'}))+' — '+esc(ev.title)+'</div>';
+              }).join('') : '';
+              lk.innerHTML = (th || eh) ? (th + (eh ? '<div class="cc-doc-h">Upcoming</div>'+eh : '')) : '<div class="cc-empty">No tasks or calendar items reference this deal yet.</div>';
+            }
+          }).catch(function(){});
       }
 
       // ---- internal (agent-only) notes on the deal ----------------------

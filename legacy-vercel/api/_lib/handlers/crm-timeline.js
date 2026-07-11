@@ -81,7 +81,45 @@ export default async function handler(req, res) {
         supa.from('deal_timeline_proposals').select('*').eq('deal_id', deal.id)
           .eq('status', 'pending').order('created_at')
       ]);
-      return ok(res, { deal: { id: deal.id, source_key: deal.source_key, address: deal.address, stage: deal.stage, coe_date: deal.coe_date }, items: items || [], proposals: proposals || [] });
+
+      // Command-center extras (fail-soft, each optional): documents on file,
+      // tasks that reference this deal, upcoming calendar items for its parties.
+      let documents = [], tasks = [], events = [];
+      try {
+        const { data: docs } = await supa.from('deal_documents')
+          .select('name, doc_type, status, created_at')
+          .eq('deal_id', deal.id).order('created_at', { ascending: false }).limit(40);
+        documents = docs || [];
+      } catch (_) {}
+      try {
+        const street = (deal.address || '').split(',')[0].trim();
+        const ors = [`source_key.ilike.%${deal.source_key}%`];
+        if (street) { ors.push(`title.ilike.%${street}%`); ors.push(`note.ilike.%${street}%`); }
+        const { data: tk } = await supa.from('agent_tasks')
+          .select('id, title, client, sub, due_label, done, agent')
+          .or(ors.join(','))
+          .order('done').order('created_at', { ascending: false }).limit(12);
+        tasks = tk || [];
+      } catch (_) {}
+      try {
+        const { data: parties } = await supa.from('deal_parties').select('lead_id').eq('deal_id', deal.id);
+        const leadIds = (parties || []).map((p) => p.lead_id).filter(Boolean);
+        const nowIso = new Date().toISOString();
+        if (leadIds.length) {
+          const [{ data: tours }, { data: appts }] = await Promise.all([
+            supa.from('tours').select('scheduled_at, tour_type, status, leads(first_name,last_name)')
+              .in('lead_id', leadIds).gte('scheduled_at', nowIso).order('scheduled_at').limit(6),
+            supa.from('appointments').select('starts_at, title, kind')
+              .in('lead_id', leadIds).gte('starts_at', nowIso).order('starts_at').limit(6)
+          ]);
+          events = [
+            ...(tours || []).map((t) => ({ at: t.scheduled_at, title: `Tour — ${[t.leads?.first_name, t.leads?.last_name].filter(Boolean).join(' ') || 'client'} (${t.tour_type || 'in person'})`, kind: 'tour' })),
+            ...(appts || []).map((a) => ({ at: a.starts_at, title: a.title || a.kind, kind: a.kind || 'appointment' }))
+          ].sort((a, b) => String(a.at).localeCompare(String(b.at))).slice(0, 8);
+        }
+      } catch (_) {}
+
+      return ok(res, { deal: { id: deal.id, source_key: deal.source_key, address: deal.address, stage: deal.stage, coe_date: deal.coe_date }, items: items || [], proposals: proposals || [], documents, tasks, events });
     }
 
     if (req.method !== 'POST') return fail(res, 405, 'method_not_allowed');
