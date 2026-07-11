@@ -63,7 +63,8 @@ function escapeHtml(s) { return (s || '').replace(/[&<>]/g, (c) => ({ '&': '&amp
 
 export function emailHtml({ firstName, agentName, dre, phone, link, intro, listings = [], collectionTitle = '' }) {
   const INK = '#1A1714', PAPER = '#FAF6EC', PAGE = '#EFE7D6', GOLD = '#B08D57', TAUPE = '#7C6A4D', RULE = '#DDD3BC', MAROON = '#5A0E24', CREAM = '#F4E6C8';
-  const mono = "'Courier New',Courier,monospace";
+  const label = "'Helvetica Neue',Helvetica,Arial,sans-serif";
+  const sans  = "'Helvetica Neue',Helvetica,Arial,sans-serif";
   const serif = "Georgia,'Times New Roman',serif";
 
   const shown = (listings || []).filter((l) => l && (l.address || l.price_label)).slice(0, 3);
@@ -80,10 +81,10 @@ export function emailHtml({ firstName, agentName, dre, phone, link, intro, listi
         <a href="${link}" style="text-decoration:none;color:${INK};">
           <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#FFFFFF;border:1px solid ${RULE};border-radius:3px;">
             ${l.photo ? `<tr><td><img src="${l.photo}" width="544" alt="${escapeHtml(l.address || 'Listing photo')}" style="display:block;width:100%;max-height:300px;object-fit:cover;border-radius:3px 3px 0 0;"></td></tr>` : ''}
-            <tr><td style="padding:14px 18px 4px;font-family:${serif};font-size:20px;font-weight:bold;color:${INK};">${escapeHtml(l.price_label || '')}</td></tr>
-            <tr><td style="padding:0 18px;font-family:${serif};font-size:15px;color:${INK};">${escapeHtml([l.address, [l.city, l.state].filter(Boolean).join(', ')].filter(Boolean).join(' · '))}</td></tr>
-            ${meta(l) ? `<tr><td style="padding:6px 18px 0;font-family:${mono};font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:${TAUPE};">${meta(l)}</td></tr>` : ''}
-            ${l.why_note ? `<tr><td style="padding:10px 18px 2px;font-family:${serif};font-size:13px;font-style:italic;color:${TAUPE};">&ldquo;${escapeHtml(l.why_note)}&rdquo;</td></tr>` : ''}
+            <tr><td style="padding:14px 18px 4px;font-family:${serif};font-size:23px;font-weight:bold;color:${INK};">${escapeHtml(l.price_label || '')}</td></tr>
+            <tr><td style="padding:0 18px;font-family:${sans};font-size:14.5px;color:${INK};">${escapeHtml([l.address, [l.city, l.state].filter(Boolean).join(', ')].filter(Boolean).join(' · '))}</td></tr>
+            ${meta(l) ? `<tr><td style="padding:6px 18px 0;font-family:${label};font-size:11.5px;letter-spacing:.07em;font-weight:600;text-transform:uppercase;color:${TAUPE};">${meta(l)}</td></tr>` : ''}
+            ${l.why_note ? `<tr><td style="padding:10px 18px 2px;font-family:${serif};font-size:15.5px;font-style:italic;line-height:1.5;color:#40381F;">&ldquo;${escapeHtml(l.why_note)}&rdquo;</td></tr>` : ''}
             <tr><td style="padding:0 0 14px;"></td></tr>
           </table>
         </a>
@@ -93,34 +94,34 @@ export function emailHtml({ firstName, agentName, dre, phone, link, intro, listi
   <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:${PAGE};padding:28px 12px;"><tr><td align="center">
     <table role="presentation" width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;background:${PAPER};border:1px solid ${RULE};border-radius:4px;">
       <tr><td style="padding:30px 28px 22px;" align="center">
-        <div style="font-family:${serif};font-size:26px;letter-spacing:.02em;color:${INK};">Legacy&nbsp;Properties</div>
-        <div style="font-family:${mono};font-size:10px;letter-spacing:.28em;text-transform:uppercase;color:${GOLD};padding-top:6px;">Every Home Has A Story</div>
+        <div style="font-family:${serif};font-size:29px;letter-spacing:.01em;color:${INK};">Legacy&nbsp;Properties</div>
+        <div style="font-family:${label};font-size:11px;letter-spacing:.26em;font-weight:600;text-transform:uppercase;color:${GOLD};padding-top:6px;">Every Home Has A Story</div>
       </td></tr>
       <tr><td style="padding:0 28px;"><hr style="border:none;border-top:1px solid ${RULE};margin:0;"></td></tr>
-      <tr><td style="padding:26px 28px 6px;font-family:${serif};font-size:17px;line-height:1.6;color:${INK};">${firstName ? escapeHtml(firstName) + ' &mdash;' : 'Hello &mdash;'}</td></tr>
-      <tr><td style="padding:0 28px 22px;font-family:${serif};font-size:15px;line-height:1.65;color:${INK};">${escapeHtml(intro || "I hand-picked a few homes I think you'll want to see. Take a look and tell me what you think — I'd love to hear which ones speak to you.")}</td></tr>
+      <tr><td style="padding:26px 28px 6px;font-family:${serif};font-size:19px;line-height:1.5;color:${INK};">${firstName ? escapeHtml(firstName) + ' &mdash;' : 'Hello &mdash;'}</td></tr>
+      <tr><td style="padding:0 28px 22px;font-family:${sans};font-size:15.5px;line-height:1.65;color:${INK};">${escapeHtml(intro || "I hand-picked a few homes I think you'll want to see. Take a look and tell me what you think — I'd love to hear which ones speak to you.")}</td></tr>
       ${shown.length ? `<tr><td style="padding:0 28px;">
         <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
-          <tr><td style="font-family:${mono};font-size:10px;letter-spacing:.22em;text-transform:uppercase;color:${TAUPE};padding:0 0 12px;">${escapeHtml(collectionTitle || 'Picked for you')} &nbsp;·&nbsp; ${(listings || []).length} home${(listings || []).length === 1 ? '' : 's'}</td></tr>
+          <tr><td style="font-family:${label};font-size:11px;letter-spacing:.2em;font-weight:600;text-transform:uppercase;color:${TAUPE};padding:0 0 12px;">${escapeHtml(collectionTitle || 'Picked for you')} &nbsp;·&nbsp; ${(listings || []).length} home${(listings || []).length === 1 ? '' : 's'}</td></tr>
           ${shown.map(card).join('')}
-          ${more ? `<tr><td style="font-family:${serif};font-size:14px;font-style:italic;color:${TAUPE};padding:2px 0 8px;" align="center">&hellip;and ${more} more inside</td></tr>` : ''}
+          ${more ? `<tr><td style="font-family:${sans};font-size:13.5px;color:${TAUPE};padding:2px 0 8px;" align="center">&hellip;and ${more} more inside</td></tr>` : ''}
         </table>
       </td></tr>` : ''}
       <tr><td align="center" style="padding:10px 28px 30px;">
         <table role="presentation" cellpadding="0" cellspacing="0"><tr>
           <td align="center" bgcolor="${MAROON}" style="border-radius:3px;">
-            <a href="${link}" style="display:inline-block;padding:15px 34px;font-family:${mono};font-size:12px;letter-spacing:.16em;text-transform:uppercase;text-decoration:none;color:${CREAM} !important;background:${MAROON};border-radius:3px;"><span style="color:${CREAM} !important;">View your collection</span></a>
+            <a href="${link}" style="display:inline-block;padding:15px 34px;font-family:${label};font-size:13px;letter-spacing:.12em;font-weight:600;text-transform:uppercase;text-decoration:none;color:${CREAM} !important;background:${MAROON};border-radius:3px;"><span style="color:${CREAM} !important;">View your collection</span></a>
           </td>
         </tr></table>
-        <div style="font-family:${serif};font-size:12px;color:${TAUPE};padding-top:12px;">or copy this link: <a href="${link}" style="color:${TAUPE};">${link}</a></div>
+        <div style="font-family:${sans};font-size:12.5px;color:${TAUPE};padding-top:12px;">or copy this link: <a href="${link}" style="color:${TAUPE};">${link}</a></div>
       </td></tr>
       <tr><td style="padding:0 28px;"><hr style="border:none;border-top:1px solid ${RULE};margin:0;"></td></tr>
-      <tr><td style="padding:18px 28px 8px;font-family:${serif};font-size:13px;line-height:1.6;color:${INK};">
+      <tr><td style="padding:18px 28px 8px;font-family:${sans};font-size:13.5px;line-height:1.6;color:${INK};">
         ${escapeHtml(agentName)}<br>
         <span style="color:${TAUPE};">${[dre ? 'DRE #' + escapeHtml(dre) : null, phone ? escapeHtml(phone) : null].filter(Boolean).join(' &nbsp;·&nbsp; ')}</span><br>
         <a href="${SITE}" style="color:${TAUPE};">${SITE.replace(/^https?:\/\//, '')}</a>
       </td></tr>
-      <tr><td style="padding:6px 28px 24px;font-family:${serif};font-size:10px;line-height:1.5;color:#A79A80;">Listing information is deemed reliable but not guaranteed. ${escapeHtml(BROKERAGE.name)} &middot; ${escapeHtml(BROKERAGE.broker)}, ${escapeHtml(BROKERAGE.broker_title)} &middot; DRE #${escapeHtml(BROKERAGE.broker_dre)}</td></tr>
+      <tr><td style="padding:6px 28px 24px;font-family:${sans};font-size:10.5px;line-height:1.5;color:#8F8267;">Listing information is deemed reliable but not guaranteed. ${escapeHtml(BROKERAGE.name)} &middot; ${escapeHtml(BROKERAGE.broker)}, ${escapeHtml(BROKERAGE.broker_title)} &middot; DRE #${escapeHtml(BROKERAGE.broker_dre)}</td></tr>
     </table>
   </td></tr></table>
   </body></html>`;
