@@ -48,9 +48,32 @@ export default async function handler(req, res) {
       is_internal: isInternal,
       created_by:  user.id
     }).select().single();
+
+    // A note that reads like an instruction becomes a task on the Tasks list
+    // (deduped per note), so "set up a curated search for her" doesn't die in
+    // the lead's file. Fail-soft — the note itself always saves.
+    let task_created = false;
+    try {
+      const ACTION_RE = /^task:|\b(set ?up|create|schedule|send|follow ?up|todo|to-do|need to|remind me|prepare|draft|order|book|call her|call him|call them|curated search|saved search)\b/i;
+      if (!insErr && ACTION_RE.test(text)) {
+        const { data: leadRow } = await supa.from('leads').select('first_name,last_name,assigned_agent').eq('id', lead_id).maybeSingle();
+        const who = leadRow ? [leadRow.first_name, leadRow.last_name].filter(Boolean).join(' ') : 'Lead';
+        const sourceKey = `note:${note.id}`;
+        const { count } = await supa.from('agent_tasks').select('id', { count: 'exact', head: true }).eq('source_key', sourceKey);
+        if (!count) {
+          const title = text.replace(/^task:\s*/i, '').split('\n')[0].slice(0, 140);
+          const { error: tErr } = await supa.from('agent_tasks').insert({
+            agent: (leadRow?.assigned_agent === 'james') ? 'james' : (profile.role === 'agent_james' ? 'james' : 'sara'),
+            client: who, title, sub: 'From your note', note: text.length > 140 ? text.slice(0, 500) : null,
+            due_label: 'Today', done: false, source_key: sourceKey
+          });
+          task_created = !tErr;
+        }
+      }
+    } catch (_) { /* never block the note */ }
     if (insErr) return fail(res, 500, `lead_notes insert: ${insErr.message}`);
 
-    return ok(res, { note });
+    return ok(res, { task_created, note });
   } catch (e) {
     return fail(res, 500, e.message);
   }

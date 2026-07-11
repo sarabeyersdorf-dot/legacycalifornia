@@ -207,6 +207,26 @@ export default async function handler(req, res) {
       }
     } catch (_) { /* nudges are a bonus, never a blocker */ }
 
+    // Your own notes from the last 24h join the live feed, so a thought jotted
+    // on a lead is visible on Today immediately. Fail-soft.
+    try {
+      const { data: notes } = await supa.from('lead_notes')
+        .select('id, body, created_at, is_internal, leads(first_name,last_name)')
+        .gte('created_at', dayAgo)
+        .order('created_at', { ascending: false })
+        .limit(8);
+      for (const n of (notes || [])) {
+        const who = n.leads ? [n.leads.first_name, n.leads.last_name].filter(Boolean).join(' ') : 'a lead';
+        result.signals.unshift({
+          id: `note:${n.id}`, lead_id: null,
+          time_iso: n.created_at, time: formatClock(n.created_at),
+          body: `You noted on ${who}: “${(n.body || '').slice(0, 110)}${(n.body || '').length > 110 ? '…' : ''}”`,
+          tag: n.is_internal ? 'Internal note' : 'Your note'
+        });
+      }
+      result.signals.sort((a, b) => String(b.time_iso || '').localeCompare(String(a.time_iso || '')));
+    } catch (_) { /* notes are a bonus */ }
+
     // Timeline updates awaiting approval — filed by the daily scan / Cowork,
     // applied to the seller-facing timeline ONLY when the agent approves.
     result.timeline_approvals = [];
