@@ -697,7 +697,26 @@
     .cur-chip.on { background:var(--brass); color:var(--shell); border-color:var(--brass); }
     .cur-filter-actions { display:flex; gap:10px; align-items:center; margin-bottom:14px; flex-wrap:wrap; }
     .cur-gaps { font-size:12px; color:var(--ink-mute); font-style:italic; margin:0 0 12px; line-height:1.5; }
-    .cur-results, .cur-incl { display:flex; flex-direction:column; gap:8px; }
+    .cur-results { display:flex; flex-direction:column; gap:8px; }
+    /* "In this collection": a compact card grid that mirrors the MLS search
+       cards (photo on top, price/address/meta below) with the annotation
+       fields tucked into the card footer. */
+    .cur-incl { display:grid; grid-template-columns:repeat(auto-fill, minmax(260px, 1fr)); gap:12px; align-items:start; }
+    .cur-card { background:#fff; border:1px solid var(--rule); display:flex; flex-direction:column; }
+    .cur-card-ph { position:relative; }
+    .cur-card-ph img, .cur-card-ph .noph { width:100%; height:140px; object-fit:cover; display:block; background:var(--vellum); }
+    .cur-card-ph .noph { display:flex; align-items:center; justify-content:center; font-family:var(--mono); font-size:9.5px; letter-spacing:.12em; text-transform:uppercase; color:var(--ink-mute); }
+    .cur-card-ph [data-remove] { position:absolute; top:6px; right:6px; width:24px; height:24px; border:none; border-radius:50%; background:rgba(26,23,20,.78); color:#FAF6EC; font-size:14px; line-height:22px; text-align:center; cursor:pointer; padding:0; }
+    .cur-card-ph [data-remove]:hover { background:#8B3A3A; }
+    .cur-card-bd { padding:9px 11px 0; }
+    .cur-card .pr { font-family:var(--serif); font-style:italic; font-size:17px; color:var(--ink); }
+    .cur-card .ad { font-size:12px; color:var(--ink-soft); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .cur-card .sp { font-family:var(--mono); font-size:9px; letter-spacing:.08em; color:var(--ink-mute); text-transform:uppercase; margin-top:2px; }
+    .cur-card .cur-incl-ed { border-top:1px solid var(--rule-soft); margin-top:8px; padding:8px 10px 10px; gap:6px; }
+    .cur-card .cur-incl-ed textarea { font-size:12px; padding:6px 8px; }
+    .cur-card .cur-incl-ed .r2 { gap:8px; row-gap:5px; font-size:9px; }
+    .cur-card .cur-incl-ed select { font-size:11px; padding:3px 5px; }
+    .cur-card .cur-incl-ed input[type=text] { font-size:12px; padding:6px 8px; }
     .cur-row { display:grid; grid-template-columns:64px 1fr auto; gap:12px; background:var(--shell); border:1px solid var(--rule); padding:10px; align-items:center; }
     .cur-row .thumb { width:64px; height:48px; object-fit:cover; background:var(--vellum); }
     .cur-row .pr { font-family:var(--serif); font-style:italic; font-size:18px; color:var(--ink); }
@@ -1975,11 +1994,16 @@ function selectLead(el) {
     if (!inc.length) return '<div class="cur-empty" style="font-size:14px;">No listings picked yet. Use “Add listings” to search and tick homes in.</div>';
     return '<div class="cur-incl">' + inc.map(function (l) {
       var g = l.listing || {};
-      return '<div class="cur-row" data-inc="' + esc(l.property_id) + '">' +
-        '<img class="thumb" src="' + esc(g.photo || '') + '" alt="">' +
-        '<div><div class="pr">' + esc(g.price_label || '—') + '</div><div class="ad">' + esc(g.address || '') + (g.city ? ', ' + esc(g.city) : '') + '</div>' +
-          '<div class="sp">' + [g.beds != null ? g.beds + 'bd' : '', g.baths != null ? g.baths + 'ba' : '', g.sqft ? g.sqft.toLocaleString() + 'sqft' : ''].filter(Boolean).join(' · ') + '</div></div>' +
-        '<button class="btn-link" data-remove="' + esc(l.property_id) + '" style="color:#8B3A3A;font-size:10px;">Remove</button>' +
+      return '<div class="cur-card" data-inc="' + esc(l.property_id) + '">' +
+        '<div class="cur-card-ph">' +
+          (g.photo ? '<img src="' + esc(g.photo) + '" alt="" loading="lazy">' : '<div class="noph">No photo</div>') +
+          '<button type="button" data-remove="' + esc(l.property_id) + '" title="Remove from collection" aria-label="Remove from collection">×</button>' +
+        '</div>' +
+        '<div class="cur-card-bd">' +
+          '<div class="pr">' + esc(g.price_label || '—') + '</div>' +
+          '<div class="ad" title="' + esc((g.address || '') + (g.city ? ', ' + g.city : '')) + '">' + esc(g.address || '') + (g.city ? ', ' + esc(g.city) : '') + '</div>' +
+          '<div class="sp">' + [g.beds != null ? g.beds + ' bd' : '', g.baths != null ? g.baths + ' ba' : '', g.sqft ? g.sqft.toLocaleString() + ' sqft' : ''].filter(Boolean).join(' · ') + '</div>' +
+        '</div>' +
         '<div class="cur-incl-ed">' +
           '<textarea data-f="agent_note" rows="2" placeholder="Your note to the client about this home…">' + esc(l.agent_note || '') + '</textarea>' +
           '<div class="r2">' +
