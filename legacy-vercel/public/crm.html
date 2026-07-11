@@ -1881,11 +1881,12 @@ function selectLead(el) {
   // ---- pick-from-IDX capture ----------------------------------------------
   // iHomefinder's Kestrel widget only initializes as a TOP-LEVEL page — it will
   // not render framed or injected into this single-page app (both leave a blank
-  // box). So "Add listings" opens the live MLS search as its own tab
-  // (curate-idx.html), which is same-origin and shares this session cookie: each
-  // "＋ Add to collection" click there POSTs straight to the same collections
-  // endpoint. When Sara returns to this tab we reload the open collection so the
-  // new picks appear under "Collection".
+  // box), but it renders fine on the public search page. So "Add listings" opens
+  // property-search.html?capture=<id> in its own tab — that page (same-origin,
+  // shares this session cookie) activates a "＋ Add to collection" overlay and
+  // each click POSTs straight to the same collections endpoint. When Sara returns
+  // to this tab we reload the open collection so the new picks show under
+  // "Collection".
   function curToast(msg, good) {
     if (window.Legacy && window.Legacy.toast) { window.Legacy.toast(msg, !!good); return; }
     var t = document.createElement('div');
@@ -1904,7 +1905,9 @@ function selectLead(el) {
   }
   function openMlsSearch() {
     if (!state.active) { curToast('Open or create a collection first.', false); return; }
-    var url = '/curate-idx.html?collection=' + encodeURIComponent(state.active.id) +
+    // Point at the public search page (the proven-working Kestrel context) with
+    // ?capture=<id>; that page activates the "＋ Add to collection" overlay.
+    var url = '/property-search.html?capture=' + encodeURIComponent(state.active.id) +
               '&title=' + encodeURIComponent(state.active.title || 'collection');
     var w = window.open(url, 'legacyMlsSearch');
     if (!w) { curToast('Allow pop-ups for this site, then click “Open MLS search” again.', false); return; }

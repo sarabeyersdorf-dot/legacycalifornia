@@ -100,5 +100,155 @@
   </div>
 </footer>
 
+<!-- CRM "curate" capture overlay. Inert for public visitors: it only activates
+     when the CRM opens this page with ?capture=<collectionId> (the agent picking
+     listings for a client collection). It stashes the target collection in
+     sessionStorage and strips the param from the URL so iHomefinder's own
+     query-string routing is untouched, then overlays a "＋ Add to collection"
+     button on each listing card and POSTs the scraped listing to the same
+     /api/curate/collections endpoint the CRM uses (same-origin session cookie). -->
+<script>
+(function () {
+  var KEY = 'legacyCaptureCollection';
+  var qs = new URLSearchParams(location.search);
+
+  // Seed sessionStorage from the launch URL, then remove our params so they
+  // don't interfere with Kestrel's routing on subsequent in-widget navigations.
+  if (qs.has('capture')) {
+    try {
+      sessionStorage.setItem(KEY, JSON.stringify({
+        id: qs.get('capture') || '',
+        title: qs.get('title') || 'this collection'
+      }));
+    } catch (e) {}
+    qs.delete('capture'); qs.delete('title');
+    var clean = location.pathname + (qs.toString() ? '?' + qs.toString() : '') + location.hash;
+    try { history.replaceState(null, '', clean); } catch (e) {}
+  }
+
+  var target = null;
+  try { target = JSON.parse(sessionStorage.getItem(KEY) || 'null'); } catch (e) {}
+  if (!target || !target.id) return; // public visitor — do nothing at all.
+
+  // ---- capture bar --------------------------------------------------------
+  var bar = document.createElement('div');
+  bar.style.cssText = 'position:sticky;top:0;z-index:99998;display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:10px 16px;background:#1A1714;color:#FAF6EC;box-shadow:0 2px 12px rgba(0,0,0,.25);font-family:system-ui,sans-serif;';
+  bar.innerHTML =
+    '<b style="font-size:14px;">Add to collection</b>' +
+    '<span style="color:#C9BEA8;font-size:12px;">“' + String(target.title).replace(/</g, '&lt;') + '”</span>' +
+    '<span style="flex:1 1 40px;"></span>' +
+    '<span style="color:#C9BEA8;font-size:12px;">Click “＋ Add to collection” on any listing</span>' +
+    '<button type="button" id="lgcCaptureStop" style="background:#B08D57;color:#1A1714;border:none;border-radius:8px;padding:8px 15px;font-size:12px;font-weight:600;cursor:pointer;">Done — stop adding</button>';
+  document.body.insertBefore(bar, document.body.firstChild);
+  bar.querySelector('#lgcCaptureStop').addEventListener('click', function () {
+    try { sessionStorage.removeItem(KEY); } catch (e) {}
+    bar.remove();
+    document.querySelectorAll('[data-lgc-addbtn]').forEach(function (b) { b.remove(); });
+    if (obs) obs.disconnect();
+  });
+
+  function toast(msg, good) {
+    var t = document.createElement('div');
+    t.textContent = msg;
+    t.style.cssText = 'position:fixed;left:50%;bottom:26px;transform:translateX(-50%);z-index:100000;padding:11px 18px;border-radius:10px;font-size:13px;color:#FAF6EC;box-shadow:0 6px 24px rgba(0,0,0,.3);background:' + (good ? '#2E5C3D' : '#8A3B2B') + ';';
+    document.body.appendChild(t);
+    setTimeout(function () { t.remove(); }, 2600);
+  }
+
+  // Find listing cards by content signature (an element with an <img>, a
+  // "$price" and an "MLS#"), keeping the smallest matching element — robust to
+  // iHomefinder's markup, which we can't pin to fixed classes.
+  function findCards() {
+    var out = [], all = document.querySelectorAll('body *');
+    for (var i = 0; i < all.length && out.length < 220; i++) {
+      var n = all[i], txt = n.textContent || '';
+      if (n === bar || bar.contains(n)) continue;
+      if (!/MLS#?\s*[A-Za-z0-9]/i.test(txt) || !/\$[\d,]{3,}/.test(txt)) continue;
+      if (!n.querySelector || !n.querySelector('img')) continue;
+      var child = false;
+      for (var k = 0; k < n.children.length; k++) {
+        var c = n.children[k], ct = c.textContent || '';
+        if (/MLS#?\s*[A-Za-z0-9]/i.test(ct) && /\$[\d,]{3,}/.test(ct) && c.querySelector && c.querySelector('img')) { child = true; break; }
+      }
+      if (!child) out.push(n);
+    }
+    return out;
+  }
+
+  function scrape(card) {
+    var text = card.textContent || '';
+    var lines = text.split('\n').map(function (l) { return l.trim(); }).filter(Boolean);
+    var m = function (re) { var x = text.match(re); return x ? x[1] : null; };
+    var cityLine = lines.filter(function (l) { return /,\s*[A-Z]{2}\s+\d{5}/.test(l); })[0] || null;
+    var street = null, city = null, zip = null;
+    if (cityLine) {
+      var ix = lines.indexOf(cityLine); if (ix > 0) street = lines[ix - 1];
+      var cm = cityLine.match(/^(.*?),\s*([A-Z]{2})\s+(\d{5})/); if (cm) { city = cm[1].trim(); zip = cm[3]; }
+    }
+    if (!street) street = lines.filter(function (l) { return /^\d+\s+\S+/.test(l) && !/\$/.test(l) && !/MLS/i.test(l); })[0] || null;
+    var img = card.querySelector('img');
+    var photo = img ? (img.getAttribute('src') || img.getAttribute('data-src') || img.currentSrc || null) : null;
+    if (photo && photo.indexOf('http') !== 0) { try { photo = new URL(photo, location.href).href; } catch (e) {} }
+    return {
+      mls_number: m(/MLS#?\s*([A-Za-z0-9-]+)/i),
+      address: street, city: city, zip: zip,
+      price: (text.match(/\$[\d,]{3,}/) || [])[0] || null,
+      beds: m(/(\d+)\s*(?:bd|beds?)\b/i),
+      baths: m(/(\d+(?:\.\d+)?)\s*(?:ba|baths?)\b/i),
+      sqft: m(/Sq\s*ft:?\s*([\d,]+)/i),
+      photo: photo
+    };
+  }
+
+  function onAdd(card, btn) {
+    var listing = scrape(card);
+    if (!listing.mls_number && !listing.address) { toast('Couldn’t read that card — open its Details page and add from there.', false); return; }
+    var orig = btn.textContent; btn.textContent = 'Adding…'; btn.disabled = true;
+    fetch('/api/curate/collections', {
+      method: 'POST', credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ op: 'capture-listing', collection_id: target.id, listing: listing })
+    })
+      .then(function (r) { return r.json().then(function (j) { return { ok: r.ok, status: r.status, j: j }; }).catch(function () { return { ok: r.ok, status: r.status, j: {} }; }); })
+      .then(function (r) {
+        if (r.ok && r.j && r.j.listing) {
+          btn.textContent = '✓ Added'; btn.style.background = '#2E5C3D';
+          toast('Added ' + (listing.address || listing.mls_number || 'listing') + ' to “' + target.title + '”.', true);
+        } else if (r.status === 401) {
+          btn.textContent = orig; btn.disabled = false;
+          toast('Sign in to the CRM in this browser first, then try again.', false);
+        } else {
+          btn.textContent = orig; btn.disabled = false;
+          toast((r.j && r.j.error) || 'Could not add that listing.', false);
+        }
+      })
+      .catch(function () { btn.textContent = orig; btn.disabled = false; toast('Network error — try again.', false); });
+  }
+
+  function decorate() {
+    try {
+      findCards().forEach(function (card) {
+        if (card.getAttribute('data-lgc-dec')) return;
+        card.setAttribute('data-lgc-dec', '1');
+        try { if (getComputedStyle(card).position === 'static') card.style.position = 'relative'; } catch (e) {}
+        var btn = document.createElement('button');
+        btn.type = 'button'; btn.textContent = '＋ Add to collection';
+        btn.setAttribute('data-lgc-addbtn', '1');
+        btn.style.cssText = 'position:absolute;top:8px;left:8px;z-index:9999;background:#1A1714;color:#FAF6EC;border:none;border-radius:8px;padding:8px 12px;font-family:monospace;font-size:11px;letter-spacing:.05em;text-transform:uppercase;cursor:pointer;box-shadow:0 2px 10px rgba(0,0,0,.35);';
+        btn.addEventListener('click', function (e) { e.preventDefault(); e.stopPropagation(); onAdd(card, btn); });
+        card.appendChild(btn);
+      });
+    } catch (e) {}
+  }
+
+  // Debounced observer — long enough that we run AFTER Kestrel finishes a
+  // results/detail re-render, not in the middle of it.
+  var obs, t;
+  obs = new MutationObserver(function () { clearTimeout(t); t = setTimeout(decorate, 700); });
+  obs.observe(document.body, { childList: true, subtree: true });
+  setTimeout(decorate, 1500);
+})();
+</script>
+
 </body>
 </html>
