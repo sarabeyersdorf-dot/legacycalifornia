@@ -419,6 +419,10 @@ function shapeDealsInMotion(deals) {
           : 'Closing overdue')
       : (isOffer ? (d.side === 'buyer' ? 'Offer out' : 'Offer in') : 'On market');
     const agentName = d.agent === 'james' ? 'James' : 'Sara';
+    // Commission (internal): percent from listing_meta against the live price.
+    const commRaw = d.listing_meta && d.listing_meta.commission;
+    const commPct = commRaw != null ? parseFloat(String(commRaw)) : null;
+    const commUsd = (price && commPct != null && Number.isFinite(commPct)) ? Math.round(price * commPct / 100) : null;
     return {
       lead_id:     d.source_key,
       lead_name:   `${sideLabel(d.side)} · ${agentName}`,
@@ -426,6 +430,12 @@ function shapeDealsInMotion(deals) {
       amount:      price,
       address:     d.address || null,
       city:        d.city || null,
+      coe_date:    d.coe_date || null,
+      days_to_coe: daysToCoe,
+      in_escrow:   inEscrow,
+      commission_pct: (commPct != null && Number.isFinite(commPct)) ? commPct : null,
+      commission_usd: commUsd,
+      agent:       d.agent || null,
       track:       TRACK.map((label, i) => ({ label, done: i < trackIdx, on: i === trackIdx }))
     };
   });

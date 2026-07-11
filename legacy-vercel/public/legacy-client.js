@@ -870,31 +870,62 @@
     }
   };
 
-  function paintHours(items) {
+  // The day strip is now the WEEK AHEAD: today + the next 6 days from the real
+  // calendar (tours, appointments, contingency deadlines, COEs), deal-colored.
+  async function paintHours(items) {
     const body = document.querySelector('[data-hours-body]');
     if (!body) return;
     const now = new Date();
-    // Header weekday — was hardcoded "Today · Tuesday".
     const todayEl = document.querySelector('[data-hours-today]');
-    if (todayEl) todayEl.textContent = `Today · ${now.toLocaleDateString('en-US', { weekday: 'long' })}`;
+    if (todayEl) todayEl.textContent = `Next 7 days`;
     const nowEl = body.querySelector('[data-hours-now]');
-    if (nowEl) {
-      nowEl.innerHTML = `<span class="hr-now-l">Now · ${escapeHtml(now.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' }))}</span><span class="hr-now-d">${items.length ? items.length + ' scheduled today' : 'No tours on the calendar today'}</span>`;
-    }
-    // Clear all .hr-row siblings, keep .hr-now
-    Array.from(body.querySelectorAll('.hr-row')).forEach((r) => r.remove());
-    if (!items.length) return;
-    items.forEach((h) => {
-      const row = document.createElement('div');
-      row.className = 'hr-row';
-      row.innerHTML = `
-        <span class="hr-time">${escapeHtml(h.time)}</span>
-        <div class="hr-card${h.brass ? ' hr-card-brass' : ''}${h.past ? ' hr-card-soft' : ''}" ${h.client ? `data-open-person="${escapeHtml(h.client)}" style="cursor:pointer;" title="Open ${escapeHtml(h.client)}"` : ''}>
-          <span class="label-cap">${escapeHtml(h.kind)}</span>
-          <strong>${escapeHtml(h.title)}</strong>
-          <span class="hr-sub">${escapeHtml(h.sub)}</span>
-        </div>`;
-      body.appendChild(row);
+    Array.from(body.querySelectorAll('.hr-row, .hr-day')).forEach((r) => r.remove());
+    let days = [], events = [];
+    try {
+      const r = await api('/api/crm/calendar?week=0&span=2', { method: 'GET' });
+      if (r.ok && Array.isArray(r.json.days)) { days = r.json.days; events = r.json.events || []; }
+    } catch (_) {}
+    if (window.LegacyDealColors) { try { await window.LegacyDealColors.ready(); } catch (_) {} }
+    const todayKey = days.find((d) => d.is_today)?.date || now.toISOString().slice(0, 10);
+    const week = days.filter((d) => d.date >= todayKey).slice(0, 7);
+    const byDate = {};
+    events.forEach((ev) => { (byDate[ev.date] = byDate[ev.date] || []).push(ev); });
+    const totalAhead = week.reduce((n, d) => n + (byDate[d.date] || []).length, 0);
+    if (nowEl) nowEl.innerHTML = `<span class="hr-now-l">Now · ${escapeHtml(now.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' }))}</span><span class="hr-now-d">${totalAhead ? totalAhead + ' scheduled this week' : 'Clear week so far'}</span>`;
+    week.forEach((d) => {
+      const evs = byDate[d.date] || [];
+      if (!evs.length && !d.is_today) return;   // skip empty future days, keep today
+      const head = document.createElement('div');
+      head.className = 'hr-day';
+      head.style.cssText = 'font-family:var(--sans);font-size:10.5px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:' + (d.is_today ? 'var(--brass)' : 'var(--ink-mute)') + ';padding:10px 2px 2px;';
+      head.textContent = (d.is_today ? 'Today · ' : '') + d.dow + ' ' + d.num;
+      body.appendChild(head);
+      if (!evs.length) {
+        const empt = document.createElement('div');
+        empt.className = 'hr-row';
+        empt.innerHTML = '<span class="hr-time"></span><div class="hr-card hr-card-soft"><span class="hr-sub">Nothing scheduled today.</span></div>';
+        body.appendChild(empt);
+        return;
+      }
+      evs.slice(0, 4).forEach((ev) => {
+        const c = ev.deal_key && window.LegacyDealColors ? window.LegacyDealColors.get(ev.deal_key) : null;
+        const row = document.createElement('div');
+        row.className = 'hr-row';
+        row.innerHTML = `
+          <span class="hr-time">${escapeHtml(ev.time_label || (ev.all_day ? 'All day' : ''))}</span>
+          <div class="hr-card${ev.type === 'deadline' || ev.type === 'coe' ? ' hr-card-brass' : ''}" style="${c ? `border-left:4px solid ${c.border};` : ''}${ev.client ? 'cursor:pointer;' : ''}" ${ev.client ? `data-open-person="${escapeHtml(ev.client)}" title="Open ${escapeHtml(ev.client)}"` : ''}>
+            <span class="label-cap">${escapeHtml(ev.type || 'event')}</span>
+            <strong>${escapeHtml(ev.title || '')}</strong>
+            ${ev.client || ev.location ? `<span class="hr-sub">${escapeHtml([ev.client, ev.location].filter(Boolean).join(' · '))}</span>` : ''}
+          </div>`;
+        body.appendChild(row);
+      });
+      if (evs.length > 4) {
+        const more = document.createElement('div');
+        more.className = 'hr-row';
+        more.innerHTML = `<span class="hr-time"></span><div class="hr-card hr-card-soft"><span class="hr-sub">+${evs.length - 4} more — open the calendar</span></div>`;
+        body.appendChild(more);
+      }
     });
   }
 
@@ -1097,28 +1128,35 @@
     // widgets with live numbers from the brief. Only real counts, no fabrication.
     const assessEl = document.querySelector('[data-bind-assessment]');
     if (assessEl) {
-      const r = data.roster || {};
-      const drafts   = (data.drafts && data.drafts.length) || 0;
-      const deals    = (data.active_deals && data.active_deals.length) || 0;
-      const tours    = (data.hours && data.hours.length) || 0;
-      const inbox     = r.inbox_count != null ? r.inbox_count : null;
-      const pipeline  = r.pipeline_count != null ? r.pipeline_count : null;
-      const row = (label, val, accent) => val == null ? '' :
-        `<div class="tb-pulse-row"><span>${label}</span><span class="v">${escapeHtml(String(val))}${accent ? ` <em class="chg ${accent.cls}">${escapeHtml(accent.text)}</em>` : ''}</span></div>`;
-      // Lead line: what needs her first.
-      const lead = drafts ? `${drafts} draft${drafts === 1 ? '' : 's'} waiting on you`
-                 : tours   ? `${tours} on the calendar today`
-                 : deals    ? `${deals} deal${deals === 1 ? '' : 's'} in motion`
-                 : 'Inbox at zero — quiet morning';
+      // "Closing soon" — the money panel: every escrow deal with its color,
+      // COE date, days-to-close, and the commission it pays (internal), plus
+      // expected totals. Replaces the static at-a-glance counts.
+      const escrow = (data.active_deals || []).filter((d) => d.in_escrow).sort((a, b) => String(a.coe_date || '9999').localeCompare(String(b.coe_date || '9999')));
+      const fmtCoe = (iso) => iso ? new Date(String(iso).slice(0, 10) + 'T12:00:00Z').toLocaleDateString('en-US', { month: 'short', day: 'numeric', timeZone: 'UTC' }) : 'TBD';
+      const money = (n) => n == null ? '—' : '$' + Math.round(n).toLocaleString('en-US');
+      const now = new Date(); const eom = new Date(now.getFullYear(), now.getMonth() + 1, 1);
+      let totalMonth = 0, total60 = 0;
+      escrow.forEach((d) => {
+        if (d.commission_usd == null || !d.coe_date) return;
+        const coe = new Date(d.coe_date);
+        if (coe < eom) totalMonth += d.commission_usd;
+        if (coe.getTime() - now.getTime() < 60 * 86400000) total60 += d.commission_usd;
+      });
+      const rows = escrow.map((d) => {
+        const c = window.LegacyDealColors ? window.LegacyDealColors.get(d.lead_id) : null;
+        const late = d.days_to_coe != null && d.days_to_coe < 0;
+        const chip = d.days_to_coe == null ? '' : `<em class="chg ${late ? 'dn' : ''}" style="margin-left:6px;">${late ? Math.abs(d.days_to_coe) + 'd late' : d.days_to_coe + 'd'}</em>`;
+        return `<div class="tb-pulse-row" data-open-deal="${escapeHtml(d.lead_id || '')}" style="cursor:pointer;" title="Open this deal">
+          <span style="display:flex;align-items:center;gap:7px;min-width:0;"><span style="width:9px;height:9px;border-radius:50%;flex:none;background:${c ? c.border : 'var(--brass)'};"></span><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escapeHtml((d.address || d.lead_id || '').split(',')[0])}</span></span>
+          <span class="v">${escapeHtml(fmtCoe(d.coe_date))}${chip}<span style="display:block;font-size:11px;color:var(--ink-mute);font-weight:400;">${d.commission_usd != null ? money(d.commission_usd) + (d.agent ? ' · ' + (d.agent === 'james' ? 'James' : 'Sara') : '') : 'commission n/a'}</span></span>
+        </div>`;
+      }).join('');
       assessEl.innerHTML = `
         <div class="tb-pulse">
-          <span class="label-cap">At a glance</span>
-          <div class="tb-pulse-row" style="font-weight:600;"><span>${escapeHtml(lead)}</span><span class="v"></span></div>
-          ${row('Awaiting your approval', drafts, drafts ? { cls: 'dn', text: 'review' } : null)}
-          ${row('On the calendar today', tours)}
-          ${row('Deals in motion', deals)}
-          ${row('Inbox awaiting reply', inbox)}
-          ${row('Active pipeline', pipeline)}
+          <span class="label-cap">Closing soon · ${escrow.length} in escrow</span>
+          ${rows || '<div class="tb-pulse-row"><span>Nothing in escrow right now.</span><span class="v"></span></div>'}
+          <div class="tb-pulse-row" style="border-top:1px solid var(--rule);margin-top:8px;padding-top:8px;font-weight:600;"><span>Expected this month</span><span class="v">${money(totalMonth)}</span></div>
+          <div class="tb-pulse-row" style="font-weight:600;"><span>Next 60 days</span><span class="v">${money(total60)}</span></div>
         </div>`;
     }
 
