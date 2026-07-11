@@ -662,8 +662,9 @@
     .cur-idx { margin-bottom:22px; background:var(--shell); border:1px solid var(--rule); border-radius:12px; overflow:hidden; }
     .cur-idx-h { font-family:var(--mono); font-size:10px; letter-spacing:.1em; text-transform:uppercase; color:var(--ink); padding:12px 16px; border-bottom:1px solid var(--rule-soft); }
     .cur-idx-h span { color:var(--ink-mute); text-transform:none; letter-spacing:0; font-size:11px; }
-    .cur-idx-embed { display:block; background:#fff; min-height:420px; padding:8px 12px 20px; }
-    .cur-idx-loading { padding:48px 16px; text-align:center; color:var(--ink-mute); font-style:italic; font-size:13px; }
+    .cur-idx-cta-body { padding:20px 18px 22px; }
+    .cur-idx-cta-body p { margin:0 0 16px; font-size:14px; line-height:1.5; color:var(--ink); max-width:52ch; }
+    .cur-idx-hint { margin-top:14px; font-size:12px; color:var(--ink-mute); }
     .cur-side { position:sticky; top:12px; }
     .cur-side-h { font-family:var(--mono); font-size:10px; letter-spacing:.18em; text-transform:uppercase; color:var(--brass); margin:0 0 10px; }
     .cur-colls, .cur-saved { display:flex; flex-direction:column; gap:6px; }
@@ -1878,11 +1879,13 @@ function selectLead(el) {
   }
 
   // ---- pick-from-IDX capture ----------------------------------------------
-  // The IDX search is embedded INLINE (mountKestrel), so it lives in the CRM's
-  // own document. We overlay an "Add" button on each listing card and read the
-  // card's photo/price/address/MLS straight from the DOM when clicked — no MLS
-  // API and no typing. The markup is iHomefinder's, so cards are found by content
-  // signature (has an image + a "$price" + an "MLS#"), not fixed classes.
+  // iHomefinder's Kestrel widget only initializes as a TOP-LEVEL page — it will
+  // not render framed or injected into this single-page app (both leave a blank
+  // box). So "Add listings" opens the live MLS search as its own tab
+  // (curate-idx.html), which is same-origin and shares this session cookie: each
+  // "＋ Add to collection" click there POSTs straight to the same collections
+  // endpoint. When Sara returns to this tab we reload the open collection so the
+  // new picks appear under "Collection".
   function curToast(msg, good) {
     if (window.Legacy && window.Legacy.toast) { window.Legacy.toast(msg, !!good); return; }
     var t = document.createElement('div');
@@ -1890,122 +1893,23 @@ function selectLead(el) {
     t.style.cssText = 'position:fixed;left:50%;bottom:26px;transform:translateX(-50%);z-index:100000;background:' + (good ? '#2E5C3D' : '#8A3B2B') + ';color:#FAF6EC;padding:11px 18px;border-radius:10px;font-size:13px;box-shadow:0 6px 24px rgba(0,0,0,.3);';
     document.body.appendChild(t); setTimeout(function () { t.remove(); }, 2600);
   }
-  function idxFindCards(rootEl) {
-    var out = [], all = rootEl.querySelectorAll('*');
-    for (var i = 0; i < all.length && out.length < 120; i++) {
-      var n = all[i], txt = n.textContent || '';
-      if (!/MLS#?\s*[A-Za-z0-9]/i.test(txt) || !/\$[\d,]{3,}/.test(txt)) continue;
-      if (!n.querySelector || !n.querySelector('img')) continue;
-      // keep the smallest matching element (skip if a child also matches)
-      var childMatch = false;
-      for (var k = 0; k < n.children.length; k++) {
-        var c = n.children[k], ct = c.textContent || '';
-        if (/MLS#?\s*[A-Za-z0-9]/i.test(ct) && /\$[\d,]{3,}/.test(ct) && c.querySelector && c.querySelector('img')) { childMatch = true; break; }
-      }
-      if (!childMatch) out.push(n);
+  // Refresh the open collection the next time this tab regains focus, so
+  // listings added over in the MLS-search tab show up here without a manual reload.
+  function armCollectionRefresh() {
+    function onFocus() {
+      window.removeEventListener('focus', onFocus);
+      if (state.active) openCollection(state.active.id);
     }
-    return out;
+    window.addEventListener('focus', onFocus);
   }
-  function idxScrape(card) {
-    var text = card.textContent || '';
-    var lines = text.split('\n').map(function (l) { return l.trim(); }).filter(Boolean);
-    var m = function (re) { var x = text.match(re); return x ? x[1] : null; };
-    var cityLine = lines.filter(function (l) { return /,\s*[A-Z]{2}\s+\d{5}/.test(l); })[0] || null;
-    var street = null, city = null, zip = null;
-    if (cityLine) {
-      var ix = lines.indexOf(cityLine); if (ix > 0) street = lines[ix - 1];
-      var cm = cityLine.match(/^(.*?),\s*([A-Z]{2})\s+(\d{5})/); if (cm) { city = cm[1].trim(); zip = cm[3]; }
-    }
-    if (!street) street = lines.filter(function (l) { return /^\d+\s+\S+/.test(l) && !/\$/.test(l) && !/MLS/i.test(l); })[0] || null;
-    var img = card.querySelector('img');
-    var photo = img ? (img.getAttribute('src') || img.getAttribute('data-src') || img.currentSrc || null) : null;
-    if (photo && photo.indexOf('http') !== 0) { try { photo = new URL(photo, card.ownerDocument.location.href).href; } catch (e) {} }
-    return {
-      mls_number: m(/MLS#?\s*([A-Za-z0-9-]+)/i),
-      address: street, city: city, zip: zip,
-      price: (text.match(/\$[\d,]{3,}/) || [])[0] || null,
-      beds: m(/(\d+)\s*(?:bd|beds?)\b/i),
-      baths: m(/(\d+(?:\.\d+)?)\s*(?:ba|baths?)\b/i),
-      sqft: m(/Sq\s*ft:?\s*([\d,]+)/i),
-      photo: photo
-    };
-  }
-  function idxOnAdd(card, btn) {
-    if (!state.active) { curToast('Open or create a collection first, then click Add.', false); return; }
-    var listing = idxScrape(card);
-    if (!listing.mls_number && !listing.address) { curToast('Couldn’t read that card — open its Details and try there.', false); return; }
-    var orig = btn.textContent; btn.textContent = 'Adding…'; btn.disabled = true;
-    api('collections', { method: 'POST', body: { op: 'capture-listing', collection_id: state.active.id, listing: listing } }).then(function (r) {
-      if (r.ok && r.j && r.j.listing) {
-        btn.textContent = '✓ Added'; btn.style.background = '#2E5C3D';
-        curToast('Added ' + (listing.address || listing.mls_number || 'listing') + ' to “' + (state.active.title || 'collection') + '”.', true);
-        if (state.active) openCollection(state.active.id);
-      } else { btn.textContent = orig; btn.disabled = false; curToast((r.j && r.j.error) || 'Could not add.', false); }
-    });
-  }
-  function idxDecorate(rootEl) {
-    idxFindCards(rootEl).forEach(function (card) {
-      if (card.getAttribute('data-cur-dec')) return;
-      card.setAttribute('data-cur-dec', '1');
-      try { if (getComputedStyle(card).position === 'static') card.style.position = 'relative'; } catch (e) {}
-      var btn = document.createElement('button');
-      btn.type = 'button'; btn.textContent = '＋ Add to collection';
-      btn.setAttribute('data-cur-addbtn', '1');
-      btn.style.cssText = 'position:absolute;top:8px;left:8px;z-index:99999;background:#1A1714;color:#FAF6EC;border:none;border-radius:8px;padding:8px 12px;font-family:monospace;font-size:11px;letter-spacing:.05em;text-transform:uppercase;cursor:pointer;box-shadow:0 2px 10px rgba(0,0,0,.35);';
-      btn.addEventListener('click', function (e) { e.preventDefault(); e.stopPropagation(); idxOnAdd(card, btn); });
-      card.appendChild(btn);
-    });
-  }
-  // Load the iHomefinder (Kestrel) widget script once, resolving on its real
-  // onload event (not by polling for a render fn — the stub can exist before the
-  // widget has finished initializing, which yields an empty placeholder).
-  var kestrelState = 0; // 0 none · 1 loading · 2 ready · 3 error
-  var kestrelWaiters = [];
-  function kestrelFlush(ok) { var l = kestrelWaiters.slice(); kestrelWaiters = []; l.forEach(function (f) { try { f(ok); } catch (e) {} }); }
-  function loadKestrel(cb) {
-    window.ihfKestrel = window.ihfKestrel || {};
-    if (!window.ihfKestrel.config) window.ihfKestrel.config = { platform: 'custom', activationToken: 'd77ab7ae-7afe-403d-89cf-61bd60bbf806' };
-    if (kestrelState === 2 || (window.ihfKestrel && typeof window.ihfKestrel.render === 'function')) { kestrelState = 2; cb(true); return; }
-    if (kestrelState === 3) { cb(false); return; }
-    kestrelWaiters.push(cb);
-    if (kestrelState === 1) return;
-    kestrelState = 1;
-    var sc = document.createElement('script');
-    sc.src = 'https://kestrel.idxhome.com/ihf-kestrel.js';
-    sc.onload  = function () { kestrelState = 2; kestrelFlush(true); };
-    sc.onerror = function () { kestrelState = 3; kestrelFlush(false); };
-    document.head.appendChild(sc);
-  }
-  var idxObs = null;
-  // Render the widget INLINE (Kestrel refuses to run inside an iframe) into the
-  // Add-listings panel. We reproduce the public site's exact call —
-  // document.currentScript.replaceWith(ihfKestrel.render()) run from a real
-  // inline <script> — because render() places its content where the calling
-  // script sits; appendChild(render()) does not populate the same way.
-  function mountKestrel() {
-    var box = el('[data-idx-embed]');
-    if (!box) return;
-    box.innerHTML = '<div class="cur-idx-loading">Loading the MLS search…</div>';
-    loadKestrel(function (ok) {
-      var b = el('[data-idx-embed]'); if (!b) return;
-      if (!ok || !window.ihfKestrel || typeof window.ihfKestrel.render !== 'function') {
-        b.innerHTML = '<div class="cur-idx-loading">Could not load the MLS search — check your connection and reopen this tab.</div>';
-        return;
-      }
-      b.innerHTML = '';
-      var holder = document.createElement('div');
-      b.appendChild(holder);
-      // Inline script: on execution, document.currentScript is this element, and
-      // the widget replaces it in place with the live search — same as the site.
-      var s = document.createElement('script');
-      s.text = 'try{document.currentScript.replaceWith(window.ihfKestrel.render());}catch(e){}';
-      holder.appendChild(s);
-      if (idxObs) idxObs.disconnect();
-      var t;
-      idxObs = new MutationObserver(function () { clearTimeout(t); t = setTimeout(function () { idxDecorate(b); }, 500); });
-      idxObs.observe(b, { childList: true, subtree: true });
-      setTimeout(function () { idxDecorate(b); }, 900);
-    });
+  function openMlsSearch() {
+    if (!state.active) { curToast('Open or create a collection first.', false); return; }
+    var url = '/curate-idx.html?collection=' + encodeURIComponent(state.active.id) +
+              '&title=' + encodeURIComponent(state.active.title || 'collection');
+    var w = window.open(url, 'legacyMlsSearch');
+    if (!w) { curToast('Allow pop-ups for this site, then click “Open MLS search” again.', false); return; }
+    try { w.focus(); } catch (e) {}
+    armCollectionRefresh();
   }
 
   // ---- open / render a collection -----------------------------------------
@@ -2057,7 +1961,10 @@ function selectLead(el) {
   function renderSub() {
     var body = el('[data-sub-body]');
     if (state.sub === 'listings') { body.innerHTML = renderIncluded(); }
-    else { body.innerHTML = renderSearchPanel(); mountKestrel(); }
+    else {
+      body.innerHTML = renderSearchPanel();
+      var ob = el('[data-open-mls]'); if (ob) ob.addEventListener('click', openMlsSearch);
+    }
   }
 
   function renderIncluded() {
@@ -2083,13 +1990,17 @@ function selectLead(el) {
   }
 
   function renderSearchPanel() {
-    // The real iHomefinder (Kestrel) search — the SAME live IDX search the public
-    // site uses. Kestrel refuses to render inside an iframe, so mountKestrel()
-    // embeds it INLINE here; idxDecorate() then overlays a "＋ Add to collection"
-    // button on every rendered card.
-    return '<div class="cur-idx" data-cur-idx>' +
-        '<div class="cur-idx-h">Search the MLS <span>· click “＋ Add to collection” on any listing to include it in “' + esc((state.active && state.active.title) || 'this collection') + '”</span></div>' +
-        '<div class="cur-idx-embed" data-idx-embed></div>' +
+    // Kestrel only initializes as a top-level page, so we open the live MLS
+    // search in its own tab (curate-idx.html) instead of embedding it. That tab
+    // shares this session and adds picks straight to the open collection.
+    var title = (state.active && state.active.title) || 'this collection';
+    return '<div class="cur-idx cur-idx-cta" data-cur-idx>' +
+        '<div class="cur-idx-h">Search the MLS <span>· the same live search your website uses</span></div>' +
+        '<div class="cur-idx-cta-body">' +
+          '<p>Opens the MLS search in a new tab. Browse listings just like your buyers do, and click <b>“＋ Add to collection”</b> on any home to drop it into <b>“' + esc(title) + '”</b>.</p>' +
+          '<button class="btn btn-ink" type="button" data-open-mls>Open MLS search ↗</button>' +
+          '<div class="cur-idx-hint">Added a few? Switch back to this tab — they’ll appear under <b>“Collection”</b> automatically.</div>' +
+        '</div>' +
       '</div>';
   }
 
