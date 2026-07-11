@@ -67,6 +67,7 @@
     var openItems = items.filter(function (i) { return ['upcoming', 'action'].indexOf(i.status) >= 0; });
     bar.innerHTML =
       '<div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;padding:10px 18px;">' +
+        chip('‹ Back', '', 'data-ac-back title="Back to where you came from"') +
         '<span style="font-size:10px;font-weight:600;letter-spacing:.2em;color:' + GOLD + ';">AGENT CONSOLE</span>' +
         '<span style="font-size:13.5px;font-weight:600;">' + esc(data.deal.address || dealKey) + '</span>' +
         '<span style="font-size:11px;color:rgba(250,246,236,.65);">' + esc(data.deal.stage || '') + (data.deal.coe_date ? ' · COE ' + fmtD(data.deal.coe_date) : '') + ' · clients never see this bar</span>' +
@@ -121,6 +122,15 @@
         return;
       }
       if (e.target.closest('[data-ac-desk]')) { location.href = '/crm.html'; return; }
+      if (e.target.closest('[data-ac-back]')) {
+        // Deal pages usually open in a fresh tab (no history): try closing it
+        // so Sara lands back on the CRM tab that opened it; otherwise walk
+        // history; otherwise go to the desk.
+        if (history.length > 1) { history.back(); return; }
+        window.close();
+        setTimeout(function () { location.href = '/crm.html'; }, 250);
+        return;
+      }
       var ap = e.target.closest('[data-ac-approve]'), rj = e.target.closest('[data-ac-reject]');
       if (ap || rj) {
         var id = (ap || rj).getAttribute(ap ? 'data-ac-approve' : 'data-ac-reject');
