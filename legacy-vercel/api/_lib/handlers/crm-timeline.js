@@ -11,7 +11,11 @@
 //     { op:'propose', deal_id, item_id|item_key, change:{...}, reason, source }
 //     { op:'approve', proposal_id } / { op:'reject', proposal_id }
 //
-// Approval is the ONLY path by which automated sources change an item.
+// Approval is the only path for AMBIGUOUS automated changes. Per Sara
+// (2026-07-12): document-backed matches that are unambiguous (clean executed
+// status, extractable date, deterministic mapping, clock running) AUTO-APPLY,
+// logged as pre-approved proposals (decided_by 'auto-doc') so the deal console
+// keeps a full audit trail. Only conflicts / uncertain items queue for Sara.
 
 import { adminClient } from '../supabase.js';
 import { getCallerProfile, isAgent } from '../auth.js';
@@ -296,16 +300,30 @@ const DOC_RULES = [
 ];
 const CONT_KEYS = ['cont_inspection', 'cont_appraisal', 'cont_title', 'cont_insurance', 'cont_loan'];
 
+// Ambiguity / negation cues — a doc status containing any of these is never
+// auto-applied; it files a proposal for Sara instead.
+const AMBIG = /awaiting|pending|out for|not\b|unchecked|missing|unsigned|partial|draft|still (?:to|needs|awaiting|out)|needs to|chase|watch for|to be filed|owed/i;
+
 function contKeysFromText(raw) {
   const t = String(raw).toLowerCase();
-  if (/all contingen|all remaining/.test(t)) return CONT_KEYS;
-  const hits = [];
-  if (/loan|financ/.test(t))  hits.push('cont_loan');
-  if (/apprais/.test(t))      hits.push('cont_appraisal');
-  if (/title/.test(t))        hits.push('cont_title');
-  if (/insur/.test(t))        hits.push('cont_insurance');
-  if (/inspect|investigat/.test(t)) hits.push('cont_inspection');
-  return hits.length ? hits : ['cont_inspection']; // CR-1 default; Sara approves or rejects
+  const scan = (x) => {
+    const h = [];
+    if (/loan|financ/.test(x))  h.push('cont_loan');
+    if (/apprais/.test(x))      h.push('cont_appraisal');
+    if (/\btitle/.test(x))      h.push('cont_title');
+    if (/insur/.test(x))        h.push('cont_insurance');
+    if (/inspect|investigat/.test(x)) h.push('cont_inspection');
+    return h;
+  };
+  // "removes ALL contingencies EXCEPT appraisal & loan" → everything BUT those.
+  const [before, after = ''] = t.split(/\bexcept\b/);
+  const excluded = scan(after);
+  if (/all contingen|all remaining|all buyer contingen/.test(before)) {
+    return { keys: CONT_KEYS.filter((k) => !excluded.includes(k)), guessed: false };
+  }
+  const hits = scan(before).filter((k) => !excluded.includes(k));
+  if (hits.length) return { keys: hits, guessed: false };
+  return { keys: ['cont_inspection'], guessed: true }; // CR-1 default — Sara decides
 }
 
 // Last m/d(/yy) date in the status text → ISO. Year defaults to the current
@@ -325,10 +343,14 @@ function dateFromText(raw) {
 export async function reconcileFromDealsFile(supa) {
   const data = requireJson('../../../data/deals.json');
   const list = Array.isArray(data) ? data : (data.deals || []);
-  const summary = { checked: 0, filed: [], deduped: 0, skipped: 0 };
+  const summary = { checked: 0, auto_applied: [], filed: [], deduped: 0, skipped: 0 };
+  const now = () => new Date().toISOString();
 
   for (const d of list) {
     if (!/pending/i.test(String(d.stage || ''))) continue;
+    // Clock-paused deals (e.g. bankruptcy-court sales): evidence never
+    // auto-applies — every change goes to Sara as a proposal.
+    const paused = d.timeline && 'clockStart' in d.timeline && !d.timeline.clockStart;
     const { data: deal } = await supa.from('deals').select('id, address, city').eq('source_key', d.id).maybeSingle();
     if (!deal) continue;
     const { data: items } = await supa.from('deal_timeline_items')
@@ -336,30 +358,54 @@ export async function reconcileFromDealsFile(supa) {
     if (!items?.length) continue;
     summary.checked++;
     const byKey = Object.fromEntries(items.map((i) => [i.key, i]));
+    const addr = [deal.address, deal.city].filter(Boolean).join(', ');
 
     for (const [token, val] of Object.entries(d.docs || {})) {
       const raw = val && typeof val === 'object' ? (val.status ?? val.state ?? '') : val;
       if (!raw) continue;
       const rule = DOC_RULES.find((r) => r.tok.test(token));
       if (!rule || !rule.sat.test(String(raw))) continue;
-      const keys = rule.keys || contKeysFromText(raw);
+      let keys = rule.keys, guessed = false;
+      if (!keys) ({ keys, guessed } = contKeysFromText(raw));
       const done_at = dateFromText(raw);
+      // AUTO only when the evidence is unambiguous: clean executed status,
+      // a real date, deterministic item mapping, and a running clock.
+      const confident = !paused && !guessed && !!done_at && !AMBIG.test(String(raw));
 
       for (const key of keys) {
         const item = byKey[key];
         if (!item || ['done', 'waived', 'na'].includes(item.status)) { summary.skipped++; continue; }
-        const { count } = await supa.from('deal_timeline_proposals')
-          .select('id', { count: 'exact', head: true }).eq('item_id', item.id).eq('status', 'pending');
-        if (count > 0) { summary.deduped++; continue; }
+        const reason = ('Executed document on file — ' + token + ': "' + String(raw).slice(0, 160) + '"').slice(0, 460);
+        const { data: pend } = await supa.from('deal_timeline_proposals')
+          .select('id').eq('item_id', item.id).eq('status', 'pending');
         const change = { status: 'done' };
         if (done_at) change.done_at = done_at;
-        const reason = ('Executed document on file — ' + token + ': "' + String(raw).slice(0, 160) + '"').slice(0, 500);
+        const label = addr + ' — ' + (item.title || key) + (done_at ? ' (done ' + done_at.slice(0, 10) + ')' : '');
+
+        if (confident) {
+          const { error: uErr } = await supa.from('deal_timeline_items')
+            .update({ ...change, updated_at: now() }).eq('id', item.id);
+          if (uErr) { summary.skipped++; continue; }
+          if (pend?.length) {
+            await supa.from('deal_timeline_proposals')
+              .update({ status: 'approved', decided_by: 'auto-doc', decided_at: now() })
+              .in('id', pend.map((p) => p.id));
+          } else {
+            await supa.from('deal_timeline_proposals').insert({
+              deal_id: deal.id, item_id: item.id, item_key: item.key, address: addr,
+              change, reason: reason + ' — auto-applied (document-backed)', source: 'cron',
+              status: 'approved', decided_by: 'auto-doc', decided_at: now()
+            });
+          }
+          summary.auto_applied.push(label);
+          continue;
+        }
+        if (pend?.length) { summary.deduped++; continue; }
         const { error } = await supa.from('deal_timeline_proposals').insert({
-          deal_id: deal.id, item_id: item.id, item_key: item.key,
-          address: [deal.address, deal.city].filter(Boolean).join(', '),
+          deal_id: deal.id, item_id: item.id, item_key: item.key, address: addr,
           change, reason, source: 'cron'
         });
-        if (!error) summary.filed.push(deal.address + ' — ' + (item.title || key) + (done_at ? ' (done ' + done_at.slice(0, 10) + ')' : ''));
+        if (!error) summary.filed.push(label);
       }
     }
   }
