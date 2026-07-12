@@ -1,6 +1,6 @@
 {
-  "version": "1.31",
-  "lastUpdated": "2026-07-11",
+  "version": "1.32",
+  "lastUpdated": "2026-07-12",
   "updatedBy": "Claude",
   "tasks": [
     {
@@ -145,7 +145,8 @@
       "agent": "james",
       "client": "Duarte",
       "title": "6240 Michel Rd — SCO1 at 434000 (sellers signed 7/8) expires ~Sat 7/11 — review with Brian and respond (accept/counter/walk)",
-      "done": false
+      "done": true,
+      "note": "SCO1 expired 7/11 unaccepted; listing agent never acknowledged — seller won't go below 434000 (James 7/11); DEAL DEAD per Sara 7/12"
     },
     {
       "agent": "james",
@@ -165,7 +166,8 @@
       "agent": "james",
       "client": "Robinson",
       "title": "992 Iroquois — BCO at 130000 (buyer's highest & best) countering seller's 134500 — watch for seller response",
-      "done": false
+      "done": true,
+      "note": "seller will not accept the counter (James 7/11); OFFER DEAD per Sara 7/12 — pivoted to 695 Feather Dr showing 7/12"
     },
     {
       "agent": "james",
@@ -178,13 +180,20 @@
       "agent": "sara",
       "client": "433 Hwy 4",
       "title": "Track appraisal status with Neriah/lender — appraisal contingency Thu 7/16 per ETA1",
-      "note": "Neriah reached out to the lender again 7/11",
-      "done": false
+      "note": "Neriah reached out to the lender again 7/11; followed up, ticked done by Sara 7/12 (contingency 7/16 stands)",
+      "done": true
     },
     {
       "agent": "sara",
       "client": "Esperson",
       "title": "Pursue 512 Gardiner Way LISTING (reduced-commission, Kristin has her own buyer) — home in ACTIVE FORECLOSURE so timing matters; buyer side dead (lending declined)",
+      "done": false,
+      "note": "7/12 per Sara — Kristin meeting her buyer Monday 7/13, will advise after"
+    },
+    {
+      "agent": "sara",
+      "client": "Furr",
+      "title": "Ben Furr (new buyer, BRBC signed 7/12) — file the signed BRBC and follow up after the 7/12 Skyline meeting",
       "done": false
     }
   ],
@@ -475,7 +484,8 @@
         "7/20 is escrow placeholder only — not a firm COE"
       ],
       "listing": {
-        "commission": "3%"
+        "commission": "3%",
+        "commissionNote": "seller pays 2.5%, buyer pays 0.5% (per Sara 7/12; SCO1 seller-paid 2.5% buyer-broker)"
       }
     },
     {
@@ -589,7 +599,8 @@
         "Escrow/title CONFIRMED: Chicago Title, Order #FSST-5312600364 (Sara 6/24); full NHD report received 6/23"
       ],
       "listing": {
-        "commission": "3%"
+        "commission": "3%",
+        "commissionNote": "3% buyer-broker per BCO1 (seller pays)"
       }
     },
     {
@@ -762,7 +773,7 @@
       "id": "offer-6240-michel",
       "address": "6240 Michel Rd",
       "city": "Mountain Ranch, CA 95246",
-      "stage": "offer",
+      "stage": "inactive",
       "type": "residential",
       "side": "buyer",
       "agent": "james",
@@ -784,16 +795,16 @@
         "sellerCounter1": "received — SCO1 signed by BOTH sellers 7/8 at 434000; awaiting Brian's response"
       },
       "correspondence": [],
-      "notes": "OFFER OUT — James's buyer Brian Duarte. Offer written 7/4/2026 at $385,000 (conventional, $371,525 loan 96.5%, $10k initial deposit, COE 30 days after acceptance) on 6240 Michel Rd, Mountain Ranch (MLS 226080924, listed 6/26 at $439,000). Sellers Yueying Wen & Steve Kwong (agent Mike/Xingwen Chen, Keller Williams Elk Grove) COUNTERED: SCO1 at $434,000, signed by both sellers 7/8, all other terms unchanged. SCO1 expires 5 PM on the 3rd day after seller signing (~Sat 7/11). Docs in _Offers/Buy Side/Brian Duarte.",
+      "notes": "OFFER OUT — James's buyer Brian Duarte. Offer written 7/4/2026 at $385,000 (conventional, $371,525 loan 96.5%, $10k initial deposit, COE 30 days after acceptance) on 6240 Michel Rd, Mountain Ranch (MLS 226080924, listed 6/26 at $439,000). Sellers Yueying Wen & Steve Kwong (agent Mike/Xingwen Chen, Keller Williams Elk Grove) COUNTERED: SCO1 at $434,000, signed by both sellers 7/8, all other terms unchanged. SCO1 expires 5 PM on the 3rd day after seller signing (~Sat 7/11). Docs in _Offers/Buy Side/Brian Duarte. DEAD 7/12/2026 (per Sara): SCO1 expired 7/11 unaccepted — listing agent never acknowledged the offer; seller firm at 434000 and won't go lower (James spoke to him 7/11). Brian not meeting 434000.",
       "alerts": [
-        "SCO1 at 434000 (sellers signed 7/8) expires ~Sat 7/11 5 PM — review with Brian and respond (accept / buyer counter / walk)"
+        "OFFER DEAD 7/12 — SCO1 expired unaccepted; seller firm at 434000"
       ]
     },
     {
       "id": "offer-992-iroquois",
       "address": "992 Iroquois Cir",
       "city": "Copperopolis, CA 95228",
-      "stage": "offer",
+      "stage": "inactive",
       "type": "residential",
       "side": "buyer",
       "agent": "james",
@@ -816,9 +827,9 @@
         "buyerCounter1": "BCO at 130000 (buyer's highest & best) — countering the 134500"
       },
       "correspondence": [],
-      "notes": "OFFER OUT / NEGOTIATING — James's buyer Ashley Robinson. 992 Iroquois Cir, Copperopolis (MLS 226026039, listed 3/5/26 at $135,000; 3bd/2ba manufactured on permanent foundation, 896 sqft, 0.08 ac, own-the-land, vacant, Lake Tulloch launch access). Listing agent Denise Stepps, Coldwell Banker Lake Tulloch. Offer written at $125,000; seller countered at $134,500; James countering back at $130,000 — Ashley's highest & best (per Sara 7/10). Docs in _Offers/Buy Side/Robinson.",
+      "notes": "OFFER OUT / NEGOTIATING — James's buyer Ashley Robinson. 992 Iroquois Cir, Copperopolis (MLS 226026039, listed 3/5/26 at $135,000; 3bd/2ba manufactured on permanent foundation, 896 sqft, 0.08 ac, own-the-land, vacant, Lake Tulloch launch access). Listing agent Denise Stepps, Coldwell Banker Lake Tulloch. Offer written at $125,000; seller countered at $134,500; James countering back at $130,000 — Ashley's highest & best (per Sara 7/10). Docs in _Offers/Buy Side/Robinson. DEAD 7/12/2026 (per Sara): seller will not accept the 130000 counter (James's note 7/11) — Ashley at her ceiling. Pivot: James showed Ashley 695 Feather Dr, Copperopolis 7/12.",
       "alerts": [
-        "Negotiating — BCO at 130000 (highest & best) vs seller's counter 134500; awaiting seller response"
+        "OFFER DEAD 7/12 — seller rejected 130000 highest & best; pivoted to 695 Feather Dr showing 7/12"
       ]
     },
     {
@@ -1062,7 +1073,8 @@
       "notes": "New listing. Flyer and prelim ready. Separate from the sold 467 Skyline transaction. Homes.com lead Sharon Hedges (7/3) — James reached out 7/4, no reply yet; following up. PRICE REDUCTION to $89,000 in progress (per Sara 7/6). HOT LEAD Kerstin Breidenthal (Zillow inquiry + 3 Ylopo views 7/8; (408) 612-5906, kerstin.ahlgren@icloud.com) — Sara SPOKE with her 7/8 and texted her the disclosure link. UPDATE 7/9: Kerstin is TRAVELING for ~2 weeks and wants a showing when she's back (~7/23) — follow-up reminder scheduled for 7/23. A 'Modification of Terms, Listing Agreement #1' finished signing 7/7 (Authentisign) — likely this price-reduction MOD (Sara to confirm which listing it belongs to).",
       "alerts": [
         "Price reduction to 89000 COMPLETE ✅ — MOT confirmed & MLS price change finished 7/10",
-        "Kerstin Breidenthal traveling ~2 weeks — wants a SHOWING when back (~7/23); reminder set for 7/23; disclosure link texted 7/8"
+        "Kerstin Breidenthal traveling ~2 weeks — wants a SHOWING when back (~7/23); reminder set for 7/23; disclosure link texted 7/8",
+        "New buyer interest: Ben Furr (BRBC signed 7/12, ph 336-254-1433) — met with Sara 7/12"
       ],
       "clientDocuments": [
         {
@@ -1528,9 +1540,9 @@
       },
       "docs": {},
       "correspondence": [],
-      "notes": "New listing — met with seller Vicky Teller. Target price ~$275,000. CMA SENT 6/23 via email to Quiterian@sbcglobal.net. Sara followed up with Vicky 6/29. UPDATE 7/5: Vicky texted — ALMOST READY to list, will let Sara know.",
+      "notes": "New listing — met with seller Vicky Teller. Target price ~$275,000. CMA SENT 6/23 via email to Quiterian@sbcglobal.net. Sara followed up with Vicky 6/29. UPDATE 7/5: Vicky texted — ALMOST READY to list, will let Sara know. UPDATE 7/12 (per Sara): Vicky MAY SELL TO HER DAUGHTER instead — will update when she knows.",
       "alerts": [
-        "Vicky texted 7/5 — almost ready to list, will let Sara know (CMA sent 6/23)"
+        "7/12: Vicky may sell to her daughter — listing on hold pending her decision"
       ]
     },
     {
@@ -1684,7 +1696,28 @@
       "notes": "FUB Realtor.com lead (received 6/29/2026). BUYER SIDE DEAD (7/10): lender Kim Hesser says Kristin has too many missed mortgage payments and she cannot lend to her — 2936 E Hwy 4 purchase off. LISTING side STILL LIVE: 512 Gardiner Way, Rio Vista, CA 94571 is in ACTIVE FORECLOSURE — Sara still trying for the listing; Kristin says she already has a BUYER, so likely a REDUCED-COMMISSION 'handle the paperwork' listing. CMA sent earlier. NOTE: 2936 E Highway 4 is a DIFFERENT property from Sara's 433 E Highway 4 listing.",
       "alerts": [
         "BUYER SIDE DEAD (7/10) — Kim Hesser: too many missed mortgage payments, cannot lend",
-        "512 Gardiner Way in ACTIVE FORECLOSURE — pursue the reduced-commission listing quickly (Kristin has her own buyer)"
+        "512 Gardiner Way in ACTIVE FORECLOSURE — pursue the reduced-commission listing quickly (Kristin has her own buyer)",
+        "7/12: Kristin meeting her buyer Monday 7/13 — will advise after"
+      ]
+    },
+    {
+      "id": "buyer-ben-furr",
+      "address": "Ben Furr (buyer client)",
+      "city": "CA",
+      "stage": "buyer-prospect",
+      "type": "residential",
+      "side": "buyer",
+      "agent": "sara",
+      "contacts": {
+        "phone": "336-254-1433"
+      },
+      "docs": {
+        "BRBC": "executed 2026-07-12 (Authentisign, signing complete 8:35 AM)"
+      },
+      "correspondence": [],
+      "notes": "New buyer client (added 7/12/2026 per Sara). BRBC signed 7/12 via Authentisign. Met with Sara Sun 7/12 11:30 AM re: 467 Skyline Dr (Sara's listing, $89,000). Phone 336-254-1433. File the signed BRBC from Authentisign.",
+      "alerts": [
+        "New buyer — BRBC signed 7/12; interested in 467 Skyline; follow up after the 7/12 meeting"
       ]
     }
   ]
