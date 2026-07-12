@@ -397,6 +397,7 @@ export async function reconcileFromDealsFile(supa) {
               status: 'approved', decided_by: 'auto-doc', decided_at: now()
             });
           }
+          byKey[key].status = 'done'; // in-run memo: a 2nd doc token can't re-apply
           summary.auto_applied.push(label);
           continue;
         }
