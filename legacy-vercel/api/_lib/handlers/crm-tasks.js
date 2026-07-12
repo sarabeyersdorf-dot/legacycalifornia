@@ -17,6 +17,7 @@ const isBroker  = (p) => p?.role === 'agent_sara' || p?.role === 'admin';
 export default async function handler(req, res) {
   if (handleOptions(req, res)) return;
   if (req.method === 'POST') return bulkSync(req, res);
+  if (req.method === 'GET' && req.query?.op === 'sync') return autoSync(req, res);
   const { user, profile } = await getCallerProfile(req, res);
   if (!user)             return fail(res, 401, 'not authenticated');
   if (!isAgent(profile)) return fail(res, 403, 'agents only');
@@ -132,4 +133,70 @@ async function toggle(req, res, profile) {
   } catch (e) {
     return fail(res, 500, e.message);
   }
+}
+
+
+// GET /api/crm/tasks?op=sync&key=<SYNC_SECRET> — server-side daily task
+// derivation for the morning briefing (whose environment can only follow
+// fixed GET URLs). Insert-only with stable source_keys, same dedupe contract
+// as bulkSync: a task Sara checked off stays checked, nothing duplicates.
+export async function autoSync(req, res) {
+  const secret = process.env.SYNC_SECRET || process.env.BRIEFING_FEEDBACK_SECRET;
+  if (!secret || req.query?.key !== secret) return fail(res, 401, 'bad key');
+  const supa = adminClient();
+  const today = new Date().toISOString().slice(0, 10);
+  const rows = [];
+
+  // 1. Overdue timeline items (due, not done) → one task per item, ever.
+  const { data: overdue } = await supa.from('deal_timeline_items')
+    .select('id, title, due_date, status, deals(source_key, address, agent)')
+    .lt('due_date', today).not('status', 'in', '("done","waived","na")').limit(40);
+  for (const it of overdue || []) {
+    if (!it.deals) continue;
+    rows.push({
+      agent: /james/i.test(it.deals.agent || '') ? 'james' : 'sara',
+      client: it.deals.address, title: 'Overdue: ' + it.title,
+      sub: 'timeline item due ' + it.due_date, due_label: 'Overdue',
+      done: false, source_key: 'auto:tl:' + it.id
+    });
+  }
+
+  // 2. Deals closing inside 7 days → one closing-prep task per deal.
+  const weekOut = new Date(Date.now() + 7 * 86400e3).toISOString().slice(0, 10);
+  const { data: closing } = await supa.from('deals')
+    .select('id, address, coe_date, agent').eq('stage', 'pending')
+    .gte('coe_date', today).lte('coe_date', weekOut);
+  for (const d of closing || []) {
+    rows.push({
+      agent: /james/i.test(d.agent || '') ? 'james' : 'sara',
+      client: d.address, title: 'Closing prep — ' + d.address,
+      sub: 'closes ' + d.coe_date, due_label: 'This week',
+      done: false, source_key: 'auto:coe:' + d.id
+    });
+  }
+
+  // 3. Timeline proposals pending more than 24h → nudge to decide.
+  const dayAgo = new Date(Date.now() - 86400e3).toISOString();
+  const { data: props } = await supa.from('deal_timeline_proposals')
+    .select('id, address, item_key, created_at').eq('status', 'pending').lt('created_at', dayAgo).limit(20);
+  for (const p2 of props || []) {
+    rows.push({
+      agent: 'sara', client: p2.address,
+      title: 'Decide timeline proposal — ' + (p2.item_key || 'item'),
+      sub: 'waiting since ' + String(p2.created_at).slice(0, 10), due_label: 'Today',
+      done: false, source_key: 'auto:prop:' + p2.id
+    });
+  }
+
+  if (!rows.length) return ok(res, { created: 0, considered: 0 });
+  const keys = rows.map((r) => r.source_key);
+  const { data: existing } = await supa.from('agent_tasks').select('source_key').in('source_key', keys);
+  const have = new Set((existing || []).map((e) => e.source_key));
+  const fresh = rows.filter((r) => !have.has(r.source_key));
+  if (fresh.length) {
+    const { error } = await supa.from('agent_tasks').insert(fresh);
+    if (error) return fail(res, 500, error.message);
+  }
+  return ok(res, { created: fresh.length, considered: rows.length,
+    titles: fresh.map((r) => r.title).slice(0, 20) });
 }

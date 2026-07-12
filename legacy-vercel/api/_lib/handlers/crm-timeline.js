@@ -17,6 +17,8 @@ import { adminClient } from '../supabase.js';
 import { getCallerProfile, isAgent } from '../auth.js';
 import { handleOptions, readJson, ok, fail } from '../cors.js';
 import { buildTimelineItems } from '../timeline-template.js';
+import { createRequire } from 'module';
+const requireJson = createRequire(import.meta.url);
 
 const ITEM_FIELDS = ['title', 'plain', 'owner', 'due_date', 'status', 'done_at', 'detail', 'client_visible', 'sort_order', 'kind'];
 const pick = (obj, keys) => Object.fromEntries(Object.entries(obj || {}).filter(([k]) => keys.includes(k)));
@@ -58,6 +60,34 @@ export default async function handler(req, res) {
       if (error) return fail(res, 500, error.message);
       return ok(res, { proposals: data || [] });
     } catch (e) { return fail(res, 500, e.message); }
+  }
+  // Key-gated DIGEST — every active deal's timeline in ONE fixed-URL read.
+  // The briefing environment can only follow URLs that appear literally in its
+  // instructions, so per-deal constructed URLs are unreachable from there.
+  if (req.method === 'GET' && req.query?.deal === '__all__' && hasKey) {
+    try {
+      const supaK = adminClient();
+      const { data: deals } = await supaK.from('deals')
+        .select('id, source_key, address, city, stage, coe_date, sale_price')
+        .in('stage', ['pending', 'listing', 'offer']).order('stage');
+      const out = [];
+      for (const deal of deals || []) {
+        const [{ data: items }, { data: proposals }, { data: docs }] = await Promise.all([
+          supaK.from('deal_timeline_items').select('id, key, kind, title, owner, due_date, status, done_at').eq('deal_id', deal.id).order('sort_order'),
+          supaK.from('deal_timeline_proposals').select('id, item_key, change, reason, source, created_at').eq('deal_id', deal.id).eq('status', 'pending'),
+          supaK.from('deal_documents').select('name, doc_type, status').eq('deal_id', deal.id)
+        ]);
+        out.push({ deal, items: items || [], pending_proposals: proposals || [], documents: docs || [] });
+      }
+      return ok(res, { deals: out });
+    } catch (e) { return fail(res, 500, e.message); }
+  }
+  // Key-gated RECONCILE trigger — the server (which has both deals.json and
+  // the DB, and no network restrictions) runs the documents↔timeline match
+  // itself and FILES PROPOSALS ONLY. Sara's approval gate is unchanged.
+  if (req.method === 'GET' && req.query?.op === 'reconcile' && hasKey) {
+    try { return ok(res, await reconcileFromDealsFile(adminClient())); }
+    catch (e) { return fail(res, 500, e.message); }
   }
   // Key-gated READ of one deal's items (the briefing reconciles executed docs
   // in the Dropbox file against the timeline) …
@@ -246,4 +276,92 @@ export default async function handler(req, res) {
   } catch (e) {
     return fail(res, 500, e.message);
   }
+}
+
+
+// ---------------------------------------------------------------------------
+// Documents ↔ timeline reconciliation (server-side; briefing Step 1c).
+// Reads the raw compliance `docs` block in data/deals.json — whose free-text
+// statuses carry the execution/delivery dates — and files 'done' proposals
+// for timeline items an executed document satisfies. Dedupe: one pending
+// proposal per item. Never touches an item directly.
+const DOC_RULES = [
+  { tok: /^(RPA|VLPA|sellerCounter|buyerCounter)/i, keys: ['acceptance'], sat: /executed|signed|accepted/i },
+  { tok: /^TDS/i,                                   keys: ['tds'],        sat: /executed|signed|complete|received/i },
+  { tok: /^SPQ/i,                                   keys: ['spq'],        sat: /executed|signed|complete|received/i },
+  { tok: /^(NHD|MU_PA_NHD)/i,                       keys: ['nhd'],        sat: /executed|signed|complete|received/i },
+  { tok: /^(sellerDisclosures|buyerSignedDisclosures|sellerDisclosurePackage)$/i, keys: ['tds', 'spq'], sat: /signed|complete|received/i },
+  { tok: /^(EMD|emdAddendum)/i,                     keys: ['emd'],        sat: /received|confirmed|deposited|cleared/i },
+  { tok: /contingencyRemoval/i,                     keys: null,           sat: /executed|signed|received/i } // keys from text
+];
+const CONT_KEYS = ['cont_inspection', 'cont_appraisal', 'cont_title', 'cont_insurance', 'cont_loan'];
+
+function contKeysFromText(raw) {
+  const t = String(raw).toLowerCase();
+  if (/all contingen|all remaining/.test(t)) return CONT_KEYS;
+  const hits = [];
+  if (/loan|financ/.test(t))  hits.push('cont_loan');
+  if (/apprais/.test(t))      hits.push('cont_appraisal');
+  if (/title/.test(t))        hits.push('cont_title');
+  if (/insur/.test(t))        hits.push('cont_insurance');
+  if (/inspect|investigat/.test(t)) hits.push('cont_inspection');
+  return hits.length ? hits : ['cont_inspection']; // CR-1 default; Sara approves or rejects
+}
+
+// Last m/d(/yy) date in the status text → ISO. Year defaults to the current
+// one; a date that lands in the future rolls back a year.
+function dateFromText(raw) {
+  const m = [...String(raw).matchAll(/(\d{1,2})\/(\d{1,2})(?:\/(\d{2,4}))?/g)].pop();
+  if (!m) return null;
+  const now = new Date();
+  let y = m[3] ? (m[3].length === 2 ? 2000 + Number(m[3]) : Number(m[3])) : now.getUTCFullYear();
+  const mo = Number(m[1]), da = Number(m[2]);
+  if (mo < 1 || mo > 12 || da < 1 || da > 31) return null;
+  let d = new Date(Date.UTC(y, mo - 1, da, 12));
+  if (!m[3] && d.getTime() > now.getTime() + 2 * 86400e3) d = new Date(Date.UTC(y - 1, mo - 1, da, 12));
+  return d.toISOString();
+}
+
+export async function reconcileFromDealsFile(supa) {
+  const data = requireJson('../../../data/deals.json');
+  const list = Array.isArray(data) ? data : (data.deals || []);
+  const summary = { checked: 0, filed: [], deduped: 0, skipped: 0 };
+
+  for (const d of list) {
+    if (!/pending/i.test(String(d.stage || ''))) continue;
+    const { data: deal } = await supa.from('deals').select('id, address, city').eq('source_key', d.id).maybeSingle();
+    if (!deal) continue;
+    const { data: items } = await supa.from('deal_timeline_items')
+      .select('id, key, title, status').eq('deal_id', deal.id);
+    if (!items?.length) continue;
+    summary.checked++;
+    const byKey = Object.fromEntries(items.map((i) => [i.key, i]));
+
+    for (const [token, val] of Object.entries(d.docs || {})) {
+      const raw = val && typeof val === 'object' ? (val.status ?? val.state ?? '') : val;
+      if (!raw) continue;
+      const rule = DOC_RULES.find((r) => r.tok.test(token));
+      if (!rule || !rule.sat.test(String(raw))) continue;
+      const keys = rule.keys || contKeysFromText(raw);
+      const done_at = dateFromText(raw);
+
+      for (const key of keys) {
+        const item = byKey[key];
+        if (!item || ['done', 'waived', 'na'].includes(item.status)) { summary.skipped++; continue; }
+        const { count } = await supa.from('deal_timeline_proposals')
+          .select('id', { count: 'exact', head: true }).eq('item_id', item.id).eq('status', 'pending');
+        if (count > 0) { summary.deduped++; continue; }
+        const change = { status: 'done' };
+        if (done_at) change.done_at = done_at;
+        const reason = ('Executed document on file — ' + token + ': "' + String(raw).slice(0, 160) + '"').slice(0, 500);
+        const { error } = await supa.from('deal_timeline_proposals').insert({
+          deal_id: deal.id, item_id: item.id, item_key: item.key,
+          address: [deal.address, deal.city].filter(Boolean).join(', '),
+          change, reason, source: 'cron'
+        });
+        if (!error) summary.filed.push(deal.address + ' — ' + (item.title || key) + (done_at ? ' (done ' + done_at.slice(0, 10) + ')' : ''));
+      }
+    }
+  }
+  return summary;
 }
