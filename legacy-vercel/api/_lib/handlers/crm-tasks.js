@@ -147,12 +147,18 @@ export async function autoSync(req, res) {
   const today = new Date().toISOString().slice(0, 10);
   const rows = [];
 
+  // Items with a pending proposal already have evidence filed — the decision
+  // nudge (block 3) covers them; an extra "Overdue" task would double-count.
+  const { data: pendingProps } = await supa.from('deal_timeline_proposals')
+    .select('item_id').eq('status', 'pending');
+  const proposed = new Set((pendingProps || []).map((r) => r.item_id));
+
   // 1. Overdue timeline items (due, not done) → one task per item, ever.
   const { data: overdue } = await supa.from('deal_timeline_items')
     .select('id, title, due_date, status, deals(source_key, address, agent)')
     .lt('due_date', today).not('status', 'in', '("done","waived","na")').limit(40);
   for (const it of overdue || []) {
-    if (!it.deals) continue;
+    if (!it.deals || proposed.has(it.id)) continue;
     rows.push({
       agent: /james/i.test(it.deals.agent || '') ? 'james' : 'sara',
       client: it.deals.address, title: 'Overdue: ' + it.title,
