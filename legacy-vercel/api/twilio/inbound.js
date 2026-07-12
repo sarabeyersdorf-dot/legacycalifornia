@@ -103,6 +103,29 @@ export default async function handler(req, res) {
       contactId = hit ? hit.id : null;
     }
 
+    // ---- Sync STOP/START keywords to the consent record --------------------
+    // Twilio's Advanced Opt-Out already blocks sends at the carrier level;
+    // this keeps OUR records (sequence gating, composer warnings, audit
+    // trail) in agreement with what the client actually asked for.
+    if (contactId && direction === 'inbound' && channel === 'sms' && content) {
+      const kw = String(content).trim().toLowerCase();
+      const STOP  = new Set(['stop', 'stopall', 'unsubscribe', 'cancel', 'end', 'quit']);
+      const START = new Set(['start', 'unstop', 'yes']);
+      if (STOP.has(kw)) {
+        await supa.from('leads').update({
+          sms_opt_out: true, sms_consent: false,
+          sms_consent_at: new Date().toISOString(),
+          sms_consent_source: 'SMS STOP keyword'
+        }).eq('id', contactId);
+      } else if (START.has(kw)) {
+        await supa.from('leads').update({
+          sms_opt_out: false, sms_consent: true,
+          sms_consent_at: new Date().toISOString(),
+          sms_consent_source: 'SMS START keyword'
+        }).eq('id', contactId);
+      }
+    }
+
     // Matched → straight to 'active' (shows in the brief). Unmatched →
     // 'pending_review' for the agent to triage. Never auto-create a lead here.
     await supa.from('deal_messages').insert({
