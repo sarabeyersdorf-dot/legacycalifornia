@@ -199,13 +199,17 @@ export async function autoSync(req, res) {
   let autoCompleted = 0;
   const { data: openAuto } = await supa.from('agent_tasks')
     .select('id, source_key').eq('done', false).like('source_key', 'auto:%').limit(200);
-  const wanted = new Set([...(rows.map((r) => r.source_key)), ...(overdue || []).filter((it) => proposed.has(it.id)).map((it) => 'auto:tl:' + it.id)]);
+  const wanted = new Set(rows.map((r) => r.source_key));
   for (const t of openAuto || []) {
     if (wanted.has(t.source_key)) continue;          // condition still current
     let resolved = false;
     if (t.source_key.startsWith('auto:tl:')) {
-      const { data: it } = await supa.from('deal_timeline_items').select('status').eq('id', t.source_key.slice(8)).maybeSingle();
-      resolved = !it || ['done', 'waived', 'na'].includes(it.status);
+      const itemId = t.source_key.slice(8);
+      if (proposed.has(itemId)) { resolved = true; } // evidence filed — nudge covers it
+      else {
+        const { data: it } = await supa.from('deal_timeline_items').select('status').eq('id', itemId).maybeSingle();
+        resolved = !it || ['done', 'waived', 'na'].includes(it.status);
+      }
     } else if (t.source_key.startsWith('auto:prop:')) {
       const { data: p2 } = await supa.from('deal_timeline_proposals').select('status').eq('id', t.source_key.slice(10)).maybeSingle();
       resolved = !p2 || p2.status !== 'pending';
