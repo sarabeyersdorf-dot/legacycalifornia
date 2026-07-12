@@ -72,6 +72,19 @@
         const wrap = document.createElement('label');
         wrap.style.cssText = 'display:flex;flex-direction:column;font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:#7C6A4D;gap:4px;';
         wrap.innerHTML = `<span>${f.label}</span>`;
+        if (f.type === 'checkbox') {
+          // Consent-style checkbox: small-print label, never pre-checked.
+          wrap.style.cssText = 'display:flex;gap:9px;align-items:flex-start;font-size:12px;letter-spacing:0;text-transform:none;color:#3A332B;line-height:1.5;cursor:pointer;';
+          const cb = document.createElement('input');
+          cb.type = 'checkbox'; cb.name = f.name; cb.style.cssText = 'margin-top:3px;flex:none;';
+          wrap.innerHTML = '';
+          wrap.appendChild(cb);
+          const span = document.createElement('span');
+          span.innerHTML = f.label;
+          wrap.appendChild(span);
+          form.appendChild(wrap);
+          continue;
+        }
         const el = f.type === 'textarea'
           ? document.createElement('textarea')
           : document.createElement('input');
@@ -157,7 +170,8 @@
           { name: 'first_name', label: 'First name', required: true },
           { name: 'last_name',  label: 'Last name' },
           { name: 'email',      label: 'Email',     type: 'email', required: true },
-          { name: 'phone',      label: 'Mobile (optional)' }
+          { name: 'phone',      label: 'Mobile (optional)' },
+              SMS_CONSENT_FIELD
         ],
         submitLabel: 'Save my place',
         onSubmit: async (data) => {
@@ -189,6 +203,7 @@
             { name: 'last_name',  label: 'Last name' },
             { name: 'email',      label: 'Email',     type: 'email', required: true },
             { name: 'phone',      label: 'Mobile' },
+            SMS_CONSENT_FIELD,
             { name: 'areas',      label: 'Towns you are watching', placeholder: 'Murphys, Arnold, Sutter Creek' },
             { name: 'price_max',  label: 'Top of your range (USD)' },
             { name: 'message',    label: 'Anything we should know', type: 'textarea' }
@@ -206,6 +221,13 @@
     });
   }
 
+  // A2P express consent — unchecked by default, added to every form that
+  // collects a phone number. Full program terms live at /sms-policy.html.
+  const SMS_CONSENT_FIELD = {
+    name: 'sms_consent', type: 'checkbox',
+    label: 'Text me about my inquiry — appointment reminders and listing updates from Legacy Properties. Frequency varies. Msg & data rates may apply. Reply STOP to opt out, HELP for help. <a href="/sms-policy.html" target="_blank" rel="noopener" style="color:#7C6A4D;">SMS policy</a>. Not required.'
+  };
+
   function wireListingsPage() {
     if (!/\/(listings|property-search)\.html$/.test(location.pathname)) return;
     // "Message Sara" buttons in the polygon CTA strip
@@ -221,6 +243,7 @@
               { name: 'first_name', label: 'First name', required: true },
               { name: 'email',      label: 'Email',      type: 'email', required: true },
               { name: 'phone',      label: 'Mobile (optional)' },
+              SMS_CONSENT_FIELD,
               { name: 'message',    label: 'Your message', type: 'textarea', required: true }
             ],
             submitLabel: 'Send',
@@ -238,7 +261,8 @@
               { name: 'first_name', label: 'First name', required: true },
               { name: 'last_name',  label: 'Last name' },
               { name: 'email',      label: 'Email',     type: 'email', required: true },
-              { name: 'phone',      label: 'Mobile',    required: true }
+              { name: 'phone',      label: 'Mobile',    required: true },
+              SMS_CONSENT_FIELD
             ],
             submitLabel: 'Request a tour',
             onSubmit: (data) => submitLead({ ...data, lead_type: 'buyer', journey_stage: 'touring' })
@@ -291,7 +315,8 @@
           { name: 'first_name', label: 'First name', required: true },
           { name: 'last_name',  label: 'Last name' },
           { name: 'email',      label: 'Email',  type: 'email', required: true },
-          { name: 'phone',      label: 'Mobile', required: true }
+          { name: 'phone',      label: 'Mobile', required: true },
+          SMS_CONSENT_FIELD
         ],
         submitLabel: 'Request tour',
         onSubmit: (data) => submitLead({
@@ -2157,6 +2182,10 @@
           <label style="display:flex;flex-direction:column;gap:3px;font-size:11px;color:var(--ink-mute);">Phone<input data-lead-phone value="${escHtml(lead.phone || '')}" style="${fld}"></label>
           <label style="display:flex;flex-direction:column;gap:3px;font-size:11px;color:var(--ink-mute);">Email<input data-lead-email value="${escHtml(lead.email || '')}" style="${fld}"></label>
         </div>
+        <label style="display:flex;gap:8px;align-items:flex-start;margin:2px 0 10px;font-size:12.5px;color:var(--ink);line-height:1.5;cursor:pointer;">
+          <input type="checkbox" data-lead-sms-consent ${lead.sms_consent ? 'checked' : ''} style="margin-top:2px;">
+          <span>Client has given SMS consent (verbal or written)${lead.sms_consent_at ? ` <em style="color:var(--ink-mute);">— recorded ${escHtml(new Date(lead.sms_consent_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }))}${lead.sms_consent_source ? ' · ' + escHtml(lead.sms_consent_source) : ''}</em>` : ''}</span>
+        </label>
         <div style="display:flex;align-items:center;gap:8px;margin:2px 0 8px;">
           <span style="${cap}">Side</span>
           <select data-lead-side style="${fld}">
@@ -2537,6 +2566,8 @@
         patch.last_name  = g('[data-lead-last]');
         patch.phone      = g('[data-lead-phone]');
         patch.email      = g('[data-lead-email]');
+        const smsCb = consentPanel.querySelector('[data-lead-sms-consent]');
+        if (smsCb) patch.sms_consent = smsCb.checked;
         // Side + side-aware status. Only send the stage(s) for the chosen side;
         // clear the other so a mis-set stage doesn't linger.
         patch.contact_type = v || null;
@@ -3004,6 +3035,7 @@
       } else if (isSms) {
         if (!lead.phone)            { sendBtn.disabled = true; statusEl.textContent = 'Lead has no phone'; bodyEl.placeholder = `No phone on file for ${fullName(lead)}.`; }
         else if (lead.sms_opt_out)  { sendBtn.disabled = true; statusEl.style.color = '#9B2C2C'; statusEl.textContent = `${fullName(lead)} has opted out of SMS — sending is blocked`; bodyEl.placeholder = 'Channel opted out.'; }
+        else if (!lead.sms_consent) { statusEl.style.color = '#8C6B2E'; statusEl.textContent = 'No SMS consent on record — fine for replying to their texts; record consent before outreach.'; bodyEl.placeholder = `Text ${fullName(lead)} (max 320 chars)`; }
         else                        { statusEl.textContent = '';                                          bodyEl.placeholder = `Text ${fullName(lead)} (max 320 chars)`; }
       } else {
         if (!lead.email)            { sendBtn.disabled = true; statusEl.textContent = 'Lead has no email'; bodyEl.placeholder = `No email on file for ${fullName(lead)}.`; }

@@ -63,7 +63,7 @@ async function tickSequences(supa) {
   // budget; the next cron tick picks up the remainder.
   const { data: dueLeads = [], error } = await supa
     .from('leads')
-    .select('id, first_name, last_name, email, phone, areas, price_min, price_max, journey_stage, lead_type, temperature, score, sequence_id, sequence_step, sequence_next_due_at, call_opt_out, sms_opt_out, email_opt_out, not_interested, pipeline_stage')
+    .select('id, first_name, last_name, email, phone, areas, price_min, price_max, journey_stage, lead_type, temperature, score, sequence_id, sequence_step, sequence_next_due_at, call_opt_out, sms_opt_out, email_opt_out, not_interested, pipeline_stage, sms_consent')
     .eq('sequence_paused', false)
     .eq('status', 'active')
     .not('sequence_id', 'is', null)
@@ -110,7 +110,7 @@ async function tickSequences(supa) {
       // the next step that has a contactable channel rather than dripping
       // through SMS when SMS is blocked.
       const channelBlocked = (
-        (step.channel === 'sms'   && lead.sms_opt_out) ||
+        (step.channel === 'sms'   && (lead.sms_opt_out || !lead.sms_consent)) ||   /* A2P: automated SMS needs express opt-in */
         (step.channel === 'email' && lead.email_opt_out)
       );
       if (channelBlocked) {

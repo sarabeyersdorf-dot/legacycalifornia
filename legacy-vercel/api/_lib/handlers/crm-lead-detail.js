@@ -149,6 +149,7 @@ async function updateLead(req, res, profile) {
         patch.assigned_agent = body.assigned_agent;
       }
     }
+    applySmsConsent(patch, body);
     if (body.status !== undefined) {
       if (!STATUSES.has(body.status)) {
         errors.push(`status must be one of: ${[...STATUSES].join(', ')}`);

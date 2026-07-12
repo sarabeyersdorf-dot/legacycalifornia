@@ -61,6 +61,13 @@ function sanitize(body) {
   out.last_name     = (body.last_name  || '').trim() || null;
   out.email         = (body.email      || '').trim().toLowerCase();
   out.phone         = (body.phone      || '').trim() || null;
+  // Express SMS opt-in (A2P): only when the form checkbox was affirmatively
+  // checked; we stamp when and where for the audit trail.
+  if (body.sms_consent === true || body.sms_consent === 'on' || body.sms_consent === 'true') {
+    out.sms_consent = true;
+    out.sms_consent_at = new Date().toISOString();
+    out.sms_consent_source = ((body.source || 'website') + ' form').slice(0, 120);
+  }
   out.source        = ALLOWED_SOURCE.has(body.source)         ? body.source        : 'website_form';
   out.journey_stage = ALLOWED_JOURNEY.has(body.journey_stage) ? body.journey_stage : null;
   out.lead_type     = ALLOWED_TYPE.has(body.lead_type)        ? body.lead_type     : null;

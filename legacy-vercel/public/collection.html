@@ -284,6 +284,7 @@ body { background: var(--vellum); color: var(--ink); }
         '<div class="row"><div><label>Approx. sq ft</label><input name="sqft" type="number" min="0" step="1"></div><div><label>Condition</label><select name="condition"><option value="">—</option><option>Turnkey / updated</option><option>Well maintained</option><option>Average</option><option>Needs work</option></select></div></div>' +
         '<label>Anything special I should know?</label><textarea name="notes" placeholder="Views, acreage, recent upgrades…"></textarea>' +
         '<div class="row"><div><label>Your name</label><input name="name"></div><div><label>Phone</label><input name="phone" type="tel"></div></div>' +
+        '<label style="display:flex;gap:8px;align-items:flex-start;font-size:12px;line-height:1.5;color:var(--ink-soft);cursor:pointer;margin:4px 0;"><input type="checkbox" name="sms_consent" style="margin-top:3px;"><span>Text me about my inquiry — updates and reminders from Legacy Properties. Frequency varies, msg &amp; data rates may apply, reply STOP to opt out. <a href="/sms-policy.html" target="_blank" rel="noopener">SMS policy</a>. Optional.</span></label>' +
         '<label>Email</label><input name="email" type="email">' +
         '<button type="submit" class="submit">Get my preliminary range</button>' +
       '</form>' +
@@ -364,6 +365,7 @@ body { background: var(--vellum); color: var(--ink); }
       ev.preventDefault();
       if (PREVIEW) { toast('Preview — your client sees a live range here'); return; }
       var fd = new FormData(form), body = { op: 'valuation', elapsed_ms: Date.now() - LOAD_AT };
+      body.sms_consent = fd.get('sms_consent') === 'on';
       fd.forEach(function (v, k) { body[k] = v; });
       var btn = form.querySelector('.submit'); btn.disabled = true; btn.textContent = 'Pulling comparable homes…';
       post(body).then(function (r) {

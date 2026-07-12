@@ -272,6 +272,21 @@ async function valuation(supa, coll, b, res) {
 
   supa.from('collection_events').insert({ collection_id: coll.id, event_type: 'valuation_open', meta: { address } }).then(() => {}, () => {});
 
+  // Express SMS opt-in from the valuation form → stamp the matching lead.
+  try {
+    if (b?.sms_consent === true && (email || phone)) {
+      let q = supa.from('leads').select('id').limit(1);
+      q = email ? q.eq('email', email) : q.eq('phone', phone);
+      const { data: match } = await q;
+      if (match && match[0]) {
+        await supa.from('leads').update({
+          sms_consent: true, sms_consent_at: new Date().toISOString(),
+          sms_consent_source: 'valuation form (collection page)'
+        }).eq('id', match[0].id);
+      }
+    }
+  } catch (_) { /* never block the valuation */ }
+
   return ok(res, {
     received: true,
     request_id: saved?.id || null,
