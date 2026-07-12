@@ -194,15 +194,44 @@ export async function autoSync(req, res) {
     });
   }
 
-  if (!rows.length) return ok(res, { created: 0, considered: 0 });
+  // Self-healing sweep — auto tasks complete themselves when the underlying
+  // condition resolves: item done/waived, proposal decided, deal closed.
+  let autoCompleted = 0;
+  const { data: openAuto } = await supa.from('agent_tasks')
+    .select('id, source_key').eq('done', false).like('source_key', 'auto:%').limit(200);
+  const wanted = new Set([...(rows.map((r) => r.source_key)), ...(overdue || []).filter((it) => proposed.has(it.id)).map((it) => 'auto:tl:' + it.id)]);
+  for (const t of openAuto || []) {
+    if (wanted.has(t.source_key)) continue;          // condition still current
+    let resolved = false;
+    if (t.source_key.startsWith('auto:tl:')) {
+      const { data: it } = await supa.from('deal_timeline_items').select('status').eq('id', t.source_key.slice(8)).maybeSingle();
+      resolved = !it || ['done', 'waived', 'na'].includes(it.status);
+    } else if (t.source_key.startsWith('auto:prop:')) {
+      const { data: p2 } = await supa.from('deal_timeline_proposals').select('status').eq('id', t.source_key.slice(10)).maybeSingle();
+      resolved = !p2 || p2.status !== 'pending';
+    } else if (t.source_key.startsWith('auto:coe:')) {
+      const { data: d2 } = await supa.from('deals').select('stage').eq('id', t.source_key.slice(9)).maybeSingle();
+      resolved = !d2 || d2.stage !== 'pending';
+    }
+    if (resolved) {
+      await supa.from('agent_tasks').update({ done: true }).eq('id', t.id);
+      autoCompleted++;
+    }
+  }
+
   const keys = rows.map((r) => r.source_key);
-  const { data: existing } = await supa.from('agent_tasks').select('source_key').in('source_key', keys);
+  const { data: existing } = keys.length
+    ? await supa.from('agent_tasks').select('source_key').in('source_key', keys)
+    : { data: [] };
   const have = new Set((existing || []).map((e) => e.source_key));
   const fresh = rows.filter((r) => !have.has(r.source_key));
   if (fresh.length) {
     const { error } = await supa.from('agent_tasks').insert(fresh);
     if (error) return fail(res, 500, error.message);
   }
-  return ok(res, { created: fresh.length, considered: rows.length,
+  return ok(res, { created: fresh.length, considered: rows.length, auto_completed: autoCompleted,
+    breakdown: { overdue: rows.filter((r) => r.source_key.startsWith('auto:tl:')).length,
+                 closing: rows.filter((r) => r.source_key.startsWith('auto:coe:')).length,
+                 proposals: rows.filter((r) => r.source_key.startsWith('auto:prop:')).length },
     titles: fresh.map((r) => r.title).slice(0, 20) });
 }
