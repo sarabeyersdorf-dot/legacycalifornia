@@ -225,7 +225,7 @@
   // collects a phone number. Full program terms live at /sms-policy.html.
   const SMS_CONSENT_FIELD = {
     name: 'sms_consent', type: 'checkbox',
-    label: 'Text me about my inquiry — appointment reminders and listing updates from Legacy Properties. Frequency varies. Msg & data rates may apply. Reply STOP to opt out, HELP for help. <a href="/sms-policy.html" target="_blank" rel="noopener" style="color:#7C6A4D;">SMS policy</a>. Not required.'
+    label: 'Text me about my inquiry — appointment reminders and listing updates from Legacy Properties. Frequency varies. Msg & data rates may apply. Reply STOP to opt out, HELP for help. <a href="/sms-terms.html" target="_blank" rel="noopener" style="color:#7C6A4D;">Terms</a> &amp; <a href="/privacy.html" target="_blank" rel="noopener" style="color:#7C6A4D;">Privacy Policy</a>. Not required.'
   };
 
   function wireListingsPage() {
