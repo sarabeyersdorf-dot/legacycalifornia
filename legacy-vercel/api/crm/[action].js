@@ -13,6 +13,8 @@
 //   GET   /api/crm/deal-visibility → a deal's client-toggleable portal items
 //   GET   /api/crm/sequences      → drip sequences for the Sequences tab
 //   GET   /api/crm/calendar       → week of tours/appointments for the Calendar tab
+//   GET   /api/crm/agent-updates  → shared "notes to Claude" log (Sara/James free-text updates)
+//   POST  /api/crm/agent-updates  → log a new update
 //
 // Counts as ONE serverless function on Vercel.
 
@@ -47,6 +49,7 @@ import dealNotes         from '../_lib/handlers/crm-deal-notes.js';
 import leadHygiene       from '../_lib/handlers/crm-lead-hygiene.js';
 import timeline          from '../_lib/handlers/crm-timeline.js';
 import roster            from '../_lib/handlers/crm-roster.js';
+import agentUpdates      from '../_lib/handlers/crm-agent-updates.js';
 
 const TABLE = {
   'lead-hygiene':    leadHygiene,
@@ -79,7 +82,8 @@ const TABLE = {
   'deal-photo':        dealPhoto,
   'deal-client':       dealClient,
   'deal-visibility':   dealVisibility,
-  'deal-notes':        dealNotes
+  'deal-notes':        dealNotes,
+  'agent-updates':     agentUpdates
 };
 
 export default async function handler(req, res) {

@@ -43,6 +43,7 @@
     <nav class="app-side-nav">
       <a href="#" class="active" onclick="showView(event,'today')">Today <span class="pill" data-roster-today>—</span></a>
       <a href="#" onclick="showView(event,'tasks')">Tasks <span class="pill" data-roster-tasks>—</span></a>
+      <a href="#" onclick="showView(event,'updates')">Notes <span class="pill" data-roster-updates>—</span></a>
       <a href="#" onclick="showView(event,'inbox')">Inbox <span class="pill" data-roster-inbox>—</span></a>
       <a href="#" onclick="showView(event,'pipe')">Pipeline</a>
       <a href="#" onclick="showView(event,'cal')">Calendar <span class="pill" data-roster-calendar>—</span></a>
@@ -291,6 +292,48 @@
           <button class="chip" data-scope="sara">Me</button>
         </div>
         <div data-tsk-list><div class="cur-empty">Loading tasks…</div></div>
+      </div>
+    </section>
+
+    <!-- ============================================================
+         NOTES / UPDATES — a running log for the daily briefing.
+         Quick free-text updates (texts, verbal updates, anything Claude
+         has no other visibility into) that Sara or James jot down so
+         the next morning briefing can read them and fold them in.
+         ============================================================ -->
+    <style>
+    .upd { padding: 22px 36px 60px; max-width: 780px; }
+    .upd-compose { border: 1px solid var(--rule); background: var(--shell); padding: 14px; margin-bottom: 18px; }
+    .upd-compose textarea { width: 100%; min-height: 64px; border: none; background: transparent; font: inherit; font-size: 14px; color: var(--ink); resize: vertical; }
+    .upd-compose textarea:focus { outline: none; }
+    .upd-compose-row { display: flex; gap: 10px; align-items: center; margin-top: 8px; }
+    .upd-compose-row input[type=text] { flex: 1; min-width: 0; border: none; border-bottom: 1px dashed var(--rule-strong); background: transparent; font: inherit; font-size: 12.5px; color: var(--ink); padding: 3px 0; }
+    .upd-compose-row input[type=text]:focus { outline: none; border-bottom-color: #2E4638; }
+    .upd-item { display: flex; gap: 12px; align-items: flex-start; padding: 14px 2px; border-bottom: 1px solid var(--rule-soft); }
+    .upd-body { flex: 1; min-width: 0; }
+    .upd-line { display: flex; gap: 8px; align-items: baseline; flex-wrap: wrap; }
+    .upd-badge { font-family: var(--mono); font-size: 9px; letter-spacing: .1em; text-transform: uppercase; padding: 2px 8px; background: #7C6A4D; color: #fff; border-radius: 2px; }
+    .upd-badge.james { background: #3A5A7C; } .upd-badge.both { background: #6A5A8B; }
+    .upd-deal { font-family: var(--mono); font-size: 9px; letter-spacing: .05em; color: var(--ink-mute); border: 1px solid var(--rule); padding: 1px 5px; }
+    .upd-content { font-size: 14.5px; color: var(--ink); line-height: 1.5; margin-top: 5px; white-space: pre-wrap; }
+    .upd-meta { display: flex; gap: 8px; align-items: baseline; margin-top: 6px; font-size: 11px; color: var(--ink-faint); }
+    .upd-seen { font-family: var(--mono); font-size: 9px; letter-spacing: .08em; text-transform: uppercase; color: #2E5C3D; }
+    @media (max-width: 900px) { .upd { padding: 18px; } }
+    </style>
+    <section class="crm-view" data-view="updates">
+      <div class="upd">
+        <div class="cur-head"><div>
+          <span class="label-cap" style="color:var(--brass);">Log something Claude can't see yet</span>
+          <h1 class="h-section" style="font-size:38px;margin-top:6px;">Notes.</h1>
+        </div></div>
+        <div class="upd-compose">
+          <textarea data-upd-text placeholder="A text you got, something James told you, anything for tomorrow's briefing…"></textarea>
+          <div class="upd-compose-row">
+            <input type="text" data-upd-deal placeholder="Tag a deal or client (optional)">
+            <button class="btn btn-ink btn-sm" data-upd-save>Log it</button>
+          </div>
+        </div>
+        <div data-upd-list><div class="cur-empty">Loading…</div></div>
       </div>
     </section>
 
@@ -1812,11 +1855,15 @@
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M8 12l3 3 5-5"/></svg>
       <span>Tasks</span>
     </button>
+    <button class="mobnav-item" data-mob="updates" onclick="showView(event,'updates')" aria-label="Notes">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16v13H8l-4 4V4z"/><path d="M8 9h8M8 12.5h5"/></svg>
+      <span>Notes</span>
+    </button>
   </nav>
 </div>
 
 <script>
-var VIEW_LABELS = { today:'Today', tasks:'Tasks', inbox:'Leads & inbox', pipe:'Pipeline', cal:'Calendar', seq:'Sequences', curate:'Curated', rep:'Reports', broker:'Broker', listings:'Deals & offers', command:'Deal command center', people:'Roster' };
+var VIEW_LABELS = { today:'Today', tasks:'Tasks', updates:'Notes', inbox:'Leads & inbox', pipe:'Pipeline', cal:'Calendar', seq:'Sequences', curate:'Curated', rep:'Reports', broker:'Broker', listings:'Deals & offers', command:'Deal command center', people:'Roster' };
 window.__viewStack = window.__viewStack || [];
 function navBack() {
   var prev = window.__viewStack.pop();
@@ -3040,6 +3087,68 @@ function selectLead(el) {
         state.data.done = (state.data.tasks || []).filter(function (x) { return x.done; }).length;
         counts(); if (state.view !== 'all') render();
       }).catch(function () {});
+  });
+})();
+</script>
+<script>
+/* Notes / updates — a shared, append-only log Sara or James jot a quick
+   free-text update into (a text they got, a verbal update, anything the
+   briefing has no other visibility into). Nothing here is ever edited or
+   deleted; "seen by Cowork" just reflects whether the morning briefing has
+   already read it. */
+(function () {
+  'use strict';
+  var root = document.querySelector('.crm-view[data-view="updates"]');
+  if (!root) return;
+  var esc = function (s) { return (s == null ? '' : String(s)).replace(/[&<>"]/g, function (c) { return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]); }); };
+  var state = { data: null }, loaded = false;
+  function ensure() { if (loaded) return; loaded = true; load(); }
+  document.addEventListener('click', function (e) { if (e.target.closest('[onclick*="\'updates\'"]')) setTimeout(ensure, 0); });
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', ensure); else ensure();
+
+  function fmtWhen(iso) {
+    try {
+      var d = new Date(iso);
+      return d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' }) + ' · ' + d.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' });
+    } catch (_) { return ''; }
+  }
+  function load() {
+    fetch('/api/crm/agent-updates', { credentials: 'include' }).then(function (r) { return r.json(); }).then(function (j) {
+      state.data = j;
+      document.querySelectorAll('[data-roster-updates]').forEach(function (e) { e.textContent = String((j.updates || []).filter(function (u) { return !u.read_by_briefing; }).length); });
+      render();
+    }).catch(function () { var l = root.querySelector('[data-upd-list]'); if (l) l.innerHTML = '<div class="cur-empty">Could not load notes.</div>'; });
+  }
+  function item(u) {
+    var who = u.agent === 'james' ? 'James' : u.agent === 'both' ? 'Both' : 'Sara';
+    var badge = '<span class="upd-badge ' + esc(u.agent) + '">' + esc(who) + '</span>';
+    var deal = u.deal ? '<span class="upd-deal">' + esc(u.deal) + '</span>' : '';
+    var seen = u.read_by_briefing ? '<span class="upd-seen">✓ seen by Cowork</span>' : '';
+    return '<div class="upd-item"><div class="upd-body"><div class="upd-line">' + badge + deal + '</div>' +
+      '<div class="upd-content">' + esc(u.content) + '</div>' +
+      '<div class="upd-meta"><span>' + esc(fmtWhen(u.created_at)) + '</span>' + seen + '</div></div></div>';
+  }
+  function render() {
+    var list = root.querySelector('[data-upd-list]');
+    var rows = (state.data && state.data.updates) || [];
+    list.innerHTML = rows.length ? rows.map(item).join('') : '<div class="cur-empty">Nothing logged yet.</div>';
+  }
+  function save() {
+    var ta = root.querySelector('[data-upd-text]');
+    var dealIn = root.querySelector('[data-upd-deal]');
+    var content = (ta.value || '').trim();
+    if (!content) { ta.focus(); return; }
+    var btn = root.querySelector('[data-upd-save]');
+    btn.disabled = true;
+    fetch('/api/crm/agent-updates', { method: 'POST', credentials: 'include', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ content: content, deal: (dealIn.value || '').trim() }) })
+      .then(function (r) { return r.json(); }).then(function () {
+        ta.value = ''; dealIn.value = '';
+        load();
+      }).catch(function () {}).finally(function () { btn.disabled = false; });
+  }
+  root.addEventListener('click', function (e) { if (e.target.closest('[data-upd-save]')) save(); });
+  root.addEventListener('keydown', function (e) {
+    if (e.target.closest('[data-upd-text]') && (e.metaKey || e.ctrlKey) && e.key === 'Enter') save();
   });
 })();
 </script>
