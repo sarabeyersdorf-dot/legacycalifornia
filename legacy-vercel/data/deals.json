@@ -1,5 +1,5 @@
 {
-  "version": "1.33",
+  "version": "1.34",
   "lastUpdated": "2026-07-13",
   "updatedBy": "Claude",
   "tasks": [
@@ -7,34 +7,34 @@
       "agent": "james",
       "client": "Wendell",
       "title": "no BRBC in the EX folder (James owes); file a copy if signed",
-      "note": "done \u2014 bbrc.pdf confirmed in EX folder 7/7",
+      "note": "done — bbrc.pdf confirmed in EX folder 7/7",
       "done": true
     },
     {
       "agent": "james",
       "client": "Baldwin",
       "title": "no fire-hardening disclosure (FHDS/WFA) on file; chase from listing side (Allyson)",
-      "note": "done 7/7 \u2014 FHDS filed in EX folder",
+      "note": "done 7/7 — FHDS filed in EX folder",
       "done": true
     },
     {
       "agent": "sara",
       "client": "Esperson",
       "title": "Resend offer on 2936 E Hwy 4 with new expiration (Kristin signs Mon/Tue); keep 512 Gardiner Way CMA moving",
-      "note": "done 7/6 \u2014 buyer is working on her lending",
+      "note": "done 7/6 — buyer is working on her lending",
       "done": true
     },
     {
       "agent": "james",
       "client": "Skyline",
-      "title": "Follow up with Sharon Hedges \u2014 Homes.com lead for 467 Skyline",
+      "title": "Follow up with Sharon Hedges — Homes.com lead for 467 Skyline",
       "note": "done 7/6",
       "done": true
     },
     {
       "agent": "sara",
       "client": "Latigo",
-      "title": "Chase Mitzi for SELLER signatures: vehicle/trailer addendum + EMD Addendum #2 \u2014 both must reach Ashley/Placer",
+      "title": "Chase Mitzi for SELLER signatures: vehicle/trailer addendum + EMD Addendum #2 — both must reach Ashley/Placer",
       "note": "PARTIALLY resolved 7/13 -- vehicle/trailer addendum (Addendum 1) back FULLY signed from Kylie; EMD Addendum #2 still missing, Mitzi/Kylie never received it -- Sara re-sending",
       "done": false
     },
@@ -48,21 +48,21 @@
     {
       "agent": "james",
       "client": "Wendell",
-      "title": "Ping Audry/Brandi for the WRITTEN bankruptcy court-approval notice (21-day noticing ends ~7/9) \u2014 it starts every clock",
-      "note": "noticing ended 7/9; pinged \u2014 now awaiting the JUDGE'S sign-off (per Sara 7/11); still no written notice, clocks stay paused",
+      "title": "Ping Audry/Brandi for the WRITTEN bankruptcy court-approval notice (21-day noticing ends ~7/9) — it starts every clock",
+      "note": "noticing ended 7/9; pinged — now awaiting the JUDGE'S sign-off (per Sara 7/11); still no written notice, clocks stay paused",
       "done": false
     },
     {
       "agent": "sara",
       "client": "433 Hwy 4",
-      "title": "Tenant IN POSSESSION \u2014 put the through-end-of-Aug extension in writing with Neriah (SIP/TIP addendum)",
-      "note": "done 7/7 \u2014 Generic Addendum 2 fully signed by all parties (Glide), filed in Ex",
+      "title": "Tenant IN POSSESSION — put the through-end-of-Aug extension in writing with Neriah (SIP/TIP addendum)",
+      "note": "done 7/7 — Generic Addendum 2 fully signed by all parties (Glide), filed in Ex",
       "done": true
     },
     {
       "agent": "sara",
       "client": "Latigo",
-      "title": "No BRBC in Ex folder for the Castles \u2014 sign/file a copy",
+      "title": "No BRBC in Ex folder for the Castles — sign/file a copy",
       "note": "done 7/7 per Sara",
       "done": true
     },
@@ -76,125 +76,125 @@
     {
       "agent": "james",
       "client": "Sheep Ranch",
-      "title": "Escrow P-698773 cancellation instructions \u2014 buyer signature pending (James sent 7/4); chase so Placer can close out",
+      "title": "Escrow P-698773 cancellation instructions — buyer signature pending (James sent 7/4); chase so Placer can close out",
       "note": "buyer signed 7/7; now awaiting SELLER signature (per Sara)",
       "done": true
     },
     {
       "agent": "james",
       "client": "Sheep Ranch",
-      "title": "Escrow P-698773 cancellation \u2014 chase the SELLER signature so Placer can close out",
-      "note": "chased 7/10 \u2014 Sean said he would sign, has not come through yet; keep following up",
+      "title": "Escrow P-698773 cancellation — chase the SELLER signature so Placer can close out",
+      "note": "chased 7/10 — Sean said he would sign, has not come through yet; keep following up",
       "done": true
     },
     {
       "agent": "sara",
       "client": "Rathburn",
-      "title": "Listing appointment \u2014 Lilia Rathburn, 11 AM",
-      "note": "done 7/6 \u2014 preparing listing agreement for 999k",
+      "title": "Listing appointment — Lilia Rathburn, 11 AM",
+      "note": "done 7/6 — preparing listing agreement for 999k",
       "done": true
     },
     {
       "agent": "james",
       "client": "Copperopolis",
-      "title": "Showing \u2014 mobile home in Copperopolis, 9 AM",
+      "title": "Showing — mobile home in Copperopolis, 9 AM",
       "note": "done 7/6",
       "done": true
     },
     {
       "agent": "sara",
       "client": "Latigo",
-      "title": "Appraisal due back Fri 7/10 (per Kim Hesser) \u2014 then remove remaining appraisal + loan contingencies and paper the HELOC/conventional financing change",
-      "note": "Kim texted 7/6; Sara texted Mitzi 7/7; appraisal NOT back 7/10 \u2014 Sara reached out to Kim again 7/11",
+      "title": "Appraisal due back Fri 7/10 (per Kim Hesser) — then remove remaining appraisal + loan contingencies and paper the HELOC/conventional financing change",
+      "note": "Kim texted 7/6; Sara texted Mitzi 7/7; appraisal NOT back 7/10 — Sara reached out to Kim again 7/11",
       "done": false
     },
     {
       "agent": "sara",
       "client": "433 Hwy 4",
-      "title": "RR follow-through \u2014 track buyer/seller agreement on the Request for Repair (received 7/7, reviewed with sellers)",
-      "note": "done \u2014 sellers signed RR1 response (Jim 7/7, Yvonne 7/8), sent to Neriah 7/8 AM",
+      "title": "RR follow-through — track buyer/seller agreement on the Request for Repair (received 7/7, reviewed with sellers)",
+      "note": "done — sellers signed RR1 response (Jim 7/7, Yvonne 7/8), sent to Neriah 7/8 AM",
       "done": true
     },
     {
       "agent": "sara",
       "client": "433 Hwy 4",
-      "title": "Watch for buyer's signed reply to the seller RR response + CR1 (sent to Neriah/Melissa 7/8) \u2014 file fully executed set in Ex when back",
-      "note": "done 7/9 \u2014 executed Seller Response & Buyer Reply to RR1 received from Neriah and filed in Ex",
+      "title": "Watch for buyer's signed reply to the seller RR response + CR1 (sent to Neriah/Melissa 7/8) — file fully executed set in Ex when back",
+      "note": "done 7/9 — executed Seller Response & Buyer Reply to RR1 received from Neriah and filed in Ex",
       "done": true
     },
     {
       "agent": "sara",
       "client": "Rathburn",
       "title": "Chase Lilia's signature on the 14281 Cobb Ln listing agreement (sent 7/7 at 999k)",
-      "note": "chased 7/10; 7/11 Sara answered Lilia's questions \u2014 she will sign soon; meeting Lilia in person today 7/13 to sign",
+      "note": "chased 7/10; 7/11 Sara answered Lilia's questions — she will sign soon; meeting Lilia in person today 7/13 to sign",
       "done": true
     },
     {
       "agent": "sara",
       "client": "433 Hwy 4",
-      "title": "Reply to Melissa re: tenant estoppel \u2014 TEC box UNCHECKED on both TOPAs (not a contract deliverable); check the signed MU-PA text first, then decide courtesy TEC if lender requires (in writing)",
+      "title": "Reply to Melissa re: tenant estoppel — TEC box UNCHECKED on both TOPAs (not a contract deliverable); check the signed MU-PA text first, then decide courtesy TEC if lender requires (in writing)",
       "done": false
     },
     {
       "agent": "sara",
       "client": "433 Hwy 4",
-      "title": "FHDS signed 7/6 has UNCHECKED boxes (per Melissa) \u2014 issue corrected FHDS for signatures",
+      "title": "FHDS signed 7/6 has UNCHECKED boxes (per Melissa) — issue corrected FHDS for signatures",
       "done": true,
       "note": "Corrected FHDS reissued and sent for signatures 7/13 per Sara"
     },
     {
       "agent": "james",
       "client": "Duarte",
-      "title": "6240 Michel Rd \u2014 SCO1 at 434000 (sellers signed 7/8) expires ~Sat 7/11 \u2014 review with Brian and respond (accept/counter/walk)",
-      "note": "SCO1 expired 7/11 unaccepted; listing agent never acknowledged \u2014 seller won't go below 434000 (James 7/11); DEAL DEAD per Sara 7/12",
+      "title": "6240 Michel Rd — SCO1 at 434000 (sellers signed 7/8) expires ~Sat 7/11 — review with Brian and respond (accept/counter/walk)",
+      "note": "SCO1 expired 7/11 unaccepted; listing agent never acknowledged — seller won't go below 434000 (James 7/11); DEAL DEAD per Sara 7/12",
       "done": true
     },
     {
       "agent": "james",
       "client": "Robinson",
       "title": "Write the offer on 992 Iroquois Cir for Ashley Robinson (BRBC signed 7/5)",
-      "note": "done \u2014 offer written at 125000; seller countered 134500; James countering back at 130000 (buyer's highest & best)",
+      "note": "done — offer written at 125000; seller countered 134500; James countering back at 130000 (buyer's highest & best)",
       "done": true
     },
     {
       "agent": "sara",
       "client": "433 Hwy 4",
-      "title": "Watch for Jim's signed ETA \u2014 he signs Fri 7/10 before leaving for Idaho; file in Ex when back",
-      "note": "done 7/10 \u2014 ETA No. 1 fully signed 7:43 AM, forwarded to Neriah/Melissa, filed in Ex; extends loan\u21927/23, appraisal\u21927/16",
+      "title": "Watch for Jim's signed ETA — he signs Fri 7/10 before leaving for Idaho; file in Ex when back",
+      "note": "done 7/10 — ETA No. 1 fully signed 7:43 AM, forwarded to Neriah/Melissa, filed in Ex; extends loan→7/23, appraisal→7/16",
       "done": true
     },
     {
       "agent": "james",
       "client": "Robinson",
-      "title": "992 Iroquois \u2014 BCO at 130000 (buyer's highest & best) countering seller's 134500 \u2014 watch for seller response",
-      "note": "seller will not accept the counter (James 7/11); OFFER DEAD per Sara 7/12 \u2014 pivoted to 695 Feather Dr showing 7/12",
+      "title": "992 Iroquois — BCO at 130000 (buyer's highest & best) countering seller's 134500 — watch for seller response",
+      "note": "seller will not accept the counter (James 7/11); OFFER DEAD per Sara 7/12 — pivoted to 695 Feather Dr showing 7/12",
       "done": true
     },
     {
       "agent": "james",
       "client": "Sheep Ranch",
-      "title": "Escrow P-698773 cancellation \u2014 Sean's (seller) signature STILL pending; said he'd sign (chased 7/10) \u2014 follow up until Placer can close out",
-      "note": "done \u2014 cancellation FULLY SIGNED 7/10 6:27 PM (Authentisign); Sara forwarded to Ashley/Amanda at Placer that evening",
+      "title": "Escrow P-698773 cancellation — Sean's (seller) signature STILL pending; said he'd sign (chased 7/10) — follow up until Placer can close out",
+      "note": "done — cancellation FULLY SIGNED 7/10 6:27 PM (Authentisign); Sara forwarded to Ashley/Amanda at Placer that evening",
       "done": true
     },
     {
       "agent": "sara",
       "client": "433 Hwy 4",
-      "title": "Track appraisal status with Neriah/lender \u2014 appraisal contingency Thu 7/16 per ETA1",
+      "title": "Track appraisal status with Neriah/lender — appraisal contingency Thu 7/16 per ETA1",
       "note": "Neriah reached out to the lender again 7/11; followed up, ticked done by Sara 7/12 (contingency 7/16 stands)",
       "done": true
     },
     {
       "agent": "sara",
       "client": "Esperson",
-      "title": "Pursue 512 Gardiner Way LISTING (reduced-commission, Kristin has her own buyer) \u2014 home in ACTIVE FORECLOSURE so timing matters; buyer side dead (lending declined)",
-      "note": "7/12 per Sara \u2014 Kristin meeting her buyer Monday 7/13, will advise after",
+      "title": "Pursue 512 Gardiner Way LISTING (reduced-commission, Kristin has her own buyer) — home in ACTIVE FORECLOSURE so timing matters; buyer side dead (lending declined)",
+      "note": "7/12 per Sara — Kristin meeting her buyer Monday 7/13, will advise after",
       "done": false
     },
     {
       "agent": "sara",
       "client": "Furr",
-      "title": "Ben Furr (new buyer, BRBC signed 7/12) \u2014 file the signed BRBC and follow up after the 7/12 Skyline meeting",
+      "title": "Ben Furr (new buyer, BRBC signed 7/12) — file the signed BRBC and follow up after the 7/12 Skyline meeting",
       "done": false
     },
     {
@@ -208,7 +208,8 @@
       "agent": "sara",
       "client": "Latigo",
       "title": "Download seller-signed vehicle/trailer addendum from Kylie's 7/13 email attachment and file in Ex",
-      "done": false
+      "done": true,
+      "note": "Not needed — Sara confirmed 7/13 that Addendum 1 is already in the Ex folder"
     },
     {
       "agent": "sara",
@@ -338,10 +339,10 @@
         "closingDocs": null
       },
       "correspondence": [],
-      "notes": "BUYER-SIDE \u2014 Sara represents the BUYERS (James Courtland Hann Jr & Cheri Lynn Hann). Listing agent and SELLER is Aric Glanville (wife Suzette). Buyer has contingency for sale of their property. COE now FRIDAY JUNE 26 (updated 6/23 \u2014 Larkspur and Heaton Moor are NOT closing together; HM closes 6/24, Larkspur 6/26). Buyers sign Lender CD. HOA docs received. RPA and SIPA executed. Name-correction addendum (buyer names to match deed: James Courtland Hann Jr & Cheri Lynn Hann) DELIVERED (per Sara 6/24). Appraisal WAIVED. Referral fee: Hana-Sue Drilling (NextHome Utica Properties) earns 25% of Sara's commission for showing Sara's buyer clients while she was traveling. Referral fee agreement SIGNED BY ALL PARTIES and with escrow (as of 6/19/2026). CLOSED (confirmed by Sara 7/5/2026). SIP deposit due back to buyers \u2014 awaiting a deposit instruction for escrow release from the buyer's agent; approx 1100 being held back.",
+      "notes": "BUYER-SIDE — Sara represents the BUYERS (James Courtland Hann Jr & Cheri Lynn Hann). Listing agent and SELLER is Aric Glanville (wife Suzette). Buyer has contingency for sale of their property. COE now FRIDAY JUNE 26 (updated 6/23 — Larkspur and Heaton Moor are NOT closing together; HM closes 6/24, Larkspur 6/26). Buyers sign Lender CD. HOA docs received. RPA and SIPA executed. Name-correction addendum (buyer names to match deed: James Courtland Hann Jr & Cheri Lynn Hann) DELIVERED (per Sara 6/24). Appraisal WAIVED. Referral fee: Hana-Sue Drilling (NextHome Utica Properties) earns 25% of Sara's commission for showing Sara's buyer clients while she was traveling. Referral fee agreement SIGNED BY ALL PARTIES and with escrow (as of 6/19/2026). CLOSED (confirmed by Sara 7/5/2026). SIP deposit due back to buyers — awaiting a deposit instruction for escrow release from the buyer's agent; approx 1100 being held back.",
       "alerts": [
-        "CLOSED \u2014 confirmed by Sara 7/5/2026",
-        "SIP deposit due back (~1100) \u2014 escrow release instruction PUSHED 7/10 (same route as Heaton Moor's 7/7); watch for the release to the Hanns"
+        "CLOSED — confirmed by Sara 7/5/2026",
+        "SIP deposit due back (~1100) — escrow release instruction PUSHED 7/10 (same route as Heaton Moor's 7/7); watch for the release to the Hanns"
       ]
     },
     {
@@ -376,10 +377,10 @@
         "closingDocs": null
       },
       "correspondence": [],
-      "notes": "CLOSED / RECORDED 6/24/2026 ('WE ARE ON RECORD!' \u2014 Ashley Cuslidge, Placer P-705589). Buyer's side (San Jose / Santa Clara County). $7k seller-credit addendum signing complete & sent to buyer side; buyer wire received; seller DocuSign items completed. Revised broker's demand SENT to Ashley 6/25 (per Sara). SIP returned signed 6/17; SIP through 7/3 (Sara covering daily PITI; $5k from the Hanns, returned when they vacate). REMAINING: VP / final walkthrough to be done 3\u20135 days before sellers vacate 7/3 (~6/28\u20136/30). Buyer-side file docs Jide's AVID, NHD sig pages (SJ tree + earthquake), buyer TDS all received 6/24.",
+      "notes": "CLOSED / RECORDED 6/24/2026 ('WE ARE ON RECORD!' — Ashley Cuslidge, Placer P-705589). Buyer's side (San Jose / Santa Clara County). $7k seller-credit addendum signing complete & sent to buyer side; buyer wire received; seller DocuSign items completed. Revised broker's demand SENT to Ashley 6/25 (per Sara). SIP returned signed 6/17; SIP through 7/3 (Sara covering daily PITI; $5k from the Hanns, returned when they vacate). REMAINING: VP / final walkthrough to be done 3–5 days before sellers vacate 7/3 (~6/28–6/30). Buyer-side file docs Jide's AVID, NHD sig pages (SJ tree + earthquake), buyer TDS all received 6/24.",
       "alerts": [
-        "RECORDED 6/24/2026 \u2014 deal closed",
-        "SIP HOLDBACK RESOLVED \u2705 \u2014 ADM No 1 fully executed 7/7 (Authentisign); Sara sent release instruction to Amanda (Placer); checks mailed 7/7 (3808.21 seller / 1191.79 buyer)"
+        "RECORDED 6/24/2026 — deal closed",
+        "SIP HOLDBACK RESOLVED ✅ — ADM No 1 fully executed 7/7 (Authentisign); Sara sent release instruction to Amanda (Placer); checks mailed 7/7 (3808.21 seller / 1191.79 buyer)"
       ]
     },
     {
@@ -400,7 +401,7 @@
       "closingDate": null,
       "timeline": {
         "clockStart": null,
-        "note": "Bankruptcy court sale (ADM1) \u2014 all contingency + COE periods start only on seller's written notice of court approval"
+        "note": "Bankruptcy court sale (ADM1) — all contingency + COE periods start only on seller's written notice of court approval"
       },
       "contacts": {
         "coAgent": "Audry M Burton / Brandi Jenkins (Busy Bee Realty) - listing/seller side",
@@ -470,7 +471,7 @@
           "url": "https://legacycalifornia.com/docs/9985-wendell/seller-property-questionnaire.pdf"
         },
         {
-          "name": "Natural Hazard Disclosure \u2014 Signature Page",
+          "name": "Natural Hazard Disclosure — Signature Page",
           "url": "https://legacycalifornia.com/docs/9985-wendell/nhd-signature-page.pdf"
         },
         {
@@ -478,7 +479,7 @@
           "url": "https://legacycalifornia.com/docs/9985-wendell/fire-hardening-disclosure.pdf"
         },
         {
-          "name": "FHDS \u2014 Corrected Page 1",
+          "name": "FHDS — Corrected Page 1",
           "url": "https://legacycalifornia.com/docs/9985-wendell/fhds-corrected-page-1.pdf"
         },
         {
@@ -511,13 +512,13 @@
         }
       ],
       "correspondence": [],
-      "notes": "UNDER CONTRACT / ACCEPTED 6/3/2026 \u2014 BANKRUPTCY COURT SALE (holding pattern). Buyer-side, Legacy Properties (James Beyersdorf's deal; buyer's agent of record on RPA is Sara Cooper \u2014 both on transaction via AAA). Buyers David Allen Hopkins & Stacy Ann Gebhart; seller Marshall Graham Guthrie (listing Audry Burton / Brandi Jenkins, Busy Bee Realty). MLS 226049846, Green Hills Sub. $375,000; SCO1 signed 6/2, buyers accepted 6/3; seller pays 2.5% buyer-broker at COE. Financing: FHA (FHA-vs-203K being confirmed with appraiser/lender), loan $361,875 (96.5%), down $1,875, deposit $11,250 (wired, EMD receipt on file). CONTINGENCY CLOCK NOT STARTED: per ADM1 (Bankruptcy Court Approval Contingency), ALL time periods \u2014 inspections, contingencies, removal periods, Close of Escrow, all performance \u2014 commence the first day AFTER seller delivers written notice of Bankruptcy Court approval to buyer. Status (per listing agent 6/19): motion to sell filed ~6/18; 21-day noticing period running; an objection could restart it; trustee has not confirmed post-approval-to-close timeline. Escrow opened a PLACEHOLDER COE of 7/20 (based on acceptance) but real COE resets to court approval. Buyers proceeding voluntarily to keep things moving: SEPTIC inspection DONE \u2014 came back CLEAN; appraisal ordered (appraiser proposed inspection Wed 6/24 10 AM; UTILITIES must be ON for it \u2014 needs resolving). If the court/bank declines, buyers get their deposit back. Lender Kim Hesser (Prime Residential) working in parallel so closing may not slip once approved.",
+      "notes": "UNDER CONTRACT / ACCEPTED 6/3/2026 — BANKRUPTCY COURT SALE (holding pattern). Buyer-side, Legacy Properties (James Beyersdorf's deal; buyer's agent of record on RPA is Sara Cooper — both on transaction via AAA). Buyers David Allen Hopkins & Stacy Ann Gebhart; seller Marshall Graham Guthrie (listing Audry Burton / Brandi Jenkins, Busy Bee Realty). MLS 226049846, Green Hills Sub. $375,000; SCO1 signed 6/2, buyers accepted 6/3; seller pays 2.5% buyer-broker at COE. Financing: FHA (FHA-vs-203K being confirmed with appraiser/lender), loan $361,875 (96.5%), down $1,875, deposit $11,250 (wired, EMD receipt on file). CONTINGENCY CLOCK NOT STARTED: per ADM1 (Bankruptcy Court Approval Contingency), ALL time periods — inspections, contingencies, removal periods, Close of Escrow, all performance — commence the first day AFTER seller delivers written notice of Bankruptcy Court approval to buyer. Status (per listing agent 6/19): motion to sell filed ~6/18; 21-day noticing period running; an objection could restart it; trustee has not confirmed post-approval-to-close timeline. Escrow opened a PLACEHOLDER COE of 7/20 (based on acceptance) but real COE resets to court approval. Buyers proceeding voluntarily to keep things moving: SEPTIC inspection DONE — came back CLEAN; appraisal ordered (appraiser proposed inspection Wed 6/24 10 AM; UTILITIES must be ON for it — needs resolving). If the court/bank declines, buyers get their deposit back. Lender Kim Hesser (Prime Residential) working in parallel so closing may not slip once approved.",
       "alerts": [
-        "BANKRUPTCY COURT SALE \u2014 contingency/COE clock starts only on written notice of court approval (none yet); ~21-day notice period running, motion filed ~6/18, objection could restart it",
-        "Appraisal inspection completed Wed 6/24 \u2014 utilities were ON (confirmed by Sara 6/25)",
+        "BANKRUPTCY COURT SALE — contingency/COE clock starts only on written notice of court approval (none yet); ~21-day notice period running, motion filed ~6/18, objection could restart it",
+        "Appraisal inspection completed Wed 6/24 — utilities were ON (confirmed by Sara 6/25)",
         "Confirm appraisal type: ordered FHA, may need FHA 203K",
-        "Septic inspection complete \u2014 CLEAN",
-        "7/20 is escrow placeholder only \u2014 not a firm COE"
+        "Septic inspection complete — CLEAN",
+        "7/20 is escrow placeholder only — not a firm COE"
       ]
     },
     {
@@ -542,9 +543,9 @@
       },
       "contacts": {
         "coAgent": "Allyson Overturf (PMZ Real Estate) - listing/seller side",
-        "escrow": "Veronica Barragan (Chicago Title per SCO) \u2014 see escrow/title discrepancy note",
+        "escrow": "Veronica Barragan (Chicago Title per SCO) — see escrow/title discrepancy note",
         "lender": null,
-        "title": "Chicago Title \u2014 Veronica Barragan / Kim McCray; Order #FSST-5312600364 (CONFIRMED by Sara 6/24/2026)"
+        "title": "Chicago Title — Veronica Barragan / Kim McCray; Order #FSST-5312600364 (CONFIRMED by Sara 6/24/2026)"
       },
       "docs": {
         "RPA": "executed",
@@ -557,8 +558,8 @@
         "disclosures": "received",
         "TDS": "executed",
         "SPQ": "executed",
-        "FHDS": "received \u2014 filed in EX 7/7",
-        "ETA1": "executed \u2014 filed in EX (extension covering the 7/6 buyer-contingency date; added to deals.json 7/11 per Sara)"
+        "FHDS": "received — filed in EX 7/7",
+        "ETA1": "executed — filed in EX (extension covering the 7/6 buyer-contingency date; added to deals.json 7/11 per Sara)"
       },
       "clientDocuments": [
         {
@@ -606,7 +607,7 @@
           "url": "https://legacycalifornia.com/docs/8235-baldwin/seller-property-questionnaire.pdf"
         },
         {
-          "name": "Natural Hazard Disclosure \u2014 Signature Page",
+          "name": "Natural Hazard Disclosure — Signature Page",
           "url": "https://legacycalifornia.com/docs/8235-baldwin/nhd-signature-page.pdf"
         },
         {
@@ -627,11 +628,11 @@
         }
       ],
       "correspondence": [],
-      "notes": "UNDER CONTRACT / ACCEPTED 6/17/2026. James Beyersdorf's deal (buyer-side). Buyer Shomari Turner; seller Rebecca Johnson (a.k.a. Rebecca Turnage); listing agent Allyson Overturf, PMZ Real Estate. Original offer $200k 6/12; SCO1 $205k 6/15 (escrow pre-opened Chicago Title - Veronica Barragan; fire disclosure in NHD); BCO1 $207,000 accepted by seller 6/17, seller to pay buyer-broker comp 3%. Financing: FHA 203(k) rehab loan (~$193k, 96.5% LTV), $4,500 down, $2,500 initial deposit. As-is; buyer waived home warranty. Key dates from acceptance 6/17: deposit $2,500 by 6/22; seller docs ~6/24; all buyer contingencies (17 days) roll to 7/6 (7/4 holiday/weekend); final walk ~7/29; COE 45 days = 8/1 (Sat) rolls to ~8/3. EMD receipt + escrow holder acknowledgement on file. FHA 203(k) rehab loan \u2014 lender milestones will drive the timeline. ESCROW/TITLE DISCREPANCY: executed SCO names Chicago Title (Veronica Barragan); a 6/22 amended prelim (reason 'Added Buyer') references Fidelity National Title Order #FSST-5312600364 (Veronica Barragan & Kim McCray) \u2014 confirm which company holds escrow.",
+      "notes": "UNDER CONTRACT / ACCEPTED 6/17/2026. James Beyersdorf's deal (buyer-side). Buyer Shomari Turner; seller Rebecca Johnson (a.k.a. Rebecca Turnage); listing agent Allyson Overturf, PMZ Real Estate. Original offer $200k 6/12; SCO1 $205k 6/15 (escrow pre-opened Chicago Title - Veronica Barragan; fire disclosure in NHD); BCO1 $207,000 accepted by seller 6/17, seller to pay buyer-broker comp 3%. Financing: FHA 203(k) rehab loan (~$193k, 96.5% LTV), $4,500 down, $2,500 initial deposit. As-is; buyer waived home warranty. Key dates from acceptance 6/17: deposit $2,500 by 6/22; seller docs ~6/24; all buyer contingencies (17 days) roll to 7/6 (7/4 holiday/weekend); final walk ~7/29; COE 45 days = 8/1 (Sat) rolls to ~8/3. EMD receipt + escrow holder acknowledgement on file. FHA 203(k) rehab loan — lender milestones will drive the timeline. ESCROW/TITLE DISCREPANCY: executed SCO names Chicago Title (Veronica Barragan); a 6/22 amended prelim (reason 'Added Buyer') references Fidelity National Title Order #FSST-5312600364 (Veronica Barragan & Kim McCray) — confirm which company holds escrow.",
       "alerts": [
         "COE ~Aug 3 (45 days; 8/1 is Saturday)",
-        "Buyer contingencies (due 7/6) handled via ETA1 \u2014 CONFIRMED filed in EX, reflected in deals.json 7/11 \u2705",
-        "FHA 203(k) rehab loan \u2014 watch lender/appraisal milestones",
+        "Buyer contingencies (due 7/6) handled via ETA1 — CONFIRMED filed in EX, reflected in deals.json 7/11 ✅",
+        "FHA 203(k) rehab loan — watch lender/appraisal milestones",
         "Escrow/title CONFIRMED: Chicago Title, Order #FSST-5312600364 (Sara 6/24); full NHD report received 6/23"
       ]
     },
@@ -660,7 +661,7 @@
       },
       "contacts": {
         "coAgent": "Kylie Windley / Mitzi Windley (Chase International)",
-        "escrow": "Ashley Cuslidge (Placer Title) \u2014 Order P-708659",
+        "escrow": "Ashley Cuslidge (Placer Title) — Order P-708659",
         "lender": "Kim Hesser (Prime Residential)",
         "title": "Placer Title"
       },
@@ -668,16 +669,16 @@
         "RPA": "executed",
         "sellerCounter1": "received",
         "buyerCounter1": "accepted",
-        "vehicleTrailerAddendum": "FULLY EXECUTED \u2014 seller-signed copy returned by Kylie via email 7/13 (attachment on 'missing items Latigo' thread); needs downloading from Gmail + filing in Ex",
+        "vehicleTrailerAddendum": "FULLY EXECUTED — seller-signed copy (Addendum 1) confirmed already filed in Ex folder (per Sara 7/13); Kylie's 7/13 email was a duplicate, no download needed",
         "emdAddendum2": "Signed by buyer 6/29 (Authentisign 'Addendum #2 - 6/25'), forwarded to Mitzi same day for seller signature -> Ashley. AS OF 7/13: Mitzi/Kylie say they've never seen it and it's not in Ex either -- Sara re-chasing, needs resend along with AVID",
-        "sellerDisclosures": "RECEIVED 7/2/2026, sent to buyers; BOTH buyers signed/accepted 7/2 (Authentisign) \u2014 Adrianna AND Guy Castle confirmed",
+        "sellerDisclosures": "RECEIVED 7/2/2026, sent to buyers; BOTH buyers signed/accepted 7/2 (Authentisign) — Adrianna AND Guy Castle confirmed",
         "TDS": "received 7/2 (in seller disclosure package)",
         "SPQ": "received 7/2 (in seller disclosure package)",
         "wellSepticInspection": "WAIVED by buyers 7/2 (Adrianna: 'We do not want to do the well and septic inspections')",
-        "EMD": "received in FULL \u2014 $10000 total posted at Placer; receipt from Amanda Boitano 7/7 on file (Receipt_414331)",
+        "EMD": "received in FULL — $10000 total posted at Placer; receipt from Amanda Boitano 7/7 on file (Receipt_414331)",
         "prelim": "received 7/1 (Placer Order P-708659)",
         "BRBC": "signed/filed 7/7 (Castles)",
-        "CR1_BIW": "executed 7/6 (Authentisign) \u2014 CR1 removes ALL contingencies except appraisal & loan; Mitzi received copy via CC; FILED in Ex 7/9",
+        "CR1_BIW": "executed 7/6 (Authentisign) — CR1 removes ALL contingencies except appraisal & loan; Mitzi received copy via CC; FILED in Ex 7/9",
         "buyerAgentAVID": "Sent 7/8, Mitzi CC'd -- Kylie confirmed receipt 7/13, resolved",
         "prelimBuyerInitialed": "Listing side (Kylie) says still missing the buyer-initialed copy as of 7/13 -- needs sending"
       },
@@ -727,7 +728,7 @@
           "url": "https://legacycalifornia.com/docs/7230-latigo/seller-property-questionnaire.pdf"
         },
         {
-          "name": "Natural Hazard Disclosure \u2014 Signature Page",
+          "name": "Natural Hazard Disclosure — Signature Page",
           "url": "https://legacycalifornia.com/docs/7230-latigo/nhd-signature-page.pdf"
         },
         {
@@ -792,12 +793,12 @@
         }
       ],
       "correspondence": [],
-      "notes": "Buyer-side. OFFER ACCEPTED (confirmed by Sara 6/22/2026). Offer (CA RPA) signed via Authentisign and sent to listing agents Kylie & Mitzi Windley (Chase International) 6/14/2026. Initially REJECTED 6/16 (seller objected to 'remove all debris' term and called price too low). Deal REVIVED: seller counter (SCO1) received 6/18 via Kylie Windley. Buyer counter at $615,000 (highest and best) sent 6/19 and ACCEPTED. salePrice $615,000 CONFIRMED by Sara 6/22. ESCROW OPENED 6/23 with Ashley Cuslidge at Placer Title (Order P-708659). Buyers: Adrianna & Guy Castle. VEHICLE/TRAILER ADDENDUM (buyer responsible for removing remaining vehicles & trailers, per Mitzi 6/20) sent out for buyer signatures 6/23 with Mitzi CC'd to receive once signed \u2014 SELLER STILL NEEDS TO SIGN. TITLE RESOLVED 6/29: Placer's underwriter had balked at insuring the Sheriff's-sale title, but Ashley confirmed 6/29 that WESTCOR will insure \u2014 proceeding with Westcor as underwriter, transaction STAYS AT PLACER (P-708659); 7/20 COE no longer threatened. FINANCING CHANGED AGAIN (per Sara 6/29): buyers had switched from 20% down to the GSFA 'Assist to Own' grant + family gift, BUT the buyer GOT A RAISE and NO LONGER QUALIFIES for GSFA \u2014 financing must be re-worked (likely back to conventional); RPA terms to be updated to reflect whatever the new financing is. EMD: Adrianna brought $1k to Placer 6/29; remaining $9k being dropped via Placer's mail slot 7/2\u20137/3 (Adrianna spoke w/ Ashley \u2014 Placer closed 7/3 holiday & Ashley out 7/6+, confirm it posts Mon 7/6); EMD Addendum #2 signing complete 6/29, forwarded to Mitzi for seller signature. UPDATE 7/2: seller disclosures received 7/2 & Adrianna signed/accepted them same day (Authentisign); buyers DECLINED well & septic inspections (Adrianna 7/2 \u2014 Sara had held off ordering inspections pending the seller's recent reports to save the buyers money). Buyer-facing timeline generated 6/23 (7230_Latigo_Buyer_Timeline.html in deal folder). Key dates from acceptance 6/19: deposit $10k by 6/24; seller docs ~6/26; all buyer contingencies (inspection/appraisal/loan/title/insurance, 17 days) 7/6; final walkthrough ~7/15; COE 30 days = 7/19 (Sun) rolls to ~7/20. Inspections TBD; home warranty waived in contract. UPDATE 7/13: final walkthrough now confirmed Friday 7/17 (buyers doing it then, per Sara's email to Kylie/Mitzi) -- supersedes earlier ~7/15 estimate. Appraisal still not back; Sara re-chasing lender 7/13.",
+      "notes": "Buyer-side. OFFER ACCEPTED (confirmed by Sara 6/22/2026). Offer (CA RPA) signed via Authentisign and sent to listing agents Kylie & Mitzi Windley (Chase International) 6/14/2026. Initially REJECTED 6/16 (seller objected to 'remove all debris' term and called price too low). Deal REVIVED: seller counter (SCO1) received 6/18 via Kylie Windley. Buyer counter at $615,000 (highest and best) sent 6/19 and ACCEPTED. salePrice $615,000 CONFIRMED by Sara 6/22. ESCROW OPENED 6/23 with Ashley Cuslidge at Placer Title (Order P-708659). Buyers: Adrianna & Guy Castle. VEHICLE/TRAILER ADDENDUM (buyer responsible for removing remaining vehicles & trailers, per Mitzi 6/20) sent out for buyer signatures 6/23 with Mitzi CC'd to receive once signed — SELLER STILL NEEDS TO SIGN. TITLE RESOLVED 6/29: Placer's underwriter had balked at insuring the Sheriff's-sale title, but Ashley confirmed 6/29 that WESTCOR will insure — proceeding with Westcor as underwriter, transaction STAYS AT PLACER (P-708659); 7/20 COE no longer threatened. FINANCING CHANGED AGAIN (per Sara 6/29): buyers had switched from 20% down to the GSFA 'Assist to Own' grant + family gift, BUT the buyer GOT A RAISE and NO LONGER QUALIFIES for GSFA — financing must be re-worked (likely back to conventional); RPA terms to be updated to reflect whatever the new financing is. EMD: Adrianna brought $1k to Placer 6/29; remaining $9k being dropped via Placer's mail slot 7/2–7/3 (Adrianna spoke w/ Ashley — Placer closed 7/3 holiday & Ashley out 7/6+, confirm it posts Mon 7/6); EMD Addendum #2 signing complete 6/29, forwarded to Mitzi for seller signature. UPDATE 7/2: seller disclosures received 7/2 & Adrianna signed/accepted them same day (Authentisign); buyers DECLINED well & septic inspections (Adrianna 7/2 — Sara had held off ordering inspections pending the seller's recent reports to save the buyers money). Buyer-facing timeline generated 6/23 (7230_Latigo_Buyer_Timeline.html in deal folder). Key dates from acceptance 6/19: deposit $10k by 6/24; seller docs ~6/26; all buyer contingencies (inspection/appraisal/loan/title/insurance, 17 days) 7/6; final walkthrough ~7/15; COE 30 days = 7/19 (Sun) rolls to ~7/20. Inspections TBD; home warranty waived in contract. UPDATE 7/13: final walkthrough now confirmed Friday 7/17 (buyers doing it then, per Sara's email to Kylie/Mitzi) -- supersedes earlier ~7/15 estimate. Appraisal still not back; Sara re-chasing lender 7/13. CORRECTION 7/13: Addendum 1 (vehicle/trailer) was already filed in Ex — Kylie's 7/13 email attachment was a duplicate, not a new item needing download.",
       "alerts": [
-        "CR1 + BIW EXECUTED 7/6 (Authentisign) \u2014 all contingencies removed EXCEPT appraisal & loan; Mitzi has copy via CC",
-        "TITLE WOBBLE RESOLVED 7/6/7: Amanda (Placer) said Westcor declined, then reversed same day \u2014 'file can proceed'; written confirmation obtained (Sara 7/7); 7/20 COE holds",
-        "EMD received in FULL \u2014 $10k receipt from Amanda 7/7 filed (Receipt_414331)",
-        "Vehicle/trailer addendum (Addendum 1) FULLY EXECUTED -- seller-signed copy back from Kylie 7/13, needs filing in Ex",
+        "CR1 + BIW EXECUTED 7/6 (Authentisign) — all contingencies removed EXCEPT appraisal & loan; Mitzi has copy via CC",
+        "TITLE WOBBLE RESOLVED 7/6/7: Amanda (Placer) said Westcor declined, then reversed same day — 'file can proceed'; written confirmation obtained (Sara 7/7); 7/20 COE holds",
+        "EMD received in FULL — $10k receipt from Amanda 7/7 filed (Receipt_414331)",
+        "Vehicle/trailer addendum (Addendum 1) FULLY EXECUTED — confirmed already in Ex folder (Sara 7/13)",
         "EMD Addendum #2 still missing -- buyer-signed 6/29 but Mitzi/Kylie never received it; Sara re-sending 7/13",
         "Buyer-agent AVID resolved -- Kylie confirmed receipt 7/13",
         "Buyer-initialed Prelim Title Report still owed to listing side (Kylie, 7/13)",
@@ -827,13 +828,13 @@
       },
       "docs": {
         "BRBC": "executed (prepared 7/2)",
-        "RPA": "offer signed & sent 7/4 \u2014 385000, conventional loan 371525 (96.5%), 10000 initial deposit, COE 30 days after acceptance",
-        "sellerCounter1": "received \u2014 SCO1 signed by BOTH sellers 7/8 at 434000; awaiting Brian's response"
+        "RPA": "offer signed & sent 7/4 — 385000, conventional loan 371525 (96.5%), 10000 initial deposit, COE 30 days after acceptance",
+        "sellerCounter1": "received — SCO1 signed by BOTH sellers 7/8 at 434000; awaiting Brian's response"
       },
       "correspondence": [],
-      "notes": "OFFER OUT \u2014 James's buyer Brian Duarte. Offer written 7/4/2026 at $385,000 (conventional, $371,525 loan 96.5%, $10k initial deposit, COE 30 days after acceptance) on 6240 Michel Rd, Mountain Ranch (MLS 226080924, listed 6/26 at $439,000). Sellers Yueying Wen & Steve Kwong (agent Mike/Xingwen Chen, Keller Williams Elk Grove) COUNTERED: SCO1 at $434,000, signed by both sellers 7/8, all other terms unchanged. SCO1 expires 5 PM on the 3rd day after seller signing (~Sat 7/11). Docs in _Offers/Buy Side/Brian Duarte. DEAD 7/12/2026 (per Sara): SCO1 expired 7/11 unaccepted \u2014 listing agent never acknowledged the offer; seller firm at 434000 and won't go lower (James spoke to him 7/11). Brian not meeting 434000.",
+      "notes": "OFFER OUT — James's buyer Brian Duarte. Offer written 7/4/2026 at $385,000 (conventional, $371,525 loan 96.5%, $10k initial deposit, COE 30 days after acceptance) on 6240 Michel Rd, Mountain Ranch (MLS 226080924, listed 6/26 at $439,000). Sellers Yueying Wen & Steve Kwong (agent Mike/Xingwen Chen, Keller Williams Elk Grove) COUNTERED: SCO1 at $434,000, signed by both sellers 7/8, all other terms unchanged. SCO1 expires 5 PM on the 3rd day after seller signing (~Sat 7/11). Docs in _Offers/Buy Side/Brian Duarte. DEAD 7/12/2026 (per Sara): SCO1 expired 7/11 unaccepted — listing agent never acknowledged the offer; seller firm at 434000 and won't go lower (James spoke to him 7/11). Brian not meeting 434000.",
       "alerts": [
-        "OFFER DEAD 7/12 \u2014 SCO1 expired unaccepted; seller firm at 434000"
+        "OFFER DEAD 7/12 — SCO1 expired unaccepted; seller firm at 434000"
       ],
       "archivedDate": "2026-07-13"
     },
@@ -860,13 +861,13 @@
       "docs": {
         "BRBC": "executed (prepared 7/5, James)",
         "RPA": "offer written & sent at 125000",
-        "sellerCounter1": "received \u2014 SCO at 134500",
-        "buyerCounter1": "BCO at 130000 (buyer's highest & best) \u2014 countering the 134500"
+        "sellerCounter1": "received — SCO at 134500",
+        "buyerCounter1": "BCO at 130000 (buyer's highest & best) — countering the 134500"
       },
       "correspondence": [],
-      "notes": "OFFER OUT / NEGOTIATING \u2014 James's buyer Ashley Robinson. 992 Iroquois Cir, Copperopolis (MLS 226026039, listed 3/5/26 at $135,000; 3bd/2ba manufactured on permanent foundation, 896 sqft, 0.08 ac, own-the-land, vacant, Lake Tulloch launch access). Listing agent Denise Stepps, Coldwell Banker Lake Tulloch. Offer written at $125,000; seller countered at $134,500; James countering back at $130,000 \u2014 Ashley's highest & best (per Sara 7/10). Docs in _Offers/Buy Side/Robinson. DEAD 7/12/2026 (per Sara): seller will not accept the 130000 counter (James's note 7/11) \u2014 Ashley at her ceiling. Pivot: James showed Ashley 695 Feather Dr, Copperopolis 7/12.",
+      "notes": "OFFER OUT / NEGOTIATING — James's buyer Ashley Robinson. 992 Iroquois Cir, Copperopolis (MLS 226026039, listed 3/5/26 at $135,000; 3bd/2ba manufactured on permanent foundation, 896 sqft, 0.08 ac, own-the-land, vacant, Lake Tulloch launch access). Listing agent Denise Stepps, Coldwell Banker Lake Tulloch. Offer written at $125,000; seller countered at $134,500; James countering back at $130,000 — Ashley's highest & best (per Sara 7/10). Docs in _Offers/Buy Side/Robinson. DEAD 7/12/2026 (per Sara): seller will not accept the 130000 counter (James's note 7/11) — Ashley at her ceiling. Pivot: James showed Ashley 695 Feather Dr, Copperopolis 7/12.",
       "alerts": [
-        "OFFER DEAD 7/12 \u2014 seller rejected 130000 highest & best; pivoted to 695 Feather Dr showing 7/12"
+        "OFFER DEAD 7/12 — seller rejected 130000 highest & best; pivoted to 695 Feather Dr showing 7/12"
       ],
       "archivedDate": "2026-07-13"
     },
@@ -909,27 +910,27 @@
         {
           "name": "Listing Agreement (Commercial & Residential Income)",
           "url": "https://legacycalifornia.com/docs/1111-dunbar/listing-agreement.pdf",
-          "note": "Pre-sale \u2014 signed at listing"
+          "note": "Pre-sale — signed at listing"
         },
         {
-          "name": "Modification of Terms \u2014 Listing Agreement #1",
+          "name": "Modification of Terms — Listing Agreement #1",
           "url": "https://legacycalifornia.com/docs/1111-dunbar/modification-of-terms-1.pdf",
-          "note": "Pre-sale \u2014 signed at listing"
+          "note": "Pre-sale — signed at listing"
         },
         {
           "name": "Trust Advisory",
           "url": "https://legacycalifornia.com/docs/1111-dunbar/trust-advisory.pdf",
-          "note": "Pre-sale \u2014 signed at listing"
+          "note": "Pre-sale — signed at listing"
         },
         {
           "name": "Exempt Seller Disclosure (ESD)",
           "url": "https://legacycalifornia.com/docs/1111-dunbar/exempt-seller-disclosure.pdf",
-          "note": "Pre-sale \u2014 signed at listing"
+          "note": "Pre-sale — signed at listing"
         },
         {
           "name": "Transfer Disclosure Statement (TDS)",
           "url": "https://legacycalifornia.com/docs/1111-dunbar/transfer-disclosure-statement.pdf",
-          "note": "Pre-sale \u2014 signed at listing"
+          "note": "Pre-sale — signed at listing"
         }
       ],
       "correspondence": [],
@@ -984,16 +985,16 @@
         "RPA": "executed",
         "sellerCounter1": "executed",
         "TOPA": "executed",
-        "EMD": "received \u2014 buyer's $12k deposit confirmed received by Placer (Sara 6/25)",
-        "sellerDisclosures": "complete \u2014 buyer-signed set received 7/6 (per Sara)",
+        "EMD": "received — buyer's $12k deposit confirmed received by Placer (Sara 6/25)",
+        "sellerDisclosures": "complete — buyer-signed set received 7/6 (per Sara)",
         "buyerSignedDisclosures": "received 7/6",
-        "MU_PA_NHD_FHDS": "signed via Authentisign 7/6 (Mixed Use Purchase Addendum + NHD sig pages + FHDS) \u2014 forwarded to Melissa/Neriah/SkySlope; still to be filed in Ex",
-        "tenantExtensionAddendum": "EXECUTED by ALL parties 7/7 (Generic Addendum 2 via Glide) \u2014 through-end-of-Aug tenant extension now in writing; filed in Ex",
-        "requestForRepair": "RR1 received 7/7 (Sara required proper RR form from Neriah, not addendum); summary sent to Jim & Yvonne 7/7; SELLER RESPONSE SIGNED (Jim 7/7, Yvonne 7/8) \u2014 Seller Response & Buyer Reply to RR #1 + CR1 sent to Neriah/Melissa 7/8 AM, awaiting BUYER reply",
+        "MU_PA_NHD_FHDS": "signed via Authentisign 7/6 (Mixed Use Purchase Addendum + NHD sig pages + FHDS) — forwarded to Melissa/Neriah/SkySlope; still to be filed in Ex",
+        "tenantExtensionAddendum": "EXECUTED by ALL parties 7/7 (Generic Addendum 2 via Glide) — through-end-of-Aug tenant extension now in writing; filed in Ex",
+        "requestForRepair": "RR1 received 7/7 (Sara required proper RR form from Neriah, not addendum); summary sent to Jim & Yvonne 7/7; SELLER RESPONSE SIGNED (Jim 7/7, Yvonne 7/8) — Seller Response & Buyer Reply to RR #1 + CR1 sent to Neriah/Melissa 7/8 AM, awaiting BUYER reply",
         "homeInspectionReport": "Dawson home inspection report + summary (Inner Vision) filed in Ex 7/8; DocuSign '433 E Hwy 4 - Home inspection' completed by all parties 7/8 (via Melissa)",
-        "homeInspection": "CONFIRMED 7/2 9AM \u2014 Norm Cucuzza/Inner Vision (Jim confirmed dog sitter 6/25)",
-        "roofInspection": "COMPLETED Mon 6/22/2026 (Paris Scott) \u2014 WRITTEN ROOF REPORT RECEIVED (per Sara 6/29)",
-        "ETA1": "EXECUTED 7/10 by all parties (Authentisign 7:43 AM; Jim signed before leaving for Idaho) \u2014 extends LOAN contingency to 7/23 and APPRAISAL to 7/16, COE unchanged 8/10; forwarded to Neriah/Melissa 7/10, FILED in Ex",
+        "homeInspection": "CONFIRMED 7/2 9AM — Norm Cucuzza/Inner Vision (Jim confirmed dog sitter 6/25)",
+        "roofInspection": "COMPLETED Mon 6/22/2026 (Paris Scott) — WRITTEN ROOF REPORT RECEIVED (per Sara 6/29)",
+        "ETA1": "EXECUTED 7/10 by all parties (Authentisign 7:43 AM; Jim signed before leaving for Idaho) — extends LOAN contingency to 7/23 and APPRAISAL to 7/16, COE unchanged 8/10; forwarded to Neriah/Melissa 7/10, FILED in Ex",
         "correctedFHDS": "Reissued and sent for signatures 7/13 per Sara (original 7/6 version had unchecked boxes per Melissa)"
       },
       "clientDocuments": [
@@ -1018,11 +1019,11 @@
           "url": "https://legacycalifornia.com/docs/433-hwy4/septic-well-monument-addendum.pdf"
         },
         {
-          "name": "Tenant Occupied Property Addendum \u2014 House",
+          "name": "Tenant Occupied Property Addendum — House",
           "url": "https://legacycalifornia.com/docs/433-hwy4/tenant-addendum-house.pdf"
         },
         {
-          "name": "Tenant Occupied Property Addendum \u2014 Yoga Studio",
+          "name": "Tenant Occupied Property Addendum — Yoga Studio",
           "url": "https://legacycalifornia.com/docs/433-hwy4/tenant-addendum-yoga-studio.pdf"
         },
         {
@@ -1046,19 +1047,19 @@
           "url": "https://legacycalifornia.com/docs/433-hwy4/well-production-report.pdf"
         },
         {
-          "name": "Natural Hazard Disclosure Report \u2014 Main Parcel",
+          "name": "Natural Hazard Disclosure Report — Main Parcel",
           "url": "https://legacycalifornia.com/docs/433-hwy4/nhd-report-main-parcel.pdf"
         },
         {
-          "name": "Natural Hazard Disclosure Report \u2014 Second Parcel",
+          "name": "Natural Hazard Disclosure Report — Second Parcel",
           "url": "https://legacycalifornia.com/docs/433-hwy4/nhd-report-second-parcel.pdf"
         },
         {
-          "name": "NHD Signature Page \u2014 Main Parcel",
+          "name": "NHD Signature Page — Main Parcel",
           "url": "https://legacycalifornia.com/docs/433-hwy4/nhd-signature-main-parcel.pdf"
         },
         {
-          "name": "NHD Signature Page \u2014 Second Parcel",
+          "name": "NHD Signature Page — Second Parcel",
           "url": "https://legacycalifornia.com/docs/433-hwy4/nhd-signature-second-parcel.pdf"
         },
         {
@@ -1067,14 +1068,14 @@
         }
       ],
       "correspondence": [],
-      "notes": "UNDER CONTRACT / ACCEPTED 6/19/2026. Sellers James R & Yvonne Heryford (Gold Electric). Buyer Elizabeth Tara Dawson (Neriah Davis, RE/MAX Gold). Seller Counter Offer No. 1 executed 6/19 at $1,300,000, 2.5% buyer-broker comp, loan contingency 25 days, COE 8/10/2026. Escrow opens Mon 6/22 with Ashley Cuslidge at Placer Title; Placer to order home warranty and NHD report upon opening. Sold on RPA + TOPA (House + Yoga/Good Karma Wellness). Key dates from acceptance: deposit $12k by 6/24; seller docs delivered 6/26; buyer inspection/appraisal/title/insurance contingencies 7/6; loan contingency 7/14; final walkthrough 8/5; COE 8/10. Sun 6/28: 11 AM property markers/boundary walk (satisfies counter item 4), then 12 PM buyer + her contractor access the home with buyer's agent Neriah present \u2014 Jim need not stay for the home-access portion. Buyer inspections: general home inspection 7/2 at 9 AM (requested) by Norm Cucuzza, Inner Vision Home Inspections \u2014 Jim H confirming with dog sitter, will verify by 6/24; roof inspection by Paris Scott (original roofer) \u2014 Neriah awaiting a date. SWPI well production & bacterial testing via Sierra Water/Rob Dunn. SELLER DELIVERABLES owed to Sara: well production test (GPM) + bacterial test from Rob Dunn (in process), update on the replaced well pump, and confirmation of sprinkler fixes \u2014 Jim will send when ready (per Sara 7/5). Per Addendum A, seller must complete all Section 1 items from Lawson Pest report (1/28/2026) up to $5,697. Seller to schedule (via Sara) a property boundary/corner walkthrough with buyer's agent and/or buyer (per counter offer item 4). Seller-facing timeline generated 6/20 (433_Hwy4_Seller_Timeline.html in __Pending offer folder).",
+      "notes": "UNDER CONTRACT / ACCEPTED 6/19/2026. Sellers James R & Yvonne Heryford (Gold Electric). Buyer Elizabeth Tara Dawson (Neriah Davis, RE/MAX Gold). Seller Counter Offer No. 1 executed 6/19 at $1,300,000, 2.5% buyer-broker comp, loan contingency 25 days, COE 8/10/2026. Escrow opens Mon 6/22 with Ashley Cuslidge at Placer Title; Placer to order home warranty and NHD report upon opening. Sold on RPA + TOPA (House + Yoga/Good Karma Wellness). Key dates from acceptance: deposit $12k by 6/24; seller docs delivered 6/26; buyer inspection/appraisal/title/insurance contingencies 7/6; loan contingency 7/14; final walkthrough 8/5; COE 8/10. Sun 6/28: 11 AM property markers/boundary walk (satisfies counter item 4), then 12 PM buyer + her contractor access the home with buyer's agent Neriah present — Jim need not stay for the home-access portion. Buyer inspections: general home inspection 7/2 at 9 AM (requested) by Norm Cucuzza, Inner Vision Home Inspections — Jim H confirming with dog sitter, will verify by 6/24; roof inspection by Paris Scott (original roofer) — Neriah awaiting a date. SWPI well production & bacterial testing via Sierra Water/Rob Dunn. SELLER DELIVERABLES owed to Sara: well production test (GPM) + bacterial test from Rob Dunn (in process), update on the replaced well pump, and confirmation of sprinkler fixes — Jim will send when ready (per Sara 7/5). Per Addendum A, seller must complete all Section 1 items from Lawson Pest report (1/28/2026) up to $5,697. Seller to schedule (via Sara) a property boundary/corner walkthrough with buyer's agent and/or buyer (per counter offer item 4). Seller-facing timeline generated 6/20 (433_Hwy4_Seller_Timeline.html in __Pending offer folder).",
       "alerts": [
-        "RR RESOLVED \u2705 \u2014 executed Seller Response & Buyer Reply to RR1 + CR1 received from Neriah 7/9, filed in Ex",
-        "ETA No. 1 EXECUTED 7/10 \u2705 \u2014 loan contingency now 7/23, appraisal 7/16, COE unchanged 8/10; filed in Ex",
-        "TENANT EXTENSION NOW IN WRITING \u2705 \u2014 Generic Addendum 2 executed by all parties 7/7 (Glide), filed in Ex",
-        "Buyer-signed disclosure set received 7/6; MU-PA + NHD sig pages + FHDS signed 7/6 (Authentisign) \u2014 still to FILE the sets in Ex (per Sara 7/13: docs are with Melissa TC awaiting buyer signatures on the corrected set -- not stalled on Sara's end)",
-        "COE 8/10/2026 \u2014 final walkthrough 8/5",
-        "LISTING EXTENDED to 8/18/2026 via MOD \u2014 covers through COE 8/10 \u2705"
+        "RR RESOLVED ✅ — executed Seller Response & Buyer Reply to RR1 + CR1 received from Neriah 7/9, filed in Ex",
+        "ETA No. 1 EXECUTED 7/10 ✅ — loan contingency now 7/23, appraisal 7/16, COE unchanged 8/10; filed in Ex",
+        "TENANT EXTENSION NOW IN WRITING ✅ — Generic Addendum 2 executed by all parties 7/7 (Glide), filed in Ex",
+        "Buyer-signed disclosure set received 7/6; MU-PA + NHD sig pages + FHDS signed 7/6 (Authentisign) — still to FILE the sets in Ex (per Sara 7/13: docs are with Melissa TC awaiting buyer signatures on the corrected set -- not stalled on Sara's end)",
+        "COE 8/10/2026 — final walkthrough 8/5",
+        "LISTING EXTENDED to 8/18/2026 via MOD — covers through COE 8/10 ✅"
       ]
     },
     {
@@ -1112,80 +1113,80 @@
         {
           "name": "Residential Listing Agreement",
           "url": "https://legacycalifornia.com/docs/467-skyline/residential-listing-agreement.pdf",
-          "note": "Pre-sale \u2014 signed at listing"
+          "note": "Pre-sale — signed at listing"
         },
         {
-          "name": "Modification of Terms \u2014 Listing Agreement #1",
+          "name": "Modification of Terms — Listing Agreement #1",
           "url": "https://legacycalifornia.com/docs/467-skyline/modification-of-terms-1.pdf",
-          "note": "Pre-sale \u2014 signed at listing"
+          "note": "Pre-sale — signed at listing"
         },
         {
           "name": "Transfer Disclosure Statement (TDS)",
           "url": "https://legacycalifornia.com/docs/467-skyline/transfer-disclosure-statement.pdf",
-          "note": "Pre-sale \u2014 signed at listing"
+          "note": "Pre-sale — signed at listing"
         },
         {
           "name": "Seller Property Questionnaire (SPQ)",
           "url": "https://legacycalifornia.com/docs/467-skyline/seller-property-questionnaire.pdf",
-          "note": "Pre-sale \u2014 signed at listing"
+          "note": "Pre-sale — signed at listing"
         },
         {
           "name": "Fire Hardening & Defensible Space Disclosure",
           "url": "https://legacycalifornia.com/docs/467-skyline/fire-hardening-disclosure.pdf",
-          "note": "Pre-sale \u2014 signed at listing"
+          "note": "Pre-sale — signed at listing"
         },
         {
           "name": "Square Footage & Lot Size Disclosure",
           "url": "https://legacycalifornia.com/docs/467-skyline/square-footage-lot-size.pdf",
-          "note": "Pre-sale \u2014 signed at listing"
+          "note": "Pre-sale — signed at listing"
         },
         {
           "name": "Solar Advisory & Questionnaire",
           "url": "https://legacycalifornia.com/docs/467-skyline/solar-advisory.pdf",
-          "note": "Pre-sale \u2014 signed at listing"
+          "note": "Pre-sale — signed at listing"
         },
         {
           "name": "Wooden Balconies & Stairs Addendum",
           "url": "https://legacycalifornia.com/docs/467-skyline/wooden-balconies-stairs.pdf",
-          "note": "Pre-sale \u2014 signed at listing"
+          "note": "Pre-sale — signed at listing"
         },
         {
           "name": "FIRPTA Affidavit (Non-foreign Status)",
           "url": "https://legacycalifornia.com/docs/467-skyline/firpta-affidavit.pdf",
-          "note": "Pre-sale \u2014 signed at listing"
+          "note": "Pre-sale — signed at listing"
         },
         {
           "name": "Statewide Buyer & Seller Advisory",
           "url": "https://legacycalifornia.com/docs/467-skyline/statewide-buyer-seller-advisory.pdf",
-          "note": "Pre-sale \u2014 signed at listing"
+          "note": "Pre-sale — signed at listing"
         },
         {
           "name": "Market Conditions Advisory",
           "url": "https://legacycalifornia.com/docs/467-skyline/market-conditions-advisory.pdf",
-          "note": "Pre-sale \u2014 signed at listing"
+          "note": "Pre-sale — signed at listing"
         },
         {
           "name": "Disclosure Information Advisory",
           "url": "https://legacycalifornia.com/docs/467-skyline/disclosure-information-advisory.pdf",
-          "note": "Pre-sale \u2014 signed at listing"
+          "note": "Pre-sale — signed at listing"
         },
         {
           "name": "Water Heater & Smoke Detector Compliance",
           "url": "https://legacycalifornia.com/docs/467-skyline/water-heater-smoke-detector.pdf",
-          "note": "Pre-sale \u2014 signed at listing"
+          "note": "Pre-sale — signed at listing"
         },
         {
           "name": "Water-Conserving Fixtures & CO Detector Notice",
           "url": "https://legacycalifornia.com/docs/467-skyline/water-fixtures-co-notice.pdf",
-          "note": "Pre-sale \u2014 signed at listing"
+          "note": "Pre-sale — signed at listing"
         }
       ],
       "correspondence": [],
-      "notes": "New listing. Flyer and prelim ready. Separate from the sold 467 Skyline transaction. Homes.com lead Sharon Hedges (7/3) \u2014 James reached out 7/4, no reply yet; following up. PRICE REDUCTION to $89,000 in progress (per Sara 7/6). HOT LEAD Kerstin Breidenthal (Zillow inquiry + 3 Ylopo views 7/8; (408) 612-5906, kerstin.ahlgren@icloud.com) \u2014 Sara SPOKE with her 7/8 and texted her the disclosure link. UPDATE 7/9: Kerstin is TRAVELING for ~2 weeks and wants a showing when she's back (~7/23) \u2014 follow-up reminder scheduled for 7/23. A 'Modification of Terms, Listing Agreement #1' finished signing 7/7 (Authentisign) \u2014 likely this price-reduction MOD (Sara to confirm which listing it belongs to).",
+      "notes": "New listing. Flyer and prelim ready. Separate from the sold 467 Skyline transaction. Homes.com lead Sharon Hedges (7/3) — James reached out 7/4, no reply yet; following up. PRICE REDUCTION to $89,000 in progress (per Sara 7/6). HOT LEAD Kerstin Breidenthal (Zillow inquiry + 3 Ylopo views 7/8; (408) 612-5906, kerstin.ahlgren@icloud.com) — Sara SPOKE with her 7/8 and texted her the disclosure link. UPDATE 7/9: Kerstin is TRAVELING for ~2 weeks and wants a showing when she's back (~7/23) — follow-up reminder scheduled for 7/23. A 'Modification of Terms, Listing Agreement #1' finished signing 7/7 (Authentisign) — likely this price-reduction MOD (Sara to confirm which listing it belongs to).",
       "alerts": [
-        "Price reduction to 89000 COMPLETE \u2705 \u2014 MOT confirmed & MLS price change finished 7/10",
-        "Kerstin Breidenthal traveling ~2 weeks \u2014 wants a SHOWING when back (~7/23); reminder set for 7/23; disclosure link texted 7/8",
-        "New buyer interest: Ben Furr (BRBC signed 7/12, ph 336-254-1433) \u2014 met with Sara 7/12"
+        "Price reduction to 89000 COMPLETE ✅ — MOT confirmed & MLS price change finished 7/10",
+        "Kerstin Breidenthal traveling ~2 weeks — wants a SHOWING when back (~7/23); reminder set for 7/23; disclosure link texted 7/8",
+        "New buyer interest: Ben Furr (BRBC signed 7/12, ph 336-254-1433) — met with Sara 7/12"
       ]
     },
     {
@@ -1225,28 +1226,28 @@
         {
           "name": "Fire Hardening & Defensible Space Disclosure",
           "url": "https://legacycalifornia.com/docs/9568-sheep-ranch/fire-hardening-disclosure.pdf",
-          "note": "Pre-sale \u2014 signed at listing"
+          "note": "Pre-sale — signed at listing"
         },
         {
           "name": "Square Footage & Lot Size Disclosure",
           "url": "https://legacycalifornia.com/docs/9568-sheep-ranch/square-footage-lot-size.pdf",
-          "note": "Pre-sale \u2014 signed at listing"
+          "note": "Pre-sale — signed at listing"
         },
         {
           "name": "Water-Conserving Fixtures & CO Detector Notice",
           "url": "https://legacycalifornia.com/docs/9568-sheep-ranch/water-fixtures-co-notice.pdf",
-          "note": "Pre-sale \u2014 signed at listing"
+          "note": "Pre-sale — signed at listing"
         },
         {
           "name": "Water Heater & Smoke Detector Compliance",
           "url": "https://legacycalifornia.com/docs/9568-sheep-ranch/water-heater-smoke-detector.pdf",
-          "note": "Pre-sale \u2014 signed at listing"
+          "note": "Pre-sale — signed at listing"
         }
       ],
       "correspondence": [],
-      "notes": "Listing agreement executed. Prelim and disclosures received. Showing was requested for Wed 6/24 1:00 PM by agent Loretta Kilpatrick \u2014 CANCELED by the agent (per Sara 6/25). Escrow P-698773 cancellation: buyer SIGNED 7/7; now awaiting SELLER signature so Placer can close it out.",
+      "notes": "Listing agreement executed. Prelim and disclosures received. Showing was requested for Wed 6/24 1:00 PM by agent Loretta Kilpatrick — CANCELED by the agent (per Sara 6/25). Escrow P-698773 cancellation: buyer SIGNED 7/7; now awaiting SELLER signature so Placer can close it out.",
       "alerts": [
-        "Escrow P-698773 cancellation \u2014 buyer signed 7/7; SELLER (Sean) signature still pending \u2014 said he'd sign, chased 7/10"
+        "Escrow P-698773 cancellation — buyer signed 7/7; SELLER (Sean) signature still pending — said he'd sign, chased 7/10"
       ]
     },
     {
@@ -1313,11 +1314,11 @@
         "transactionDocs": "received"
       },
       "correspondence": [],
-      "notes": "LITIGATION \u2014 Mediation filed April 1, 2026. Commission dispute case active. All evidence and communications documented. Attorney Mike Fluetsch reviewed materials 6/21/2026 and found a VIABLE commission claim. Sara is RETAINING Mike for the case (confirmed 6/22/2026). ON HOLD (per Sara 7/3): Sara asked Mike to POSTPONE until she has the funds for the $10k retainer (funding after the next escrow closes). INSURANCE: Coterie claim BM-PL-26-00016 (claimant Hovey Wineries) transferred to adjuster Emmanuel Isaac 7/8; Sara replied 7/9 \u2014 mediation months ago was unsuccessful (Hovey offered to drop their 93k claim if Sara dropped hers). Awaiting adjuster's response.",
+      "notes": "LITIGATION — Mediation filed April 1, 2026. Commission dispute case active. All evidence and communications documented. Attorney Mike Fluetsch reviewed materials 6/21/2026 and found a VIABLE commission claim. Sara is RETAINING Mike for the case (confirmed 6/22/2026). ON HOLD (per Sara 7/3): Sara asked Mike to POSTPONE until she has the funds for the $10k retainer (funding after the next escrow closes). INSURANCE: Coterie claim BM-PL-26-00016 (claimant Hovey Wineries) transferred to adjuster Emmanuel Isaac 7/8; Sara replied 7/9 — mediation months ago was unsuccessful (Hovey offered to drop their 93k claim if Sara dropped hers). Awaiting adjuster's response.",
       "alerts": [
-        "ACTIVE MEDIATION \u2014 Filed April 1, 2026. Commission case in progress.",
-        "ON HOLD \u2014 Sara asked Mike Fluetsch to postpone until retainer funds available (next closing); then send full docs for deeper review",
-        "Coterie adjuster Emmanuel Isaac active on claim BM-PL-26-00016 \u2014 Sara replied 7/9, awaiting his response; loop in Mike before agreeing to anything"
+        "ACTIVE MEDIATION — Filed April 1, 2026. Commission case in progress.",
+        "ON HOLD — Sara asked Mike Fluetsch to postpone until retainer funds available (next closing); then send full docs for deeper review",
+        "Coterie adjuster Emmanuel Isaac active on claim BM-PL-26-00016 — Sara replied 7/9, awaiting his response; loop in Mike before agreeing to anything"
       ]
     },
     {
@@ -1336,10 +1337,10 @@
         "seller": "Lilia Rathburn"
       },
       "docs": {
-        "listingAgreement": "SENT to Lilia 2026-07-07 \u2014 awaiting her signature"
+        "listingAgreement": "SENT to Lilia 2026-07-07 — awaiting her signature"
       },
       "correspondence": [],
-      "notes": "Preparing to list \u2014 Lilia Rathburn's home (FUB person #1012). Listing appointment 7/6 went well; LA prepared at 999000 and sent to Lilia 7/7. Chased 7/10. UPDATE 7/13: in-person signing meeting scheduled today to get Lilia's signature.",
+      "notes": "Preparing to list — Lilia Rathburn's home (FUB person #1012). Listing appointment 7/6 went well; LA prepared at 999000 and sent to Lilia 7/7. Chased 7/10. UPDATE 7/13: in-person signing meeting scheduled today to get Lilia's signature.",
       "alerts": [
         "LA sent to Lilia 7/7 at 999000 -- chased 7/10 -- in-person signing meeting scheduled today 7/13"
       ]
@@ -1363,7 +1364,7 @@
         "listingAgreement": "EXECUTED 7/12 (Authentisign 'Residential Listing Agreement - Exclusive'); filed in _Listings/1143 Echo/Ex/"
       },
       "correspondence": [],
-      "notes": "Preparing to list \u2014 Adrianna & Guy Castle's home (they are the 7230 Latigo buyers). Listing appointment Sat 7/11 10:00 AM (on CRM calendar). UPDATE 7/12: listing agreement signed via Authentisign; now an active listing. Sellers Adrianna & Guy Castle are also the 7230 Latigo buyers.",
+      "notes": "Preparing to list — Adrianna & Guy Castle's home (they are the 7230 Latigo buyers). Listing appointment Sat 7/11 10:00 AM (on CRM calendar). UPDATE 7/12: listing agreement signed via Authentisign; now an active listing. Sellers Adrianna & Guy Castle are also the 7230 Latigo buyers.",
       "alerts": [
         "Listing agreement executed 7/12 -- now an active listing; list price TBD (CMA on file, not yet confirmed in deals.json)"
       ]
@@ -1472,7 +1473,7 @@
       "closingDate": null,
       "contacts": {
         "coAgent": null,
-        "escrow": "Ashley Cuslidge (Placer Title) \u2014 Order P-706390",
+        "escrow": "Ashley Cuslidge (Placer Title) — Order P-706390",
         "lender": null,
         "title": "Placer Title"
       },
@@ -1510,7 +1511,7 @@
       "listingExpiration": "2026-12-18",
       "contacts": {
         "coAgent": null,
-        "escrow": "Ashley Cuslidge (Placer Title) \u2014 escrow PRE-OPENED",
+        "escrow": "Ashley Cuslidge (Placer Title) — escrow PRE-OPENED",
         "lender": null,
         "title": "Placer Title"
       },
@@ -1519,45 +1520,45 @@
         {
           "name": "Residential Listing Agreement",
           "url": "https://legacycalifornia.com/docs/preparing-324-augusta/residential-listing-agreement.pdf",
-          "note": "Pre-sale \u2014 signed at listing"
+          "note": "Pre-sale — signed at listing"
         },
         {
           "name": "Statewide Buyer & Seller Advisory",
           "url": "https://legacycalifornia.com/docs/preparing-324-augusta/statewide-buyer-seller-advisory.pdf",
-          "note": "Pre-sale \u2014 signed at listing"
+          "note": "Pre-sale — signed at listing"
         },
         {
           "name": "Market Conditions Advisory",
           "url": "https://legacycalifornia.com/docs/preparing-324-augusta/market-conditions-advisory.pdf",
-          "note": "Pre-sale \u2014 signed at listing"
+          "note": "Pre-sale — signed at listing"
         },
         {
           "name": "Disclosure Information Advisory",
           "url": "https://legacycalifornia.com/docs/preparing-324-augusta/disclosure-information-advisory.pdf",
-          "note": "Pre-sale \u2014 signed at listing"
+          "note": "Pre-sale — signed at listing"
         },
         {
           "name": "Calaveras Regional Advisory",
           "url": "https://legacycalifornia.com/docs/preparing-324-augusta/calaveras-regional-advisory.pdf",
-          "note": "Pre-sale \u2014 signed at listing"
+          "note": "Pre-sale — signed at listing"
         },
         {
           "name": "Water Heater & Smoke Detector Compliance",
           "url": "https://legacycalifornia.com/docs/preparing-324-augusta/water-heater-smoke-detector.pdf",
-          "note": "Pre-sale \u2014 signed at listing"
+          "note": "Pre-sale — signed at listing"
         },
         {
           "name": "Water-Conserving Fixtures & CO Detector Notice",
           "url": "https://legacycalifornia.com/docs/preparing-324-augusta/water-fixtures-co-notice.pdf",
-          "note": "Pre-sale \u2014 signed at listing"
+          "note": "Pre-sale — signed at listing"
         }
       ],
       "correspondence": [],
-      "notes": "ACTIVE LISTING (live 6/25/2026; listing expires 12/18/2026). Client Brian Fitzgerald. Ryan (photographer) shot photos + drone 6/22. Escrow PRE-OPENED with Ashley Cuslidge at Placer Title (Order P-708410). Preliminary report received 6/29 (P-708410). ListTrac (6/25\u20136/28): 306 views + 1 inquiry \u2014 Sara chasing the inquiry (6/29).",
+      "notes": "ACTIVE LISTING (live 6/25/2026; listing expires 12/18/2026). Client Brian Fitzgerald. Ryan (photographer) shot photos + drone 6/22. Escrow PRE-OPENED with Ashley Cuslidge at Placer Title (Order P-708410). Preliminary report received 6/29 (P-708410). ListTrac (6/25–6/28): 306 views + 1 inquiry — Sara chasing the inquiry (6/29).",
       "alerts": [
-        "Active listing \u2014 expires 12/18/2026",
+        "Active listing — expires 12/18/2026",
         "Escrow pre-opened with Ashley at Placer Title; prelim received 6/29 (P-708410)",
-        "1 inquiry from ListTrac (6/28) \u2014 Sara following up"
+        "1 inquiry from ListTrac (6/28) — Sara following up"
       ]
     },
     {
@@ -1581,9 +1582,9 @@
       },
       "docs": {},
       "correspondence": [],
-      "notes": "New listing \u2014 met with seller Vicky Teller. Target price ~$275,000. CMA SENT 6/23 via email to Quiterian@sbcglobal.net. Sara followed up with Vicky 6/29. UPDATE 7/5: Vicky texted \u2014 ALMOST READY to list, will let Sara know. UPDATE 7/12 (per Sara): Vicky MAY SELL TO HER DAUGHTER instead \u2014 will update when she knows.",
+      "notes": "New listing — met with seller Vicky Teller. Target price ~$275,000. CMA SENT 6/23 via email to Quiterian@sbcglobal.net. Sara followed up with Vicky 6/29. UPDATE 7/5: Vicky texted — ALMOST READY to list, will let Sara know. UPDATE 7/12 (per Sara): Vicky MAY SELL TO HER DAUGHTER instead — will update when she knows.",
       "alerts": [
-        "7/12: Vicky may sell to her daughter \u2014 listing on hold pending her decision"
+        "7/12: Vicky may sell to her daughter — listing on hold pending her decision"
       ]
     },
     {
@@ -1631,7 +1632,7 @@
         "modificationOfTerms": "executed"
       },
       "correspondence": [],
-      "notes": "Vacant land listing (Sultana commercial district), Angels Camp. Seller-signed Vacant Land Listing Agreement (12/24), AAA, Additional Signature Addendum 2, MOT 2026 on file (_Listings/Land/635 S Main St). Flyer + marketing assets (plat maps, OnX, commercial-zone maps) ready. A past buyer VLPA sits in Duds/635 Main St \u2014 dead offer, not active.",
+      "notes": "Vacant land listing (Sultana commercial district), Angels Camp. Seller-signed Vacant Land Listing Agreement (12/24), AAA, Additional Signature Addendum 2, MOT 2026 on file (_Listings/Land/635 S Main St). Flyer + marketing assets (plat maps, OnX, commercial-zone maps) ready. A past buyer VLPA sits in Duds/635 Main St — dead offer, not active.",
       "alerts": []
     },
     {
@@ -1717,12 +1718,12 @@
         "BRBC": "executed 6/24/2026"
       },
       "correspondence": [],
-      "notes": "INACTIVE (per Sara 7/3/2026) \u2014 Roger never responded after the 6/25 showings despite re-engagement attempts; Sara removed him from active follow-up. BRBC signed 6/24/2026 remains on file if he resurfaces.",
+      "notes": "INACTIVE (per Sara 7/3/2026) — Roger never responded after the 6/25 showings despite re-engagement attempts; Sara removed him from active follow-up. BRBC signed 6/24/2026 remains on file if he resurfaces.",
       "alerts": []
     },
     {
       "id": "lead-kristin-esperson",
-      "address": "Kristin Esperson (lead \u2014 buyer + potential listing)",
+      "address": "Kristin Esperson (lead — buyer + potential listing)",
       "city": "CA",
       "stage": "buyer-prospect",
       "type": "residential",
@@ -1734,11 +1735,11 @@
       },
       "docs": {},
       "correspondence": [],
-      "notes": "FUB Realtor.com lead (received 6/29/2026). BUYER SIDE DEAD (7/10): lender Kim Hesser says Kristin has too many missed mortgage payments and she cannot lend to her \u2014 2936 E Hwy 4 purchase off. LISTING side STILL LIVE: 512 Gardiner Way, Rio Vista, CA 94571 is in ACTIVE FORECLOSURE \u2014 Sara still trying for the listing; Kristin says she already has a BUYER, so likely a REDUCED-COMMISSION 'handle the paperwork' listing. CMA sent earlier. NOTE: 2936 E Highway 4 is a DIFFERENT property from Sara's 433 E Highway 4 listing.",
+      "notes": "FUB Realtor.com lead (received 6/29/2026). BUYER SIDE DEAD (7/10): lender Kim Hesser says Kristin has too many missed mortgage payments and she cannot lend to her — 2936 E Hwy 4 purchase off. LISTING side STILL LIVE: 512 Gardiner Way, Rio Vista, CA 94571 is in ACTIVE FORECLOSURE — Sara still trying for the listing; Kristin says she already has a BUYER, so likely a REDUCED-COMMISSION 'handle the paperwork' listing. CMA sent earlier. NOTE: 2936 E Highway 4 is a DIFFERENT property from Sara's 433 E Highway 4 listing.",
       "alerts": [
-        "BUYER SIDE DEAD (7/10) \u2014 Kim Hesser: too many missed mortgage payments, cannot lend",
-        "512 Gardiner Way in ACTIVE FORECLOSURE \u2014 pursue the reduced-commission listing quickly (Kristin has her own buyer)",
-        "7/12: Kristin meeting her buyer Monday 7/13 \u2014 will advise after"
+        "BUYER SIDE DEAD (7/10) — Kim Hesser: too many missed mortgage payments, cannot lend",
+        "512 Gardiner Way in ACTIVE FORECLOSURE — pursue the reduced-commission listing quickly (Kristin has her own buyer)",
+        "7/12: Kristin meeting her buyer Monday 7/13 — will advise after"
       ]
     },
     {
@@ -1758,7 +1759,7 @@
       "correspondence": [],
       "notes": "New buyer client (added 7/12/2026 per Sara). BRBC signed 7/12 via Authentisign. Met with Sara Sun 7/12 11:30 AM re: 467 Skyline Dr (Sara's listing, $89,000). Phone 336-254-1433. File the signed BRBC from Authentisign.",
       "alerts": [
-        "New buyer \u2014 BRBC signed 7/12; interested in 467 Skyline; follow up after the 7/12 meeting"
+        "New buyer — BRBC signed 7/12; interested in 467 Skyline; follow up after the 7/12 meeting"
       ]
     },
     {
