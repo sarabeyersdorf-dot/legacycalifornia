@@ -3114,6 +3114,7 @@ function selectLead(el) {
   }
   function load() {
     fetch('/api/crm/agent-updates', { credentials: 'include' }).then(function (r) { return r.json(); }).then(function (j) {
+      if (j && j.success === false) { var l = root.querySelector('[data-upd-list]'); if (l) l.innerHTML = '<div class="cur-empty">Could not load notes.</div>'; return; }
       state.data = j;
       document.querySelectorAll('[data-roster-updates]').forEach(function (e) { e.textContent = String((j.updates || []).filter(function (u) { return !u.read_by_briefing; }).length); });
       render();
@@ -3141,10 +3142,12 @@ function selectLead(el) {
     var btn = root.querySelector('[data-upd-save]');
     btn.disabled = true;
     fetch('/api/crm/agent-updates', { method: 'POST', credentials: 'include', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ content: content, deal: (dealIn.value || '').trim() }) })
-      .then(function (r) { return r.json(); }).then(function () {
+      .then(function (r) { return r.json(); }).then(function (j) {
+        if (j && j.success === false) { if (window.Legacy && window.Legacy.toast) window.Legacy.toast(j.error || 'Could not save — try again.', false); return; }
         ta.value = ''; dealIn.value = '';
         load();
-      }).catch(function () {}).finally(function () { btn.disabled = false; });
+      }).catch(function () { if (window.Legacy && window.Legacy.toast) window.Legacy.toast('Network error — try again.', false); })
+      .finally(function () { btn.disabled = false; });
   }
   root.addEventListener('click', function (e) { if (e.target.closest('[data-upd-save]')) save(); });
   root.addEventListener('keydown', function (e) {
