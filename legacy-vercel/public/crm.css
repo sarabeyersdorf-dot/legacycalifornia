@@ -1067,11 +1067,11 @@
 .task-list li:last-child { border-bottom: none; }
 .tk-box {
   display: block; width: 16px; height: 16px;
-  border: 1.5px solid var(--ink-mute);
   cursor: pointer;
-  transition: all .15s;
+  accent-color: var(--brass);
 }
-.tk-box:hover { border-color: var(--brass); background: var(--linen); }
+.task-list li.done .tk-body { text-decoration: line-through; opacity: .55; }
+.task-list li.done .tk-time { opacity: .4; }
 .tk-body {
   font-size: 13.5px; color: var(--ink-soft);
 }

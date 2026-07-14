@@ -1027,6 +1027,13 @@
     if (e.target.closest('[data-report-export]')) { e.preventDefault(); exportReportsCsv(); }
   });
 
+  // The day list is recomputed fresh from live signals on every load (drafts
+  // awaiting approval, dark leads, today's tours, new leads) — there's no
+  // stable per-item id to persist a "done" state against server-side. So
+  // checking one off just crosses it out for the current page session: a
+  // quick "I see this, ignore it for now" rather than a saved task. If the
+  // underlying signal is still true next time the page loads, it'll show up
+  // again — that's intentional, it mirrors reality.
   function paintDayList(items, totalMin) {
     const ul = document.querySelector('[data-day-list]');
     if (!ul) return;
@@ -1034,18 +1041,30 @@
       ul.innerHTML = `<li style="opacity:.55;font-style:italic;padding:14px 0;">Quiet day list. No drafts, no radio silence, no new leads in the last 24 hours.</li>`;
     } else {
       ul.innerHTML = items.map((t) => `
-        <li><span class="tk-box"></span><span class="tk-body"><strong>${escapeHtml(t.title)}</strong>${t.sub ? ' · ' + escapeHtml(t.sub) : ''}</span><span class="tk-time">${escapeHtml(t.time || '')}</span></li>`).join('');
+        <li data-tk-min="${parseInt(t.time) || 0}"><input type="checkbox" class="tk-box" data-tk-check title="Cross off for today"><span class="tk-body"><strong>${escapeHtml(t.title)}</strong>${t.sub ? ' · ' + escapeHtml(t.sub) : ''}</span><span class="tk-time">${escapeHtml(t.time || '')}</span></li>`).join('');
     }
-    const foot = document.querySelector('[data-day-total]');
-    if (foot) {
-      if (!items.length) { foot.innerHTML = `<strong>0 min</strong> · inbox is clear`; }
-      else {
-        const done = new Date(Date.now() + totalMin * 60000);
-        const hh = done.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
-        foot.innerHTML = `<strong>${totalMin} min</strong> · if you start now, done by ${hh}`;
-      }
-    }
+    renderDayTotal();
   }
+
+  function renderDayTotal() {
+    const foot = document.querySelector('[data-day-total]');
+    const ul = document.querySelector('[data-day-list]');
+    if (!foot) return;
+    const rows = ul ? Array.from(ul.querySelectorAll('li[data-tk-min]')) : [];
+    if (!rows.length) { foot.innerHTML = `<strong>0 min</strong> · inbox is clear`; return; }
+    const remaining = rows.filter((li) => !li.classList.contains('done'))
+      .reduce((s, li) => s + (parseInt(li.getAttribute('data-tk-min')) || 0), 0);
+    if (!remaining) { foot.innerHTML = `<strong>All crossed off</strong> · nice work`; return; }
+    const done = new Date(Date.now() + remaining * 60000);
+    const hh = done.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+    foot.innerHTML = `<strong>${remaining} min</strong> · if you start now, done by ${hh}`;
+  }
+  document.addEventListener('change', (e) => {
+    const box = e.target.closest('[data-tk-check]');
+    if (!box) return;
+    const li = box.closest('li');
+    if (li) { li.classList.toggle('done', box.checked); renderDayTotal(); }
+  });
 
   function paintDayStats(y) {
     const grid = document.querySelector('[data-day-stats]');
