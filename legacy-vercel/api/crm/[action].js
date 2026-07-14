@@ -15,6 +15,7 @@
 //   GET   /api/crm/calendar       → week of tours/appointments for the Calendar tab
 //   GET   /api/crm/agent-updates  → shared "notes to Claude" log (Sara/James free-text updates)
 //   POST  /api/crm/agent-updates  → log a new update
+//   POST  /api/crm/discard-draft  → delete a pending AI-suggested reply Sara doesn't want
 //
 // Counts as ONE serverless function on Vercel.
 
@@ -50,6 +51,7 @@ import leadHygiene       from '../_lib/handlers/crm-lead-hygiene.js';
 import timeline          from '../_lib/handlers/crm-timeline.js';
 import roster            from '../_lib/handlers/crm-roster.js';
 import agentUpdates      from '../_lib/handlers/crm-agent-updates.js';
+import discardDraft      from '../_lib/handlers/crm-discard-draft.js';
 
 const TABLE = {
   'lead-hygiene':    leadHygiene,
@@ -83,7 +85,8 @@ const TABLE = {
   'deal-client':       dealClient,
   'deal-visibility':   dealVisibility,
   'deal-notes':        dealNotes,
-  'agent-updates':     agentUpdates
+  'agent-updates':     agentUpdates,
+  'discard-draft':     discardDraft
 };
 
 export default async function handler(req, res) {

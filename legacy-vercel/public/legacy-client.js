@@ -2232,6 +2232,7 @@
     const pendingDraft = messages.find((m) => m.status === 'pending_approval' && m.ai_generated);
     const otherMessages = messages.filter((m) => m !== pendingDraft).sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
 
+    const draftChannelLabel = pendingDraft && (pendingDraft.channel === 'sms' ? 'SMS' : pendingDraft.channel === 'portal' ? 'Portal' : 'Email');
     const draftHtml = pendingDraft ? `
       <div class="ai-draft" data-message-id="${escHtml(pendingDraft.id)}">
         <div class="ai-draft-head">
@@ -2243,15 +2244,16 @@
             <div class="avatar avatar-sm"><img src="${escHtml(leadAgent.headshot)}" alt="${escHtml(leadAgent.first)}"></div>
             <div>
               <div class="ld">From <strong>you</strong> · to <strong>${escHtml(fullName(lead))}</strong></div>
-              <div class="sub">${pendingDraft.channel === 'sms' ? 'SMS' : 'Email'} · Will send only after you approve</div>
+              <div class="sub">${draftChannelLabel} · Will send only after you approve</div>
             </div>
           </div>
           ${pendingDraft.subject ? `<div class="ai-subject">${escHtml(pendingDraft.subject)}</div>` : ''}
           <p class="ai-msg" style="white-space:pre-wrap;" data-draft-body>${escHtml(pendingDraft.body || '')}</p>
         </div>
         <div class="ai-foot">
-          <div class="ai-foot-l"><span><strong>Channel:</strong> ${pendingDraft.channel === 'sms' ? 'SMS' : 'Email'}</span></div>
+          <div class="ai-foot-l"><span><strong>Channel:</strong> ${draftChannelLabel}</span></div>
           <div class="ai-foot-r">
+            <button class="btn btn-ghost btn-sm" data-detail-action="discard" title="Delete this suggestion, write your own instead">Discard</button>
             <button class="btn btn-ghost btn-sm" data-detail-action="edit">Edit</button>
             <button class="btn btn-brass btn-sm" data-detail-action="approve">Send as ${escHtml(leadAgent.first)} →</button>
           </div>
@@ -2429,6 +2431,7 @@
         <div class="composer-foot">
           <div class="composer-tools"><span data-composer-status style="font-size:11px;opacity:.7;font-family:var(--mono);letter-spacing:.12em;text-transform:uppercase;"></span></div>
           <div style="display: flex; gap: 6px;">
+            <button class="btn btn-ghost btn-sm" data-detail-action="suggest-reply" title="Let AI draft a reply based on this conversation">✦ Suggest a reply</button>
             <button class="btn btn-ink btn-sm" data-detail-action="send">Send</button>
           </div>
         </div>
@@ -2868,9 +2871,34 @@
   function wireDraftActions(card, message, lead) {
     const editBtn    = card.querySelector('[data-detail-action="edit"]');
     const approveBtn = card.querySelector('[data-detail-action="approve"]');
+    const discardBtn = card.querySelector('[data-detail-action="discard"]');
     const bodyEl     = card.querySelector('[data-draft-body]');
     const resultEl   = card.querySelector('[data-detail-result]');
     let editedTa = null;
+
+    if (discardBtn) discardBtn.addEventListener('click', async () => {
+      if (!confirm('Discard this suggested reply?')) return;
+      discardBtn.disabled = true;
+      if (editBtn) editBtn.disabled = true;
+      if (approveBtn) approveBtn.disabled = true;
+      discardBtn.textContent = 'Discarding…';
+      resultEl.textContent = '';
+      const r = await window.Legacy.api('/api/crm/discard-draft', {
+        body: { message_id: message.id }
+      });
+      if (r.ok) {
+        card.style.opacity = '0.55';
+        card.style.pointerEvents = 'none';
+        setTimeout(() => loadLead(lead.id), 300);
+      } else {
+        resultEl.style.color = '#9B2C2C';
+        resultEl.textContent = (r.json && r.json.error) || 'Could not discard.';
+        discardBtn.disabled = false;
+        if (editBtn) editBtn.disabled = false;
+        if (approveBtn) approveBtn.disabled = false;
+        discardBtn.textContent = 'Discard';
+      }
+    });
 
     if (editBtn) editBtn.addEventListener('click', () => {
       if (bodyEl.querySelector('textarea')) return;
@@ -3028,6 +3056,7 @@
     const bodyEl    = composer.querySelector('[data-composer-body]');
     const statusEl  = composer.querySelector('[data-composer-status]');
     const sendBtn   = composer.querySelector('[data-detail-action="send"]');
+    const suggestBtn = composer.querySelector('[data-detail-action="suggest-reply"]');
     const tabs      = Array.from(composer.querySelectorAll('[data-composer-tab]'));
 
     let channel = 'email';
@@ -3044,6 +3073,7 @@
       sendBtn.disabled = false;
       sendBtn.title = '';
       sendBtn.textContent = isNote ? 'Save note' : 'Send';
+      if (suggestBtn) suggestBtn.style.display = isNote ? 'none' : '';
       if (isNote) {
         bodyEl.placeholder = `Note about ${fullName(lead)}… (start with "task:" to also create a task)`;
         statusEl.innerHTML = 'Agents only. <label style="cursor:pointer;"><input type="checkbox" data-note-internal style="vertical-align:-2px;"> Mark internal (extra-sensitive)</label>';
@@ -3113,6 +3143,34 @@
         statusEl.textContent = (r.json && r.json.error) || (isNote ? 'Save failed.' : 'Send failed.');
         sendBtn.textContent = isNote ? 'Save note' : 'Send';
         sendBtn.disabled = false;
+      }
+    });
+
+    if (suggestBtn) suggestBtn.addEventListener('click', async () => {
+      const isNote = channel === 'note' || channel === 'internal';
+      if (isNote) return; // guarded by hidden button too, but belt-and-suspenders
+      suggestBtn.disabled = true;
+      sendBtn.disabled = true;
+      const prevLabel = suggestBtn.textContent;
+      suggestBtn.textContent = 'Thinking…';
+      statusEl.style.color = '';
+      statusEl.textContent = 'Drafting a suggested reply…';
+
+      const r = await window.Legacy.api('/api/ai/draft-reply', {
+        body: { lead_id: lead.id, channel }
+      });
+
+      if (r.ok && r.json && r.json.draft) {
+        statusEl.style.color = '#2E5C3D';
+        statusEl.textContent = 'Draft ready above ↑';
+        suggestBtn.textContent = prevLabel;
+        setTimeout(() => loadLead(lead.id), 400);
+      } else {
+        statusEl.style.color = '#9B2C2C';
+        statusEl.textContent = (r.json && r.json.error) || 'Could not draft a reply.';
+        suggestBtn.disabled = false;
+        sendBtn.disabled = false;
+        suggestBtn.textContent = prevLabel;
       }
     });
   }

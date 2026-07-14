@@ -89,7 +89,13 @@ export default async function handler(req, res) {
 
     let providerResult, sentPatch, usedChannel = msg.channel;
     try {
-      if (msg.channel === 'sms') {
+      if (msg.channel === 'portal') {
+        // Portal messages have no external provider — the row IS the
+        // delivery. The client's page polls the thread and shows it within
+        // seconds (same as a manual portal send via /api/crm/message).
+        providerResult = { via: 'portal' };
+        sentPatch = { status: 'sent' };
+      } else if (msg.channel === 'sms') {
         try {
           if (!twilioConfigured()) throw new Error('Twilio not configured');
           if (!lead.phone)         throw new Error('lead has no phone number');
@@ -128,7 +134,7 @@ export default async function handler(req, res) {
       await supa.from('lead_events').insert({
         lead_id:    lead.id,
         event_type: 'message_sent',
-        source:     usedChannel === 'sms' ? 'twilio' : 'mailerlite',
+        source:     usedChannel === 'sms' ? 'twilio' : usedChannel === 'portal' ? 'portal' : 'mailerlite',
         event_data: { message_id, channel: usedChannel, approved_by: patch.approved_by, fell_back_from: providerResult.fell_back_from || null }
       });
     }

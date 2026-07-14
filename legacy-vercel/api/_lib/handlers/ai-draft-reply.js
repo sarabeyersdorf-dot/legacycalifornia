@@ -5,7 +5,7 @@
 //
 // Usage:
 //   POST /api/ai/draft-reply
-//   body: { lead_id, channel?: 'sms'|'email' (defaults 'sms'), instruction?: 'optional human nudge' }
+//   body: { lead_id, channel?: 'sms'|'email'|'portal' (defaults 'sms'), instruction?: 'optional human nudge' }
 //
 // Returns the inserted draft row.
 
@@ -47,7 +47,7 @@ export default async function handler(req, res) {
   try {
     const { lead_id, channel = 'sms', instruction = '' } = await readJson(req);
     if (!lead_id) return fail(res, 400, 'lead_id required');
-    if (!['sms','email'].includes(channel)) return fail(res, 400, 'invalid channel');
+    if (!['sms','email','portal'].includes(channel)) return fail(res, 400, 'invalid channel');
 
     const supa = adminClient();
 
@@ -64,7 +64,10 @@ export default async function handler(req, res) {
     const { data: tours = [] } = await supa
       .from('tours').select('*').eq('lead_id', lead_id).order('scheduled_at', { ascending: true });
 
-    const userPrompt = `Draft a ${channel === 'sms' ? 'short SMS (<160 chars)' : 'short email (2-4 short paragraphs)'} reply for this lead.
+    const channelDesc = channel === 'sms'    ? 'short SMS (<160 chars)'
+                       : channel === 'portal' ? 'short, warm note (2-5 sentences) that will appear in the message drawer on their client portal — a bit more relaxed than an email, no subject line, no sign-off needed'
+                       : 'short email (2-4 short paragraphs)';
+    const userPrompt = `Draft a ${channelDesc} reply for this lead.
 
 Lead profile:
   name:          ${[lead.first_name, lead.last_name].filter(Boolean).join(' ') || 'unknown'}
@@ -89,8 +92,9 @@ ${fmtTours(tours) || '(none)'}
 ${instruction ? `Sara's note for you: ${instruction}\n` : ''}
 Respond in JSON only, no markdown fences:
 {
-  "${channel === 'sms' ? 'sms' : 'email_subject'}": "...",
-  ${channel === 'email' ? '"email_body": "...",' : ''}
+  ${channel === 'sms'    ? '"sms": "...",' : ''}
+  ${channel === 'portal' ? '"portal": "...",' : ''}
+  ${channel === 'email'  ? '"email_subject": "...", "email_body": "...",' : ''}
   "reasoning": "one sentence on the angle you chose"
 }`;
 
@@ -108,7 +112,9 @@ Respond in JSON only, no markdown fences:
       status: 'pending_approval',
       ai_generated: true,
       ai_draft_reasoning: (draft.reasoning || '').trim(),
-      body:    channel === 'sms' ? (draft.sms || '').trim() : (draft.email_body || '').trim(),
+      body:    channel === 'sms' ? (draft.sms || '').trim()
+             : channel === 'portal' ? (draft.portal || '').trim()
+             : (draft.email_body || '').trim(),
       subject: channel === 'email' ? (draft.email_subject || '').trim() : null
     };
 
