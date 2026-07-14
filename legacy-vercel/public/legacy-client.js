@@ -2876,8 +2876,24 @@
     const resultEl   = card.querySelector('[data-detail-result]');
     let editedTa = null;
 
+    // Inline "click again to confirm" instead of a blocking native confirm()
+    // dialog — keeps the flow fast and matches the app's own styling. Resets
+    // back to "Discard" if the second click doesn't come within 4 seconds.
+    let discardArmed = false;
+    let discardResetTimer = null;
     if (discardBtn) discardBtn.addEventListener('click', async () => {
-      if (!confirm('Discard this suggested reply?')) return;
+      if (!discardArmed) {
+        discardArmed = true;
+        discardBtn.textContent = 'Click again to confirm';
+        discardBtn.style.color = '#9B2C2C';
+        discardResetTimer = setTimeout(() => {
+          discardArmed = false;
+          discardBtn.textContent = 'Discard';
+          discardBtn.style.color = '';
+        }, 4000);
+        return;
+      }
+      clearTimeout(discardResetTimer);
       discardBtn.disabled = true;
       if (editBtn) editBtn.disabled = true;
       if (approveBtn) approveBtn.disabled = true;
@@ -2896,7 +2912,9 @@
         discardBtn.disabled = false;
         if (editBtn) editBtn.disabled = false;
         if (approveBtn) approveBtn.disabled = false;
+        discardArmed = false;
         discardBtn.textContent = 'Discard';
+        discardBtn.style.color = '';
       }
     });
 
