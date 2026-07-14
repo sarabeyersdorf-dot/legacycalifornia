@@ -28,19 +28,10 @@ alter table public.agent_updates enable row level security;
 
 -- Agent-only, both directions (read the log, add to it). No client access —
 -- there is no policy granting anon/authenticated-non-agent rows here at all,
--- matching the internal-only visibility pattern used for agent_tasks.
+-- matching the internal-only visibility pattern used for agent_tasks (which
+-- reuses this same current_role_is_agent() helper against public.users).
 drop policy if exists agent_updates_agent_all on public.agent_updates;
 create policy agent_updates_agent_all on public.agent_updates
   for all
-  using (
-    exists (
-      select 1 from public.profiles p
-      where p.id = auth.uid() and p.role in ('agent_sara','agent_james','admin')
-    )
-  )
-  with check (
-    exists (
-      select 1 from public.profiles p
-      where p.id = auth.uid() and p.role in ('agent_sara','agent_james','admin')
-    )
-  );
+  using (current_role_is_agent())
+  with check (current_role_is_agent());
