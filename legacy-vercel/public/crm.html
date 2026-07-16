@@ -3148,14 +3148,14 @@ function selectLead(el) {
   var root = document.querySelector('.crm-view[data-view="updates"]');
   if (!root) return;
   var esc = function (s) { return (s == null ? '' : String(s)).replace(/[&<>"]/g, function (c) { return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]); }); };
-  // `address` sometimes already has city/state baked in (deals.json source
-  // data is inconsistent) — only append city when the address doesn't
-  // already end with it, so a tag never shows the city twice.
+  // `address` sometimes already has city/state (and a trailing zip) baked in
+  // (deals.json source data is inconsistent) — only append city when the
+  // address doesn't already contain it somewhere, so a tag never shows the
+  // city twice.
   function dealAddrLabel(address, city) {
     if (!city) return address || '';
     if (!address) return city;
-    var a = address.toLowerCase().trim(), c = city.toLowerCase().trim();
-    return a.slice(-c.length) === c ? address : (address + ', ' + city);
+    return address.toLowerCase().indexOf(city.toLowerCase().trim()) !== -1 ? address : (address + ', ' + city);
   }
   var state = { data: null, deals: null, selectedContact: null }, loaded = false;
   function ensure() { if (loaded) return; loaded = true; load(); loadDeals(); }

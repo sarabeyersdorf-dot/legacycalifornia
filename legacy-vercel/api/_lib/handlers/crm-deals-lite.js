@@ -29,14 +29,15 @@ export default async function handler(req, res) {
     if (error) return fail(res, 500, error.message);
 
     // `address` is inconsistent at the source (deals.json) — some rows are
-    // just the street ("1111 Dunbar Rd"), others already have city/state
-    // baked in ("0 Vacant Land, Angels Camp, CA 95222"). Only append `city`
-    // to the label when the address doesn't already end with it, so the
-    // dropdown never shows a city twice.
+    // just the street ("1111 Dunbar Rd"), others already have city/state (and
+    // sometimes a trailing zip) baked in ("0 Vacant Land, Angels Camp, CA
+    // 95222"). Only append `city` to the label when the address doesn't
+    // already contain it somewhere (not just at the very end, since a zip
+    // code can trail after the city), so the dropdown never shows it twice.
     const labelFor = (address, city) => {
       if (!city) return address || '';
       if (!address) return city;
-      return address.toLowerCase().trim().endsWith(city.toLowerCase().trim())
+      return address.toLowerCase().includes(city.toLowerCase().trim())
         ? address
         : `${address}, ${city}`;
     };
