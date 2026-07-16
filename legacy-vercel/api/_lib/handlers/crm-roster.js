@@ -45,7 +45,26 @@ export default async function handler(req, res) {
     let q = bucketQuery(supa, bucket);
     if (term) {
       const t = term.replace(/[%(),]/g, ' ').trim();
-      if (t) q = q.or(`first_name.ilike.%${t}%,last_name.ilike.%${t}%,email.ilike.%${t}%,phone.ilike.%${t}%`);
+      if (t) {
+        const clauses = [
+          `first_name.ilike.%${t}%`,
+          `last_name.ilike.%${t}%`,
+          `email.ilike.%${t}%`,
+          `phone.ilike.%${t}%`
+        ];
+        // A typed "First Last" (or "Last First") won't match either name
+        // column alone as a single substring — split on the first space and
+        // also try first_name+last_name matched pairwise, both orders, so
+        // "Dan Har" finds a lead with first_name="Dan", last_name="Harder".
+        const words = t.split(/\s+/).filter(Boolean);
+        if (words.length > 1) {
+          const w1 = words[0];
+          const w2 = words.slice(1).join(' ');
+          clauses.push(`and(first_name.ilike.%${w1}%,last_name.ilike.%${w2}%)`);
+          clauses.push(`and(first_name.ilike.%${w2}%,last_name.ilike.%${w1}%)`);
+        }
+        q = q.or(clauses.join(','));
+      }
     }
     const { data, error, count } = await q
       .order('last_contact_at', { ascending: false, nullsFirst: false })
