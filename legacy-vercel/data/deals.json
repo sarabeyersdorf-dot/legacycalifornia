@@ -1,5 +1,5 @@
 {
-  "version": 1.37,
+  "version": 1.38,
   "lastUpdated": "2026-07-16",
   "updatedBy": "Claude",
   "tasks": [
@@ -228,6 +228,24 @@
       "client": "695 Feather",
       "title": "Watch for seller response on 695 Feather Dr offer (Ashley Robinson)",
       "done": true
+    },
+    {
+      "agent": "james",
+      "client": "695 Feather",
+      "title": "Confirm accepted SCO1 terms (price, commission split, COE) so deals.json can be updated for the new escrow (Orange Coast Title, Order #2473532-TS, Tanya Salgado)",
+      "done": false
+    },
+    {
+      "agent": "james",
+      "client": "695 Feather",
+      "title": "Confirm the $170,000 cash-purchase figure given to Placer for the net sheet matches the final accepted SCO1 price",
+      "done": false
+    },
+    {
+      "agent": "james",
+      "client": "695 Feather",
+      "title": "Confirm BRBC (3% total, 1% seller/2% buyer) sent to Orange Coast Title 7/16 is filed/tracked; confirm the $5,000 ClosingLock deposit request went out",
+      "done": false
     }
   ],
   "deals": [
