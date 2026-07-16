@@ -1,6 +1,6 @@
 // api/_lib/handlers/crm-agent-updates.js
 // GET   /api/crm/agent-updates                 → recent log entries (agent-session auth, shared — both agents see everything)
-// POST  /api/crm/agent-updates { content, deal? } → log a new update (agent-session auth, server stamps who)
+// POST  /api/crm/agent-updates { content, deal_id?, lead_id?, deal? } → log a new update (agent-session auth, server stamps who)
 // GET   /api/crm/agent-updates?op=feed&key=<SYNC_SECRET> → unread entries for the morning briefing;
 //         marks them read_by_briefing=true as a side effect of this same GET (no separate ack call,
 //         since the briefing environment is GET-only and never issues POSTs).
@@ -12,12 +12,22 @@
 // overwritable note per deal shown in the Command Center. This is append-only
 // and never overwritten — nothing here is ever deleted or edited after saving.
 // Agent-only, no client access, matching agent_tasks' visibility pattern.
+//
+// Tagging (db/035): a note can be tagged with a real deal (deal_id → deals.id,
+// picked from a dropdown in the CRM) and/or a real contact (lead_id →
+// leads.id, picked via typeahead or created on the spot) — both stay
+// live-linked to the actual record rather than typed free text. The legacy
+// `deal` text column is kept for older rows that only ever had a typed
+// string and no deal_id.
 
 import { adminClient } from '../supabase.js';
 import { getCallerProfile, isAgent } from '../auth.js';
 import { handleOptions, readJson, ok, fail } from '../cors.js';
 
 const agentKey = (role) => (role === 'agent_james' ? 'james' : 'sara');
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+const SELECT_COLS = 'id, agent, deal, deal_id, lead_id, content, created_at, read_by_briefing, read_by_briefing_at, ' +
+  'tagged_deal:deals(id, source_key, address, city), tagged_lead:leads(id, first_name, last_name, email)';
 
 export default async function handler(req, res) {
   if (handleOptions(req, res)) return;
@@ -38,7 +48,7 @@ async function list(req, res) {
     const supa = adminClient();
     const limit = Math.min(parseInt(req.query?.limit, 10) || 100, 300);
     const { data, error } = await supa.from('agent_updates')
-      .select('id, agent, deal, content, created_at, read_by_briefing, read_by_briefing_at')
+      .select(SELECT_COLS)
       .order('created_at', { ascending: false })
       .limit(limit);
     if (error) return fail(res, 500, error.message);
@@ -53,11 +63,25 @@ async function create(req, res, profile) {
     const body = await readJson(req);
     const content = (body?.content || '').toString().trim().slice(0, 2000);
     if (!content) return fail(res, 400, 'content required');
+
+    const dealId = (body?.deal_id || '').toString().trim();
+    const leadId = (body?.lead_id || '').toString().trim();
+    if (dealId && !UUID_RE.test(dealId)) return fail(res, 400, 'deal_id is not a valid id');
+    if (leadId && !UUID_RE.test(leadId)) return fail(res, 400, 'lead_id is not a valid id');
+
+    // Legacy free-text deal tag — only kept for callers that don't pass
+    // deal_id (the CRM's own Notes tab always resolves to a real deal now).
     const deal = (body?.deal || '').toString().trim().slice(0, 120) || null;
 
     const supa = adminClient();
-    const row = { agent: agentKey(profile.role), deal, content };
-    const { data, error } = await supa.from('agent_updates').insert(row).select('id, agent, deal, content, created_at').maybeSingle();
+    const row = {
+      agent:   agentKey(profile.role),
+      deal,
+      deal_id: dealId || null,
+      lead_id: leadId || null,
+      content
+    };
+    const { data, error } = await supa.from('agent_updates').insert(row).select(SELECT_COLS).maybeSingle();
     if (error) return fail(res, 500, error.message);
     return ok(res, { update: data });
   } catch (e) {
@@ -81,7 +105,8 @@ export async function feed(req, res) {
   try {
     const supa = adminClient();
     const { data, error } = await supa.from('agent_updates')
-      .select('id, agent, deal, content, created_at')
+      .select('id, agent, deal, deal_id, lead_id, content, created_at, ' +
+        'tagged_deal:deals(id, source_key, address, city), tagged_lead:leads(id, first_name, last_name, email)')
       .eq('read_by_briefing', false)
       .order('created_at', { ascending: true })
       .limit(100);

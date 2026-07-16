@@ -1,9 +1,15 @@
 // api/_lib/handlers/crm-roster.js
-// GET /api/crm/roster?bucket=leads|clients|past|sphere&q=&limit=
+// GET /api/crm/roster?bucket=leads|clients|past|sphere|all&q=&limit=
 // Browsable people lists behind the sidebar roster items. The count returned
 // here is computed from the SAME query that fills the list, so the sidebar
 // pill and the list can never disagree (the pills are refreshed from this
 // response on open).
+//
+// bucket=all is a separate mode for typeahead contact-tagging (e.g. the
+// Notes tab's "tag a contact" field): no status/stage filter at all, so it
+// can find anyone — active, archived, sphere, past client. It REQUIRES a
+// search term (min 2 chars) and returns nothing without one, since it's
+// meant to be typed-into, not browsed.
 
 import { adminClient } from '../supabase.js';
 import { getCallerProfile, isAgent } from '../auth.js';
@@ -16,6 +22,7 @@ function bucketQuery(supa, bucket) {
   if (bucket === 'clients')     return q.eq('status', 'active').in('pipeline_stage', ['closed', 'close']);
   if (bucket === 'past')        return q.eq('status', 'archived').in('pipeline_stage', ['closed', 'close']);
   if (bucket === 'sphere')      return q.eq('status', 'active').eq('pipeline_stage', 'sphere');
+  if (bucket === 'all')         return q;   // no filter — every lead, any status/stage
   return q.eq('status', 'active');   // leads (everyone active)
 }
 
@@ -27,10 +34,15 @@ export default async function handler(req, res) {
   if (!isAgent(profile)) return fail(res, 403, 'agents only');
   const supa = adminClient();
   try {
-    const bucket = ['leads', 'clients', 'past', 'sphere'].includes(req.query?.bucket) ? req.query.bucket : 'leads';
+    const bucket = ['leads', 'clients', 'past', 'sphere', 'all'].includes(req.query?.bucket) ? req.query.bucket : 'leads';
     const limit = Math.min(Math.max(parseInt(req.query?.limit, 10) || 200, 1), 500);
-    let q = bucketQuery(supa, bucket);
     const term = (req.query?.q || '').toString().trim();
+
+    if (bucket === 'all' && term.length < 2) {
+      return ok(res, { bucket, count: 0, people: [] });
+    }
+
+    let q = bucketQuery(supa, bucket);
     if (term) {
       const t = term.replace(/[%(),]/g, ' ').trim();
       if (t) q = q.or(`first_name.ilike.%${t}%,last_name.ilike.%${t}%,email.ilike.%${t}%,phone.ilike.%${t}%`);

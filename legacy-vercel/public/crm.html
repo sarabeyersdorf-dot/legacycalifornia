@@ -306,15 +306,27 @@
     .upd-compose { border: 1px solid var(--rule); background: var(--shell); padding: 14px; margin-bottom: 18px; }
     .upd-compose textarea { width: 100%; min-height: 64px; border: none; background: transparent; font: inherit; font-size: 14px; color: var(--ink); resize: vertical; }
     .upd-compose textarea:focus { outline: none; }
-    .upd-compose-row { display: flex; gap: 10px; align-items: center; margin-top: 8px; }
+    .upd-compose-row { display: flex; gap: 10px; align-items: center; margin-top: 8px; flex-wrap: wrap; }
     .upd-compose-row input[type=text] { flex: 1; min-width: 0; border: none; border-bottom: 1px dashed var(--rule-strong); background: transparent; font: inherit; font-size: 12.5px; color: var(--ink); padding: 3px 0; }
     .upd-compose-row input[type=text]:focus { outline: none; border-bottom-color: #2E4638; }
+    .upd-deal-select { font: inherit; font-size: 12.5px; color: var(--ink); border: none; border-bottom: 1px dashed var(--rule-strong); background: transparent; padding: 3px 4px 3px 0; max-width: 230px; cursor: pointer; }
+    .upd-deal-select:focus { outline: none; border-bottom-color: #2E4638; }
+    .upd-contact-wrap { position: relative; flex: 1; min-width: 160px; }
+    .upd-contact-results { position: absolute; top: 100%; left: 0; right: 0; z-index: 30; background: #fff; border: 1px solid var(--rule-strong); box-shadow: 0 8px 20px rgba(0,0,0,.14); max-height: 240px; overflow-y: auto; margin-top: 2px; }
+    .upd-contact-row { padding: 7px 10px; font-size: 13px; cursor: pointer; display: flex; flex-direction: column; gap: 1px; }
+    .upd-contact-row:hover { background: var(--shell); }
+    .upd-contact-row .nm { color: var(--ink); }
+    .upd-contact-row .sub { font-size: 10.5px; color: var(--ink-mute); }
+    .upd-contact-row.add-new { color: #2E5C3D; font-weight: 600; border-top: 1px solid var(--rule-soft); }
+    .upd-contact-chip { display: inline-flex; align-items: center; gap: 7px; font-size: 12.5px; color: var(--ink); border: 1px solid var(--rule-strong); background: var(--shell); padding: 4px 6px 4px 9px; }
+    .upd-contact-chip button { border: none; background: none; cursor: pointer; color: var(--ink-mute); font-size: 14px; line-height: 1; padding: 0 2px; }
     .upd-item { display: flex; gap: 12px; align-items: flex-start; padding: 14px 2px; border-bottom: 1px solid var(--rule-soft); }
     .upd-body { flex: 1; min-width: 0; }
     .upd-line { display: flex; gap: 8px; align-items: baseline; flex-wrap: wrap; }
     .upd-badge { font-family: var(--mono); font-size: 9px; letter-spacing: .1em; text-transform: uppercase; padding: 2px 8px; background: #7C6A4D; color: #fff; border-radius: 2px; }
     .upd-badge.james { background: #3A5A7C; } .upd-badge.both { background: #6A5A8B; }
-    .upd-deal { font-family: var(--mono); font-size: 9px; letter-spacing: .05em; color: var(--ink-mute); border: 1px solid var(--rule); padding: 1px 5px; }
+    .upd-deal, .upd-tag { font-family: var(--mono); font-size: 9px; letter-spacing: .05em; color: var(--ink-mute); border: 1px solid var(--rule); padding: 1px 5px; }
+    .upd-tag.contact { color: #2E4638; border-color: #B7C8BC; }
     .upd-content { font-size: 14.5px; color: var(--ink); line-height: 1.5; margin-top: 5px; white-space: pre-wrap; }
     .upd-meta { display: flex; gap: 8px; align-items: baseline; margin-top: 6px; font-size: 11px; color: var(--ink-faint); }
     .upd-seen { font-family: var(--mono); font-size: 9px; letter-spacing: .08em; text-transform: uppercase; color: #2E5C3D; }
@@ -329,7 +341,11 @@
         <div class="upd-compose">
           <textarea data-upd-text placeholder="A text you got, something James told you, anything for tomorrow's briefing…"></textarea>
           <div class="upd-compose-row">
-            <input type="text" data-upd-deal placeholder="Tag a deal or client (optional)">
+            <select class="upd-deal-select" data-upd-deal-select><option value="">Tag a deal (optional)</option></select>
+            <div class="upd-contact-wrap" data-upd-contact-wrap>
+              <input type="text" data-upd-contact placeholder="Tag a contact (optional)" autocomplete="off">
+              <div class="upd-contact-results" data-upd-contact-results style="display:none;"></div>
+            </div>
             <button class="btn btn-ink btn-sm" data-upd-save>Log it</button>
           </div>
         </div>
@@ -2909,14 +2925,24 @@ function selectLead(el) {
 <script>
 /* Add a single lead — modal wired to any [data-new-lead] trigger.
    POSTs to /api/crm/create-lead, then reloads so the new lead shows in
-   Pipeline/Inbox with fresh counts. */
+   Pipeline/Inbox with fresh counts.
+
+   Also reusable programmatically (e.g. the Notes tab's "add a contact"
+   flow) via window.__legacyOpenNewLeadModal(opts):
+     opts.prefillName — best-effort split into first/last name fields
+     opts.onCreated(lead) — if given, the modal calls this with the created
+       (or de-duped existing) lead INSTEAD of reloading the page, so the
+       caller can wire the new contact into its own UI without losing
+       whatever else was on the page (e.g. an in-progress note draft). */
 (function () {
   'use strict';
   var IN = 'font:inherit;font-size:15px;text-transform:none;letter-spacing:normal;color:#1A1714;background:#fff;border:1px solid #D9CFB7;padding:9px 11px;width:100%;box-sizing:border-box;';
   var LB = 'font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:#7C6A4D;display:flex;flex-direction:column;gap:4px;';
-  function open() {
+  function open(opts) {
+    opts = opts || {};
     var id = 'leg-newlead-modal';
-    if (document.getElementById(id)) { document.getElementById(id).style.display = 'flex'; return; }
+    var existing = document.getElementById(id);
+    if (existing) { existing.parentNode.removeChild(existing); }   // always rebuild — opts differ per open()
     var m = document.createElement('div'); m.id = id;
     m.style.cssText = 'position:fixed;inset:0;z-index:99997;background:rgba(20,18,15,0.6);display:flex;align-items:center;justify-content:center;padding:24px;font-family:Manrope,system-ui,sans-serif;';
     m.innerHTML = ''
@@ -2946,9 +2972,18 @@ function selectLead(el) {
       + '</div>';
     document.body.appendChild(m);
     var form = m.querySelector('#nl-form'), result = m.querySelector('#nl-result');
-    function close() { m.style.display = 'none'; }
+    function close() { if (m.parentNode) m.parentNode.removeChild(m); }
     m.querySelector('#nl-close').onclick = close;
     m.addEventListener('click', function (e) { if (e.target === m) close(); });
+
+    // Prefill from a typed name (e.g. the Notes tab's contact search box) —
+    // best-effort split on the first space; a single word goes to first_name.
+    if (opts.prefillName) {
+      var parts = String(opts.prefillName).trim().split(/\s+/);
+      var fEl = form.querySelector('[name=first_name]'), lEl = form.querySelector('[name=last_name]');
+      if (fEl) fEl.value = parts[0] || '';
+      if (lEl) lEl.value = parts.slice(1).join(' ') || '';
+    }
 
     // Default "Assign to" to whoever is signed in.
     fetch('/api/auth/session', { credentials: 'include' }).then(function (r) { return r.json(); }).then(function (j) {
@@ -2981,10 +3016,15 @@ function selectLead(el) {
           if (x.ok && x.j.lead) {
             var nm = [x.j.lead.first_name, x.j.lead.last_name].filter(Boolean).join(' ') || x.j.lead.email || 'Lead';
             result.style.color = '#2E5C3D';
-            result.textContent = x.j.existed
-              ? ('“' + nm + '” already exists — opened their record instead.')
-              : ('✓ Added ' + nm + '. Refreshing your pipeline…');
-            setTimeout(function () { window.location.reload(); }, 900);
+            if (typeof opts.onCreated === 'function') {
+              result.textContent = x.j.existed ? ('“' + nm + '” already exists — using that contact.') : ('✓ Added ' + nm + '.');
+              setTimeout(function () { close(); opts.onCreated(x.j.lead); }, 500);
+            } else {
+              result.textContent = x.j.existed
+                ? ('“' + nm + '” already exists — opened their record instead.')
+                : ('✓ Added ' + nm + '. Refreshing your pipeline…');
+              setTimeout(function () { window.location.reload(); }, 900);
+            }
           } else {
             result.style.color = '#8B3A3A'; result.textContent = '✗ ' + ((x.j && x.j.error) || 'Could not add the lead.');
           }
@@ -2992,6 +3032,7 @@ function selectLead(el) {
     });
   }
   document.addEventListener('click', function (e) { var t = e.target.closest('[data-new-lead]'); if (t) { e.preventDefault(); open(); } });
+  window.__legacyOpenNewLeadModal = open;
 })();
 </script>
 <script>
@@ -3095,14 +3136,20 @@ function selectLead(el) {
    free-text update into (a text they got, a verbal update, anything the
    briefing has no other visibility into). Nothing here is ever edited or
    deleted; "seen by Cowork" just reflects whether the morning briefing has
-   already read it. */
+   already read it.
+
+   Tagging (db/035): "Tag a deal" is a real dropdown of deals (deals-lite);
+   "Tag a contact" is a typeahead against leads (roster?bucket=all) that
+   either picks an existing contact or — via "+ Add … as a new contact" —
+   opens the same modal the top-bar "+ New lead" button uses, so a brand
+   new contact is a real leads row from the moment it's tagged. */
 (function () {
   'use strict';
   var root = document.querySelector('.crm-view[data-view="updates"]');
   if (!root) return;
   var esc = function (s) { return (s == null ? '' : String(s)).replace(/[&<>"]/g, function (c) { return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]); }); };
-  var state = { data: null }, loaded = false;
-  function ensure() { if (loaded) return; loaded = true; load(); }
+  var state = { data: null, deals: null, selectedContact: null }, loaded = false;
+  function ensure() { if (loaded) return; loaded = true; load(); loadDeals(); }
   document.addEventListener('click', function (e) { if (e.target.closest('[onclick*="\'updates\'"]')) setTimeout(ensure, 0); });
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', ensure); else ensure();
 
@@ -3120,12 +3167,116 @@ function selectLead(el) {
       render();
     }).catch(function () { var l = root.querySelector('[data-upd-list]'); if (l) l.innerHTML = '<div class="cur-empty">Could not load notes.</div>'; });
   }
+
+  // ---- Deal dropdown -------------------------------------------------
+  function loadDeals() {
+    var sel = root.querySelector('[data-upd-deal-select]');
+    if (!sel) return;
+    fetch('/api/crm/deals-lite', { credentials: 'include' }).then(function (r) { return r.json(); }).then(function (j) {
+      if (!j || j.success === false) return;
+      state.deals = j.deals || [];
+      var opts = ['<option value="">Tag a deal (optional)</option>'];
+      state.deals.forEach(function (d) {
+        var closed = d.stage === 'closed' ? ' (closed)' : '';
+        opts.push('<option value="' + esc(d.id) + '">' + esc(d.label || d.address || d.source_key || 'Deal') + esc(closed) + '</option>');
+      });
+      sel.innerHTML = opts.join('');
+    }).catch(function () {});
+  }
+  function dealById(id) { return (state.deals || []).find(function (d) { return d.id === id; }) || null; }
+
+  // ---- Contact typeahead ----------------------------------------------
+  var contactSearchTimer = null;
+  function contactWrapEl() { return root.querySelector('[data-upd-contact-wrap]'); }
+
+  function renderContactInput() {
+    var wrap = contactWrapEl();
+    wrap.innerHTML = '<input type="text" data-upd-contact placeholder="Tag a contact (optional)" autocomplete="off">' +
+      '<div class="upd-contact-results" data-upd-contact-results style="display:none;"></div>';
+  }
+  function renderContactChip(person) {
+    var wrap = contactWrapEl();
+    var sub = [person.email, person.phone].filter(Boolean).join(' · ');
+    wrap.innerHTML = '<span class="upd-contact-chip"><span>' + esc(person.name) + (sub ? ' <span style="opacity:.55;">— ' + esc(sub) + '</span>' : '') + '</span>' +
+      '<button type="button" data-upd-contact-clear title="Remove">×</button></span>';
+  }
+  function selectContact(person) {
+    state.selectedContact = person;
+    renderContactChip(person);
+  }
+  function clearContact() {
+    state.selectedContact = null;
+    renderContactInput();
+    var input = root.querySelector('[data-upd-contact]');
+    if (input) input.focus();
+  }
+
+  function searchContacts(term) {
+    var results = root.querySelector('[data-upd-contact-results]');
+    if (!results) return;
+    if (!term || term.trim().length < 2) { results.style.display = 'none'; results.innerHTML = ''; return; }
+    fetch('/api/crm/roster?bucket=all&limit=8&q=' + encodeURIComponent(term.trim()), { credentials: 'include' })
+      .then(function (r) { return r.json(); }).then(function (j) {
+        var people = (j && j.people) || [];
+        var rows = people.map(function (p) {
+          var sub = [p.email, p.phone].filter(Boolean).join(' · ');
+          return '<div class="upd-contact-row" data-upd-pick=\'' + esc(JSON.stringify(p)).replace(/'/g, '&#39;') + '\'>' +
+            '<span class="nm">' + esc(p.name) + '</span>' + (sub ? '<span class="sub">' + esc(sub) + '</span>' : '') + '</div>';
+        }).join('');
+        rows += '<div class="upd-contact-row add-new" data-upd-add-new="' + esc(term.trim()) + '">+ Add “' + esc(term.trim()) + '” as a new contact</div>';
+        results.innerHTML = rows;
+        results.style.display = 'block';
+      }).catch(function () {});
+  }
+
+  root.addEventListener('input', function (e) {
+    if (!e.target.matches('[data-upd-contact]')) return;
+    var term = e.target.value;
+    clearTimeout(contactSearchTimer);
+    contactSearchTimer = setTimeout(function () { searchContacts(term); }, 250);
+  });
+  root.addEventListener('focusout', function (e) {
+    if (!e.target.matches('[data-upd-contact]')) return;
+    // Let a click on a result register before hiding the dropdown.
+    setTimeout(function () {
+      var results = root.querySelector('[data-upd-contact-results]');
+      if (results) { results.style.display = 'none'; }
+    }, 200);
+  });
+  root.addEventListener('click', function (e) {
+    var pick = e.target.closest('[data-upd-pick]');
+    if (pick) {
+      try { selectContact(JSON.parse(pick.getAttribute('data-upd-pick'))); } catch (_) {}
+      return;
+    }
+    var addNew = e.target.closest('[data-upd-add-new]');
+    if (addNew) {
+      var typed = addNew.getAttribute('data-upd-add-new') || '';
+      if (typeof window.__legacyOpenNewLeadModal === 'function') {
+        window.__legacyOpenNewLeadModal({
+          prefillName: typed,
+          onCreated: function (lead) {
+            var nm = [lead.first_name, lead.last_name].filter(Boolean).join(' ') || lead.email || 'Contact';
+            selectContact({ id: lead.id, name: nm, email: lead.email, phone: lead.phone });
+          }
+        });
+      }
+      return;
+    }
+    if (e.target.closest('[data-upd-contact-clear]')) { clearContact(); return; }
+    if (e.target.closest('[data-upd-save]')) { save(); return; }
+  });
+
+  // ---- Render log -------------------------------------------------------
   function item(u) {
     var who = u.agent === 'james' ? 'James' : u.agent === 'both' ? 'Both' : 'Sara';
     var badge = '<span class="upd-badge ' + esc(u.agent) + '">' + esc(who) + '</span>';
-    var deal = u.deal ? '<span class="upd-deal">' + esc(u.deal) + '</span>' : '';
+    var dealLabel = u.tagged_deal ? [u.tagged_deal.address, u.tagged_deal.city].filter(Boolean).join(', ') : u.deal;
+    var deal = dealLabel ? '<span class="upd-tag">' + esc(dealLabel) + '</span>' : '';
+    var contactLabel = u.tagged_lead ? [u.tagged_lead.first_name, u.tagged_lead.last_name].filter(Boolean).join(' ') : null;
+    var contact = contactLabel ? '<span class="upd-tag contact">' + esc(contactLabel) + '</span>' : '';
     var seen = u.read_by_briefing ? '<span class="upd-seen">✓ seen by Cowork</span>' : '';
-    return '<div class="upd-item"><div class="upd-body"><div class="upd-line">' + badge + deal + '</div>' +
+    return '<div class="upd-item"><div class="upd-body"><div class="upd-line">' + badge + deal + contact + '</div>' +
       '<div class="upd-content">' + esc(u.content) + '</div>' +
       '<div class="upd-meta"><span>' + esc(fmtWhen(u.created_at)) + '</span>' + seen + '</div></div></div>';
   }
@@ -3136,20 +3287,24 @@ function selectLead(el) {
   }
   function save() {
     var ta = root.querySelector('[data-upd-text]');
-    var dealIn = root.querySelector('[data-upd-deal]');
+    var dealSel = root.querySelector('[data-upd-deal-select]');
     var content = (ta.value || '').trim();
     if (!content) { ta.focus(); return; }
     var btn = root.querySelector('[data-upd-save]');
     btn.disabled = true;
-    fetch('/api/crm/agent-updates', { method: 'POST', credentials: 'include', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ content: content, deal: (dealIn.value || '').trim() }) })
+    var body = { content: content };
+    if (dealSel && dealSel.value) body.deal_id = dealSel.value;
+    if (state.selectedContact && state.selectedContact.id) body.lead_id = state.selectedContact.id;
+    fetch('/api/crm/agent-updates', { method: 'POST', credentials: 'include', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) })
       .then(function (r) { return r.json(); }).then(function (j) {
         if (j && j.success === false) { if (window.Legacy && window.Legacy.toast) window.Legacy.toast(j.error || 'Could not save — try again.', false); return; }
-        ta.value = ''; dealIn.value = '';
+        ta.value = '';
+        if (dealSel) dealSel.value = '';
+        clearContact();
         load();
       }).catch(function () { if (window.Legacy && window.Legacy.toast) window.Legacy.toast('Network error — try again.', false); })
       .finally(function () { btn.disabled = false; });
   }
-  root.addEventListener('click', function (e) { if (e.target.closest('[data-upd-save]')) save(); });
   root.addEventListener('keydown', function (e) {
     if (e.target.closest('[data-upd-text]') && (e.metaKey || e.ctrlKey) && e.key === 'Enter') save();
   });
