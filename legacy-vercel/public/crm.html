@@ -3148,6 +3148,15 @@ function selectLead(el) {
   var root = document.querySelector('.crm-view[data-view="updates"]');
   if (!root) return;
   var esc = function (s) { return (s == null ? '' : String(s)).replace(/[&<>"]/g, function (c) { return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]); }); };
+  // `address` sometimes already has city/state baked in (deals.json source
+  // data is inconsistent) — only append city when the address doesn't
+  // already end with it, so a tag never shows the city twice.
+  function dealAddrLabel(address, city) {
+    if (!city) return address || '';
+    if (!address) return city;
+    var a = address.toLowerCase().trim(), c = city.toLowerCase().trim();
+    return a.slice(-c.length) === c ? address : (address + ', ' + city);
+  }
   var state = { data: null, deals: null, selectedContact: null }, loaded = false;
   function ensure() { if (loaded) return; loaded = true; load(); loadDeals(); }
   document.addEventListener('click', function (e) { if (e.target.closest('[onclick*="\'updates\'"]')) setTimeout(ensure, 0); });
@@ -3271,7 +3280,7 @@ function selectLead(el) {
   function item(u) {
     var who = u.agent === 'james' ? 'James' : u.agent === 'both' ? 'Both' : 'Sara';
     var badge = '<span class="upd-badge ' + esc(u.agent) + '">' + esc(who) + '</span>';
-    var dealLabel = u.tagged_deal ? [u.tagged_deal.address, u.tagged_deal.city].filter(Boolean).join(', ') : u.deal;
+    var dealLabel = u.tagged_deal ? dealAddrLabel(u.tagged_deal.address, u.tagged_deal.city) : u.deal;
     var deal = dealLabel ? '<span class="upd-tag">' + esc(dealLabel) + '</span>' : '';
     var contactLabel = u.tagged_lead ? [u.tagged_lead.first_name, u.tagged_lead.last_name].filter(Boolean).join(' ') : null;
     var contact = contactLabel ? '<span class="upd-tag contact">' + esc(contactLabel) + '</span>' : '';

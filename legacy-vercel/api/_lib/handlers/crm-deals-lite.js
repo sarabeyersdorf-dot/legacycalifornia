@@ -28,6 +28,19 @@ export default async function handler(req, res) {
       .order('address', { ascending: true });
     if (error) return fail(res, 500, error.message);
 
+    // `address` is inconsistent at the source (deals.json) — some rows are
+    // just the street ("1111 Dunbar Rd"), others already have city/state
+    // baked in ("0 Vacant Land, Angels Camp, CA 95222"). Only append `city`
+    // to the label when the address doesn't already end with it, so the
+    // dropdown never shows a city twice.
+    const labelFor = (address, city) => {
+      if (!city) return address || '';
+      if (!address) return city;
+      return address.toLowerCase().trim().endsWith(city.toLowerCase().trim())
+        ? address
+        : `${address}, ${city}`;
+    };
+
     const deals = (data || [])
       .slice()
       .sort((a, b) => {
@@ -43,7 +56,7 @@ export default async function handler(req, res) {
         stage:      d.stage,
         side:       d.side,
         agent:      d.agent,
-        label:      [d.address, d.city].filter(Boolean).join(', ')
+        label:      labelFor(d.address, d.city)
       }));
 
     return ok(res, { deals });
