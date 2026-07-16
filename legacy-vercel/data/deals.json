@@ -1,6 +1,6 @@
 {
-  "version": 1.36,
-  "lastUpdated": "2026-07-14",
+  "version": 1.37,
+  "lastUpdated": "2026-07-16",
   "updatedBy": "Claude",
   "tasks": [
     {
@@ -50,7 +50,7 @@
       "client": "Wendell",
       "title": "Ping Audry/Brandi for the WRITTEN bankruptcy court-approval notice (21-day noticing ends ~7/9) — it starts every clock",
       "note": "noticing ended 7/9; pinged — now awaiting the JUDGE'S sign-off (per Sara 7/11); still no written notice, clocks stay paused",
-      "done": false
+      "done": true
     },
     {
       "agent": "sara",
@@ -106,7 +106,7 @@
       "client": "Latigo",
       "title": "Appraisal due back Fri 7/10 (per Kim Hesser) — then remove remaining appraisal + loan contingencies and paper the HELOC/conventional financing change",
       "note": "Kim texted 7/6; Sara texted Mitzi 7/7; appraisal NOT back 7/10 — Sara reached out to Kim again 7/11",
-      "done": false
+      "done": true
     },
     {
       "agent": "sara",
@@ -133,7 +133,7 @@
       "agent": "sara",
       "client": "433 Hwy 4",
       "title": "Reply to Melissa re: tenant estoppel — TEC box UNCHECKED on both TOPAs (not a contract deliverable); check the signed MU-PA text first, then decide courtesy TEC if lender requires (in writing)",
-      "done": false
+      "done": true
     },
     {
       "agent": "sara",
@@ -189,20 +189,20 @@
       "client": "Esperson",
       "title": "Pursue 512 Gardiner Way LISTING (reduced-commission, Kristin has her own buyer) — home in ACTIVE FORECLOSURE so timing matters; buyer side dead (lending declined)",
       "note": "7/12 per Sara — Kristin meeting her buyer Monday 7/13, will advise after",
-      "done": false
+      "done": true
     },
     {
       "agent": "sara",
       "client": "Furr",
       "title": "Ben Furr (new buyer, BRBC signed 7/12) — file the signed BRBC and follow up after the 7/12 Skyline meeting",
-      "done": false
+      "done": true
     },
     {
       "agent": "sara",
       "client": "Latigo",
       "title": "Resend EMD Addendum #2 to Mitzi/Kylie for seller signature",
       "note": "buyer signed 6/29 but listing side never received it -- resend along with AVID copy",
-      "done": false
+      "done": true
     },
     {
       "agent": "sara",
@@ -221,13 +221,13 @@
       "agent": "sara",
       "client": "1143 Echo",
       "title": "1143 Echo St listing agreement executed 7/12 -- confirm list price and publish to portal",
-      "done": false
+      "done": true
     },
     {
       "agent": "james",
       "client": "695 Feather",
       "title": "Watch for seller response on 695 Feather Dr offer (Ashley Robinson)",
-      "done": false
+      "done": true
     }
   ],
   "deals": [
