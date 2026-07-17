@@ -77,7 +77,7 @@ export default async function handler(req, res) {
     let providerResult, sentOk = false, bodyText = '';
     if (channel === 'sms') {
       bodyText = msg.body;
-      providerResult = await sendSMS({ to, body: bodyText });
+      providerResult = await sendSMS({ to, body: bodyText, signAs: agent });
       sentOk = !providerResult.skipped;
       providerResult.via = 'twilio';
     } else {

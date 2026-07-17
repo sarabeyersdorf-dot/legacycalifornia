@@ -28,12 +28,27 @@ export function twilioConfigured() {
   return !!(TWILIO_SID && TWILIO_TOKEN && TWILIO_FROM);
 }
 
-export async function sendSMS({ to, body }) {
+// Standard US SMS has no carrier-level "sender name" field (Caller ID Name is
+// voice-only) — recipients just see a raw phone number. Lead-facing texts get
+// a short signature appended so they know who's texting. Internal alerts to
+// Sara/James about lead activity are business-to-agent, not business-to-lead,
+// and must NOT be signed — callers simply omit `signAs` (default behavior,
+// unchanged) to opt out.
+export const SMS_SIGNATURES = {
+  sara:  '– Sara, Legacy Properties',
+  james: '– James, Legacy Properties'
+};
+
+export async function sendSMS({ to, body, signAs }) {
+  let outBody = body;
+  if (signAs && SMS_SIGNATURES[signAs] && !/legacy properties/i.test(String(body || ''))) {
+    outBody = `${body}\n\n${SMS_SIGNATURES[signAs]}`;
+  }
   if (!twilioConfigured()) {
     return { skipped: true, reason: 'Twilio env not set' };
   }
   const url = `https://api.twilio.com/2010-04-01/Accounts/${TWILIO_SID}/Messages.json`;
-  const params = new URLSearchParams({ From: normalizeE164(TWILIO_FROM), To: normalizeE164(to), Body: body });
+  const params = new URLSearchParams({ From: normalizeE164(TWILIO_FROM), To: normalizeE164(to), Body: outBody });
   const auth = Buffer.from(`${TWILIO_SID}:${TWILIO_TOKEN}`).toString('base64');
 
   const res = await fetch(url, {

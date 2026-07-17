@@ -126,7 +126,7 @@ export default async function handler(req, res) {
     } else {
     try {
       if (channel === 'sms') {
-        providerResult = await sendSMS({ to: lead.phone, body: text });
+        providerResult = await sendSMS({ to: lead.phone, body: text, signAs: sentBy });
         sentPatch = {
           status:     providerResult.skipped ? 'failed' : 'sent',
           twilio_sid: providerResult.sid || null

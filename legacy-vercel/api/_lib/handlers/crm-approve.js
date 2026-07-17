@@ -99,7 +99,7 @@ export default async function handler(req, res) {
         try {
           if (!twilioConfigured()) throw new Error('Twilio not configured');
           if (!lead.phone)         throw new Error('lead has no phone number');
-          providerResult = await sendSMS({ to: lead.phone, body: updated.body });
+          providerResult = await sendSMS({ to: lead.phone, body: updated.body, signAs: patch.approved_by });
           if (providerResult.skipped) throw new Error(providerResult.reason || 'sms skipped');
           providerResult.via = 'twilio';
           sentPatch = { status: 'sent', twilio_sid: providerResult.sid || null };
