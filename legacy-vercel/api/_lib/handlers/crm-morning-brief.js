@@ -265,17 +265,23 @@ export default async function handler(req, res) {
     // place to catch it. Kept OUTSIDE the main Promise.all and fail-soft, same
     // pattern as recent_comms above — the brief must load even if this lookup
     // errors or the columns aren't there yet.
-    result.email_reconnect_needed = [];
+    let reconnectOwners = [];
     try {
       const { data: flagged } = await supa
         .from('email_accounts')
         .select('owner')
         .eq('needs_reconnect', true);
-      result.email_reconnect_needed = (flagged || []).map((r) => r.owner);
+      reconnectOwners = (flagged || []).map((r) => r.owner);
     } catch (_) { /* never break the brief over an email-status lookup */ }
 
     // Look for today's cached brief first. Refresh narrative if older than 4h.
     const agent = profile.role === 'agent_james' ? 'james' : 'sara';
+
+    // Scope the outward-facing field to the calling agent's own mailbox only —
+    // never leak the other agent's owner name in the API response, mirroring
+    // the "never surface James's status in Sara's brief or vice versa" rule
+    // used for the narrative below.
+    result.email_reconnect_needed = reconnectOwners.includes(agent) ? [agent] : [];
     const today = new Date().toISOString().slice(0, 10);
     const { data: cached } = await supa
       .from('briefs')
