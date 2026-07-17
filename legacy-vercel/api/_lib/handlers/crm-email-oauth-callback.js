@@ -77,7 +77,7 @@ export default async function handler(req, res) {
     });
     const tokenJson = await tokenRes.json().catch(() => ({}));
     if (!tokenRes.ok || !tokenJson.access_token) {
-      console.error('[email-oauth-callback] token exchange failed', tokenRes.status, tokenJson);
+      console.error('[email-oauth-callback] token exchange failed', tokenRes.status, tokenJson?.error, tokenJson?.error_description);
       return redirectTo(res, { email_oauth: 'error', owner: state, reason: 'token_exchange_failed' });
     }
 
