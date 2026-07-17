@@ -205,7 +205,7 @@
         <section class="deals" data-comms-section style="display:none;">
           <div class="deals-h">
             <span class="hairline-brass"></span>
-            <span class="eyebrow">Recent communications · texts &amp; calls, last 24h</span>
+            <span class="eyebrow">Recent communications · texts, calls &amp; email, last 24h</span>
             <h2 class="h-section" style="font-size: 28px; margin-top: 8px;">Who reached out.</h2>
             <a href="#" class="hours-link" data-comms-review style="display:none;">0 unreviewed →</a>
           </div>
@@ -1829,6 +1829,26 @@
           <div class="set-row"><span class="k">Phone</span><span class="v" data-set-phone>—</span></div>
         </div>
 
+        <div class="set-card" data-email-accounts-card>
+          <h2>Connect email</h2>
+          <p class="sub">Link a Gmail inbox so texts and calls aren't the only thing showing up in Recent Communications — inbound mail from a matched lead lands there too. Read-only access; nothing is ever sent from here.</p>
+          <div data-email-accounts-banner></div>
+          <div class="set-row">
+            <span class="k">Sara</span>
+            <span class="v" data-email-status="sara">Checking…</span>
+          </div>
+          <div class="set-tools">
+            <button data-connect-email="sara">Connect Sara's email<span class="arw">→</span></button>
+          </div>
+          <div class="set-row">
+            <span class="k">James</span>
+            <span class="v" data-email-status="james">Checking…</span>
+          </div>
+          <div class="set-tools">
+            <button data-connect-email="james">Connect James's email<span class="arw">→</span></button>
+          </div>
+        </div>
+
         <div class="set-card">
           <h2>Tools</h2>
           <p class="sub">The same actions live in the left sidebar under “Import.” They’re gathered here too.</p>
@@ -2084,8 +2104,8 @@ function selectLead(el) {
     m.innerHTML = ''
       + '<div style="background:#FAF6EC;max-width:560px;width:100%;padding:26px 30px;color:#1A1714;max-height:88vh;overflow:auto;">'
       + '  <div style="font-family:\'JetBrains Mono\',monospace;font-size:10px;letter-spacing:.22em;text-transform:uppercase;color:#7C6A4D;margin-bottom:8px;">Review queue</div>'
-      + '  <h2 style="font-family:\'Cormorant Garamond\',serif;font-style:italic;font-weight:500;font-size:26px;margin:0 0 4px;">Unknown numbers.</h2>'
-      + '  <p style="font-size:13px;line-height:1.5;color:#3A332B;margin:0 0 16px;">Texts and calls from numbers not yet in your contacts. Make each a lead, or dismiss it.</p>'
+      + '  <h2 style="font-family:\'Cormorant Garamond\',serif;font-style:italic;font-weight:500;font-size:26px;margin:0 0 4px;">Unknown senders.</h2>'
+      + '  <p style="font-size:13px;line-height:1.5;color:#3A332B;margin:0 0 16px;">Texts, calls, and emails from numbers or addresses not yet in your contacts. Make each a lead, or dismiss it.</p>'
       + '  <div id="leg-review-list">Loading…</div>'
       + '  <div style="margin-top:16px;text-align:right;"><button id="leg-review-close" style="background:transparent;border:none;color:#7C6A4D;cursor:pointer;font-size:13px;">Close</button></div>'
       + '</div>';
@@ -2095,9 +2115,18 @@ function selectLead(el) {
     return m;
   }
   function itemRow(it) {
+    // Phase 2D: an item is either a phone-based row (sms/call, raw_phone_number
+    // set) or an email-based row (channel:'email', raw_email_address set) —
+    // never both. Show the address + subject line for email; phone + snippet
+    // (unchanged) for sms/call.
+    var isEmail = it.channel === 'email';
+    var headline = isEmail ? (it.email || 'Unknown sender') : (it.phone || 'Unknown');
+    var subjectLine = (isEmail && it.subject)
+      ? '<div style="font-size:13px;font-weight:600;color:#1A1714;margin-top:4px;">'+esc(it.subject)+'</div>' : '';
     return '<div class="leg-rev-item" data-rev-id="'+esc(it.id)+'" style="border:1px solid #E0D6C0;padding:12px 14px;margin-bottom:10px;display:flex;gap:12px;align-items:flex-start;justify-content:space-between;">'
       + '<div style="min-width:0;">'
-      + '<div style="font-weight:600;font-size:14px;">'+esc(it.phone||'Unknown')+' <span style="font-family:\'JetBrains Mono\',monospace;font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:#7C6A4D;">'+esc(it.channel)+' · '+esc(it.direction)+'</span></div>'
+      + '<div style="font-weight:600;font-size:14px;">'+esc(headline)+' <span style="font-family:\'JetBrains Mono\',monospace;font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:#7C6A4D;">'+esc(it.channel)+' · '+esc(it.direction)+'</span></div>'
+      + subjectLine
       + '<div style="font-size:13px;color:#3A332B;margin-top:3px;word-break:break-word;">'+esc(it.snippet||'')+'</div>'
       + '<div style="font-size:11px;color:#8A7B60;margin-top:3px;">'+esc(when(it.created_at))+'</div>'
       + '</div>'
@@ -3657,6 +3686,94 @@ function selectLead(el) {
     }).catch(function () {});
   }
   document.addEventListener('click', function (e) { if (e.target.closest('[onclick*="\'settings\'"]')) setTimeout(load, 0); });
+})();
+</script>
+<script>
+/* Connect email (Phase 2D) — per-owner Gmail connection status card on the
+   Settings tab, plus a banner reacting to the ?email_oauth=... redirect that
+   /api/crm/email-oauth-callback lands on after Google sends the browser back
+   here. "Connect" buttons just navigate to /api/crm/email-oauth-start, which
+   302s to Google — no fetch/XHR needed for that half of the flow. */
+(function () {
+  'use strict';
+  var loaded = false;
+  function esc(s) { return (s == null ? '' : String(s)).replace(/[&<>"]/g, function (c) { return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]); }); }
+  function when(iso) {
+    if (!iso) return null;
+    try { return new Date(iso).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' }); }
+    catch (e) { return null; }
+  }
+  function label(name) { return name === 'james' ? 'James' : 'Sara'; }
+
+  function paintBanner() {
+    var box = document.querySelector('[data-email-accounts-banner]');
+    if (!box) return;
+    var params = new URLSearchParams(location.search);
+    var status = params.get('email_oauth');
+    if (!status) return;
+    var owner = params.get('owner');
+    var color = status === 'success' ? '#2E5C3D' : '#9B2C2C';
+    var msg;
+    if (status === 'success') {
+      msg = '✓ ' + label(owner) + '’s email is connected' + (params.get('email') ? ' as ' + esc(params.get('email')) : '') + '.';
+    } else {
+      var reason = params.get('reason') || 'unknown error';
+      msg = '✗ Couldn’t connect ' + label(owner) + '’s email (' + esc(reason) + '). Try again, or check the Google OAuth setup with your developer.';
+    }
+    box.innerHTML = '<div style="color:' + color + ';font-size:13px;margin:4px 0 12px;">' + msg + '</div>';
+    // Clean the query string so a page refresh doesn't re-show a stale banner.
+    try {
+      var url = new URL(location.href);
+      ['email_oauth', 'owner', 'email', 'reason'].forEach(function (k) { url.searchParams.delete(k); });
+      history.replaceState(null, '', url.toString());
+    } catch (e) { /* non-fatal */ }
+  }
+
+  function load() {
+    if (loaded) return; loaded = true;
+    fetch('/api/crm/email-accounts', { credentials: 'include' }).then(function (r) { return r.json(); }).then(function (j) {
+      var accounts = (j && j.accounts) || [];
+      accounts.forEach(function (a) {
+        var el = document.querySelector('[data-email-status="' + a.owner + '"]');
+        if (!el) return;
+        if (a.connected && a.email_address) {
+          var synced = when(a.last_synced_at);
+          el.textContent = 'Connected as ' + a.email_address + (synced ? ' · last synced ' + synced : ' · not synced yet');
+        } else {
+          el.textContent = 'Not connected';
+        }
+        var btn = document.querySelector('[data-connect-email="' + a.owner + '"]');
+        if (btn) btn.innerHTML = (a.connected ? 'Reconnect ' : 'Connect ') + label(a.owner) + '’s email<span class="arw">→</span>';
+      });
+    }).catch(function () {
+      ['sara', 'james'].forEach(function (o) {
+        var el = document.querySelector('[data-email-status="' + o + '"]');
+        if (el) el.textContent = 'Status unavailable';
+      });
+    });
+  }
+
+  document.addEventListener('click', function (e) {
+    if (e.target.closest('[onclick*="\'settings\'"]')) setTimeout(load, 0);
+    var btn = e.target.closest('[data-connect-email]');
+    if (btn) {
+      e.preventDefault();
+      location.href = '/api/crm/email-oauth-start?owner=' + encodeURIComponent(btn.getAttribute('data-connect-email'));
+    }
+  });
+
+  // The success/error banner can land on ANY view (Google redirects straight
+  // to /crm.html), so paint it on load, not just when Settings opens. If it
+  // references an email connection, also jump the user to Settings so they
+  // see it in context rather than have it silently disappear on the Today tab.
+  document.addEventListener('DOMContentLoaded', function () {
+    paintBanner();
+    var params = new URLSearchParams(location.search);
+    if (params.get('email_oauth') && typeof showView === 'function') {
+      showView(null, 'settings');
+    }
+    if (document.querySelector('.crm-view[data-view="settings"].on')) load();
+  });
 })();
 </script>
 <script>

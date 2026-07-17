@@ -643,6 +643,26 @@
     paintQuietAsks(drafts, { embedded: true, queueEmpty: total === 0 });
   }
 
+  // Phase 2D — builds a human summary + tag for a recent_comms group that may
+  // mix texts, calls, AND email (contacts are grouped by contact_id, so one
+  // person's text + email today land in the same group). Keeps the existing
+  // "Texts & calls" wording when there's no email in the mix, so old groups
+  // read exactly as before; only adds an "& email" distinction when present.
+  function commsSummary(c) {
+    const parts = [];
+    if (c.texts)  parts.push(`${c.texts} text${c.texts === 1 ? '' : 's'}`);
+    if (c.calls)  parts.push(`${c.calls} call${c.calls === 1 ? '' : 's'}`);
+    if (c.emails) parts.push(`${c.emails} email${c.emails === 1 ? '' : 's'}`);
+    return parts.join(' · ');
+  }
+  function commsTag(c) {
+    const hasEmail = !!c.emails;
+    const hasPhone = !!(c.texts || c.calls);
+    if (hasEmail && hasPhone) return 'Texts, calls & email';
+    if (hasEmail) return 'Email';
+    return 'Texts & calls';
+  }
+
   // ---- Live feed: signals + Twilio comms merged, filterable, one stream ----
   let feedItems = [], feedFilter = 'all';
   function paintLiveFeed(brief) {
@@ -675,8 +695,8 @@
       time: sg.time, body: sg.body, tag: sg.tag, ts: sg.time_iso || '',
       kind: DEAL_TAGS.test(sg.tag || '') ? 'deals' : 'clients'
     })).concat((brief.recent_comms || []).map((c) => ({
-      time: fmtRelative(c.last_at), ts: c.last_at, kind: 'clients', tag: 'Texts & calls',
-      body: `${c.name} — ${c.texts ? c.texts + ' text' + (c.texts === 1 ? '' : 's') : ''}${c.texts && c.calls ? ' · ' : ''}${c.calls ? c.calls + ' call' + (c.calls === 1 ? '' : 's') : ''} in the last day`
+      time: fmtRelative(c.last_at), ts: c.last_at, kind: 'clients', tag: commsTag(c),
+      body: `${c.name} — ${commsSummary(c)} in the last day`
     })));
     feedItems.sort((a, b) => String(b.ts).localeCompare(String(a.ts)));
     renderFeed();
@@ -792,13 +812,11 @@
     section.style.display = '';
 
     if (!groups.length) {
-      grid.innerHTML = emptyPanel('No new texts or calls in the last 24 hours.');
+      grid.innerHTML = emptyPanel('No new texts, calls, or emails in the last 24 hours.');
       return;
     }
     grid.innerHTML = groups.map((g) => {
-      const parts = [];
-      if (g.texts) parts.push(`${g.texts} text${g.texts === 1 ? '' : 's'}`);
-      if (g.calls) parts.push(`${g.calls} call${g.calls === 1 ? '' : 's'}`);
+      const summary = commsSummary(g);
       const clickable = g.contact_id ? ` data-comm-contact="${escapeHtml(g.contact_id)}" style="cursor:pointer;"` : '';
       return `
         <article class="deal"${clickable}>
@@ -807,7 +825,7 @@
             <span class="deal-amt" style="font-size:13px;">${escapeHtml(fmtRelative(g.last_at))}</span>
           </div>
           <h4>${escapeHtml(g.name)}</h4>
-          <p class="deal-buyer">${escapeHtml(parts.join(' · ') || 'Activity')}</p>
+          <p class="deal-buyer">${escapeHtml(summary || 'Activity')} <span class="label-cap" style="font-size:9px;opacity:.6;">${escapeHtml(commsTag(g))}</span></p>
         </article>`;
     }).join('');
 

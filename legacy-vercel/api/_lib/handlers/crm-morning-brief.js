@@ -379,8 +379,13 @@ function shapeSignals(rows) {
   });
 }
 
-// Phase 2C — group active Twilio messages/calls by contact for the brief's
-// "Recent Communications" section. Most-recent activity first.
+// Phase 2C/2D — group active Twilio + email messages/calls by contact for the
+// brief's "Recent Communications" section. Grouping key is contact_id (rows
+// with no contact never reach here — they're 'pending_review', not 'active'
+// — but anon: fallback keys still separate them defensively). Mixed sms/
+// call/email rows for the SAME contact_id land in the SAME group, so a
+// contact who both texted and emailed today shows as one card with both
+// counts. Most-recent activity first.
 function shapeRecentComms(rows) {
   const groups = new Map();
   for (const m of rows) {
@@ -389,11 +394,13 @@ function shapeRecentComms(rows) {
     if (!g) {
       const nm = [m.leads?.first_name, m.leads?.last_name].filter(Boolean).join(' ').trim();
       g = { contact_id: m.contact_id || null, name: nm || 'Unknown contact',
-            count: 0, texts: 0, calls: 0, last_at: m.created_at };
+            count: 0, texts: 0, calls: 0, emails: 0, last_at: m.created_at };
       groups.set(key, g);
     }
     g.count += 1;
-    if (m.channel === 'call') g.calls += 1; else g.texts += 1;
+    if (m.channel === 'call') g.calls += 1;
+    else if (m.channel === 'email') g.emails += 1;
+    else g.texts += 1;
     if (new Date(m.created_at) > new Date(g.last_at)) g.last_at = m.created_at;
   }
   return [...groups.values()].sort((a, b) => new Date(b.last_at) - new Date(a.last_at));

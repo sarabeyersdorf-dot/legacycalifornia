@@ -145,6 +145,9 @@
     },
     "api/cron/flag-matches.js": {
       "maxDuration": 60
+    },
+    "api/cron/email-sync.js": {
+      "maxDuration": 60
     }
   },
   "crons": [
@@ -167,6 +170,10 @@
     {
       "path": "/api/cron/timeline-scan",
       "schedule": "30 13 * * *"
+    },
+    {
+      "path": "/api/cron/email-sync",
+      "schedule": "*/15 * * * *"
     }
   ]
 }
