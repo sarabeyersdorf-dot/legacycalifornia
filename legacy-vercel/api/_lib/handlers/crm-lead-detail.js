@@ -46,6 +46,18 @@ function derivePipeline(contactType, buyerStage, sellerStage) {
   return STAGE_TO_PIPELINE[best] || null;
 }
 
+// Manual SMS consent toggle from the lead-detail "Update contact" panel
+// (db/033). The checkbox always submits its current checked state on every
+// save, so just stage the boolean here — sms_consent_at/sms_consent_source
+// only get stamped in updateLead() once we know whether the value actually
+// flipped from what's on record (see the "before" comparison below), so
+// re-saving name/phone edits doesn't clobber the original consent date.
+function applySmsConsent(patch, body) {
+  if (body.sms_consent !== undefined) {
+    patch.sms_consent = body.sms_consent === true || body.sms_consent === 'on' || body.sms_consent === 'true';
+  }
+}
+
 export default async function handler(req, res) {
   if (handleOptions(req, res)) return;
 
@@ -228,9 +240,21 @@ async function updateLead(req, res, profile) {
 
     // 1. Fetch current state so we can compute and log the diff
     const { data: before, error: beforeErr } = await supa
-      .from('leads').select('id, pipeline_stage, assigned_agent').eq('id', id).maybeSingle();
+      .from('leads').select('id, pipeline_stage, assigned_agent, sms_consent').eq('id', id).maybeSingle();
     if (beforeErr) return fail(res, 500, beforeErr.message);
     if (!before)   return fail(res, 404, 'lead not found');
+
+    // 1b. SMS consent (A2P 10DLC, db/033): stamp when + source only when the
+    // checkbox actually flips the recorded value, so unrelated contact edits
+    // don't reset the consent date. Mirrors the source conventions used by
+    // the STOP/START keyword handler (api/twilio/inbound.js) and the intake
+    // forms (api/leads/intake.js, api/c/[token].js).
+    if (patch.sms_consent !== undefined && patch.sms_consent !== before.sms_consent) {
+      patch.sms_consent_at = new Date().toISOString();
+      patch.sms_consent_source = patch.sms_consent
+        ? 'Manually confirmed by agent'
+        : 'Manually revoked by agent';
+    }
 
     // 2. Apply the patch. If a not-yet-migrated column (contact_type / 022,
     //    buyer_stage|seller_stage / 023) is referenced before its migration
