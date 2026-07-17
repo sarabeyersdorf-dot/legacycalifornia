@@ -126,10 +126,16 @@ export default async function handler(req, res) {
       const { error: updErr } = await supa
         .from('email_accounts')
         .update({
-          owner:         state,
-          email_address: emailAddress,
-          refresh_token: refreshToken,
-          active:        true
+          owner:           state,
+          email_address:   emailAddress,
+          refresh_token:   refreshToken,
+          active:          true,
+          // A successful reconnect immediately fixes whatever the cron had
+          // flagged — clear it here rather than making the owner wait up to
+          // 15 minutes for the next cron run to notice the token works again.
+          needs_reconnect: false,
+          last_sync_error: null,
+          last_error_at:   null
         })
         .eq('id', existing.id);
       if (updErr) {
@@ -140,10 +146,13 @@ export default async function handler(req, res) {
       const { error: insErr } = await supa
         .from('email_accounts')
         .insert({
-          owner:         state,
-          email_address: emailAddress,
-          refresh_token: refreshToken,
-          active:        true
+          owner:           state,
+          email_address:   emailAddress,
+          refresh_token:   refreshToken,
+          active:          true,
+          needs_reconnect: false,
+          last_sync_error: null,
+          last_error_at:   null
         });
       if (insErr) {
         console.error('[email-oauth-callback] insert failed', insErr.message);

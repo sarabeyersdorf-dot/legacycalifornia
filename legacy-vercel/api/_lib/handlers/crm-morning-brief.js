@@ -258,6 +258,22 @@ export default async function handler(req, res) {
       result.review_pending_count = pending || 0;
     } catch (_) { /* table absent / transient — leave empty, never break the brief */ }
 
+    // Phase 2D follow-up — surface mailboxes whose Gmail connection needs to be
+    // redone (testing-mode OAuth app => refresh tokens for test users expire
+    // periodically). The Settings card shows this too, but the morning brief is
+    // the channel the owner actually reads daily, so this is the more reliable
+    // place to catch it. Kept OUTSIDE the main Promise.all and fail-soft, same
+    // pattern as recent_comms above — the brief must load even if this lookup
+    // errors or the columns aren't there yet.
+    result.email_reconnect_needed = [];
+    try {
+      const { data: flagged } = await supa
+        .from('email_accounts')
+        .select('owner')
+        .eq('needs_reconnect', true);
+      result.email_reconnect_needed = (flagged || []).map((r) => r.owner);
+    } catch (_) { /* never break the brief over an email-status lookup */ }
+
     // Look for today's cached brief first. Refresh narrative if older than 4h.
     const agent = profile.role === 'agent_james' ? 'james' : 'sara';
     const today = new Date().toISOString().slice(0, 10);
@@ -279,6 +295,9 @@ export default async function handler(req, res) {
 
     // Generate the narrative — fail soft so the panel still works if Anthropic is down.
     try {
+      // Only mention a reconnect if it's the reading agent's OWN mailbox —
+      // never surface James's connection status in Sara's brief or vice versa.
+      const emailReconnectSelf = result.email_reconnect_needed.includes(agent);
       const ctx = {
         draft_count:        result.drafts.length,
         tours_today_count:  result.tours_today.length,
@@ -286,7 +305,8 @@ export default async function handler(req, res) {
         new_today_count:    result.new_today.length,
         open_offer_count:   result.open_offers.length,
         sample_new_lead:    result.new_today[0]?.first_name || null,
-        sample_radio_lead:  result.radio_silence[0]?.first_name || null
+        sample_radio_lead:  result.radio_silence[0]?.first_name || null,
+        email_reconnect_needed: emailReconnectSelf
       };
       const userPrompt = `Today is ${now.toLocaleDateString(undefined, { weekday:'long', month:'long', day:'numeric' })}.
 Snapshot for ${agent === 'sara' ? 'Sara' : 'James'}:
@@ -294,8 +314,8 @@ Snapshot for ${agent === 'sara' ? 'Sara' : 'James'}:
   ${ctx.tours_today_count} tour(s) on today's calendar
   ${ctx.new_today_count} new lead(s) in the past 24 hours${ctx.sample_new_lead ? ' (latest: ' + ctx.sample_new_lead + ')' : ''}
   ${ctx.radio_silence_count} lead(s) with no contact in 14+ days${ctx.sample_radio_lead ? ' (e.g. ' + ctx.sample_radio_lead + ')' : ''}
-  ${ctx.open_offer_count} open offer(s) in negotiation
-Write the brief paragraph now. Lead with the most important signal.`;
+  ${ctx.open_offer_count} open offer(s) in negotiation${emailReconnectSelf ? '\n  Your Gmail connection has expired — email sync is paused until you reconnect it from Settings' : ''}
+Write the brief paragraph now. Lead with the most important signal${emailReconnectSelf ? ' — the expired Gmail connection is important and should be mentioned' : ''}.`;
       const { text } = await anthropicMessage({
         system: briefSystem(agent),
         messages: [{ role: 'user', content: userPrompt }],

@@ -24,7 +24,7 @@ export default async function handler(req, res) {
     const { data, error } = await supa
       .from('email_accounts')
       // Explicitly NEVER select refresh_token here.
-      .select('owner, email_address, last_synced_at, connected_at, active');
+      .select('owner, email_address, last_synced_at, connected_at, active, needs_reconnect, last_sync_error, last_error_at');
     if (error) return fail(res, 500, error.message);
 
     const byOwner = new Map((data || []).map((r) => [r.owner, r]));
@@ -32,10 +32,13 @@ export default async function handler(req, res) {
       const row = byOwner.get(owner);
       return {
         owner,
-        connected:      !!(row && row.active),
-        email_address:  row ? row.email_address : null,
-        last_synced_at: row ? row.last_synced_at : null,
-        connected_at:   row ? row.connected_at : null
+        connected:       !!(row && row.active),
+        email_address:   row ? row.email_address : null,
+        last_synced_at:  row ? row.last_synced_at : null,
+        connected_at:    row ? row.connected_at : null,
+        needs_reconnect: !!(row && row.needs_reconnect),
+        last_sync_error: row ? (row.last_sync_error || null) : null,
+        last_error_at:   row ? (row.last_error_at || null) : null
       };
     });
 

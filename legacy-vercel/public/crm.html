@@ -3735,15 +3735,34 @@ function selectLead(el) {
       var accounts = (j && j.accounts) || [];
       accounts.forEach(function (a) {
         var el = document.querySelector('[data-email-status="' + a.owner + '"]');
-        if (!el) return;
-        if (a.connected && a.email_address) {
-          var synced = when(a.last_synced_at);
-          el.textContent = 'Connected as ' + a.email_address + (synced ? ' · last synced ' + synced : ' · not synced yet');
-        } else {
-          el.textContent = 'Not connected';
-        }
         var btn = document.querySelector('[data-connect-email="' + a.owner + '"]');
-        if (btn) btn.innerHTML = (a.connected ? 'Reconnect ' : 'Connect ') + label(a.owner) + '’s email<span class="arw">→</span>';
+        if (el) {
+          if (a.needs_reconnect) {
+            // Testing-mode Google OAuth app => refresh tokens for test users expire
+            // periodically. When that happens the cron flags this row instead of
+            // failing silently — show it clearly so the owner knows sync stopped.
+            var reason = a.last_sync_error || 'Google sign-in expired — reconnect';
+            el.innerHTML = '<span style="color:#A23B26;font-weight:600;">⚠ ' + esc(reason) + '</span>';
+          } else if (a.connected && a.email_address) {
+            var synced = when(a.last_synced_at);
+            el.textContent = 'Connected as ' + a.email_address + (synced ? ' · last synced ' + synced : ' · not synced yet');
+          } else {
+            el.textContent = 'Not connected';
+          }
+        }
+        if (btn) {
+          btn.innerHTML = (a.connected ? 'Reconnect ' : 'Connect ') + label(a.owner) + '’s email<span class="arw">→</span>';
+          // Make the button impossible to miss when a reconnect is actually needed.
+          if (a.needs_reconnect) {
+            btn.style.borderColor = '#A23B26';
+            btn.style.color = '#A23B26';
+            btn.style.fontWeight = '600';
+          } else {
+            btn.style.borderColor = '';
+            btn.style.color = '';
+            btn.style.fontWeight = '';
+          }
+        }
       });
     }).catch(function () {
       ['sara', 'james'].forEach(function (o) {

@@ -23,12 +23,42 @@
 // so a revoked/expired token on one account never blocks the other or crashes
 // the cron run. Uses the service-role client — this is an unattended cron,
 // there is no agent session.
+//
+// Reconnect flagging (testing-mode OAuth app => 7-day refresh token lifetime
+// for test users): when refreshAccessToken() fails, that specifically means
+// the stored refresh_token no longer works and the owner needs to click
+// "Connect Email" again — so we flag email_accounts.needs_reconnect = true
+// with a short human-readable last_sync_error, distinct from any other
+// mid-sync failure (e.g. a transient Gmail list/message error), which is
+// NOT reconnect-worthy and is left alone. A mailbox that completes a sync
+// successfully (i.e. token refresh worked) always clears the flag, so a
+// one-off failure that resolves itself doesn't leave a stale warning.
 
 import { adminClient } from '../_lib/supabase.js';
 import { handleOptions, ok, fail } from '../_lib/cors.js';
 
 const GMAIL_METADATA_HEADERS = ['From', 'Subject'];
 const MAX_MESSAGES_PER_MAILBOX = 50; // keep each 15-minute run bounded
+
+// Thrown only for a failed access-token refresh, so the caller can tell
+// "the refresh_token is dead, flag needs_reconnect" apart from any other
+// mid-sync error (bad Gmail response, DB hiccup, etc.) that shouldn't send
+// the owner off to reconnect a mailbox that's actually fine.
+class TokenRefreshError extends Error {
+  constructor(detail, summary) {
+    super(detail);
+    this.name = 'TokenRefreshError';
+    this.isTokenRefreshError = true;
+    this.summary = summary;
+  }
+}
+
+// Short, human-readable reason for the Settings card / morning brief — never
+// the raw Google error payload.
+function summarizeTokenError(errorCode) {
+  if (errorCode === 'invalid_grant') return 'Google sign-in expired — please reconnect';
+  return 'Google sign-in failed — please reconnect';
+}
 
 // Pull the bare address out of a From header like `"Jane Doe" <jane@x.com>`
 // or a bare `jane@x.com`. Mirrors the fail-soft, never-throw style of
@@ -60,7 +90,11 @@ async function refreshAccessToken(refreshToken, clientId, clientSecret) {
   });
   const json = await r.json().catch(() => ({}));
   if (!r.ok || !json.access_token) {
-    throw new Error(`token refresh failed (${r.status}): ${json.error || 'unknown'}`);
+    const errorCode = json.error || 'unknown';
+    throw new TokenRefreshError(
+      `token refresh failed (${r.status}): ${errorCode}`,
+      summarizeTokenError(errorCode)
+    );
   }
   return json.access_token;
 }
@@ -148,8 +182,16 @@ async function syncMailbox(supa, account, clientId, clientSecret) {
     }
   }
 
+  // Reaching here means refreshAccessToken() succeeded, so whatever token
+  // problem (if any) previously flagged this mailbox is resolved — clear it
+  // alongside the routine last_synced_at advance.
   await supa.from('email_accounts')
-    .update({ last_synced_at: syncStartedAt })
+    .update({
+      last_synced_at:  syncStartedAt,
+      needs_reconnect: false,
+      last_sync_error: null,
+      last_error_at:   null
+    })
     .eq('id', account.id);
 
   return { mailbox: account.email_address, checked: ids.length, inserted, matched, skipped };
@@ -186,10 +228,25 @@ export default async function handler(req, res) {
         results.push({ ok: true, ...r });
       } catch (e) {
         // Fail-soft per mailbox — a revoked/expired token on one account
-        // (e.g. Sara re-does her Google password) must never block James's
-        // mailbox or crash the cron run.
+        // (e.g. Sara re-does her Google password, or the 7-day test-user
+        // refresh token in our OAuth-testing-mode app simply expires) must
+        // never block James's mailbox or crash the cron run.
         console.error(`[email-sync] mailbox ${account.email_address} failed:`, e.message);
         results.push({ ok: false, mailbox: account.email_address, error: e.message });
+
+        if (e && e.isTokenRefreshError) {
+          try {
+            await supa.from('email_accounts')
+              .update({
+                needs_reconnect: true,
+                last_sync_error: e.summary,
+                last_error_at:   new Date().toISOString()
+              })
+              .eq('id', account.id);
+          } catch (_) {
+            // Best-effort flagging — never let this break the cron run.
+          }
+        }
       }
     }
 
