@@ -120,9 +120,13 @@ function mapDeal(d) {
     timeline:       d.timeline || null,
     // ONE SHARED TIMELINE: At-a-Glance milestones + the author-attributed client
     // note, written verbatim from deals.json and read by the Today board, seller
-    // portal, and buyer dashboard so all three show the same thing.
+    // portal, and buyer dashboard so all three show the same thing. Milestones
+    // carry their own `badge`/`desc`/`col` inside the jsonb.
     milestones:     Array.isArray(d.milestones) ? d.milestones : null,
     agent_note:     d.agentNote || null,
+    // v1.5 client-portal content: "What I need from you" + "Good to know".
+    client_tasks:   Array.isArray(d.clientTasks) ? d.clientTasks : null,
+    good_to_know:   Array.isArray(d.goodToKnow) ? d.goodToKnow : null,
     updated_at: new Date().toISOString()
   };
 }
@@ -245,8 +249,8 @@ export default async function handler(req, res) {
         // referenced before its migration runs, retry without them rather than
         // dropping the whole deal — a missing column must never blank the list.
         // They're restored automatically on the next sync once migrated.
-        if (wErr && /(listing_meta|timeline|milestones|agent_note)/i.test(wErr.message || '')) {
-          const { listing_meta, timeline, milestones, agent_note, ...safe } = mapped;
+        if (wErr && /(listing_meta|timeline|milestones|agent_note|client_tasks|good_to_know)/i.test(wErr.message || '')) {
+          const { listing_meta, timeline, milestones, agent_note, client_tasks, good_to_know, ...safe } = mapped;
           ({ error: wErr, id: dealId } = await writeDeal(safe));
         }
         if (wErr) throw new Error(`${ex ? 'update' : 'insert'}: ${wErr.message}`);

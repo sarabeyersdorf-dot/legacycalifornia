@@ -102,8 +102,24 @@
 .road-dot.next { background: var(--ink); border-color: var(--ink); }
 .road-dot.key  { background: var(--brass); border-color: var(--brass); box-shadow: 0 0 0 4px var(--linen); }
 .road-date { font-family: var(--mono); font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-mute); padding-top: 4px; }
+.road-label-row { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
 .road-body .road-label { font-family: var(--serif); font-style: italic; font-size: 19px; color: var(--ink); line-height: 1.15; }
 .road-body .road-desc { font-size: 13px; color: var(--ink-soft); margin-top: 4px; line-height: 1.5; }
+/* Status chip on a road step (v1.5 milestone.badge) */
+.road-badge {
+  font-family: var(--mono); font-size: 9px; letter-spacing: 0.1em; text-transform: uppercase;
+  padding: 3px 8px; border-radius: 100px; white-space: nowrap;
+  background: var(--rule-soft); color: var(--ink-mute); border: 1px solid var(--rule);
+}
+.road-badge.done { background: rgba(76,124,90,0.14); color: #3F6B4E; border-color: rgba(76,124,90,0.3); }
+.road-badge.key  { background: var(--linen); color: var(--brass-bright); border-color: var(--brass); }
+.road-badge.next { background: var(--ink); color: var(--shell); border-color: var(--ink); }
+
+/* Good to know (v1.5) */
+.gtk-item { padding: 12px 0; border-bottom: 1px solid var(--rule-soft); }
+.gtk-item:last-child { border-bottom: none; }
+.gtk-title { font-family: var(--serif); font-style: italic; font-size: 17px; color: var(--ink); line-height: 1.2; }
+.gtk-body { font-size: 13px; color: var(--ink-soft); margin-top: 4px; line-height: 1.55; }
 
 /* Sara note */
 .sara-note {
@@ -140,6 +156,8 @@
 }
 .task-row:last-child { border-bottom: none; }
 .task-box { width: 17px; height: 17px; border: 1px solid var(--rule-strong); background: var(--shell); }
+.task-row.done .task-box { background: var(--brass); border-color: var(--brass); }
+.task-row.done .task-label { color: var(--ink-mute); text-decoration: line-through; }
 .task-label { font-size: 13.5px; color: var(--ink); }
 .task-when { font-family: var(--mono); font-size: 10px; letter-spacing: 0.12em; color: var(--brass); text-transform: uppercase; white-space: nowrap; }
 .task-intro { font-size: 13px; color: var(--ink-soft); font-style: italic; line-height: 1.5; margin-bottom: 6px; }
@@ -273,9 +291,24 @@
             <div class="road-date" data-bind="date">—</div>
             <div class="road-mark"><span class="road-dot" data-add-class="status"></span></div>
             <div class="road-body">
-              <div class="road-label" data-bind="label">Milestone</div>
+              <div class="road-label-row">
+                <span class="road-label" data-bind="label">Milestone</span>
+                <span class="road-badge" data-bind="badge" data-add-class="status" data-optional>Done</span>
+              </div>
               <div class="road-desc" data-bind="description" data-optional>—</div>
             </div>
+          </div>
+        </section>
+
+        <!-- Good to know (v1.5) — collapses entirely when empty -->
+        <section class="s-card" id="good" data-list="good_to_know" data-optional>
+          <div class="s-card-h">
+            <h2>Good to know.</h2>
+            <span class="meta">Context on where things stand</span>
+          </div>
+          <div class="gtk-item" data-row>
+            <div class="gtk-title" data-bind="title">—</div>
+            <div class="gtk-body" data-bind="body" data-optional>—</div>
           </div>
         </section>
       </div>
@@ -286,7 +319,7 @@
         <section class="s-mini" id="tasks" data-list="tasks">
           <h3>What I need from you</h3>
           <p class="task-intro">I only reach out when something genuinely needs your signature. Those requests land right here — and I will text you too.</p>
-          <div class="task-row" data-row>
+          <div class="task-row" data-row data-add-class="status">
             <div class="task-box"></div>
             <div class="task-label" data-bind="label">Task</div>
             <span class="task-when" data-bind="when" data-optional>Open</span>

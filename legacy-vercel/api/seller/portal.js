@@ -283,10 +283,27 @@ export default async function handler(req, res) {
     let road = [];
     let timelineTasks = null;
 
-    // Preferred source: the curated deal_timeline_items — the rich, plain-English
-    // contractual timeline the agent approves updates to (per-deal detail, owner,
-    // due dates). This is what the client sees on "The road to closing".
-    try {
+    // Preferred source: the deals.json milestones (v1.5 — each carries a full
+    // `desc` paragraph, a `badge` chip, a status dot and an At-a-Glance `col`).
+    // This is Cowork's maintained source of truth and matches the Today board.
+    if (Array.isArray(deal.milestones) && deal.milestones.length) {
+      const msLabel = (d) => {
+        const s = /^(\d{4}-\d{2}-\d{2})/.exec(String(d || ''));
+        return s ? new Date(s[1] + 'T12:00:00Z').toLocaleDateString('en-US', { month: 'short', day: 'numeric', timeZone: 'UTC' }) : '';
+      };
+      road = deal.milestones.map((m) => ({
+        date: msLabel(m && m.date),
+        label: sanitize((m && m.label) || ''),
+        description: sanitize((m && (m.desc || m.description)) || ''),
+        status: ['done', 'next', 'upcoming', 'key'].includes(m && m.status) ? m.status : 'upcoming',
+        badge: sanitize((m && m.badge) || ''),
+        col: (m && m.col) || null
+      }));
+    }
+
+    // Next: the curated deal_timeline_items (rich contractual timeline) for a deal
+    // that isn't on the milestones model yet.
+    if (!road.length) try {
       const { data: tlItems } = await supa
         .from('deal_timeline_items')
         .select('*')
@@ -323,23 +340,7 @@ export default async function handler(req, res) {
             status: 'open'
           }));
       }
-    } catch (_) { /* table may not exist yet — fall through to the milestone/heuristic road */ }
-
-    // Fallback: the deals.json milestones (same steps the Today board shows) for
-    // a deal that hasn't been seeded into deal_timeline_items yet.
-    if (!road.length && Array.isArray(deal.milestones) && deal.milestones.length) {
-      const msLabel = (d) => {
-        const s = /^(\d{4}-\d{2}-\d{2})/.exec(String(d || ''));
-        return s ? new Date(s[1] + 'T12:00:00Z').toLocaleDateString('en-US', { month: 'short', day: 'numeric', timeZone: 'UTC' }) : '';
-      };
-      road = deal.milestones.map((m) => ({
-        date: msLabel(m && m.date),
-        label: sanitize((m && m.label) || ''),
-        description: sanitize((m && (m.desc || m.description)) || ''),
-        status: ['done', 'next', 'upcoming', 'key'].includes(m && m.status) ? m.status : 'upcoming',
-        col: (m && m.col) || null
-      }));
-    }
+    } catch (_) { /* table may not exist yet — fall through to the heuristic road */ }
 
     if (!road.length) {
     if (open) road.push({ date: fmtDate(open), label: 'Escrow opened', status: 'done',
@@ -366,13 +367,30 @@ export default async function handler(req, res) {
       else road.push(...cleaned);
     }
 
-    // What I need from you = docs the client still owes a signature on,
-    // plus any tasks the agent explicitly shared with this client.
-    const tasks = (timelineTasks || [])
-      .concat(docs
-        .filter((d) => d.status === 'to_sign' || d.status === 'with_seller' || d.status === 'pending')
-        .map((d) => ({ label: `Sign ${d.name}`, when: DOC_STATUS_LABEL[d.status] || 'Open', status: 'open' })))
-      .concat(sharedTasks);
+    // What I need from you. Preferred: the deal's curated clientTasks[] (v1.5,
+    // from deals.json) — the real to-do list, so a deal with genuine tasks no
+    // longer shows the empty state just because no doc is owed. Fall back to the
+    // owed-docs + timeline derivation when clientTasks isn't present.
+    let tasks;
+    if (Array.isArray(deal.client_tasks) && deal.client_tasks.length) {
+      tasks = deal.client_tasks.map((t) => ({
+        label:  sanitize((t && t.label) || ''),
+        when:   sanitize((t && t.when) || 'Open'),
+        status: (t && t.status === 'done') ? 'done' : 'open'
+      })).filter((t) => t.label).concat(sharedTasks);
+    } else {
+      tasks = (timelineTasks || [])
+        .concat(docs
+          .filter((d) => d.status === 'to_sign' || d.status === 'with_seller' || d.status === 'pending')
+          .map((d) => ({ label: `Sign ${d.name}`, when: DOC_STATUS_LABEL[d.status] || 'Open', status: 'open' })))
+        .concat(sharedTasks);
+    }
+
+    // "Good to know" — titled context bullets shown alongside the agent note
+    // (v1.5, from deals.json goodToKnow[]).
+    const goodToKnow = (Array.isArray(deal.good_to_know) ? deal.good_to_know : [])
+      .map((g) => ({ title: sanitize((g && g.title) || ''), body: sanitize((g && g.body) || '') }))
+      .filter((g) => g.title || g.body);
 
     // Team from the deal's contact columns
     const team = [];
@@ -473,6 +491,7 @@ export default async function handler(req, res) {
       },
       nav: { documents: String(docs.length), tasks: String(tasks.length) },
       kpis, road, documents: documentsArr, tasks, team,
+      good_to_know: goodToKnow,
       activity: [],
       note: {
         head: `A note from ${agentFirst} · This week`,
@@ -504,7 +523,7 @@ function emptyPortal(user) {
     status: { label: 'No active listing', badge: '', address: '', city: '', type: '', price: '—', since: '', tagline: '' },
     tour: { video_url: null, video_id: null, matterport_url: null },
     nav: { documents: '0', tasks: '0' },
-    kpis: [], road: [], documents: [], tasks: [], team: [], activity: [],
+    kpis: [], road: [], documents: [], tasks: [], team: [], good_to_know: [], activity: [],
     note: { head: 'A note from Sara', body: 'Your listing dashboard will appear here once your sale is under way.', sign: '— Sara · (209) 559-4966' }
   };
 }
