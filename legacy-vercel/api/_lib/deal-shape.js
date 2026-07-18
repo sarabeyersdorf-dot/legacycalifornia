@@ -60,3 +60,15 @@ export function sideKey(side) {
   if (side === 'seller') return 'sell';
   return null;
 }
+
+// Commission math from a deal's listing_meta.commission (a percent, stored
+// as a string like "3%" or "2.5"). Shared so the Ledger's Deadline Radar
+// cards and the morning brief's deal cards can't compute this two different
+// ways — same source data (listing_meta), same math, one place.
+export function commissionFor(price, listingMeta) {
+  const raw = listingMeta && listingMeta.commission;
+  const parsed = raw != null ? parseFloat(String(raw)) : null;
+  const pct = parsed != null && Number.isFinite(parsed) ? parsed : null;
+  const usd = (price && pct != null) ? Math.round(price * pct / 100) : null;
+  return { pct, usd };
+}

@@ -16,7 +16,7 @@ import { adminClient } from '../supabase.js';
 import { getCallerProfile, isAgent } from '../auth.js';
 import { anthropicMessage } from '../anthropic.js';
 import { handleOptions, ok, fail } from '../cors.js';
-import { daysToCoe, escrowStageSentence, sideKey } from '../deal-shape.js';
+import { daysToCoe, escrowStageSentence, sideKey, commissionFor } from '../deal-shape.js';
 
 // Agent-aware brief voice — the narrative addresses whoever is signed in, in
 // their own second person, never a hardcoded name. James must never read a
@@ -455,9 +455,7 @@ function shapeDealsInMotion(deals) {
     const stageLabel = escrowStageSentence(d);
     const agentName = d.agent === 'james' ? 'James' : 'Sara';
     // Commission (internal): percent from listing_meta against the live price.
-    const commRaw = d.listing_meta && d.listing_meta.commission;
-    const commPct = commRaw != null ? parseFloat(String(commRaw)) : null;
-    const commUsd = (price && commPct != null && Number.isFinite(commPct)) ? Math.round(price * commPct / 100) : null;
+    const { pct: commPct, usd: commUsd } = commissionFor(price, d.listing_meta);
     return {
       lead_id:     d.source_key,
       lead_name:   `${sideLabel(d.side)} · ${agentName}`,
@@ -468,7 +466,7 @@ function shapeDealsInMotion(deals) {
       coe_date:    d.coe_date || null,
       days_to_coe: daysToCloseVal,
       in_escrow:   inEscrow,
-      commission_pct: (commPct != null && Number.isFinite(commPct)) ? commPct : null,
+      commission_pct: commPct,
       commission_usd: commUsd,
       agent:       d.agent || null,
       track:       TRACK.map((label, i) => ({ label, done: i < trackIdx, on: i === trackIdx }))

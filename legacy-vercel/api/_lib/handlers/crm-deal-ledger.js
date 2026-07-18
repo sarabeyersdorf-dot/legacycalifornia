@@ -1,12 +1,13 @@
 // api/_lib/handlers/crm-deal-ledger.js
-// GET   /api/crm/deal-ledger   → deals in motion, shaped for the Ledger table
+// GET   /api/crm/deal-ledger   → deals in motion, shaped for the "Deadline
+//                                 Radar" card view on the Today tab
 // PATCH /api/crm/deal-ledger   → update the Ledger's own fields on one deal
 //
-// This is the read/write side for the crm.html "Deals in motion" section
-// (formerly a plain strip, now the full Ledger table). It does NOT replace
-// shapeDealsInMotion() in crm-morning-brief.js — that still feeds the
-// lighter-weight card view used elsewhere. This endpoint adds the columns
-// the Ledger needs that shapeDealsInMotion doesn't compute:
+// This is the read/write side for crm.html's "Deals in motion" section. It
+// does NOT replace shapeDealsInMotion() in crm-morning-brief.js — that still
+// feeds the lighter-weight card view used elsewhere. This endpoint adds
+// everything the Deadline Radar cards need that shapeDealsInMotion doesn't
+// compute:
 //
 //   next_contingency — read from deal_timeline_items (kind='contingency',
 //     status='upcoming'), NOT from deal_contingencies (that table exists but
@@ -24,12 +25,37 @@
 //     the lead_id/deal_parties chain so this keeps working as that data
 //     improves. Earliest upcoming starts_at per deal.
 //
-//   client_label, portal_shared — new, agent-set fields from db/036. See
-//     that migration's comments for why client_label is separate from the
-//     deal_parties/leads client-linking chain. (db/036 also added
-//     waiting_on — the UI dropped it as too fiddly to use in practice, but
-//     the column/API support is left in place rather than ripped out, in
-//     case that changes.)
+//   acceptance_date, escrow_open_date, coe_date — real deals columns, used
+//     to draw the card's timeline (Offer accepted → Inspection →
+//     Contingency → COE) for in-escrow deals.
+//
+//   listing_expiration — deals.listing_meta.expiration. Only meaningful for
+//     deals NOT yet in escrow (stage != 'pending') — the Deadline Radar's
+//     countdown for those is "days to expiration" rather than days to a
+//     contingency/inspection that doesn't exist yet. Not every listing has
+//     this in listing_meta; deals without it show no countdown badge rather
+//     than a fabricated one.
+//
+//   escrow_company / escrow_order (falls back to title_company if no escrow
+//     company on file) — real deals columns, for the card's "Escrow: X · Y"
+//     line.
+//
+//   commission_pct / commission_usd — shared with shapeDealsInMotion via
+//     deal-shape.js's commissionFor(); see that file for why this is shared.
+//
+//   parties — the deal's REAL linked contacts (deal_parties → leads), same
+//     join crm-deal-client.js already does for the Command Center. This is
+//     what makes the Deadline Radar's Call/Email buttons real: a tel:/
+//     mailto: link only appears when a linked party actually has a phone or
+//     email. Deals with no linked party yet fall back to client_label (free
+//     text, from db/036) and show a "Link client" action instead — linking
+//     itself is done by POSTing to the existing /api/crm/link-deal-party,
+//     not duplicated here.
+//
+//   client_label, portal_shared — agent-set fields from db/036. (db/036 also
+//     added waiting_on — the UI dropped it as too fiddly to use in
+//     practice, but the column/API support is left in place rather than
+//     ripped out, in case that changes.)
 //
 //   ledger_hidden — db/037. "Remove from Ledger" is a soft hide, not a row
 //     delete — see that migration's comments for why (deals.json would just
@@ -42,7 +68,13 @@
 import { adminClient } from '../supabase.js';
 import { getCallerProfile, isAgent } from '../auth.js';
 import { handleOptions, readJson, ok, fail } from '../cors.js';
-import { escrowStageSentence, sideKey } from '../deal-shape.js';
+import { escrowStageSentence, sideKey, commissionFor } from '../deal-shape.js';
+
+// Order deal_parties roles the same way crm-deal-client.js does — the
+// principal (seller/buyer) before a co-party — so "the client" shown first
+// on a card is consistent with what the Command Center calls primary.
+const ROLE_RANK = { seller: 0, buyer: 0, 'co-seller': 1, 'co-buyer': 1 };
+const fullName = (lead) => [lead.first_name, lead.last_name].filter(Boolean).join(' ') || lead.email || 'Client';
 
 // Deals considered "in motion" for the Ledger — mirrors the stage list
 // crm-calendar.js already uses for its deal picker, so the Ledger and the
@@ -88,7 +120,8 @@ async function listLedger(req, res, supa) {
 
   let dq = supa.from('deals').select(
     'id, source_key, address, city, side, stage, agent, co_agent, list_price, sale_price, ' +
-    'coe_date, client_label, portal_shared, updated_at'
+    'coe_date, acceptance_date, escrow_open_date, escrow_company, escrow_order, title_company, ' +
+    'listing_meta, client_label, portal_shared, updated_at'
   ).eq('ledger_hidden', false);
   dq = includeClosed ? dq : dq.in('stage', ACTIVE_STAGES);
   const { data: deals, error: dealErr } = await dq.order('address', { ascending: true });
@@ -116,13 +149,34 @@ async function listLedger(req, res, supa) {
     }
   }
 
-  // ---- Inspections: appointments, kind='inspection' ------------------------
-  // Resolve the lead_id -> deal_id chain too (deal_parties), as a fallback
-  // for once that data is actually populated (see file header).
+  // ---- Linked parties: deal_parties → leads --------------------------------
+  // Same join crm-deal-client.js does for the Command Center. Also builds
+  // leadToDeal, reused below as the inspection-matching fallback (see file
+  // header) for once appointments start carrying a real lead_id.
   const leadToDeal = new Map();
+  const partiesByDeal = new Map();
   {
-    const { data: parties } = await supa.from('deal_parties').select('lead_id, deal_id').in('deal_id', dealIds);
-    for (const p of (parties || [])) if (p.lead_id) leadToDeal.set(p.lead_id, p.deal_id);
+    const { data: partyRows, error } = await supa
+      .from('deal_parties').select('deal_id, role, lead_id').in('deal_id', dealIds);
+    if (error) return fail(res, 500, `deal_parties: ${error.message}`);
+    const leadIds = [...new Set((partyRows || []).map((p) => p.lead_id).filter(Boolean))];
+    let leadsById = new Map();
+    if (leadIds.length) {
+      const { data: leadRows, error: leadErr } = await supa
+        .from('leads').select('id, first_name, last_name, email, phone').in('id', leadIds);
+      if (leadErr) return fail(res, 500, `leads: ${leadErr.message}`);
+      leadsById = new Map((leadRows || []).map((l) => [l.id, l]));
+    }
+    for (const p of (partyRows || [])) {
+      if (!p.lead_id) continue;
+      leadToDeal.set(p.lead_id, p.deal_id);
+      const lead = leadsById.get(p.lead_id);
+      if (!lead) continue;
+      const arr = partiesByDeal.get(p.deal_id) || [];
+      arr.push({ role: p.role, name: fullName(lead), phone: lead.phone || null, email: lead.email || null });
+      partiesByDeal.set(p.deal_id, arr);
+    }
+    for (const arr of partiesByDeal.values()) arr.sort((a, b) => (ROLE_RANK[a.role] ?? 2) - (ROLE_RANK[b.role] ?? 2));
   }
 
   const inspByDeal = new Map();
@@ -157,6 +211,7 @@ async function listLedger(req, res, supa) {
 
   const shaped = deals.map((d) => {
     const price = d.sale_price || d.list_price || null;
+    const { pct: commissionPct, usd: commissionUsd } = commissionFor(price, d.listing_meta);
     return {
       id: d.id,
       source_key: d.source_key,
@@ -168,12 +223,24 @@ async function listLedger(req, res, supa) {
       stage: d.stage,
       stage_label: stageLabel(d),
       price,
+      commission_pct: commissionPct,
+      commission_usd: commissionUsd,
+      acceptance_date: d.acceptance_date || null,
+      escrow_open_date: d.escrow_open_date || null,
       coe_date: d.coe_date,
+      // Only meaningful pre-escrow — see file header. Left populated
+      // regardless of stage; the front end decides when to show it.
+      listing_expiration: (d.listing_meta && d.listing_meta.expiration) || null,
+      listing_meta_date_listed: (d.listing_meta && d.listing_meta.dateListed) || null,
+      listing_meta_disclosure_url: (d.listing_meta && d.listing_meta.disclosurePackage) || null,
+      escrow_company: d.escrow_company || d.title_company || null,
+      escrow_order: d.escrow_order || null,
       client_label: d.client_label || null,
       portal_shared: d.portal_shared === true,
       last_touch: d.updated_at,
       next_contingency: contByDeal.get(d.id) || null,
-      next_inspection: inspByDeal.get(d.id) || null
+      next_inspection: inspByDeal.get(d.id) || null,
+      parties: partiesByDeal.get(d.id) || []
     };
   });
 
