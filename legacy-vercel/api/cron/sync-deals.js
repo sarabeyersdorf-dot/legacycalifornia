@@ -229,9 +229,35 @@ export default async function handler(req, res) {
         // constraint on source_key existing in the (ad-hoc) deals table. A
         // missing constraint would make .upsert(onConflict) throw and abort the
         // whole sync, zeroing every listing.
-        const { data: ex, error: selErr } = await supa
-          .from('deals').select('id').eq('source_key', mapped.source_key).maybeSingle();
-        if (selErr) throw new Error(`lookup: ${selErr.message}`);
+        let ex = null;
+        {
+          const sel = await supa.from('deals').select('id, agent_note').eq('source_key', mapped.source_key).maybeSingle();
+          if (sel.error && /agent_note/i.test(sel.error.message || '')) {
+            const sel2 = await supa.from('deals').select('id').eq('source_key', mapped.source_key).maybeSingle();
+            if (sel2.error) throw new Error(`lookup: ${sel2.error.message}`);
+            ex = sel2.data;
+          } else if (sel.error) {
+            throw new Error(`lookup: ${sel.error.message}`);
+          } else {
+            ex = sel.data;
+          }
+        }
+
+        // Preserve a note the agent PUBLISHED in the CRM. deals.json always ships
+        // the note as a draft, so without this a routine re-sync would silently
+        // un-publish a live client note. Keep 'published' as long as the body is
+        // unchanged; if Cowork edited the note text, it reverts to draft and needs
+        // re-publishing (so the client never sees an edit the agent didn't OK).
+        const exNote = ex && ex.agent_note && typeof ex.agent_note === 'object' && !Array.isArray(ex.agent_note) ? ex.agent_note : null;
+        if (exNote && exNote.status === 'published' && mapped.agent_note &&
+            String(exNote.body || '').trim() === String(mapped.agent_note.body || '').trim()) {
+          mapped.agent_note = {
+            ...mapped.agent_note,
+            status: 'published',
+            published_at: exNote.published_at || null,
+            published_by: exNote.published_by || null
+          };
+        }
 
         // If a newly-added column (e.g. listing_meta before migration 019 runs)
         // isn't in the table yet, retry once without it rather than dropping the
