@@ -120,14 +120,22 @@ export default async function handler(req, res) {
     // (PENDING). On-market listings are NOT deals in motion — they live in the
     // Deals & Offers view. Scoped per agent: James sees his deals; the
     // broker-owner (Sara / admin) sees the whole brokerage.
-    let dealsQ = supa
-      .from('deals')
-      .select('source_key, address, city, stage, side, agent, list_price, sale_price, coe_date, listing_meta')
-      .in('stage', ['offer', 'pending'])
-      .order('coe_date', { ascending: true, nullsFirst: false })
-      .limit(8);
-    if (profile.role === 'agent_james') dealsQ = dealsQ.eq('agent', 'james');
-    const { data: dealsInMotion } = await dealsQ;
+    // `milestones` (migration 038) drives the At-a-Glance card; select it, but
+    // fall back to the base columns if the column isn't there yet so the Today
+    // board never blanks on a pre-migration deployment.
+    const DEAL_BASE = 'source_key, address, city, stage, side, agent, list_price, sale_price, coe_date, listing_meta';
+    const buildDealsQ = (cols) => {
+      let q = supa.from('deals').select(cols)
+        .in('stage', ['offer', 'pending'])
+        .order('coe_date', { ascending: true, nullsFirst: false })
+        .limit(8);
+      if (profile.role === 'agent_james') q = q.eq('agent', 'james');
+      return q;
+    };
+    let { data: dealsInMotion, error: dealsErr } = await buildDealsQ(DEAL_BASE + ', milestones');
+    if (dealsErr && /milestones/i.test(dealsErr.message || '')) {
+      ({ data: dealsInMotion } = await buildDealsQ(DEAL_BASE));
+    }
 
     const result = {
       drafts:        drafts.data        || [],
@@ -432,6 +440,50 @@ function shapeRecentComms(rows) {
   return [...groups.values()].sort((a, b) => new Date(b.last_at) - new Date(a.last_at));
 }
 
+// The four At-a-Glance columns (ONE SHARED TIMELINE). `col` on each milestone
+// (from deals.json) groups it here; the same headings render on the Today board,
+// the seller portal, and the buyer dashboard.
+const AT_A_GLANCE_COLS = [
+  { key: 'complete',      heading: 'Complete' },
+  { key: 'week',          heading: 'This Week' },
+  { key: 'contingencies', heading: 'Inspections & Contingencies' },
+  { key: 'closing',       heading: 'Closing' }
+];
+const MS_DATE = (s) => {
+  if (!s) return null;
+  const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(String(s));
+  if (!m) return null;
+  return { iso: `${m[1]}-${m[2]}-${m[3]}`, label: `${+m[2]}/${+m[3]}` };
+};
+// Group a deal's milestones[] into the four At-a-Glance columns, each ordered by
+// date. Returns null when the deal has no milestones (falls back to `track`).
+function shapeAtAGlance(milestones) {
+  if (!Array.isArray(milestones) || !milestones.length) return null;
+  const byCol = { complete: [], week: [], contingencies: [], closing: [] };
+  milestones.forEach((m) => {
+    const rawCol = m && m.col;
+    const bucket = byCol[rawCol] || byCol.week; // unknown/missing col → This Week, never dropped
+    const d = MS_DATE(m && m.date);
+    bucket.push({
+      date:       d ? d.iso : null,
+      date_label: d ? d.label : '',
+      label:      (m && m.label) || '',
+      status:     (m && m.status) || 'upcoming',
+      desc:       (m && (m.desc || m.description)) || ''
+    });
+  });
+  Object.keys(byCol).forEach((k) => byCol[k].sort((a, b) =>
+    (a.date || '9999').localeCompare(b.date || '9999')));
+  // Only surface columns that actually have items — today's data uses
+  // complete/contingencies/closing but not "week", and an always-empty column
+  // reads as broken. A column reappears automatically once a deal uses it.
+  const columns = AT_A_GLANCE_COLS
+    .map((c) => ({ key: c.key, heading: c.heading, items: byCol[c.key] }))
+    .filter((c) => c.items.length);
+  const total = columns.reduce((n, c) => n + c.items.length, 0);
+  return total ? { columns, total } : null;
+}
+
 // Real transactions from the deals table (fed by deals.json). Shows Sara's
 // actual listings + escrows on the Today view, with side (buy/sell/dual),
 // price, and where each is on the road to closing.
@@ -469,7 +521,10 @@ function shapeDealsInMotion(deals) {
       commission_pct: (commPct != null && Number.isFinite(commPct)) ? commPct : null,
       commission_usd: commUsd,
       agent:       d.agent || null,
-      track:       TRACK.map((label, i) => ({ label, done: i < trackIdx, on: i === trackIdx }))
+      track:       TRACK.map((label, i) => ({ label, done: i < trackIdx, on: i === trackIdx })),
+      // ONE SHARED TIMELINE: the At-a-Glance columns when the deal has milestones
+      // (replaces the linear track on the card); null → fall back to `track`.
+      at_a_glance: shapeAtAGlance(d.milestones)
     };
   });
 }

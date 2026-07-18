@@ -118,6 +118,11 @@ function mapDeal(d) {
     // CA RPA timeline (acceptance Day 0, overrides, removals, paused clock) for
     // the briefing calendar's contingency/COE deadline math.
     timeline:       d.timeline || null,
+    // ONE SHARED TIMELINE: At-a-Glance milestones + the author-attributed client
+    // note, written verbatim from deals.json and read by the Today board, seller
+    // portal, and buyer dashboard so all three show the same thing.
+    milestones:     Array.isArray(d.milestones) ? d.milestones : null,
+    agent_note:     d.agentNote || null,
     updated_at: new Date().toISOString()
   };
 }
@@ -240,8 +245,8 @@ export default async function handler(req, res) {
         // referenced before its migration runs, retry without them rather than
         // dropping the whole deal — a missing column must never blank the list.
         // They're restored automatically on the next sync once migrated.
-        if (wErr && /(listing_meta|timeline)/i.test(wErr.message || '')) {
-          const { listing_meta, timeline, ...safe } = mapped;
+        if (wErr && /(listing_meta|timeline|milestones|agent_note)/i.test(wErr.message || '')) {
+          const { listing_meta, timeline, milestones, agent_note, ...safe } = mapped;
           ({ error: wErr, id: dealId } = await writeDeal(safe));
         }
         if (wErr) throw new Error(`${ex ? 'update' : 'insert'}: ${wErr.message}`);

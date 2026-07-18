@@ -769,23 +769,46 @@
       return;
     }
     grid.innerHTML = deals.map((d) => {
-      const track = (d.track || []).map((step) => {
-        const cls = step.done ? 'dt dt-done' : (step.on ? 'dt dt-on' : 'dt');
-        return `<span class="${cls}">${escapeHtml(step.label)}</span>`;
-      }).join('');
       const addressLine = d.address ? `${escapeHtml(d.address)}${d.city ? ' · ' + escapeHtml(d.city) : ''}` : escapeHtml(d.lead_name);
       const dc = window.LegacyDealColors ? window.LegacyDealColors.get(d.lead_id) : null;
+      // ONE SHARED TIMELINE: when the deal has milestones, the card shows the
+      // four At-a-Glance columns (the same grouping the seller portal + buyer
+      // dashboard use); otherwise fall back to the linear track.
+      const glance = d.at_a_glance ? renderGlance(d.at_a_glance) : null;
+      const body = glance || `<div class="deal-track">${
+        (d.track || []).map((step) => {
+          const cls = step.done ? 'dt dt-done' : (step.on ? 'dt dt-on' : 'dt');
+          return `<span class="${cls}">${escapeHtml(step.label)}</span>`;
+        }).join('')
+      }</div>`;
       return `
-        <article class="deal" data-open-deal="${escapeHtml(d.lead_id || '')}" style="cursor:pointer;${dc ? `border-left:5px solid ${dc.border};` : ''}" title="Open this deal's command center" role="link" tabindex="0">
+        <article class="deal${glance ? ' deal-wide' : ''}" data-open-deal="${escapeHtml(d.lead_id || '')}" style="cursor:pointer;${dc ? `border-left:5px solid ${dc.border};` : ''}" title="Open this deal's command center" role="link" tabindex="0">
           <div class="deal-h">
             <span class="deal-stage">${escapeHtml(d.stage_label)}</span>
             <span class="deal-amt">${escapeHtml(fmtUsdBrief(d.amount))}</span>
           </div>
           <h4>${addressLine}</h4>
           <p class="deal-buyer">${escapeHtml(d.lead_name)}</p>
-          <div class="deal-track">${track}</div>
+          ${body}
         </article>`;
     }).join('');
+  }
+
+  // Render a deal's At-a-Glance as four dated columns (Complete / This Week /
+  // Inspections & Contingencies / Closing). Shared shape with the seller portal.
+  function renderGlance(g) {
+    return '<div class="deal-glance">' + (g.columns || []).map((c) => {
+      const items = (c.items && c.items.length)
+        ? c.items.map((it) => (
+            `<li class="dg-item dg-${escapeHtml(it.status || 'upcoming')}">` +
+              (it.date_label ? `<span class="dg-date">${escapeHtml(it.date_label)}</span>` : '') +
+              `<span class="dg-label">${escapeHtml(it.label)}</span>` +
+              (it.desc ? `<span class="dg-desc">${escapeHtml(it.desc)}</span>` : '') +
+            `</li>`
+          )).join('')
+        : '<li class="dg-empty">—</li>';
+      return `<div class="dg-col"><span class="dg-h">${escapeHtml(c.heading)}</span><ul class="dg-list">${items}</ul></div>`;
+    }).join('') + '</div>';
   }
 
   // Phase 2C — "Recent Communications" (Twilio deal inbox). Groups of active

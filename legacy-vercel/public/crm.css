@@ -1041,6 +1041,43 @@
 }
 .deal-foot strong { color: var(--ink); margin-right: 4px; }
 
+/* — At-a-Glance (ONE SHARED TIMELINE) — a deal with milestones renders a wide
+     card with four dated columns instead of the linear track. — */
+.deal.deal-wide { grid-column: 1 / -1; }
+.deal-glance {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 18px;
+  margin-top: 6px; padding-top: 14px; border-top: 1px solid var(--rule-soft);
+}
+.dg-col { min-width: 0; }
+.dg-h {
+  display: block; font-family: var(--mono); font-size: 9px; letter-spacing: 0.12em;
+  text-transform: uppercase; color: var(--brass);
+  padding-bottom: 8px; margin-bottom: 8px; border-bottom: 2px solid var(--rule);
+}
+.dg-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+.dg-item {
+  font-size: 12px; line-height: 1.35; color: var(--ink-soft);
+  padding-left: 14px; position: relative;
+}
+.dg-item::before {
+  content: ''; position: absolute; left: 0; top: 5px;
+  width: 7px; height: 7px; border-radius: 50%; background: var(--rule);
+}
+.dg-date { font-family: var(--mono); font-size: 9.5px; color: var(--ink-mute); margin-right: 5px; }
+.dg-label { color: var(--ink); }
+.dg-desc { display: block; font-size: 11px; color: var(--ink-mute); margin-top: 1px; }
+.dg-empty { font-size: 12px; color: var(--ink-faint); padding-left: 14px; }
+/* status colours — match the linear track's brass/ink language */
+.dg-item.dg-done { color: var(--ink-mute); }
+.dg-item.dg-done::before { background: var(--brass); }
+.dg-item.dg-next::before { background: var(--ink); }
+.dg-item.dg-next .dg-label { font-weight: 600; }
+.dg-item.dg-key::before { background: #2E5C3D; }
+.dg-item.dg-key .dg-label { font-weight: 600; }
+@media (max-width: 720px) {
+  .deal-glance { grid-template-columns: 1fr 1fr; }
+}
+
 /* — Tasks + day stats — */
 .today-foot {
   display: grid;
