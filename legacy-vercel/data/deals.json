@@ -1,5 +1,5 @@
 {
-  "version": 1.39,
+  "version": 1.4,
   "lastUpdated": "2026-07-18",
   "updatedBy": "Claude",
   "tasks": [
@@ -385,6 +385,21 @@
     },
     {
       "id": "9985-wendell",
+      "milestones": [
+        { "date": "2026-06-03", "label": "Contract accepted ($375K)", "status": "done", "col": "complete" },
+        { "date": "2026-06-18", "label": "Deposit wired · septic clean", "status": "done", "col": "complete" },
+        { "date": "2026-06-24", "label": "Appraisal inspection completed", "status": "done", "col": "complete" },
+        { "date": "2026-07-09", "label": "Court noticing period ended", "status": "done", "col": "complete" },
+        { "date": "", "label": "Awaiting judge's written approval", "status": "next", "col": "contingencies", "desc": "Starts every remaining deadline" },
+        { "date": "", "label": "Contingency windows open", "status": "upcoming", "col": "contingencies" },
+        { "date": "", "label": "Close of Escrow (tentative)", "status": "key", "col": "closing" }
+      ],
+      "agentNote": {
+        "author": "james",
+        "status": "draft",
+        "updated": "2026-07-18",
+        "body": "David and Stacy, the court's noticing period is behind us and we are waiting on the judge's written approval, which starts every remaining deadline. Your loan paperwork is moving in parallel so we can close quickly once it lands. Nothing is needed from you right now."
+      },
       "address": "9985 Wendell Rd",
       "city": "Mountain Ranch, CA 95246",
       "stage": "pending",
@@ -524,6 +539,20 @@
     },
     {
       "id": "8235-baldwin",
+      "milestones": [
+        { "date": "2026-06-17", "label": "Contract accepted ($207K)", "status": "done", "col": "complete" },
+        { "date": "2026-06-22", "label": "Deposit in escrow", "status": "done", "col": "complete", "desc": "Chicago Title · Veronica Barragan" },
+        { "date": "2026-06-24", "label": "Reports & disclosures received", "status": "done", "col": "complete" },
+        { "date": "2026-07-13", "label": "Contingency Removal #1 signed", "status": "done", "col": "contingencies", "desc": "Acknowledged by listing side 7/14" },
+        { "date": "2026-07-29", "label": "Final walk-through", "status": "upcoming", "col": "closing" },
+        { "date": "2026-08-03", "label": "Close of Escrow", "status": "key", "col": "closing" }
+      ],
+      "agentNote": {
+        "author": "james",
+        "status": "draft",
+        "updated": "2026-07-18",
+        "body": "Shomari, your contingencies are removed and we are moving toward closing in early August. The main thing now is keeping your renovation loan on track with your lender, so please answer their requests quickly. I will flag anything I need from you."
+      },
       "address": "8235 Baldwin St",
       "city": "Valley Springs, CA 95252",
       "stage": "pending",
@@ -641,6 +670,22 @@
     },
     {
       "id": "7230-latigo",
+      "milestones": [
+        { "date": "2026-06-19", "label": "Contract accepted ($615K)", "status": "done", "col": "complete" },
+        { "date": "2026-06-23", "label": "Escrow opened", "status": "done", "col": "complete", "desc": "Placer Title · Ashley Cuslidge (P-708659)" },
+        { "date": "2026-07-02", "label": "Disclosures received & signed", "status": "done", "col": "complete" },
+        { "date": "2026-07-06", "label": "Contingency Removal #1", "status": "done", "col": "contingencies" },
+        { "date": "2026-07-13", "label": "Appraisal in, above price ($620K)", "status": "done", "col": "contingencies" },
+        { "date": "2026-07-16", "label": "Final contingency removal", "status": "done", "col": "contingencies" },
+        { "date": "2026-07-17", "label": "Final walk-through", "status": "done", "col": "closing" },
+        { "date": "2026-07-20", "label": "Close of Escrow", "status": "key", "col": "closing" }
+      ],
+      "agentNote": {
+        "author": "sara",
+        "status": "draft",
+        "updated": "2026-07-18",
+        "body": "Guy and Adrianna, we are set to close Monday. Your appraisal came in above your purchase price and every contingency is removed. Escrow is finalizing the loan documents and the seller signing now. I will confirm the exact recording time and let you know the moment we are clear."
+      },
       "address": "7230 Latigo",
       "city": "CA",
       "stage": "pending",
@@ -944,6 +989,23 @@
     },
     {
       "id": "433-hwy4",
+      "milestones": [
+        { "date": "2026-06-19", "label": "Contract accepted ($1.3M)", "status": "done", "col": "complete" },
+        { "date": "2026-06-22", "label": "Escrow opened · roof inspection", "status": "done", "col": "complete", "desc": "Placer Title · Ashley Cuslidge" },
+        { "date": "2026-07-02", "label": "Buyer's home inspection", "status": "done", "col": "complete" },
+        { "date": "2026-07-07", "label": "Tenant extension signed", "status": "done", "col": "complete" },
+        { "date": "2026-07-09", "label": "Repair request resolved", "status": "done", "col": "contingencies" },
+        { "date": "2026-07-17", "label": "Appraisal report received", "status": "done", "col": "contingencies" },
+        { "date": "2026-07-23", "label": "Buyer loan contingency due", "status": "next", "col": "contingencies" },
+        { "date": "2026-08-05", "label": "Buyer's final walk-through", "status": "upcoming", "col": "closing" },
+        { "date": "2026-08-10", "label": "Close of Escrow", "status": "key", "col": "closing" }
+      ],
+      "agentNote": {
+        "author": "sara",
+        "status": "draft",
+        "updated": "2026-07-18",
+        "body": "Jim and Yvonne, the buyer's appraisal report is in and her lender is finishing its review, with the loan contingency due July 23. Your repair items and the tenant extension are all handled in writing. I will keep you posted as we head toward the August 10 close."
+      },
       "address": "433 E Highway 4",
       "city": "Murphys, CA",
       "stage": "pending",
@@ -1773,6 +1835,19 @@
     },
     {
       "id": "offer-695-feather",
+      "milestones": [
+        { "date": "2026-07-12", "label": "Offer sent", "status": "done", "col": "complete" },
+        { "date": "2026-07-15", "label": "Offer accepted · RPA executed", "status": "done", "col": "complete", "desc": "Orange Coast Title · Escrow 2473532-TS" },
+        { "date": "2026-07-16", "label": "Earnest money received", "status": "done", "col": "complete" },
+        { "date": "", "label": "Confirm final price & terms", "status": "next", "col": "contingencies" },
+        { "date": "", "label": "Close of Escrow (TBD)", "status": "key", "col": "closing" }
+      ],
+      "agentNote": {
+        "author": "james",
+        "status": "draft",
+        "updated": "2026-07-18",
+        "body": "Ashley, congratulations, your offer is accepted and escrow is open with Orange Coast Title. Your earnest money is in. I am confirming a few final details on price and next steps and will walk you through each one."
+      },
       "address": "695 Feather Dr",
       "city": "Copperopolis, CA 95228",
       "stage": "pending",
