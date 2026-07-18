@@ -29,8 +29,11 @@
 //   DROPBOX_REFRESH_TOKEN - long-lived refresh token (one-time OAuth setup, see notes)
 //   DROPBOX_DEALS_PATH    - optional, defaults to "/_LEGACY/Legacy Cowork/deals.json"
 //   SYNC_SECRET           - the existing secret your /api/cron/sync-deals already uses
+//
+// NOTE: this project's package.json has "type": "module", so this file is
+// loaded as an ES module — it uses `export default`, not `module.exports`.
 
-module.exports = async (req, res) => {
+export default async function handler(req, res) {
   const {
     PUBLISH_SECRET,
     GITHUB_TOKEN,
@@ -148,4 +151,4 @@ module.exports = async (req, res) => {
   } catch (err) {
     res.status(500).json({ success: false, error: err.message, steps });
   }
-};
+}
