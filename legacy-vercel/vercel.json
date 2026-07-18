@@ -148,6 +148,9 @@
     },
     "api/cron/email-sync.js": {
       "maxDuration": 60
+    },
+    "api/cron/publish-from-dropbox.js": {
+      "maxDuration": 60
     }
   },
   "crons": [
@@ -160,7 +163,7 @@
       "schedule": "0 */3 * * *"
     },
     {
-      "path": "/api/cron/flag-matches",
+      "path": "/api/cron/flag-matches.js",
       "schedule": "15 */3 * * *"
     },
     {
@@ -174,6 +177,10 @@
     {
       "path": "/api/cron/email-sync",
       "schedule": "*/15 * * * *"
+    },
+    {
+      "path": "/api/cron/publish-from-dropbox?key=YOUR_PUBLISH_SECRET",
+      "schedule": "0 16 * * *"
     }
   ]
 }
