@@ -156,6 +156,9 @@ export default async function handler(req, res) {
       lead = data || null;
     }
 
+    // Whose buyer is this — drives the note/message/digest attribution below.
+    const agent = agentFor(lead && lead.assigned_agent);
+
     // No lead yet — return a friendly empty payload the painter can handle.
     if (!lead) {
       return ok(res, {
@@ -257,8 +260,8 @@ export default async function handler(req, res) {
 
     // 6. Messages — surface outbound (Sara → buyer) recent notes
     const messagesArr = messages.map((m) => ({
-      avatar: 'art/sara-headshot.png',
-      from:   'Sara Cooper',
+      avatar: agent.avatar,
+      from:   agent.name,
       time:   fmtRelative(m.created_at),
       body:   sanitize(m.subject ? `${m.subject} — ${m.body.slice(0, 220)}` : m.body.slice(0, 240))
     }));
@@ -303,9 +306,9 @@ export default async function handler(req, res) {
       : 0;
 
     // 9. AI digest letter (Sara's note to the buyer). Fail-soft.
-    let digestLetter = `Quick note while you're here. I keep pulling listings that match what you told me — three new ones below. Tell me which ones spark a question or a flat no, and I'll narrow the next round. — Sara`;
+    let digestLetter = `Quick note while you're here. I keep pulling listings that match what you told me, three new ones below. Tell me which ones spark a question or a flat no, and I'll narrow the next round. — ${agent.first}`;
     try {
-      digestLetter = await draftDigest(lead, matched);
+      digestLetter = await draftDigest(lead, matched, agent);
     } catch (_) { /* keep fallback copy */ }
 
     // 10. Assemble the dashboard payload — strict shape per the selector contract
@@ -329,7 +332,7 @@ export default async function handler(req, res) {
       greeting: {
         eyebrow:    `${new Date().toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric' })} · welcome back`,
         first_name: firstName,
-        narrative:  buildGreetingNarrative(newMatchesArr.length, tours.length, messages.length)
+        narrative:  buildGreetingNarrative(newMatchesArr.length, tours.length, messages.length, agent.first)
       },
       stats: {
         saved_homes:     String(saved.length),
@@ -351,9 +354,9 @@ export default async function handler(req, res) {
       messages:    messagesArr,
       digest: {
         letter:       digestLetter,
-        agent_name:   'Sara Cooper',
-        agent_title:  'Broker · Legacy Properties',
-        agent_avatar: 'art/sara-headshot.png',
+        agent_name:   agent.name,
+        agent_title:  agent.title,
+        agent_avatar: agent.avatar,
         items:        newMatchesArr.slice(0, 3).map((m) => ({
           price:       fmtUSD(m._price),
           address:     m.address,
@@ -407,12 +410,20 @@ function emptyDashboard(user, profile) {
   };
 }
 
-function buildGreetingNarrative(matchCount, tourCount, msgCount) {
+// Agent identity so a buyer assigned to James sees James (name, phone, avatar,
+// digest signature) — not Sara. Keyed by leads.assigned_agent.
+const AGENTS = {
+  sara:  { key: 'sara',  name: 'Sara Cooper',      first: 'Sara',  title: 'Broker · Legacy Properties', phone: '209-559-4966', avatar: 'art/sara-headshot.png' },
+  james: { key: 'james', name: 'James Beyersdorf', first: 'James', title: 'Agent · Legacy Properties',  phone: '209-770-7523', avatar: 'art/james-headshot.png' }
+};
+const agentFor = (key) => AGENTS[key] || AGENTS.sara;
+
+function buildGreetingNarrative(matchCount, tourCount, msgCount, agentFirst = 'Sara') {
   const bits = [];
   if (matchCount) bits.push(`${matchCount} fresh match${matchCount === 1 ? '' : 'es'} on your brief`);
   if (tourCount)  bits.push(`${tourCount} tour${tourCount === 1 ? '' : 's'} coming up`);
-  if (msgCount)   bits.push(`${msgCount} new note${msgCount === 1 ? '' : 's'} from Sara`);
-  if (!bits.length) return 'Nothing new since you were here. Sara is on it.';
+  if (msgCount)   bits.push(`${msgCount} new note${msgCount === 1 ? '' : 's'} from ${agentFirst}`);
+  if (!bits.length) return `Nothing new since you were here. ${agentFirst} is on it.`;
   return bits.join(' · ') + '.';
 }
 
@@ -481,25 +492,26 @@ function buildAlerts(lead) {
   return out;
 }
 
-async function draftDigest(lead, matched) {
-  const SYSTEM = `You are writing a single short paragraph for Sara Cooper, Broker-Owner of Legacy Properties.
-Voice: warm, direct, never salesy. Like a friend who happens to be a broker.
+async function draftDigest(lead, matched, agent = AGENTS.sara) {
+  const A = agent || AGENTS.sara;
+  const SYSTEM = `You are writing a single short paragraph for ${A.name}, ${A.key === 'sara' ? 'Broker-Owner' : 'agent'} of Legacy Properties.
+Voice: warm, direct, never salesy. Like a friend who happens to be a real estate agent.
 Short sentences. No exclamation points. No filler. No em-dashes. No markdown. No greeting fluff.
 Hard rules:
-1. Sara's phone is 209-559-4966. Never use a placeholder like [phone] or {{phone}}.
+1. ${A.first}'s phone is ${A.phone}. Never use a placeholder like [phone] or {{phone}}. Never invent other contact info.
 2. Do not repeat the same phrase, sentence, or idea twice.
-3. If the recipient's first name is "Sara" (matches Sara's own name), open with "Hi," instead of "Hey Sara".
+3. If the recipient's first name is "${A.first}" (matches the agent's own name), open with "Hi," instead of "Hey ${A.first}".
 4. Output 3-4 short sentences. No salutation, no signoff. Plain prose.`;
 
   const matchLines = matched.length
     ? matched.map(({ p, pct }) => `  • ${p.address || 'Listing'} in ${p.city || '—'} — ${fmtUSD(p.price)} — ${pct}% match`).join('\n')
     : '  (none today)';
 
-  const prompt = `Write the buyer's daily digest letter from Sara.
+  const prompt = `Write the buyer's daily digest letter from ${A.first}.
 Recipient: ${lead.first_name || 'the buyer'} (lead type: ${lead.lead_type || 'buyer'}, journey: ${lead.journey_stage || 'unspecified'}).
 Today's top matches I picked for them:
 ${matchLines}
-The note should reference that you (Sara) handpicked these, invite one specific reply (yes / no / not sure), and stay under 90 words.`;
+The note should reference that you (${A.first}) handpicked these, invite one specific reply (yes / no / not sure), and stay under 90 words.`;
 
   const { text } = await anthropicMessage({
     system:      SYSTEM,

@@ -282,7 +282,27 @@ export default async function handler(req, res) {
     // the original date-heuristic road when a deal hasn't been seeded yet.
     let road = [];
     let timelineTasks = null;
-    try {
+
+    // Top preference: the SHARED milestones timeline (deals.json → the Today
+    // board and here), so the client portal shows the exact same steps the
+    // agent sees on the Today board. `col` (At-a-Glance column) rides along so
+    // the front-end can group it if it wants. Statuses already share the
+    // done/next/upcoming/key vocabulary.
+    if (Array.isArray(deal.milestones) && deal.milestones.length) {
+      const msLabel = (d) => {
+        const s = /^(\d{4}-\d{2}-\d{2})/.exec(String(d || ''));
+        return s ? new Date(s[1] + 'T12:00:00Z').toLocaleDateString('en-US', { month: 'short', day: 'numeric', timeZone: 'UTC' }) : '';
+      };
+      road = deal.milestones.map((m) => ({
+        date: msLabel(m && m.date),
+        label: sanitize((m && m.label) || ''),
+        description: sanitize((m && (m.desc || m.description)) || ''),
+        status: ['done', 'next', 'upcoming', 'key'].includes(m && m.status) ? m.status : 'upcoming',
+        col: (m && m.col) || null
+      }));
+    }
+
+    if (!road.length) try {
       const { data: tlItems } = await supa
         .from('deal_timeline_items')
         .select('*')
@@ -406,6 +426,14 @@ export default async function handler(req, res) {
     } else {
       noteBody = `${hi}I'll keep this page updated as things move along. Call me anytime with any questions.`;
     }
+
+    // A PUBLISHED agent note (deals.json agentNote, author-attributed) is the
+    // exact words the agent signed off on — it overrides the auto-note. Draft /
+    // approved notes stay agent-only (never shown to the client) until published,
+    // so the client only ever sees copy an agent has explicitly released.
+    const anote = deal.agent_note;
+    const notePublished = !!(anote && anote.status === 'published' && typeof anote.body === 'string' && anote.body.trim());
+    if (notePublished) noteBody = anote.body.trim();
 
     // Standing wire-fraud warning — shown ONLY to in-escrow clients (the reason
     // the private-link model exists). Never on a listing that isn't in escrow.
