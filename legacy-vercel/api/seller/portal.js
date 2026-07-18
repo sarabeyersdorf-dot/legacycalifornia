@@ -283,26 +283,10 @@ export default async function handler(req, res) {
     let road = [];
     let timelineTasks = null;
 
-    // Top preference: the SHARED milestones timeline (deals.json → the Today
-    // board and here), so the client portal shows the exact same steps the
-    // agent sees on the Today board. `col` (At-a-Glance column) rides along so
-    // the front-end can group it if it wants. Statuses already share the
-    // done/next/upcoming/key vocabulary.
-    if (Array.isArray(deal.milestones) && deal.milestones.length) {
-      const msLabel = (d) => {
-        const s = /^(\d{4}-\d{2}-\d{2})/.exec(String(d || ''));
-        return s ? new Date(s[1] + 'T12:00:00Z').toLocaleDateString('en-US', { month: 'short', day: 'numeric', timeZone: 'UTC' }) : '';
-      };
-      road = deal.milestones.map((m) => ({
-        date: msLabel(m && m.date),
-        label: sanitize((m && m.label) || ''),
-        description: sanitize((m && (m.desc || m.description)) || ''),
-        status: ['done', 'next', 'upcoming', 'key'].includes(m && m.status) ? m.status : 'upcoming',
-        col: (m && m.col) || null
-      }));
-    }
-
-    if (!road.length) try {
+    // Preferred source: the curated deal_timeline_items — the rich, plain-English
+    // contractual timeline the agent approves updates to (per-deal detail, owner,
+    // due dates). This is what the client sees on "The road to closing".
+    try {
       const { data: tlItems } = await supa
         .from('deal_timeline_items')
         .select('*')
@@ -339,7 +323,23 @@ export default async function handler(req, res) {
             status: 'open'
           }));
       }
-    } catch (_) { /* table may not exist yet — fall through to the heuristic road */ }
+    } catch (_) { /* table may not exist yet — fall through to the milestone/heuristic road */ }
+
+    // Fallback: the deals.json milestones (same steps the Today board shows) for
+    // a deal that hasn't been seeded into deal_timeline_items yet.
+    if (!road.length && Array.isArray(deal.milestones) && deal.milestones.length) {
+      const msLabel = (d) => {
+        const s = /^(\d{4}-\d{2}-\d{2})/.exec(String(d || ''));
+        return s ? new Date(s[1] + 'T12:00:00Z').toLocaleDateString('en-US', { month: 'short', day: 'numeric', timeZone: 'UTC' }) : '';
+      };
+      road = deal.milestones.map((m) => ({
+        date: msLabel(m && m.date),
+        label: sanitize((m && m.label) || ''),
+        description: sanitize((m && (m.desc || m.description)) || ''),
+        status: ['done', 'next', 'upcoming', 'key'].includes(m && m.status) ? m.status : 'upcoming',
+        col: (m && m.col) || null
+      }));
+    }
 
     if (!road.length) {
     if (open) road.push({ date: fmtDate(open), label: 'Escrow opened', status: 'done',
