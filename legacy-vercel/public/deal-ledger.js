@@ -156,7 +156,11 @@
     };
     if (d.stage === 'pending') {
       const points = [
-        { label: 'Offer',       date: d.acceptance_date },
+        // Being in escrow means an offer was already accepted, whether or
+        // not acceptance_date happens to be on file — never show this as
+        // "future" just because that column is empty (it's null on every
+        // live deal today; the milestone still already happened).
+        { label: 'Offer',       date: d.acceptance_date, state: 'done' },
         { label: 'Inspection',  date: d.next_inspection?.starts_at || null },
         { label: 'Contingency', date: d.next_contingency?.due_date || null },
         { label: 'COE',         date: d.coe_date }
@@ -165,13 +169,13 @@
       // everything before it is "done", everything after is "future".
       let currentIdx = -1, soonest = Infinity;
       points.forEach((p, i) => {
-        if (!p.date) return;
+        if (p.state || !p.date) return; // Offer's state above is fixed, not date-derived
         const days = daysFrom(p.date);
         if (days != null && days >= 0 && days < soonest) { soonest = days; currentIdx = i; }
       });
       return points.map((p, i) => ({
         ...p,
-        state: i === currentIdx ? 'current' : (p.date ? pointState(p.date) : 'future')
+        state: p.state || (i === currentIdx ? 'current' : (p.date ? pointState(p.date) : 'future'))
       }));
     }
     return [
