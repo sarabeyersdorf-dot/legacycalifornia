@@ -1,5 +1,5 @@
 {
-  "version": 1.4,
+  "version": 1.5,
   "lastUpdated": "2026-07-18",
   "updatedBy": "Claude",
   "tasks": [
@@ -386,13 +386,13 @@
     {
       "id": "9985-wendell",
       "milestones": [
-        { "date": "2026-06-03", "label": "Contract accepted ($375K)", "status": "done", "col": "complete" },
-        { "date": "2026-06-18", "label": "Deposit wired · septic clean", "status": "done", "col": "complete" },
-        { "date": "2026-06-24", "label": "Appraisal inspection completed", "status": "done", "col": "complete" },
-        { "date": "2026-07-09", "label": "Court noticing period ended", "status": "done", "col": "complete" },
-        { "date": "", "label": "Awaiting judge's written approval", "status": "next", "col": "contingencies", "desc": "Starts every remaining deadline" },
-        { "date": "", "label": "Contingency windows open", "status": "upcoming", "col": "contingencies" },
-        { "date": "", "label": "Close of Escrow (tentative)", "status": "key", "col": "closing" }
+        { "date": "2026-06-03", "label": "Contract accepted ($375K)", "status": "done", "col": "complete", "badge": "Done", "desc": "Your offer at $375,000 was accepted (Seller Counter signed June 2, accepted June 3), with the seller paying your broker's compensation at closing." },
+        { "date": "2026-06-18", "label": "Deposit wired · septic clean", "status": "done", "col": "complete", "badge": "Done", "desc": "Your $11,250 deposit is with Placer Title. You proceeded voluntarily with the septic inspection, which came back clean." },
+        { "date": "2026-06-24", "label": "Appraisal inspection completed", "status": "done", "col": "complete", "badge": "Done", "desc": "The appraiser visited the property with utilities on. Your lender is working in parallel while the court process runs." },
+        { "date": "2026-07-09", "label": "Court noticing period ended", "status": "done", "col": "complete", "badge": "Done", "desc": "The 21-day noticing window ran out with no objection stopping the sale. The file is now with the court for the judge's sign-off." },
+        { "date": "", "label": "Awaiting judge's written approval", "status": "next", "col": "contingencies", "badge": "Watch", "desc": "Every deadline in this deal begins the first day after the seller delivers written notice of court approval. We will send you real dates the day it arrives." },
+        { "date": "", "label": "Contingency windows open", "status": "upcoming", "col": "contingencies", "badge": "", "desc": "Standard contingency periods run from the approval date, followed by your final walk-through and closing." },
+        { "date": "", "label": "Close of Escrow (tentative)", "status": "key", "col": "closing", "badge": "Closing day", "desc": "The real closing date is set once the court approves. Deed records and the property is yours." }
       ],
       "agentNote": {
         "author": "james",
@@ -400,6 +400,16 @@
         "updated": "2026-07-18",
         "body": "David and Stacy, the court's noticing period is behind us and we are waiting on the judge's written approval, which starts every remaining deadline. Your loan paperwork is moving in parallel so we can close quickly once it lands. Nothing is needed from you right now."
       },
+      "clientTasks": [
+        { "label": "Sit tight on the court process — nothing is required from you while the judge's sign-off is pending", "when": "Now", "status": "open" },
+        { "label": "Keep your loan file current with your lender so financing stays ready the moment the court approves", "when": "Ongoing", "status": "open" },
+        { "label": "Coordinate early-occupancy logistics with James", "when": "Ongoing", "status": "open" }
+      ],
+      "goodToKnow": [
+        { "title": "Why the wait?", "body": "This is a court-supervised sale. By contract, all time periods start only after the seller delivers written notice of court approval. The noticing period is done; the judge's sign-off is the last step." },
+        { "title": "Your deposit is protected", "body": "If the court declines to approve the sale, your earnest money deposit is returned to you." },
+        { "title": "You're ahead of the game", "body": "The septic inspection (clean), the appraisal inspection, and your loan paperwork are already done or moving, so the remaining steps can move quickly once approval lands." }
+      ],
       "address": "9985 Wendell Rd",
       "city": "Mountain Ranch, CA 95246",
       "stage": "pending",
@@ -540,12 +550,12 @@
     {
       "id": "8235-baldwin",
       "milestones": [
-        { "date": "2026-06-17", "label": "Contract accepted ($207K)", "status": "done", "col": "complete" },
-        { "date": "2026-06-22", "label": "Deposit in escrow", "status": "done", "col": "complete", "desc": "Chicago Title · Veronica Barragan" },
-        { "date": "2026-06-24", "label": "Reports & disclosures received", "status": "done", "col": "complete" },
-        { "date": "2026-07-13", "label": "Contingency Removal #1 signed", "status": "done", "col": "contingencies", "desc": "Acknowledged by listing side 7/14" },
-        { "date": "2026-07-29", "label": "Final walk-through", "status": "upcoming", "col": "closing" },
-        { "date": "2026-08-03", "label": "Close of Escrow", "status": "key", "col": "closing" }
+        { "date": "2026-06-17", "label": "Contract accepted ($207K)", "status": "done", "col": "complete", "badge": "Done", "desc": "Your Buyer Counter at $207,000 was accepted, with the seller paying your broker's compensation. The home is sold as-is." },
+        { "date": "2026-06-22", "label": "Deposit in escrow", "status": "done", "col": "complete", "badge": "Done", "desc": "Your initial $2,500 earnest money deposit was received. The receipt and escrow holder acknowledgment are on file with Chicago Title, Veronica Barragan." },
+        { "date": "2026-06-24", "label": "Reports & disclosures received", "status": "done", "col": "complete", "badge": "Done", "desc": "The hazard report, the seller's disclosure package (TDS, SPQ, agent inspection, advisories), the fire-hardening disclosure, and the preliminary title report are all on file." },
+        { "date": "2026-07-13", "label": "Contingency removal signed", "status": "done", "col": "contingencies", "badge": "Done", "desc": "You signed Buyer Contingency Removal #1, and the listing side acknowledged it July 14. Your contingencies are removed." },
+        { "date": "2026-07-29", "label": "Final walk-through", "status": "upcoming", "col": "closing", "badge": "", "desc": "A final look at the property's condition, about 5 days before closing." },
+        { "date": "2026-08-03", "label": "Close of Escrow", "status": "key", "col": "closing", "badge": "Closing day", "desc": "Deed records and the property is yours. The 45-day date of August 1 is a Saturday, so closing rolls to the next business day." }
       ],
       "agentNote": {
         "author": "james",
@@ -553,6 +563,15 @@
         "updated": "2026-07-18",
         "body": "Shomari, your contingencies are removed and we are moving toward closing in early August. The main thing now is keeping your renovation loan on track with your lender, so please answer their requests quickly. I will flag anything I need from you."
       },
+      "clientTasks": [
+        { "label": "Stay in close contact with your lender — your renovation loan drives the closing timeline. Respond quickly to document or contractor-bid requests.", "when": "Ongoing", "status": "open" },
+        { "label": "Have homeowner's insurance ready to be effective at closing", "when": "By closing", "status": "open" },
+        { "label": "Plan for the final walk-through around July 29 with James", "when": "~Jul 29", "status": "open" }
+      ],
+      "goodToKnow": [
+        { "title": "Contingencies are removed", "body": "With your signed removal delivered and acknowledged, the remaining steps are your lender's funding milestones, the walk-through, and closing." },
+        { "title": "Renovation financing", "body": "Renovation-loan timelines depend on lender milestones, so the closing date can shift a little. James is tracking it week to week." }
+      ],
       "address": "8235 Baldwin St",
       "city": "Valley Springs, CA 95252",
       "stage": "pending",
@@ -671,14 +690,14 @@
     {
       "id": "7230-latigo",
       "milestones": [
-        { "date": "2026-06-19", "label": "Contract accepted ($615K)", "status": "done", "col": "complete" },
-        { "date": "2026-06-23", "label": "Escrow opened", "status": "done", "col": "complete", "desc": "Placer Title · Ashley Cuslidge (P-708659)" },
-        { "date": "2026-07-02", "label": "Disclosures received & signed", "status": "done", "col": "complete" },
-        { "date": "2026-07-06", "label": "Contingency Removal #1", "status": "done", "col": "contingencies" },
-        { "date": "2026-07-13", "label": "Appraisal in, above price ($620K)", "status": "done", "col": "contingencies" },
-        { "date": "2026-07-16", "label": "Final contingency removal", "status": "done", "col": "contingencies" },
-        { "date": "2026-07-17", "label": "Final walk-through", "status": "done", "col": "closing" },
-        { "date": "2026-07-20", "label": "Close of Escrow", "status": "key", "col": "closing" }
+        { "date": "2026-06-19", "label": "Contract accepted ($615K)", "status": "done", "col": "complete", "badge": "Done", "desc": "Your Buyer Counter at $615,000 was accepted and signed by the seller. This is Day 0 for every deadline." },
+        { "date": "2026-06-23", "label": "Escrow opened", "status": "done", "col": "complete", "badge": "Done", "desc": "Placer Title, Ashley Cuslidge (Order P-708659). Escrow and title fees split 50/50." },
+        { "date": "2026-07-02", "label": "Disclosures received & signed", "status": "done", "col": "complete", "badge": "Done", "desc": "The seller's full disclosure package arrived and you both signed the same day. You waived separate well and septic inspections after reviewing the seller's reports." },
+        { "date": "2026-07-06", "label": "Contingency Removal #1", "status": "done", "col": "contingencies", "badge": "Done", "desc": "You removed all contingencies except appraisal and loan, right on the 17-day contract deadline." },
+        { "date": "2026-07-13", "label": "Appraisal complete — above purchase price", "status": "done", "col": "contingencies", "badge": "Good news", "desc": "The home appraised at $620,000, above your $615,000 purchase price." },
+        { "date": "2026-07-16", "label": "Final contingency removal signed", "status": "done", "col": "contingencies", "badge": "Done", "desc": "You both signed the final Buyer Contingency Removal, clearing the last appraisal and loan contingencies." },
+        { "date": "2026-07-17", "label": "Final walk-through", "status": "done", "col": "closing", "badge": "Done", "desc": "You completed your final look at the property's condition before closing." },
+        { "date": "2026-07-20", "label": "Close of Escrow", "status": "key", "col": "closing", "badge": "Closing day", "desc": "Deed records and the property is yours. The contractual July 19 is a Sunday, so closing rolls to Monday." }
       ],
       "agentNote": {
         "author": "sara",
@@ -686,6 +705,15 @@
         "updated": "2026-07-18",
         "body": "Guy and Adrianna, we are set to close Monday. Your appraisal came in above your purchase price and every contingency is removed. Escrow is finalizing the loan documents and the seller signing now. I will confirm the exact recording time and let you know the moment we are clear."
       },
+      "clientTasks": [
+        { "label": "Watch for your signing appointment and funding instructions from Placer Title, and respond right away", "when": "Now", "status": "open" },
+        { "label": "Verify any wire instructions by phone with Placer (209.736.9553) before sending funds", "when": "Before wiring", "status": "open" },
+        { "label": "Have your homeowner's insurance effective at closing", "when": "By closing", "status": "open" }
+      ],
+      "goodToKnow": [
+        { "title": "All contingencies are removed", "body": "With the final removal signed July 16 and the appraisal above price, the deal is fully de-risked on your side. What remains is the mechanical closing." },
+        { "title": "Vehicles & trailers", "body": "The signed addendum confirms the buyer removes the remaining vehicles and trailers. All pool equipment is included in the sale." }
+      ],
       "address": "7230 Latigo",
       "city": "CA",
       "stage": "pending",
@@ -990,15 +1018,15 @@
     {
       "id": "433-hwy4",
       "milestones": [
-        { "date": "2026-06-19", "label": "Contract accepted ($1.3M)", "status": "done", "col": "complete" },
-        { "date": "2026-06-22", "label": "Escrow opened · roof inspection", "status": "done", "col": "complete", "desc": "Placer Title · Ashley Cuslidge" },
-        { "date": "2026-07-02", "label": "Buyer's home inspection", "status": "done", "col": "complete" },
-        { "date": "2026-07-07", "label": "Tenant extension signed", "status": "done", "col": "complete" },
-        { "date": "2026-07-09", "label": "Repair request resolved", "status": "done", "col": "contingencies" },
-        { "date": "2026-07-17", "label": "Appraisal report received", "status": "done", "col": "contingencies" },
-        { "date": "2026-07-23", "label": "Buyer loan contingency due", "status": "next", "col": "contingencies" },
-        { "date": "2026-08-05", "label": "Buyer's final walk-through", "status": "upcoming", "col": "closing" },
-        { "date": "2026-08-10", "label": "Close of Escrow", "status": "key", "col": "closing" }
+        { "date": "2026-06-19", "label": "Contract accepted ($1.3M)", "status": "done", "col": "complete", "badge": "Done", "desc": "Seller Counter Offer No. 1 signed at $1,300,000 — the house plus the wellness-studio space, sold together." },
+        { "date": "2026-06-22", "label": "Escrow opened · roof inspection", "status": "done", "col": "complete", "badge": "Done", "desc": "Placer Title, Ashley Cuslidge. The buyer's roof inspection was completed and the written report received June 29." },
+        { "date": "2026-07-02", "label": "Buyer's home inspection", "status": "done", "col": "complete", "badge": "Done", "desc": "General home inspection completed by Norm Cucuzza, Inner Vision Home Inspections. The written report is on file." },
+        { "date": "2026-07-07", "label": "Tenant extension signed", "status": "done", "col": "complete", "badge": "Done", "desc": "The through-end-of-August occupancy extension is now fully signed by all parties." },
+        { "date": "2026-07-09", "label": "Repair request resolved", "status": "done", "col": "contingencies", "badge": "Done", "desc": "You signed your response to the buyer's Request for Repair and her signed reply came back. Everyone is aligned on the repair items." },
+        { "date": "2026-07-17", "label": "Appraisal report received", "status": "done", "col": "contingencies", "badge": "Done", "desc": "The buyer's lender received the appraisal report and is finalizing its review." },
+        { "date": "2026-07-23", "label": "Buyer loan contingency due", "status": "next", "col": "contingencies", "badge": "Key date", "desc": "The last major hurdle. Once the buyer removes her loan contingency, the sale is substantially de-risked." },
+        { "date": "2026-08-05", "label": "Buyer's final walk-through", "status": "upcoming", "col": "closing", "badge": "", "desc": "The buyer verifies the property's condition about 5 days before closing." },
+        { "date": "2026-08-10", "label": "Close of Escrow", "status": "key", "col": "closing", "badge": "Closing day", "desc": "Deed records, funds disburse, and the sale is complete." }
       ],
       "agentNote": {
         "author": "sara",
@@ -1006,6 +1034,17 @@
         "updated": "2026-07-18",
         "body": "Jim and Yvonne, the buyer's appraisal report is in and her lender is finishing its review, with the loan contingency due July 23. Your repair items and the tenant extension are all handled in writing. I will keep you posted as we head toward the August 10 close."
       },
+      "clientTasks": [
+        { "label": "Complete the agreed repair items — the Section 1 pest work (up to $5,697) plus the signed repair-request items. Keep receipts for the file.", "when": "In process", "status": "open" },
+        { "label": "Send the well results when ready — production (GPM) and bacterial test, the replaced-pump update, and confirmation of the sprinkler fixes", "when": "In process", "status": "open" },
+        { "label": "Sign the corrected fire-hardening disclosure if a signature is still outstanding", "when": "Sent to you", "status": "open" },
+        { "label": "Keep your tenants in the loop on the August timeline — walk-through Aug 5, closing Aug 10, occupancy through end of August", "when": "Ongoing", "status": "open" }
+      ],
+      "goodToKnow": [
+        { "title": "The appraisal report is in", "body": "The buyer's lender received the report July 17 and is finalizing its review, with the loan contingency due July 23." },
+        { "title": "Inspection contingencies are behind you", "body": "The buyer has signed contingency removals following the inspections and agreed repairs. The loan contingency is what remains." },
+        { "title": "Listing coverage", "body": "Your listing agreement runs through August 18, fully covering the August 10 close." }
+      ],
       "address": "433 E Highway 4",
       "city": "Murphys, CA",
       "stage": "pending",
@@ -1836,11 +1875,11 @@
     {
       "id": "offer-695-feather",
       "milestones": [
-        { "date": "2026-07-12", "label": "Offer sent", "status": "done", "col": "complete" },
-        { "date": "2026-07-15", "label": "Offer accepted · RPA executed", "status": "done", "col": "complete", "desc": "Orange Coast Title · Escrow 2473532-TS" },
-        { "date": "2026-07-16", "label": "Earnest money received", "status": "done", "col": "complete" },
-        { "date": "", "label": "Confirm final price & terms", "status": "next", "col": "contingencies" },
-        { "date": "", "label": "Close of Escrow (TBD)", "status": "key", "col": "closing" }
+        { "date": "2026-07-12", "label": "Offer sent", "status": "done", "col": "complete", "badge": "Done", "desc": "Your offer went to the listing agent for 695 Feather Dr, Copperopolis." },
+        { "date": "2026-07-15", "label": "Offer accepted · RPA executed", "status": "done", "col": "complete", "badge": "Done", "desc": "Your offer was accepted and the purchase agreement fully executed. Escrow opened at Orange Coast Title (Escrow 2473532-TS)." },
+        { "date": "2026-07-16", "label": "Earnest money received", "status": "done", "col": "complete", "badge": "Done", "desc": "Your earnest money deposit was confirmed received by escrow." },
+        { "date": "", "label": "Confirm final price & terms", "status": "next", "col": "contingencies", "badge": "Action", "desc": "We are finalizing the accepted price and next steps and will walk you through each one." },
+        { "date": "", "label": "Close of Escrow (TBD)", "status": "key", "col": "closing", "badge": "Closing day", "desc": "The closing date is set once terms are confirmed. Deed records and the property is yours." }
       ],
       "agentNote": {
         "author": "james",
@@ -1848,6 +1887,13 @@
         "updated": "2026-07-18",
         "body": "Ashley, congratulations, your offer is accepted and escrow is open with Orange Coast Title. Your earnest money is in. I am confirming a few final details on price and next steps and will walk you through each one."
       },
+      "clientTasks": [
+        { "label": "Complete your ClosingLock wire instructions and verify by phone before sending any funds", "when": "Now", "status": "open" }
+      ],
+      "goodToKnow": [
+        { "title": "Escrow is open", "body": "Your offer is accepted and escrow is open with Orange Coast Title. Your earnest money is in." },
+        { "title": "A few details to confirm", "body": "We are finalizing the accepted price and next steps and will walk you through each one." }
+      ],
       "address": "695 Feather Dr",
       "city": "Copperopolis, CA 95228",
       "stage": "pending",
