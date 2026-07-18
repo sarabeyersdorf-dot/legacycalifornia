@@ -18,9 +18,11 @@
 //     tab, which already has real reschedule/cancel support — this table
 //     just links there via "Open" so there isn't a second, conflicting way
 //     to edit the same event.
-//   - client name and "waiting on" and "share on client portal" ARE real and
-//     editable here — they're new fields that exist only for this table
-//     (db/036), so there's nothing else to conflict with.
+//   - client name and "share on client portal" ARE real and editable here —
+//     they're new fields that exist only for this table (db/036), so
+//     there's nothing else to conflict with.
+//   - "Remove" hides a deal from this table (db/037: ledger_hidden) rather
+//     than deleting the underlying deal — see that migration's comments.
 
 (function () {
   const root = document.querySelector('[data-ledger-root]');
@@ -48,14 +50,6 @@
   const AGENTS = {
     sara:  { initials: 'S', c: 'oklch(0.62 0.1 78)', cd: 'oklch(0.5 0.1 78)' },
     james: { initials: 'J', c: 'oklch(0.55 0.09 250)', cd: 'oklch(0.46 0.09 250)' }
-  };
-  const PARTIES = {
-    you:       { label: 'You',       c: 'oklch(0.58 0.11 55)', strong: true },
-    lender:    { label: 'Lender',    c: 'oklch(0.5 0.09 250)' },
-    inspector: { label: 'Inspector', c: 'oklch(0.5 0.09 285)' },
-    coagent:   { label: 'Co-agent',  c: 'oklch(0.52 0.07 40)' },
-    client:    { label: 'Client',    c: 'oklch(0.5 0.07 160)' },
-    escrowco:  { label: 'Escrow',    c: 'oklch(0.5 0.05 320)' }
   };
   const GROUP_META = {
     action:     { name: 'Action today', icon: '!', tint: 'oklch(0.55 0.15 25)', hint: 'Overdue or a 48-hour deadline' },
@@ -175,11 +169,6 @@
 
     h += `<div class="dl-price${price ? '' : ' empty'}">${price || 'TBD'}</div>`;
 
-    h += `<div class="dl-wait"><select data-wait-select>`;
-    h += `<option value="" ${!d.waiting_on ? 'selected' : ''}>— set</option>`;
-    Object.keys(PARTIES).forEach((k) => { h += `<option value="${k}" ${d.waiting_on === k ? 'selected' : ''}>${PARTIES[k].label}</option>`; });
-    h += `</select></div>`;
-
     h += `<div class="dl-cont" data-open-deal="${esc(d.source_key || '')}" title="Open this deal's timeline">`;
     h += `<div class="dl-cell">`;
     if (nc) {
@@ -205,10 +194,12 @@
     h += coeDays != null ? `<div class="dl-coecount" style="color:${coeDays <= 7 ? 'oklch(0.52 0.15 25)' : 'oklch(0.55 0.01 60)'}">${coeDays}d</div>` : '';
     h += `</div>`;
 
-    const hasClient = !!d.client_label; // best signal we have client-side without a second round trip
     h += `<div class="dl-portal-wrap"><button class="dl-portal${d.portal_shared ? ' on' : ''}" data-portal-toggle title="${d.portal_shared ? 'Shared on client portal — click to unshare' : 'Share this deal on the client portal'}"></button></div>`;
 
-    h += `<div class="dl-act"><button class="dl-actbtn" data-open-deal="${esc(d.source_key || '')}" title="Open deal" style="width:31px;height:31px;border:1px solid oklch(0.88 0.008 80);border-radius:8px;cursor:pointer;background:oklch(0.99 0.004 85);color:oklch(0.42 0.01 60);font-size:13px;">⌕</button></div>`;
+    h += `<div class="dl-act">`;
+    h += `<button class="dl-actbtn" data-open-deal="${esc(d.source_key || '')}" title="Open deal">⌕</button>`;
+    h += `<button class="dl-actbtn danger" data-remove title="Remove from Ledger">✕</button>`;
+    h += `</div>`;
     h += `</div>`;
     return h;
   }
@@ -258,15 +249,14 @@
         </div>
         <div class="dl-card"><div class="dl-scroll"><div class="dl-inner">
           <div class="dl-head">
-            <span class="dl-c-deal">Deal &middot; Client</span>
-            <span class="dl-c-side">Side &middot; Agent</span>
-            <span class="dl-c-price">Price</span>
-            <span class="dl-c-wait">Waiting on</span>
-            <span class="dl-c-cont">Next contingency</span>
-            <span class="dl-c-insp">Next inspection</span>
-            <span class="dl-c-coe">COE</span>
-            <span style="flex:.5;text-align:center;">Portal</span>
-            <span class="dl-c-act"></span>
+            <span>Deal &middot; Client</span>
+            <span>Side &middot; Agent</span>
+            <span>Price</span>
+            <span>Next contingency</span>
+            <span>Next inspection</span>
+            <span>COE</span>
+            <span>Portal</span>
+            <span></span>
           </div>
           <div data-rows>${rowsHTML}</div>
         </div></div></div>
@@ -295,14 +285,6 @@
         });
       }
 
-      const waitSelect = rowEl.querySelector('[data-wait-select]');
-      if (waitSelect) {
-        waitSelect.addEventListener('click', (e) => e.stopPropagation());
-        waitSelect.addEventListener('change', async () => {
-          await patchDeal(deal, { waiting_on: waitSelect.value || null }, 'Updated who we’re waiting on');
-        });
-      }
-
       const portalBtn = rowEl.querySelector('[data-portal-toggle]');
       if (portalBtn) {
         portalBtn.addEventListener('click', async (e) => {
@@ -310,6 +292,17 @@
           const next = !deal.portal_shared;
           const okDone = await patchDeal(deal, { portal_shared: next }, next ? 'Sharing on client portal' : 'No longer sharing on client portal');
           if (okDone) render();
+        });
+      }
+
+      const removeBtn = rowEl.querySelector('[data-remove]');
+      if (removeBtn) {
+        removeBtn.addEventListener('click', async (e) => {
+          e.stopPropagation();
+          const label = deal.client_label ? `${deal.address} (${deal.client_label})` : deal.address;
+          if (!confirm(`Remove "${label}" from the Ledger?\n\nThis just hides it here — nothing is deleted, and it may come back if it's still in the daily sync feed.`)) return;
+          const okDone = await patchDeal(deal, { ledger_hidden: true }, 'Removed from Ledger');
+          if (okDone) { state.deals = state.deals.filter((x) => x.id !== deal.id); render(); }
         });
       }
     });

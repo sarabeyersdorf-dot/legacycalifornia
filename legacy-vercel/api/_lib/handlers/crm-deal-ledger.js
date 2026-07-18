@@ -24,9 +24,18 @@
 //     the lead_id/deal_parties chain so this keeps working as that data
 //     improves. Earliest upcoming starts_at per deal.
 //
-//   client_label, waiting_on, portal_shared — new, agent-set fields from
-//     db/036. See that migration's comments for why these are separate from
-//     the deal_parties/leads client-linking chain.
+//   client_label, portal_shared — new, agent-set fields from db/036. See
+//     that migration's comments for why client_label is separate from the
+//     deal_parties/leads client-linking chain. (db/036 also added
+//     waiting_on — the UI dropped it as too fiddly to use in practice, but
+//     the column/API support is left in place rather than ripped out, in
+//     case that changes.)
+//
+//   ledger_hidden — db/037. "Remove from Ledger" is a soft hide, not a row
+//     delete — see that migration's comments for why (deals.json would just
+//     resurrect a hard-deleted row on the next sync, and a cascade delete
+//     would destroy real child records). Hidden deals are filtered out of
+//     the default GET; nothing else in the app reads this column.
 //
 // Agent-only, same auth pattern as every other CRM handler.
 
@@ -38,6 +47,8 @@ import { handleOptions, readJson, ok, fail } from '../cors.js';
 // crm-calendar.js already uses for its deal picker, so the Ledger and the
 // Calendar agree on what counts as an active deal.
 const ACTIVE_STAGES = ['pending', 'offer', 'listing', 'preparing'];
+// Still validated/settable via PATCH even though the Ledger UI no longer
+// shows a "waiting on" control — see the file header note.
 const WAITING_ON_VALUES = ['you', 'lender', 'inspector', 'coagent', 'client', 'escrowco'];
 
 const DEAL_TAG_RE = /\[deal:([a-z0-9-]+)/i;
@@ -82,8 +93,8 @@ async function listLedger(req, res, supa) {
 
   let dq = supa.from('deals').select(
     'id, source_key, address, city, side, stage, agent, co_agent, list_price, sale_price, ' +
-    'coe_date, client_label, waiting_on, portal_shared, updated_at'
-  );
+    'coe_date, client_label, portal_shared, updated_at'
+  ).eq('ledger_hidden', false);
   dq = includeClosed ? dq : dq.in('stage', ACTIVE_STAGES);
   const { data: deals, error: dealErr } = await dq.order('address', { ascending: true });
   if (dealErr) return fail(res, 500, `deals: ${dealErr.message}`);
@@ -164,7 +175,6 @@ async function listLedger(req, res, supa) {
       price,
       coe_date: d.coe_date,
       client_label: d.client_label || null,
-      waiting_on: d.waiting_on || null,
       portal_shared: d.portal_shared === true,
       last_touch: d.updated_at,
       next_contingency: contByDeal.get(d.id) || null,
@@ -192,11 +202,12 @@ async function patchLedger(req, res, supa) {
     patch.waiting_on = body.waiting_on;
   }
   if (body.portal_shared !== undefined) patch.portal_shared = body.portal_shared === true;
+  if (body.ledger_hidden !== undefined) patch.ledger_hidden = body.ledger_hidden === true;
   if (!Object.keys(patch).length) return fail(res, 400, 'no updatable fields provided');
 
   let q = supa.from('deals').update(patch);
   q = dealId ? q.eq('id', dealId) : q.eq('source_key', sourceKey);
-  const { data, error } = await q.select('id, source_key, client_label, waiting_on, portal_shared');
+  const { data, error } = await q.select('id, source_key, client_label, waiting_on, portal_shared, ledger_hidden');
   if (error) return fail(res, 500, error.message);
   if (!data || !data.length) return fail(res, 404, `no deal with ${dealId ? 'id ' + dealId : 'source_key ' + sourceKey}`);
 

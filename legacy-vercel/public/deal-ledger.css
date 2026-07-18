@@ -3,7 +3,14 @@
    rest of the CRM's styling (legacy.css / crm.css use a different, unrelated
    naming convention). Visual language matches the approved design mockup;
    re-theming this to match the site's paper/ledger aesthetic elsewhere is a
-   separate follow-up, not part of this pass. */
+   separate follow-up, not part of this pass.
+
+   Header and rows share ONE grid column template (--dl-cols, set once on
+   .dl-card and inherited) instead of two independently hand-tuned sets of
+   flex-basis numbers — that's what caused the earlier misalignment (content
+   width nudging flex children out of sync with the header). A shared grid
+   template can't drift: every row uses the exact same track sizes as the
+   header, always. */
 @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Poppins:wght@500;600;700&family=Archivo:wght@400;500;600;700&family=Archivo+Mono:wght@400;500&display=swap');
 
 .dl { display:block; width:100%; font-family:'Archivo',sans-serif; color:oklch(0.28 0.012 55); box-sizing:border-box; }
@@ -22,59 +29,65 @@
 .dl-legend { margin-left:auto; display:flex; gap:14px; }
 .dl-leg { display:inline-flex; align-items:center; gap:6px; font-size:12px; font-weight:600; color:oklch(0.46 0.01 60); }
 .dl-leg i { width:9px; height:9px; border-radius:3px; display:inline-block; }
-.dl-card { border:1px solid oklch(0.9 0.008 80); border-radius:18px; box-shadow:0 12px 40px oklch(0.3 0.02 60 / 0.09); overflow:hidden; background:oklch(0.995 0.002 85); }
+.dl-card { border:1px solid oklch(0.9 0.008 80); border-radius:18px; box-shadow:0 12px 40px oklch(0.3 0.02 60 / 0.09); overflow:hidden; background:oklch(0.995 0.002 85);
+  --dl-cols: 2.4fr 1.05fr 0.8fr 1.5fr 1.6fr 0.8fr 0.7fr 92px; }
 .dl-scroll { overflow-x:auto; }
 .dl-inner { min-width:1080px; }
-.dl-head { display:flex; align-items:center; height:44px; padding:0 12px 0 0; background:oklch(0.235 0.012 55); color:oklch(0.82 0.01 80); font-size:11px; letter-spacing:.8px; text-transform:uppercase; font-weight:700; }
-.dl-c-deal { flex:2.2; padding-left:16px; } .dl-c-side { flex:1.05; } .dl-c-price { flex:.75; } .dl-c-wait { flex:1.15; }
-.dl-c-cont { flex:1.4; } .dl-c-insp { flex:1.5; } .dl-c-coe { flex:.75; }
-.dl-c-act { width:60px; flex:none; text-align:right; padding-right:14px; }
+
+.dl-head, .dl-row { display:grid; grid-template-columns: var(--dl-cols); align-items:center; column-gap:8px; }
+.dl-head { height:44px; padding:0 16px; background:oklch(0.235 0.012 55); color:oklch(0.82 0.01 80); font-size:11px; letter-spacing:.8px; text-transform:uppercase; font-weight:700; }
+.dl-head > span:last-child, .dl-row > .dl-act { text-align:right; }
+.dl-head > span:nth-child(7) { text-align:center; }
+
 .dl-group { display:flex; align-items:center; gap:10px; padding:11px 22px; }
 .dl-group-name { font-size:12.5px; font-weight:700; letter-spacing:.3px; color:oklch(0.26 0.012 55); }
 .dl-group-icon, .dl-group-count { display:inline-flex; align-items:center; justify-content:center; font-weight:700; }
 .dl-group-icon { width:22px; height:22px; flex:none; border-radius:6px; font-size:12px; }
 .dl-group-count { min-width:22px; height:20px; padding:0 7px; border-radius:6px; font-size:12px; }
 .dl-group-hint { font-size:11.5px; color:oklch(0.55 0.01 60); font-weight:500; }
-.dl-row { display:flex; align-items:center; padding:0 12px 0 0; min-height:66px; border-bottom:1px solid oklch(0.93 0.006 80); }
+
+.dl-row { padding:0 16px; min-height:66px; border-bottom:1px solid oklch(0.93 0.006 80); }
 .dl-row:hover { background:oklch(0.97 0.005 85); }
-.dl-deal { flex:2.2; display:flex; align-items:center; gap:12px; padding:11px 10px 11px 16px; position:relative; cursor:pointer; }
+.dl-deal { display:flex; align-items:center; gap:12px; padding:11px 0; position:relative; cursor:pointer; margin-left:-16px; padding-left:16px; }
 .dl-spine { position:absolute; left:0; top:0; bottom:0; width:4px; }
 .dl-avatar { width:30px; height:30px; flex:none; border-radius:50%; display:inline-flex; align-items:center; justify-content:center; font-size:11.5px; font-weight:700; }
 .dl-addr { font-family:'Poppins',sans-serif; font-size:15px; font-weight:600; letter-spacing:-.2px; color:oklch(0.2 0.012 55); line-height:1.15; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 .dl-clientline { display:flex; align-items:center; gap:7px; margin-top:2px; }
-.dl-client { font-size:12px; color:oklch(0.52 0.01 60); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; background:transparent; border:none; border-bottom:1px dashed transparent; padding:0; cursor:text; min-width:40px; }
+.dl-client { font-size:12px; color:oklch(0.52 0.01 60); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; background:transparent; border:none; border-bottom:1px dashed transparent; padding:0; cursor:text; min-width:40px; max-width:110px; }
 .dl-client:hover, .dl-client:focus { border-bottom-color:oklch(0.7 0.06 70); outline:none; }
 .dl-client::placeholder { color:oklch(0.7 0.01 60); font-style:italic; }
 .dl-statusdot { width:5px; height:5px; flex:none; border-radius:50%; }
 .dl-status { font-size:11px; color:oklch(0.58 0.01 60); white-space:nowrap; }
 .dl-touchline { display:flex; align-items:center; gap:7px; margin-top:4px; }
 .dl-touch { font-size:11px; color:oklch(0.6 0.01 60); }
-.dl-side { flex:1.05; display:flex; align-items:center; gap:7px; }
+.dl-side { display:flex; align-items:center; gap:7px; flex-wrap:wrap; }
 .dl-sidechip { display:inline-flex; align-items:center; font-size:11.5px; font-weight:700; letter-spacing:.3px; padding:2px 9px; border-radius:20px; white-space:nowrap; }
 .dl-agents { display:flex; gap:3px; }
 .dl-agent { width:21px; height:21px; flex:none; border-radius:50%; display:inline-flex; align-items:center; justify-content:center; font-size:11px; font-weight:700; }
-.dl-price { flex:.75; font-size:14px; font-weight:700; color:oklch(0.26 0.012 55); }
+.dl-price { font-size:14px; font-weight:700; color:oklch(0.26 0.012 55); }
 .dl-price.empty { color:oklch(0.7 0.01 60); font-weight:500; }
-.dl-wait { flex:1.15; }
-.dl-wait select { appearance:none; -webkit-appearance:none; font-size:12px; font-weight:600; padding:5px 24px 5px 10px; border-radius:20px; cursor:pointer; background-color:oklch(0.95 0.006 85); color:oklch(0.4 0.01 60); border:1px solid oklch(0.9 0.008 80); background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='%23888'><path d='M5 7l5 5 5-5z'/></svg>"); background-repeat:no-repeat; background-position:right 6px center; background-size:14px; }
-.dl-cont, .dl-insp { cursor:pointer; }
-.dl-cont { flex:1.4; } .dl-insp { flex:1.5; }
-.dl-cell { display:block; width:100%; text-align:left; padding:6px 8px; margin:0 -8px; border-radius:7px; }
-.dl-cell-top { display:flex; align-items:center; gap:6px; }
+.dl-cont, .dl-insp { cursor:pointer; min-width:0; }
+.dl-cell { display:block; width:100%; text-align:left; padding:6px 8px; margin:0 -8px; border-radius:7px; min-width:0; }
+.dl-cell-top { display:flex; align-items:center; gap:6px; min-width:0; }
 .dl-state { display:inline-flex; align-items:center; flex:none; font-size:9.5px; font-weight:700; letter-spacing:.4px; text-transform:uppercase; padding:2px 6px; border-radius:5px; white-space:nowrap; }
-.dl-celllabel { font-size:12px; color:oklch(0.34 0.01 60); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.dl-celllabel { font-size:12px; color:oklch(0.34 0.01 60); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; min-width:0; }
 .dl-contdate { font-size:11px; font-weight:700; margin-top:3px; }
 .dl-inspdate { font-size:11px; color:oklch(0.5 0.09 250); font-weight:600; margin-top:3px; }
-.dl-coe { flex:.75; }
 .dl-coeshort { font-size:13px; font-weight:600; color:oklch(0.3 0.012 55); }
 .dl-coecount { font-size:11px; font-weight:700; }
-.dl-act { width:60px; flex:none; display:flex; justify-content:flex-end; padding-right:14px; }
+.dl-act { display:flex; justify-content:flex-end; align-items:center; gap:5px; }
+.dl-actbtn { width:30px; height:30px; flex:none; border:1px solid oklch(0.88 0.008 80); border-radius:8px; cursor:pointer; background:oklch(0.99 0.004 85); color:oklch(0.42 0.01 60); font-size:13px; display:inline-flex; align-items:center; justify-content:center; }
+.dl-actbtn:hover { background:oklch(0.235 0.012 55); color:oklch(0.98 0 0); border-color:oklch(0.235 0.012 55); }
+.dl-actbtn.danger:hover { background:oklch(0.5 0.16 25); border-color:oklch(0.5 0.16 25); }
 .dl-portal { width:34px; height:20px; flex:none; border-radius:20px; border:1px solid oklch(0.85 0.01 80); background:oklch(0.92 0.006 80); cursor:pointer; position:relative; transition:background .15s; }
 .dl-portal::after { content:''; position:absolute; top:1px; left:1px; width:16px; height:16px; border-radius:50%; background:#fff; box-shadow:0 1px 2px oklch(0.3 0.02 60 / 0.3); transition:transform .15s; }
 .dl-portal.on { background:oklch(0.5 0.13 155); border-color:oklch(0.5 0.13 155); }
 .dl-portal.on::after { transform:translateX(14px); }
-.dl-portal[disabled] { cursor:not-allowed; opacity:.5; }
-.dl-portal-wrap { flex:.5; display:flex; align-items:center; justify-content:center; }
+.dl-portal-wrap { display:flex; align-items:center; justify-content:center; }
 .dl-empty { padding:48px 24px; text-align:center; color:oklch(0.55 0.01 60); font-size:13.5px; }
 .dl-toast { position:fixed; bottom:26px; left:50%; display:flex; align-items:center; gap:10px; transform:translateX(-50%) translateY(20px); opacity:0; transition:all .25s; pointer-events:none; z-index:50; background:oklch(0.235 0.012 55); color:oklch(0.97 0.006 85); padding:12px 20px; border-radius:11px; font-size:13.5px; font-weight:600; box-shadow:0 10px 34px oklch(0.2 0.02 60 / 0.35); }
 .dl-toast.on { transform:translateX(-50%) translateY(0); opacity:1; pointer-events:auto; }
+
+@media (max-width: 900px) {
+  .dl-inner { min-width:960px; }
+}
