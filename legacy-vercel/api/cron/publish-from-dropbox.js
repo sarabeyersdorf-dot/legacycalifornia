@@ -14,32 +14,32 @@
 //      portal pick up the change immediately.
 //
 // Trigger: GET https://legacycalifornia.vercel.app/api/cron/publish-from-dropbox?key=<PUBLISH_SECRET>
-// Add a Vercel Cron entry (see vercel.json snippet in the setup notes) to
-// call this automatically once a day, or hit the URL manually any time.
 //
-// Required environment variables (set these in Vercel -> Project -> Settings -> Environment Variables):
+// Required environment variables (Vercel -> Project -> Settings -> Environment Variables):
 //   PUBLISH_SECRET        - any password you choose, protects this endpoint
-//   GITHUB_TOKEN          - the same fine-grained PAT already used for pushes
-//                           (repo: sarabeyersdorf-dot/legacycalifornia, contents: read/write)
-//   GITHUB_OWNER          - "sarabeyersdorf-dot"
-//   GITHUB_REPO           - "legacycalifornia"
-//   GITHUB_BRANCH         - "main"
+//   GITHUB_TOKEN          - fine-grained PAT scoped to sarabeyersdorf-dot/legacycalifornia,
+//                           Contents: Read and write
 //   DROPBOX_APP_KEY       - from your Dropbox App Console
 //   DROPBOX_APP_SECRET    - from your Dropbox App Console
-//   DROPBOX_REFRESH_TOKEN - long-lived refresh token (one-time OAuth setup, see notes)
+//   DROPBOX_REFRESH_TOKEN - long-lived refresh token from the one-time OAuth setup
 //   DROPBOX_DEALS_PATH    - optional, defaults to "/_LEGACY/Legacy Cowork/deals.json"
 //   SYNC_SECRET           - the existing secret your /api/cron/sync-deals already uses
 //
-// NOTE: this project's package.json has "type": "module", so this file is
-// loaded as an ES module — it uses `export default`, not `module.exports`.
+// GITHUB_OWNER, GITHUB_REPO, and GITHUB_BRANCH are NOT env vars anymore —
+// they're fixed values (this repo never moves), so they're hardcoded just
+// below instead of being one more thing that can be mistyped in Vercel.
+//
+// NOTE: this project's package.json has "type": "module", so this file uses
+// `export default`, not `module.exports`.
+
+const GITHUB_OWNER = "sarabeyersdorf-dot";
+const GITHUB_REPO = "legacycalifornia";
+const GITHUB_BRANCH = "main";
 
 export default async function handler(req, res) {
   const {
     PUBLISH_SECRET,
     GITHUB_TOKEN,
-    GITHUB_OWNER,
-    GITHUB_REPO,
-    GITHUB_BRANCH,
     DROPBOX_APP_KEY,
     DROPBOX_APP_SECRET,
     DROPBOX_REFRESH_TOKEN,
@@ -53,7 +53,6 @@ export default async function handler(req, res) {
     return;
   }
 
-  const branch = GITHUB_BRANCH || "main";
   const dropboxPath = DROPBOX_DEALS_PATH || "/_LEGACY/Legacy Cowork/deals.json";
   const steps = {};
 
@@ -113,7 +112,9 @@ export default async function handler(req, res) {
       "Content-Type": "application/json",
     };
 
-    const getResp = await fetch(`${contentsUrl}?ref=${branch}`, { headers: ghHeaders });
+    steps.githubRequestUrl = `${contentsUrl}?ref=${GITHUB_BRANCH}`;
+
+    const getResp = await fetch(`${contentsUrl}?ref=${GITHUB_BRANCH}`, { headers: ghHeaders });
     if (!getResp.ok) {
       const errText = await getResp.text();
       throw new Error(`GitHub GET failed: ${getResp.status} ${errText}`);
@@ -131,7 +132,7 @@ export default async function handler(req, res) {
           message: `Publish deals.json v${parsed.version} (${parsed.lastUpdated}) via Vercel cron`,
           content: Buffer.from(dealsText, "utf-8").toString("base64"),
           sha: getJson.sha,
-          branch,
+          branch: GITHUB_BRANCH,
         }),
       });
       if (!putResp.ok) {
