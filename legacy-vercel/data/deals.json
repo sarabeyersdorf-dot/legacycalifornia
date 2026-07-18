@@ -1,6 +1,6 @@
 {
-  "version": 1.38,
-  "lastUpdated": "2026-07-16",
+  "version": 1.39,
+  "lastUpdated": "2026-07-18",
   "updatedBy": "Claude",
   "tasks": [
     {
@@ -215,7 +215,7 @@
       "agent": "sara",
       "client": "Latigo",
       "title": "Send buyer-initialed Preliminary Title Report to Kylie",
-      "done": false
+      "done": true
     },
     {
       "agent": "sara",
@@ -228,24 +228,6 @@
       "client": "695 Feather",
       "title": "Watch for seller response on 695 Feather Dr offer (Ashley Robinson)",
       "done": true
-    },
-    {
-      "agent": "james",
-      "client": "695 Feather",
-      "title": "Confirm accepted SCO1 terms (price, commission split, COE) so deals.json can be updated for the new escrow (Orange Coast Title, Order #2473532-TS, Tanya Salgado)",
-      "done": false
-    },
-    {
-      "agent": "james",
-      "client": "695 Feather",
-      "title": "Confirm the $170,000 cash-purchase figure given to Placer for the net sheet matches the final accepted SCO1 price",
-      "done": false
-    },
-    {
-      "agent": "james",
-      "client": "695 Feather",
-      "title": "Confirm BRBC (3% total, 1% seller/2% buyer) sent to Orange Coast Title 7/16 is filed/tracked; confirm the $5,000 ClosingLock deposit request went out",
-      "done": false
     }
   ],
   "deals": [
@@ -578,7 +560,8 @@
         "TDS": "executed",
         "SPQ": "executed",
         "FHDS": "received — filed in EX 7/7",
-        "ETA1": "executed — filed in EX (extension covering the 7/6 buyer-contingency date; added to deals.json 7/11 per Sara)"
+        "ETA1": "executed — filed in EX (extension covering the 7/6 buyer-contingency date; added to deals.json 7/11 per Sara)",
+        "contingencyRemoval": "executed — Buyer Contingency Removal #1 (dated 6/24) signed by Shomari Turner via Authentisign 7/13, sent to Allyson Overturf 7/13, acknowledged 7/14; file confirmed in EX 7/14 (per James Gmail review 7/17, verified against EX folder)"
       },
       "clientDocuments": [
         {
@@ -652,7 +635,8 @@
         "COE ~Aug 3 (45 days; 8/1 is Saturday)",
         "Buyer contingencies (due 7/6) handled via ETA1 — CONFIRMED filed in EX, reflected in deals.json 7/11 ✅",
         "FHA 203(k) rehab loan — watch lender/appraisal milestones",
-        "Escrow/title CONFIRMED: Chicago Title, Order #FSST-5312600364 (Sara 6/24); full NHD report received 6/23"
+        "Escrow/title CONFIRMED: Chicago Title, Order #FSST-5312600364 (Sara 6/24); full NHD report received 6/23",
+        "Buyer Contingency Removal #1 now filed in EX (7/14) and added to docs{} — distinct from the ETA1 extension already logged (per James Gmail review 7/17)"
       ]
     },
     {
@@ -699,7 +683,8 @@
         "BRBC": "signed/filed 7/7 (Castles)",
         "CR1_BIW": "executed 7/6 (Authentisign) — CR1 removes ALL contingencies except appraisal & loan; Mitzi received copy via CC; FILED in Ex 7/9",
         "buyerAgentAVID": "Sent 7/8, Mitzi CC'd -- Kylie confirmed receipt 7/13, resolved",
-        "prelimBuyerInitialed": "Listing side (Kylie) says still missing the buyer-initialed copy as of 7/13 -- needs sending"
+        "prelimBuyerInitialed": "Listing side (Kylie) says still missing the buyer-initialed copy as of 7/13 -- needs sending",
+        "CR2_final": "FULLY EXECUTED 7/16 (Authentisign \"Final_Buyer Contingency Removal #2 - 6/24\") by both buyers — Guy Castle 1:55 PM PDT, Adrianna Castle 3:58 PM PDT; CC'd to Mitzi Windley same day; filed in Ex 7/17. Titled \"Final\" and follows CR1 (which removed all contingencies except appraisal & loan) — likely removes the remaining appraisal/loan contingencies, but the checkboxes are not machine-readable from the PDF text extraction, so this could NOT be visually confirmed which boxes were checked. Recommend Sara visually open the PDF to confirm before treating all contingencies as removed."
       },
       "clientDocuments": [
         {
@@ -822,7 +807,8 @@
         "Buyer-agent AVID resolved -- Kylie confirmed receipt 7/13",
         "Buyer-initialed Prelim Title Report still owed to listing side (Kylie, 7/13)",
         "Final walkthrough now confirmed Friday 7/17; COE Mon 7/20",
-        "Appraisal STILL not back as of 7/13 (was due Fri 7/10) -- Sara re-chasing lender"
+        "Appraisal STILL not back as of 7/13 (was due Fri 7/10) -- Sara re-chasing lender",
+        "NEW 7/17: Buyer Contingency Removal #2 (\"Final\") executed by both Castles 7/16, filed in Ex 7/17 — likely clears the last two contingencies (appraisal & loan) ahead of Monday 7/20 COE, but checkboxes unverifiable from text extraction; Sara should confirm visually."
       ]
     },
     {
@@ -981,8 +967,8 @@
         "coe": "2026-08-10",
         "extensions": {
           "loan": "2026-07-23",
-          "appraisal": "2026-07-16",
-          "source": "ETA No. 1 executed 2026-07-10 (COE unchanged); overrides set to 34/27 days from acceptance so the CRM calendar computes the extended ETA dates (7/23 loan, 7/16 appraisal)"
+          "appraisal": "2026-07-17",
+          "source": "ETA No. 1 executed 2026-07-10 (COE unchanged); overrides set to 34/27 days from acceptance so the CRM calendar computes the extended ETA dates (7/23 loan, 7/16 appraisal) UPDATED 7/17: appraisal further extended one more day to 7/17 via a second ETA (sellers signed same morning) after the lender requested extra time; appraisal report has been received but value not yet confirmed."
         }
       },
       "listPrice": null,
@@ -1014,7 +1000,9 @@
         "homeInspection": "CONFIRMED 7/2 9AM — Norm Cucuzza/Inner Vision (Jim confirmed dog sitter 6/25)",
         "roofInspection": "COMPLETED Mon 6/22/2026 (Paris Scott) — WRITTEN ROOF REPORT RECEIVED (per Sara 6/29)",
         "ETA1": "EXECUTED 7/10 by all parties (Authentisign 7:43 AM; Jim signed before leaving for Idaho) — extends LOAN contingency to 7/23 and APPRAISAL to 7/16, COE unchanged 8/10; forwarded to Neriah/Melissa 7/10, FILED in Ex",
-        "correctedFHDS": "Reissued and sent for signatures 7/13 per Sara (original 7/6 version had unchecked boxes per Melissa)"
+        "correctedFHDS": "Reissued and sent for signatures 7/13 per Sara (original 7/6 version had unchecked boxes per Melissa)",
+        "ETA2_appraisal": "NEW 7/17: Second Extension of Time Amendment executed — extends the APPRAISAL contingency to 7/17/2026 (today), signed by sellers James R Heryford (8:40 AM PDT) and Yvonne Heryford (8:38 AM PDT) via Authentisign; sent by Sara 7/17 8:37 AM after lender (Clayton, Atlas Mortgage) requested one more day 7/16. Per Sara's cover message: \"the appraisal is back, the lender has not informed on if it came in at value or not.\" Filed in Ex 7/17. Only seller signatures appear on this envelope — buyer-side execution not visible in this document.",
+        "contingencyRemoval2_CRB": "[CR-B] Buyer Contingency Removal No. 2 — all parties signed via Glide 7/17 (Glide notification 7:19 PM); filed in Ex 7/17 10:05 PM. Scope NOT yet visually verified — likely addresses the remaining appraisal/loan contingencies given the same-day ETA2 appraisal extension to 7/17, but this has not been confirmed by opening the document. Sara to confirm scope before treating those contingencies as resolved."
       },
       "clientDocuments": [
         {
@@ -1094,7 +1082,9 @@
         "TENANT EXTENSION NOW IN WRITING ✅ — Generic Addendum 2 executed by all parties 7/7 (Glide), filed in Ex",
         "Buyer-signed disclosure set received 7/6; MU-PA + NHD sig pages + FHDS signed 7/6 (Authentisign) — still to FILE the sets in Ex (per Sara 7/13: docs are with Melissa TC awaiting buyer signatures on the corrected set -- not stalled on Sara's end)",
         "COE 8/10/2026 — final walkthrough 8/5",
-        "LISTING EXTENDED to 8/18/2026 via MOD — covers through COE 8/10 ✅"
+        "LISTING EXTENDED to 8/18/2026 via MOD — covers through COE 8/10 ✅",
+        "NEW 7/17: Appraisal contingency extended one more day to 7/17 (second ETA, sellers signed this morning) — appraisal report is back per lender but value not yet confirmed; loan contingency still 7/23, COE still 8/10",
+        "NEW 7/18: [CR-B] Buyer Contingency Removal No. 2 executed 7/17 (Glide), filed in Ex — content/scope not verified this run; confirm before treating appraisal/loan contingencies as removed"
       ]
     },
     {
@@ -1785,7 +1775,7 @@
       "id": "offer-695-feather",
       "address": "695 Feather Dr",
       "city": "Copperopolis, CA 95228",
-      "stage": "offer",
+      "stage": "pending",
       "type": "residential",
       "side": "buyer",
       "agent": "james",
@@ -1795,20 +1785,27 @@
       "openEscrowDate": null,
       "closingDate": null,
       "contacts": {
-        "coAgent": "Dee, listing side (dee@caltel.com)",
-        "escrow": null,
+        "coAgent": "Dee Bradley (Bradley and Santos Realty), listing side (dee@caltel.com)",
+        "escrow": "Tanya Salgado, Orange Coast Title Company of Southern California (Santa Ana) — Escrow #2473532-TS",
         "lender": null,
         "title": null
       },
       "docs": {
         "BRBC": "executed (prepared ~7/12)",
-        "RPA": "buyer-signed, sent to listing agent Dee 7/12",
-        "AAA": "buyer-signed 7/13"
+        "RPA": "RPA fully executed via Authentisign 7/15 (buyer-signed 7/12, sent to Dee; both buyers — Ashley Robinson and Bert Andrews — signed 7/15)",
+        "AAA": "buyer-signed 7/13",
+        "sellerCounter1": "SCO1 fully executed 7/15 (Authentisign) — offer accepted; per James's 7/18 Gmail review, cross-checked against Sara's Gmail (Orange Coast Title correspondence) but exact accepted price/terms not independently confirmed — see alerts",
+        "EMD": "confirmed received by escrow 7/16 (receipt sent to Ashley Robinson, James, and Sara by Tanya Salgado/Orange Coast Title 7/16, verified in Sara's Gmail)"
       },
       "correspondence": [],
-      "notes": "Pivot for Ashley Robinson (James's buyer) after the 992 Iroquois offer went dead 7/12. Offer sent to listing agent Dee 7/12 for 695 Feather Dr, Copperopolis. Docs in _Offers/Buy Side/Robinson 695 Feather Dr/.",
+      "notes": "Pivot for Ashley Robinson (James's buyer) after the 992 Iroquois offer went dead 7/12. Offer sent to listing agent Dee 7/12 for 695 Feather Dr, Copperopolis. Docs in _Offers/Buy Side/Robinson 695 Feather Dr/. UPDATE 7/18 (from James's 7/18 Gmail review, cross-checked against Sara's Gmail): Offer accepted 7/15; escrow opened at Orange Coast Title Company of Southern California (Santa Ana), Escrow #2473532-TS, escrow officer Tanya Salgado (tanyas@octitle.com) — switched from Placer Title because the property was acquired via tax sale last year and Placer is restricted from insuring/escrowing such properties for 3-5 years. EMD confirmed received by escrow 7/16. ClosingLock wire instructions sent to both buyers 7/15-7/16; Ashley Robinson submitted proof of funds 7/16. NOT yet confirmed: final accepted purchase price/terms (a preliminary net sheet referenced a $170,000 cash-purchase figure sent 7/15 before escrow opened — not verified as final); what listing agent Dee Bradley committed to doing \"Monday\" (7/20) per her 7/17 email; and what the \"Page 17\" document escrow sent 7/17 actually is (likely the RPA escrow acknowledgment James requested, not confirmed).",
       "alerts": [
-        "Offer sent 7/12, awaiting seller response"
+        "Offer ACCEPTED 7/15 — moved off \"offer\" stage 7/18; RPA/SCO1 fully executed via Authentisign, both buyers signed",
+        "Escrow OPEN at Orange Coast Title (Santa Ana), Escrow #2473532-TS, Tanya Salgado — switched from Placer (tax-sale restriction, 3-5yr)",
+        "EMD confirmed received by escrow 7/16",
+        "NEEDS CONFIRMATION: final accepted purchase price/terms — net sheet referenced $170,000 cash purchase but that was a preliminary pre-escrow estimate, not confirmed final",
+        "NEEDS CONFIRMATION: what Dee Bradley (listing agent) committed to doing \"Monday\" 7/20 per her 7/17 email — content unclear from snippet",
+        "NEEDS CONFIRMATION: \"Page 17\" document escrow sent 7/17 — likely RPA escrow acknowledgment James requested, not confirmed"
       ]
     }
   ]
