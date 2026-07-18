@@ -179,7 +179,7 @@
       "schedule": "*/15 * * * *"
     },
     {
-      "path": "/api/cron/publish-from-dropbox?key=YOUR_PUBLISH_SECRET",
+      "path": "/api/cron/publish-from-dropbox?key=thisisasecret1234",
       "schedule": "0 16 * * *"
     }
   ]
