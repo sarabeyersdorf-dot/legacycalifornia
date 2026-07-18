@@ -151,8 +151,16 @@
     h += `<div class="dl-deal" data-open-deal="${esc(d.source_key || '')}" title="Open this deal's command center">`;
     h += `<div class="dl-spine" style="background:${dc ? dc.border : S.solid}"></div>`;
     h += `<span class="dl-avatar" style="background:${S.soft};color:${S.deep}">${esc(initialsOf(d.client_label || d.address))}</span>`;
+    // City goes on its own line below the address, and only when it isn't
+    // already folded into the address string — some addresses in deals.json
+    // already read "123 Main St, Angels Camp, CA 95222", so appending city
+    // again would show it twice and (since it's all one line) push the row
+    // out of alignment with the header. Same de-dupe check crm-deals-lite.js
+    // already uses for its own deal-picker label.
+    const cityIsDupe = d.city && d.address && d.address.toLowerCase().includes(d.city.toLowerCase().trim());
     h += `<div style="min-width:0">`;
-    h += `<div class="dl-addr">${esc(d.address || 'Untitled')}${d.city ? ' <span style=\'font-weight:400;color:oklch(0.55 0.01 60);\'>· ' + esc(d.city) + '</span>' : ''}</div>`;
+    h += `<div class="dl-addr">${esc(d.address || 'Untitled')}</div>`;
+    if (d.city && !cityIsDupe) h += `<div class="dl-city">${esc(d.city)}</div>`;
     h += `<div class="dl-clientline">`;
     h += `<input class="dl-client" data-client-input value="${esc(d.client_label || '')}" placeholder="Add client name" title="Whose deal is this">`;
     h += `<span class="dl-statusdot" style="background:${S.solid}"></span><span class="dl-status">${esc(d.stage_label)}</span></div>`;

@@ -42,6 +42,7 @@
 import { adminClient } from '../supabase.js';
 import { getCallerProfile, isAgent } from '../auth.js';
 import { handleOptions, readJson, ok, fail } from '../cors.js';
+import { escrowStageSentence, sideKey } from '../deal-shape.js';
 
 // Deals considered "in motion" for the Ledger — mirrors the stage list
 // crm-calendar.js already uses for its deal picker, so the Ledger and the
@@ -53,21 +54,15 @@ const WAITING_ON_VALUES = ['you', 'lender', 'inspector', 'coagent', 'client', 'e
 
 const DEAL_TAG_RE = /\[deal:([a-z0-9-]+)/i;
 
-const sideLabel = (s) => (s === 'both' ? 'dual' : (s === 'buyer' ? 'buy' : (s === 'seller' ? 'sell' : null)));
+// Both the short chip key and the stage sentence now come from the shared
+// deal-shape.js helper (see that file's header) — 'preparing' is the one
+// stage the Ledger can see that the morning brief's query never returns, so
+// it's still handled locally rather than in the shared function.
+const sideLabel = sideKey;
 
 function stageLabel(d) {
-  const inEscrow = d.stage === 'pending';
-  const isOffer = d.stage === 'offer';
-  if (inEscrow) {
-    const coe = d.coe_date ? new Date(d.coe_date) : null;
-    const daysToCoe = coe ? Math.round((coe.getTime() - Date.now()) / 86400000) : null;
-    if (daysToCoe == null) return 'In escrow';
-    if (daysToCoe >= 0) return `In escrow · ${daysToCoe} day${daysToCoe === 1 ? '' : 's'} to close`;
-    return 'Closing overdue';
-  }
-  if (isOffer) return d.side === 'buyer' ? 'Offer out' : 'Offer in';
   if (d.stage === 'preparing') return 'Preparing';
-  return 'On market';
+  return escrowStageSentence(d);
 }
 
 export default async function handler(req, res) {

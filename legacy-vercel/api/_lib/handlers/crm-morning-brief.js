@@ -16,6 +16,7 @@ import { adminClient } from '../supabase.js';
 import { getCallerProfile, isAgent } from '../auth.js';
 import { anthropicMessage } from '../anthropic.js';
 import { handleOptions, ok, fail } from '../cors.js';
+import { daysToCoe, escrowStageSentence, sideKey } from '../deal-shape.js';
 
 // Agent-aware brief voice — the narrative addresses whoever is signed in, in
 // their own second person, never a hardcoded name. James must never read a
@@ -435,22 +436,23 @@ function shapeRecentComms(rows) {
 // Real transactions from the deals table (fed by deals.json). Shows Sara's
 // actual listings + escrows on the Today view, with side (buy/sell/dual),
 // price, and where each is on the road to closing.
+// Full-text side label for the brief's card sentence — builds on the same
+// sideKey() the Ledger uses for its chip, with its own text + a 'Sell-side'
+// fallback for anything sideKey() doesn't recognize (matches this
+// function's pre-refactor behavior for a missing/unexpected side value).
+const SIDE_TEXT = { buy: 'Buy-side', sell: 'Sell-side', dual: 'Dual agency' };
+
 function shapeDealsInMotion(deals) {
   const TRACK = ['Listed', 'Offer', 'Escrow', 'Inspection', 'Appraisal', 'Close'];
-  const sideLabel = (s) => (s === 'both' ? 'Dual agency' : (s === 'buyer' ? 'Buy-side' : 'Sell-side'));
+  const sideLabel = (s) => SIDE_TEXT[sideKey(s)] || 'Sell-side';
   return deals.map((d) => {
     const inEscrow = d.stage === 'pending';
     const isOffer  = d.stage === 'offer';
     // Offer = step 1 on the track, escrow = step 2.
     const trackIdx = inEscrow ? 2 : (isOffer ? 1 : 0);
     const price = d.sale_price || d.list_price || null;
-    const coe = d.coe_date ? new Date(d.coe_date) : null;
-    const daysToCoe = coe ? Math.round((coe.getTime() - Date.now()) / 86400000) : null;
-    const stageLabel = inEscrow
-      ? (daysToCoe == null ? 'In escrow'
-          : daysToCoe >= 0 ? `In escrow · ${daysToCoe} day${daysToCoe === 1 ? '' : 's'} to close`
-          : 'Closing overdue')
-      : (isOffer ? (d.side === 'buyer' ? 'Offer out' : 'Offer in') : 'On market');
+    const daysToCloseVal = daysToCoe(d.coe_date);
+    const stageLabel = escrowStageSentence(d);
     const agentName = d.agent === 'james' ? 'James' : 'Sara';
     // Commission (internal): percent from listing_meta against the live price.
     const commRaw = d.listing_meta && d.listing_meta.commission;
@@ -464,7 +466,7 @@ function shapeDealsInMotion(deals) {
       address:     d.address || null,
       city:        d.city || null,
       coe_date:    d.coe_date || null,
-      days_to_coe: daysToCoe,
+      days_to_coe: daysToCloseVal,
       in_escrow:   inEscrow,
       commission_pct: (commPct != null && Number.isFinite(commPct)) ? commPct : null,
       commission_usd: commUsd,

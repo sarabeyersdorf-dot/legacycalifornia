@@ -52,6 +52,7 @@
 .dl-spine { position:absolute; left:0; top:0; bottom:0; width:4px; }
 .dl-avatar { width:30px; height:30px; flex:none; border-radius:50%; display:inline-flex; align-items:center; justify-content:center; font-size:11.5px; font-weight:700; }
 .dl-addr { font-family:'Poppins',sans-serif; font-size:15px; font-weight:600; letter-spacing:-.2px; color:oklch(0.2 0.012 55); line-height:1.15; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.dl-city { font-size:12px; font-weight:500; color:oklch(0.55 0.01 60); line-height:1.2; margin-top:1px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 .dl-clientline { display:flex; align-items:center; gap:7px; margin-top:2px; }
 .dl-client { font-size:12px; color:oklch(0.52 0.01 60); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; background:transparent; border:none; border-bottom:1px dashed transparent; padding:0; cursor:text; min-width:40px; max-width:110px; }
 .dl-client:hover, .dl-client:focus { border-bottom-color:oklch(0.7 0.06 70); outline:none; }
