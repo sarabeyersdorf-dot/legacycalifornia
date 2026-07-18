@@ -17,6 +17,8 @@
 //   POST  /api/crm/agent-updates  → log a new update
 //   POST  /api/crm/discard-draft  → delete a pending AI-suggested reply Sara doesn't want
 //   GET   /api/crm/deals-lite     → minimal deals list for pickers (e.g. Notes tab deal dropdown)
+//   GET   /api/crm/deal-ledger    → deals in motion, shaped for the Ledger table (Today tab)
+//   PATCH /api/crm/deal-ledger    → update a deal's client_label / waiting_on / portal_shared
 //   GET   /api/crm/email-oauth-start    → begin Google OAuth for a mailbox (Phase 2D)
 //   GET   /api/crm/email-oauth-callback → Google OAuth redirect target (Phase 2D, unauthenticated)
 //   GET   /api/crm/email-accounts       → per-owner connected-mailbox status (Phase 2D)
@@ -57,6 +59,7 @@ import roster            from '../_lib/handlers/crm-roster.js';
 import agentUpdates      from '../_lib/handlers/crm-agent-updates.js';
 import discardDraft      from '../_lib/handlers/crm-discard-draft.js';
 import dealsLite         from '../_lib/handlers/crm-deals-lite.js';
+import dealLedger        from '../_lib/handlers/crm-deal-ledger.js';
 import emailOauthStart    from '../_lib/handlers/crm-email-oauth-start.js';
 import emailOauthCallback from '../_lib/handlers/crm-email-oauth-callback.js';
 import emailAccounts      from '../_lib/handlers/crm-email-accounts.js';
@@ -96,6 +99,7 @@ const TABLE = {
   'agent-updates':     agentUpdates,
   'discard-draft':     discardDraft,
   'deals-lite':        dealsLite,
+  'deal-ledger':       dealLedger,
   'email-oauth-start':    emailOauthStart,
   'email-oauth-callback': emailOauthCallback,
   'email-accounts':       emailAccounts
