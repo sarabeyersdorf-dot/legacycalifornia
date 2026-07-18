@@ -9,7 +9,8 @@
 //   1. Refreshes a Dropbox access token (using a long-lived refresh token).
 //   2. Downloads the current deals.json from Dropbox.
 //   3. Validates it parses as JSON (never publishes broken JSON).
-//   4. Commits it to GitHub at data/deals.json (only if content changed).
+//   4. Commits it to GitHub at legacy-vercel/data/deals.json (only if
+//      content changed).
 //   5. Calls the existing /api/cron/sync-deals endpoint so Supabase / the
 //      portal pick up the change immediately.
 //
@@ -17,7 +18,7 @@
 //
 // Required environment variables (Vercel -> Project -> Settings -> Environment Variables):
 //   PUBLISH_SECRET        - any password you choose, protects this endpoint
-//   GITHUB_TOKEN          - fine-grained PAT scoped to sarabeyersdorf-dot/legacycalifornia,
+//   GITHUB_TOKEN          - PAT scoped to sarabeyersdorf-dot/legacycalifornia,
 //                           Contents: Read and write
 //   DROPBOX_APP_KEY       - from your Dropbox App Console
 //   DROPBOX_APP_SECRET    - from your Dropbox App Console
@@ -25,8 +26,8 @@
 //   DROPBOX_DEALS_PATH    - optional, defaults to "/_LEGACY/Legacy Cowork/deals.json"
 //   SYNC_SECRET           - the existing secret your /api/cron/sync-deals already uses
 //
-// GITHUB_OWNER, GITHUB_REPO, and GITHUB_BRANCH are NOT env vars anymore —
-// they're fixed values (this repo never moves), so they're hardcoded just
+// GITHUB_OWNER, GITHUB_REPO, GITHUB_BRANCH, and GITHUB_FILE_PATH are fixed
+// values (this repo layout never moves day-to-day), so they're hardcoded
 // below instead of being one more thing that can be mistyped in Vercel.
 //
 // NOTE: this project's package.json has "type": "module", so this file uses
@@ -35,6 +36,10 @@
 const GITHUB_OWNER = "sarabeyersdorf-dot";
 const GITHUB_REPO = "legacycalifornia";
 const GITHUB_BRANCH = "main";
+// The Vercel project root lives inside this subfolder of the repo -- the
+// GitHub Contents API always wants the FULL repo-relative path, regardless
+// of what Vercel's own "Root Directory" project setting is.
+const GITHUB_FILE_PATH = "legacy-vercel/data/deals.json";
 
 export default async function handler(req, res) {
   const {
@@ -105,7 +110,7 @@ export default async function handler(req, res) {
     steps.jsonValid = `ok (version ${parsed.version}, lastUpdated ${parsed.lastUpdated})`;
 
     // --- 4. Commit to GitHub (only if content actually changed) ---
-    const contentsUrl = `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/data/deals.json`;
+    const contentsUrl = `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${GITHUB_FILE_PATH}`;
     const ghHeaders = {
       Authorization: `Bearer ${GITHUB_TOKEN}`,
       Accept: "application/vnd.github+json",
