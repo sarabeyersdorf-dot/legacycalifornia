@@ -180,7 +180,6 @@
     },
     {
       "path": "/api/cron/publish-from-dropbox?key=thisisasecret1234",
-      "schedule": "0 16 * * *"
-    }
+"schedule": "0 * * * *"    }
   ]
 }
