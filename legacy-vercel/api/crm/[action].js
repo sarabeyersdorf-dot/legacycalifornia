@@ -52,6 +52,7 @@ import dealClient       from '../_lib/handlers/crm-deal-client.js';
 import dealVisibility    from '../_lib/handlers/crm-deal-visibility.js';
 import dealNotes         from '../_lib/handlers/crm-deal-notes.js';
 import dealNotePublish   from '../_lib/handlers/crm-deal-note-publish.js';
+import dealPortalNotes   from '../_lib/handlers/crm-deal-portal-notes.js';
 import leadHygiene       from '../_lib/handlers/crm-lead-hygiene.js';
 import timeline          from '../_lib/handlers/crm-timeline.js';
 import roster            from '../_lib/handlers/crm-roster.js';
@@ -95,6 +96,7 @@ const TABLE = {
   'deal-visibility':   dealVisibility,
   'deal-notes':        dealNotes,
   'deal-note-publish': dealNotePublish,
+  'deal-portal-notes': dealPortalNotes,
   'agent-updates':     agentUpdates,
   'discard-draft':     discardDraft,
   'deals-lite':        dealsLite,

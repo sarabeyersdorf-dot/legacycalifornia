@@ -50,6 +50,33 @@ export default async function handler(req, res) {
       deal:       t.source_key || null
     }));
 
+    // Seller-portal feedback (db/040): the note the agent wrote for the briefing
+    // and the client-tasks they ticked complete on the portal, per deal. Cowork
+    // acts on these — reword/answer the note, and drop the completed tasks from
+    // deals.json clientTasks. Fail-soft if migration 040 hasn't run.
+    let deal_portal_notes = [];
+    try {
+      const { data: dRows, error: dErr } = await supa.from('deals')
+        .select('source_key, agent, address, portal_seller_note, client_task_done')
+        .or('portal_seller_note.not.is.null,client_task_done.not.is.null');
+      if (!dErr && Array.isArray(dRows)) {
+        deal_portal_notes = dRows
+          .map((d) => {
+            const note = d.portal_seller_note && typeof d.portal_seller_note === 'object' ? d.portal_seller_note : null;
+            const completed = Array.isArray(d.client_task_done) ? d.client_task_done : [];
+            if (!note && !completed.length) return null;
+            return {
+              deal: d.source_key, agent: d.agent || null, address: d.address || null,
+              note: note ? (note.body || null) : null,
+              note_by: note ? (note.by || null) : null,
+              note_at: note ? (note.updated_at || null) : null,
+              completed_tasks: completed
+            };
+          })
+          .filter(Boolean);
+      }
+    } catch (_) { /* migration 040 not run yet */ }
+
     return ok(res, {
       generated_at: new Date().toISOString(),
       counts: {
@@ -61,7 +88,8 @@ export default async function handler(req, res) {
       },
       // The list Cowork should act on first: flagged or annotated.
       needs_review: tasks.filter((t) => t.needs_attention || t.agent_note),
-      tasks
+      tasks,
+      deal_portal_notes
     });
   } catch (e) {
     return fail(res, 500, e.message);

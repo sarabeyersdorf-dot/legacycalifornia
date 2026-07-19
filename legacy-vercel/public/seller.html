@@ -155,10 +155,24 @@
   padding: 12px 0; border-bottom: 1px solid var(--rule-soft); align-items: center;
 }
 .task-row:last-child { border-bottom: none; }
-.task-box { width: 17px; height: 17px; border: 1px solid var(--rule-strong); background: var(--shell); }
+.task-box { width: 17px; height: 17px; border: 1px solid var(--rule-strong); background: var(--shell); padding: 0; border-radius: 3px; cursor: default; }
 .task-row.done .task-box { background: var(--brass); border-color: var(--brass); }
+.task-row.done .task-box::after { content: '✓'; color: var(--shell); font-size: 12px; line-height: 15px; display: block; }
 .task-row.done .task-label { color: var(--ink-mute); text-decoration: line-through; }
 .task-label { font-size: 13.5px; color: var(--ink); }
+/* Agent preview: the boxes become tickable */
+body.agent-preview .task-box { cursor: pointer; }
+body.agent-preview .task-box:hover { border-color: var(--brass); box-shadow: 0 0 0 3px var(--linen); }
+/* Note for the daily briefing (agent-only) */
+.cowork-note { border-left: 3px solid var(--brass); }
+.cowork-note-ta { width: 100%; box-sizing: border-box; min-height: 70px; resize: vertical; font: inherit; font-size: 13.5px; line-height: 1.5; color: var(--ink); background: var(--shell); border: 1px solid var(--rule); border-radius: 9px; padding: 10px 12px; margin-top: 4px; }
+.cowork-note-ta:focus { outline: none; border-color: var(--brass); }
+.cowork-note-foot { display: flex; align-items: center; gap: 12px; margin-top: 9px; }
+.cowork-note-status { font-size: 12px; color: var(--ink-mute); margin-right: auto; }
+.cowork-note-status.ok { color: #2E5C3D; }
+.cowork-note-status.warn { color: #A23B26; }
+.cowork-note-save { font-family: var(--mono); font-size: 10px; letter-spacing: .12em; text-transform: uppercase; padding: 9px 16px; border: 1px solid var(--ink); background: var(--ink); color: var(--shell); border-radius: 8px; cursor: pointer; }
+.cowork-note-save:hover { background: var(--brass); border-color: var(--brass); }
 .task-when { font-family: var(--mono); font-size: 10px; letter-spacing: 0.12em; color: var(--brass); text-transform: uppercase; white-space: nowrap; }
 .task-intro { font-size: 13px; color: var(--ink-soft); font-style: italic; line-height: 1.5; margin-bottom: 6px; }
 
@@ -320,9 +334,20 @@
           <h3>What I need from you</h3>
           <p class="task-intro">I only reach out when something genuinely needs your signature. Those requests land right here — and I will text you too.</p>
           <div class="task-row" data-row data-add-class="status">
-            <div class="task-box"></div>
+            <button type="button" class="task-box" data-task-toggle aria-label="Mark complete"></button>
             <div class="task-label" data-bind="label">Task</div>
             <span class="task-when" data-bind="when" data-optional>Open</span>
+          </div>
+        </section>
+
+        <!-- Note for the daily briefing — AGENT ONLY (revealed on agent preview) -->
+        <section class="s-mini cowork-note" id="cowork-note" data-agent-only hidden>
+          <h3>Note for your daily briefing</h3>
+          <p class="task-intro">Private — the client never sees this. Your morning briefing reads it and updates the deal (drops completed tasks, adjusts the list) accordingly.</p>
+          <textarea class="cowork-note-ta" data-cowork-note placeholder="e.g. Seller finished the pest repairs — clear that task. Add: confirm HOA docs by Friday."></textarea>
+          <div class="cowork-note-foot">
+            <span class="cowork-note-status" data-cowork-note-status></span>
+            <button class="cowork-note-save" type="button" data-cowork-note-save>Save for briefing</button>
           </div>
         </section>
 
@@ -384,7 +409,53 @@
       if (btn && first) btn.textContent = 'Message ' + first;
       var av = document.getElementById('sell-note-avatar');
       if (av && first && first !== 'Sara') av.innerHTML = '<span style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-family:Cormorant Garamond,serif;font-size:20px;color:#FAF6EC;">' + first.charAt(0) + '</span>';
+      // Agent preview: reveal the tickable tasks + the note-for-briefing.
+      if (portal.viewer_is_agent) setupAgentPortal(portal);
     }).catch(function () {});
+
+  // AGENT-ONLY: on an agent's preview, the task checkboxes become tickable
+  // (mark complete → drops off the client's list) and a private note-for-the-
+  // briefing appears. Both persist via /api/crm/deal-portal-notes and are read
+  // back by Cowork through the briefing-feedback feed. The client never sees any
+  // of this — the server only sends viewer_is_agent:true to an authed agent.
+  function setupAgentPortal(portal) {
+    var sk = portal.source_key || _deal;
+    if (!sk) return;
+    document.body.classList.add('agent-preview');
+
+    // Note field
+    var sec = document.getElementById('cowork-note');
+    if (sec) {
+      sec.hidden = false;
+      var ta = sec.querySelector('[data-cowork-note]');
+      var st = sec.querySelector('[data-cowork-note-status]');
+      var save = sec.querySelector('[data-cowork-note-save]');
+      if (ta && portal.seller_note && portal.seller_note.body) ta.value = portal.seller_note.body;
+      if (save) save.addEventListener('click', function () {
+        save.disabled = true; if (st) { st.className = 'cowork-note-status'; st.textContent = 'Saving…'; }
+        fetch('/api/crm/deal-portal-notes', { method: 'POST', credentials: 'include', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ source_key: sk, action: 'save-note', body: ta ? ta.value : '' }) })
+          .then(function (r) { return r.json().then(function (j) { return { ok: r.ok, j: j }; }); })
+          .then(function (res) { save.disabled = false; if (st) { if (res.ok && res.j && res.j.saved) { st.className = 'cowork-note-status ok'; st.textContent = 'Saved for your briefing.'; } else { st.className = 'cowork-note-status warn'; st.textContent = (res.j && res.j.error) || 'Could not save.'; } } })
+          .catch(function () { save.disabled = false; if (st) { st.className = 'cowork-note-status warn'; st.textContent = 'Network error.'; } });
+      });
+    }
+
+    // Delegated toggle — robust to when the task rows get painted.
+    document.addEventListener('click', function (e) {
+      var box = e.target.closest('[data-task-toggle]');
+      if (!box || !document.body.classList.contains('agent-preview')) return;
+      var row = box.closest('.task-row'); if (!row) return;
+      var labelEl = row.querySelector('.task-label'); var label = labelEl ? labelEl.textContent.trim() : '';
+      if (!label) return;
+      var makeDone = !row.classList.contains('done');
+      row.classList.toggle('done', makeDone);           // optimistic
+      box.disabled = true;
+      fetch('/api/crm/deal-portal-notes', { method: 'POST', credentials: 'include', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ source_key: sk, action: 'toggle-task', label: label, done: makeDone }) })
+        .then(function (r) { return r.json().then(function (j) { return { ok: r.ok, j: j }; }); })
+        .then(function (res) { box.disabled = false; if (!(res.ok && res.j && res.j.saved)) row.classList.toggle('done', !makeDone); })
+        .catch(function () { box.disabled = false; row.classList.toggle('done', !makeDone); });
+    });
+  }
 })();
 </script>
 <script src="/agent-console.js"></script>

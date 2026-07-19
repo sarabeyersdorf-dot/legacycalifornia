@@ -385,6 +385,12 @@ export default async function handler(req, res) {
           .map((d) => ({ label: `Sign ${d.name}`, when: DOC_STATUS_LABEL[d.status] || 'Open', status: 'open' })))
         .concat(sharedTasks);
     }
+    // Agent-managed completion (db/040): a task whose label the agent ticked on
+    // the portal is 'done'. The CLIENT only sees open tasks (completed ones drop
+    // off); an AGENT previewing sees them all — struck — so they can un-tick.
+    const doneSet = new Set(Array.isArray(deal.client_task_done) ? deal.client_task_done : []);
+    tasks = tasks.map((t) => doneSet.has(t.label) ? { ...t, status: 'done' } : t);
+    if (!isAgent) tasks = tasks.filter((t) => t.status !== 'done');
 
     // "Good to know" — titled context bullets shown alongside the agent note
     // (v1.5, from deals.json goodToKnow[]).
@@ -492,6 +498,11 @@ export default async function handler(req, res) {
       nav: { documents: String(docs.length), tasks: String(tasks.length) },
       kpis, road, documents: documentsArr, tasks, team,
       good_to_know: goodToKnow,
+      // Agent-preview affordances (db/040): only an agent viewing gets the
+      // tickable checkboxes + the private note-for-Cowork; the client never does.
+      viewer_is_agent: !!isAgent,
+      source_key: deal.source_key || null,
+      seller_note: isAgent ? (deal.portal_seller_note || null) : null,
       activity: [],
       note: {
         head: `A note from ${agentFirst} · This week`,
