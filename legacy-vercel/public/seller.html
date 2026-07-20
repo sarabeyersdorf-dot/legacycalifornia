@@ -430,13 +430,22 @@ body.agent-preview .task-box:hover { border-color: var(--brass); box-shadow: 0 0
       var ta = sec.querySelector('[data-cowork-note]');
       var st = sec.querySelector('[data-cowork-note-status]');
       var save = sec.querySelector('[data-cowork-note-save]');
-      if (ta && portal.seller_note && portal.seller_note.body) ta.value = portal.seller_note.body;
+      var setStatus = function (cls, msg) { if (st) { st.className = 'cowork-note-status' + (cls ? ' ' + cls : ''); st.textContent = msg || ''; } };
+      // Authoritative state (incl. whether the briefing has read it) from the
+      // agent endpoint — not the cached portal payload.
+      fetch('/api/crm/deal-portal-notes?deal=' + encodeURIComponent(sk), { credentials: 'include' })
+        .then(function (r) { return r.ok ? r.json() : null; })
+        .then(function (j) {
+          if (!j) return;
+          if (ta && j.note && j.note.body) ta.value = j.note.body;
+          if (j.note && j.note.body) setStatus(j.note_seen ? 'ok' : '', j.note_seen ? '✓ Your daily briefing has this note.' : 'Waiting for your next daily briefing to pick this up.');
+        }).catch(function () {});
       if (save) save.addEventListener('click', function () {
-        save.disabled = true; if (st) { st.className = 'cowork-note-status'; st.textContent = 'Saving…'; }
+        save.disabled = true; setStatus('', 'Sending…');
         fetch('/api/crm/deal-portal-notes', { method: 'POST', credentials: 'include', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ source_key: sk, action: 'save-note', body: ta ? ta.value : '' }) })
           .then(function (r) { return r.json().then(function (j) { return { ok: r.ok, j: j }; }); })
-          .then(function (res) { save.disabled = false; if (st) { if (res.ok && res.j && res.j.saved) { st.className = 'cowork-note-status ok'; st.textContent = 'Saved for your briefing.'; } else { st.className = 'cowork-note-status warn'; st.textContent = (res.j && res.j.error) || 'Could not save.'; } } })
-          .catch(function () { save.disabled = false; if (st) { st.className = 'cowork-note-status warn'; st.textContent = 'Network error.'; } });
+          .then(function (res) { save.disabled = false; if (res.ok && res.j && res.j.saved) { setStatus('ok', (ta && ta.value.trim()) ? 'Sent to your daily briefing.' : 'Cleared.'); } else { setStatus('warn', (res.j && res.j.error) || 'Could not save.'); } })
+          .catch(function () { save.disabled = false; setStatus('warn', 'Network error.'); });
       });
     }
 

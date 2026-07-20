@@ -36,6 +36,31 @@ escrow deadlines / close-of-escrow — each with `start`, `end`, `all_day`,
 `agent`, `client`, `deal` (matching a deals.json id when it's escrow-related),
 `type`, `location`, and `notes`, sorted earliest-first.
 
+Finally, pull the **updates log** — the free-text notes Sara & James file from
+the CRM and from the seller portal (texts they got, verbal updates, "I already
+sent the FHDS", "mark this task done"). **You must read this every run** — it is
+where their live corrections come from:
+
+```
+GET https://legacycalifornia.vercel.app/api/crm/agent-updates?op=feed&key=<SYNC_SECRET>
+```
+
+Same key. Returns only entries you haven't read yet, and **reading it marks them
+read** (so each note reaches you exactly once — no repeats). Each entry has
+`agent`, `deal` (a deals.json id when tagged), `content`, and `created_at`. Act
+on every one, then reflect it in `deals.json`:
+- A **`Seller-portal note — <address>: …`** entry → fold that fact into the deal
+  (update `notes`, `agentNote`, a milestone `desc`, or `goodToKnow` as fits) so
+  the portal shows it going forward.
+- A **`Seller portal … I marked "<task>" complete — please drop it …`** entry →
+  **remove that task from that deal's `clientTasks[]`** (it's done). This is how
+  a ticked-off task actually disappears — until you remove it from `clientTasks`,
+  it stays on the list.
+- Any other update → treat like an agent_note: act on it and adjust the day.
+
+Because the feed marks these read as you pull them, they won't show up again —
+so the agent's note/tick "stays current" instead of repeating day after day.
+
 Use it to tune the day:
 - A task marked **done** → don't repeat it; if it closes a loop, note the
   outcome and drop it.
