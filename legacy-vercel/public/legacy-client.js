@@ -1416,7 +1416,18 @@
   });
 
   // expose for debugging
-  window.Legacy = { api, openModal, submitLead };
+  // openLead(id): jump to the inbox and load that contact's detail by id — used
+  // by the People roster so clicking a person opens THAT person (not a name
+  // search that lands on whoever was last open). Works for any contact, incl.
+  // archived/closed clients, because selectLeadId→loadLead fetches by id.
+  window.Legacy = {
+    api, openModal, submitLead,
+    openLead: function (id) {
+      if (!id) return;
+      if (typeof window.showView === 'function') window.showView(null, 'inbox');
+      if (typeof selectLeadId === 'function') selectLeadId(id, true);
+    }
+  };
 })();
 
 /* ===========================================================================
