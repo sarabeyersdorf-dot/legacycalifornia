@@ -1170,7 +1170,7 @@
             var rows = (j.people||[]).map(function(pp){
               var temp = pp.temperature ? '<span class="ppl-temp '+esc(pp.temperature)+'">'+esc(pp.temperature)+'</span>' : '';
               var last = pp.last_contact_at ? new Date(pp.last_contact_at).toLocaleDateString('en-US',{month:'short',day:'numeric'}) : '—';
-              return '<div class="ppl-row" data-open-person="'+esc(pp.name)+'" role="link" tabindex="0">'
+              return '<div class="ppl-row" data-ppl-open="'+esc(pp.id)+'" role="link" tabindex="0">'
                 + '<span class="ppl-av">'+esc((pp.name||'?').charAt(0).toUpperCase())+'</span>'
                 + '<span class="ppl-name">'+esc(pp.name)+temp+'</span>'
                 + '<span class="ppl-meta">'+esc(pp.email||'')+(pp.phone?' · '+esc(pp.phone):'')+'</span>'
@@ -1184,7 +1184,15 @@
         var nav = e.target.closest('[data-people-bucket]');
         if(nav){ st.bucket = nav.getAttribute('data-people-bucket'); st.q=''; var qi=view.querySelector('[data-people-q]'); if(qi) qi.value=''; setTimeout(load,0); return; }
         var tab = e.target.closest('[data-people-tab]');
-        if(tab && view.contains(tab)){ st.bucket = tab.getAttribute('data-people-tab'); load(); }
+        if(tab && view.contains(tab)){ st.bucket = tab.getAttribute('data-people-tab'); load(); return; }
+        // Open the clicked person's detail by id (not a name search that lands on
+        // whoever was last open).
+        var row = e.target.closest('[data-ppl-open]');
+        if(row && view.contains(row)){
+          var id = row.getAttribute('data-ppl-open');
+          if(id && window.Legacy && typeof window.Legacy.openLead === 'function') window.Legacy.openLead(id);
+          return;
+        }
       });
       document.addEventListener('crm:view', function(ev){ if(ev.detail && ev.detail.name==='people') load(); });
       var qt; view.querySelector('[data-people-q]').addEventListener('input', function(){ clearTimeout(qt); var v=this.value; qt=setTimeout(function(){ st.q=v.trim(); load(); },350); });
