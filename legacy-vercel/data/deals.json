@@ -1,6 +1,6 @@
 {
-  "version": 1.9,
-  "lastUpdated": "2026-07-19",
+  "version": 2.0,
+  "lastUpdated": "2026-07-20",
   "updatedBy": "Claude",
   "tasks": [
     {
@@ -305,6 +305,30 @@
       "agent": "sara",
       "client": "Latigo",
       "title": "EMD receipt and Escrow Holder Ack not found in Ex folder during 7/19 scan \u2014 confirm they're actually filed in Ex (may be elsewhere or pre-dates Ex structure)",
+      "done": false
+    },
+    {
+      "agent": "james",
+      "client": "695 Feather",
+      "title": "Update Commission Demand for 695 Feather \u2014 file still says 'needs escrow info'; escrow is now known: Orange Coast Title, Escrow #2473532-TS, Tanya Salgado (tanyas@octitle.com)",
+      "done": false
+    },
+    {
+      "agent": "james",
+      "client": "695 Feather",
+      "title": "Check what listing agent Dee Bradley (dee@caltel.com) committed to do 'Monday' 7/20 per her 7/17 email\u2014 content unclear from snippet; follow up with Dee to confirm",
+      "done": false
+    },
+    {
+      "agent": "sara",
+      "client": "433 Hwy 4",
+      "title": "Download and file signed AVID from Glide — Glide notification 7/19 9:11 PM confirms all parties signed '[AVID] Agent Visual Inspection Disclosure – 1.pdf'; open Glide email (thread 19f7c38328ed5339) in Sara's Gmail and save PDF to 433 Ex folder",
+      "done": false
+    },
+    {
+      "agent": "james",
+      "client": "Baldwin",
+      "title": "No AVID found in Baldwin EX folder — James as buyer's agent needs to create and file buyer-agent AVID before COE 8/3",
       "done": false
     }
   ],
