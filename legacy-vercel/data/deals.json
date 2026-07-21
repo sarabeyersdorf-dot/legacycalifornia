@@ -1,6 +1,6 @@
 {
-  "version": 2.0,
-  "lastUpdated": "2026-07-20",
+  "version": 2.3,
+  "lastUpdated": "2026-07-21",
   "updatedBy": "Claude",
   "tasks": [
     {
@@ -245,25 +245,29 @@
       "agent": "sara",
       "client": "Latigo",
       "title": "Call David at Hometown Lenders for new COE date \u2014 lender requested extension 7/19, original COE 7/20 is off, likely 7/22 or 7/24; update CRM calendar once confirmed",
-      "done": false
+      "done": true,
+      "note": "Done 7/20 \u2014 Kim confirmed COE is July 24. Update CRM Latigo calendar to 7/24."
     },
     {
       "agent": "sara",
       "client": "Wendell",
       "title": "Read James's forwarded court email (thread 19f7b805f96b1b38, 1:50 PM 7/19) \u2014 could be court approval notice that starts all clocks; open manually in Gmail, too large to auto-extract",
-      "done": false
+      "done": true,
+      "note": "Read 7/20 \u2014 NOT a court approval notice. Court has NOT signed off yet. Case status only (CASE # 25-31761). All contingency clocks still frozen."
     },
     {
       "agent": "sara",
       "client": "Wendell",
       "title": "Fix Audry's bounced email \u2014 audrybusybeerealty@gmail.com returned 550 error 7/17; find correct address (call escrow, MLS, or Audry direct) and resend FHA Amendatory Clause; also confirm Tiphani at Prime Residential has a copy",
-      "done": false
+      "done": true,
+      "note": "Done 7/20 \u2014 correct email found, FHA Amendatory Clause resent."
     },
     {
       "agent": "sara",
       "client": "433 Hwy 4",
       "title": "Loan contingency deadline is 7/23 (4 days) \u2014 call Neriah Davis to confirm Elizabeth Dawson's lender is on track; if any delay risk, plan a loan contingency extension now",
-      "done": false
+      "done": true,
+      "note": "Emailed Neriah 7/21 \u2014 no written loan removal or extension confirmation in hand yet. 7/23 deadline is TOMORROW. Must receive written removal or extension in writing by EOD 7/23."
     },
     {
       "agent": "sara",
@@ -275,7 +279,8 @@
       "agent": "sara",
       "client": "Latigo",
       "title": "Buyer-agent AVID still missing from Ex folder \u2014 only listing-agent AVID (LA Avid.pdf) is on file; chase buyer AVID before COE",
-      "done": false
+      "done": true,
+      "note": "Done 7/21 \u2014 Kylie Windley's buyer-agent AVID confirmed in Ex."
     },
     {
       "agent": "james",
@@ -299,13 +304,15 @@
       "agent": "james",
       "client": "Baldwin",
       "title": "NHD not found as standalone in EX folder \u2014 check if it's inside the FVACHID bundle; add standalone NHD if not present before COE 8/3",
-      "done": false
+      "done": true,
+      "note": "Done 7/21 \u2014 NHD_Signature_page_-_fully_executed_ts55458.pdf confirmed in Baldwin EX folder during 7/21 morning compliance scan"
     },
     {
       "agent": "sara",
       "client": "Latigo",
       "title": "EMD receipt and Escrow Holder Ack not found in Ex folder during 7/19 scan \u2014 confirm they're actually filed in Ex (may be elsewhere or pre-dates Ex structure)",
-      "done": false
+      "done": true,
+      "note": "Done 7/21 \u2014 Escrow Holder Ack confirmed in Ex/EMD folder."
     },
     {
       "agent": "james",
@@ -329,6 +336,63 @@
       "agent": "james",
       "client": "Baldwin",
       "title": "No AVID found in Baldwin EX folder — James as buyer's agent needs to create and file buyer-agent AVID before COE 8/3",
+      "done": false
+    },
+    {
+      "agent": "james",
+      "client": "Wendell",
+      "title": "🚨 URGENT — Judge signed Wendell court approval (7/21): Call David & Stacy Hopkins immediately with the good news. Tell them all contingency clocks start the day after Audry delivers written notice to Placer — that is imminent. Confirm lender Kim Hesser (khesser@primeres.com, 209-768-8277) is ready to move fast and ask for estimated days to close.",
+      "done": false
+    },
+    {
+      "agent": "james",
+      "client": "Wendell",
+      "title": "🚨 URGENT — Wendell court approval imminent: Call Amanda Boitano at Placer Title (Escrow #P-704376) to confirm she is preparing for closing and get an estimated COE date once written notice arrives from Audry. Attorney needs a signed settlement statement before recording.",
+      "done": false
+    },
+    {
+      "agent": "james",
+      "client": "Wendell",
+      "title": "Watch for Audry's forwarded court approval document to Amanda — the day it is delivered to buyer (written notice) starts ALL contingency clocks. Note the exact delivery date immediately; it is Day 0 for every remaining deadline.",
+      "done": false
+    },
+    {
+      "agent": "sara",
+      "client": "433 Hwy 4",
+      "title": "Download & file 7/20 DocuSign package (NHD sig pages + MU-PA + ADM2) — all parties signed via Authentisign; search Sara's Gmail for Authentisign completion notification",
+      "done": true,
+      "note": "Done 7/21 — package filed in 433 Ex folder."
+    },
+    {
+      "agent": "sara",
+      "client": "433 Hwy 4",
+      "title": "Download & file Neriah's buyer-agent AVID from Melissa Frey email 7/20 — search Gmail for '[AVID] Agent Visual Inspection' from Melissa",
+      "done": true,
+      "note": "Done 7/21 — received 7/20 from Melissa Frey (melissa.frey@norcalgold.com); sent to sellers Jim & Yvonne Heryford for signature acknowledgment. Awaiting return."
+    },
+    {
+      "agent": "sara",
+      "client": "Skyline",
+      "title": "Reply to Lisa Clark HOA vacation rental inquiry — email 7/21 2:31 PM UNREAD; answer whether vacation rentals are allowed at 467 Skyline",
+      "done": true,
+      "note": "Done 7/21 — Sara replied to Lisa Clark (lisaclarkmurphys@gmail.com)."
+    },
+    {
+      "agent": "james",
+      "client": "Baldwin",
+      "title": "Watch for contractor repair bid from Kim Hesser — expected today 7/21; forward to lender and Shomari for 203(k) underwriting",
+      "done": false
+    },
+    {
+      "agent": "sara",
+      "client": "Hovey",
+      "title": "Hovey hearing FRIDAY 7/25 at 1:30 PM — Caroline Selfridge wants pre-hearing meeting; coordinate with Mike Fluetsch on what to bring and say",
+      "done": false
+    },
+    {
+      "agent": "sara",
+      "client": "433 Hwy 4",
+      "title": "Chase sellers Jim & Yvonne Heryford for signed acknowledgment on Neriah's buyer-agent AVID — sent to Herfords 7/21; signed copy must come back and be filed in Ex before COE 8/10.",
       "done": false
     }
   ],
@@ -522,11 +586,11 @@
         },
         {
           "date": "",
-          "label": "Awaiting judge's written approval",
+          "label": "Judge has signed — awaiting written notice delivery",
           "status": "next",
           "col": "contingencies",
-          "badge": "Watch",
-          "desc": "Every deadline in this deal begins the first day after the seller delivers written notice of court approval. We will send you real dates the day it arrives."
+          "badge": "Coming Soon",
+          "desc": "The judge signed the court approval document (7/21). Audry (listing agent) is waiting for the copy from the attorney's office to forward to Placer Title. Every deadline in this deal begins the first day after written notice is delivered to the buyer — that day is coming very soon."
         },
         {
           "date": "",
@@ -549,7 +613,7 @@
         "author": "james",
         "status": "draft",
         "updated": "2026-07-18",
-        "body": "David and Stacy, the court's noticing period is behind us and we are waiting on the judge's written approval, which starts every remaining deadline. Your loan paperwork is moving in parallel so we can close quickly once it lands. Nothing is needed from you right now."
+        "body": "David and Stacy, great news — the judge has signed the court approval document. We are waiting for the attorney's office to deliver a copy to escrow, and the moment written notice is delivered, every deadline officially begins and we will move quickly to close. James will be in touch with your closing timeline as soon as we have the document in hand. Please make sure your lender has everything they need — we want to be ready to move fast."
       },
       "clientTasks": [
         {
@@ -716,7 +780,10 @@
         "Confirm appraisal type: ordered FHA, may need FHA 203K",
         "Septic inspection complete \u2014 CLEAN",
         "7/20 is escrow placeholder only \u2014 not a firm COE",
-        "Buyer Early Occupancy (BEO) arranged \u2014 buyers David Allen Hopkins & Stacy Ann Gebhart plan to take early possession once the bankruptcy court approves, ahead of/at the 7/20 target COE; formal written court approval still pending as of 7/14 (per Sara)."
+        "Buyer Early Occupancy (BEO) arranged \u2014 buyers David Allen Hopkins & Stacy Ann Gebhart plan to take early possession once the bankruptcy court approves, ahead of/at the 7/20 target COE; formal written court approval still pending as of 7/14 (per Sara).",
+        "Court email read 7/20 (CASE # 25-31761 Marshall Guthrie, forwarded by James 7/19) \u2014 NOT a court approval notice. Court has NOT signed off yet. All contingency clocks still frozen.",
+        "Audry bounced email RESOLVED 7/20 \u2014 correct email found; FHA Amendatory Clause resent.",
+        "\ud83d\udea8 BREAKTHROUGH 7/21: JUDGE HAS SIGNED \u2014 Audry emailed Amanda (Placer): 'the judge has signed the document needed for closing escrow. As soon as I have a copy I will forward to you.' Attorney needs signed settlement statement to record after close. Audry: 'Please prepare us for closing \u2014 we can move to close once we have this signed document.' Document not yet in hand \u2014 delivery of written notice to buyer starts all clocks. IMMINENT: notify James, Kim Hesser (lender), David & Stacy, and get COE date from escrow."
       ]
     },
     {
@@ -987,14 +1054,14 @@
           "status": "next",
           "col": "closing",
           "badge": "Delayed",
-          "desc": "The lender asked for an extension on 7/19 \u2014 no new closing date confirmed yet. Likely Wednesday or Friday this week; Sara will confirm as soon as escrow has a firm date."
+          "desc": "COE confirmed Thursday July 24. The lender requested an extension from 7/20; Kim (Prime Residential) confirmed July 24 on 7/20."
         }
       ],
       "agentNote": {
         "author": "sara",
         "status": "draft",
         "updated": "2026-07-19",
-        "body": "Guy and Adrianna, your lender has asked for a short extension, so we will not be closing Monday as planned. Every contingency is still removed and your appraisal came in above your purchase price, so this is just a timing adjustment on the lender's end. I expect a new closing date (likely Wednesday or Friday this week) very soon and will confirm the moment escrow has it in writing."
+        "body": "Guy and Adrianna, we have a new closing date: Thursday, July 24. Every contingency is removed and your appraisal came in above your purchase price — you are in great shape. Watch for signing instructions and wire details from Placer Title very soon."
       },
       "clientTasks": [
         {
@@ -1038,12 +1105,12 @@
       "closingDate": null,
       "timeline": {
         "acceptance": "2026-06-19",
-        "coe": null,
+        "coe": "2026-07-24",
         "remaining": [
           "appraisal",
           "loan"
         ],
-        "coeNote": "Lender requested an extension 7/19 \u2014 new COE not yet set; buyers/Sara expecting likely Wed 7/22 or Fri 7/24, unconfirmed."
+        "coeNote": "COE confirmed July 24, 2026 \u2014 Kim Hesser (Prime Residential/lender) confirmed 7/20 per Sara's call. Original COE was 7/20; lender requested extension 7/19."
       },
       "contacts": {
         "coAgent": "Kylie Windley / Mitzi Windley (Chase International)",
@@ -1182,7 +1249,7 @@
       "correspondence": [],
       "notes": "Buyer-side. OFFER ACCEPTED (confirmed by Sara 6/22/2026). Offer (CA RPA) signed via Authentisign and sent to listing agents Kylie & Mitzi Windley (Chase International) 6/14/2026. Initially REJECTED 6/16 (seller objected to 'remove all debris' term and called price too low). Deal REVIVED: seller counter (SCO1) received 6/18 via Kylie Windley. Buyer counter at $615,000 (highest and best) sent 6/19 and ACCEPTED. salePrice $615,000 CONFIRMED by Sara 6/22. ESCROW OPENED 6/23 with Ashley Cuslidge at Placer Title (Order P-708659). Buyers: Adrianna & Guy Castle. VEHICLE/TRAILER ADDENDUM (buyer responsible for removing remaining vehicles & trailers, per Mitzi 6/20) sent out for buyer signatures 6/23 with Mitzi CC'd to receive once signed \u2014 SELLER STILL NEEDS TO SIGN. TITLE RESOLVED 6/29: Placer's underwriter had balked at insuring the Sheriff's-sale title, but Ashley confirmed 6/29 that WESTCOR will insure \u2014 proceeding with Westcor as underwriter, transaction STAYS AT PLACER (P-708659); 7/20 COE no longer threatened. FINANCING CHANGED AGAIN (per Sara 6/29): buyers had switched from 20% down to the GSFA 'Assist to Own' grant + family gift, BUT the buyer GOT A RAISE and NO LONGER QUALIFIES for GSFA \u2014 financing must be re-worked (likely back to conventional); RPA terms to be updated to reflect whatever the new financing is. EMD: Adrianna brought $1k to Placer 6/29; remaining $9k being dropped via Placer's mail slot 7/2\u20137/3 (Adrianna spoke w/ Ashley \u2014 Placer closed 7/3 holiday & Ashley out 7/6+, confirm it posts Mon 7/6); EMD Addendum #2 signing complete 6/29, forwarded to Mitzi for seller signature. UPDATE 7/2: seller disclosures received 7/2 & Adrianna signed/accepted them same day (Authentisign); buyers DECLINED well & septic inspections (Adrianna 7/2 \u2014 Sara had held off ordering inspections pending the seller's recent reports to save the buyers money). Buyer-facing timeline generated 6/23 (7230_Latigo_Buyer_Timeline.html in deal folder). Key dates from acceptance 6/19: deposit $10k by 6/24; seller docs ~6/26; all buyer contingencies (inspection/appraisal/loan/title/insurance, 17 days) 7/6; final walkthrough ~7/15; COE 30 days = 7/19 (Sun) rolls to ~7/20. Inspections TBD; home warranty waived in contract. UPDATE 7/13: final walkthrough now confirmed Friday 7/17 (buyers doing it then, per Sara's email to Kylie/Mitzi) -- supersedes earlier ~7/15 estimate. Appraisal still not back; Sara re-chasing lender 7/13. CORRECTION 7/13: Addendum 1 (vehicle/trailer) was already filed in Ex \u2014 Kylie's 7/13 email attachment was a duplicate, not a new item needing download.",
       "alerts": [
-        "NEW 7/19: COE NO LONGER MONDAY 7/20 \u2014 lender requested an extension; no new date confirmed yet, likely Wed 7/22 or Fri 7/24 (per Sara 7/19). Watch for the signed ETA/extension paperwork.",
+        "COE CONFIRMED 7/24 (Kim/lender confirmed 7/20 per Sara's call) \u2014 lender had requested extension from 7/20; now Thursday July 24. Watch for signing instructions from Placer Title (209.736.9553).",
         "CR1 + BIW EXECUTED 7/6 (Authentisign) \u2014 all contingencies removed EXCEPT appraisal & loan; Mitzi has copy via CC",
         "TITLE WOBBLE RESOLVED 7/6/7: Amanda (Placer) said Westcor declined, then reversed same day \u2014 'file can proceed'; written confirmation obtained (Sara 7/7); 7/20 COE holds",
         "EMD received in FULL \u2014 $10k receipt from Amanda 7/7 filed (Receipt_414331)",
@@ -1493,7 +1560,9 @@
         "EMD": "received \u2014 buyer's $12k deposit confirmed received by Placer (Sara 6/25)",
         "sellerDisclosures": "complete \u2014 buyer-signed set received 7/6 (per Sara)",
         "buyerSignedDisclosures": "received 7/6",
-        "MU_PA_NHD_FHDS": "signed via Authentisign 7/6 (Mixed Use Purchase Addendum + NHD sig pages + FHDS) \u2014 forwarded to Melissa/Neriah/SkySlope; still to be filed in Ex",
+        "MU_PA_NHD_FHDS": "DocuSign pkg 'MU-PA + ADM 2 + NHD sig pages' completed 7/20 19:41 by ALL signers; downloaded and filed in Ex 7/21 \u2705. NHD sig pages now in Ex. (Original Authentisign 7/6 also signed; 7/20 pkg is the current complete version.)",
+        "buyerAgentAVID_433": "Neriah Davis buyer-agent AVID received via Melissa Frey (melissa.frey@norcalgold.com) 7/20 17:17 RE: 'need buyer signed disclosures returned'; sent to sellers Jim & Yvonne Heryford for signature acknowledgment 7/21. Awaiting return.",
+        "saraAVID_glide": "Sara's Glide AVID completed 7/19 (cert e47c5a62), forwarded to ziplogix 7/20. NOT YET downloaded and filed in Ex \u2014 still pending.",
         "tenantExtensionAddendum": "EXECUTED by ALL parties 7/7 (Generic Addendum 2 via Glide) \u2014 through-end-of-Aug tenant extension now in writing; filed in Ex",
         "requestForRepair": "RR1 received 7/7 (Sara required proper RR form from Neriah, not addendum); summary sent to Jim & Yvonne 7/7; SELLER RESPONSE SIGNED (Jim 7/7, Yvonne 7/8) \u2014 Seller Response & Buyer Reply to RR #1 + CR1 sent to Neriah/Melissa 7/8 AM, awaiting BUYER reply",
         "homeInspectionReport": "Dawson home inspection report + summary (Inner Vision) filed in Ex 7/8; DocuSign '433 E Hwy 4 - Home inspection' completed by all parties 7/8 (via Melissa)",
@@ -1580,7 +1649,10 @@
         "RR RESOLVED \u2705 \u2014 executed Seller Response & Buyer Reply to RR1 + CR1 received from Neriah 7/9, filed in Ex",
         "ETA No. 1 EXECUTED 7/10 \u2705 \u2014 loan contingency now 7/23, appraisal 7/16, COE unchanged 8/10; filed in Ex",
         "TENANT EXTENSION NOW IN WRITING \u2705 \u2014 Generic Addendum 2 executed by all parties 7/7 (Glide), filed in Ex",
-        "Buyer-signed disclosure set received 7/6; MU-PA + NHD sig pages + FHDS signed 7/6 (Authentisign) \u2014 still to FILE the sets in Ex (per Sara 7/13: docs are with Melissa TC awaiting buyer signatures on the corrected set -- not stalled on Sara's end)",
+        "MU-PA + ADM 2 + NHD sig pages FILED IN EX 7/21 \u2705 \u2014 DocuSign pkg completed 7/20 19:41 all signers; downloaded by Sara 7/21. NHD sig pages requirement met.",
+        "\u26a0\ufe0f LOAN CONTINGENCY TOMORROW 7/23 \u2014 Sara emailed Neriah 7/21 but no written loan contingency removal/extension confirmed yet. Must be resolved by 7/23.",
+        "Buyer-agent AVID (Neriah Davis/RE/MAX GOLD): received via Melissa Frey 7/20; sent to Herfords for seller acknowledgment sigs 7/21 \u2014 awaiting return.",
+        "Sara's Glide AVID (cert e47c5a62, completed 7/19): not yet downloaded from Glide email and filed in Ex \u2014 still pending.",
         "COE 8/10/2026 \u2014 final walkthrough 8/5",
         "LISTING EXTENDED to 8/18/2026 via MOD \u2014 covers through COE 8/10 \u2705",
         "NEW 7/17: Appraisal contingency extended one more day to 7/17 (second ETA, sellers signed this morning) \u2014 appraisal report is back per lender but value not yet confirmed; loan contingency still 7/23, COE still 8/10",
