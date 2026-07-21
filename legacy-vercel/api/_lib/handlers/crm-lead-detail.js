@@ -151,11 +151,100 @@ async function readLead(req, res) {
       offers:           offers.data   || [],
       notes:            notes.data    || [],
       tasks:            tasks.data     || [],
-      appointments:     appts.data     || []
+      appointments:     appts.data     || [],
+      collections:      await curatedForLead(supa, id, events.data || []).catch(() => [])
     });
   } catch (e) {
     return fail(res, 500, e.message);
   }
+}
+
+// Curated searches sent to this lead + their live engagement (opens,
+// per-listing views/dwell, reactions) — the same rollup the Curated tab
+// computes, surfaced on the contact card. Matches collections attached to the
+// lead (client_lead_id) plus any referenced by the lead's own collection
+// events (covers a push where the client was never formally attached).
+// Every query is fail-soft so an un-provisioned curated schema just yields [].
+async function curatedForLead(supa, leadId, leadEvents) {
+  const evtCollIds = new Set();
+  for (const e of (leadEvents || [])) {
+    const cid = e && e.event_data && e.event_data.collection_id;
+    if (cid) evtCollIds.add(cid);
+  }
+
+  const { data: attached, error: aErr } = await supa.from('curated_collections')
+    .select('id, title, status, share_token, created_at, updated_at')
+    .eq('client_lead_id', leadId);
+  if (aErr) return [];   // table absent / not readable — no curated block
+
+  const collById = new Map();
+  for (const c of (attached || [])) collById.set(c.id, c);
+  const missing = [...evtCollIds].filter((cid) => !collById.has(cid));
+  if (missing.length) {
+    const { data: extra } = await supa.from('curated_collections')
+      .select('id, title, status, share_token, created_at, updated_at').in('id', missing);
+    for (const c of (extra || [])) collById.set(c.id, c);
+  }
+  const collIds = [...collById.keys()];
+  if (!collIds.length) return [];
+
+  const [listRes, evRes, rxRes] = await Promise.all([
+    supa.from('collection_listings').select('collection_id, property_id, included, properties(address, city)').in('collection_id', collIds),
+    supa.from('collection_events').select('collection_id, property_id, event_type, dwell_ms').in('collection_id', collIds),
+    supa.from('collection_reactions').select('collection_id, property_id, reaction, comment, created_at').in('collection_id', collIds)
+  ]);
+  const listings = listRes.data || [], evrows = evRes.data || [], rxrows = rxRes.data || [];
+
+  const addr = new Map();            // property_id -> "address · city"
+  const includedCount = new Map();   // collection_id -> included listings
+  for (const l of listings) {
+    if (l.properties) addr.set(l.property_id, [l.properties.address, l.properties.city].filter(Boolean).join(' · '));
+    if (l.included) includedCount.set(l.collection_id, (includedCount.get(l.collection_id) || 0) + 1);
+  }
+
+  const opensByColl = new Map();
+  const perProp = new Map();          // `${coll}|${prop}` -> {views, dwell}
+  for (const ev of evrows) {
+    if (ev.event_type === 'open') { opensByColl.set(ev.collection_id, (opensByColl.get(ev.collection_id) || 0) + 1); continue; }
+    if (!ev.property_id) continue;
+    const k = ev.collection_id + '|' + ev.property_id;
+    const cur = perProp.get(k) || { views: 0, dwell: 0 };
+    if (ev.event_type === 'listing_view') cur.views++;
+    if (ev.event_type === 'dwell') cur.dwell += (parseInt(ev.dwell_ms, 10) || 0);
+    perProp.set(k, cur);
+  }
+
+  const rxByColl = new Map();
+  const rxByProp = new Map();          // `${coll}|${prop}` -> reaction (latest wins)
+  for (const rx of rxrows) {
+    if (!rxByColl.has(rx.collection_id)) rxByColl.set(rx.collection_id, []);
+    rxByColl.get(rx.collection_id).push({ property_id: rx.property_id, address: addr.get(rx.property_id) || null, reaction: rx.reaction, comment: rx.comment || null, created_at: rx.created_at });
+    if (rx.property_id) rxByProp.set(rx.collection_id + '|' + rx.property_id, rx.reaction);
+  }
+
+  return collIds.map((cid) => {
+    const c = collById.get(cid);
+    const propKeys = new Set();
+    for (const k of perProp.keys()) if (k.slice(0, cid.length + 1) === cid + '|') propKeys.add(k.slice(cid.length + 1));
+    for (const k of rxByProp.keys()) if (k.slice(0, cid.length + 1) === cid + '|') propKeys.add(k.slice(cid.length + 1));
+    const engagement = [...propKeys].map((pid) => {
+      const pp = perProp.get(cid + '|' + pid) || { views: 0, dwell: 0 };
+      return { property_id: pid, address: addr.get(pid) || null, views: pp.views, dwell_ms: pp.dwell, reaction: rxByProp.get(cid + '|' + pid) || null };
+    }).sort((a, b) => (b.views - a.views) || (b.dwell_ms - a.dwell_ms));
+    return {
+      id: cid,
+      title: c.title || 'Curated search',
+      status: c.status || null,
+      share_path: c.share_token ? '/c/' + c.share_token : null,
+      created_at: c.created_at, updated_at: c.updated_at,
+      opens: opensByColl.get(cid) || 0,
+      listing_count: includedCount.get(cid) || 0,
+      total_views: engagement.reduce((s, e) => s + e.views, 0),
+      total_reactions: (rxByColl.get(cid) || []).length,
+      engagement,
+      reactions: rxByColl.get(cid) || []
+    };
+  }).sort((a, b) => Date.parse(b.updated_at || b.created_at || 0) - Date.parse(a.updated_at || a.created_at || 0));
 }
 
 // ---------------------------------------------------------------------------

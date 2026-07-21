@@ -2201,6 +2201,7 @@
     const offers   = payload.offers || [];
     const tasks    = payload.tasks || [];
     const appts    = payload.appointments || [];
+    const collections = payload.collections || [];
 
     const initials = initialsOf(lead.first_name, lead.last_name, lead.email);
     // Comms on this lead speak as the agent who owns it (assigned_agent), so a
@@ -2399,9 +2400,43 @@
             <div class="lp-preview-avatar">${escHtml(initials)}</div>
           </div>
           ${wire}
+          ${curatedBlockHtml()}
           <div class="lp-eyebrow" style="margin-top:18px;margin-bottom:10px;">Upcoming</div>
           ${cards}
         </div>`;
+    }
+
+    // Curated searches sent to this lead + their live engagement (opens,
+    // per-listing views/dwell, reactions). Reads payload.collections — the same
+    // numbers the Curated tab shows, here on the contact card so an agent sees
+    // what the client clicked and how often without leaving the record.
+    function curatedBlockHtml() {
+      if (!collections.length) return '';
+      const REACT = { love: '❤️ Loved', want_to_see: '👀 Wants to see', tell_me_more: '💬 Tell me more', not_for_me: '✕ Not for me' };
+      const dwellMin = (ms) => { const m = Math.round((+ms || 0) / 60000); return m >= 1 ? `${m}m` : ''; };
+      const when = (iso) => { const d = new Date(iso); if (isNaN(d)) return ''; const MO = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']; return `${MO[d.getMonth()]} ${d.getDate()}`; };
+      const blocks = collections.map((c) => {
+        const engaged = (c.engagement || []).filter((e) => e.views > 0 || e.dwell_ms > 0 || e.reaction);
+        const rows = engaged.length ? engaged.slice(0, 6).map((e) => `
+          <div class="lp-cur-row">
+            <span class="lp-cur-addr">${escHtml(e.address || 'A listing')}</span>
+            <span class="lp-cur-stat">${e.views ? `${e.views} view${e.views === 1 ? '' : 's'}` : 'Not opened'}${dwellMin(e.dwell_ms) ? ` · ${dwellMin(e.dwell_ms)}` : ''}${e.reaction ? ` · ${escHtml(REACT[e.reaction] || e.reaction)}` : ''}</span>
+          </div>`).join('')
+          : `<div class="lp-cur-empty">Sent — ${escHtml(clientFirst)} hasn’t opened a listing yet.</div>`;
+        const openedChip = c.opens ? `${c.opens} open${c.opens === 1 ? '' : 's'}` : 'Not opened yet';
+        return `
+          <div class="lp-cur-card">
+            <div class="lp-cur-top">
+              <span class="lp-cur-title">${escHtml(c.title || 'Curated search')}</span>
+              ${c.share_path ? `<a class="lp-cur-link" href="${escHtml(c.share_path)}" target="_blank" rel="noopener">View ↗</a>` : ''}
+            </div>
+            <div class="lp-cur-meta">${escHtml(String(c.listing_count || 0))} listings · ${escHtml(openedChip)}${c.total_views ? ` · ${c.total_views} listing views` : ''}${c.created_at ? ` · sent ${escHtml(when(c.created_at))}` : ''}</div>
+            ${rows}
+          </div>`;
+      }).join('');
+      return `
+        <div class="lp-eyebrow" style="margin-top:18px;margin-bottom:10px;">Curated searches</div>
+        <div class="lp-cur-wrap">${blocks}</div>`;
     }
 
     const shareRowHtml = (s) => `

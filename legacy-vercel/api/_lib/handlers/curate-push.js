@@ -64,6 +64,20 @@ export default async function handler(req, res) {
     const to = b?.to || (channel === 'sms' ? lead?.phone : lead?.email);
     if (!to) return fail(res, 422, channel === 'sms' ? 'no phone on file for this client' : 'no email on file for this client');
 
+    // Auto-link the collection to a known contact when it was never formally
+    // attached, so its engagement surfaces on that contact's card. Conservative:
+    // exact email match only (phone matching is fuzzy — left to the client picker).
+    let clientLead = lead;
+    if (!coll.client_lead_id && channel === 'email' && /@/.test(String(to))) {
+      const { data: m } = await supa.from('leads')
+        .select('id, first_name, last_name, email, phone')
+        .eq('email', String(to).trim().toLowerCase()).maybeSingle();
+      if (m) {
+        clientLead = m;
+        await supa.from('curated_collections').update({ client_lead_id: m.id }).eq('id', coll.id).then(() => {}, () => {});
+      }
+    }
+
     // Build the EXACT message the preview shows — one source of truth. The
     // client payload supplies the shaped listings for the email's photo cards.
     const payload = channel === 'email' ? await buildClientPayload(supa, coll) : null;
@@ -98,10 +112,10 @@ export default async function handler(req, res) {
 
     // ---- Log to messages (only when we have a client lead) -------------
     let message_id = null;
-    if (lead?.id) {
+    if (clientLead?.id) {
       const nowIso = new Date().toISOString();
       const { data: row } = await supa.from('messages').insert({
-        lead_id: lead.id,
+        lead_id: clientLead.id,
         direction: 'outbound',
         channel,
         body: channel === 'sms' ? bodyText : `Collection pushed: ${link}`,
@@ -114,9 +128,9 @@ export default async function handler(req, res) {
       }).select('id').single();
       message_id = row?.id || null;
       if (sentOk) {
-        await supa.from('leads').update({ last_contact_at: nowIso }).eq('id', lead.id);
+        await supa.from('leads').update({ last_contact_at: nowIso }).eq('id', clientLead.id);
         await supa.from('lead_events').insert({
-          lead_id: lead.id, event_type: 'message_sent',
+          lead_id: clientLead.id, event_type: 'message_sent',
           source: channel === 'sms' ? 'twilio' : 'mailerlite',
           event_data: { collection_id: coll.id, channel, kind: 'curated_collection_push' }
         });
