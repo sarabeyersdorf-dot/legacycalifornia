@@ -3436,6 +3436,21 @@
     loadLead(id);
   }
 
+  // Re-bind window.Legacy.openLead HERE, where selectLeadId is actually in
+  // scope. The stub defined in the earlier IIFE (see the openLead comment there)
+  // could not see selectLeadId — different closure — so `typeof selectLeadId`
+  // was 'undefined' and openLead only switched to the inbox, leaving whichever
+  // lead boot had auto-selected (the most-recent one) on screen. That made every
+  // People-roster / Messages click open the same wrong person. loadLead fetches
+  // the contact by id, so this works for anyone, incl. archived/closed clients.
+  if (window.Legacy) {
+    window.Legacy.openLead = function (id) {
+      if (!id) return;
+      if (typeof window.showView === 'function') window.showView(null, 'inbox');
+      selectLeadId(id, true);
+    };
+  }
+
   // Permanently delete a contact (the "Trash" option / card delete icon).
   // Returns true if the delete was started (confirmed), false if cancelled.
   function deleteLeadFlow(id, name) {
