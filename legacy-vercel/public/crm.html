@@ -2040,9 +2040,37 @@ function selectLead(el) {
    seller sees only their own portal. Agent-only (the endpoint enforces it). */
 (function () {
   'use strict';
+  // Fill the deal picker with in-escrow deals (source keys are too random to
+  // type). Runs on every open so the list stays fresh and retries after a failure.
+  function populateEscrowDeals(root) {
+    var sel = root && root.querySelector('#leg-linkdeal-deal');
+    if (!sel) return;
+    fetch('/api/crm/deals-lite', { credentials: 'include' })
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (j) {
+        var deals = ((j && j.deals) || []).filter(function (d) { return d.stage === 'pending'; })
+          .sort(function (a, b) { return (a.label || a.address || '').localeCompare(b.label || b.address || ''); });
+        var keep = sel.value;
+        sel.innerHTML = '';
+        var ph = document.createElement('option');
+        ph.value = ''; ph.textContent = deals.length ? 'Select a deal in escrow…' : 'No deals in escrow';
+        sel.appendChild(ph);
+        deals.forEach(function (d) {
+          var o = document.createElement('option');
+          o.value = d.source_key;
+          o.textContent = (d.label || d.address || d.source_key) + (d.agent ? ' · ' + (d.agent === 'james' ? 'James' : 'Sara') : '');
+          sel.appendChild(o);
+        });
+        if (keep) sel.value = keep;   // preserve a prior selection across reopens
+      })
+      .catch(function () { sel.innerHTML = '<option value="">Could not load deals — reopen to retry</option>'; });
+  }
+
   function openLinkDealModal() {
     if (document.getElementById('leg-linkdeal-modal')) {
-      document.getElementById('leg-linkdeal-modal').style.display = 'flex';
+      var ex = document.getElementById('leg-linkdeal-modal');
+      ex.style.display = 'flex';
+      populateEscrowDeals(ex);
       return;
     }
     var m = document.createElement('div');
@@ -2054,8 +2082,10 @@ function selectLead(el) {
       + '  <h2 style="font-family:\'Cormorant Garamond\',serif;font-style:italic;font-weight:500;font-size:28px;margin:0 0 6px;">Grant portal access.</h2>'
       + '  <p style="font-size:13.5px;line-height:1.55;color:#3A332B;margin:0 0 18px;">Ties a client to a transaction so that when they sign in they see only their own portal. Finds or creates their lead by email, then links it to the deal.</p>'
       + '  <form id="leg-linkdeal-form" style="display:flex;flex-direction:column;gap:12px;">'
-      + '    <label style="font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:#7C6A4D;display:flex;flex-direction:column;gap:4px;">Deal (source key)'
-      + '      <input name="deal" required placeholder="e.g. 433-hwy4" style="font:inherit;font-size:15px;text-transform:none;letter-spacing:normal;color:#1A1714;background:#fff;border:1px solid #D9CFB7;padding:9px 11px;"></label>'
+      + '    <label style="font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:#7C6A4D;display:flex;flex-direction:column;gap:4px;">Deal in escrow'
+      + '      <select name="deal" id="leg-linkdeal-deal" required style="font:inherit;font-size:15px;color:#1A1714;background:#fff;border:1px solid #D9CFB7;padding:9px 11px;">'
+      + '        <option value="">Loading deals in escrow…</option>'
+      + '      </select></label>'
       + '    <label style="font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:#7C6A4D;display:flex;flex-direction:column;gap:4px;">Client email'
       + '      <input name="email" type="email" required placeholder="client@example.com" style="font:inherit;font-size:15px;text-transform:none;letter-spacing:normal;color:#1A1714;background:#fff;border:1px solid #D9CFB7;padding:9px 11px;"></label>'
       + '    <div style="display:flex;gap:10px;">'
@@ -2084,6 +2114,7 @@ function selectLead(el) {
       + '  <div id="leg-linkdeal-result" style="margin-top:14px;font-size:13.5px;line-height:1.5;min-height:20px;"></div>'
       + '</div>';
     document.body.appendChild(m);
+    populateEscrowDeals(m);
 
     var form   = m.querySelector('#leg-linkdeal-form');
     var submit = m.querySelector('#leg-linkdeal-submit');
