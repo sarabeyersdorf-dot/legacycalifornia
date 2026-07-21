@@ -190,16 +190,357 @@
           </div>
         </section>
 
-        <!-- LIVE DEALS STRIP -->
-        <section class="deals">
-          <div class="deals-h">
-            <span class="hairline-brass"></span>
-            <span class="eyebrow">In the air right now · active deals</span>
-            <h2 class="h-section" style="font-size: 28px; margin-top: 8px;">Deals in motion.</h2>
+        <!-- ===== BEGIN Deals in Motion (ledger + triage toggle) ===== -->
+        <!-- Self-contained .dl-* widget. Its own type system (Poppins, 12px floor)
+             and palette — deliberately NOT the CRM's parchment/ink. Rows are fed
+             by /api/crm/deals-motion, which resolves every calendar event to its
+             deal so contingencies, inspections & appointments show at a glance. -->
+        <section class="dl" id="dlRoot" aria-label="Deals in motion">
+          <div class="dl-toolbar">
+            <div>
+              <div class="dl-eyebrow"><span class="dl-eyebrow-tick"></span>In the air right now &middot; active deals</div>
+              <div class="dl-title">Deals in motion.</div>
+            </div>
+            <div class="dl-modes" data-modes></div>
           </div>
-          <div class="deal-grid" data-deal-grid>
+
+          <div class="dl-filterbar">
+            <div class="dl-filters" data-filters></div>
+            <div class="dl-legend" data-legend></div>
           </div>
+
+          <div class="dl-bulk" data-bulk hidden></div>
+
+          <div class="dl-card">
+            <div class="dl-scroll">
+              <div class="dl-inner">
+                <div class="dl-head">
+                  <span class="dl-c-check"></span>
+                  <span class="dl-c-deal">Deal &middot; Client</span>
+                  <span class="dl-c-side">Side &middot; Agent</span>
+                  <span class="dl-c-price">Price</span>
+                  <span class="dl-c-wait">Waiting on</span>
+                  <span class="dl-c-cont">Next contingency</span>
+                  <span class="dl-c-insp">Next event &middot; calendar</span>
+                  <span class="dl-c-coe">COE</span>
+                  <span class="dl-c-act">Act</span>
+                </div>
+                <div data-rows><div class="dl-loading">Loading your deals…</div></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="dl-keys" data-keys></div>
         </section>
+        <div class="dl-toast" data-toast></div>
+
+        <style>
+          .dl { display:block; padding:26px 0 42px; width:100%; font-family:'Poppins',system-ui,sans-serif; color:oklch(0.28 0.012 55); box-sizing:border-box; }
+          .dl *, .dl *::before, .dl *::after { box-sizing:border-box; }
+          .dl button { font-family:'Poppins',system-ui,sans-serif; }
+          .dl-toolbar { display:flex; align-items:flex-end; justify-content:space-between; gap:20px; flex-wrap:wrap; margin-bottom:16px; }
+          .dl-eyebrow { display:flex; align-items:center; gap:10px; font-size:12px; letter-spacing:2px; text-transform:uppercase; color:oklch(0.5 0.06 70); font-weight:600; }
+          .dl-eyebrow-tick { width:26px; height:2px; background:oklch(0.62 0.1 78); }
+          .dl-title { font-family:'Poppins',system-ui,sans-serif; font-size:32px; font-weight:700; letter-spacing:-.5px; color:oklch(0.22 0.012 55); line-height:1; margin-top:8px; }
+          .dl-modes { display:flex; background:oklch(0.92 0.008 80); border-radius:11px; padding:4px; gap:3px; }
+          .dl-mode { padding:7px 15px; border:none; border-radius:8px; cursor:pointer; font-size:13px; font-weight:600; transition:all .12s; background:transparent; color:oklch(0.48 0.01 60); }
+          .dl-mode.on { background:oklch(0.995 0.002 85); color:oklch(0.24 0.012 55); box-shadow:0 1px 3px oklch(0.3 0.02 60 / 0.14); }
+          .dl-filterbar { display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin-bottom:16px; }
+          .dl-filters { display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+          .dl-chip { display:inline-flex; align-items:center; gap:7px; padding:6px 13px; border-radius:9px; cursor:pointer; font-size:12.5px; font-weight:600; background:oklch(0.995 0.002 85); color:oklch(0.42 0.01 60); border:1px solid oklch(0.9 0.008 80); }
+          .dl-chip.on { background:oklch(0.235 0.012 55); color:oklch(0.95 0.006 85); border-color:oklch(0.235 0.012 55); }
+          .dl-chip .ct { font-size:12px; font-weight:700; padding:0 5px; border-radius:5px; background:oklch(0.92 0.006 80); color:oklch(0.5 0.01 60); }
+          .dl-chip.on .ct { background:oklch(1 0 0 / 0.15); color:oklch(0.9 0.006 85); }
+          .dl-legend { margin-left:auto; display:flex; gap:14px; }
+          .dl-leg { display:inline-flex; align-items:center; gap:6px; font-size:12px; font-weight:600; color:oklch(0.46 0.01 60); }
+          .dl-leg i { width:9px; height:9px; border-radius:3px; display:inline-block; }
+          .dl-bulk { display:flex; align-items:center; gap:12px; padding:11px 16px; margin-bottom:14px; border-radius:12px; background:oklch(0.235 0.012 55); color:oklch(0.95 0.006 85); }
+          .dl-bulk[hidden] { display:none; }
+          .dl-bulk-label { font-size:13.5px; font-weight:600; }
+          .dl-bulk-sep { width:1px; height:20px; background:oklch(1 0 0 / 0.18); }
+          .dl-bulk-btn { padding:6px 13px; border:1px solid oklch(1 0 0 / 0.2); border-radius:8px; cursor:pointer; background:oklch(1 0 0 / 0.08); color:oklch(0.95 0.006 85); font-size:12.5px; font-weight:600; }
+          .dl-bulk-clear { margin-left:auto; background:none; border:none; color:oklch(0.75 0.02 80); font-size:12.5px; font-weight:600; cursor:pointer; }
+          .dl-card { border:1px solid oklch(0.9 0.008 80); border-radius:18px; box-shadow:0 12px 40px oklch(0.3 0.02 60 / 0.09); overflow:hidden; background:oklch(0.995 0.002 85); }
+          .dl-scroll { overflow-x:auto; }
+          .dl-inner { min-width:1200px; }
+          .dl-loading, .dl-empty-row { padding:34px 22px; font-size:13.5px; color:oklch(0.5 0.01 60); font-style:italic; }
+          .dl-head { display:flex; align-items:center; height:44px; padding:0 12px 0 0; background:oklch(0.235 0.012 55); color:oklch(0.86 0.01 80); font-size:12px; letter-spacing:.6px; text-transform:uppercase; font-weight:700; }
+          .dl-c-check { width:44px; flex:none; }
+          .dl-c-deal { flex:2.3; } .dl-c-side { flex:1.1; } .dl-c-price { flex:.75; } .dl-c-wait { flex:1; }
+          .dl-c-cont { flex:1.85; } .dl-c-insp { flex:1.75; } .dl-c-coe { flex:.75; padding-left:6px; }
+          .dl-c-act { width:104px; flex:none; text-align:right; padding-right:14px; }
+          .dl-group { display:flex; align-items:center; gap:10px; padding:11px 22px; }
+          .dl-group-name { font-size:12.5px; font-weight:700; letter-spacing:.3px; color:oklch(0.26 0.012 55); }
+          .dl-group-icon, .dl-group-count { display:inline-flex; align-items:center; justify-content:center; font-weight:700; }
+          .dl-group-icon { width:22px; height:22px; flex:none; border-radius:6px; font-size:12px; }
+          .dl-group-count { min-width:22px; height:20px; padding:0 7px; border-radius:6px; font-size:12px; }
+          .dl-group-hint { font-size:12px; color:oklch(0.55 0.01 60); font-weight:500; }
+          .dl-row { display:flex; align-items:center; padding:0 12px 0 0; min-height:66px; border-bottom:1px solid oklch(0.93 0.006 80); }
+          .dl-row:hover { background:oklch(0.97 0.005 85); }
+          .dl-row.sel { background:oklch(0.97 0.008 80); }
+          .dl-row.foc { background:oklch(0.96 0.01 82); box-shadow:inset 3px 0 0 oklch(0.62 0.1 78); }
+          .dl-check-wrap { width:44px; flex:none; display:flex; align-items:center; justify-content:center; }
+          .dl-check { width:18px; height:18px; flex:none; border-radius:5px; cursor:pointer; display:inline-flex; align-items:center; justify-content:center; font-size:12px; font-weight:700; color:oklch(0.98 0 0); background:oklch(0.99 0.004 85); border:1.5px solid oklch(0.82 0.01 80); }
+          .dl-check.on { background:oklch(0.235 0.012 55); border-color:oklch(0.235 0.012 55); }
+          .dl-deal { flex:2.4; display:flex; align-items:center; gap:12px; padding:11px 10px 11px 0; position:relative; }
+          .dl-spine { position:absolute; left:0; top:0; bottom:0; width:4px; }
+          .dl-avatar { width:30px; height:30px; flex:none; border-radius:50%; display:inline-flex; align-items:center; justify-content:center; font-size:12px; font-weight:700; }
+          .dl-addr { font-family:'Poppins',sans-serif; font-size:15px; font-weight:600; letter-spacing:-.2px; color:oklch(0.2 0.012 55); line-height:1.15; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; cursor:pointer; }
+          .dl-addr:hover { text-decoration:underline; }
+          .dl-clientline { display:flex; align-items:center; gap:7px; margin-top:2px; }
+          .dl-client { font-size:12px; color:oklch(0.52 0.01 60); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+          .dl-statusdot { width:5px; height:5px; flex:none; border-radius:50%; }
+          .dl-status { font-size:12px; color:oklch(0.5 0.01 60); white-space:nowrap; }
+          .dl-touchline { display:flex; align-items:center; gap:7px; margin-top:4px; }
+          .dl-touch { font-size:12px; color:oklch(0.55 0.01 60); }
+          .dl-stale { font-size:12px; font-weight:700; padding:1px 6px; border-radius:5px; }
+          .dl-side { flex:1.15; display:flex; align-items:center; gap:7px; }
+          .dl-sidechip { display:inline-flex; align-items:center; font-size:12px; font-weight:700; letter-spacing:.3px; padding:2px 9px; border-radius:20px; white-space:nowrap; }
+          .dl-agents { display:flex; gap:3px; }
+          .dl-agent { width:22px; height:22px; flex:none; border-radius:50%; display:inline-flex; align-items:center; justify-content:center; font-size:12px; font-weight:700; }
+          .dl-price { flex:.8; font-size:14px; font-weight:700; color:oklch(0.26 0.012 55); }
+          .dl-wait { flex:1.05; }
+          .dl-waitchip { display:inline-flex; align-items:center; gap:6px; font-size:12px; padding:3px 10px 3px 8px; border-radius:20px; }
+          .dl-waitchip i { width:7px; height:7px; flex:none; border-radius:50%; }
+          .dl-cont { flex:1.85; } .dl-insp { flex:1.75; }
+          .dl-cell { display:block; width:100%; text-align:left; border:none; background:transparent; padding:6px 8px; margin:0 -8px; border-radius:7px; cursor:pointer; transition:background .12s; }
+          .dl-cell:hover:not(.dead) { background:oklch(0.95 0.008 80); }
+          .dl-cell.dead { cursor:default; }
+          .dl-cell-top { display:flex; align-items:center; gap:6px; }
+          .dl-state { display:inline-flex; align-items:center; flex:none; font-size:12px; font-weight:700; letter-spacing:.2px; text-transform:uppercase; padding:2px 5px; border-radius:5px; white-space:nowrap; }
+          .dl-celllabel { font-size:12px; color:oklch(0.34 0.01 60); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+          .dl-contdate { font-size:12px; font-weight:700; margin-top:3px; }
+          .dl-inspdate { font-size:12px; color:oklch(0.5 0.09 250); font-weight:600; margin-top:3px; }
+          .dl-coe { flex:.8; }
+          .dl-coeshort { font-size:13px; font-weight:600; color:oklch(0.3 0.012 55); }
+          .dl-coecount { font-size:12px; font-weight:700; }
+          .dl-act { width:104px; flex:none; display:flex; justify-content:flex-end; gap:5px; padding-right:14px; }
+          .dl-actbtn { width:31px; height:31px; flex:none; border:1px solid oklch(0.88 0.008 80); border-radius:8px; cursor:pointer; background:oklch(0.99 0.004 85); color:oklch(0.42 0.01 60); font-size:14px; display:inline-flex; align-items:center; justify-content:center; transition:all .12s; }
+          .dl-actbtn:hover { background:oklch(0.235 0.012 55); color:oklch(0.98 0 0); border-color:oklch(0.235 0.012 55); }
+          .dl-keys { display:flex; align-items:center; gap:14px; margin-top:12px; font-size:12px; color:oklch(0.55 0.01 60); flex-wrap:wrap; }
+          .dl-keys b { font-weight:600; color:oklch(0.45 0.01 60); }
+          .dl-key { display:inline-flex; align-items:center; gap:5px; }
+          .dl-key kbd { font-family:'JetBrains Mono',ui-monospace,monospace; font-size:12px; padding:2px 6px; border-radius:5px; background:oklch(0.9 0.008 80); color:oklch(0.4 0.01 60); }
+          .dl-toast { position:fixed; bottom:26px; left:50%; display:flex; align-items:center; gap:10px; transform:translateX(-50%) translateY(20px); opacity:0; transition:all .25s; pointer-events:none; z-index:50; background:oklch(0.235 0.012 55); color:oklch(0.97 0.006 85); padding:12px 20px; border-radius:11px; font-size:13.5px; font-weight:600; box-shadow:0 10px 34px oklch(0.2 0.02 60 / 0.35); }
+          .dl-toast.on { transform:translateX(-50%) translateY(0); opacity:1; pointer-events:auto; }
+          @media (max-width:760px){ .dl { padding:18px 0 30px; } }
+        </style>
+
+        <script>
+        (function () {
+          var root = document.getElementById('dlRoot');
+          if (!root) return;
+          var toastEl = document.querySelector('.dl-toast[data-toast]');
+          var MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+          function today12(){ var d = new Date(); d.setHours(12,0,0,0); return d; }
+
+          var side = {
+            buy:  { solid:'oklch(0.55 0.09 155)', deep:'oklch(0.42 0.08 155)', soft:'oklch(0.55 0.09 155 / 0.14)', label:'Buy' },
+            sell: { solid:'oklch(0.58 0.11 45)',  deep:'oklch(0.46 0.09 45)',  soft:'oklch(0.58 0.11 45 / 0.14)',  label:'Sell' },
+            dual: { solid:'oklch(0.53 0.09 285)', deep:'oklch(0.42 0.08 285)', soft:'oklch(0.53 0.09 285 / 0.14)', label:'Dual' }
+          };
+          var agents = { sara:{initials:'S',c:'oklch(0.62 0.1 78)',cd:'oklch(0.5 0.1 78)'}, james:{initials:'J',c:'oklch(0.55 0.09 250)',cd:'oklch(0.46 0.09 250)'} };
+          var statusKind = {
+            lead:{label:'New lead',c:'oklch(0.5 0.05 250)'}, nurture:{label:'Nurture',c:'oklch(0.52 0.06 300)'},
+            onmarket:{label:'On market',c:'oklch(0.55 0.09 155)'}, offerout:{label:'Offer out',c:'oklch(0.56 0.11 65)'},
+            offerin:{label:'Offer in',c:'oklch(0.5 0.1 150)'}, escrow:{label:'In escrow',c:'oklch(0.56 0.1 45)'}, closing:{label:'Closing',c:'oklch(0.5 0.15 25)'}
+          };
+          var parties = {
+            you:{label:'You',c:'oklch(0.58 0.11 55)',strong:true}, lender:{label:'Lender',c:'oklch(0.5 0.09 250)'},
+            inspector:{label:'Inspector',c:'oklch(0.5 0.09 285)'}, coagent:{label:'Co-agent',c:'oklch(0.52 0.07 40)'},
+            client:{label:'Client',c:'oklch(0.5 0.07 160)'}, escrowco:{label:'Escrow',c:'oklch(0.5 0.05 320)'}
+          };
+          var contState = { ontrack:{label:'On track',c:'oklch(0.5 0.09 155)'}, atrisk:{label:'At risk',c:'oklch(0.55 0.16 25)'}, cleared:{label:'Cleared',c:'oklch(0.55 0.02 60)'} };
+          var evState = { scheduled:{label:'Scheduled',c:'oklch(0.5 0.09 250)'}, confirmed:{label:'Confirmed',c:'oklch(0.5 0.09 190)'}, awaiting:{label:'Awaiting',c:'oklch(0.56 0.12 65)'}, complete:{label:'Complete',c:'oklch(0.55 0.02 60)'}, atrisk:{label:'At risk',c:'oklch(0.55 0.16 25)'} };
+          var groupMeta = {
+            action:{name:'Action today',icon:'!',tint:'oklch(0.55 0.15 25)',hint:'At-risk items, 48-hour deadlines, or gone quiet'},
+            closing:{name:'Closing soon',icon:'⚑',tint:'oklch(0.46 0.09 155)',hint:'Close of escrow within a week'},
+            contweek:{name:'Contingencies this week',icon:'●',tint:'oklch(0.5 0.09 45)',hint:'Next contingency within 10 days'},
+            inspection:{name:'Upcoming calendar events',icon:'▲',tint:'oklch(0.5 0.09 250)',hint:'A scheduled event within 10 days'},
+            later:{name:'In motion',icon:'○',tint:'oklch(0.5 0.02 60)',hint:'Deals moving normally'}
+          };
+          var groupOrder = ['action','closing','contweek','inspection','later'];
+
+          var state = { mode:'ledger', filter:'all', selected:{}, focusId:null, deals:[], loaded:false, error:false, toastTimer:null };
+
+          function alpha(c, a) { return c.replace(')', ' / ' + a + ')'); }
+          function esc(s) { return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+          function fmt(iso){ if(!iso) return '—'; var d=new Date(iso+'T12:00:00'); if(isNaN(d)) return '—'; return MONTHS[d.getMonth()]+' '+d.getDate(); }
+          function daysFrom(iso){ if(!iso) return null; var d=new Date(iso+'T12:00:00'); if(isNaN(d)) return null; return Math.round((d-today12())/86400000); }
+          function weekday(iso){ var d=new Date(iso+'T12:00:00'); if(isNaN(d)) return ''; return ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'][d.getDay()]; }
+          function initialsOf(c){ var a=String(c||'').replace(/[&·—]/g,' ').replace(/\d+\s*ac/gi,' ').trim().split(/\s+/).filter(Boolean); if(!a.length) return '—'; if(a.length===1) return a[0].slice(0,2).toUpperCase(); return (a[0][0]+a[a.length-1][0]).toUpperCase(); }
+          function byId(id){ for(var i=0;i<state.deals.length;i++) if(state.deals[i].id===id) return state.deals[i]; return null; }
+          function nextCont(d){ if(!d.contingencies) return null; var u=d.contingencies.filter(function(c){return c.state!=='cleared';}); u.sort(function(a,b){ var da=a.iso?daysFrom(a.iso):99999, db=b.iso?daysFrom(b.iso):99999; return da-db; }); return u.length?u[0]:null; }
+          function nextEv(d){ if(!d.events||!d.events.length) return null; var up=d.events.filter(function(e){ var x=daysFrom(e.iso); return x!=null && x>=0 && e.state!=='complete'; }); up.sort(function(a,b){return daysFrom(a.iso)-daysFrom(b.iso);}); return up.length?up[0]:null; }
+          function staleDays(d){ var x=daysFrom(d.lastTouch); return x==null?0:-x; }
+
+          function bucketOf(d){
+            var nc=nextCont(d), ncD=nc?daysFrom(nc.iso):null;
+            if(nc && (nc.state==='atrisk'||(ncD!=null&&ncD<=2))) return 'action';
+            var coeD=daysFrom(d.coe);
+            if(coeD!=null && coeD>=0 && coeD<=7) return 'closing';
+            if(staleDays(d)>=10) return 'action';
+            if(ncD!=null && ncD>=0 && ncD<=10) return 'contweek';
+            var ni=nextEv(d);
+            if(ni && daysFrom(ni.iso)<=10) return 'inspection';
+            return 'later';
+          }
+          function matchFilter(d,f){
+            f=f||state.filter;
+            if(f==='all') return true;
+            if(f==='sara') return d.agent==='sara'||d.agent==='both';
+            if(f==='james') return d.agent==='james'||d.agent==='both';
+            if(f==='action'){ var nc=nextCont(d); return (nc&&(nc.state==='atrisk'||(daysFrom(nc.iso)!=null&&daysFrom(nc.iso)<=2)))||staleDays(d)>=10||(daysFrom(d.coe)!=null&&daysFrom(d.coe)>=0&&daysFrom(d.coe)<=7); }
+            if(f==='closing'){ var c=daysFrom(d.coe); return c!=null&&c>=0&&new Date(d.coe+'T12:00:00').getMonth()===today12().getMonth(); }
+            return true;
+          }
+
+          function showToast(msg){
+            if(!toastEl) return;
+            toastEl.innerHTML = '<span>'+esc(msg)+'</span>';
+            toastEl.classList.add('on');
+            clearTimeout(state.toastTimer);
+            state.toastTimer = setTimeout(function(){ toastEl.classList.remove('on'); }, 2200);
+          }
+          function openDeal(id){ if(window.openDealByKey) window.openDealByKey(id); else window.open('/seller.html?deal='+encodeURIComponent(id),'_blank','noopener'); }
+          function toggleSelect(id){ if(state.selected[id]) delete state.selected[id]; else state.selected[id]=true; render(); }
+
+          function stateChip(cfg){ return '<span class="dl-state" style="color:'+cfg.c+';background:'+alpha(cfg.c,0.13)+'">'+cfg.label+'</span>'; }
+
+          function dealRowHTML(d){
+            var nc=nextCont(d), ni=nextEv(d), coeD=daysFrom(d.coe);
+            var foc=state.focusId===d.id, seld=!!state.selected[d.id];
+            var sd=staleDays(d), stale=sd>=7;
+            var ncD=nc?daysFrom(nc.iso):null, p=parties[d.wait]||parties.you, S=side[d.side]||side.sell, sk=statusKind[d.status]||{label:d.status||'',c:'oklch(0.5 0.01 60)'};
+            var cls='dl-row'+(foc?' foc':(seld?' sel':''));
+            var h='<div class="'+cls+'" data-row="'+esc(d.id)+'">';
+            h+='<div class="dl-check-wrap"><span class="dl-check'+(seld?' on':'')+'" data-sel="'+esc(d.id)+'">'+(seld?'✓':'')+'</span></div>';
+            h+='<div class="dl-deal"><div class="dl-spine" style="background:'+S.solid+'"></div>';
+            h+='<span class="dl-avatar" style="background:'+S.soft+';color:'+S.deep+'">'+esc(initialsOf(d.client))+'</span><div style="min-width:0">';
+            h+='<div class="dl-addr" data-open="'+esc(d.id)+'" title="Open this deal’s page">'+esc(d.address)+'</div>';
+            h+='<div class="dl-clientline"><span class="dl-client">'+esc(d.client)+'</span><span class="dl-statusdot" style="background:'+sk.c+'"></span><span class="dl-status">'+esc(sk.label)+'</span></div>';
+            h+='<div class="dl-touchline"><span class="dl-touch">Last touch '+fmt(d.lastTouch)+'</span>';
+            if(stale){ var sc=sd>=14?'oklch(0.55 0.16 25)':'oklch(0.55 0.12 65)'; h+='<span class="dl-stale" style="color:'+sc+';background:'+alpha(sd>=14?'oklch(0.6 0.16 25)':'oklch(0.6 0.12 65)',0.12)+'">'+sd+'d quiet</span>'; }
+            h+='</div></div></div>';
+            h+='<div class="dl-side"><span class="dl-sidechip" style="color:'+S.deep+';background:'+S.soft+';border:1px solid '+alpha(S.solid,0.3)+'">'+S.label+'</span><div class="dl-agents">';
+            (d.agent==='both'?['sara','james']:[d.agent]).forEach(function(k){ var a=agents[k]||agents.sara; h+='<span class="dl-agent" style="background:'+alpha(a.c,0.18)+';color:'+a.cd+';border:1.5px solid '+alpha(a.c,0.4)+'">'+a.initials+'</span>'; });
+            h+='</div></div>';
+            h+='<div class="dl-price">'+esc(d.price||'—')+'</div>';
+            h+='<div class="dl-wait"><span class="dl-waitchip" style="font-weight:'+(p.strong?700:600)+';color:'+(p.strong?p.c:'oklch(0.4 0.01 60)')+';background:'+(p.strong?alpha(p.c,0.12):'oklch(0.95 0.006 85)')+';border:1px solid '+(p.strong?alpha(p.c,0.3):'oklch(0.9 0.008 80)')+'"><i style="background:'+p.c+'"></i>'+p.label+'</span></div>';
+            var contDead=d.contingencies?'':' dead';
+            h+='<div class="dl-cont"><button class="dl-cell'+contDead+'"'+(d.contingencies?' data-open="'+esc(d.id)+'"':'')+'>';
+            if(nc){ var overdue=ncD!=null&&ncD<0&&nc.state!=='cleared'; var chip=overdue?{label:'Overdue',c:contState.atrisk.c}:contState[nc.state]||contState.ontrack;
+              h+='<div class="dl-cell-top">'+stateChip(chip)+'<span class="dl-celllabel">'+esc(nc.label)+'</span></div>';
+              var cdc=(nc.state==='atrisk'||(ncD!=null&&ncD<=3))?'oklch(0.52 0.15 25)':'oklch(0.5 0.09 45)';
+              h+='<div class="dl-contdate" style="color:'+cdc+'">'+fmt(nc.iso)+'</div>';
+            } else { h+='<div class="dl-cell-top"><span class="dl-celllabel">'+(d.contingencies?'All cleared':'—')+'</span></div>'; }
+            h+='</button></div>';
+            var evDead=d.events?'':' dead';
+            h+='<div class="dl-insp"><button class="dl-cell'+evDead+'"'+(d.events?' data-open="'+esc(d.id)+'"':'')+'>';
+            if(ni){ h+='<div class="dl-cell-top">'+stateChip(evState[ni.state]||evState.confirmed)+'<span class="dl-celllabel">'+esc(ni.label+(ni.vendor?' · '+ni.vendor:''))+'</span></div>';
+              h+='<div class="dl-inspdate">'+weekday(ni.iso)+' '+fmt(ni.iso)+(ni.time?' · '+ni.time:'')+'</div>';
+            } else { h+='<div class="dl-cell-top"><span class="dl-celllabel">'+(d.events?'Nothing upcoming':'—')+'</span></div>'; }
+            h+='</button></div>';
+            h+='<div class="dl-coe"><div class="dl-coeshort">'+(d.coe?fmt(d.coe):'—')+'</div>'+(coeD!=null?'<div class="dl-coecount" style="color:'+(coeD>=0&&coeD<=7?'oklch(0.52 0.15 25)':'oklch(0.55 0.01 60)')+'">'+coeD+'d</div>':'')+'</div>';
+            h+='<div class="dl-act">';
+            h+='<button class="dl-actbtn" title="Schedule on calendar (S)" data-rowact="sched" data-id="'+esc(d.id)+'">◑</button>';
+            h+='<button class="dl-actbtn" title="Open deal page (Enter)" data-rowact="open" data-id="'+esc(d.id)+'">⌕</button>';
+            h+='</div></div>';
+            return h;
+          }
+
+          var orderedIds=[];
+          function render(){
+            root.querySelector('[data-modes]').innerHTML = [['ledger','Ledger'],['triage','By triage']].map(function(m){
+              return '<button class="dl-mode'+(state.mode===m[0]?' on':'')+'" data-mode="'+m[0]+'">'+m[1]+'</button>';
+            }).join('');
+            root.querySelector('[data-filters]').innerHTML = [['all','All'],['sara','Sara'],['james','James'],['action','Needs action'],['closing','Closing this month']].map(function(f){
+              var n=state.deals.filter(function(d){return matchFilter(d,f[0]);}).length;
+              return '<button class="dl-chip'+(state.filter===f[0]?' on':'')+'" data-filter="'+f[0]+'">'+f[1]+'<span class="ct">'+n+'</span></button>';
+            }).join('');
+            root.querySelector('[data-legend]').innerHTML = ['buy','sell','dual'].map(function(k){ return '<span class="dl-leg"><i style="background:'+side[k].solid+'"></i>'+side[k].label+'</span>'; }).join('');
+
+            var rowsEl = root.querySelector('[data-rows]');
+            if(!state.loaded){ rowsEl.innerHTML='<div class="dl-loading">Loading your deals…</div>'; }
+            else if(state.error){ rowsEl.innerHTML='<div class="dl-empty-row">Couldn’t load deals in motion. Refresh to retry.</div>'; }
+            else if(!state.deals.length){ rowsEl.innerHTML='<div class="dl-empty-row">No deals in motion right now. Offers, listings and escrows will appear here.</div>'; }
+            else {
+              var visible = state.deals.filter(function(d){return matchFilter(d);});
+              var html=''; orderedIds=[];
+              if(!visible.length){ html='<div class="dl-empty-row">Nothing matches this filter.</div>'; }
+              else if(state.mode==='triage'){
+                var groups={}; groupOrder.forEach(function(k){groups[k]=[];});
+                visible.forEach(function(d){ groups[bucketOf(d)].push(d); });
+                groupOrder.forEach(function(k){
+                  var list=groups[k]; if(!list.length) return; var g=groupMeta[k];
+                  html+='<div class="dl-group" style="background:'+alpha(g.tint,0.15)+';border-top:1px solid '+alpha(g.tint,0.22)+';border-bottom:1px solid '+alpha(g.tint,0.3)+'">'
+                    +'<span class="dl-group-icon" style="background:'+alpha(g.tint,0.2)+';color:'+g.tint+'">'+g.icon+'</span>'
+                    +'<span class="dl-group-name">'+g.name+'</span>'
+                    +'<span class="dl-group-count" style="background:'+alpha(g.tint,0.2)+';color:'+g.tint+'">'+list.length+'</span>'
+                    +'<span class="dl-group-hint">'+g.hint+'</span></div>';
+                  list.forEach(function(d){ html+=dealRowHTML(d); orderedIds.push(d.id); });
+                });
+              } else {
+                visible.forEach(function(d){ html+=dealRowHTML(d); orderedIds.push(d.id); });
+              }
+              rowsEl.innerHTML = html;
+            }
+
+            var sel=Object.keys(state.selected).filter(function(id){return state.selected[id];});
+            var bulk=root.querySelector('[data-bulk]');
+            if(sel.length){ bulk.hidden=false;
+              bulk.innerHTML='<span class="dl-bulk-label">'+sel.length+' selected</span><span class="dl-bulk-sep"></span>'
+                +'<button class="dl-bulk-btn" data-bulk-open>Open first</button>'
+                +'<button class="dl-bulk-clear" data-bclear>Clear</button>';
+            } else { bulk.hidden=true; bulk.innerHTML=''; }
+
+            root.querySelector('[data-keys]').innerHTML='<b>Keyboard</b>'+[['↑↓','move'],['S','schedule'],['X','select'],['⏎','open']].map(function(k){return '<span class="dl-key"><kbd>'+k[0]+'</kbd>'+k[1]+'</span>';}).join('');
+          }
+
+          root.addEventListener('click', function(e){
+            var t=e.target.closest('[data-mode],[data-filter],[data-sel],[data-open],[data-rowact],[data-bulk-open],[data-bclear]');
+            if(!t) return;
+            if(t.dataset.mode){ state.mode=t.dataset.mode; render(); return; }
+            if(t.dataset.filter){ state.filter=t.dataset.filter; render(); return; }
+            if(t.dataset.sel){ toggleSelect(t.dataset.sel); return; }
+            if(t.hasAttribute('data-open')){ openDeal(t.getAttribute('data-open')); return; }
+            if(t.dataset.rowact){ var a=t.dataset.rowact, id=t.dataset.id;
+              if(a==='open'){ openDeal(id); }
+              else if(a==='sched'){ try{ if(window.showView) showView(null,'cal'); }catch(_){} showToast('Opening the calendar to schedule'); }
+              return; }
+            if(t.hasAttribute('data-bulk-open')){ var first=Object.keys(state.selected)[0]; if(first) openDeal(first); return; }
+            if(t.hasAttribute('data-bclear')){ state.selected={}; render(); return; }
+          });
+
+          window.addEventListener('keydown', function(e){
+            if(!root || !root.offsetParent) return;   // only when the today view is visible
+            if(e.target && /INPUT|TEXTAREA|SELECT/.test(e.target.tagName)) return;
+            if(!orderedIds.length) return;
+            var i=orderedIds.indexOf(state.focusId);
+            if(e.key==='ArrowDown'){ e.preventDefault(); i=i<0?0:Math.min(orderedIds.length-1,i+1); state.focusId=orderedIds[i]; render(); return; }
+            if(e.key==='ArrowUp'){ e.preventDefault(); i=i<0?0:Math.max(0,i-1); state.focusId=orderedIds[i]; render(); return; }
+            if(i<0) return; var d=byId(state.focusId); if(!d) return;
+            var k=e.key.toLowerCase();
+            if(k==='s'){ e.preventDefault(); try{ if(window.showView) showView(null,'cal'); }catch(_){} }
+            else if(k==='x'){ e.preventDefault(); toggleSelect(d.id); }
+            else if(e.key==='Enter'){ e.preventDefault(); openDeal(d.id); }
+          });
+
+          function load(){
+            fetch('/api/crm/deals-motion', { credentials:'include' })
+              .then(function(r){ return r.ok ? r.json() : null; })
+              .then(function(j){ state.loaded=true; if(j && Array.isArray(j.deals)){ state.deals=j.deals; state.error=false; } else { state.error=true; } render(); })
+              .catch(function(){ state.loaded=true; state.error=true; render(); });
+          }
+
+          render();
+          load();
+          // Refresh when returning to Today, and on a gentle pulse.
+          document.addEventListener('crm:view', function(ev){ if(ev.detail && ev.detail.name==='today') load(); });
+          setInterval(load, 180000);
+        })();
+        </script>
+        <!-- ===== END Deals in Motion ===== -->
 
         <!-- RECENT COMMUNICATIONS (Twilio deal inbox) -->
         <section class="deals" data-comms-section style="display:none;">
