@@ -61,6 +61,35 @@
     return '<button ' + (attrs || '') + ' style="background:transparent;border:1px solid rgba(250,246,236,.35);color:' + PAPER + ';border-radius:5px;padding:7px 13px;font-size:12px;font-weight:600;cursor:pointer;' + (cls || '') + '">' + label + '</button>';
   }
 
+  // Link-to-portal panel: connect a client to THIS deal without leaving the page.
+  // Type-ahead searches the whole CRM; picking a match auto-fills the fields.
+  // A brand-new contact is created (and auto-classified as a client) by the
+  // /api/crm/link-deal-party endpoint. Role defaults to the deal's own side.
+  function linkPanel(deal) {
+    var side = deal.side === 'buyer' ? 'buyer' : 'seller';
+    var fld = 'font:inherit;font-size:13px;padding:8px 10px;border-radius:5px;border:1px solid rgba(250,246,236,.3);background:rgba(250,246,236,.08);color:' + PAPER + ';';
+    var roleOpts = [['seller', 'Seller'], ['co-seller', 'Co-seller'], ['buyer', 'Buyer'], ['co-buyer', 'Co-buyer']]
+      .map(function (o) { return '<option value="' + o[0] + '"' + (o[0] === side ? ' selected' : '') + '>' + o[1] + '</option>'; }).join('');
+    return '<div data-ac-panel="link" style="display:none;border-top:1px solid rgba(250,246,236,.15);padding:12px 18px;max-width:660px;">' +
+      '<div style="font-size:12.5px;color:rgba(250,246,236,.75);line-height:1.5;margin-bottom:9px;">Link a client to <b>' + esc(deal.address || dealKey) + '</b> so they see this portal when they sign in. Search someone already in your CRM, or type a new person — new contacts are auto-added as clients.</div>' +
+      '<div style="position:relative;margin-bottom:8px;">' +
+        '<input data-ac-link-search autocomplete="off" placeholder="Search your contacts — name, email, phone…" style="width:100%;box-sizing:border-box;' + fld + '">' +
+        '<div data-ac-link-matches style="display:none;position:absolute;top:100%;left:0;right:0;z-index:6;background:' + PAPER + ';color:' + INK + ';border-radius:0 0 6px 6px;max-height:220px;overflow:auto;box-shadow:0 10px 24px rgba(0,0,0,.35);"></div>' +
+      '</div>' +
+      '<input data-ac-link-email type="email" placeholder="Email (required)" style="width:100%;box-sizing:border-box;margin-bottom:8px;' + fld + '">' +
+      '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px;">' +
+        '<input data-ac-link-first placeholder="First name" style="flex:1;min-width:120px;' + fld + '">' +
+        '<input data-ac-link-last placeholder="Last name" style="flex:1;min-width:120px;' + fld + '">' +
+        '<input data-ac-link-phone placeholder="Phone" style="flex:1;min-width:120px;' + fld + '">' +
+        '<select data-ac-link-role style="' + fld + '">' + roleOpts + '</select>' +
+      '</div>' +
+      '<label style="display:flex;gap:7px;align-items:flex-start;font-size:12.5px;color:rgba(250,246,236,.8);line-height:1.4;margin-bottom:10px;"><input data-ac-link-provision type="checkbox" checked style="margin-top:2px;"><span>Create their sign-in account now so they can log in immediately (no email sent).</span></label>' +
+      '<div style="display:flex;gap:10px;align-items:center;">' + chip('Link to portal', 'background:#2E5C3D;border-color:#2E5C3D;', 'data-ac-link-submit') + '<span data-ac-link-st style="font-size:12.5px;color:rgba(250,246,236,.7);"></span></div>' +
+    '</div>';
+  }
+
+  function splitName(full) { var p = (full || '').trim().split(/\s+/); return { first: p.shift() || '', last: p.join(' ') || '' }; }
+
   function render(bar, data) {
     var proposals = data.proposals || [];
     var items = data.items || [];
@@ -75,6 +104,7 @@
         (proposals.length ? '<span style="background:#5A0E24;color:#F4E6C8;border-radius:12px;padding:4px 11px;font-size:11px;font-weight:600;">' + proposals.length + ' awaiting your OK</span>' : '') +
         chip('Timeline · ' + openItems.length + ' open', '', 'data-ac-toggle="tl"') +
         chip('Internal notes', '', 'data-ac-toggle="notes"') +
+        chip('＋ Link to portal', 'background:#2E5C3D;border-color:#2E5C3D;', 'data-ac-toggle="link"') +
         chip('Open desk', '', 'data-ac-desk') +
       '</div>' +
       infoStrip(data.deal) +
@@ -107,18 +137,20 @@
       '<div data-ac-panel="notes" style="display:none;border-top:1px solid rgba(250,246,236,.15);padding:12px 18px;">' +
         '<textarea data-ac-notes rows="3" placeholder="Internal notes on this deal — agents only, never on the client page…" style="width:100%;font:inherit;font-size:13.5px;line-height:1.5;padding:9px 11px;border-radius:6px;border:1px solid rgba(250,246,236,.3);background:rgba(250,246,236,.08);color:' + PAPER + ';"></textarea>' +
         '<div style="display:flex;gap:10px;align-items:center;margin-top:8px;">' + chip('Save notes', 'background:#2E5C3D;border-color:#2E5C3D;', 'data-ac-save-notes') + '<span data-ac-notes-st style="font-size:12px;color:rgba(250,246,236,.6);"></span></div>' +
-      '</div>';
+      '</div>' +
+      linkPanel(data.deal);
 
     // toggles
     bar.addEventListener('click', function (e) {
       var t = e.target.closest('[data-ac-toggle]');
       if (t) {
         var k = t.getAttribute('data-ac-toggle');
-        ['tl', 'notes'].forEach(function (p) {
+        ['tl', 'notes', 'link'].forEach(function (p) {
           var el = bar.querySelector('[data-ac-panel="' + p + '"]');
           if (el) el.style.display = (p === k && el.style.display === 'none') ? 'block' : 'none';
         });
         if (k === 'notes') loadNotes();
+        if (k === 'link') { var si = bar.querySelector('[data-ac-link-search]'); if (si) setTimeout(function () { si.focus(); }, 0); }
         return;
       }
       if (e.target.closest('[data-ac-desk]')) { location.href = '/crm.html'; return; }
@@ -162,7 +194,92 @@
           .then(function (r) { st.textContent = r.ok ? 'Saved.' : ((r.j && r.j.error) || 'Save failed.'); setTimeout(function () { st.textContent = ''; }, 2500); });
         return;
       }
+      if (e.target.closest('[data-ac-link-submit]')) { submitLink(e.target.closest('[data-ac-link-submit]')); return; }
     });
+
+    wireLinkSearch();
+
+    function submitLink(btn) {
+      var g = function (s) { var el = bar.querySelector('[data-ac-link-' + s + ']'); return el ? el.value.trim() : ''; };
+      var st = bar.querySelector('[data-ac-link-st]');
+      var email = g('email');
+      if (!email) { st.style.color = RED; st.textContent = 'Enter their email.'; return; }
+      var provEl = bar.querySelector('[data-ac-link-provision]');
+      var body = {
+        deal: dealKey, email: email,
+        first_name: g('first') || undefined, last_name: g('last') || undefined,
+        phone: g('phone') || undefined,
+        role: (bar.querySelector('[data-ac-link-role]') || {}).value || 'seller',
+        provision: !!(provEl && provEl.checked)
+      };
+      btn.disabled = true; btn.textContent = 'Linking…';
+      st.style.color = 'rgba(250,246,236,.7)'; st.textContent = 'Working…';
+      api('/api/crm/link-deal-party', { method: 'POST', body: body }).then(function (r) {
+        btn.disabled = false; btn.textContent = 'Link to portal';
+        if (r.ok && r.j && r.j.linked) {
+          var who = body.first_name || (r.j.lead && r.j.lead.email) || 'Client';
+          var status = r.j.user_provisioned ? ' — they can sign in now.'
+            : (r.j.user_linked ? ' — linked to their existing account.'
+              : ' — link activates when they first sign in with this email.');
+          st.style.color = GREEN;
+          st.textContent = '✓ ' + who + ' linked as ' + (r.j.party && r.j.party.role || body.role)
+            + (r.j.lead && r.j.lead.created ? ' (new client added)' : '') + status;
+          ['search', 'email', 'first', 'last', 'phone'].forEach(function (s) { var el = bar.querySelector('[data-ac-link-' + s + ']'); if (el) el.value = ''; });
+        } else {
+          st.style.color = RED; st.textContent = '✗ ' + ((r.j && r.j.error) || 'Could not link.');
+        }
+      });
+    }
+
+    // Type-ahead over the whole CRM (GET roster?bucket=all). Picking a match
+    // auto-fills the fields so a known contact is linked without retyping.
+    function wireLinkSearch() {
+      var input = bar.querySelector('[data-ac-link-search]');
+      var box = bar.querySelector('[data-ac-link-matches]');
+      if (!input || !box) return;
+      var timer = null, tok = 0;
+      var hide = function () { box.style.display = 'none'; box.innerHTML = ''; box._people = null; };
+      var set = function (s, v) { var el = bar.querySelector('[data-ac-link-' + s + ']'); if (el && v != null) el.value = v; };
+      input.addEventListener('input', function () {
+        var term = input.value.trim();
+        if (timer) clearTimeout(timer);
+        if (term.length < 2) { hide(); return; }
+        var mine = ++tok;
+        timer = setTimeout(function () {
+          fetch('/api/crm/roster?bucket=all&limit=8&q=' + encodeURIComponent(term), { credentials: 'include' })
+            .then(function (r) { return r.ok ? r.json() : null; })
+            .then(function (j) {
+              if (mine !== tok) return;
+              var people = (j && j.people) || [];
+              if (!people.length) { box.innerHTML = '<div style="padding:9px 11px;font-size:12.5px;color:#8A7B60;font-style:italic;">No match — fill the fields to add a new contact.</div>'; box.style.display = 'block'; box._people = null; return; }
+              box._people = people;
+              box.innerHTML = people.slice(0, 8).map(function (p, i) {
+                var sub = [p.email, p.phone].filter(Boolean).join(' · ');
+                return '<button type="button" data-lpick="' + i + '" style="display:block;width:100%;text-align:left;background:transparent;border:none;border-bottom:1px solid #EFE7D4;padding:9px 11px;cursor:pointer;">'
+                  + '<span style="font-size:13.5px;color:' + INK + ';font-weight:600;">' + esc(p.name || '(no name)') + '</span>'
+                  + (sub ? '<br><span style="font-size:12px;color:#8A7B60;">' + esc(sub) + '</span>' : '') + '</button>';
+              }).join('');
+              box.style.display = 'block';
+            })
+            .catch(function () { if (mine === tok) hide(); });
+        }, 180);
+      });
+      box.addEventListener('click', function (e) {
+        var b = e.target.closest('[data-lpick]');
+        if (!b || !box._people) return;
+        var p = box._people[parseInt(b.getAttribute('data-lpick'), 10)];
+        if (!p) return;
+        var nm = splitName(p.name);
+        set('email', p.email || '');
+        if (p.name && p.name !== p.email) { set('first', nm.first); set('last', nm.last); }
+        if (p.phone) set('phone', p.phone);
+        if (p.type === 'buyer' || p.type === 'seller') { var rl = bar.querySelector('[data-ac-link-role]'); if (rl) rl.value = p.type; }
+        input.value = p.name || p.email || '';
+        hide();
+        var em = bar.querySelector('[data-ac-link-email]'); if (em) em.focus();
+      });
+      input.addEventListener('keydown', function (e) { if (e.key === 'Escape') hide(); });
+    }
 
     var notesLoaded = false;
     function loadNotes() {

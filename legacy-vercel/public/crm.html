@@ -2066,6 +2066,65 @@ function selectLead(el) {
       .catch(function () { sel.innerHTML = '<option value="">Could not load deals — reopen to retry</option>'; });
   }
 
+  function esc(s){ return (s==null?'':String(s)).replace(/[&<>"]/g,function(c){return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]);}); }
+  function splitName(full){ var p=(full||'').trim().split(/\s+/); return { first: p.shift()||'', last: p.join(' ')||'' }; }
+
+  // Type-ahead over the whole CRM (GET /api/crm/roster?bucket=all&q=…). Picking a
+  // match auto-fills email/first/last/phone so an already-known contact is linked
+  // to the portal without retyping — and, matched by email, reuses their lead.
+  function wireContactSearch(root) {
+    var input = root.querySelector('#leg-linkdeal-search');
+    var box   = root.querySelector('#leg-linkdeal-matches');
+    if (!input || !box) return;
+    var timer = null, token = 0;
+
+    function hide() { box.style.display = 'none'; box.innerHTML = ''; }
+    function fill(p) {
+      var setVal = function (name, val) { var el = root.querySelector('[name="' + name + '"]'); if (el && val != null) el.value = val; };
+      var nm = splitName(p.name);
+      setVal('email', p.email || '');
+      if (p.name && p.name !== p.email) { setVal('first_name', nm.first); setVal('last_name', nm.last); }
+      if (p.phone) setVal('phone', p.phone);
+      // Default the role from the contact's book side when it's obvious.
+      if (p.type === 'buyer' || p.type === 'seller') { var r = root.querySelector('[name="role"]'); if (r) r.value = p.type; }
+      input.value = p.name || p.email || '';
+      hide();
+      var em = root.querySelector('[name="email"]'); if (em) em.focus();
+    }
+    function render(people) {
+      if (!people.length) { box.innerHTML = '<div style="padding:9px 11px;font-size:12.5px;color:#8A7B60;font-style:italic;text-transform:none;letter-spacing:normal;">No match — the fields below will create a new contact.</div>'; box.style.display = 'block'; return; }
+      box.innerHTML = people.slice(0, 8).map(function (p, i) {
+        var sub = [p.email, p.phone].filter(Boolean).join(' · ');
+        return '<button type="button" data-pick="' + i + '" style="display:block;width:100%;text-align:left;background:transparent;border:none;border-bottom:1px solid #EFE7D4;padding:9px 11px;cursor:pointer;text-transform:none;letter-spacing:normal;">'
+          + '<span style="font-size:14px;color:#1A1714;font-weight:600;">' + esc(p.name || '(no name)') + '</span>'
+          + (sub ? '<br><span style="font-size:12px;color:#8A7B60;">' + esc(sub) + '</span>' : '') + '</button>';
+      }).join('');
+      box.style.display = 'block';
+      box._people = people;
+    }
+
+    input.addEventListener('input', function () {
+      var term = input.value.trim();
+      if (timer) clearTimeout(timer);
+      if (term.length < 2) { hide(); return; }
+      var mine = ++token;
+      timer = setTimeout(function () {
+        fetch('/api/crm/roster?bucket=all&limit=8&q=' + encodeURIComponent(term), { credentials: 'include' })
+          .then(function (r) { return r.ok ? r.json() : null; })
+          .then(function (j) { if (mine !== token) return; render((j && j.people) || []); })
+          .catch(function () { if (mine === token) hide(); });
+      }, 180);
+    });
+    box.addEventListener('click', function (e) {
+      var b = e.target.closest('[data-pick]');
+      if (!b || !box._people) return;
+      var p = box._people[parseInt(b.getAttribute('data-pick'), 10)];
+      if (p) fill(p);
+    });
+    input.addEventListener('keydown', function (e) { if (e.key === 'Escape') hide(); });
+    document.addEventListener('click', function (e) { if (!root.contains(e.target)) hide(); else if (!e.target.closest('#leg-linkdeal-search') && !e.target.closest('#leg-linkdeal-matches')) hide(); });
+  }
+
   function openLinkDealModal() {
     if (document.getElementById('leg-linkdeal-modal')) {
       var ex = document.getElementById('leg-linkdeal-modal');
@@ -2086,6 +2145,10 @@ function selectLead(el) {
       + '      <select name="deal" id="leg-linkdeal-deal" required style="font:inherit;font-size:15px;color:#1A1714;background:#fff;border:1px solid #D9CFB7;padding:9px 11px;">'
       + '        <option value="">Loading deals in escrow…</option>'
       + '      </select></label>'
+      + '    <label style="position:relative;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:#7C6A4D;display:flex;flex-direction:column;gap:4px;">Search your contacts'
+      + '      <input id="leg-linkdeal-search" autocomplete="off" placeholder="Type a name, email, or phone…" style="font:inherit;font-size:15px;text-transform:none;letter-spacing:normal;color:#1A1714;background:#fff;border:1px solid #D9CFB7;padding:9px 11px;">'
+      + '      <div id="leg-linkdeal-matches" style="display:none;position:absolute;top:100%;left:0;right:0;z-index:5;background:#fff;border:1px solid #D9CFB7;border-top:none;max-height:220px;overflow:auto;box-shadow:0 8px 20px rgba(20,18,15,.14);"></div>'
+      + '      <span style="text-transform:none;letter-spacing:normal;font-size:11.5px;color:#8A7B60;">Pick someone already in your CRM to auto-fill the fields below — or just type their details in fresh.</span></label>'
       + '    <label style="font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:#7C6A4D;display:flex;flex-direction:column;gap:4px;">Client email'
       + '      <input name="email" type="email" required placeholder="client@example.com" style="font:inherit;font-size:15px;text-transform:none;letter-spacing:normal;color:#1A1714;background:#fff;border:1px solid #D9CFB7;padding:9px 11px;"></label>'
       + '    <div style="display:flex;gap:10px;">'
@@ -2115,6 +2178,7 @@ function selectLead(el) {
       + '</div>';
     document.body.appendChild(m);
     populateEscrowDeals(m);
+    wireContactSearch(m);
 
     var form   = m.querySelector('#leg-linkdeal-form');
     var submit = m.querySelector('#leg-linkdeal-submit');

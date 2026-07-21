@@ -45,6 +45,29 @@ const EMAIL_RE = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
 const roleToLeadType = (role) => (role === 'buyer' || role === 'co-buyer') ? 'buyer' : 'seller';
 const roleToUserRole = (role) => (role === 'buyer' || role === 'co-buyer') ? 'buyer' : 'seller';
 
+// A person you're linking to a deal is, by definition, a CLIENT — not a cold
+// lead. So when we CREATE their contact we stamp the client-classifying fields
+// the roster reads (contact_type + pipeline_stage + the side stage), pinned to
+// the deal's stage. crm-roster.classify() treats any of {active, under_contract,
+// closed} pipeline_stage — or an in_escrow/closed side stage — as a Client, so
+// these newly-added portal contacts land in the Clients list, not Leads.
+function clientFieldsForDeal(deal, role) {
+  const type = roleToLeadType(role); // 'buyer' | 'seller'
+  const s = (deal?.stage || '').toString().toLowerCase();
+  const f = { contact_type: 'client' };
+  if (s === 'closed' || s === 'sold' || s === 'close') {
+    f.pipeline_stage = 'closed';
+    if (type === 'buyer') f.buyer_stage = 'closed'; else f.seller_stage = 'closed';
+  } else if (s === 'pending' || s === 'in_escrow' || s === 'escrow' || s === 'under_contract') {
+    f.pipeline_stage = 'under_contract';
+    if (type === 'buyer') f.buyer_stage = 'in_escrow'; else f.seller_stage = 'in_escrow';
+  } else {
+    // On-market listing / active buyer — still a client, just not yet in escrow.
+    f.pipeline_stage = 'active';
+  }
+  return f;
+}
+
 // GoTrue has no server-side email filter, so page through the admin user list.
 // Auth users (people who have actually signed in) are far fewer than leads, so
 // a bounded scan is cheap. Cap the scan so a runaway never hangs the request.
@@ -89,7 +112,7 @@ export default async function handler(req, res) {
     const supa = adminClient();
 
     // 1. Resolve the deal --------------------------------------------------
-    let dealQuery = supa.from('deals').select('id, source_key, address, agent');
+    let dealQuery = supa.from('deals').select('id, source_key, address, agent, stage');
     dealQuery = dealId ? dealQuery.eq('id', dealId) : dealQuery.eq('source_key', sourceKey);
     const { data: deal, error: dealErr } = await dealQuery.maybeSingle();
     if (dealErr) return fail(res, 500, `deal lookup: ${dealErr.message}`);
@@ -98,7 +121,8 @@ export default async function handler(req, res) {
     // 2. Find or create the client's lead (keyed by email) -----------------
     let leadCreated = false;
     let { data: lead, error: leadErr } = await supa
-      .from('leads').select('id, email, first_name, last_name').eq('email', email).maybeSingle();
+      .from('leads').select('id, email, first_name, last_name, contact_type, pipeline_stage')
+      .eq('email', email).maybeSingle();
     if (leadErr) return fail(res, 500, `lead lookup: ${leadErr.message}`);
 
     if (!lead) {
@@ -110,17 +134,30 @@ export default async function handler(req, res) {
         source:         'manual',
         lead_type:      roleToLeadType(role),
         assigned_agent: deal.agent === 'james' ? 'james' : 'sara',
+        // Auto-classify as a client (see clientFieldsForDeal above).
+        ...clientFieldsForDeal(deal, role),
         notes:          `Linked to deal ${deal.source_key || deal.id} (${role}) by ${profile.role}.`
       }).select('id, email, first_name, last_name').single();
       if (insErr) return fail(res, 500, `lead create: ${insErr.message}`);
       lead = created;
       leadCreated = true;
-    } else if ((firstName && !lead.first_name) || (lastName && !lead.last_name) || phone) {
-      // Backfill name/phone only where empty — never clobber existing CRM data.
+    } else {
+      // Existing contact: backfill empty name/phone AND, if they're still an
+      // early-stage lead, promote them to a client now that they're on a deal.
+      // We never touch anyone already classified as a client/past_client/sphere
+      // (or a do-not-contact), so existing CRM data is never clobbered.
       const patch = {};
       if (firstName && !lead.first_name) patch.first_name = firstName;
       if (lastName && !lead.last_name)   patch.last_name  = lastName;
       if (phone)                         patch.phone      = phone;
+
+      const EARLY = new Set(['new', 'contacted', 'nurture', 'nurturing', 'active', '', null, undefined]);
+      const ct = lead.contact_type;
+      const alreadyTracked = ct === 'client' || ct === 'past_client' || ct === 'sphere'
+        || ct === 'do_not_call' || ct === 'do_not_contact';
+      if (!alreadyTracked && EARLY.has(lead.pipeline_stage)) {
+        Object.assign(patch, clientFieldsForDeal(deal, role));
+      }
       if (Object.keys(patch).length) await supa.from('leads').update(patch).eq('id', lead.id);
     }
 
