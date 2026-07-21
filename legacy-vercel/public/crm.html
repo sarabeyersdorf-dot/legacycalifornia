@@ -45,6 +45,7 @@
       <a href="#" onclick="showView(event,'tasks')">Tasks <span class="pill" data-roster-tasks>—</span></a>
       <a href="#" onclick="showView(event,'updates')">Notes <span class="pill" data-roster-updates>—</span></a>
       <a href="#" onclick="showView(event,'inbox')">Inbox <span class="pill" data-roster-inbox>—</span></a>
+      <a href="#" onclick="showView(event,'messages')">Messages <span class="pill" data-msg-unread style="display:none;background:#8B3A3A;color:#fff;">0</span></a>
       <a href="#" onclick="showView(event,'pipe')">Pipeline</a>
       <a href="#" onclick="showView(event,'cal')">Calendar <span class="pill" data-roster-calendar>—</span></a>
       <a href="#" onclick="showView(event,'seq')">Sequences</a>
@@ -732,6 +733,131 @@
         </aside>
       </div>
     </section>
+
+    <!-- ============================================================
+         MESSAGES VIEW — the unified "who reached out" feed.
+         Unions inbound texts/calls (deal_messages) + curated-list /
+         portal / email questions (messages) via /api/crm/messages.
+         A background poller keeps the sidebar unread badge live from
+         any view, so a lead's reply is noticed immediately.
+         ============================================================ -->
+    <style>
+    .msgs { padding: 22px 36px 60px; max-width: 900px; }
+    .msgs-sub { font-size: 13.5px; color: var(--ink-soft); margin: 0 0 6px; max-width: 660px; line-height: 1.5; }
+    .msgs-filter { display: flex; gap: 6px; margin: 16px 0 6px; flex-wrap: wrap; }
+    .msg-item { display: flex; gap: 13px; align-items: flex-start; padding: 15px 6px; border-bottom: 1px solid var(--rule-soft); cursor: pointer; }
+    .msg-item:hover { background: var(--shell); }
+    .msg-item.unread { background: rgba(139,58,58,0.045); }
+    .msg-chan { font-family: var(--mono); font-size: 12px; letter-spacing: .06em; text-transform: uppercase; padding: 4px 9px; border-radius: 4px; flex: none; white-space: nowrap; margin-top: 1px; }
+    .msg-body { flex: 1; min-width: 0; }
+    .msg-top { display: flex; gap: 10px; align-items: baseline; }
+    .msg-name { font-size: 15px; font-weight: 600; color: var(--ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .msg-time { font-size: 12px; color: var(--ink-faint); margin-left: auto; white-space: nowrap; flex: none; }
+    .msg-preview { font-size: 13.5px; color: var(--ink-soft); margin-top: 3px; line-height: 1.45; }
+    .msg-triage { font-family: var(--mono); font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: #8B3A3A; border: 1px solid #d9b7b7; background: #fbeeee; padding: 1px 7px; border-radius: 3px; margin-left: 6px; }
+    .msg-dot { width: 7px; height: 7px; border-radius: 50%; background: #8B3A3A; flex: none; margin-top: 8px; }
+    @media (max-width: 900px) { .msgs { padding: 18px; } }
+    </style>
+    <section class="crm-view" data-view="messages">
+      <div class="msgs">
+        <div class="cur-head"><div>
+          <span class="label-cap" style="color:var(--brass);">Everyone who reached out</span>
+          <h1 class="h-section" style="font-size:38px;margin-top:6px;">Messages.</h1>
+        </div></div>
+        <p class="msgs-sub">Every inbound message in one place — texts to your Legacy number, questions from a curated list, and portal replies. Click anyone to open their record; unknown numbers can be triaged into a lead.</p>
+        <div class="msgs-filter" data-msgs-filter>
+          <button class="chip on" data-msgf="all">All <span class="ct" data-msgf-c-all>—</span></button>
+          <button class="chip" data-msgf="triage">Needs triage <span class="ct" data-msgf-c-triage>—</span></button>
+        </div>
+        <div data-msgs-list><div class="cur-empty">Loading messages…</div></div>
+      </div>
+    </section>
+    <script>
+    (function () {
+      'use strict';
+      var CHAN = {
+        sms:    { label: 'Text',         bg: '#e7f1ea', fg: '#2E5C3D' },
+        call:   { label: 'Call',         bg: '#e9edf3', fg: '#3A5A7C' },
+        portal: { label: 'Curated list', bg: '#f5ecd9', fg: '#7C6A4D' },
+        email:  { label: 'Email',        bg: '#eceaf3', fg: '#5A4C7C' }
+      };
+      var state = { rows: [], filter: 'all', loaded: false, error: false };
+      function esc(s){ return String(s==null?'':s).replace(/[&<>"]/g,function(c){return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]);}); }
+      function ago(iso){
+        var t = Date.parse(iso); if (isNaN(t)) return '';
+        var s = Math.max(0, (Date.now()-t)/1000);
+        if (s < 60) return 'just now';
+        if (s < 3600) return Math.floor(s/60)+'m ago';
+        if (s < 86400) return Math.floor(s/3600)+'h ago';
+        if (s < 604800) return Math.floor(s/86400)+'d ago';
+        try { return new Date(t).toLocaleDateString('en-US',{month:'short',day:'numeric'}); } catch(_){ return ''; }
+      }
+      function lastSeen(){ try { return localStorage.getItem('legacyMsgSeen') || ''; } catch(_){ return ''; } }
+      function markSeen(iso){ try { if (iso) localStorage.setItem('legacyMsgSeen', iso); } catch(_){} }
+      function isUnread(r){ var ls = lastSeen(); return !ls || Date.parse(r.created_at) > Date.parse(ls); }
+      function unreadCount(){ return state.rows.filter(isUnread).length; }
+      function setBadge(n){ var el = document.querySelector('[data-msg-unread]'); if (!el) return; if (n>0){ el.textContent = n>9?'9+':String(n); el.style.display=''; } else { el.style.display='none'; } }
+
+      function rowHTML(r){
+        var c = CHAN[r.channel] || CHAN.sms;
+        var unread = isUnread(r);
+        var triage = r.needs_review ? '<span class="msg-triage">Unknown #</span>' : '';
+        return '<div class="msg-item'+(unread?' unread':'')+'" data-msg-lead="'+esc(r.lead_id||'')+'" data-msg-review="'+(r.needs_review?'1':'')+'">'
+          + (unread ? '<span class="msg-dot"></span>' : '<span style="width:7px;flex:none;"></span>')
+          + '<span class="msg-chan" style="background:'+c.bg+';color:'+c.fg+';">'+c.label+'</span>'
+          + '<div class="msg-body"><div class="msg-top"><span class="msg-name">'+esc(r.name||'Unknown')+triage+'</span><span class="msg-time">'+ago(r.created_at)+'</span></div>'
+          + '<div class="msg-preview">'+esc(r.preview||'(no text)')+'</div></div></div>';
+      }
+      function renderList(){
+        var list = document.querySelector('[data-msgs-list]'); if (!list) return;
+        if (!state.loaded){ list.innerHTML = '<div class="cur-empty">Loading messages…</div>'; return; }
+        if (state.error){ list.innerHTML = '<div class="cur-empty">Couldn’t load messages. Refresh to retry.</div>'; return; }
+        var rows = state.filter==='triage' ? state.rows.filter(function(r){return r.needs_review;}) : state.rows;
+        list.innerHTML = rows.length ? rows.map(rowHTML).join('')
+          : '<div class="cur-empty">'+(state.filter==='triage'?'No unknown numbers to triage.':'No inbound messages yet.')+'</div>';
+        var a = document.querySelector('[data-msgf-c-all]'), t = document.querySelector('[data-msgf-c-triage]');
+        if (a) a.textContent = state.rows.length;
+        if (t) t.textContent = state.rows.filter(function(r){return r.needs_review;}).length;
+      }
+      function markAllSeenAndClear(){ if (state.rows.length) markSeen(state.rows[0].created_at); setBadge(0); }
+
+      function load(forView){
+        return fetch('/api/crm/messages?limit=120', { credentials: 'include' })
+          .then(function(r){ return r.ok ? r.json() : null; })
+          .then(function(j){
+            if (j && Array.isArray(j.messages)) { state.rows = j.messages; state.loaded = true; state.error = false; }
+            else { state.error = true; state.loaded = true; }
+            var active = document.querySelector('.crm-view[data-view="messages"].on');
+            if (active) { renderList(); markAllSeenAndClear(); }
+            else setBadge(unreadCount());
+          })
+          .catch(function(){ state.error = true; state.loaded = true; var active=document.querySelector('.crm-view[data-view="messages"].on'); if (active) renderList(); });
+      }
+
+      // Open on view activation: paint instantly with the current unread
+      // highlight, then refresh from the server (which re-paints and marks seen).
+      document.addEventListener('crm:view', function(ev){ if (ev.detail && ev.detail.name==='messages'){ if (state.loaded) renderList(); load(true); } });
+      // Filter chips.
+      document.addEventListener('click', function(e){
+        var f = e.target.closest('[data-msgf]');
+        if (f){ state.filter = f.getAttribute('data-msgf');
+          document.querySelectorAll('[data-msgs-filter] .chip').forEach(function(c){ c.classList.toggle('on', c===f); });
+          renderList(); return; }
+        var item = e.target.closest('[data-msg-lead]');
+        if (item){
+          var lead = item.getAttribute('data-msg-lead');
+          if (item.getAttribute('data-msg-review')==='1' || !lead){ if (window.openReviewQueue) window.openReviewQueue(); return; }
+          if (window.Legacy && window.Legacy.openLead) window.Legacy.openLead(lead);
+          else showView(null, 'inbox');
+          return;
+        }
+      });
+
+      // Background poll so the unread badge stays live from any view.
+      load(false);
+      setInterval(function(){ load(false); }, 60000);
+    })();
+    </script>
 
     <!-- ============================================================
          PIPELINE VIEW
@@ -2315,7 +2441,7 @@
 </div>
 
 <script>
-var VIEW_LABELS = { today:'Today', tasks:'Tasks', updates:'Notes', inbox:'Leads & inbox', pipe:'Pipeline', cal:'Calendar', seq:'Sequences', curate:'Curated', rep:'Reports', broker:'Broker', listings:'Deals & offers', command:'Deal command center', people:'Roster' };
+var VIEW_LABELS = { today:'Today', tasks:'Tasks', updates:'Notes', inbox:'Leads & inbox', messages:'Messages', pipe:'Pipeline', cal:'Calendar', seq:'Sequences', curate:'Curated', rep:'Reports', broker:'Broker', listings:'Deals & offers', command:'Deal command center', people:'Roster' };
 window.__viewStack = window.__viewStack || [];
 function navBack() {
   var prev = window.__viewStack.pop();

@@ -60,6 +60,7 @@ import agentUpdates      from '../_lib/handlers/crm-agent-updates.js';
 import discardDraft      from '../_lib/handlers/crm-discard-draft.js';
 import dealsLite         from '../_lib/handlers/crm-deals-lite.js';
 import dealsMotion        from '../_lib/handlers/crm-deals-motion.js';
+import messages           from '../_lib/handlers/crm-messages.js';
 import emailOauthStart    from '../_lib/handlers/crm-email-oauth-start.js';
 import emailOauthCallback from '../_lib/handlers/crm-email-oauth-callback.js';
 import emailAccounts      from '../_lib/handlers/crm-email-accounts.js';
@@ -102,6 +103,7 @@ const TABLE = {
   'discard-draft':     discardDraft,
   'deals-lite':        dealsLite,
   'deals-motion':      dealsMotion,
+  'messages':          messages,
   'email-oauth-start':    emailOauthStart,
   'email-oauth-callback': emailOauthCallback,
   'email-accounts':       emailAccounts

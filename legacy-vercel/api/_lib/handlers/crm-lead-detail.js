@@ -105,7 +105,7 @@ async function readLead(req, res) {
     if (!id) return fail(res, 400, 'id required');
 
     const supa = adminClient();
-    const [lead, messages, events, saved, tours, offers, notes, tasks, appts] = await Promise.all([
+    const [lead, messages, events, saved, tours, offers, notes, tasks, appts, dealMsgs] = await Promise.all([
       supa.from('leads').select('*').eq('id', id).single(),
       supa.from('messages').select('*').eq('lead_id', id).order('created_at'),
       supa.from('lead_events').select('*').eq('lead_id', id).order('created_at', { ascending: false }).limit(50),
@@ -114,14 +114,37 @@ async function readLead(req, res) {
       supa.from('offers').select('*, properties(address,city,mls_number)').eq('buyer_lead_id', id),
       supa.from('lead_notes').select('id, body, is_internal, created_at, created_by').eq('lead_id', id).order('created_at', { ascending: false }).limit(50),
       supa.from('agent_tasks').select('*').eq('lead_id', id).order('created_at', { ascending: false }),
-      supa.from('appointments').select('*').eq('lead_id', id).order('starts_at', { ascending: false })
+      supa.from('appointments').select('*').eq('lead_id', id).order('starts_at', { ascending: false }),
+      // Inbound texts/calls live in deal_messages, keyed by contact_id. Pull
+      // them in so this lead's conversation shows texts alongside portal/email.
+      supa.from('deal_messages').select('id, direction, channel, content, call_duration_seconds, raw_phone_number, created_at')
+        .eq('contact_id', id).order('created_at').then((r) => r, () => ({ data: [] }))
     ]);
 
     if (lead.error || !lead.data) return fail(res, 404, 'lead not found');
 
+    // Fold deal_messages into the conversation as message-shaped rows so the
+    // existing thread renderer shows them inline, chronologically.
+    const thread = (messages.data || []).slice();
+    for (const d of (dealMsgs && dealMsgs.data) || []) {
+      const isCall = d.channel === 'call';
+      const dur = parseInt(d.call_duration_seconds, 10);
+      const body = isCall
+        ? ('☎ Call' + (dur ? ` · ${Math.floor(dur / 60)}m ${dur % 60}s` : ''))
+        : (d.content || '');
+      thread.push({
+        id: 'dm-' + d.id, lead_id: id,
+        direction: d.direction || 'inbound',
+        channel: isCall ? 'call' : 'sms',
+        body, subject: null, status: 'delivered', ai_generated: false,
+        created_at: d.created_at, _source: 'deal_messages'
+      });
+    }
+    thread.sort((a, b) => Date.parse(a.created_at || 0) - Date.parse(b.created_at || 0));
+
     return ok(res, {
       lead:             lead.data,
-      messages:         messages.data || [],
+      messages:         thread,
       events:           events.data   || [],
       saved_properties: saved.data    || [],
       tours:            tours.data    || [],

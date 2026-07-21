@@ -18,6 +18,8 @@
 
 import crypto from 'node:crypto';
 import { adminClient } from '../_lib/supabase.js';
+import { sendSMS, alertSara } from '../_lib/twilio.js';
+import { agentIdentity } from '../_lib/collection-render.js';
 
 // Empty TwiML — acknowledges the event with no auto-reply / no further action.
 const EMPTY_TWIML = '<?xml version="1.0" encoding="UTF-8"?><Response></Response>';
@@ -96,11 +98,13 @@ export default async function handler(req, res) {
     // ---- Match against an existing lead by phone (last-10) -----------------
     const want = normPhone(phone);
     let contactId = null;
+    let hitLead = null;
     if (want) {
       const { data: leads } = await supa
-        .from('leads').select('id, phone').not('phone', 'is', null).limit(5000);
+        .from('leads').select('id, phone, first_name, last_name, assigned_agent').not('phone', 'is', null).limit(5000);
       const hit = (leads || []).find((l) => normPhone(l.phone) === want);
       contactId = hit ? hit.id : null;
+      hitLead = hit || null;
     }
 
     // ---- Sync STOP/START keywords to the consent record --------------------
@@ -137,6 +141,30 @@ export default async function handler(req, res) {
       raw_phone_number:      String(phone),
       status:                contactId ? 'active' : 'pending_review'
     });
+
+    // ---- Alert the agent so a lead's reply is seen immediately -------------
+    // Any inbound text pings the assigned agent (matched) or Sara (unmatched).
+    // Fail-soft and quiet: never on STOP/START keywords, never on calls, never
+    // blocks the 200 back to Twilio.
+    if (direction === 'inbound' && channel === 'sms' && content) {
+      const kw = String(content).trim().toLowerCase();
+      const isKeyword = ['stop', 'stopall', 'unsubscribe', 'cancel', 'end', 'quit', 'start', 'unstop', 'yes'].includes(kw);
+      if (!isKeyword) {
+        try {
+          const snippet = String(content).replace(/\s+/g, ' ').trim().slice(0, 140);
+          if (contactId) {
+            const who = [hitLead?.first_name, hitLead?.last_name].filter(Boolean).join(' ') || 'A lead';
+            const agentKey = hitLead?.assigned_agent === 'james' ? 'james' : 'sara';
+            const agent = await agentIdentity(supa, agentKey).catch(() => null);
+            const body = `${who} just texted: “${snippet}” — open Legacy CRM to reply.`;
+            if (agent?.phone) await sendSMS({ to: agent.phone, body });
+            else await alertSara(body);
+          } else {
+            await alertSara(`New text from an unknown number ${String(phone)}: “${snippet}” — triage it in Legacy CRM.`);
+          }
+        } catch (_) { /* alert is best-effort; never block the webhook */ }
+      }
+    }
 
     return twiml(res);
   } catch (e) {
