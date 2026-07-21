@@ -198,7 +198,7 @@
         <section class="dl" id="dlRoot" aria-label="Deals in motion">
           <div class="dl-toolbar">
             <div>
-              <div class="dl-eyebrow"><span class="dl-eyebrow-tick"></span>In the air right now &middot; active deals</div>
+              <div class="dl-eyebrow"><span class="dl-eyebrow-tick"></span>In escrow right now &middot; live transactions</div>
               <div class="dl-title">Deals in motion.</div>
             </div>
             <div class="dl-modes" data-modes></div>
@@ -463,7 +463,7 @@
             var rowsEl = root.querySelector('[data-rows]');
             if(!state.loaded){ rowsEl.innerHTML='<div class="dl-loading">Loading your deals…</div>'; }
             else if(state.error){ rowsEl.innerHTML='<div class="dl-empty-row">Couldn’t load deals in motion. Refresh to retry.</div>'; }
-            else if(!state.deals.length){ rowsEl.innerHTML='<div class="dl-empty-row">No deals in motion right now. Offers, listings and escrows will appear here.</div>'; }
+            else if(!state.deals.length){ rowsEl.innerHTML='<div class="dl-empty-row">Nothing in escrow right now. Deals move here the moment they go under contract.</div>'; }
             else {
               var visible = state.deals.filter(function(d){return matchFilter(d);});
               var html=''; orderedIds=[];

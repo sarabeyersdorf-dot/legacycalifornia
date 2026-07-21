@@ -80,10 +80,12 @@ export default async function handler(req, res) {
   const supa = adminClient();
 
   try {
-    // 1. The live transactions (everything but closed) ----------------------
+    // 1. Deals in escrow only — stage 'pending' is the in-escrow bucket
+    //    (same value the Grant-portal escrow picker uses). The ledger is
+    //    intentionally the escrow board, not every active listing/offer.
     const { data: dealRows, error: dErr } = await supa.from('deals')
       .select('id, source_key, address, city, stage, side, agent, list_price, sale_price, coe_date, milestones, updated_at')
-      .in('stage', ['offer', 'pending', 'listing', 'preparing'])
+      .eq('stage', 'pending')
       .order('coe_date', { ascending: true, nullsFirst: false });
     if (dErr) return fail(res, 500, `deals: ${dErr.message}`);
 
