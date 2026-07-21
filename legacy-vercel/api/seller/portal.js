@@ -386,11 +386,14 @@ export default async function handler(req, res) {
         .concat(sharedTasks);
     }
     // Agent-managed completion (db/040): a task whose label the agent ticked on
-    // the portal is 'done'. The CLIENT only sees open tasks (completed ones drop
-    // off); an AGENT previewing sees them all — struck — so they can un-tick.
+    // the portal is 'done'. Completed tasks drop off the main "What I need from
+    // you" list for EVERYONE — a done ask should never read as still-open. The
+    // agent additionally gets them in a separate, collapsed "Completed" list so a
+    // mistaken tick can be undone; the client gets none.
     const doneSet = new Set(Array.isArray(deal.client_task_done) ? deal.client_task_done : []);
     tasks = tasks.map((t) => doneSet.has(t.label) ? { ...t, status: 'done' } : t);
-    if (!isAgent) tasks = tasks.filter((t) => t.status !== 'done');
+    const tasksDone = isAgent ? tasks.filter((t) => t.status === 'done') : [];
+    tasks = tasks.filter((t) => t.status !== 'done');
 
     // "Good to know" — titled context bullets shown alongside the agent note
     // (v1.5, from deals.json goodToKnow[]).
@@ -503,6 +506,7 @@ export default async function handler(req, res) {
       viewer_is_agent: !!isAgent,
       source_key: deal.source_key || null,
       seller_note: isAgent ? (deal.portal_seller_note || null) : null,
+      tasks_done: tasksDone,
       activity: [],
       note: {
         head: `A note from ${agentFirst} · This week`,
@@ -534,7 +538,7 @@ function emptyPortal(user) {
     status: { label: 'No active listing', badge: '', address: '', city: '', type: '', price: '—', since: '', tagline: '' },
     tour: { video_url: null, video_id: null, matterport_url: null },
     nav: { documents: '0', tasks: '0' },
-    kpis: [], road: [], documents: [], tasks: [], team: [], good_to_know: [], activity: [],
+    kpis: [], road: [], documents: [], tasks: [], tasks_done: [], team: [], good_to_know: [], activity: [],
     note: { head: 'A note from Sara', body: 'Your listing dashboard will appear here once your sale is under way.', sign: '— Sara · (209) 559-4966' }
   };
 }

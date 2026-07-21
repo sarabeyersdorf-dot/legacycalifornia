@@ -163,6 +163,10 @@
 /* Agent preview: the boxes become tickable */
 body.agent-preview .task-box { cursor: pointer; }
 body.agent-preview .task-box:hover { border-color: var(--brass); box-shadow: 0 0 0 3px var(--linen); }
+/* Completed tasks (agent-only) — de-emphasized below the open list */
+.tasks-done { background: transparent; border-style: dashed; }
+.tasks-done h3 { color: var(--ink-mute); }
+.tasks-done .task-when { color: var(--ink-mute); }
 /* Note for the daily briefing (agent-only) */
 .cowork-note { border-left: 3px solid var(--brass); }
 .cowork-note-ta { width: 100%; box-sizing: border-box; min-height: 70px; resize: vertical; font: inherit; font-size: 13.5px; line-height: 1.5; color: var(--ink); background: var(--shell); border: 1px solid var(--rule); border-radius: 9px; padding: 10px 12px; margin-top: 4px; }
@@ -337,6 +341,18 @@ body.agent-preview .task-box:hover { border-color: var(--brass); box-shadow: 0 0
             <button type="button" class="task-box" data-task-toggle aria-label="Mark complete"></button>
             <div class="task-label" data-bind="label">Task</div>
             <span class="task-when" data-bind="when" data-optional>Open</span>
+          </div>
+        </section>
+
+        <!-- Completed tasks — AGENT ONLY (collapses when empty; client gets none).
+             Tick a row to un-complete it and send it back to the open list. -->
+        <section class="s-mini tasks-done" id="tasks-done" data-list="tasks_done" data-optional>
+          <h3>✓ Completed</h3>
+          <p class="task-intro">Done and off the client's list. Tick one to bring it back.</p>
+          <div class="task-row done" data-row data-add-class="status">
+            <button type="button" class="task-box" data-task-toggle aria-label="Un-complete"></button>
+            <div class="task-label" data-bind="label">Task</div>
+            <span class="task-when" data-bind="when" data-optional>Done</span>
           </div>
         </section>
 
