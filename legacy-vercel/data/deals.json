@@ -1,6 +1,6 @@
 {
-  "version": 2.3,
-  "lastUpdated": "2026-07-21",
+  "version": 2.4,
+  "lastUpdated": "2026-07-22",
   "updatedBy": "Claude",
   "tasks": [
     {
@@ -336,7 +336,8 @@
       "agent": "james",
       "client": "Baldwin",
       "title": "No AVID found in Baldwin EX folder — James as buyer's agent needs to create and file buyer-agent AVID before COE 8/3",
-      "done": false
+      "done": true,
+      "note": "Done 7/21 — Buyer AVID.pdf confirmed in Baldwin EX folder; Allyson Overturf (listing agent) sent it 7/20 10:49 PM, James acknowledged 7/21 4:35 PM."
     },
     {
       "agent": "james",
@@ -387,12 +388,38 @@
       "agent": "sara",
       "client": "Hovey",
       "title": "Hovey hearing FRIDAY 7/25 at 1:30 PM — Caroline Selfridge wants pre-hearing meeting; coordinate with Mike Fluetsch on what to bring and say",
-      "done": false
+      "done": true,
+      "note": "Removed 7/22 — Sara confirmed this hearing is NOT related to the Hovey/Emco file. Caroline Selfridge item is a separate matter."
     },
     {
       "agent": "sara",
       "client": "433 Hwy 4",
       "title": "Chase sellers Jim & Yvonne Heryford for signed acknowledgment on Neriah's buyer-agent AVID — sent to Herfords 7/21; signed copy must come back and be filed in Ex before COE 8/10.",
+      "done": false
+    },
+    {
+      "agent": "sara",
+      "client": "Latigo",
+      "title": "COE THURSDAY 7/24 — watch for signing instructions from Chase International (Mitzi: mwindley@chaseinternational.com). Call Mitzi if nothing in inbox by noon today 7/22.",
+      "done": false
+    },
+    {
+      "agent": "sara",
+      "client": "695 Feather",
+      "title": "Sign OC Title escrow DocuSign — Commission Instructions (broker sig required) + NHD signature pages. From Tanya Salgado (tanyas@octitle.com), escrow #2473532-TS. Received 7/21. Do today — COE timeline active.",
+      "done": true,
+      "note": "Done 7/21 — Sara signed."
+    },
+    {
+      "agent": "james",
+      "client": "Baldwin",
+      "title": "Update deals.json contacts.lender — confirmed Kimberly Hesser, Prime Residential (khesser@primeres.com, 209-768-8277); same lender as Wendell per Kim's 7/20 email to Allyson.",
+      "done": false
+    },
+    {
+      "agent": "james",
+      "client": "Wendell",
+      "title": "Update deals.json BEO alert — Buyer Early Occupancy Addendum is now fully executed via Authentisign (7/20, Brandi Jenkins forwarding). Change language from 'arranged' to 'executed'.",
       "done": false
     }
   ],
