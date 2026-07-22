@@ -53,6 +53,23 @@ function dbxLink(url, dl) {
   return u;
 }
 
+// Resolve a stored document link to something the client's browser can actually
+// open. Our own files live in public/docs and are served at /docs/... on the
+// app's real origin — but many rows store an ABSOLUTE url to legacycalifornia.com,
+// a domain that isn't connected to this deployment, so those 404. Rewrite any
+// "/docs/..." link (whatever host it was saved with) to a same-origin relative
+// path so it works on the actual portal domain (vercel.app today, a custom
+// domain later). Dropbox links get the dl=0/1 preview/download flag; anything
+// else external is passed through untouched.
+function portalDocUrl(url, forDownload) {
+  if (!url) return '';
+  if (/dropbox\.com/i.test(url)) return dbxLink(url, forDownload ? 1 : 0);
+  const m = /^https?:\/\/[^/]+(\/docs\/.+)$/i.exec(url);   // absolute → /docs/... path
+  if (m) return m[1];
+  if (/^\/docs\//i.test(url)) return url;                  // already relative
+  return url;
+}
+
 // Map a deal's property type to the right noun so a listing is never
 // mis-described (vacant land is not a "home"). Falls back to "property", which
 // is correct for anything. Matches on substrings so "single-family residential",
@@ -409,13 +426,13 @@ export default async function handler(req, res) {
     if (deal.co_agent)       team.push({ name: sanitize(deal.co_agent), sub: "Buyer's side", access: 'Buyer side' });
 
     const documentsArr = docs.map((d) => {
-      const raw = (d.doc_url && /^https?:\/\//i.test(d.doc_url)) ? d.doc_url : '';
+      const raw = (d.doc_url && /^(https?:\/\/|\/docs\/)/i.test(d.doc_url)) ? d.doc_url : '';
       return {
         type: (d.doc_type || '').toUpperCase().slice(0, 6),
         name: sanitize(d.name), sub: sanitize(d.sub || ''),
         status: d.status ? (DOC_STATUS_LABEL[d.status] || 'On file') : '',   // optional — blank for flat drops
-        view_url:       raw ? dbxLink(raw, 0) : '',   // preview (Dropbox dl=0)
-        download_url:   raw ? dbxLink(raw, 1) : '',   // force download (Dropbox dl=1)
+        view_url:       raw ? portalDocUrl(raw, false) : '',   // same-origin /docs or Dropbox dl=0
+        download_url:   raw ? portalDocUrl(raw, true)  : '',   // same-origin /docs or Dropbox dl=1
         view_label:     raw ? 'View' : '',            // data-optional anchors hide when empty
         download_label: raw ? 'Download ↓' : ''
       };
