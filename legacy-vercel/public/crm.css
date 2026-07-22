@@ -41,6 +41,20 @@
   min-height: calc(100vh - 60px);
 }
 
+/* Focused contact view — opened from Messages / roster / a link. The leads
+   list is hidden so the contact and their interaction data fill the space. */
+.inbox-shell.contact-focus { grid-template-columns: 1fr 380px; }
+.inbox-shell.contact-focus .lead-list { display: none; }
+.ld-focus-back { display: none; }
+.inbox-shell.contact-focus .ld-focus-back {
+  display: inline-flex; align-items: center; gap: 6px; margin: 0 0 14px;
+  background: transparent; border: 1px solid var(--rule); border-radius: 8px;
+  padding: 6px 12px; font: inherit; font-size: 13px; font-weight: 600;
+  color: var(--ink-soft); cursor: pointer;
+}
+.inbox-shell.contact-focus .ld-focus-back:hover { background: var(--shell); color: var(--ink); }
+@media (max-width: 900px) { .inbox-shell.contact-focus { display: block; } }
+
 /* — LEAD LIST — */
 .lead-list {
   border-right: 1px solid var(--rule); background: var(--shell);

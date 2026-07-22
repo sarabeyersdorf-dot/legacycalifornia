@@ -189,19 +189,15 @@ async function curatedForLead(supa, leadId, leadEvents) {
   if (!collIds.length) return [];
 
   const [listRes, evRes, rxRes] = await Promise.all([
-    supa.from('collection_listings').select('collection_id, property_id, included, properties(address, city)').in('collection_id', collIds),
+    supa.from('collection_listings')
+      .select('collection_id, property_id, included, sort_order, agent_note, properties(address, city, state, price, bedrooms, bathrooms, sq_ft, property_type, status, mls_number, photos)')
+      .in('collection_id', collIds),
     supa.from('collection_events').select('collection_id, property_id, event_type, dwell_ms').in('collection_id', collIds),
-    supa.from('collection_reactions').select('collection_id, property_id, reaction, comment, created_at').in('collection_id', collIds)
+    supa.from('collection_reactions').select('collection_id, property_id, reaction, comment, created_at').in('collection_id', collIds).order('created_at', { ascending: true })
   ]);
-  const listings = listRes.data || [], evrows = evRes.data || [], rxrows = rxRes.data || [];
+  const listingRows = listRes.data || [], evrows = evRes.data || [], rxrows = rxRes.data || [];
 
-  const addr = new Map();            // property_id -> "address · city"
-  const includedCount = new Map();   // collection_id -> included listings
-  for (const l of listings) {
-    if (l.properties) addr.set(l.property_id, [l.properties.address, l.properties.city].filter(Boolean).join(' · '));
-    if (l.included) includedCount.set(l.collection_id, (includedCount.get(l.collection_id) || 0) + 1);
-  }
-
+  // views/dwell per (collection, property); opens per collection
   const opensByColl = new Map();
   const perProp = new Map();          // `${coll}|${prop}` -> {views, dwell}
   for (const ev of evrows) {
@@ -214,23 +210,43 @@ async function curatedForLead(supa, leadId, leadEvents) {
     perProp.set(k, cur);
   }
 
-  const rxByColl = new Map();
-  const rxByProp = new Map();          // `${coll}|${prop}` -> reaction (latest wins)
+  // the client's reactions per (collection, property), oldest→newest, with comments
+  const rxByKey = new Map();
+  const rxCountByColl = new Map();
   for (const rx of rxrows) {
-    if (!rxByColl.has(rx.collection_id)) rxByColl.set(rx.collection_id, []);
-    rxByColl.get(rx.collection_id).push({ property_id: rx.property_id, address: addr.get(rx.property_id) || null, reaction: rx.reaction, comment: rx.comment || null, created_at: rx.created_at });
-    if (rx.property_id) rxByProp.set(rx.collection_id + '|' + rx.property_id, rx.reaction);
+    const k = rx.collection_id + '|' + (rx.property_id || '');
+    if (!rxByKey.has(k)) rxByKey.set(k, []);
+    rxByKey.get(k).push({ reaction: rx.reaction, comment: rx.comment || null, created_at: rx.created_at });
+    rxCountByColl.set(rx.collection_id, (rxCountByColl.get(rx.collection_id) || 0) + 1);
+  }
+
+  // included listings per collection, carrying the real MLS card data + this
+  // client's interaction (views, dwell, reactions/comments) on each one.
+  const listingsByColl = new Map();
+  for (const l of listingRows) {
+    if (!l.included) continue;
+    const p = l.properties || {};
+    if (!listingsByColl.has(l.collection_id)) listingsByColl.set(l.collection_id, []);
+    const pp = perProp.get(l.collection_id + '|' + l.property_id) || { views: 0, dwell: 0 };
+    listingsByColl.get(l.collection_id).push({
+      property_id: l.property_id,
+      sort_order: l.sort_order == null ? 999 : l.sort_order,
+      agent_note: l.agent_note || null,
+      address: p.address || null, city: p.city || null, state: p.state || null,
+      price: p.price == null ? null : p.price,
+      beds: p.bedrooms == null ? null : p.bedrooms,
+      baths: p.bathrooms == null ? null : p.bathrooms,
+      sqft: p.sq_ft == null ? null : p.sq_ft,
+      property_type: p.property_type || null, status: p.status || null, mls_number: p.mls_number || null,
+      photo: Array.isArray(p.photos) && p.photos.length ? p.photos[0] : null,
+      views: pp.views, dwell_ms: pp.dwell,
+      reactions: rxByKey.get(l.collection_id + '|' + l.property_id) || []
+    });
   }
 
   return collIds.map((cid) => {
     const c = collById.get(cid);
-    const propKeys = new Set();
-    for (const k of perProp.keys()) if (k.slice(0, cid.length + 1) === cid + '|') propKeys.add(k.slice(cid.length + 1));
-    for (const k of rxByProp.keys()) if (k.slice(0, cid.length + 1) === cid + '|') propKeys.add(k.slice(cid.length + 1));
-    const engagement = [...propKeys].map((pid) => {
-      const pp = perProp.get(cid + '|' + pid) || { views: 0, dwell: 0 };
-      return { property_id: pid, address: addr.get(pid) || null, views: pp.views, dwell_ms: pp.dwell, reaction: rxByProp.get(cid + '|' + pid) || null };
-    }).sort((a, b) => (b.views - a.views) || (b.dwell_ms - a.dwell_ms));
+    const listings = (listingsByColl.get(cid) || []).sort((a, b) => a.sort_order - b.sort_order);
     return {
       id: cid,
       title: c.title || 'Curated search',
@@ -238,11 +254,10 @@ async function curatedForLead(supa, leadId, leadEvents) {
       share_path: c.share_token ? '/c/' + c.share_token : null,
       created_at: c.created_at, updated_at: c.updated_at,
       opens: opensByColl.get(cid) || 0,
-      listing_count: includedCount.get(cid) || 0,
-      total_views: engagement.reduce((s, e) => s + e.views, 0),
-      total_reactions: (rxByColl.get(cid) || []).length,
-      engagement,
-      reactions: rxByColl.get(cid) || []
+      listing_count: listings.length,
+      total_views: listings.reduce((s, e) => s + (e.views || 0), 0),
+      total_reactions: rxCountByColl.get(cid) || 0,
+      listings
     };
   }).sort((a, b) => Date.parse(b.updated_at || b.created_at || 0) - Date.parse(a.updated_at || a.created_at || 0));
 }

@@ -2406,36 +2406,70 @@
         </div>`;
     }
 
-    // Curated searches sent to this lead + their live engagement (opens,
-    // per-listing views/dwell, reactions). Reads payload.collections — the same
-    // numbers the Curated tab shows, here on the contact card so an agent sees
-    // what the client clicked and how often without leaving the record.
+    // Curated searches sent to this lead, rendered as the real MLS listing
+    // cards (photo + price + specs) with the client's own interaction on each —
+    // views, dwell, reactions and any comment they left. Reads payload.collections.
     function curatedBlockHtml() {
       if (!collections.length) return '';
       const REACT = { love: '❤️ Loved', want_to_see: '👀 Wants to see', tell_me_more: '💬 Tell me more', not_for_me: '✕ Not for me' };
-      const dwellMin = (ms) => { const m = Math.round((+ms || 0) / 60000); return m >= 1 ? `${m}m` : ''; };
+      const dwellTxt = (ms) => { const m = Math.round((+ms || 0) / 60000); return m >= 1 ? `${m}m` : ''; };
       const when = (iso) => { const d = new Date(iso); if (isNaN(d)) return ''; const MO = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']; return `${MO[d.getMonth()]} ${d.getDate()}`; };
+      const money = (n) => (n == null || n === '') ? '' : '$' + Number(n).toLocaleString('en-US');
+      const specLine = (l) => [
+        l.beds != null ? `${l.beds} bd` : '', l.baths != null ? `${l.baths} ba` : '',
+        l.sqft != null ? `${Number(l.sqft).toLocaleString('en-US')} sqft` : '',
+        l.mls_number ? `MLS ${l.mls_number}` : ''
+      ].filter(Boolean).join(' · ');
+
+      const listingCard = (l) => {
+        const uniqReacts = [];
+        (l.reactions || []).forEach((r) => { if (r.reaction && !uniqReacts.includes(r.reaction)) uniqReacts.push(r.reaction); });
+        const comments = (l.reactions || []).filter((r) => r.comment).map((r) => r.comment);
+        const viewsTxt = l.views ? `👁 ${l.views} view${l.views === 1 ? '' : 's'}${dwellTxt(l.dwell_ms) ? ` · ${dwellTxt(l.dwell_ms)}` : ''}` : '';
+        const chips = uniqReacts.map((r) => `<span class="lp-lreact lp-lreact-${escHtml(r)}">${escHtml(REACT[r] || r)}</span>`).join('');
+        const hasInteraction = viewsTxt || chips || comments.length;
+        const interact = hasInteraction
+          ? `<div class="lp-lcard-interact">
+               ${viewsTxt ? `<span class="lp-lviews">${viewsTxt}</span>` : ''}${chips}
+               ${comments.map((c) => `<div class="lp-lcomment">“${escHtml(c)}”</div>`).join('')}
+             </div>`
+          : `<div class="lp-lcard-interact lp-lcard-quiet">No views or reactions yet</div>`;
+        const photo = l.photo ? `<div class="lp-lcard-photo" style="background-image:url('${escHtml(l.photo)}')"></div>` : `<div class="lp-lcard-photo lp-lcard-nophoto">No photo</div>`;
+        return `
+          <div class="lp-lcard">
+            ${photo}
+            <div class="lp-lcard-body">
+              <div class="lp-lcard-top"><span class="lp-lcard-price">${escHtml(money(l.price) || '—')}</span>${l.status ? `<span class="lp-lcard-status">${escHtml(String(l.status).replace(/^./, (x) => x.toUpperCase()))}</span>` : ''}</div>
+              <div class="lp-lcard-addr">${escHtml([l.address, l.city].filter(Boolean).join(' · ') || 'Listing')}</div>
+              ${specLine(l) ? `<div class="lp-lcard-specs">${escHtml(specLine(l))}</div>` : ''}
+              ${interact}
+            </div>
+          </div>`;
+      };
+
       const blocks = collections.map((c) => {
-        const engaged = (c.engagement || []).filter((e) => e.views > 0 || e.dwell_ms > 0 || e.reaction);
-        const rows = engaged.length ? engaged.slice(0, 6).map((e) => `
-          <div class="lp-cur-row">
-            <span class="lp-cur-addr">${escHtml(e.address || 'A listing')}</span>
-            <span class="lp-cur-stat">${e.views ? `${e.views} view${e.views === 1 ? '' : 's'}` : 'Not opened'}${dwellMin(e.dwell_ms) ? ` · ${dwellMin(e.dwell_ms)}` : ''}${e.reaction ? ` · ${escHtml(REACT[e.reaction] || e.reaction)}` : ''}</span>
-          </div>`).join('')
-          : `<div class="lp-cur-empty">Sent — ${escHtml(clientFirst)} hasn’t opened a listing yet.</div>`;
-        const openedChip = c.opens ? `${c.opens} open${c.opens === 1 ? '' : 's'}` : 'Not opened yet';
+        const cards = (c.listings && c.listings.length)
+          ? c.listings.map(listingCard).join('')
+          : `<div class="lp-cur-empty">This collection has no listings yet.</div>`;
+        const openedChip = c.opens ? `${c.opens} open${c.opens === 1 ? '' : 's'}` : (c.total_views || c.total_reactions ? 'Viewed' : 'Not opened yet');
+        const meta = [
+          `${c.listing_count || 0} listing${(c.listing_count === 1) ? '' : 's'}`,
+          openedChip,
+          c.total_reactions ? `${c.total_reactions} reaction${c.total_reactions === 1 ? '' : 's'}` : '',
+          c.created_at ? `sent ${when(c.created_at)}` : ''
+        ].filter(Boolean).join(' · ');
         return `
           <div class="lp-cur-card">
             <div class="lp-cur-top">
               <span class="lp-cur-title">${escHtml(c.title || 'Curated search')}</span>
-              ${c.share_path ? `<a class="lp-cur-link" href="${escHtml(c.share_path)}" target="_blank" rel="noopener">View ↗</a>` : ''}
+              ${c.share_path ? `<a class="lp-cur-link" href="${escHtml(c.share_path)}" target="_blank" rel="noopener">Open ↗</a>` : ''}
             </div>
-            <div class="lp-cur-meta">${escHtml(String(c.listing_count || 0))} listings · ${escHtml(openedChip)}${c.total_views ? ` · ${c.total_views} listing views` : ''}${c.created_at ? ` · sent ${escHtml(when(c.created_at))}` : ''}</div>
-            ${rows}
+            <div class="lp-cur-meta">${escHtml(meta)}</div>
+            <div class="lp-lcard-wrap">${cards}</div>
           </div>`;
       }).join('');
       return `
-        <div class="lp-eyebrow" style="margin-top:18px;margin-bottom:10px;">Curated searches</div>
+        <div class="lp-eyebrow" style="margin-top:18px;margin-bottom:10px;">Curated searches &amp; what they clicked</div>
         <div class="lp-cur-wrap">${blocks}</div>`;
     }
 
@@ -2472,6 +2506,7 @@
       </div>`;
 
     detailEl.innerHTML = `
+      <button class="ld-focus-back" data-focus-back title="Back to the leads list">‹ All leads</button>
       <div class="ld-head">
         <div class="ld-head-l">
           <div class="avatar avatar-lg" style="background: var(--hot); color: var(--shell); font-family: var(--serif); font-style: italic;">${escHtml(initials)}</div>
@@ -2944,7 +2979,13 @@
       ${tours.length ? `<div class="lp-section"><h3>Tours · ${tours.length}</h3>${tours.slice(0,3).map((t) => `<div class="tl-item"><div class="tl-dot"></div><div><div class="tl-text"><strong>${escHtml(t.properties && t.properties.address || 'Tour')}</strong></div><div class="tl-when">${escHtml(fmtRel(t.scheduled_at))} · ${escHtml(t.status || '')}</div></div></div>`).join('')}</div>` : ''}
       ${offers.length ? `<div class="lp-section"><h3>Offers · ${offers.length}</h3>${offers.slice(0,3).map((o) => `<div class="tl-item"><div class="tl-dot ink"></div><div><div class="tl-text"><strong>${escHtml(fmtUSD(o.amount))}</strong> · ${escHtml(o.status || '')}</div><div class="tl-when">${escHtml(o.properties && o.properties.address || '')}</div></div></div>`).join('')}</div>` : ''}
     `;
-    detailEl.insertAdjacentHTML('beforeend', `<details class="lp-agent-details"><summary>Agent details · internal</summary><div class="lp-agent-details-body">${railHtml}</div></details>`);
+    // Agent details / internal rail — placed at the TOP, just under the header
+    // actions (collapsed), so the internal meta is at hand while the body stays
+    // focused on the contact and their interaction data.
+    const railDetails = `<details class="lp-agent-details"><summary>Agent details · internal</summary><div class="lp-agent-details-body">${railHtml}</div></details>`;
+    const headEl = detailEl.querySelector('.ld-head');
+    if (headEl) headEl.insertAdjacentHTML('afterend', railDetails);
+    else detailEl.insertAdjacentHTML('beforeend', railDetails);
 
     // Right pane = LIVE client-portal preview (mirrors exactly what this client
     // sees at their private link; repaints as visibility toggles flip).
@@ -3483,8 +3524,22 @@
       if (!id) return;
       if (typeof window.showView === 'function') window.showView(null, 'inbox');
       selectLeadId(id, true);
+      // Focused mode: hide the leads list so the contact + interaction data
+      // fill the screen. showView() cleared it on the switch above; re-add it
+      // here so opening a contact by id lands in focus. Browsing the inbox via
+      // the nav (which just calls showView) stays in the normal 3-column view.
+      const shell = document.querySelector('.inbox-shell');
+      if (shell) shell.classList.add('contact-focus');
     };
   }
+
+  // Leave focused mode: the in-detail "‹ All leads" button restores the list.
+  document.addEventListener('click', (e) => {
+    if (e.target.closest('[data-focus-back]')) {
+      const shell = document.querySelector('.inbox-shell');
+      if (shell) shell.classList.remove('contact-focus');
+    }
+  });
 
   // Permanently delete a contact (the "Trash" option / card delete icon).
   // Returns true if the delete was started (confirmed), false if cancelled.

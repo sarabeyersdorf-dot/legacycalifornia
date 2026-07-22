@@ -2449,6 +2449,9 @@ function navBack() {
 }
 function showView(e, name, fromBack) {
   if (e) e.preventDefault();
+  // Any view switch leaves the focused-contact mode (openLead re-adds it right
+  // after, so opening a contact still lands focused; nav clicks don't).
+  try { var __sh = document.querySelector('.inbox-shell'); if (__sh) __sh.classList.remove('contact-focus'); } catch (_) {}
   // History stack (installed-PWA back control). Pushing only on forward moves.
   try {
     var cur = document.querySelector('.crm-view.on');
