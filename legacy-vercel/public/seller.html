@@ -61,6 +61,22 @@
 .sell-status .v { font-family: var(--serif); font-style: italic; font-weight: 300; font-size: 42px; line-height: 1; color: var(--shell); }
 .sell-status .since { font-family: var(--mono); font-size: 10px; letter-spacing: 0.14em; color: rgba(250,246,236,0.5); text-transform: uppercase; margin-top: 14px; padding-top: 12px; border-top: 1px solid rgba(250,246,236,0.15); }
 
+/* Your team — in the hero, below the address; every member reachable by tap */
+.sell-team { margin-top: 26px; padding-top: 20px; border-top: 1px solid var(--rule); max-width: 480px; }
+.sell-team-h { font-family: var(--mono); font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--brass); margin-bottom: 12px; }
+.sell-team-card { padding: 11px 0; border-bottom: 1px solid var(--rule); }
+.sell-team-card:last-child { border-bottom: none; padding-bottom: 0; }
+.sell-team-id { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+.sell-team-name { font-family: var(--serif); font-style: italic; font-size: 19px; color: var(--ink); }
+.sell-team-role { font-family: var(--mono); font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-mute); }
+.sell-team-contact { display: flex; flex-wrap: wrap; gap: 8px 10px; margin-top: 8px; }
+.sell-team-link { display: inline-flex; align-items: center; gap: 6px; font-size: 13.5px; font-weight: 600; text-decoration: none; padding: 6px 12px; border: 1px solid var(--rule); border-radius: 20px; background: #fff; color: var(--ink); white-space: nowrap; }
+.sell-team-link.tel { color: #2F7A4D; }
+.sell-team-link:hover { border-color: var(--brass); }
+.sell-team-link::before { font-family: var(--mono); font-size: 12px; opacity: 0.85; }
+.sell-team-link.tel::before { content: '\260E'; }
+.sell-team-link.mail::before { content: '\2709'; }
+
 /* KPI strip */
 .sell-kpi {
   display: grid; grid-template-columns: repeat(4, 1fr); gap: 1px;
@@ -268,6 +284,21 @@ body.agent-preview .task-box:hover { border-color: var(--brass); box-shadow: 0 0
           <span data-bind="status.label" data-optional>In escrow</span>
         </div>
         <div id="sell-tour" class="sell-tour"></div>
+
+        <!-- Your team — right up top so a client can reach anyone in one tap -->
+        <div class="sell-team" id="team" data-list="team">
+          <div class="sell-team-h">Your team</div>
+          <div class="sell-team-card" data-row>
+            <div class="sell-team-id">
+              <span class="sell-team-name" data-bind="name">—</span>
+              <span class="sell-team-role" data-bind="sub" data-optional>—</span>
+            </div>
+            <div class="sell-team-contact">
+              <a class="sell-team-link tel" data-bind="phone_label" data-bind-href="phone_href" data-optional href="#">Call</a>
+              <a class="sell-team-link mail" data-bind="email_label" data-bind-href="email_href" data-optional href="#">Email</a>
+            </div>
+          </div>
+        </div>
       </div>
       <div class="sell-status">
         <div class="l" data-bind="status.price_label">List price</div>
@@ -381,14 +412,6 @@ body.agent-preview .task-box:hover { border-color: var(--brass); box-shadow: 0 0
           </div>
         </section>
 
-        <!-- Your team -->
-        <section class="s-mini" id="team" data-list="team">
-          <h3>Your team</h3>
-          <div class="share-row" data-row>
-            <div class="who"><span data-bind="name">Name</span><span class="sub" data-bind="sub" data-optional>Role</span></div>
-            <span class="access" data-bind="access">Access</span>
-          </div>
-        </section>
       </div>
     </div>
   </main>

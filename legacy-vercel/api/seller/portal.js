@@ -418,12 +418,36 @@ export default async function handler(req, res) {
       .map((g) => ({ title: sanitize((g && g.title) || ''), body: sanitize((g && g.body) || '') }))
       .filter((g) => g.title || g.body);
 
-    // Team from the deal's contact columns
+    // Agent identity (real contact info) — fetched up front so the team block
+    // carries the agent's email + phone. Fail-soft to sensible defaults.
+    let agentRow = null;
+    try {
+      const { data } = await supa.from('agents').select('name, phone, email, title, dre_number').eq('agent_key', deal.agent || 'sara').maybeSingle();
+      agentRow = data || null;
+    } catch (_) { /* agents table optional */ }
+    const agentName  = agentRow?.name  || (deal.agent === 'james' ? 'James Beyersdorf' : 'Sara Cooper');
+    const agentFirst = (agentName.split(' ')[0]) || 'Sara';
+    const agentPhone = agentRow?.phone || (deal.agent === 'james' ? '209-770-7523' : '209-559-4966');
+    const agentEmail = agentRow?.email || (deal.agent === 'james' ? 'JamesSellsCalifornia@gmail.com' : 'SaraSellsCalifornia@gmail.com');
+
+    // Team — the agent ALWAYS carries email + phone (no exceptions) so a client
+    // can reach them in one tap; escrow / co-agent show whatever the deal stores.
+    const telHref = (p) => p ? 'tel:' + String(p).replace(/[^\d+]/g, '') : '';
+    const teamMember = (m) => ({
+      name: m.name, sub: m.sub || '', access: m.access || '',
+      phone: m.phone || '', email: m.email || '',
+      phone_label: m.phone || '', email_label: m.email || '',
+      phone_href: telHref(m.phone), email_href: m.email ? 'mailto:' + m.email : ''
+    });
     const team = [];
-    team.push({ name: deal.agent === 'james' ? 'James Beyersdorf' : 'Sara Cooper',
-                sub: 'Your agent · Legacy', access: deal.agent === 'james' ? 'Agent' : 'Broker' });
-    if (deal.escrow_officer) team.push({ name: sanitize(deal.escrow_officer), sub: 'Escrow / Title', access: 'Escrow' });
-    if (deal.co_agent)       team.push({ name: sanitize(deal.co_agent), sub: "Buyer's side", access: 'Buyer side' });
+    team.push(teamMember({
+      name: agentName,
+      sub: (agentRow?.title || (deal.agent === 'james' ? 'Agent' : 'Broker-Owner')) + ' · Legacy',
+      access: deal.agent === 'james' ? 'Agent' : 'Broker',
+      phone: agentPhone, email: agentEmail
+    }));
+    if (deal.escrow_officer) team.push(teamMember({ name: sanitize(deal.escrow_officer), sub: 'Escrow / Title', access: 'Escrow' }));
+    if (deal.co_agent)       team.push(teamMember({ name: sanitize(deal.co_agent), sub: "Buyer's side", access: 'Buyer side' }));
 
     const documentsArr = docs.map((d) => {
       const raw = (d.doc_url && /^(https?:\/\/|\/docs\/)/i.test(d.doc_url)) ? d.doc_url : '';
@@ -438,16 +462,8 @@ export default async function handler(req, res) {
       };
     });
 
-    // Per-agent portal: James's sellers see James, not Sara. Pull the deal's
-    // agent identity from the agents table (fail-soft to sensible defaults).
-    let agentRow = null;
-    try {
-      const { data } = await supa.from('agents').select('name, phone, email, dre_number').eq('agent_key', deal.agent || 'sara').maybeSingle();
-      agentRow = data || null;
-    } catch (_) { /* agents table optional */ }
-    const agentName  = agentRow?.name  || (deal.agent === 'james' ? 'James Beyersdorf' : 'Sara Cooper');
-    const agentFirst = (agentName.split(' ')[0]) || 'Sara';
-    const agentPhone = agentRow?.phone || (deal.agent === 'james' ? '209-770-7523' : '209-559-4966');
+    // (Agent identity — agentName / agentFirst / agentPhone / agentEmail — was
+    // resolved above with the team block.)
 
     // 4. Note from the agent — stage-appropriate. The escrow-framed AI note is
     //    used ONLY when the deal is actually in escrow; otherwise we use safe,
