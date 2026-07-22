@@ -155,7 +155,12 @@ export default async function handler(req, res) {
       const ct = lead.contact_type;
       const alreadyTracked = ct === 'client' || ct === 'past_client' || ct === 'sphere'
         || ct === 'do_not_call' || ct === 'do_not_contact';
-      if (!alreadyTracked && EARLY.has(lead.pipeline_stage)) {
+      // Being linked to an in-escrow / closed deal makes them a client outright,
+      // whatever stage they were at (so a portal-share on a pending deal promotes
+      // immediately). For an on-market listing we only promote early-stage leads.
+      const s = (deal.stage || '').toString().toLowerCase();
+      const dealIsCommitted = s === 'pending' || s === 'closed' || s === 'sold' || s === 'in_escrow' || s === 'escrow' || s === 'under_contract';
+      if (!alreadyTracked && (dealIsCommitted || EARLY.has(lead.pipeline_stage))) {
         Object.assign(patch, clientFieldsForDeal(deal, role));
       }
       if (Object.keys(patch).length) await supa.from('leads').update(patch).eq('id', lead.id);

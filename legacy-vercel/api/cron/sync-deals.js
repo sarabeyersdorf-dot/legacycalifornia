@@ -200,6 +200,65 @@ function extType(s) {
   return e ? e.toUpperCase().slice(0, 4) : 'DOC';
 }
 
+// A contact linked to a deal that's in escrow or closed is, by definition, a
+// client — not a lead. Roll every such lead's classification forward to match
+// the deal, so the roster stops showing them under "Leads" and the agent never
+// has to swap them by hand. Never touches anyone already a client/past_client/
+// sphere/do-not-contact. Returns the number of leads actually updated.
+async function promoteAttachedLeads(supa) {
+  // 1. Deals under contract (pending) or closed, keyed by id.
+  const { data: deals, error: dErr } = await supa.from('deals').select('id, stage').in('stage', ['pending', 'closed']);
+  if (dErr || !deals || !deals.length) return 0;
+  const stageByDeal = new Map(deals.map((d) => [d.id, d.stage]));
+
+  // 2. Their parties (lead ↔ deal ↔ role).
+  const { data: parties, error: pErr } = await supa.from('deal_parties')
+    .select('deal_id, lead_id, role').in('deal_id', [...stageByDeal.keys()]);
+  if (pErr || !parties || !parties.length) return 0;
+
+  // 3. Fold to one desired classification per lead. Closed beats pending; a
+  //    buyer role sets buyer_stage, a seller role sets seller_stage (a lead on
+  //    both sides gets both).
+  const want = new Map(); // lead_id -> { pipeline, closed, buyer, seller }
+  for (const p of parties) {
+    if (!p.lead_id) continue;
+    const stage = stageByDeal.get(p.deal_id);
+    const closed = stage === 'closed';
+    const isBuyer = /buyer/.test(p.role || '');
+    const isSeller = /seller/.test(p.role || '') || !isBuyer; // default to seller side
+    const cur = want.get(p.lead_id) || { closed: false, buyer: false, seller: false };
+    cur.closed = cur.closed || closed;
+    cur.buyer = cur.buyer || isBuyer;
+    cur.seller = cur.seller || isSeller;
+    want.set(p.lead_id, cur);
+  }
+  const leadIds = [...want.keys()];
+  if (!leadIds.length) return 0;
+
+  // 4. Current lead state — skip anyone already tracked, and only write a diff.
+  const { data: leads, error: lErr } = await supa.from('leads')
+    .select('id, contact_type, pipeline_stage, buyer_stage, seller_stage').in('id', leadIds);
+  if (lErr || !leads) return 0;
+
+  const TRACKED = new Set(['client', 'past_client', 'sphere', 'do_not_call', 'do_not_contact']);
+  let promoted = 0;
+  for (const l of leads) {
+    if (TRACKED.has(l.contact_type)) continue;         // never touch an existing client/etc.
+    const w = want.get(l.id);
+    const sideStage = w.closed ? 'closed' : 'in_escrow';
+    const pipeline  = w.closed ? 'closed' : 'under_contract';
+    const patch = {};
+    if (l.contact_type !== 'client') patch.contact_type = 'client';
+    if (l.pipeline_stage !== pipeline) patch.pipeline_stage = pipeline;
+    if (w.buyer  && l.buyer_stage  !== sideStage) patch.buyer_stage  = sideStage;
+    if (w.seller && l.seller_stage !== sideStage) patch.seller_stage = sideStage;
+    if (!Object.keys(patch).length) continue;
+    const { error } = await supa.from('leads').update(patch).eq('id', l.id);
+    if (!error) promoted++;
+  }
+  return promoted;
+}
+
 export default async function handler(req, res) {
   if (handleOptions(req, res)) return;
 
@@ -354,6 +413,14 @@ export default async function handler(req, res) {
       }
     }
 
+    // Promote any lead attached to an in-escrow / closed deal to a CLIENT with
+    // the matching side stage, so a contact who's under contract never lingers
+    // in the roster as a "lead". Self-healing: runs every sync, only touches
+    // rows that need it, and never downgrades an existing client/past/sphere/DNC.
+    let leadsPromoted = 0;
+    try { leadsPromoted = await promoteAttachedLeads(supa); }
+    catch (e) { errors.push({ deal: 'lead-promotion', error: e.message || String(e) }); }
+
     // Post-sync breakdown of the deals table (side/stage) so a single trigger
     // is self-diagnosing: you can see exactly what the CRM Listings view reads.
     let dealsInTable = null;
@@ -370,6 +437,7 @@ export default async function handler(req, res) {
       deals_upserted: dealsUpserted,
       documents_written: docsWritten,
       tasks_written: tasksWritten,
+      leads_promoted: leadsPromoted,
       deal_errors: errors,
       deals_in_table: dealsInTable,
       ran_at: new Date().toISOString()
