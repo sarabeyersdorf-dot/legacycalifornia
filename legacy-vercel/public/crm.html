@@ -292,6 +292,7 @@
           .dl-client { font-size:12px; color:oklch(0.52 0.01 60); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
           .dl-statusdot { width:5px; height:5px; flex:none; border-radius:50%; }
           .dl-status { font-size:12px; color:oklch(0.5 0.01 60); white-space:nowrap; }
+          .dl-parties { font-size:11px; color:oklch(0.5 0.01 60); margin-top:4px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:100%; }
           .dl-touchline { display:flex; align-items:center; gap:7px; margin-top:4px; }
           .dl-touch { font-size:12px; color:oklch(0.55 0.01 60); }
           .dl-stale { font-size:12px; font-weight:700; padding:1px 6px; border-radius:5px; }
@@ -422,7 +423,9 @@
             h+='<div class="dl-clientline"><span class="dl-client">'+esc(d.client)+'</span><span class="dl-statusdot" style="background:'+sk.c+'"></span><span class="dl-status">'+esc(sk.label)+'</span></div>';
             h+='<div class="dl-touchline"><span class="dl-touch">Last touch '+fmt(d.lastTouch)+'</span>';
             if(stale){ var sc=sd>=14?'oklch(0.55 0.16 25)':'oklch(0.55 0.12 65)'; h+='<span class="dl-stale" style="color:'+sc+';background:'+alpha(sd>=14?'oklch(0.6 0.16 25)':'oklch(0.6 0.12 65)',0.12)+'">'+sd+'d quiet</span>'; }
-            h+='</div></div></div>';
+            h+='</div>';
+            if(d.party_summary) h+='<div class="dl-parties" title="'+esc(d.party_summary)+'">'+esc(d.party_summary)+'</div>';
+            h+='</div></div>';
             h+='<div class="dl-side"><span class="dl-sidechip" style="color:'+S.deep+';background:'+S.soft+';border:1px solid '+alpha(S.solid,0.3)+'">'+S.label+'</span><div class="dl-agents">';
             (d.agent==='both'?['sara','james']:[d.agent]).forEach(function(k){ var a=agents[k]||agents.sara; h+='<span class="dl-agent" style="background:'+alpha(a.c,0.18)+';color:'+a.cd+';border:1.5px solid '+alpha(a.c,0.4)+'">'+a.initials+'</span>'; });
             h+='</div></div>';
@@ -445,6 +448,7 @@
             h+='<div class="dl-coe"><div class="dl-coeshort">'+(d.coe?fmt(d.coe):'—')+'</div>'+(coeD!=null?'<div class="dl-coecount" style="color:'+(coeD>=0&&coeD<=7?'oklch(0.52 0.15 25)':'oklch(0.55 0.01 60)')+'">'+coeD+'d</div>':'')+'</div>';
             h+='<div class="dl-act">';
             h+='<button class="dl-actbtn" title="Schedule on calendar (S)" data-rowact="sched" data-id="'+esc(d.id)+'">◑</button>';
+            h+='<button class="dl-actbtn" title="Edit people & escrow" data-parties-edit="'+esc(d.id)+'">✎</button>';
             h+='<button class="dl-actbtn" title="Open deal page (Enter)" data-rowact="open" data-id="'+esc(d.id)+'">⌕</button>';
             h+='</div></div>';
             return h;
@@ -533,6 +537,16 @@
               .then(function(j){ state.loaded=true; if(j && Array.isArray(j.deals)){ state.deals=j.deals; state.error=false; } else { state.error=true; } render(); })
               .catch(function(){ state.loaded=true; state.error=true; render(); });
           }
+
+          // Patch a row's people/escrow summary in place after an edit.
+          document.addEventListener('deal-parties:saved', function(ev){
+            if(!ev.detail) return;
+            var d = state.deals.filter(function(x){ return x.id===ev.detail.source_key; })[0];
+            if(!d) return;
+            d.parties = ev.detail.parties;
+            if(window.LegacyDealParties) d.party_summary = window.LegacyDealParties.summarize(ev.detail.parties);
+            render();
+          });
 
           render();
           load();
@@ -1703,6 +1717,227 @@
         .catch(function(){});
     })();
     </script>
+
+    <!-- ===========================================================
+         DEAL PARTIES & ESCROW — shared module (window.LegacyDealParties)
+         People + escrow for a deal, editable from any surface. Saves the
+         sync-safe overlay (db/029) via /api/crm/deal-parties.
+         =========================================================== -->
+    <style>
+    .dp-panel { border:1px solid var(--rule); background:var(--shell); }
+    .dp-head { display:flex; align-items:center; justify-content:space-between; gap:10px; padding:11px 14px; border-bottom:1px solid var(--rule); }
+    .dp-h { font-family:var(--mono); font-size:10px; letter-spacing:.13em; text-transform:uppercase; color:var(--ink-mute); }
+    .dp-edit { font-family:var(--mono); font-size:10px; letter-spacing:.08em; text-transform:uppercase; padding:5px 10px; border:1px solid var(--rule); background:transparent; color:var(--brass); cursor:pointer; }
+    .dp-edit:hover { border-color:var(--brass); }
+    .dp-row { display:grid; grid-template-columns:104px 1fr; gap:12px; padding:9px 14px; border-bottom:1px solid var(--rule-soft,#eee5d8); font-family:var(--sans); font-size:13.5px; }
+    .dp-row:last-child { border-bottom:none; }
+    .dp-role { font-family:var(--mono); font-size:10px; letter-spacing:.06em; text-transform:uppercase; color:var(--ink-mute); padding-top:2px; }
+    .dp-name { font-weight:600; color:var(--ink); }
+    .dp-extra { color:var(--ink-mute); font-size:12.5px; }
+    .dp-ct { display:block; font-size:12.5px; margin-top:2px; }
+    .dp-ct a { color:var(--brass); text-decoration:none; }
+    .dp-ct a:hover { text-decoration:underline; }
+    .dp-empty { padding:14px; font-family:var(--sans); font-size:13px; color:var(--ink-mute); }
+    /* compact card summary */
+    .dp-sum { display:flex; align-items:center; gap:6px; font-size:11.5px; color:var(--ink-mute); margin-top:6px; }
+    .dp-sum-txt { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+    .dp-sum-edit { flex:none; border:0; background:transparent; color:var(--brass); cursor:pointer; font-size:12px; padding:0 2px; }
+    /* editor modal */
+    .dp-ov { position:fixed; inset:0; background:rgba(30,22,14,.5); z-index:9000; display:flex; align-items:flex-start; justify-content:center; padding:32px 16px; overflow:auto; }
+    .dp-card { background:var(--shell); width:min(680px,100%); border:1px solid var(--rule); box-shadow:0 20px 60px rgba(30,22,14,.3); }
+    .dp-card-h { display:flex; align-items:center; justify-content:space-between; padding:16px 20px; border-bottom:1px solid var(--rule); }
+    .dp-card-h h3 { font-family:var(--serif); font-style:italic; font-size:22px; color:var(--ink); }
+    .dp-card-x { border:0; background:transparent; font-size:22px; line-height:1; cursor:pointer; color:var(--ink-mute); }
+    .dp-body { padding:8px 20px 4px; }
+    .dp-sec { padding:12px 0; border-bottom:1px solid var(--rule-soft,#eee5d8); }
+    .dp-sec-h { display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:7px; }
+    .dp-sec-h b { font-family:var(--mono); font-size:10.5px; letter-spacing:.1em; text-transform:uppercase; color:var(--ink); }
+    .dp-link-btn { font-family:var(--mono); font-size:9.5px; letter-spacing:.06em; text-transform:uppercase; border:1px solid var(--rule); background:transparent; color:var(--brass); cursor:pointer; padding:4px 8px; }
+    .dp-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:8px; }
+    .dp-grid input { font:inherit; font-size:13px; padding:8px 10px; border:1px solid var(--rule); background:#fff; width:100%; }
+    .dp-hint { font-size:11px; color:var(--ink-mute); margin-top:5px; font-style:italic; }
+    .dp-linked { font-size:11px; color:#2E5C3D; margin-top:4px; }
+    .dp-search { position:relative; margin-top:6px; }
+    .dp-search-res { position:absolute; left:0; right:0; top:100%; background:#fff; border:1px solid var(--rule); max-height:210px; overflow:auto; z-index:5; box-shadow:0 8px 20px rgba(30,22,14,.14); }
+    .dp-search-res button { display:block; width:100%; text-align:left; border:0; border-bottom:1px solid var(--rule-soft,#eee5d8); background:transparent; padding:8px 10px; font:inherit; font-size:13px; cursor:pointer; }
+    .dp-search-res button:hover { background:var(--linen); }
+    .dp-foot { display:flex; align-items:center; gap:12px; padding:14px 20px; border-top:1px solid var(--rule); }
+    .dp-save { font-family:var(--mono); font-size:11px; letter-spacing:.1em; text-transform:uppercase; padding:9px 16px; border:1px solid var(--ink); background:var(--ink); color:var(--shell); cursor:pointer; }
+    .dp-save:disabled { opacity:.5; cursor:default; }
+    .dp-msg { font-size:12.5px; color:var(--ink-mute); }
+    </style>
+    <script>
+    (function(){
+      'use strict';
+      function esc(s){ return (s==null?'':String(s)).replace(/[&<>"]/g,function(c){return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]); }); }
+      var SCHEMA = [
+        { key:'buyer',   label:'Buyer',      role:'buyer',    fields:['name','phone','email'], link:true },
+        { key:'buyer2',  label:'Co-buyer',   role:'co-buyer', fields:['name','phone','email'], link:true },
+        { key:'seller',  label:'Seller',     role:'seller',   fields:['name','phone','email'], link:true },
+        { key:'seller2', label:'Co-seller',  role:'co-seller',fields:['name','phone','email'], link:true },
+        { key:'co_agent',label:'Co-agent',   fields:['name','company','phone','email'] },
+        { key:'tc',      label:'Transaction coordinator', fields:['name','phone','email'] },
+        { key:'escrow',  label:'Escrow',     fields:['officer','company','number','phone','email'] },
+        { key:'lender',  label:'Lender',     fields:['name','company','phone','email'] }
+      ];
+      var FLABEL = { name:'Name', company:'Company', brokerage:'Brokerage', phone:'Phone', email:'Email', officer:'Officer', number:'Escrow #' };
+      function telHref(p){ return String(p||'').replace(/[^0-9+]/g,''); }
+      function contactBits(p){ var o=[]; if(p&&p.phone) o.push('<a href="tel:'+esc(telHref(p.phone))+'">'+esc(p.phone)+'</a>'); if(p&&p.email) o.push('<a href="mailto:'+esc(p.email)+'">'+esc(p.email)+'</a>'); return o.join(' · '); }
+      function nameOf(p){ return (p && (p.name || p.officer || p.company)) || ''; }
+      function row(label, p){
+        if(!p || !nameOf(p)) return '';
+        var extra=[]; if(p.company && p.company!==nameOf(p)) extra.push(esc(p.company)); if(p.number) extra.push('#'+esc(p.number));
+        var bits=contactBits(p);
+        return '<div class="dp-row"><span class="dp-role">'+esc(label)+'</span><span class="dp-val">'
+          + '<span class="dp-name">'+esc(nameOf(p))+'</span>'+(extra.length?' <span class="dp-extra">'+extra.join(' · ')+'</span>':'')
+          + (bits?'<span class="dp-ct">'+bits+'</span>':'')+'</span></div>';
+      }
+      function panelHtml(parties, sourceKey){
+        parties = parties||{};
+        var agentName = parties.agent==='james'?'James Beyersdorf':(parties.agent==='both'?'Sara & James':'Sara Cooper');
+        var sideLabel = ({buyer:'Representing the buyer',seller:'Representing the seller',listing:'Representing the seller',both:'Dual — representing both sides'}[parties.side])||'';
+        var rows = [
+          row('Agent',{name:agentName}),
+          sideLabel?'<div class="dp-row"><span class="dp-role">Side</span><span class="dp-val"><span class="dp-name">'+esc(sideLabel)+'</span></span></div>':'',
+          row('Buyer',parties.buyer), row('Co-buyer',parties.buyer2),
+          row('Seller',parties.seller), row('Co-seller',parties.seller2),
+          row('Co-agent',parties.co_agent), row('TC',parties.tc),
+          row('Escrow',parties.escrow), row('Lender',parties.lender),
+          parties.coe?'<div class="dp-row"><span class="dp-role">COE</span><span class="dp-val"><span class="dp-name">'+esc(parties.coe)+'</span></span></div>':''
+        ].filter(Boolean).join('');
+        var edit = sourceKey?'<button class="dp-edit" data-parties-edit="'+esc(sourceKey)+'">✎ Edit</button>':'';
+        return '<div class="dp-panel"><div class="dp-head"><span class="dp-h">People &amp; escrow</span>'+edit+'</div>'
+          + (rows||'<div class="dp-empty">No parties on file yet — click Edit to add them.</div>')+'</div>';
+      }
+      // Client mirror of the server partySummary — a compact people line.
+      function summarize(parties){
+        if(!parties) return '';
+        var bits=[]; var nm=function(p){ return p && (p.name||p.officer||p.company); };
+        if(nm(parties.buyer)) bits.push('Buyer: '+nm(parties.buyer));
+        if(nm(parties.seller)) bits.push('Seller: '+nm(parties.seller));
+        if(nm(parties.co_agent)) bits.push('Co-agent: '+nm(parties.co_agent));
+        if(parties.escrow && parties.escrow.number) bits.push('Escrow #'+parties.escrow.number);
+        return bits.join(' · ');
+      }
+      // Compact one-line summary for a deal card. `text` is server party_summary.
+      function summaryHtml(text, sourceKey){
+        var t = (text||'').trim();
+        return '<div class="dp-sum"><span class="dp-sum-txt">'+(t?esc(t):'<span style="opacity:.7;">No parties yet</span>')+'</span>'
+          + (sourceKey?'<button class="dp-sum-edit" data-parties-edit="'+esc(sourceKey)+'" title="Edit people &amp; escrow">✎</button>':'')+'</div>';
+      }
+
+      function api(path, opts){ return fetch('/api/crm/'+path,Object.assign({credentials:'include'},opts||{})).then(function(r){ return r.json().then(function(j){return {ok:r.ok,j:j};}).catch(function(){return {ok:r.ok,j:{}};}); }); }
+
+      function fieldInput(sec, f, val){
+        var type = f==='email'?'email':(f==='phone'?'tel':'text');
+        return '<input type="'+type+'" placeholder="'+esc(FLABEL[f]||f)+'" data-dp="'+esc(sec)+'.'+esc(f)+'" value="'+esc(val||'')+'">';
+      }
+      function sectionHtml(s, overlay, base){
+        var d = (overlay && overlay[s.key]) || {};
+        var linkBtn = s.link?'<button class="dp-link-btn" data-dp-linkbtn="'+esc(s.key)+'">🔗 Link contact</button>':'';
+        var linkedNote = d.lead_id?'<div class="dp-linked" data-dp-linked="'+esc(s.key)+'">✓ Linked to a CRM contact</div>':'<div class="dp-linked" data-dp-linked="'+esc(s.key)+'" style="display:none;"></div>';
+        var inputs = s.fields.map(function(f){ return fieldInput(s.key,f,d[f]); }).join('');
+        // deals.json prose hint for escrow / co-agent when no structured value yet.
+        var hint='';
+        if(s.key==='escrow' && base && base.escrow_officer && !d.officer) hint='<div class="dp-hint">From deals.json: '+esc(base.escrow_officer)+(base.title_company?' — '+esc(base.title_company):'')+'</div>';
+        if(s.key==='co_agent' && base && base.co_agent && !d.name) hint='<div class="dp-hint">From deals.json: '+esc(base.co_agent)+'</div>';
+        return '<div class="dp-sec" data-dp-sec="'+esc(s.key)+'"><div class="dp-sec-h"><b>'+esc(s.label)+'</b>'+linkBtn+'</div>'
+          + '<div class="dp-grid">'+inputs+'</div>'+linkedNote
+          + (s.link?'<div class="dp-search" data-dp-search="'+esc(s.key)+'" style="display:none;"></div>':'')
+          + hint+'</div>';
+      }
+
+      function openEditor(sourceKey, onSaved){
+        var ov = document.createElement('div'); ov.className='dp-ov';
+        ov.innerHTML = '<div class="dp-card"><div class="dp-card-h"><h3>People &amp; escrow</h3><button class="dp-card-x" aria-label="Close">×</button></div>'
+          + '<div class="dp-body"><div style="padding:24px;color:var(--ink-mute);">Loading…</div></div>'
+          + '<div class="dp-foot"><button class="dp-save" disabled>Save</button><span class="dp-msg"></span></div></div>';
+        document.body.appendChild(ov);
+        function close(){ if(ov.parentNode) ov.parentNode.removeChild(ov); document.removeEventListener('keydown',onKey); }
+        function onKey(e){ if(e.key==='Escape') close(); }
+        document.addEventListener('keydown',onKey);
+        ov.addEventListener('click',function(e){ if(e.target===ov) close(); });
+        ov.querySelector('.dp-card-x').onclick = close;
+
+        var body = ov.querySelector('.dp-body');
+        var saveBtn = ov.querySelector('.dp-save');
+        var msg = ov.querySelector('.dp-msg');
+
+        api('deal-parties?deal='+encodeURIComponent(sourceKey)).then(function(r){
+          if(!r.ok){ body.innerHTML='<div style="padding:24px;color:#8A2C3B;">'+esc((r.j&&r.j.error)||'Could not load.')+'</div>'; return; }
+          var overlay = r.j.overlay||{}, base = r.j.base||{};
+          body.innerHTML = SCHEMA.map(function(s){ return sectionHtml(s, overlay, base); }).join('')
+            + '<div class="dp-sec"><div class="dp-sec-h"><b>Close of escrow (COE)</b></div><div class="dp-grid"><input type="date" data-dp="coe" value="'+esc((r.j.parties&&r.j.parties.coe)||'')+'"></div></div>';
+          saveBtn.disabled = false;
+          wireLinkPickers(body);
+        });
+
+        // Inline CRM-contact search for the linkable sections.
+        function wireLinkPickers(root){
+          root.addEventListener('click', function(e){
+            var b = e.target.closest('[data-dp-linkbtn]'); if(!b) return;
+            var key = b.getAttribute('data-dp-linkbtn');
+            var box = root.querySelector('[data-dp-search="'+key+'"]');
+            if(!box) return;
+            var open = box.style.display!=='none';
+            root.querySelectorAll('[data-dp-search]').forEach(function(x){ x.style.display='none'; x.innerHTML=''; });
+            if(open) return;
+            box.style.display='block';
+            box.innerHTML = '<input type="text" placeholder="Search contacts by name…" data-dp-q style="font:inherit;font-size:13px;padding:8px 10px;border:1px solid var(--rule);width:100%;"><div class="dp-search-res" data-dp-res></div>';
+            var q = box.querySelector('[data-dp-q]'); var res = box.querySelector('[data-dp-res]'); q.focus();
+            var t; q.addEventListener('input', function(){ clearTimeout(t); var v=q.value.trim(); if(v.length<2){ res.innerHTML=''; return; } t=setTimeout(function(){
+              api('roster?bucket=all&q='+encodeURIComponent(v)).then(function(rr){
+                var people=(rr.j&&rr.j.people)||[];
+                res.innerHTML = people.length? people.slice(0,8).map(function(p){ return '<button data-pick=\''+esc(JSON.stringify({id:p.id,name:p.name,phone:p.phone||"",email:p.email||""}))+'\'>'+esc(p.name)+(p.email?' · '+esc(p.email):'')+'</button>'; }).join('') : '<div style="padding:8px 10px;color:var(--ink-mute);font-size:12.5px;">No match.</div>';
+              });
+            },250); });
+            res.addEventListener('click', function(e2){
+              var pk = e2.target.closest('[data-pick]'); if(!pk) return;
+              var p = JSON.parse(pk.getAttribute('data-pick'));
+              var sec = root.querySelector('[data-dp-sec="'+key+'"]');
+              var setF=function(f,val){ var el=sec.querySelector('[data-dp="'+key+'.'+f+'"]'); if(el && val) el.value=val; };
+              setF('name',p.name); setF('phone',p.phone); setF('email',p.email);
+              sec.setAttribute('data-dp-leadid', p.id);
+              var ln = root.querySelector('[data-dp-linked="'+key+'"]'); if(ln){ ln.style.display='block'; ln.textContent='✓ Linked: '+p.name; }
+              box.style.display='none'; box.innerHTML='';
+            });
+          });
+        }
+
+        saveBtn.onclick = function(){
+          var details = {};
+          SCHEMA.forEach(function(s){
+            var obj = {}; var any=false;
+            s.fields.forEach(function(f){ var el=body.querySelector('[data-dp="'+s.key+'.'+f+'"]'); var v=el?el.value.trim():''; if(v){ obj[f]=v; any=true; } });
+            var sec = body.querySelector('[data-dp-sec="'+s.key+'"]');
+            var lid = sec && sec.getAttribute('data-dp-leadid'); if(lid){ obj.lead_id=lid; any=true; }
+            details[s.key] = any?obj:null;   // null clears the section server-side
+          });
+          var coeEl = body.querySelector('[data-dp="coe"]'); details.coe = coeEl && coeEl.value ? coeEl.value : null;
+          saveBtn.disabled=true; msg.textContent='Saving…';
+          api('deal-parties',{ method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({ deal:sourceKey, party_details:details }) }).then(function(r){
+            if(r.ok && r.j && r.j.saved){ msg.textContent='Saved.'; if(typeof onSaved==='function') onSaved(r.j.parties); setTimeout(close,400); }
+            else { saveBtn.disabled=false; msg.textContent=(r.j&&r.j.error)||'Save failed.'; }
+          }).catch(function(){ saveBtn.disabled=false; msg.textContent='Network error.'; });
+        };
+      }
+
+      // Any ✎ Edit / ✎ across every deal surface opens the same editor. Runs in
+      // the CAPTURE phase so it fires before a card's own click handler and can
+      // stop the card from also opening the deal page. On save it broadcasts so
+      // the open surface can patch its copy + re-render.
+      document.addEventListener('click', function(e){
+        var b = e.target.closest('[data-parties-edit]'); if(!b) return;
+        e.preventDefault(); e.stopPropagation();
+        var key = b.getAttribute('data-parties-edit');
+        openEditor(key, function(parties){
+          document.dispatchEvent(new CustomEvent('deal-parties:saved', { detail:{ source_key:key, parties:parties } }));
+        });
+      }, true);
+
+      window.LegacyDealParties = { panelHtml: panelHtml, summaryHtml: summaryHtml, summarize: summarize, openEditor: openEditor };
+    })();
+    </script>
     <style>
     .ppl-row { display:grid; grid-template-columns:38px minmax(140px,1.2fr) minmax(160px,1.6fr) auto; gap:12px; align-items:center; padding:11px 16px; border-bottom:1px solid var(--rule); font-family:var(--sans); font-size:14px; cursor:pointer; }
     .ppl-row:hover { background:var(--linen); }
@@ -1857,6 +2092,7 @@
         +   consoleHtml(deal)
         + '</div>'
         + '<div class="cc-extras">'
+        +   '<div class="cc-panel" style="padding:0;overflow:hidden;"><div data-cc-parties>'+(window.LegacyDealParties?window.LegacyDealParties.panelHtml(deal.parties, deal.source_key):'')+'</div></div>'
         +   '<div class="cc-panel"><div class="cc-caplab">Timeline</div><div data-cc-timeline class="cc-tl">Loading…</div></div>'
         +   '<div class="cc-panel"><div class="cc-caplab">Documents</div><div data-cc-docs>Loading…</div></div>'
         +   '<div class="cc-panel"><div class="cc-caplab">Tasks &amp; calendar for this deal</div><div data-cc-linked>Loading…</div></div>'
@@ -1873,6 +2109,14 @@
           if (dcol) { root.style.borderTop = '5px solid ' + dcol.border; root.style.paddingTop = '14px'; }
         } catch (_) {}
       }
+
+      // Keep the People & escrow panel current after an edit, without a reload.
+      document.addEventListener('deal-parties:saved', function(ev){
+        if(!ev.detail || !current || current.source_key!==ev.detail.source_key) return;
+        current.parties = ev.detail.parties;
+        var node = root.querySelector('[data-cc-parties]');
+        if(node && window.LegacyDealParties) node.innerHTML = window.LegacyDealParties.panelHtml(current.parties, current.source_key);
+      });
 
       // ---- documents / timeline / linked items panels ----------------------
       function fmtD(d){ if(!d) return 'TBD'; try{ return new Date(String(d).slice(0,10)+'T12:00:00Z').toLocaleDateString('en-US',{month:'short',day:'numeric',timeZone:'UTC'}); }catch(_){ return String(d); } }
@@ -4130,6 +4374,7 @@ function selectLead(el) {
       '<div class="mt"><span class="lst-badge ' + state.tab + '">' + badge(state.tab) + '</span>' + sideBadge +
         '<span class="lst-badge">' + (d.agent === 'james' ? 'James' : 'Sara') + '</span>' + tour + '</div>' +
       (d.coe_date ? '<div style="font-size:11px;color:var(--ink-mute);">COE ' + esc(d.coe_date) + '</div>' : '') +
+      (window.LegacyDealParties ? window.LegacyDealParties.summaryHtml(d.party_summary, d.source_key) : '') +
       '<span class="lk">Deal page ↗ · client view + agent console</span>' +
       accept +
       '</div></div>';
@@ -4268,6 +4513,15 @@ function selectLead(el) {
   // Let the Command Center re-render the grid after it mutates a deal (e.g. a
   // photo upload) so the card reflects the change without a re-fetch.
   window.__renderDeals = render;
+  // Patch a card's people/escrow summary in place after an edit (no re-fetch).
+  document.addEventListener('deal-parties:saved', function (ev) {
+    if (!ev.detail) return;
+    var d = dealByKey(ev.detail.source_key);
+    if (!d) return;
+    d.parties = ev.detail.parties;
+    if (window.LegacyDealParties) d.party_summary = window.LegacyDealParties.summarize(ev.detail.parties);
+    render();
+  });
   // Close every open ⋯ dropdown (optionally except one). Also resets aria.
   function closeMenus(except) {
     root.querySelectorAll('.lst-drop.open').forEach(function (dp) {

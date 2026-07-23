@@ -1,0 +1,31 @@
+-- 029_deal_party_details.sql
+-- A sync-safe, agent-editable overlay of the deal's people + escrow details.
+--
+-- deals.json (Cowork's SSOT) carries these as free-text prose (e.g. escrow =
+-- "Amanda Boitano (Placer Title) - Escrow #P-704376"). This column lets the
+-- agent add/correct STRUCTURED party info — buyer/seller, co-agent, TC, escrow
+-- officer + number, lender, COE, each with contact info and an optional link to
+-- a CRM contact — right from any deal surface, and have it persist.
+--
+-- Like stage_override / photo_override, the sync NEVER writes this column, so
+-- agent edits survive every deals.json re-sync. The CRM merges deals.json's
+-- prose base with this overlay for display (overlay wins). Cowork can read the
+-- overlay (surfaced in the sync response) and fold changes into deals.json on
+-- its own schedule — the CRM never depends on that round-trip.
+--
+-- Shape (all keys optional):
+--   {
+--     "buyer":   { "name","phone","email","lead_id" },
+--     "buyer2":  { ... },   // co-buyer
+--     "seller":  { ... },
+--     "seller2": { ... },   // co-seller
+--     "co_agent":{ "name","company","phone","email" },
+--     "tc":      { "name","phone","email" },
+--     "escrow":  { "officer","company","number","phone","email" },
+--     "lender":  { "name","company","phone","email" },
+--     "coe":     "YYYY-MM-DD"
+--   }
+--
+-- Safe to run repeatedly.
+
+alter table public.deals add column if not exists party_details jsonb;

@@ -20,6 +20,7 @@
 import { adminClient } from '../supabase.js';
 import { getCallerProfile, isAgent } from '../auth.js';
 import { handleOptions, ok, fail } from '../cors.js';
+import { resolveParties, partySummary } from '../deal-parties.js';
 
 const TZ = 'America/Los_Angeles';
 
@@ -83,10 +84,11 @@ export default async function handler(req, res) {
     // 1. Deals in escrow only — stage 'pending' is the in-escrow bucket
     //    (same value the Grant-portal escrow picker uses). The ledger is
     //    intentionally the escrow board, not every active listing/offer.
-    const { data: dealRows, error: dErr } = await supa.from('deals')
-      .select('id, source_key, address, city, stage, side, agent, list_price, sale_price, coe_date, milestones, updated_at')
-      .eq('stage', 'pending')
-      .order('coe_date', { ascending: true, nullsFirst: false });
+    const MOTION_FULL = 'id, source_key, address, city, stage, side, agent, list_price, sale_price, coe_date, milestones, updated_at, escrow_officer, title_company, co_agent, listing_meta, party_details';
+    const MOTION_BASE = 'id, source_key, address, city, stage, side, agent, list_price, sale_price, coe_date, milestones, updated_at';
+    const motionQ = (cols) => supa.from('deals').select(cols).eq('stage', 'pending').order('coe_date', { ascending: true, nullsFirst: false });
+    let { data: dealRows, error: dErr } = await motionQ(MOTION_FULL);
+    if (dErr) ({ data: dealRows, error: dErr } = await motionQ(MOTION_BASE));   // pre-029/019 degrade
     if (dErr) return fail(res, 500, `deals: ${dErr.message}`);
 
     const deals = (dealRows || []).filter((d) => d.source_key);
@@ -244,7 +246,10 @@ export default async function handler(req, res) {
         coe: d.coe_date || null,
         contingencies: contingencies.length ? contingencies : null,
         events: events.length ? events.map((e) => ({ label: e.label, vendor: e.vendor, iso: e.iso, time: e.time, state: e.state, kind: e.kind })) : null,
-        next_event: nextEvent ? { label: nextEvent.label, iso: nextEvent.iso } : null
+        next_event: nextEvent ? { label: nextEvent.label, iso: nextEvent.iso } : null,
+        // People + escrow (deals.json prose merged with the agent's overlay).
+        parties:       resolveParties(d),
+        party_summary: partySummary(resolveParties(d))
       };
     });
 

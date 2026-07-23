@@ -13,6 +13,7 @@ import { getCallerProfile, isAgent } from '../auth.js';
 import { handleOptions, ok, fail } from '../cors.js';
 import { isConfigured as mlsConfigured, apiGet as mlsGet, shape as mlsShape, ids as mlsIds } from '../../_metrolist.js';
 import { extractYouTubeId } from '../youtube.js';
+import { resolveParties, partySummary } from '../deal-parties.js';
 
 // A branded YouTube tour gives us a real, hotlinkable thumbnail — no MetroList
 // feed, no proxy, no env needed. Used as a photo fallback so a deal with a
@@ -122,8 +123,8 @@ export default async function handler(req, res) {
 
   try {
     const supa = adminClient();
-    const BASE      = 'source_key, address, city, stage, side, agent, list_price, sale_price, coe_date, photo_url, video_url, matterport_url';
-    const COLS_FULL = BASE + ', mls_number, listing_meta, stage_override, photo_override';
+    const BASE      = 'source_key, address, city, stage, side, agent, list_price, sale_price, coe_date, photo_url, video_url, matterport_url, escrow_officer, title_company, co_agent';
+    const COLS_FULL = BASE + ', mls_number, listing_meta, stage_override, photo_override, party_details';
     const COLS_MLS  = BASE + ', mls_number, stage_override, photo_override';
     const COLS      = BASE;   // ultimate fallback — no stage_override/photo_override (pre-024/026)
     // Include buyer-side deals too — a purchase we represent is a live
@@ -224,7 +225,10 @@ export default async function handler(req, res) {
         tour_url:   d.matterport_url || null,    // "3D tour" link
         has_video:  !!d.video_url,
         has_tour:   !!d.matterport_url,
-        stage:      stage
+        stage:      stage,
+        // People + escrow (deals.json prose merged with the agent's overlay).
+        parties:       resolveParties(d),
+        party_summary: partySummary(resolveParties(d))
       };
       // 'dead' = an offer the agent marked FELL THROUGH (stage_override, db/027).
       // It's soft-archived: out of every active bucket and count, but kept as a

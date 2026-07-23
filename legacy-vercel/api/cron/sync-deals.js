@@ -458,6 +458,21 @@ export default async function handler(req, res) {
       dealsInTable = { total: (after || []).length, by_side_stage: bd };
     } catch (_) { /* diagnostic only */ }
 
+    // Cowork reconcile: any party/escrow details agents edited in the CRM live
+    // in deals.party_details (db/029) — a sync-safe overlay this sync never
+    // writes. Surface every non-empty overlay here so Cowork can fold the
+    // agent's structured people/escrow edits back into deals.json on its own
+    // schedule. Empty until the migration runs; diagnostic-only, never fatal.
+    let partyEdits = [];
+    try {
+      const { data: pe } = await supa.from('deals')
+        .select('source_key, address, party_details')
+        .not('party_details', 'is', null);
+      partyEdits = (pe || [])
+        .filter((r) => r.party_details && Object.keys(r.party_details).length)
+        .map((r) => ({ source_key: r.source_key, address: r.address, party_details: r.party_details }));
+    } catch (_) { /* column not migrated yet — nothing to reconcile */ }
+
     return ok(res, {
       synced: true,
       source_version: data.version || null,
@@ -468,6 +483,8 @@ export default async function handler(req, res) {
       leads_promoted: leadsPromoted,
       deal_errors: errors,
       deals_in_table: dealsInTable,
+      // Agent party/escrow edits awaiting reconciliation into deals.json.
+      party_edits: partyEdits,
       ran_at: new Date().toISOString()
     });
   } catch (e) {
