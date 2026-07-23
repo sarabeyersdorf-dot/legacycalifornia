@@ -2914,7 +2914,11 @@ function selectLead(el) {
     var box = el('[data-cur-saved]');
     if (!state.saved.length) { box.innerHTML = '<div class="cur-empty" style="font-size:12px;padding:8px 0;">None yet — run a search and save it.</div>'; return; }
     box.innerHTML = state.saved.map(function (s) {
-      return '<button data-apply-saved="' + esc(s.id) + '"><span>' + esc(s.name) + '</span>' + (s.new_match_count ? '<span class="c">' + s.new_match_count + ' new</span>' : '') + '</button>';
+      var sub = [];
+      if (s.client_name) sub.push(esc(s.client_name));
+      if (s.auto_push) sub.push('⚡ auto-emails');
+      var label = '<span>' + esc(s.name) + (sub.length ? '<br><span style="font-size:10px;color:var(--ink-mute);">' + sub.join(' · ') + '</span>' : '') + '</span>';
+      return '<button data-apply-saved="' + esc(s.id) + '">' + label + (s.new_match_count ? '<span class="c">' + s.new_match_count + ' new</span>' : '') + '</button>';
     }).join('');
   }
 
@@ -3393,14 +3397,34 @@ function selectLead(el) {
 
   function saveSearchModal() {
     var filters = gatherFilters();
+    var picked = null;   // { id, name } client this search is for
     var m = modal('<h3>Save this search.</h3><p class="sub">Store these filters to reuse for a client. New MLS matches get flagged after each sync.</p>' +
       '<label>Name</label><input id="ssName" placeholder="Karen — single story, under 700k" autofocus>' +
+      '<label style="margin-top:12px;">For client</label>' +
+      '<div style="display:flex;align-items:center;gap:10px;"><button class="btn-link" id="ssClient" style="padding:0;">+ Attach a client</button><span id="ssClientName" style="font-size:13px;color:var(--ink);"></span></div>' +
+      '<label class="ss-auto" style="display:flex;align-items:flex-start;gap:9px;margin-top:14px;cursor:pointer;opacity:.5;">' +
+        '<input type="checkbox" id="ssAuto" style="margin-top:3px;" disabled>' +
+        '<span><b style="font-weight:600;">Auto-email new matches to this client</b><br>' +
+        '<span style="font-size:12px;color:var(--ink-mute);">Every few hours, new listings that fit these filters are added to a collection and emailed to the client automatically — no review step. Attach a client to enable.</span></span>' +
+      '</label>' +
       '<div class="actions"><button class="btn btn-ink btn-sm" id="ssGo">Save</button><button class="btn-link" id="ssX" style="margin-left:auto;">Cancel</button></div><div class="cur-result" id="ssR"></div>');
+    var autoBox = m.querySelector('#ssAuto');
+    var autoLabel = m.querySelector('.ss-auto');
+    function refreshClient() {
+      m.querySelector('#ssClientName').textContent = picked ? ('✓ ' + picked.name) : '';
+      m.querySelector('#ssClient').textContent = picked ? 'Change client' : '+ Attach a client';
+      // Auto-email needs a recipient — only enable once a client is attached.
+      autoBox.disabled = !picked;
+      autoLabel.style.opacity = picked ? '1' : '.5';
+      if (!picked) autoBox.checked = false;
+    }
+    m.querySelector('#ssClient').onclick = function () { pickClient(function (c) { picked = c || null; refreshClient(); }); };
     m.querySelector('#ssX').onclick = m._close;
     m.querySelector('#ssGo').onclick = function () {
       var name = m.querySelector('#ssName').value.trim();
       if (!name) { m.querySelector('#ssR').textContent = 'Give it a name.'; return; }
-      api('saved-searches', { method: 'POST', body: { name: name, filters: filters } }).then(function (r) {
+      if (autoBox.checked && !picked) { m.querySelector('#ssR').textContent = 'Attach a client to auto-email matches.'; return; }
+      api('saved-searches', { method: 'POST', body: { name: name, filters: filters, client_lead_id: picked ? picked.id : null, auto_push: !!autoBox.checked } }).then(function (r) {
         if (r.ok) { m._close(); loadSaved(); } else m.querySelector('#ssR').textContent = (r.j && r.j.error) || 'Failed.';
       });
     };

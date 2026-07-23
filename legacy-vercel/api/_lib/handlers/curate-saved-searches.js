@@ -26,7 +26,7 @@ export default async function handler(req, res) {
     if (req.method === 'GET') {
       const { data, error } = await supa
         .from('saved_searches')
-        .select('id, name, filters, client_lead_id, last_run_at, new_match_count, created_at, updated_at, leads(first_name,last_name)')
+        .select('id, name, filters, client_lead_id, auto_push, last_auto_push_at, last_run_at, new_match_count, created_at, updated_at, leads(first_name,last_name)')
         .eq('agent', agent)
         .order('updated_at', { ascending: false });
       if (error) return fail(res, 500, error.message);
@@ -34,6 +34,7 @@ export default async function handler(req, res) {
         id: s.id, name: s.name, filters: s.filters || {},
         client_lead_id: s.client_lead_id,
         client_name: s.leads ? [s.leads.first_name, s.leads.last_name].filter(Boolean).join(' ') : null,
+        auto_push: !!s.auto_push, last_auto_push_at: s.last_auto_push_at,
         last_run_at: s.last_run_at, new_match_count: s.new_match_count || 0,
         created_at: s.created_at, updated_at: s.updated_at
       }));
@@ -45,9 +46,14 @@ export default async function handler(req, res) {
       const name = typeof b?.name === 'string' ? b.name.trim() : '';
       if (!name) return fail(res, 400, 'name is required');
       const filters = (b && typeof b.filters === 'object' && b.filters) ? b.filters : {};
+      const clientLeadId = b?.client_lead_id || null;
+      // Auto-push (hands-off client delivery) requires a client to email —
+      // never let it be true without one, so the cron always has a recipient.
+      const autoPush = !!b?.auto_push && !!clientLeadId;
       const row = {
         agent, name, filters,
-        client_lead_id: b?.client_lead_id || null
+        client_lead_id: clientLeadId,
+        auto_push: autoPush
       };
       if (b?.id) {
         const { data, error } = await supa.from('saved_searches')
