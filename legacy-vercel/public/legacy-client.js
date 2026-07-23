@@ -1257,9 +1257,11 @@
       setAll('[data-roster-calendar]',     r.calendar_week);
       setAll('[data-roster-calendar-week]', r.calendar_week);
       setAll('[data-roster-pipeline]',     r.pipeline_count);
-      setAll('[data-roster-leads]',        r.leads_total);
-      setAll('[data-roster-clients]',      r.clients);
-      setAll('[data-roster-past]',         r.past_clients);
+      // NOTE: the roster segment pills (Leads / Clients / Past / Sphere) are
+      // owned SOLELY by the People-roster loader (crm.html), which counts each
+      // bucket the same way it lists it (crm-roster.js classify()). Writing them
+      // here from the morning-brief's differently-defined counts made the pills
+      // change the moment the roster loaded — so we leave them alone.
       // NOTE: the Active/Pending listing pills are owned by the Listings loader
       // (crm.html), which counts the deals table directly. Metrics must not
       // overwrite them — it was clobbering the real count (9) back to 0.
@@ -1983,24 +1985,20 @@
   }
 
   function paintLeadCounts() {
+    // Only the inbox/pipeline temperature chips (all/hot/warm/new) live here.
     const counts = { all: state.leads.length, hot: 0, warm: 0, new: 0, cold: 0 };
-    const seg = { clients: 0, past: 0, sphere: 0 };
     state.leads.forEach((l) => {
       if (counts[l.temperature] != null) counts[l.temperature]++;
-      const s = STAGE_NORM[l.pipeline_stage] || l.pipeline_stage;
-      if (SEGMENTS.clients(s)) seg.clients++;
-      else if (s === 'closed') seg.past++;
-      else if (s === 'sphere') seg.sphere++;
     });
     document.querySelectorAll('[data-count]').forEach((el) => {
       const k = el.getAttribute('data-count');
       if (counts[k] != null) el.textContent = String(counts[k]);
     });
-    // Roster sidebar pills — segment-accurate.
-    const setPill = (sel, n) => document.querySelectorAll(sel).forEach((el) => { el.textContent = String(n); });
-    setPill('[data-roster-leads]', state.leads.length);
-    setPill('[data-roster-clients]', seg.clients);
-    setPill('[data-roster-past]', seg.past);
+    // NOTE: the roster sidebar pills (Leads / Clients / Past / Sphere) are NOT
+    // written here. They're owned by the People-roster loader (crm.html), which
+    // counts each bucket the same way it lists it (crm-roster.js classify()).
+    // This function's pipeline-based segment counts used a different definition,
+    // so writing them here made the pills change as soon as the roster loaded.
   }
 
   // One rendered lead row.

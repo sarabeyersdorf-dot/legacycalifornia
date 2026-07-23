@@ -90,6 +90,13 @@ export default async function handler(req, res) {
     const { data, error } = await supa.from('leads').select(COLS).limit(3000);
     if (error) return fail(res, 500, error.message);
 
+    // Count every browse bucket in ONE pass over the full book, so the sidebar
+    // pills can be primed all at once and stay consistent no matter which bucket
+    // is open. These are unfiltered totals (independent of any search term) —
+    // exactly what each list shows when opened without a query.
+    const counts = { leads: 0, clients: 0, past: 0, sphere: 0 };
+    for (const l of (data || [])) { const b = classify(l); if (counts[b] != null) counts[b]++; }
+
     let people = (data || []).filter((l) => classify(l) === bucket);
 
     if (term) {
@@ -102,7 +109,7 @@ export default async function handler(req, res) {
 
     people.sort(byRecency);
     const count = people.length;
-    return ok(res, { bucket, count, people: people.slice(0, limit).map(shape) });
+    return ok(res, { bucket, count, counts, people: people.slice(0, limit).map(shape) });
   } catch (e) {
     return fail(res, 500, e.message);
   }
