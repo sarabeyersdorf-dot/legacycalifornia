@@ -1,6 +1,6 @@
 {
-  "version": 2.4,
-  "lastUpdated": "2026-07-22",
+  "version": 2.5,
+  "lastUpdated": "2026-07-23",
   "updatedBy": "Claude",
   "tasks": [
     {
@@ -298,7 +298,8 @@
       "agent": "sara",
       "client": "695 Feather",
       "title": "TDS/SPQ/NHD/AVID/FHDS not yet on file (new deal 7/15) \u2014 request from escrow/seller's agent if not received by 7/22",
-      "done": false
+      "done": true,
+      "note": "Done per Sara's 7/22 briefing note \u2014 disclosures confirmed in Ex now."
     },
     {
       "agent": "james",
@@ -421,6 +422,48 @@
       "client": "Wendell",
       "title": "Update deals.json BEO alert — Buyer Early Occupancy Addendum is now fully executed via Authentisign (7/20, Brandi Jenkins forwarding). Change language from 'arranged' to 'executed'.",
       "done": false
+    },
+    {
+      "agent": "sara",
+      "client": "433 Hwy 4",
+      "title": "🔥 LOAN CONTINGENCY DUE TODAY 7/23: Sara replied 1:30 AM agreeing to $100K seller-carry note (6% IO, 5yr/30yr amort, no prepay penalty). A CR3 or signed written extension must still be executed TODAY — email agreement ≠ formal contingency removal. Confirm with Neriah Davis and Randall LeBlanc (Atlas Mortgage) that a formal removal or extension is forthcoming. Escalate by 3 PM if nothing received.",
+      "done": false,
+      "dateAdded": "2026-07-23"
+    },
+    {
+      "agent": "sara",
+      "client": "433 Hwy 4",
+      "title": "Seller-carry structure needs a written addendum: $100K note, 6% interest-only, 5-year term, 30-yr amortized, no prepayment penalty, Sara wants to record a 2nd DOT. Lender (Atlas Mortgage) wants this to fund 30 days post-closing. Coordinate addendum with title (how 2nd DOT affects close) and get it drafted before COE 8/10.",
+      "done": false,
+      "dateAdded": "2026-07-23"
+    },
+    {
+      "agent": "sara",
+      "client": "9568 Sheep Ranch",
+      "title": "Cancellation instructions STILL NOT RECEIVED by Placer Title (Ashley Cuslidge confirmed 7/23 10:13 AM — 'Good morning, I haven’t yet'). Sara resent the signed cancellation this morning. Call Ashley directly: 209-736-9553. Deposit release blocked until escrow closes out.",
+      "done": false,
+      "dateAdded": "2026-07-23"
+    },
+    {
+      "agent": "sara",
+      "client": "Latigo",
+      "title": "RE-FLAG 7/23: Buyer-agent AVID from Kylie Windley NOT in EX folder — bash scan this morning found only LA Avid.pdf x2 (Sara’s listing-agent AVID), no BA AVID present. Prior task was marked done 7/21 but file does not appear on disk. COE TOMORROW 7/24 — contact Kylie immediately: kyliewindley@gmail.com / 209-304-7971.",
+      "done": false,
+      "dateAdded": "2026-07-23"
+    },
+    {
+      "agent": "sara",
+      "client": "467 Skyline",
+      "title": "Follow up with Kerstin Breidenthal — was traveling ~2 weeks from ~7/8, wanted showing on return (~7/23 today). No contact in 48 hrs. Reach out proactively. Also: Lisa Clark (lisaclarkmurphys@gmail.com) confirmed HOA allows vacation rentals 7/21 — follow up to schedule a showing.",
+      "done": false,
+      "dateAdded": "2026-07-23"
+    },
+    {
+      "agent": "james",
+      "client": "695 Feather",
+      "title": "695 Feather DocuSign escrow pkg #2473532-TS COMPLETED by all parties 7/22 (buyers Ashley Robinson & Bert Andrews were camping; signed on return per DocuSign completion email from OC Title). Download the completed package from DocuSign and file in 695 Feather Ex folder.",
+      "done": false,
+      "dateAdded": "2026-07-23"
     }
   ],
   "deals": [
