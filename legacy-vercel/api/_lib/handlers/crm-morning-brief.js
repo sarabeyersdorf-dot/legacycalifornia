@@ -296,6 +296,37 @@ export default async function handler(req, res) {
       }
     } catch (_) { /* unmatched surfacing is a bonus, never blocks the brief */ }
 
+    // Data-integrity nudge: a deal under contract (in escrow or closed) ALWAYS
+    // has an accepted price — an executed RPA or counter can't be priceless. A
+    // pending/closed deal with no price on file is therefore a data gap in
+    // deals.json (Cowork missed the number), not a real state, and it hides
+    // behind a "—" in the CRM. Surface it so it gets fixed. Fail-soft.
+    result.data_gaps = [];
+    try {
+      let dq = supa.from('deals')
+        .select('source_key, address, city, stage, agent')
+        .in('stage', ['pending', 'closed'])
+        .is('list_price', null).is('sale_price', null)
+        .limit(25);
+      if (profile.role === 'agent_james') dq = dq.eq('agent', 'james');
+      const { data: noPrice } = await dq;
+      const nowIso = new Date().toISOString();
+      for (const d of (noPrice || [])) {
+        const where = [d.address, d.city].filter(Boolean).join(', ') || d.source_key;
+        const stageLabel = d.stage === 'closed' ? 'closed' : 'in escrow';
+        result.data_gaps.push({ source_key: d.source_key, address: where, stage: d.stage, issue: 'missing_price' });
+        result.signals.unshift({
+          id: `noprice:${d.source_key}`, lead_id: null,
+          time_iso: nowIso, time: 'Now',
+          body: `${where} is ${stageLabel} but has no price on file — an accepted RPA/counter always has one. Cowork needs to add it in deals.json.`,
+          tag: 'Needs attention'
+        });
+      }
+      if (noPrice && noPrice.length) {
+        result.signals.sort((a, b) => String(b.time_iso || '').localeCompare(String(a.time_iso || '')));
+      }
+    } catch (_) { /* price-gap nudge is a bonus, never blocks the brief */ }
+
     // Phase 2D follow-up — surface mailboxes whose Gmail connection needs to be
     // redone (testing-mode OAuth app => refresh tokens for test users expire
     // periodically). The Settings card shows this too, but the morning brief is
