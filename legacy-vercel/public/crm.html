@@ -1387,16 +1387,24 @@
     .lst-badge.selling { background: #EAF0F6; color: #2B4A6B; border-color: #C3D4E6; }
     .lst-badge.buying  { background: #F6EFE8; color: #6B4A2B; border-color: #E6D2C3; }
     .lst-card .lk { font-family: var(--mono); font-size: 10px; letter-spacing: .1em; text-transform: uppercase; color: var(--brass); text-decoration: none; margin-top: 6px; }
-    .lst-actions { margin-top: 10px; display: flex; gap: 8px; flex-wrap: wrap; }
-    .lst-accept, .lst-dead, .lst-restore { font-family: var(--mono); font-size: 9.5px; letter-spacing: .12em; text-transform: uppercase; padding: 7px 12px; border: 1px solid var(--ink); background: var(--ink); color: var(--shell); cursor: pointer; transition: opacity .12s; }
-    .lst-accept:hover, .lst-dead:hover, .lst-restore:hover { opacity: .85; }
-    .lst-accept:disabled, .lst-dead:disabled, .lst-restore:disabled { opacity: .5; cursor: default; }
-    /* Fell through — a quiet, destructive-looking secondary next to Accept. */
-    .lst-dead { background: transparent; color: var(--ink-mute); border-color: var(--rule, #d9cfc3); }
-    .lst-dead:hover { color: #8A3B2B; border-color: #8A3B2B; opacity: 1; }
+    .lst-actions { margin-top: 10px; display: flex; gap: 8px; flex-wrap: wrap; align-items: stretch; }
+    .lst-accept, .lst-restore { font-family: var(--mono); font-size: 9.5px; letter-spacing: .12em; text-transform: uppercase; padding: 7px 12px; border: 1px solid var(--ink); background: var(--ink); color: var(--shell); cursor: pointer; transition: opacity .12s; }
+    .lst-accept:hover, .lst-restore:hover { opacity: .85; }
+    .lst-accept:disabled, .lst-restore:disabled { opacity: .5; cursor: default; }
     /* Restore — outlined brass, clearly the way back out of the archive. */
     .lst-restore { background: transparent; color: var(--brass); border-color: var(--brass); }
     .lst-restore:hover { background: var(--brass); color: var(--shell); opacity: 1; }
+    /* Fell through lives in a ⋯ dropdown so it reads as a deliberate choice. */
+    .lst-drop { position: relative; display: inline-flex; }
+    .lst-drop-btn { font-family: var(--mono); font-size: 13px; line-height: 1; letter-spacing: .05em; padding: 4px 10px; border: 1px solid var(--rule, #d9cfc3); background: transparent; color: var(--ink-mute); cursor: pointer; transition: border-color .12s, color .12s; }
+    .lst-drop-btn:hover, .lst-drop.open .lst-drop-btn { color: var(--ink); border-color: var(--ink); }
+    .lst-drop-menu { position: absolute; top: calc(100% + 4px); right: 0; min-width: 148px; background: var(--shell); border: 1px solid var(--rule, #d9cfc3); box-shadow: 0 8px 22px rgba(40,30,20,.14); padding: 4px; display: none; z-index: 30; }
+    .lst-drop.open .lst-drop-menu { display: block; }
+    .lst-drop-item { display: block; width: 100%; text-align: left; font-family: var(--mono); font-size: 9.5px; letter-spacing: .12em; text-transform: uppercase; padding: 8px 10px; border: 0; background: transparent; color: var(--ink); cursor: pointer; }
+    .lst-drop-item:hover { background: var(--sand, #f3ede4); }
+    .lst-drop-item.danger { color: #8A3B2B; }
+    .lst-drop-item.danger:hover { background: #F6E6E1; }
+    .lst-drop-item:disabled { opacity: .5; cursor: default; }
     @media (max-width: 900px) { .lst { padding: 18px; } }
     </style>
     <section class="crm-view" data-view="listings">
@@ -4048,14 +4056,21 @@ function selectLead(el) {
     // <a target="_blank">, because some contexts (webviews / popup blockers)
     // silently swallow target=_blank so the portal "wouldn't open".
     var url = d.source_key ? '/seller.html?deal=' + encodeURIComponent(d.source_key) : '';
-    // Offer cards get two actions — flip to escrow (pending) when the offer is
-    // accepted, or mark it fell through (soft-archive). Archived cards get a
-    // Restore. All stop propagation so they don't open the portal.
+    // Offer cards get the primary "accepted → escrow" action plus a small
+    // dropdown (⋯) holding the secondary "Fell through" (soft-archive) so it's
+    // a deliberate pick, not a stray tap. Archived cards get a Restore. All
+    // stop propagation so they don't open the portal.
     var accept = '';
     if (state.tab === 'offers') {
+      var k = esc(d.source_key || '');
       accept = '<div class="lst-actions">' +
-        '<button class="lst-accept" data-accept="' + esc(d.source_key || '') + '">Mark accepted → escrow</button>' +
-        '<button class="lst-dead" data-dead="' + esc(d.source_key || '') + '">Fell through</button>' +
+        '<button class="lst-accept" data-accept="' + k + '">Mark accepted → escrow</button>' +
+        '<div class="lst-drop">' +
+          '<button class="lst-drop-btn" type="button" data-menu="' + k + '" aria-haspopup="true" aria-expanded="false" aria-label="More offer actions">⋯</button>' +
+          '<div class="lst-drop-menu" data-menu-for="' + k + '" role="menu">' +
+            '<button class="lst-drop-item danger" type="button" role="menuitem" data-dead="' + k + '">Fell through</button>' +
+          '</div>' +
+        '</div>' +
         '</div>';
     } else if (state.tab === 'archived') {
       accept = '<div class="lst-actions">' +
@@ -4207,6 +4222,18 @@ function selectLead(el) {
   // Let the Command Center re-render the grid after it mutates a deal (e.g. a
   // photo upload) so the card reflects the change without a re-fetch.
   window.__renderDeals = render;
+  // Close every open ⋯ dropdown (optionally except one). Also resets aria.
+  function closeMenus(except) {
+    root.querySelectorAll('.lst-drop.open').forEach(function (dp) {
+      if (dp === except) return;
+      dp.classList.remove('open');
+      var b = dp.querySelector('[data-menu]'); if (b) b.setAttribute('aria-expanded', 'false');
+    });
+  }
+  // A click anywhere that isn't inside an open dropdown closes them. Runs at
+  // document level so clicks outside the listings view still dismiss the menu;
+  // the toggle itself stops propagation so it never closes what it just opened.
+  document.addEventListener('click', function (e) { if (!e.target.closest('.lst-drop')) closeMenus(); });
   root.addEventListener('click', function (e) {
     var up = e.target.closest('[data-upload]');
     if (up) {
@@ -4226,8 +4253,18 @@ function selectLead(el) {
     }
     var acc = e.target.closest('[data-accept]');
     if (acc) { e.stopPropagation(); acceptOffer(acc.getAttribute('data-accept'), acc); return; }
+    var menu = e.target.closest('[data-menu]');
+    if (menu) {
+      e.stopPropagation();
+      var dp = menu.closest('.lst-drop');
+      var wasOpen = dp.classList.contains('open');
+      closeMenus(wasOpen ? null : dp);
+      dp.classList.toggle('open', !wasOpen);
+      menu.setAttribute('aria-expanded', wasOpen ? 'false' : 'true');
+      return;
+    }
     var dead = e.target.closest('[data-dead]');
-    if (dead) { e.stopPropagation(); fellThrough(dead.getAttribute('data-dead'), dead); return; }
+    if (dead) { e.stopPropagation(); closeMenus(); fellThrough(dead.getAttribute('data-dead'), dead); return; }
     var rest = e.target.closest('[data-restore]');
     if (rest) { e.stopPropagation(); restoreDeal(rest.getAttribute('data-restore'), rest); return; }
     var cardEl = e.target.closest('.lst-card[data-source-key]');
@@ -4239,7 +4276,9 @@ function selectLead(el) {
   });
   root.addEventListener('keydown', function (e) {
     if (e.key !== 'Enter' && e.key !== ' ') return;
-    if (e.target.closest('[data-upload]')) return;
+    // Let the in-card buttons (upload, accept, ⋯ menu, its items, restore)
+    // handle their own key activation instead of opening the deal page.
+    if (e.target.closest('[data-upload],[data-accept],[data-menu],[data-dead],[data-restore]')) return;
     var cardEl = e.target.closest('.lst-card[data-source-key]');
     if (cardEl) { e.preventDefault(); openCard(cardEl); }
   });
