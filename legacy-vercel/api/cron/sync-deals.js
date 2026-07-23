@@ -355,6 +355,33 @@ export default async function handler(req, res) {
       }
     }
 
+    // Reconcile: the deals table must MIRROR the active feed. A deal that
+    // dropped out of deals.json — removed outright, or moved to a retired stage
+    // like 'inactive'/'dispute' — was previously left frozen at its last stage,
+    // so e.g. an offer Cowork retired lingered as a phantom in the Offers tab.
+    // Prune any table row whose source_key is no longer an active deal. All
+    // child rows (documents, parties, timeline, milestones) cascade on delete.
+    // Guarded: never prune when the active set is empty, so a bad/empty deploy
+    // of deals.json can't wipe the table.
+    let dealsPruned = 0;
+    try {
+      const activeKeys = new Set(active.map((d) => d.id).filter(Boolean));
+      if (activeKeys.size > 0) {
+        const { data: existing, error: exErr } = await supa.from('deals').select('source_key');
+        if (exErr) throw new Error(exErr.message);
+        const orphans = [...new Set((existing || [])
+          .map((r) => r.source_key)
+          .filter((k) => k && !activeKeys.has(k)))];
+        if (orphans.length) {
+          const { error: pErr } = await supa.from('deals').delete().in('source_key', orphans);
+          if (pErr) throw new Error(pErr.message);
+          dealsPruned = orphans.length;
+        }
+      }
+    } catch (e) {
+      errors.push({ deal: 'prune-orphans', error: e.message || String(e) });
+    }
+
     // Per-agent tasks from the briefing (deals.json "tasks") → agent_tasks.
     // The briefing is the source of truth for content, but check-offs made in
     // the CRM are preserved across syncs (matched by agent|client|title).
@@ -435,6 +462,7 @@ export default async function handler(req, res) {
       synced: true,
       source_version: data.version || null,
       deals_upserted: dealsUpserted,
+      deals_pruned: dealsPruned,
       documents_written: docsWritten,
       tasks_written: tasksWritten,
       leads_promoted: leadsPromoted,
