@@ -1,15 +1,17 @@
 // api/_lib/handlers/crm-deal-stage.js
 // POST /api/crm/deal-stage
 //
-// Agent-only. Sets a per-deal stage_override (db/024) so the agent can flip an
-// offer to "in escrow" (pending) the moment it's accepted — before Cowork moves
-// the deal in deals.json. The override only takes effect while deals.json still
-// has the deal at stage 'offer' (see crm-listings.js), so it self-heals once
-// Cowork advances the deal; it never clobbers the deals.json source of truth.
+// Agent-only. Sets a per-deal stage_override (db/024, db/027) so the agent can
+// flip an offer to "in escrow" (pending) the moment it's accepted — before
+// Cowork moves the deal in deals.json — or soft-archive an offer that fell
+// through. The override only takes effect while deals.json still has the deal
+// at stage 'offer' (see crm-listings.js), so it self-heals once Cowork advances
+// the deal; it never clobbers the deals.json source of truth.
 //
-// Body: { source_key: string, accepted: boolean }
-//   accepted:true  → stage_override = 'pending'  (offer accepted → escrow)
-//   accepted:false → stage_override = null        (undo — back to offer)
+// Body: { source_key: string, accepted?: boolean, fell_through?: boolean }
+//   accepted:true      → stage_override = 'pending'  (offer accepted → escrow)
+//   fell_through:true  → stage_override = 'dead'      (offer collapsed → archived)
+//   accepted:false / fell_through:false / neither → stage_override = null (restore)
 
 import { adminClient } from '../supabase.js';
 import { getCallerProfile, isAgent } from '../auth.js';
@@ -26,7 +28,9 @@ export default async function handler(req, res) {
     const body = req.body && typeof req.body === 'object' ? req.body : {};
     const sourceKey = String(body.source_key || '').trim();
     if (!sourceKey) return fail(res, 400, 'source_key required');
-    const override = body.accepted ? 'pending' : null;
+    // 'dead' (fell through) takes precedence, then 'pending' (accepted);
+    // anything else clears the override (restore to the deals.json stage).
+    const override = body.fell_through ? 'dead' : body.accepted ? 'pending' : null;
 
     const supa = adminClient();
     const { data, error } = await supa
@@ -36,6 +40,10 @@ export default async function handler(req, res) {
       .select('source_key, stage, stage_override');
 
     if (error) {
+      // Constraint too narrow for 'dead' — db/027 not run yet.
+      if (/deals_stage_override_check|check constraint/i.test(error.message || '')) {
+        return fail(res, 409, 'stage_override constraint out of date — run db/027_deal_stage_override_dead.sql');
+      }
       // Column not migrated yet (db/024). Report clearly rather than 500.
       if (/stage_override|schema cache|column/i.test(error.message || '')) {
         return fail(res, 409, 'stage_override column missing — run db/024_deal_stage_override.sql');

@@ -1387,9 +1387,24 @@
     .lst-badge.selling { background: #EAF0F6; color: #2B4A6B; border-color: #C3D4E6; }
     .lst-badge.buying  { background: #F6EFE8; color: #6B4A2B; border-color: #E6D2C3; }
     .lst-card .lk { font-family: var(--mono); font-size: 10px; letter-spacing: .1em; text-transform: uppercase; color: var(--brass); text-decoration: none; margin-top: 6px; }
-    .lst-accept { margin-top: 10px; align-self: flex-start; font-family: var(--mono); font-size: 9.5px; letter-spacing: .12em; text-transform: uppercase; padding: 7px 12px; border: 1px solid var(--ink); background: var(--ink); color: var(--shell); cursor: pointer; transition: opacity .12s; }
-    .lst-accept:hover { opacity: .85; }
-    .lst-accept:disabled { opacity: .5; cursor: default; }
+    .lst-actions { margin-top: 10px; display: flex; gap: 8px; flex-wrap: wrap; align-items: stretch; }
+    .lst-accept, .lst-restore { font-family: var(--mono); font-size: 9.5px; letter-spacing: .12em; text-transform: uppercase; padding: 7px 12px; border: 1px solid var(--ink); background: var(--ink); color: var(--shell); cursor: pointer; transition: opacity .12s; }
+    .lst-accept:hover, .lst-restore:hover { opacity: .85; }
+    .lst-accept:disabled, .lst-restore:disabled { opacity: .5; cursor: default; }
+    /* Restore — outlined brass, clearly the way back out of the archive. */
+    .lst-restore { background: transparent; color: var(--brass); border-color: var(--brass); }
+    .lst-restore:hover { background: var(--brass); color: var(--shell); opacity: 1; }
+    /* Fell through lives in a ⋯ dropdown so it reads as a deliberate choice. */
+    .lst-drop { position: relative; display: inline-flex; }
+    .lst-drop-btn { font-family: var(--mono); font-size: 13px; line-height: 1; letter-spacing: .05em; padding: 4px 10px; border: 1px solid var(--rule, #d9cfc3); background: transparent; color: var(--ink-mute); cursor: pointer; transition: border-color .12s, color .12s; }
+    .lst-drop-btn:hover, .lst-drop.open .lst-drop-btn { color: var(--ink); border-color: var(--ink); }
+    .lst-drop-menu { position: absolute; top: calc(100% + 4px); right: 0; min-width: 148px; background: var(--shell); border: 1px solid var(--rule, #d9cfc3); box-shadow: 0 8px 22px rgba(40,30,20,.14); padding: 4px; display: none; z-index: 30; }
+    .lst-drop.open .lst-drop-menu { display: block; }
+    .lst-drop-item { display: block; width: 100%; text-align: left; font-family: var(--mono); font-size: 9.5px; letter-spacing: .12em; text-transform: uppercase; padding: 8px 10px; border: 0; background: transparent; color: var(--ink); cursor: pointer; }
+    .lst-drop-item:hover { background: var(--sand, #f3ede4); }
+    .lst-drop-item.danger { color: #8A3B2B; }
+    .lst-drop-item.danger:hover { background: #F6E6E1; }
+    .lst-drop-item:disabled { opacity: .5; cursor: default; }
     @media (max-width: 900px) { .lst { padding: 18px; } }
     </style>
     <section class="crm-view" data-view="listings">
@@ -1404,6 +1419,7 @@
           <button class="chip" data-lst="pending">In escrow <span class="c" data-lst-c-pending>—</span></button>
           <button class="chip" data-lst="preparing">Preparing <span class="c" data-lst-c-preparing>—</span></button>
           <button class="chip" data-lst="closed">Closed <span class="c" data-lst-c-closed>—</span></button>
+          <button class="chip" data-lst="archived">Fell through <span class="c" data-lst-c-archived>—</span></button>
         </div>
         <div class="lst-grid" data-lst-grid><div class="cur-empty">Loading your listings…</div></div>
       </div>
@@ -4013,7 +4029,7 @@ function selectLead(el) {
       if (!j || !j.counts) { if (!state.data) { var g0 = root.querySelector('[data-lst-grid]'); if (g0) g0.innerHTML = '<div class="cur-empty">Could not load deals — try again.</div>'; } return; }
       state.data = j;
       var c = j.counts;
-      set('[data-lst-c-offers]', c.offers || 0); set('[data-lst-c-pending]', c.pending); set('[data-lst-c-preparing]', c.preparing || 0); set('[data-lst-c-closed]', c.closed);
+      set('[data-lst-c-offers]', c.offers || 0); set('[data-lst-c-pending]', c.pending); set('[data-lst-c-preparing]', c.preparing || 0); set('[data-lst-c-closed]', c.closed); set('[data-lst-c-archived]', c.archived || 0);
       var o = document.querySelector('[data-roster-offers]'); if (o) o.textContent = String(c.offers || 0);
       var a = document.querySelector('[data-roster-listings]'); if (a) a.textContent = String(c.active);
       var p = document.querySelector('[data-roster-pending]'); if (p) p.textContent = String(c.pending);
@@ -4025,7 +4041,7 @@ function selectLead(el) {
       if (!state.data) { var g = root.querySelector('[data-lst-grid]'); if (g) g.innerHTML = '<div class="cur-empty">Could not load deals — try again.</div>'; }
     });
   }
-  function badge(tab) { return tab === 'offers' ? 'Offer out' : tab === 'active' ? 'On market' : tab === 'pending' ? 'In escrow' : tab === 'preparing' ? 'Preparing to list' : 'Closed'; }
+  function badge(tab) { return tab === 'offers' ? 'Offer out' : tab === 'active' ? 'On market' : tab === 'pending' ? 'In escrow' : tab === 'preparing' ? 'Preparing to list' : tab === 'archived' ? 'Fell through' : 'Closed'; }
   function card(d) {
     var ph = '<div class="ph-wrap">' + (d.photo_url ? '<img class="ph" src="' + esc(d.photo_url) + '" alt="">' : '<div class="ph-empty">No photo yet</div>') + '<button class="ph-up" data-upload="' + esc(d.source_key || '') + '">' + (d.photo_url ? 'Replace photo' : 'Add photo') + '</button></div>';
     var tour = (d.has_video ? '<span class="lst-badge">Video</span>' : '') + (d.has_tour ? '<span class="lst-badge">3D tour</span>' : '');
@@ -4040,11 +4056,27 @@ function selectLead(el) {
     // <a target="_blank">, because some contexts (webviews / popup blockers)
     // silently swallow target=_blank so the portal "wouldn't open".
     var url = d.source_key ? '/seller.html?deal=' + encodeURIComponent(d.source_key) : '';
-    // Offer cards get an accept toggle — flip to escrow (pending) the moment
-    // the offer is accepted. It stops propagation so it doesn't open the portal.
-    var accept = state.tab === 'offers'
-      ? '<button class="lst-accept" data-accept="' + esc(d.source_key || '') + '">Mark accepted → escrow</button>'
-      : '';
+    // Offer cards get the primary "accepted → escrow" action plus a small
+    // dropdown (⋯) holding the secondary "Fell through" (soft-archive) so it's
+    // a deliberate pick, not a stray tap. Archived cards get a Restore. All
+    // stop propagation so they don't open the portal.
+    var accept = '';
+    if (state.tab === 'offers') {
+      var k = esc(d.source_key || '');
+      accept = '<div class="lst-actions">' +
+        '<button class="lst-accept" data-accept="' + k + '">Mark accepted → escrow</button>' +
+        '<div class="lst-drop">' +
+          '<button class="lst-drop-btn" type="button" data-menu="' + k + '" aria-haspopup="true" aria-expanded="false" aria-label="More offer actions">⋯</button>' +
+          '<div class="lst-drop-menu" data-menu-for="' + k + '" role="menu">' +
+            '<button class="lst-drop-item danger" type="button" role="menuitem" data-dead="' + k + '">Fell through</button>' +
+          '</div>' +
+        '</div>' +
+        '</div>';
+    } else if (state.tab === 'archived') {
+      accept = '<div class="lst-actions">' +
+        '<button class="lst-restore" data-restore="' + esc(d.source_key || '') + '">Restore to offers</button>' +
+        '</div>';
+    }
     var lc = (window.LegacyDealColors && window.LegacyDealColors.get(d.source_key)) || null;
     return '<div class="lst-card" data-source-key="' + esc(d.source_key || '') + '"' + (lc ? ' style="border-top:5px solid ' + lc.border + ';"' : '') + ' role="link" tabindex="0">' + ph + '<div class="bd">' +
       '<div class="pr">' + esc(fmtUSD(d.price)) + '</div>' +
@@ -4059,7 +4091,7 @@ function selectLead(el) {
   // Find the loaded deal (a live reference so a photo upload updates the grid too).
   function dealByKey(k) {
     if (!state.data) return null;
-    var all = ['offers', 'active', 'pending', 'preparing', 'closed'];
+    var all = ['offers', 'active', 'pending', 'preparing', 'closed', 'archived'];
     for (var i = 0; i < all.length; i++) {
       var arr = state.data[all[i]] || [];
       for (var j = 0; j < arr.length; j++) if (arr[j].source_key === k) return arr[j];
@@ -4105,18 +4137,103 @@ function selectLead(el) {
       alert('Network error moving the offer.');
     }
   }
+  // Recompute every chip count + the roster offers pill from state.data. Used
+  // after we move a row between buckets so the UI stays in sync without a fetch.
+  function refreshCounts() {
+    if (!state.data) return;
+    var c = state.data.counts || (state.data.counts = {});
+    ['offers', 'pending', 'preparing', 'closed', 'archived'].forEach(function (k) {
+      c[k] = (state.data[k] || []).length;
+      set('[data-lst-c-' + k + ']', c[k]);
+    });
+    var oPill = document.querySelector('[data-roster-offers]'); if (oPill) oPill.textContent = String(c.offers || 0);
+  }
+  // Move a deal between two buckets by source_key, mutating state.data in place.
+  function moveRow(sourceKey, fromKey, toKey, newStage) {
+    if (!state.data || !Array.isArray(state.data[fromKey])) return null;
+    var idx = state.data[fromKey].findIndex(function (x) { return x.source_key === sourceKey; });
+    if (idx < 0) return null;
+    var moved = state.data[fromKey].splice(idx, 1)[0];
+    moved.stage = newStage;
+    (state.data[toKey] = state.data[toKey] || []).unshift(moved);
+    return moved;
+  }
+  // Fell through → soft-archive the offer (stage_override='dead'). Reversible.
+  async function fellThrough(sourceKey, btn) {
+    if (!sourceKey) return;
+    if (!window.confirm('Mark this offer as fallen through? It moves to “Fell through” and leaves the active pipeline. You can restore it later.')) return;
+    btn.disabled = true; btn.textContent = 'Archiving…';
+    try {
+      var res = await fetch('/api/crm/deal-stage', {
+        method: 'POST', credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ source_key: sourceKey, fell_through: true })
+      });
+      var j = await res.json().catch(function () { return {}; });
+      if (res.ok && j && j.updated) {
+        moveRow(sourceKey, 'offers', 'archived', 'dead');
+        refreshCounts();
+        render();
+        if (window.Legacy && window.Legacy.toast) window.Legacy.toast('Offer moved to Fell through.', true);
+      } else {
+        btn.disabled = false; btn.textContent = 'Fell through';
+        alert((j && j.error) || 'Could not archive the offer.');
+      }
+    } catch (err) {
+      btn.disabled = false; btn.textContent = 'Fell through';
+      alert('Network error archiving the offer.');
+    }
+  }
+  // Restore a fell-through offer back to Offers (clears the override).
+  async function restoreDeal(sourceKey, btn) {
+    if (!sourceKey) return;
+    btn.disabled = true; btn.textContent = 'Restoring…';
+    try {
+      var res = await fetch('/api/crm/deal-stage', {
+        method: 'POST', credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ source_key: sourceKey, fell_through: false })
+      });
+      var j = await res.json().catch(function () { return {}; });
+      if (res.ok && j && j.updated) {
+        moveRow(sourceKey, 'archived', 'offers', 'offer');
+        refreshCounts();
+        render();
+        if (window.Legacy && window.Legacy.toast) window.Legacy.toast('Offer restored.', true);
+      } else {
+        btn.disabled = false; btn.textContent = 'Restore to offers';
+        alert((j && j.error) || 'Could not restore the offer.');
+      }
+    } catch (err) {
+      btn.disabled = false; btn.textContent = 'Restore to offers';
+      alert('Network error restoring the offer.');
+    }
+  }
   function render() {
     var grid = root.querySelector('[data-lst-grid]');
     if (!grid) return;
     var rows = (state.data && state.data[state.tab]) || [];
     var emptyMsg = state.tab === 'offers' ? 'No open offers. Cowork adds properties as offers go out.'
                  : state.tab === 'pending' ? 'Nothing in escrow right now.'
+                 : state.tab === 'archived' ? 'No offers have fallen through. Ones you mark “Fell through” land here — restorable, docs stay in Zipforms.'
                  : 'No ' + state.tab + ' deals.';
     grid.innerHTML = rows.length ? rows.map(card).join('') : '<div class="cur-empty">' + emptyMsg + '</div>';
   }
   // Let the Command Center re-render the grid after it mutates a deal (e.g. a
   // photo upload) so the card reflects the change without a re-fetch.
   window.__renderDeals = render;
+  // Close every open ⋯ dropdown (optionally except one). Also resets aria.
+  function closeMenus(except) {
+    root.querySelectorAll('.lst-drop.open').forEach(function (dp) {
+      if (dp === except) return;
+      dp.classList.remove('open');
+      var b = dp.querySelector('[data-menu]'); if (b) b.setAttribute('aria-expanded', 'false');
+    });
+  }
+  // A click anywhere that isn't inside an open dropdown closes them. Runs at
+  // document level so clicks outside the listings view still dismiss the menu;
+  // the toggle itself stops propagation so it never closes what it just opened.
+  document.addEventListener('click', function (e) { if (!e.target.closest('.lst-drop')) closeMenus(); });
   root.addEventListener('click', function (e) {
     var up = e.target.closest('[data-upload]');
     if (up) {
@@ -4136,6 +4253,20 @@ function selectLead(el) {
     }
     var acc = e.target.closest('[data-accept]');
     if (acc) { e.stopPropagation(); acceptOffer(acc.getAttribute('data-accept'), acc); return; }
+    var menu = e.target.closest('[data-menu]');
+    if (menu) {
+      e.stopPropagation();
+      var dp = menu.closest('.lst-drop');
+      var wasOpen = dp.classList.contains('open');
+      closeMenus(wasOpen ? null : dp);
+      dp.classList.toggle('open', !wasOpen);
+      menu.setAttribute('aria-expanded', wasOpen ? 'false' : 'true');
+      return;
+    }
+    var dead = e.target.closest('[data-dead]');
+    if (dead) { e.stopPropagation(); closeMenus(); fellThrough(dead.getAttribute('data-dead'), dead); return; }
+    var rest = e.target.closest('[data-restore]');
+    if (rest) { e.stopPropagation(); restoreDeal(rest.getAttribute('data-restore'), rest); return; }
     var cardEl = e.target.closest('.lst-card[data-source-key]');
     if (cardEl) { openCard(cardEl); return; }
     var t = e.target.closest('[data-lst]'); if (!t) return;
@@ -4145,7 +4276,9 @@ function selectLead(el) {
   });
   root.addEventListener('keydown', function (e) {
     if (e.key !== 'Enter' && e.key !== ' ') return;
-    if (e.target.closest('[data-upload]')) return;
+    // Let the in-card buttons (upload, accept, ⋯ menu, its items, restore)
+    // handle their own key activation instead of opening the deal page.
+    if (e.target.closest('[data-upload],[data-accept],[data-menu],[data-dead],[data-restore]')) return;
     var cardEl = e.target.closest('.lst-card[data-source-key]');
     if (cardEl) { e.preventDefault(); openCard(cardEl); }
   });

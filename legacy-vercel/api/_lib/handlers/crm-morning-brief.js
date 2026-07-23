@@ -266,6 +266,36 @@ export default async function handler(req, res) {
       result.review_pending_count = pending || 0;
     } catch (_) { /* table absent / transient — leave empty, never break the brief */ }
 
+    // A text/call from a number we DON'T yet have as a contact is stored
+    // 'pending_review' and (by design) never joins recent_comms — so without
+    // this it was invisible on the Today feed and only bumped a hidden counter.
+    // Surface each unmatched inbound from the last 24h as a live-feed signal so
+    // nothing a client sends can silently disappear. Fail-soft.
+    try {
+      const dayAgoIso = new Date(Date.now() - 24 * 3600 * 1000).toISOString();
+      const { data: unmatched } = await supa.from('deal_messages')
+        .select('id, channel, content, raw_phone_number, call_duration_seconds, created_at')
+        .eq('status', 'pending_review')
+        .eq('direction', 'inbound')
+        .gte('created_at', dayAgoIso)
+        .order('created_at', { ascending: false })
+        .limit(12);
+      for (const u of (unmatched || [])) {
+        const num = u.raw_phone_number || 'an unknown number';
+        const body = u.channel === 'call'
+          ? `Missed/inbound call from ${num} — unknown number, triage it in Messages.`
+          : `New text from ${num}: “${String(u.content || '').replace(/\s+/g, ' ').trim().slice(0, 110)}” — unknown number, triage it in Messages.`;
+        result.signals.unshift({
+          id: `dm:${u.id}`, lead_id: null,
+          time_iso: u.created_at, time: formatClock(u.created_at),
+          body, tag: 'Needs triage'
+        });
+      }
+      if (unmatched && unmatched.length) {
+        result.signals.sort((a, b) => String(b.time_iso || '').localeCompare(String(a.time_iso || '')));
+      }
+    } catch (_) { /* unmatched surfacing is a bonus, never blocks the brief */ }
+
     // Phase 2D follow-up — surface mailboxes whose Gmail connection needs to be
     // redone (testing-mode OAuth app => refresh tokens for test users expire
     // periodically). The Settings card shows this too, but the morning brief is

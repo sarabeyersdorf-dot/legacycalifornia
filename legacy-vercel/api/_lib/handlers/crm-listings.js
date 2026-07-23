@@ -194,7 +194,7 @@ export default async function handler(req, res) {
     };
 
     let photosMatched = 0;
-    const buckets = { offers: [], active: [], pending: [], closed: [], preparing: [] };
+    const buckets = { offers: [], active: [], pending: [], closed: [], preparing: [], archived: [] };
     for (const d of (data || [])) {
       // Photo source order: agent's uploaded photo (photo_override) → explicit
       // deals.json photo → MetroList/IDX (by MLS or address) → the branded
@@ -226,7 +226,12 @@ export default async function handler(req, res) {
         has_tour:   !!d.matterport_url,
         stage:      stage
       };
-      if (stage === 'offer')          buckets.offers.push(row);
+      // 'dead' = an offer the agent marked FELL THROUGH (stage_override, db/027).
+      // It's soft-archived: out of every active bucket and count, but kept as a
+      // thin row so it can be restored. Reachable only while deals.json still
+      // has the deal at 'offer' — self-heals if Cowork re-advances it.
+      if (stage === 'dead')           buckets.archived.push(row);
+      else if (stage === 'offer')     buckets.offers.push(row);
       else if (stage === 'listing')   buckets.active.push(row);
       else if (stage === 'pending')   buckets.pending.push(row);
       else if (stage === 'closed')    buckets.closed.push(row);
@@ -239,7 +244,8 @@ export default async function handler(req, res) {
       pending:   buckets.pending,
       closed:    buckets.closed,
       preparing: buckets.preparing,
-      counts:    { offers: buckets.offers.length, active: buckets.active.length, pending: buckets.pending.length, closed: buckets.closed.length, preparing: buckets.preparing.length },
+      archived:  buckets.archived,
+      counts:    { offers: buckets.offers.length, active: buckets.active.length, pending: buckets.pending.length, closed: buckets.closed.length, preparing: buckets.preparing.length, archived: buckets.archived.length },
       // Photo-sourcing diagnostics: how many deals got a photo, and where the
       // feeds stood. If metrolist_configured is false, the MetroList env vars
       // aren't set on this deployment; if metrolist_listings is 0, the office
