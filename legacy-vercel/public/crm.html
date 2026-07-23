@@ -1636,20 +1636,35 @@
       var st = { bucket:'leads', q:'', loading:false };
       var TITLES = { leads:'Leads.', clients:'Clients.', past:'Past clients.', sphere:'Sphere.' };
       var PILL = { leads:'[data-roster-leads]', clients:'[data-roster-clients]', past:'[data-roster-past]', sphere:'[data-roster-sphere]' };
+      // Paint all four sidebar pills from a {leads,clients,past,sphere} totals
+      // object — the single source of truth for these counts.
+      function setAllPills(counts){
+        if(!counts) return;
+        Object.keys(PILL).forEach(function(k){
+          if(counts[k]==null) return;
+          document.querySelectorAll(PILL[k]).forEach(function(el){ el.textContent = String(counts[k]); });
+        });
+      }
+      var seq = 0;   // supersede in-flight loads so the LATEST bucket always wins
       function load(){
-        if(st.loading) return; st.loading = true;
+        var want = st.bucket, my = ++seq;
         var list = view.querySelector('[data-people-list]');
         list.innerHTML = '<div style="padding:28px;font-family:var(--sans);font-size:14px;color:var(--ink-mute);">Loading…</div>';
-        fetch('/api/crm/roster?bucket='+st.bucket+'&q='+encodeURIComponent(st.q),{credentials:'include'})
+        fetch('/api/crm/roster?bucket='+want+'&q='+encodeURIComponent(st.q),{credentials:'include'})
           .then(function(r){ return r.ok?r.json():null; })
           .then(function(j){
-            st.loading = false;
+            // A newer load() started after this one — drop this stale response so
+            // we never paint (e.g.) the Leads list under a "Clients." title.
+            if(my !== seq) return;
             if(!j){ list.innerHTML = '<div style="padding:28px;font-family:var(--sans);color:var(--ink-mute);">Could not load — try again.</div>'; return; }
-            view.querySelector('[data-people-title]').textContent = TITLES[st.bucket];
+            view.querySelector('[data-people-title]').textContent = TITLES[want];
             view.querySelector('[data-people-count]').textContent = j.count + (j.count===1?' person':' people') + (st.q?' matching “'+st.q+'”':'');
-            // sidebar pill parity: the pill shows what this list shows
-            if(!st.q){ var pill = document.querySelector(PILL[st.bucket]); if(pill) pill.textContent = String(j.count); }
-            view.querySelectorAll('[data-people-tab]').forEach(function(b){ b.classList.toggle('on', b.getAttribute('data-people-tab')===st.bucket); });
+            // Sidebar pills: set ALL FOUR from the authoritative bucket totals so
+            // they're consistent no matter which list is open (and never jump
+            // between the Today-page value and the roster value). These totals are
+            // search-independent, so a query in one list never skews the pills.
+            setAllPills(j.counts);
+            view.querySelectorAll('[data-people-tab]').forEach(function(b){ b.classList.toggle('on', b.getAttribute('data-people-tab')===want); });
             var rows = (j.people||[]).map(function(pp){
               var temp = pp.temperature ? '<span class="ppl-temp '+esc(pp.temperature)+'">'+esc(pp.temperature)+'</span>' : '';
               var last = pp.last_contact_at ? new Date(pp.last_contact_at).toLocaleDateString('en-US',{month:'short',day:'numeric'}) : '—';
@@ -1661,7 +1676,7 @@
                 + '</div>';
             }).join('');
             list.innerHTML = rows || '<div style="padding:28px;font-family:var(--sans);font-size:14px;color:var(--ink-mute);">Nobody in this list yet.</div>';
-          }).catch(function(){ st.loading=false; });
+          }).catch(function(){ if(my===seq) list.innerHTML = '<div style="padding:28px;font-family:var(--sans);color:var(--ink-mute);">Could not load — try again.</div>'; });
       }
       document.addEventListener('click', function(e){
         var nav = e.target.closest('[data-people-bucket]');
@@ -1679,6 +1694,13 @@
       });
       document.addEventListener('crm:view', function(ev){ if(ev.detail && ev.detail.name==='people') load(); });
       var qt; view.querySelector('[data-people-q]').addEventListener('input', function(){ clearTimeout(qt); var v=this.value; qt=setTimeout(function(){ st.q=v.trim(); load(); },350); });
+      // Prime the four sidebar pills once on CRM open so they're correct
+      // immediately — and identical to what opening any bucket shows — instead
+      // of flashing a different number until the people view is first loaded.
+      fetch('/api/crm/roster?bucket=leads',{credentials:'include'})
+        .then(function(r){ return r.ok?r.json():null; })
+        .then(function(j){ if(j) setAllPills(j.counts); })
+        .catch(function(){});
     })();
     </script>
     <style>
