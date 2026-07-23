@@ -2605,16 +2605,18 @@
         if (ep.indexOf('/api/sequences/enroll') === 0) { promptEnrollSequence(lead); return; }
         const r = await window.Legacy.api('/api/crm/actions', { method: 'POST', body: { lead_id: lead.id, action_id: id } });
         if (!r.ok) { toast((r.json && r.json.error) || 'Action failed.', false); return; }
-        const who = lead.first_name || 'the client';
-        // Every registry action lands INTERNAL first — the agent edits the
-        // wording, then toggles it on to share. Nothing auto-reaches the portal.
-        if (group === 'schedule') {
-          // Scheduling actions open the calendar to create the real event.
-          toast(`"${label}" logged. Opening the calendar to schedule it.`);
+        // Actions no longer leave a to-do behind — each one takes you to the tool
+        // that does the real thing (the artifact is what reaches the portal).
+        if (id === 'create-curated-search') {
+          toast('Opening Curated to build the search.');
+          if (typeof window.showView === 'function') window.showView(null, 'curate');
+        } else if (group === 'schedule') {
+          // Scheduling actions open the calendar to create the real event — that
+          // event (not a task) is what shows on the client portal + your agenda.
+          toast(`Opening the calendar to schedule "${label}".`);
           if (typeof window.showView === 'function') window.showView(null, 'cal');
         } else {
-          toast(`"${label}" added to ${who}'s workspace — internal for now. Toggle it on when you're ready to share.`);
-          selectLeadId(lead.id);   // refresh so the new item appears in the Deal Workspace
+          toast(`"${label}" — ready when you are.`);
         }
       };
       // "Actions for a <side> in <stage>" header — sentence-case, quiet.
