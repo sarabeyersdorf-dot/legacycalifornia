@@ -1,5 +1,5 @@
 {
-  "version": 2.5,
+  "version": 2.6,
   "lastUpdated": "2026-07-23",
   "updatedBy": "Claude",
   "tasks": [
@@ -2445,12 +2445,12 @@
           "desc": "Your earnest money deposit was confirmed received by escrow."
         },
         {
-          "date": "",
-          "label": "Confirm final price & terms",
-          "status": "next",
+          "date": "2026-07-23",
+          "label": "Price confirmed — $170,000 cash",
+          "status": "done",
           "col": "contingencies",
-          "badge": "Action",
-          "desc": "We are finalizing the accepted price and next steps and will walk you through each one."
+          "badge": "Done",
+          "desc": "Purchase price confirmed at $170,000, all-cash purchase."
         },
         {
           "date": "",
@@ -2464,8 +2464,8 @@
       "agentNote": {
         "author": "james",
         "status": "draft",
-        "updated": "2026-07-18",
-        "body": "Ashley, congratulations, your offer is accepted and escrow is open with Orange Coast Title. Your earnest money is in. I am confirming a few final details on price and next steps and will walk you through each one."
+        "updated": "2026-07-23",
+        "body": "Ashley and Bert, you are under contract at $170,000 cash on 695 Feather Dr. Escrow is open with Orange Coast Title (#2473532-TS, Tanya Salgado). Your earnest money is in. Disclosures are on file. Watch for closing instructions from escrow — we are moving toward close."
       },
       "clientTasks": [
         {
@@ -2480,8 +2480,8 @@
           "body": "Your offer is accepted and escrow is open with Orange Coast Title. Your earnest money is in."
         },
         {
-          "title": "A few details to confirm",
-          "body": "We are finalizing the accepted price and next steps and will walk you through each one."
+          "title": "All-cash purchase at $170,000",
+          "body": "Your purchase price is confirmed at $170,000, all cash. Escrow is working through the remaining steps toward close."
         }
       ],
       "address": "695 Feather Dr",
@@ -2492,7 +2492,7 @@
       "agent": "james",
       "client": "Ashley Robinson",
       "listPrice": null,
-      "salePrice": null,
+      "salePrice": 170000,
       "openEscrowDate": null,
       "closingDate": null,
       "contacts": {
@@ -2505,18 +2505,33 @@
         "BRBC": "executed (prepared ~7/12)",
         "RPA": "RPA fully executed via Authentisign 7/15 (buyer-signed 7/12, sent to Dee; both buyers \u2014 Ashley Robinson and Bert Andrews \u2014 signed 7/15)",
         "AAA": "buyer-signed 7/13",
-        "sellerCounter1": "SCO1 fully executed 7/15 (Authentisign) \u2014 offer accepted; per James's 7/18 Gmail review, cross-checked against Sara's Gmail (Orange Coast Title correspondence) but exact accepted price/terms not independently confirmed \u2014 see alerts",
+        "sellerCounter1": "SCO1 fully executed 7/15 (Authentisign) \u2014 offer accepted at $170,000 cash; price confirmed by Sara 7/23",
         "EMD": "confirmed received by escrow 7/16 (receipt sent to Ashley Robinson, James, and Sara by Tanya Salgado/Orange Coast Title 7/16, verified in Sara's Gmail)"
       },
       "correspondence": [],
+      "clientDocuments": [
+        {"name": "Purchase Agreement (RPA)", "url": "https://legacycalifornia.com/docs/695-feather/purchase-agreement-rpa.pdf"},
+        {"name": "Seller Counter Offer 1", "url": "https://legacycalifornia.com/docs/695-feather/seller-counter-offer-1.pdf"},
+        {"name": "Buyer Representation Agreement (BRBC)", "url": "https://legacycalifornia.com/docs/695-feather/buyer-representation-agreement.pdf"},
+        {"name": "Earnest Money Deposit Receipt", "url": "https://legacycalifornia.com/docs/695-feather/emd-receipt.pdf"},
+        {"name": "Escrow Holder Acknowledgment", "url": "https://legacycalifornia.com/docs/695-feather/escrow-holder-acknowledgment.pdf"},
+        {"name": "Preliminary Title Report", "url": "https://legacycalifornia.com/docs/695-feather/preliminary-title-report.pdf"},
+        {"name": "Natural Hazard Disclosure (Full Report)", "url": "https://legacycalifornia.com/docs/695-feather/nhd-report-full.pdf"},
+        {"name": "Natural Hazard Disclosure — Signature Page", "url": "https://legacycalifornia.com/docs/695-feather/nhd-signature-page.pdf"},
+        {"name": "Transfer Disclosure Statement & Addendum 1 Acknowledgment", "url": "https://legacycalifornia.com/docs/695-feather/transfer-disclosure-statement.pdf"},
+        {"name": "Fire Hardening & Defensible Space Disclosure", "url": "https://legacycalifornia.com/docs/695-feather/fire-hardening-disclosure.pdf"},
+        {"name": "Lead-Based Paint Disclosure", "url": "https://legacycalifornia.com/docs/695-feather/lead-based-paint-disclosure.pdf"},
+        {"name": "Statewide Buyer & Seller Advisory", "url": "https://legacycalifornia.com/docs/695-feather/statewide-buyer-seller-advisory.pdf"},
+        {"name": "Market Conditions Advisory", "url": "https://legacycalifornia.com/docs/695-feather/market-conditions-advisory.pdf"},
+        {"name": "Water Heater & Smoke Detector Compliance", "url": "https://legacycalifornia.com/docs/695-feather/water-heater-smoke-detector.pdf"}
+      ],
       "notes": "Pivot for Ashley Robinson (James's buyer) after the 992 Iroquois offer went dead 7/12. Offer sent to listing agent Dee 7/12 for 695 Feather Dr, Copperopolis. Docs in _Offers/Buy Side/Robinson 695 Feather Dr/. UPDATE 7/18 (from James's 7/18 Gmail review, cross-checked against Sara's Gmail): Offer accepted 7/15; escrow opened at Orange Coast Title Company of Southern California (Santa Ana), Escrow #2473532-TS, escrow officer Tanya Salgado (tanyas@octitle.com) \u2014 switched from Placer Title because the property was acquired via tax sale last year and Placer is restricted from insuring/escrowing such properties for 3-5 years. EMD confirmed received by escrow 7/16. ClosingLock wire instructions sent to both buyers 7/15-7/16; Ashley Robinson submitted proof of funds 7/16. NOT yet confirmed: final accepted purchase price/terms (a preliminary net sheet referenced a $170,000 cash-purchase figure sent 7/15 before escrow opened \u2014 not verified as final); what listing agent Dee Bradley committed to doing \"Monday\" (7/20) per her 7/17 email; and what the \"Page 17\" document escrow sent 7/17 actually is (likely the RPA escrow acknowledgment James requested, not confirmed).",
       "alerts": [
         "Offer ACCEPTED 7/15 \u2014 moved off \"offer\" stage 7/18; RPA/SCO1 fully executed via Authentisign, both buyers signed",
         "Escrow OPEN at Orange Coast Title (Santa Ana), Escrow #2473532-TS, Tanya Salgado \u2014 switched from Placer (tax-sale restriction, 3-5yr)",
         "EMD confirmed received by escrow 7/16",
-        "NEEDS CONFIRMATION: final accepted purchase price/terms \u2014 net sheet referenced $170,000 cash purchase but that was a preliminary pre-escrow estimate, not confirmed final",
         "NEEDS CONFIRMATION: what Dee Bradley (listing agent) committed to doing \"Monday\" 7/20 per her 7/17 email \u2014 content unclear from snippet",
-        "NEEDS CONFIRMATION: \"Page 17\" document escrow sent 7/17 \u2014 likely RPA escrow acknowledgment James requested, not confirmed"
+        "\"Page 17\" = RPA escrow acknowledgment (695 feather escrow acknowledgement.pdf) filed in EX \u2014 confirmed 7/23"
       ]
     }
   ]
