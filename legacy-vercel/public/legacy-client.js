@@ -1229,11 +1229,21 @@
       });
       const rows = escrow.map((d) => {
         const c = window.LegacyDealColors ? window.LegacyDealColors.get(d.lead_id) : null;
-        const late = d.days_to_coe != null && d.days_to_coe < 0;
-        const chip = d.days_to_coe == null ? '' : `<em class="chg ${late ? 'dn' : ''}" style="margin-left:6px;">${late ? Math.abs(d.days_to_coe) + 'd late' : d.days_to_coe + 'd'}</em>`;
-        return `<div class="tb-pulse-row" data-open-deal="${escapeHtml(d.lead_id || '')}" style="cursor:pointer;" title="Open this deal">
-          <span style="display:flex;align-items:center;gap:7px;min-width:0;"><span style="width:9px;height:9px;border-radius:50%;flex:none;background:${c ? c.border : 'var(--brass)'};"></span><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escapeHtml((d.address || d.lead_id || '').split(',')[0])}</span></span>
-          <span class="v">${escapeHtml(fmtCoe(d.coe_date))}${chip}<span style="display:block;font-size:11px;color:var(--ink-mute);font-weight:400;">${d.commission_usd != null ? money(d.commission_usd) + (d.agent ? ' · ' + (d.agent === 'james' ? 'James' : 'Sara') : '') : 'commission n/a'}</span></span>
+        const dtc = d.days_to_coe;
+        // Prominent days-to-close countdown per deal — green when there's runway,
+        // amber inside a week, red when past the COE date.
+        let countTxt, countCls;
+        if (dtc == null)      { countTxt = 'COE TBD';       countCls = 'tbd'; }
+        else if (dtc < 0)     { countTxt = Math.abs(dtc) + ' day' + (Math.abs(dtc) === 1 ? '' : 's') + ' late'; countCls = 'late'; }
+        else if (dtc === 0)   { countTxt = 'Closes today';  countCls = 'near'; }
+        else                  { countTxt = dtc + ' day' + (dtc === 1 ? '' : 's'); countCls = dtc <= 7 ? 'near' : 'ok'; }
+        const commission = d.commission_usd != null
+          ? money(d.commission_usd) + (d.agent ? ' · ' + (d.agent === 'james' ? 'James' : 'Sara') : '')
+          : 'commission n/a';
+        return `<div class="tb-pulse-row tb-esc" data-open-deal="${escapeHtml(d.lead_id || '')}" style="cursor:pointer;" title="Open this deal">
+          <span class="tb-esc-main"><span class="tb-esc-dot" style="background:${c ? c.border : 'var(--brass)'};"></span>
+            <span class="tb-esc-txt"><span class="tb-esc-addr">${escapeHtml((d.address || d.lead_id || '').split(',')[0])}</span><span class="tb-esc-sub">COE ${escapeHtml(fmtCoe(d.coe_date))} · ${escapeHtml(commission)}</span></span></span>
+          <span class="tb-esc-count ${countCls}">${escapeHtml(countTxt)}</span>
         </div>`;
       }).join('');
       assessEl.innerHTML = `

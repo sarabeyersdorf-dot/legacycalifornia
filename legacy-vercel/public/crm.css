@@ -725,8 +725,8 @@
 /* — Brief header — */
 .today-brief {
   display: grid;
-  grid-template-columns: 1.4fr 1fr;
-  gap: 56px;
+  grid-template-columns: 1fr 1.15fr;   /* give the Closing-soon panel more room */
+  gap: 44px;
   align-items: end;
   padding-bottom: 32px;
   border-bottom: 1px solid var(--rule);
@@ -1319,11 +1319,24 @@ body { overflow: hidden; }
 
 
 /* Closing soon panel: room for street + date + days chip + commission */
-.tb-r { min-width: 400px; }
-.tb-assess .tb-pulse { min-width: 380px; }
+.tb-r { min-width: 480px; }
+.tb-assess .tb-pulse { min-width: 460px; }
 .tb-pulse-row { gap: 14px; }
 .tb-pulse-row .v { text-align: right; white-space: nowrap; }
 @media (max-width: 1100px) { .tb-r { min-width: 0; width: 100%; } }
+
+/* Closing-soon escrow rows — a per-deal days-to-close countdown badge */
+.tb-esc { align-items: center; gap: 14px; }
+.tb-esc-main { display: flex; align-items: center; gap: 10px; min-width: 0; flex: 1; }
+.tb-esc-dot { width: 9px; height: 9px; border-radius: 50%; flex: none; }
+.tb-esc-txt { min-width: 0; display: flex; flex-direction: column; gap: 1px; }
+.tb-esc-addr { font-family: var(--serif); font-size: 15px; color: var(--ink); line-height: 1.2; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.tb-esc-sub { font-size: 11px; color: var(--ink-mute); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.tb-esc-count { flex: none; font-family: var(--mono); font-size: 11.5px; font-weight: 600; letter-spacing: 0.03em; padding: 5px 11px; border-radius: 20px; white-space: nowrap; }
+.tb-esc-count.ok   { background: rgba(60,110,80,0.12);  color: #2F7A4D; }
+.tb-esc-count.near { background: rgba(176,120,44,0.15);  color: #9A6A1E; }
+.tb-esc-count.late { background: rgba(155,44,44,0.12);   color: #9B2C2C; }
+.tb-esc-count.tbd  { background: var(--rule);            color: var(--ink-mute); }
 
 /* ============================================================================
    UI CLEANUP (2026-07) — retire the flourishy display serif in the CRM.
