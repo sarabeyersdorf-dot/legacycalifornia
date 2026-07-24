@@ -1324,3 +1324,39 @@ body { overflow: hidden; }
 .tb-pulse-row { gap: 14px; }
 .tb-pulse-row .v { text-align: right; white-space: nowrap; }
 @media (max-width: 1100px) { .tb-r { min-width: 0; width: 100%; } }
+
+/* ============================================================================
+   UI CLEANUP (2026-07) — retire the flourishy display serif in the CRM.
+   crm.css is loaded ONLY by the agent CRM (crm.html), never by the client
+   seller portal, so this swaps Fraunces/Cormorant for Montserrat on the desk
+   while the client-facing portal keeps its serif look. Scoped to
+   body.lp-restyle so it out-specifies the :root variable defaults.
+   ========================================================================== */
+body.lp-restyle {
+  /* !important so this wins over legacy-app.css, which also sets --lp-serif on
+     body.lp-restyle (Cormorant) and loads after crm.css. CRM-scoped, so the
+     client portal — which never loads crm.css — keeps its serif. */
+  --serif: 'Montserrat', system-ui, sans-serif !important;
+  --lp-serif: 'Montserrat', system-ui, sans-serif !important;
+}
+/* Upright, tightened headings — Montserrat reads clean, not fancy. The old
+   italic + Fraunces combo was the "flourishy" look we're removing. */
+body.lp-restyle .display,
+body.lp-restyle .display em,
+body.lp-restyle .h-section,
+body.lp-restyle .h-section em,
+body.lp-restyle .h-sub,
+body.lp-restyle .lede,
+body.lp-restyle .numeral,
+body.lp-restyle h1,
+body.lp-restyle h2,
+body.lp-restyle h3,
+body.lp-restyle .cc-title h1,
+body.lp-restyle .cc-title,
+body.lp-restyle .lp-preview-title,
+body.lp-restyle .lp-score .v,
+body.lp-restyle .lp-home-p,
+body.lp-restyle .pipe-stats div .v {
+  font-style: normal;
+  letter-spacing: -0.01em;
+}
