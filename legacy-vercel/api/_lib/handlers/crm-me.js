@@ -8,6 +8,7 @@
 import { adminClient } from '../supabase.js';
 import { getCallerProfile, isAgent } from '../auth.js';
 import { handleOptions, ok, fail } from '../cors.js';
+import { feedUrl } from '../cal-feed.js';
 
 function agentKeyForRole(role) {
   if (role === 'agent_james') return 'james';
@@ -36,6 +37,17 @@ export default async function handler(req, res) {
       agent = data || null;
     }
 
+    // Private calendar subscription link for this agent (for the "sync to your
+    // phone" card). Built from the request's own origin so it works on any host.
+    let calFeed = null;
+    if (key) {
+      const proto = (req.headers['x-forwarded-proto'] || 'https').split(',')[0].trim();
+      const host  = req.headers['x-forwarded-host'] || req.headers.host;
+      const origin = host ? `${proto}://${host}` : null;
+      const https = feedUrl(key, origin);
+      calFeed = { https, webcal: https.replace(/^https?:\/\//i, 'webcal://') };
+    }
+
     return ok(res, {
       account: {
         id:    user.id,
@@ -43,7 +55,8 @@ export default async function handler(req, res) {
         role:  profile?.role || null,
         name:  profile?.display_name || null
       },
-      agent
+      agent,
+      cal_feed: calFeed
     });
   } catch (e) {
     return fail(res, 500, e.message);

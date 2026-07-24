@@ -932,6 +932,7 @@
               <button data-cal-view="week">Week</button>
               <button data-cal-view="month">Month</button>
             </div>
+            <button class="btn btn-ghost btn-sm" data-cal-sync title="Subscribe to this calendar on your phone">📱 Sync to phone</button>
             <button class="btn btn-ink btn-sm" data-cal-new>+ New event</button>
           </div>
         </div>
@@ -942,6 +943,64 @@
             <div data-cal-month style="display:none;"></div>
       </div>
     </section>
+    <script>
+    /* Calendar sync — subscribe this agent's CRM calendar on their phone via a
+       private .ics feed. Opens a small sheet with a one-tap subscribe + copy. */
+    (function () {
+      'use strict';
+      var feed = null;
+      function esc(s){ return String(s==null?'':s).replace(/[&<>"]/g,function(c){return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]);}); }
+      function sheet() {
+        var m = document.getElementById('leg-calsync');
+        if (m) return m;
+        m = document.createElement('div');
+        m.id = 'leg-calsync';
+        m.style.cssText = 'position:fixed;inset:0;z-index:99997;background:rgba(20,18,15,.6);display:flex;align-items:center;justify-content:center;padding:22px;';
+        m.innerHTML = '<div style="background:#FAF6EC;max-width:520px;width:100%;padding:26px 28px;color:#1A1714;max-height:88vh;overflow:auto;font-family:Manrope,system-ui,sans-serif;">'
+          + '<div style="font-family:\'JetBrains Mono\',monospace;font-size:10px;letter-spacing:.22em;text-transform:uppercase;color:#7C6A4D;margin-bottom:8px;">Calendar sync</div>'
+          + '<h2 style="font-family:Montserrat,system-ui,sans-serif;font-weight:700;font-size:24px;margin:0 0 6px;">Put your CRM calendar on your phone.</h2>'
+          + '<p style="font-size:13.5px;line-height:1.55;color:#3A332B;margin:0 0 16px;">Subscribe once and every tour &amp; appointment shows up in your phone’s calendar, always current. This link is private to you — don’t share it.</p>'
+          + '<div id="calsync-body" style="font-size:13.5px;color:#3A332B;">Loading your link…</div>'
+          + '<div style="margin-top:18px;text-align:right;"><button id="calsync-close" style="background:transparent;border:none;color:#7C6A4D;cursor:pointer;font-size:13px;">Close</button></div>'
+          + '</div>';
+        document.body.appendChild(m);
+        m.addEventListener('click', function (e) { if (e.target === m) m.style.display = 'none'; });
+        m.querySelector('#calsync-close').onclick = function () { m.style.display = 'none'; };
+        return m;
+      }
+      function fill(m) {
+        var body = m.querySelector('#calsync-body');
+        if (!feed || !feed.https) { body.innerHTML = 'Could not load your calendar link. Refresh and try again.'; return; }
+        var btn = 'display:inline-block;background:#1A1714;color:#FAF6EC;text-decoration:none;padding:11px 18px;font-family:\'JetBrains Mono\',monospace;font-size:11px;letter-spacing:.16em;text-transform:uppercase;border-radius:2px;';
+        body.innerHTML =
+          '<a href="' + esc(feed.webcal) + '" style="' + btn + '">Add to my calendar</a>'
+          + '<div style="margin-top:14px;">'
+          + '<div style="font-family:\'JetBrains Mono\',monospace;font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:#7C6A4D;margin-bottom:5px;">Or copy this link</div>'
+          + '<div style="display:flex;gap:8px;"><input id="calsync-url" readonly value="' + esc(feed.https) + '" style="flex:1;font:inherit;font-size:12.5px;background:#fff;border:1px solid #D9CFB7;padding:9px 10px;color:#1A1714;">'
+          + '<button id="calsync-copy" style="background:#7C6A4D;color:#FAF6EC;border:none;padding:0 14px;font-size:12.5px;font-weight:600;cursor:pointer;">Copy</button></div></div>'
+          + '<div style="margin-top:16px;font-size:12.5px;line-height:1.6;color:#5A5348;">'
+          + '<b>iPhone:</b> tap “Add to my calendar” above, then Subscribe.<br>'
+          + '<b>Google Calendar:</b> on a computer, Other calendars → <b>+</b> → <b>From URL</b> → paste the copied link.</div>';
+        var copy = body.querySelector('#calsync-copy');
+        if (copy) copy.onclick = function () {
+          var i = body.querySelector('#calsync-url'); i.select();
+          var done = function(){ copy.textContent = 'Copied ✓'; setTimeout(function(){ copy.textContent = 'Copy'; }, 1600); };
+          if (navigator.clipboard) navigator.clipboard.writeText(feed.https).then(done).catch(function(){ try{document.execCommand('copy');done();}catch(_){} });
+          else { try { document.execCommand('copy'); done(); } catch (_) {} }
+        };
+      }
+      document.addEventListener('click', function (e) {
+        if (!e.target.closest('[data-cal-sync]')) return;
+        e.preventDefault();
+        var m = sheet(); m.style.display = 'flex';
+        if (feed) { fill(m); return; }
+        fetch('/api/crm/me', { credentials: 'include' })
+          .then(function (r) { return r.ok ? r.json() : null; })
+          .then(function (j) { feed = (j && j.cal_feed) || null; fill(m); })
+          .catch(function () { fill(m); });
+      });
+    })();
+    </script>
 
     <!-- ============================================================
          SEQUENCES VIEW
