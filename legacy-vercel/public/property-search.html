@@ -43,6 +43,119 @@
   </nav>
 </header>
 
+<!-- ===== Commute calculator — check the drive before you fall for the house ===== -->
+<section class="cw" id="commuteWidget" aria-label="Commute calculator">
+  <div class="cw-inner">
+    <div class="cw-head">
+      <span class="cw-eyebrow">§ Commute · honest drive times</span>
+      <h2 class="cw-title">Before you fall for a place, check the drive.</h2>
+      <p class="cw-dek">Real, time-of-day drive times from the foothill towns Sara works — and statewide, any address to any address.</p>
+    </div>
+    <div class="cw-form">
+      <label class="cw-field"><span>From</span>
+        <input id="cwFrom" list="cwTowns" autocomplete="off" placeholder="Murphys — or any California address">
+      </label>
+      <span class="cw-arrow" aria-hidden="true">→</span>
+      <label class="cw-field"><span>To</span>
+        <input id="cwTo" list="cwDests" autocomplete="off" placeholder="SFO, Downtown SF — or a work address">
+      </label>
+      <label class="cw-field cw-when"><span>When</span>
+        <select id="cwWhen">
+          <option value="morning">Morning peak</option>
+          <option value="midday" selected>Mid-day</option>
+          <option value="evening">Evening peak</option>
+          <option value="friday">Fri p.m. escape</option>
+        </select>
+      </label>
+      <button id="cwGo" class="cw-go" type="button">Drive time</button>
+    </div>
+    <datalist id="cwTowns"></datalist>
+    <datalist id="cwDests"></datalist>
+    <div id="cwResult" class="cw-result" hidden></div>
+  </div>
+</section>
+<style>
+  .cw { background: var(--shell); border-bottom: 1px solid var(--rule); }
+  .cw-inner { max-width: 1120px; margin: 0 auto; padding: 34px 30px 30px; }
+  .cw-eyebrow { font-family: var(--mono); font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--brass); }
+  .cw-title { font-family: var(--serif); font-style: italic; font-weight: 300; font-size: clamp(26px, 3vw, 38px); color: var(--ink); margin: 8px 0 6px; line-height: 1.05; }
+  .cw-dek { font-size: 14.5px; color: var(--ink-soft); max-width: 640px; margin: 0 0 18px; line-height: 1.5; }
+  .cw-form { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 12px; }
+  .cw-field { display: flex; flex-direction: column; gap: 5px; flex: 1; min-width: 190px; }
+  .cw-field > span { font-family: var(--mono); font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-mute); }
+  .cw-field input, .cw-field select { font: inherit; font-size: 15px; color: var(--ink); background: #fff; border: 1px solid var(--rule-strong, #D9CFB7); padding: 11px 12px; border-radius: 2px; }
+  .cw-field input:focus, .cw-field select:focus { outline: none; border-color: var(--brass); }
+  .cw-when { flex: 0 0 170px; min-width: 150px; }
+  .cw-arrow { color: var(--ink-mute); font-size: 18px; padding-bottom: 12px; }
+  .cw-go { flex: 0 0 auto; background: var(--ink); color: var(--shell); border: none; padding: 12px 22px; font-family: var(--mono); font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase; cursor: pointer; border-radius: 2px; height: 44px; }
+  .cw-go:hover { background: var(--brass); }
+  .cw-result { margin-top: 18px; }
+  .cw-r-main { display: flex; align-items: baseline; gap: 14px; flex-wrap: wrap; }
+  .cw-r-time { font-family: var(--serif); font-style: italic; font-weight: 300; font-size: 40px; color: var(--ink); line-height: 1; }
+  .cw-r-route { font-size: 14.5px; color: var(--ink-soft); }
+  .cw-r-note { font-size: 13px; color: var(--ink-mute); margin-top: 8px; line-height: 1.5; max-width: 640px; }
+  .cw-bands { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
+  .cw-band { border: 1px solid var(--rule); background: #fff; padding: 8px 13px; border-radius: 2px; min-width: 92px; }
+  .cw-band.on { border-color: var(--ink); }
+  .cw-band .l { font-family: var(--mono); font-size: 9.5px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-mute); display: block; }
+  .cw-band .v { font-family: var(--serif); font-style: italic; font-size: 20px; color: var(--ink); }
+  .cw-band.good .v { color: #2F7A4D; } .cw-band.okay .v { color: #8A6D1E; }
+  .cw-band.tough .v { color: #A6551F; } .cw-band.bad .v { color: #9B2C2C; }
+  .cw-err { font-size: 14px; color: var(--ink-soft); background: #fff; border: 1px solid var(--rule); border-left: 3px solid var(--brass); padding: 12px 15px; }
+  @media (max-width: 640px){ .cw-arrow { display: none; } .cw-field, .cw-when, .cw-go { flex-basis: 100%; } }
+</style>
+<script src="commute-data.js"></script>
+<script>
+(function () {
+  var LC = window.LegacyCommute; if (!LC) return;
+  var $ = function (id) { return document.getElementById(id); };
+  var fromEl = $('cwFrom'), toEl = $('cwTo'), whenEl = $('cwWhen'), goEl = $('cwGo'), resEl = $('cwResult');
+  // Datalist suggestions from the honest matrix.
+  $('cwTowns').innerHTML = LC.TOWNS.map(function (t) { return '<option value="' + t.town + '">'; }).join('');
+  $('cwDests').innerHTML = LC.DESTS.map(function (d) { return '<option value="' + d.label + '">' + d.sub + '</option>'; }).join('');
+  var esc = function (s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) { return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]); }); };
+
+  function render(j, band) {
+    resEl.hidden = false;
+    if (!j || j.ok === false) {
+      var msg = (j && j.configured === false)
+        ? 'Enter one of the five foothill towns (Murphys, Arnold, Angels Camp, Copperopolis, Sutter Creek) for Sara’s honest logged times. Statewide any-address lookups are being switched on shortly.'
+        : (j && j.error === 'could_not_locate') ? 'Couldn’t find one of those places — try a fuller address (street, city, CA).'
+        : (j && j.error === 'no_route') ? 'No drivable route found between those two points.'
+        : 'Couldn’t look that up right now — please try again.';
+      resEl.innerHTML = '<div class="cw-err">' + esc(msg) + '</div>';
+      return;
+    }
+    var bandsHtml = '';
+    if (j.bands && j.bands.length) {
+      var LB = { morning: 'Morning', midday: 'Mid-day', evening: 'Evening', friday: 'Fri escape' };
+      bandsHtml = '<div class="cw-bands">' + j.bands.map(function (b) {
+        return '<div class="cw-band ' + LC.level(b.minutes) + (b.key === band ? ' on' : '') + '"><span class="l">' + esc(LB[b.key] || b.key) + '</span><span class="v">' + esc(LC.minsToHM(b.minutes)) + '</span></div>';
+      }).join('') + '</div>';
+    }
+    resEl.innerHTML =
+      '<div class="cw-r-main"><span class="cw-r-time">' + esc(LC.minsToHM(j.minutes)) + '</span>' +
+      '<span class="cw-r-route">' + esc((j.from && j.from.label) || fromEl.value) + ' → ' + esc((j.to && j.to.label) || toEl.value) +
+      (j.distance_mi ? ' · ' + j.distance_mi + ' mi' : '') + '</span></div>' +
+      bandsHtml +
+      (j.note ? '<div class="cw-r-note">' + esc(j.note) + '</div>' : '');
+  }
+
+  function run() {
+    var from = fromEl.value.trim(), to = toEl.value.trim(), band = whenEl.value;
+    if (!from || !to) { resEl.hidden = false; resEl.innerHTML = '<div class="cw-err">Enter a starting point and a destination.</div>'; return; }
+    goEl.disabled = true; goEl.textContent = 'Checking…';
+    fetch('/api/commute?from=' + encodeURIComponent(from) + '&to=' + encodeURIComponent(to) + '&depart=' + encodeURIComponent(band))
+      .then(function (r) { return r.json(); })
+      .then(function (j) { render(j, band); })
+      .catch(function () { render(null, band); })
+      .then(function () { goEl.disabled = false; goEl.textContent = 'Drive time'; });
+  }
+  goEl.addEventListener('click', run);
+  [fromEl, toEl].forEach(function (el) { el.addEventListener('keydown', function (e) { if (e.key === 'Enter') run(); }); });
+})();
+</script>
+
 <div class="idx-embed">
 <script>
   document.currentScript.replaceWith(ihfKestrel.render());
