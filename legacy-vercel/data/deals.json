@@ -1,6 +1,6 @@
 {
-  "version": 2.6,
-  "lastUpdated": "2026-07-23",
+  "version": 2.7,
+  "lastUpdated": "2026-07-24",
   "updatedBy": "Claude",
   "tasks": [
     {
@@ -239,7 +239,8 @@
       "agent": "james",
       "client": "Baldwin",
       "title": "CR#1 not showing in Allyson Overturf's (listing side) portal despite her 7/14 acknowledgment \u2014 resend/confirm it's actually filed on the seller side",
-      "done": false
+      "done": true,
+      "note": "[marked done via CRM feedback 2026-07-24]"
     },
     {
       "agent": "sara",
@@ -319,7 +320,8 @@
       "agent": "james",
       "client": "695 Feather",
       "title": "Update Commission Demand for 695 Feather \u2014 file still says 'needs escrow info'; escrow is now known: Orange Coast Title, Escrow #2473532-TS, Tanya Salgado (tanyas@octitle.com)",
-      "done": false
+      "done": true,
+      "note": "[marked done via CRM feedback 2026-07-24]"
     },
     {
       "agent": "james",
@@ -330,105 +332,112 @@
     {
       "agent": "sara",
       "client": "433 Hwy 4",
-      "title": "Download and file signed AVID from Glide — Glide notification 7/19 9:11 PM confirms all parties signed '[AVID] Agent Visual Inspection Disclosure – 1.pdf'; open Glide email (thread 19f7c38328ed5339) in Sara's Gmail and save PDF to 433 Ex folder",
+      "title": "Download and file signed AVID from Glide \u2014 Glide notification 7/19 9:11 PM confirms all parties signed '[AVID] Agent Visual Inspection Disclosure \u2013 1.pdf'; open Glide email (thread 19f7c38328ed5339) in Sara's Gmail and save PDF to 433 Ex folder",
       "done": false
     },
     {
       "agent": "james",
       "client": "Baldwin",
-      "title": "No AVID found in Baldwin EX folder — James as buyer's agent needs to create and file buyer-agent AVID before COE 8/3",
+      "title": "No AVID found in Baldwin EX folder \u2014 James as buyer's agent needs to create and file buyer-agent AVID before COE 8/3",
       "done": true,
-      "note": "Done 7/21 — Buyer AVID.pdf confirmed in Baldwin EX folder; Allyson Overturf (listing agent) sent it 7/20 10:49 PM, James acknowledged 7/21 4:35 PM."
+      "note": "Done 7/21 \u2014 Buyer AVID.pdf confirmed in Baldwin EX folder; Allyson Overturf (listing agent) sent it 7/20 10:49 PM, James acknowledged 7/21 4:35 PM."
     },
     {
       "agent": "james",
       "client": "Wendell",
-      "title": "🚨 URGENT — Judge signed Wendell court approval (7/21): Call David & Stacy Hopkins immediately with the good news. Tell them all contingency clocks start the day after Audry delivers written notice to Placer — that is imminent. Confirm lender Kim Hesser (khesser@primeres.com, 209-768-8277) is ready to move fast and ask for estimated days to close.",
-      "done": false
+      "title": "\ud83d\udea8 URGENT \u2014 Judge signed Wendell court approval (7/21): Call David & Stacy Hopkins immediately with the good news. Tell them all contingency clocks start the day after Audry delivers written notice to Placer \u2014 that is imminent. Confirm lender Kim Hesser (khesser@primeres.com, 209-768-8277) is ready to move fast and ask for estimated days to close.",
+      "done": true,
+      "note": "[marked done via CRM feedback 2026-07-24]"
     },
     {
       "agent": "james",
       "client": "Wendell",
-      "title": "🚨 URGENT — Wendell court approval imminent: Call Amanda Boitano at Placer Title (Escrow #P-704376) to confirm she is preparing for closing and get an estimated COE date once written notice arrives from Audry. Attorney needs a signed settlement statement before recording.",
-      "done": false
+      "title": "\ud83d\udea8 URGENT \u2014 Wendell court approval imminent: Call Amanda Boitano at Placer Title (Escrow #P-704376) to confirm she is preparing for closing and get an estimated COE date once written notice arrives from Audry. Attorney needs a signed settlement statement before recording.",
+      "done": true,
+      "note": "[marked done via CRM feedback 2026-07-24]"
     },
     {
       "agent": "james",
       "client": "Wendell",
-      "title": "Watch for Audry's forwarded court approval document to Amanda — the day it is delivered to buyer (written notice) starts ALL contingency clocks. Note the exact delivery date immediately; it is Day 0 for every remaining deadline.",
-      "done": false
+      "title": "Watch for Audry's forwarded court approval document to Amanda \u2014 the day it is delivered to buyer (written notice) starts ALL contingency clocks. Note the exact delivery date immediately; it is Day 0 for every remaining deadline.",
+      "done": true,
+      "note": "[marked done via CRM feedback 2026-07-24]"
     },
     {
       "agent": "sara",
       "client": "433 Hwy 4",
-      "title": "Download & file 7/20 DocuSign package (NHD sig pages + MU-PA + ADM2) — all parties signed via Authentisign; search Sara's Gmail for Authentisign completion notification",
+      "title": "Download & file 7/20 DocuSign package (NHD sig pages + MU-PA + ADM2) \u2014 all parties signed via Authentisign; search Sara's Gmail for Authentisign completion notification",
       "done": true,
-      "note": "Done 7/21 — package filed in 433 Ex folder."
+      "note": "Done 7/21 \u2014 package filed in 433 Ex folder."
     },
     {
       "agent": "sara",
       "client": "433 Hwy 4",
-      "title": "Download & file Neriah's buyer-agent AVID from Melissa Frey email 7/20 — search Gmail for '[AVID] Agent Visual Inspection' from Melissa",
+      "title": "Download & file Neriah's buyer-agent AVID from Melissa Frey email 7/20 \u2014 search Gmail for '[AVID] Agent Visual Inspection' from Melissa",
       "done": true,
-      "note": "Done 7/21 — received 7/20 from Melissa Frey (melissa.frey@norcalgold.com); sent to sellers Jim & Yvonne Heryford for signature acknowledgment. Awaiting return."
+      "note": "Done 7/21 \u2014 received 7/20 from Melissa Frey (melissa.frey@norcalgold.com); sent to sellers Jim & Yvonne Heryford for signature acknowledgment. Awaiting return."
     },
     {
       "agent": "sara",
       "client": "Skyline",
-      "title": "Reply to Lisa Clark HOA vacation rental inquiry — email 7/21 2:31 PM UNREAD; answer whether vacation rentals are allowed at 467 Skyline",
+      "title": "Reply to Lisa Clark HOA vacation rental inquiry \u2014 email 7/21 2:31 PM UNREAD; answer whether vacation rentals are allowed at 467 Skyline",
       "done": true,
-      "note": "Done 7/21 — Sara replied to Lisa Clark (lisaclarkmurphys@gmail.com)."
+      "note": "Done 7/21 \u2014 Sara replied to Lisa Clark (lisaclarkmurphys@gmail.com)."
     },
     {
       "agent": "james",
       "client": "Baldwin",
-      "title": "Watch for contractor repair bid from Kim Hesser — expected today 7/21; forward to lender and Shomari for 203(k) underwriting",
+      "title": "Watch for contractor repair bid from Kim Hesser \u2014 expected today 7/21; forward to lender and Shomari for 203(k) underwriting",
       "done": false
     },
     {
       "agent": "sara",
       "client": "Hovey",
-      "title": "Hovey hearing FRIDAY 7/25 at 1:30 PM — Caroline Selfridge wants pre-hearing meeting; coordinate with Mike Fluetsch on what to bring and say",
+      "title": "Hovey hearing FRIDAY 7/25 at 1:30 PM \u2014 Caroline Selfridge wants pre-hearing meeting; coordinate with Mike Fluetsch on what to bring and say",
       "done": true,
-      "note": "Removed 7/22 — Sara confirmed this hearing is NOT related to the Hovey/Emco file. Caroline Selfridge item is a separate matter."
+      "note": "Removed 7/22 \u2014 Sara confirmed this hearing is NOT related to the Hovey/Emco file. Caroline Selfridge item is a separate matter."
     },
     {
       "agent": "sara",
       "client": "433 Hwy 4",
-      "title": "Chase sellers Jim & Yvonne Heryford for signed acknowledgment on Neriah's buyer-agent AVID — sent to Herfords 7/21; signed copy must come back and be filed in Ex before COE 8/10.",
-      "done": false
+      "title": "Chase sellers Jim & Yvonne Heryford for signed acknowledgment on Neriah's buyer-agent AVID \u2014 sent to Herfords 7/21; signed copy must come back and be filed in Ex before COE 8/10.",
+      "done": true,
+      "note": "[marked done via CRM feedback 2026-07-24]"
     },
     {
       "agent": "sara",
       "client": "Latigo",
-      "title": "COE THURSDAY 7/24 — watch for signing instructions from Chase International (Mitzi: mwindley@chaseinternational.com). Call Mitzi if nothing in inbox by noon today 7/22.",
-      "done": false
+      "title": "COE THURSDAY 7/24 \u2014 watch for signing instructions from Chase International (Mitzi: mwindley@chaseinternational.com). Call Mitzi if nothing in inbox by noon today 7/22.",
+      "done": true,
+      "note": "[marked done via CRM feedback 2026-07-24]"
     },
     {
       "agent": "sara",
       "client": "695 Feather",
-      "title": "Sign OC Title escrow DocuSign — Commission Instructions (broker sig required) + NHD signature pages. From Tanya Salgado (tanyas@octitle.com), escrow #2473532-TS. Received 7/21. Do today — COE timeline active.",
+      "title": "Sign OC Title escrow DocuSign \u2014 Commission Instructions (broker sig required) + NHD signature pages. From Tanya Salgado (tanyas@octitle.com), escrow #2473532-TS. Received 7/21. Do today \u2014 COE timeline active.",
       "done": true,
-      "note": "Done 7/21 — Sara signed."
+      "note": "Done 7/21 \u2014 Sara signed."
     },
     {
       "agent": "james",
       "client": "Baldwin",
-      "title": "Update deals.json contacts.lender — confirmed Kimberly Hesser, Prime Residential (khesser@primeres.com, 209-768-8277); same lender as Wendell per Kim's 7/20 email to Allyson.",
-      "done": false
+      "title": "Update deals.json contacts.lender \u2014 confirmed Kimberly Hesser, Prime Residential (khesser@primeres.com, 209-768-8277); same lender as Wendell per Kim's 7/20 email to Allyson.",
+      "done": true,
+      "note": "[marked done via CRM feedback 2026-07-24]"
     },
     {
       "agent": "james",
       "client": "Wendell",
-      "title": "Update deals.json BEO alert — Buyer Early Occupancy Addendum is now fully executed via Authentisign (7/20, Brandi Jenkins forwarding). Change language from 'arranged' to 'executed'.",
+      "title": "Update deals.json BEO alert \u2014 Buyer Early Occupancy Addendum is now fully executed via Authentisign (7/20, Brandi Jenkins forwarding). Change language from 'arranged' to 'executed'.",
       "done": false
     },
     {
       "agent": "sara",
       "client": "433 Hwy 4",
-      "title": "🔥 LOAN CONTINGENCY DUE TODAY 7/23: Sara replied 1:30 AM agreeing to $100K seller-carry note (6% IO, 5yr/30yr amort, no prepay penalty). A CR3 or signed written extension must still be executed TODAY — email agreement ≠ formal contingency removal. Confirm with Neriah Davis and Randall LeBlanc (Atlas Mortgage) that a formal removal or extension is forthcoming. Escalate by 3 PM if nothing received.",
-      "done": false,
-      "dateAdded": "2026-07-23"
+      "title": "\ud83d\udd25 LOAN CONTINGENCY DUE TODAY 7/23: Sara replied 1:30 AM agreeing to $100K seller-carry note (6% IO, 5yr/30yr amort, no prepay penalty). A CR3 or signed written extension must still be executed TODAY \u2014 email agreement \u2260 formal contingency removal. Confirm with Neriah Davis and Randall LeBlanc (Atlas Mortgage) that a formal removal or extension is forthcoming. Escalate by 3 PM if nothing received.",
+      "done": true,
+      "dateAdded": "2026-07-23",
+      "note": "[marked done via CRM feedback 2026-07-24]"
     },
     {
       "agent": "sara",
@@ -440,21 +449,23 @@
     {
       "agent": "sara",
       "client": "9568 Sheep Ranch",
-      "title": "Cancellation instructions STILL NOT RECEIVED by Placer Title (Ashley Cuslidge confirmed 7/23 10:13 AM — 'Good morning, I haven’t yet'). Sara resent the signed cancellation this morning. Call Ashley directly: 209-736-9553. Deposit release blocked until escrow closes out.",
-      "done": false,
-      "dateAdded": "2026-07-23"
+      "title": "Cancellation instructions STILL NOT RECEIVED by Placer Title (Ashley Cuslidge confirmed 7/23 10:13 AM \u2014 'Good morning, I haven\u2019t yet'). Sara resent the signed cancellation this morning. Call Ashley directly: 209-736-9553. Deposit release blocked until escrow closes out.",
+      "done": true,
+      "dateAdded": "2026-07-23",
+      "note": "[marked done via CRM feedback 2026-07-24]"
     },
     {
       "agent": "sara",
       "client": "Latigo",
-      "title": "RE-FLAG 7/23: Buyer-agent AVID from Kylie Windley NOT in EX folder — bash scan this morning found only LA Avid.pdf x2 (Sara’s listing-agent AVID), no BA AVID present. Prior task was marked done 7/21 but file does not appear on disk. COE TOMORROW 7/24 — contact Kylie immediately: kyliewindley@gmail.com / 209-304-7971.",
-      "done": false,
-      "dateAdded": "2026-07-23"
+      "title": "RE-FLAG 7/23: Buyer-agent AVID from Kylie Windley NOT in EX folder \u2014 bash scan this morning found only LA Avid.pdf x2 (Sara\u2019s listing-agent AVID), no BA AVID present. Prior task was marked done 7/21 but file does not appear on disk. COE TOMORROW 7/24 \u2014 contact Kylie immediately: kyliewindley@gmail.com / 209-304-7971.",
+      "done": true,
+      "dateAdded": "2026-07-23",
+      "note": "[marked done via CRM feedback 2026-07-24]"
     },
     {
       "agent": "sara",
       "client": "467 Skyline",
-      "title": "Follow up with Kerstin Breidenthal — was traveling ~2 weeks from ~7/8, wanted showing on return (~7/23 today). No contact in 48 hrs. Reach out proactively. Also: Lisa Clark (lisaclarkmurphys@gmail.com) confirmed HOA allows vacation rentals 7/21 — follow up to schedule a showing.",
+      "title": "Follow up with Kerstin Breidenthal \u2014 was traveling ~2 weeks from ~7/8, wanted showing on return (~7/23 today). No contact in 48 hrs. Reach out proactively. Also: Lisa Clark (lisaclarkmurphys@gmail.com) confirmed HOA allows vacation rentals 7/21 \u2014 follow up to schedule a showing.",
       "done": false,
       "dateAdded": "2026-07-23"
     },
@@ -462,8 +473,45 @@
       "agent": "james",
       "client": "695 Feather",
       "title": "695 Feather DocuSign escrow pkg #2473532-TS COMPLETED by all parties 7/22 (buyers Ashley Robinson & Bert Andrews were camping; signed on return per DocuSign completion email from OC Title). Download the completed package from DocuSign and file in 695 Feather Ex folder.",
-      "done": false,
-      "dateAdded": "2026-07-23"
+      "done": true,
+      "dateAdded": "2026-07-23",
+      "note": "[marked done via CRM feedback 2026-07-24]"
+    },
+    {
+      "agent": "sara",
+      "client": "433 Hwy 4",
+      "title": "Download and file ETA No. 3 from Glide \u2014 all parties signed 7/24 12:34 AM per Glide notification; open Glide email and save [ETA] Extension of Time Amendment No. 3.pdf to 433 Ex folder",
+      "done": false
+    },
+    {
+      "agent": "sara",
+      "client": "433 Hwy 4",
+      "title": "Review UNREAD SFA + Price Reduction Addendum from Neriah (email 7/24 12:58 AM, UNREAD) \u2014 confirm interest-only terms ($1.2M price, $100K at 6% interest-only/5yr/30yr/no prepay/2nd DOT records with 1st), then forward to Jim & Yvonne Heryford for seller signatures",
+      "done": false
+    },
+    {
+      "agent": "james",
+      "client": "695 Feather",
+      "title": "Download signed ADM #2 from Authentisign (completion email 7/24 1:28 AM \u2014 removes Bert Andrews, Ashley holds title alone) and file in 695 Feather Ex folder",
+      "done": false
+    },
+    {
+      "agent": "james",
+      "client": "695 Feather",
+      "title": "Confirm ADM #1 execution \u2014 sent for signatures 7/24 12:30 AM; no Authentisign completion confirmation yet; also clarify 'ADM #21 from Dee' per OC Title Tanya Salgado email 7/23",
+      "done": false
+    },
+    {
+      "agent": "james",
+      "client": "695 Feather",
+      "title": "CRITICAL FILE GAP: Chase Dee Bradley (dee@caltel.com) for seller disclosures \u2014 TDS, SPQ, NHD + sig page, and LA AVID all missing from 695 Feather Ex folder; also file James BA AVID; cash deal nearing close",
+      "done": false
+    },
+    {
+      "agent": "sara",
+      "client": "Latigo",
+      "title": "Post-COE file remediation: BA AVID from Kylie Windley still not in Ex \u2014 Kylie mis-named her LA AVID as BA AVID; after COE confirmed, request true BA AVID from Kylie (kyliewindley@gmail.com / 209-304-7971) and file in Latigo Ex",
+      "done": false
     }
   ],
   "deals": [
@@ -656,11 +704,11 @@
         },
         {
           "date": "",
-          "label": "Judge has signed — awaiting written notice delivery",
+          "label": "Judge has signed \u2014 awaiting written notice delivery",
           "status": "next",
           "col": "contingencies",
           "badge": "Coming Soon",
-          "desc": "The judge signed the court approval document (7/21). Audry (listing agent) is waiting for the copy from the attorney's office to forward to Placer Title. Every deadline in this deal begins the first day after written notice is delivered to the buyer — that day is coming very soon."
+          "desc": "The judge signed the court approval document (7/21). Audry (listing agent) is waiting for the copy from the attorney's office to forward to Placer Title. Every deadline in this deal begins the first day after written notice is delivered to the buyer \u2014 that day is coming very soon."
         },
         {
           "date": "",
@@ -683,7 +731,7 @@
         "author": "james",
         "status": "draft",
         "updated": "2026-07-18",
-        "body": "David and Stacy, great news — the judge has signed the court approval document. We are waiting for the attorney's office to deliver a copy to escrow, and the moment written notice is delivered, every deadline officially begins and we will move quickly to close. James will be in touch with your closing timeline as soon as we have the document in hand. Please make sure your lender has everything they need — we want to be ready to move fast."
+        "body": "David and Stacy, great news \u2014 the judge has signed the court approval document. We are waiting for the attorney's office to deliver a copy to escrow, and the moment written notice is delivered, every deadline officially begins and we will move quickly to close. James will be in touch with your closing timeline as soon as we have the document in hand. Please make sure your lender has everything they need \u2014 we want to be ready to move fast."
       },
       "clientTasks": [
         {
@@ -1131,7 +1179,7 @@
         "author": "sara",
         "status": "draft",
         "updated": "2026-07-19",
-        "body": "Guy and Adrianna, we have a new closing date: Thursday, July 24. Every contingency is removed and your appraisal came in above your purchase price — you are in great shape. Watch for signing instructions and wire details from Placer Title very soon."
+        "body": "Guy and Adrianna, we have a new closing date: Thursday, July 24. Every contingency is removed and your appraisal came in above your purchase price \u2014 you are in great shape. Watch for signing instructions and wire details from Placer Title very soon."
       },
       "clientTasks": [
         {
@@ -2446,7 +2494,7 @@
         },
         {
           "date": "2026-07-23",
-          "label": "Price confirmed — $170,000 cash",
+          "label": "Price confirmed \u2014 $170,000 cash",
           "status": "done",
           "col": "contingencies",
           "badge": "Done",
@@ -2465,7 +2513,7 @@
         "author": "james",
         "status": "draft",
         "updated": "2026-07-23",
-        "body": "Ashley and Bert, you are under contract at $170,000 cash on 695 Feather Dr. Escrow is open with Orange Coast Title (#2473532-TS, Tanya Salgado). Your earnest money is in. Disclosures are on file. Watch for closing instructions from escrow — we are moving toward close."
+        "body": "Ashley and Bert, you are under contract at $170,000 cash on 695 Feather Dr. Escrow is open with Orange Coast Title (#2473532-TS, Tanya Salgado). Your earnest money is in. Disclosures are on file. Watch for closing instructions from escrow \u2014 we are moving toward close."
       },
       "clientTasks": [
         {
@@ -2510,20 +2558,62 @@
       },
       "correspondence": [],
       "clientDocuments": [
-        {"name": "Purchase Agreement (RPA)", "url": "https://legacycalifornia.com/docs/695-feather/purchase-agreement-rpa.pdf"},
-        {"name": "Seller Counter Offer 1", "url": "https://legacycalifornia.com/docs/695-feather/seller-counter-offer-1.pdf"},
-        {"name": "Buyer Representation Agreement (BRBC)", "url": "https://legacycalifornia.com/docs/695-feather/buyer-representation-agreement.pdf"},
-        {"name": "Earnest Money Deposit Receipt", "url": "https://legacycalifornia.com/docs/695-feather/emd-receipt.pdf"},
-        {"name": "Escrow Holder Acknowledgment", "url": "https://legacycalifornia.com/docs/695-feather/escrow-holder-acknowledgment.pdf"},
-        {"name": "Preliminary Title Report", "url": "https://legacycalifornia.com/docs/695-feather/preliminary-title-report.pdf"},
-        {"name": "Natural Hazard Disclosure (Full Report)", "url": "https://legacycalifornia.com/docs/695-feather/nhd-report-full.pdf"},
-        {"name": "Natural Hazard Disclosure — Signature Page", "url": "https://legacycalifornia.com/docs/695-feather/nhd-signature-page.pdf"},
-        {"name": "Transfer Disclosure Statement & Addendum 1 Acknowledgment", "url": "https://legacycalifornia.com/docs/695-feather/transfer-disclosure-statement.pdf"},
-        {"name": "Fire Hardening & Defensible Space Disclosure", "url": "https://legacycalifornia.com/docs/695-feather/fire-hardening-disclosure.pdf"},
-        {"name": "Lead-Based Paint Disclosure", "url": "https://legacycalifornia.com/docs/695-feather/lead-based-paint-disclosure.pdf"},
-        {"name": "Statewide Buyer & Seller Advisory", "url": "https://legacycalifornia.com/docs/695-feather/statewide-buyer-seller-advisory.pdf"},
-        {"name": "Market Conditions Advisory", "url": "https://legacycalifornia.com/docs/695-feather/market-conditions-advisory.pdf"},
-        {"name": "Water Heater & Smoke Detector Compliance", "url": "https://legacycalifornia.com/docs/695-feather/water-heater-smoke-detector.pdf"}
+        {
+          "name": "Purchase Agreement (RPA)",
+          "url": "https://legacycalifornia.com/docs/695-feather/purchase-agreement-rpa.pdf"
+        },
+        {
+          "name": "Seller Counter Offer 1",
+          "url": "https://legacycalifornia.com/docs/695-feather/seller-counter-offer-1.pdf"
+        },
+        {
+          "name": "Buyer Representation Agreement (BRBC)",
+          "url": "https://legacycalifornia.com/docs/695-feather/buyer-representation-agreement.pdf"
+        },
+        {
+          "name": "Earnest Money Deposit Receipt",
+          "url": "https://legacycalifornia.com/docs/695-feather/emd-receipt.pdf"
+        },
+        {
+          "name": "Escrow Holder Acknowledgment",
+          "url": "https://legacycalifornia.com/docs/695-feather/escrow-holder-acknowledgment.pdf"
+        },
+        {
+          "name": "Preliminary Title Report",
+          "url": "https://legacycalifornia.com/docs/695-feather/preliminary-title-report.pdf"
+        },
+        {
+          "name": "Natural Hazard Disclosure (Full Report)",
+          "url": "https://legacycalifornia.com/docs/695-feather/nhd-report-full.pdf"
+        },
+        {
+          "name": "Natural Hazard Disclosure \u2014 Signature Page",
+          "url": "https://legacycalifornia.com/docs/695-feather/nhd-signature-page.pdf"
+        },
+        {
+          "name": "Transfer Disclosure Statement & Addendum 1 Acknowledgment",
+          "url": "https://legacycalifornia.com/docs/695-feather/transfer-disclosure-statement.pdf"
+        },
+        {
+          "name": "Fire Hardening & Defensible Space Disclosure",
+          "url": "https://legacycalifornia.com/docs/695-feather/fire-hardening-disclosure.pdf"
+        },
+        {
+          "name": "Lead-Based Paint Disclosure",
+          "url": "https://legacycalifornia.com/docs/695-feather/lead-based-paint-disclosure.pdf"
+        },
+        {
+          "name": "Statewide Buyer & Seller Advisory",
+          "url": "https://legacycalifornia.com/docs/695-feather/statewide-buyer-seller-advisory.pdf"
+        },
+        {
+          "name": "Market Conditions Advisory",
+          "url": "https://legacycalifornia.com/docs/695-feather/market-conditions-advisory.pdf"
+        },
+        {
+          "name": "Water Heater & Smoke Detector Compliance",
+          "url": "https://legacycalifornia.com/docs/695-feather/water-heater-smoke-detector.pdf"
+        }
       ],
       "notes": "Pivot for Ashley Robinson (James's buyer) after the 992 Iroquois offer went dead 7/12. Offer sent to listing agent Dee 7/12 for 695 Feather Dr, Copperopolis. Docs in _Offers/Buy Side/Robinson 695 Feather Dr/. UPDATE 7/18 (from James's 7/18 Gmail review, cross-checked against Sara's Gmail): Offer accepted 7/15; escrow opened at Orange Coast Title Company of Southern California (Santa Ana), Escrow #2473532-TS, escrow officer Tanya Salgado (tanyas@octitle.com) \u2014 switched from Placer Title because the property was acquired via tax sale last year and Placer is restricted from insuring/escrowing such properties for 3-5 years. EMD confirmed received by escrow 7/16. ClosingLock wire instructions sent to both buyers 7/15-7/16; Ashley Robinson submitted proof of funds 7/16. NOT yet confirmed: final accepted purchase price/terms (a preliminary net sheet referenced a $170,000 cash-purchase figure sent 7/15 before escrow opened \u2014 not verified as final); what listing agent Dee Bradley committed to doing \"Monday\" (7/20) per her 7/17 email; and what the \"Page 17\" document escrow sent 7/17 actually is (likely the RPA escrow acknowledgment James requested, not confirmed).",
       "alerts": [
