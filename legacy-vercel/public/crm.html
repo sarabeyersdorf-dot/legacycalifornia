@@ -98,10 +98,15 @@
       </div>
     </div>
   </aside>
+  <!-- Dimmer behind the slide-in nav drawer (phones only) -->
+  <div class="nav-scrim" data-nav-scrim aria-hidden="true"></div>
 
   <!-- ============ MAIN ============ -->
   <main class="app-main crm-main">
     <div class="app-topbar">
+      <button class="nav-toggle" data-nav-toggle aria-label="Menu" aria-expanded="false">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+      </button>
       <div class="app-search">
         <span style="font-family:var(--mono);font-size:11px;">⌕</span>
         <input placeholder="Search leads by name, email, area…" data-global-search>
@@ -1764,14 +1769,29 @@
     .cc-vhint { margin-top: 10px; font-size: 11px; color: var(--ink-mute); line-height: 1.5; }
     .cc-vhint.warn { color: #A23B26; }
     .calm-grid { display:grid; grid-template-columns:repeat(7,1fr); gap:1px; background:var(--rule); border:1px solid var(--rule); }
-    .calm-cell { background:var(--shell); min-height:96px; padding:6px 7px; font-family:var(--sans); }
+    /* min-width:0 lets the 1fr tracks shrink — without it a cell's min-content
+       (a no-wrap event title) blows the 7 columns past the viewport and the
+       week's last days scroll off-screen. */
+    .calm-cell { background:var(--shell); min-height:96px; padding:6px 7px; font-family:var(--sans); min-width:0; overflow:hidden; }
     .calm-cell.other { background:var(--linen); opacity:.75; }
     .calm-cell.today { outline:2px solid var(--brass); outline-offset:-2px; }
     .calm-num { font-size:11px; font-weight:600; color:var(--ink-mute); }
     .calm-cell.today .calm-num { color:var(--brass); }
     .calm-ev { display:block; font-size:10.5px; line-height:1.35; padding:2px 5px; margin-top:3px; border-radius:3px; border-left:3px solid var(--brass); background:var(--linen); color:var(--ink); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; cursor:pointer; }
     .calm-more { font-size:10px; color:var(--ink-mute); margin-top:2px; }
-    .calm-head { display:grid; grid-template-columns:repeat(7,1fr); font-family:var(--sans); font-size:10.5px; font-weight:600; letter-spacing:.08em; text-transform:uppercase; color:var(--ink-mute); padding:0 1px 6px; }
+    /* Header must share the grid's 1px gaps + 1px side border, or the day
+       labels drift across the columns below (worse the narrower the screen). */
+    .calm-head { display:grid; grid-template-columns:repeat(7,1fr); gap:1px; font-family:var(--sans); font-size:10.5px; font-weight:600; letter-spacing:.08em; text-transform:uppercase; color:var(--ink-mute); padding:0 1px 6px; }
+    .calm-head span { text-align:center; }
+    /* Phone: shrink the month so all seven columns fit the screen. Defined here
+       (after the base rules, in the same inline block) so it wins over them. */
+    @media (max-width: 760px) {
+      .calm-cell { min-height:62px; padding:4px 3px; }
+      .calm-num { font-size:11px; }
+      .calm-ev { font-size:9px; padding:1px 3px; margin-top:2px; border-left-width:2px; }
+      .calm-more { font-size:9px; }
+      .calm-head { font-size:8.5px; letter-spacing:.02em; }
+    }
     .cc-extras { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 14px; margin-top: 16px; }
     .cc-panel { background: var(--shell); border: 1px solid var(--rule); padding: 16px 18px; }
     .cc-tl-item { display: flex; gap: 10px; align-items: baseline; padding: 6px 0; border-bottom: 1px dashed var(--rule); font-family: var(--sans); font-size: 13.5px; }
@@ -2935,6 +2955,21 @@ function showView(e, name, fromBack) {
 document.addEventListener('click', function (e) {
   if (e.target.closest('[data-nav-back]')) { e.preventDefault(); navBack(); }
 });
+// Mobile nav drawer ("the desk") — hamburger opens it, scrim / nav-tap / Esc close it.
+(function () {
+  function setNav(open) {
+    document.body.classList.toggle('nav-open', open);
+    var t = document.querySelector('[data-nav-toggle]');
+    if (t) t.setAttribute('aria-expanded', open ? 'true' : 'false');
+  }
+  document.addEventListener('click', function (e) {
+    if (e.target.closest('[data-nav-toggle]')) { e.preventDefault(); setNav(!document.body.classList.contains('nav-open')); return; }
+    if (e.target.closest('[data-nav-scrim]')) { setNav(false); return; }
+    // Any tap inside the sidebar nav navigates — close the drawer after.
+    if (e.target.closest('.app-side .app-side-nav a')) { setNav(false); }
+  });
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape') setNav(false); });
+})();
 // The deal page (client portal + agent console bar) is THE place to work a
 // deal. Any legacy caller of openCommandCenter lands there too.
 window.openDealByKey = function (key) {

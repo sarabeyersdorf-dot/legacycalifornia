@@ -560,6 +560,21 @@
 .calw-ev.deal .t { color: rgba(26,23,20,0.6); }
 .calw-ev.deal .ti { color: #1A1714; font-style: italic; font-family: var(--serif); }
 
+/* ---- Calendar on a phone ---- */
+@media (max-width: 760px) {
+  .cal { padding: 16px 14px 40px; }
+  /* Header controls stack cleanly instead of colliding */
+  .cal-h { align-items: flex-start; gap: 12px; }
+  .cal-h-title { font-size: 23px; }
+  /* Week view: 7 narrow columns are unreadable — keep each day a legible width
+     and let the whole grid scroll sideways so Sat/Sun are reachable. Head and
+     body share the min-width so their columns stay aligned as you scroll. */
+  .cal-week { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  .calw-head, .calw-grid { min-width: 660px; }
+  /* Month-view (.calm-*) phone sizing lives in crm.html's inline <style>,
+     which loads after this file — a rule here would be overridden. */
+}
+
 /* View-by-deal dropdown */
 .cal-deal-select {
   font-family: var(--mono); font-size: 10.5px; letter-spacing: 0.06em;
@@ -1224,14 +1239,17 @@ body { overflow: hidden; }
 .lead-detail  { height: 100%; overflow-y: auto; }
 .lead-profile { height: 100%; overflow-y: auto; }
 
+/* The full desktop nav ("the desk") — a hamburger drawer on a phone. Hidden
+   off-canvas by default so no view has the whole nav dumped under it; the
+   4-pillar bottom bar + this drawer are the phone's navigation. */
+.nav-toggle { display: none; }
+.nav-scrim { display: none; }
+
 /* Phone: the fixed 3-pane can't fit — fall back to one natural scroll */
 @media (max-width: 760px) {
   html, body { overflow-x: hidden; }
   body { overflow-y: auto; }
-  /* Content first, nav below — land on the search + inbox, not a long nav scroll */
-  .app { height: auto; min-height: 100vh; display: flex; flex-direction: column-reverse; overflow: visible; }
-  .app-side { border-right: none; border-top: 1px solid var(--rule); }
-  .app-side { position: static; height: auto; overflow: visible; }
+  .app { height: auto; min-height: 100vh; display: block; overflow: visible; }
   .app-main { height: auto; overflow: visible; }
   .crm-view.on,
   .crm-view[data-view="inbox"].on { overflow: visible; }
@@ -1239,16 +1257,36 @@ body { overflow: hidden; }
   .lead-list, .lead-detail, .lead-profile { height: auto; overflow: visible; width: 100%; }
   .lead-list { border-right: none; border-bottom: 1px solid var(--rule); }
   .lead-profile { border-top: 1px solid var(--rule); border-left: none; }
-  /* Topbar wraps: full-width search on its own row, actions below */
-  .app-topbar { flex-wrap: wrap; gap: 10px 8px; padding: 12px 16px; }
-  .app-search { min-width: 0; flex: 1 1 100%; }
-  /* The horizontal view-tab strip scrolls instead of overflowing the page */
+  /* Topbar: hamburger + search share a row, actions wrap below */
+  .app-topbar { flex-wrap: wrap; gap: 10px 8px; padding: 12px 16px; align-items: center; }
+  .app-search { min-width: 0; flex: 1 1 200px; }
   .crm-tabs { overflow-x: auto; -webkit-overflow-scrolling: touch; }
-  /* Compact the nav so you reach content without a long scroll */
-  .app-side { padding: 14px 0; }
+
+  /* Hamburger — only on a phone */
+  .nav-toggle {
+    display: inline-flex; align-items: center; justify-content: center;
+    flex: 0 0 auto; width: 40px; height: 40px; padding: 0;
+    background: var(--shell); border: 1px solid var(--rule); border-radius: 8px;
+    color: var(--ink); cursor: pointer; -webkit-tap-highlight-color: transparent;
+  }
+  .nav-toggle svg { width: 20px; height: 20px; }
+
+  /* Sidebar → off-canvas slide-in drawer */
+  .app-side {
+    position: fixed; top: 0; left: 0; bottom: 0; z-index: 130;
+    width: 84%; max-width: 320px; height: 100%; overflow-y: auto;
+    background: var(--shell); border-right: 1px solid var(--rule); border-top: none;
+    transform: translateX(-100%); transition: transform .22s ease;
+    box-shadow: 2px 0 24px rgba(20,18,15,.16); padding: 14px 0;
+    -webkit-overflow-scrolling: touch;
+  }
+  body.nav-open .app-side { transform: translateX(0); }
+  .nav-scrim { position: fixed; inset: 0; z-index: 120; background: rgba(20,18,15,.5); }
+  body.nav-open .nav-scrim { display: block; }
+
   .app-side-brand { padding: 0 20px 14px; }
   .app-side-section { padding: 12px 20px 5px; }
-  .app-side-nav a { padding: 7px 14px; font-size: 13px; }
+  .app-side-nav a { padding: 9px 20px; font-size: 14px; }
 }
 
 /* ============================================================
