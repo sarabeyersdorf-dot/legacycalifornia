@@ -127,6 +127,34 @@ counter), NOT escrow open. All keys optional; keep it as accurate as you can:
   deadlines but flags them `(basis: escrow open — verify)` — add `"acceptance"`
   as soon as you have it to make them authoritative.
 
+## 1c. Deal team contacts (`"contacts"`) — pull from email comms
+
+Add a `"contacts"` object to the **deal** so the client portal's **Your team**
+block can show reachable contact info for the escrow officer and co-op agent.
+**Harvest these from the deal's email threads** — the escrow officer's signature,
+the title company's opening email (which carries the **escrow / file number**),
+and the buyer's-agent emails. As soon as you see an email address, phone number,
+or escrow number in a deal's correspondence, capture it here. All keys optional:
+
+```json
+"contacts": {
+  "escrow":       "Jane Ramirez",
+  "escrowEmail":  "jramirez@fidelitytitle.com",
+  "escrowPhone":  "209-555-0100",
+  "escrowNumber": "ESC-2026-0433",
+  "title":        "Fidelity National Title",
+  "coAgent":      "John Smith",
+  "coAgentEmail": "john@remax.com",
+  "coAgentPhone": "209-555-0200"
+}
+```
+
+- The **agent's** own email + phone always show (from the agents table) — no
+  exceptions — so you don't need to add Sara/James here.
+- `escrowNumber` renders as the escrow member's **File #** in the portal.
+- Only what you provide shows a Call / Email link; a member with just a name
+  shows name + role. Fill in email/phone the moment a deal's emails reveal them.
+
 ## 2. Listing media (so photos / videos load in the CRM)
 
 Add to the **deal** object:

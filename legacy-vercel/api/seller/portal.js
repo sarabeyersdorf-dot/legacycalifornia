@@ -439,6 +439,10 @@ export default async function handler(req, res) {
       phone_label: m.phone || '', email_label: m.email || '',
       phone_href: telHref(m.phone), email_href: m.email ? 'mailto:' + m.email : ''
     });
+    // Escrow / co-agent contact details come from the deal's `contacts` object
+    // (Cowork extracts email/phone/escrow-# from email comms into deals.json).
+    const ct = (deal.contacts && typeof deal.contacts === 'object' && !Array.isArray(deal.contacts)) ? deal.contacts : {};
+
     const team = [];
     team.push(teamMember({
       name: agentName,
@@ -446,8 +450,26 @@ export default async function handler(req, res) {
       access: deal.agent === 'james' ? 'Agent' : 'Broker',
       phone: agentPhone, email: agentEmail
     }));
-    if (deal.escrow_officer) team.push(teamMember({ name: sanitize(deal.escrow_officer), sub: 'Escrow / Title', access: 'Escrow' }));
-    if (deal.co_agent)       team.push(teamMember({ name: sanitize(deal.co_agent), sub: "Buyer's side", access: 'Buyer side' }));
+
+    const escrowName = ct.escrow || deal.escrow_officer;
+    if (escrowName) {
+      const house = ct.title || deal.title_company;
+      const fileNo = ct.escrowNumber ? ' · File #' + sanitize(String(ct.escrowNumber)) : '';
+      team.push(teamMember({
+        name: sanitize(escrowName),
+        sub: (house ? sanitize(house) + ' · Escrow' : 'Escrow / Title') + fileNo,
+        access: 'Escrow',
+        phone: sanitize(ct.escrowPhone || ''), email: sanitize(ct.escrowEmail || '')
+      }));
+    }
+
+    const coName = ct.coAgent || deal.co_agent;
+    if (coName) {
+      team.push(teamMember({
+        name: sanitize(coName), sub: "Buyer's side", access: 'Buyer side',
+        phone: sanitize(ct.coAgentPhone || ''), email: sanitize(ct.coAgentEmail || '')
+      }));
+    }
 
     const documentsArr = docs.map((d) => {
       const raw = (d.doc_url && /^(https?:\/\/|\/docs\/)/i.test(d.doc_url)) ? d.doc_url : '';

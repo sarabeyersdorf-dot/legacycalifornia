@@ -103,6 +103,10 @@ function mapDeal(d) {
     escrow_officer: c.escrow || null,
     title_company: c.title || null,
     co_agent: c.coAgent || null,
+    // Full team-contact object (escrow/co-agent email + phone, escrow file #),
+    // written verbatim so the portal Your-team block can show reachable info.
+    // Cowork populates this from email comms.
+    contacts: (d.contacts && typeof d.contacts === 'object') ? d.contacts : null,
     mls_number: d.mls || d.mlsNumber || d.mls_number || null,
     loan_contingency_days: d.id === '433-hwy4' ? 25 : 17,
     notes_internal: d.notes || null,
@@ -334,8 +338,8 @@ export default async function handler(req, res) {
         // referenced before its migration runs, retry without them rather than
         // dropping the whole deal — a missing column must never blank the list.
         // They're restored automatically on the next sync once migrated.
-        if (wErr && /(listing_meta|timeline|milestones|agent_note|client_tasks|good_to_know)/i.test(wErr.message || '')) {
-          const { listing_meta, timeline, milestones, agent_note, client_tasks, good_to_know, ...safe } = mapped;
+        if (wErr && /(listing_meta|timeline|milestones|agent_note|client_tasks|good_to_know|contacts)/i.test(wErr.message || '')) {
+          const { listing_meta, timeline, milestones, agent_note, client_tasks, good_to_know, contacts, ...safe } = mapped;
           ({ error: wErr, id: dealId } = await writeDeal(safe));
         }
         if (wErr) throw new Error(`${ex ? 'update' : 'insert'}: ${wErr.message}`);
