@@ -1,5 +1,5 @@
 {
-  "version": 2.7,
+  "version": 2.9,
   "lastUpdated": "2026-07-24",
   "updatedBy": "Claude",
   "tasks": [
@@ -333,7 +333,8 @@
       "agent": "sara",
       "client": "433 Hwy 4",
       "title": "Download and file signed AVID from Glide \u2014 Glide notification 7/19 9:11 PM confirms all parties signed '[AVID] Agent Visual Inspection Disclosure \u2013 1.pdf'; open Glide email (thread 19f7c38328ed5339) in Sara's Gmail and save PDF to 433 Ex folder",
-      "done": false
+      "done": true,
+      "note": "Done 7/24 \u2014 added to Homeligh disclosure package; T and Neriah notified it is there. Still needs buyer (Elizabeth Dawson) signature to complete"
     },
     {
       "agent": "james",
@@ -442,9 +443,17 @@
     {
       "agent": "sara",
       "client": "433 Hwy 4",
-      "title": "Seller-carry structure needs a written addendum: $100K note, 6% interest-only, 5-year term, 30-yr amortized, no prepayment penalty, Sara wants to record a 2nd DOT. Lender (Atlas Mortgage) wants this to fund 30 days post-closing. Coordinate addendum with title (how 2nd DOT affects close) and get it drafted before COE 8/10.",
+      "title": "433 seller-carry REVISED 7/24: Herfords want PRIVATE $100K note — not through escrow. ADD3 (price reduction to $1.2M) + loan cont extension to Aug 5 out for Herford signatures. Note is private promissory note between buyer and sellers outside escrow; no SFA, no 2nd DOT through escrow. File both docs in Ex when signed; update CRM sale price to $1.2M.",
       "done": false,
-      "dateAdded": "2026-07-23"
+      "dateAdded": "2026-07-23",
+      "note": "ADD3 terms confirmed by Sara 7/24. Both ADD3 and ETA3 (loan cont ext to Aug 5) now out for Herford (seller) signatures via Neriah."
+    },
+    {
+      "agent": "sara",
+      "client": "433 Hwy 4",
+      "title": "Chase buyer signature on LA AVID in Homeligh — Sara added her AVID to the Homeligh disclosure package 7/24 and notified Neriah; Elizabeth Dawson (buyer) still needs to sign. Follow up with Neriah Davis (neriahd@gmail.com) to confirm buyer reviews and signs the AVID in Homeligh.",
+      "done": false,
+      "dateAdded": "2026-07-24"
     },
     {
       "agent": "sara",
@@ -466,8 +475,9 @@
       "agent": "sara",
       "client": "467 Skyline",
       "title": "Follow up with Kerstin Breidenthal \u2014 was traveling ~2 weeks from ~7/8, wanted showing on return (~7/23 today). No contact in 48 hrs. Reach out proactively. Also: Lisa Clark (lisaclarkmurphys@gmail.com) confirmed HOA allows vacation rentals 7/21 \u2014 follow up to schedule a showing.",
-      "done": false,
-      "dateAdded": "2026-07-23"
+      "done": true,
+      "dateAdded": "2026-07-23",
+      "note": "Followed up 7/24"
     },
     {
       "agent": "james",
@@ -481,13 +491,15 @@
       "agent": "sara",
       "client": "433 Hwy 4",
       "title": "Download and file ETA No. 3 from Glide \u2014 all parties signed 7/24 12:34 AM per Glide notification; open Glide email and save [ETA] Extension of Time Amendment No. 3.pdf to 433 Ex folder",
-      "done": false
+      "done": true,
+      "note": "Downloaded and filed in 433 Ex 7/24. Note: ETA No. 3 still out for Herford (seller) signatures to be fully counter-executed \u2014 loan cont extension to Aug 5; covered by ADD3 Herfords watch item"
     },
     {
       "agent": "sara",
       "client": "433 Hwy 4",
       "title": "Review UNREAD SFA + Price Reduction Addendum from Neriah (email 7/24 12:58 AM, UNREAD) \u2014 confirm interest-only terms ($1.2M price, $100K at 6% interest-only/5yr/30yr/no prepay/2nd DOT records with 1st), then forward to Jim & Yvonne Heryford for seller signatures",
-      "done": false
+      "done": true,
+      "note": "SUPERSEDED 7/24 \u2014 Herfords want private $100K note not through escrow; SFA approach replaced by ADD3 (price reduction to $1.2M) + loan cont extension to Aug 5, both out for Herford signatures"
     },
     {
       "agent": "james",
@@ -512,6 +524,13 @@
       "client": "Latigo",
       "title": "Post-COE file remediation: BA AVID from Kylie Windley still not in Ex \u2014 Kylie mis-named her LA AVID as BA AVID; after COE confirmed, request true BA AVID from Kylie (kyliewindley@gmail.com / 209-304-7971) and file in Latigo Ex",
       "done": false
+    },
+    {
+      "agent": "sara",
+      "client": "Latigo",
+      "title": "COE DELAYED 7/24 \u2014 lender Kim (Prime Residential) waiting on rent appraisal on Castles' primary residence before funding; follow up with Kim for appraisal ETA and revised COE date; notify Ashley Cuslidge at Placer Title (209-736-9553) and Guy & Adrianna Castle",
+      "done": false,
+      "dateAdded": "2026-07-24"
     }
   ],
   "deals": [
@@ -1172,7 +1191,7 @@
           "status": "next",
           "col": "closing",
           "badge": "Delayed",
-          "desc": "COE confirmed Thursday July 24. The lender requested an extension from 7/20; Kim (Prime Residential) confirmed July 24 on 7/20."
+          "desc": "COE DELAYED beyond 7/24. Lender Kim (Prime Residential) is waiting on a rent appraisal on the Castles' primary residence before funding. Revised COE date TBD — contact Kim for ETA."
         }
       ],
       "agentNote": {
@@ -1228,7 +1247,7 @@
           "appraisal",
           "loan"
         ],
-        "coeNote": "COE confirmed July 24, 2026 \u2014 Kim Hesser (Prime Residential/lender) confirmed 7/20 per Sara's call. Original COE was 7/20; lender requested extension 7/19."
+        "coeNote": "COE DELAYED beyond 7/24 \u2014 Kim (Prime Residential) waiting on rent appraisal on Castles' primary residence before funding. Revised COE date TBD. Original COE was 7/20, extended to 7/24, now delayed further."
       },
       "contacts": {
         "coAgent": "Kylie Windley / Mitzi Windley (Chase International)",
