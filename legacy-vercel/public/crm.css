@@ -1254,9 +1254,9 @@ body { overflow: hidden; }
 /* ============================================================
    MOBILE BOTTOM NAV — thumb-reachable primary nav on phones.
    Hidden on desktop; the sidebar stays the desktop nav. The four
-   most-used destinations (Today / Inbox / Deals / Tasks) are always
-   one tap away at the bottom of the screen, honoring the iOS home-bar
-   safe area so nothing sits under the gesture strip.
+   on-the-go tools (Talk / Calendar / Add / Curate) are always one tap
+   away at the bottom of the screen, honoring the iOS home-bar safe
+   area so nothing sits under the gesture strip.
    ============================================================ */
 .mobnav { display: none; }
 
@@ -1282,8 +1282,17 @@ body { overflow: hidden; }
   .mobnav-item.on { color: var(--brass); }
   .mobnav-item:active { background: var(--linen); }
 
-  /* Reserve space so content and the sidebar foot clear the fixed bar */
-  body { padding-bottom: calc(58px + env(safe-area-inset-bottom, 0px)); }
+  /* The center "Add a contact" action — the one create-first control, given
+     brass weight so it reads as the primary on-the-go move. It never lights
+     as a nav destination (it opens a modal), so no .on state. */
+  .mobnav-add { color: var(--brass); }
+  .mobnav-add svg { width: 30px; height: 30px; stroke-width: 1.7; }
+  .mobnav-add:active { background: none; }
+  .mobnav-add:active svg { transform: scale(.92); }
+
+  /* Reserve space so content and the sidebar foot clear the fixed bar
+     (the center Add button's larger icon makes the bar ~62px tall). */
+  body { padding-bottom: calc(64px + env(safe-area-inset-bottom, 0px)); }
   /* Tighten the Command Center gutters on a phone */
   .cc { padding: 16px 16px 40px; }
 }

@@ -778,7 +778,7 @@
           <span class="label-cap" style="color:var(--brass);">Everyone who reached out</span>
           <h1 class="h-section" style="font-size:38px;margin-top:6px;">Messages.</h1>
         </div></div>
-        <p class="msgs-sub">Every inbound message in one place — texts to your Legacy number, questions from a curated list, and portal replies. Click anyone to open their record; unknown numbers can be triaged into a lead.</p>
+        <p class="msgs-sub">Every inbound message in one place — texts to your Legacy number, questions from a curated list, and portal replies. Tap anyone to reply by text or email right here; unknown numbers can be triaged into a lead.</p>
         <div class="msgs-filter" data-msgs-filter>
           <button class="chip on" data-msgf="all">All <span class="ct" data-msgf-c-all>—</span></button>
           <button class="chip" data-msgf="triage">Needs triage <span class="ct" data-msgf-c-triage>—</span></button>
@@ -816,7 +816,7 @@
         var c = CHAN[r.channel] || CHAN.sms;
         var unread = isUnread(r);
         var triage = r.needs_review ? '<span class="msg-triage">Unknown #</span>' : '';
-        return '<div class="msg-item'+(unread?' unread':'')+'" data-msg-lead="'+esc(r.lead_id||'')+'" data-msg-review="'+(r.needs_review?'1':'')+'">'
+        return '<div class="msg-item'+(unread?' unread':'')+'" data-msg-key="'+esc(r.key||'')+'" data-msg-lead="'+esc(r.lead_id||'')+'" data-msg-review="'+(r.needs_review?'1':'')+'">'
           + (unread ? '<span class="msg-dot"></span>' : '<span style="width:7px;flex:none;"></span>')
           + '<span class="msg-chan" style="background:'+c.bg+';color:'+c.fg+';">'+c.label+'</span>'
           + '<div class="msg-body"><div class="msg-top"><span class="msg-name">'+esc(r.name||'Unknown')+triage+'</span><span class="msg-time">'+ago(r.created_at)+'</span></div>'
@@ -861,11 +861,104 @@
         if (item){
           var lead = item.getAttribute('data-msg-lead');
           if (item.getAttribute('data-msg-review')==='1' || !lead){ if (window.openReviewQueue) window.openReviewQueue(); return; }
-          if (window.Legacy && window.Legacy.openLead) window.Legacy.openLead(lead);
-          else showView(null, 'inbox');
+          var key = item.getAttribute('data-msg-key');
+          var row = state.rows.filter(function(r){ return r.key===key; })[0];
+          openReply(row || { lead_id: lead });
           return;
         }
       });
+
+      // ---- Inline reply sheet — answer a text or email without leaving the
+      // Messages list. The core "talk to clients on the go" tool. Sends via
+      // POST /api/crm/message (the server picks Twilio / email provider). ----
+      var reply = { lead_id: null, channel: 'sms', row: null };
+      function replySheet(){
+        var m = document.getElementById('leg-reply');
+        if (m) return m;
+        m = document.createElement('div');
+        m.id = 'leg-reply';
+        m.style.cssText = 'position:fixed;inset:0;z-index:99996;background:rgba(20,18,15,.6);display:none;align-items:flex-end;justify-content:center;';
+        m.innerHTML =
+          '<div id="reply-card" style="background:#FAF6EC;width:100%;max-width:560px;padding:20px 22px calc(22px + env(safe-area-inset-bottom,0px));color:#1A1714;max-height:92vh;overflow:auto;font-family:Manrope,system-ui,sans-serif;border-top-left-radius:14px;border-top-right-radius:14px;box-shadow:0 -8px 40px rgba(20,18,15,.3);">'
+          + '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;">'
+          +   '<div><div style="font-family:\'JetBrains Mono\',monospace;font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:#7C6A4D;margin-bottom:4px;">Reply</div>'
+          +   '<h2 id="reply-name" style="font-family:Montserrat,system-ui,sans-serif;font-weight:700;font-size:21px;margin:0;">Client</h2></div>'
+          +   '<button id="reply-close" aria-label="Close" style="background:transparent;border:none;color:#7C6A4D;cursor:pointer;font-size:24px;line-height:1;padding:2px 4px;">×</button>'
+          + '</div>'
+          + '<div id="reply-quote" style="display:none;margin:12px 0 4px;padding:9px 12px;background:#F1E9D6;border-left:3px solid #D9CFB7;font-size:13px;line-height:1.5;color:#5A5348;font-style:italic;"></div>'
+          + '<div id="reply-chan" style="display:flex;gap:8px;margin:16px 0 12px;">'
+          +   '<button type="button" data-rchan="sms" style="flex:1;padding:9px;border:1px solid #D9CFB7;background:#fff;font:inherit;font-size:13px;font-weight:600;cursor:pointer;border-radius:3px;">Text</button>'
+          +   '<button type="button" data-rchan="email" style="flex:1;padding:9px;border:1px solid #D9CFB7;background:#fff;font:inherit;font-size:13px;font-weight:600;cursor:pointer;border-radius:3px;">Email</button>'
+          + '</div>'
+          + '<input id="reply-subject" placeholder="Subject" style="display:none;width:100%;font:inherit;font-size:14px;background:#fff;border:1px solid #D9CFB7;padding:10px 11px;color:#1A1714;margin-bottom:9px;box-sizing:border-box;">'
+          + '<textarea id="reply-body" rows="4" placeholder="Type your reply…" style="width:100%;font:inherit;font-size:15px;background:#fff;border:1px solid #D9CFB7;padding:11px;color:#1A1714;box-sizing:border-box;resize:vertical;min-height:96px;"></textarea>'
+          + '<div id="reply-note" style="font-size:12px;color:#7C6A4D;margin-top:6px;min-height:16px;"></div>'
+          + '<div style="display:flex;justify-content:space-between;align-items:center;gap:12px;margin-top:12px;">'
+          +   '<button id="reply-open" style="background:transparent;border:none;color:#7C6A4D;cursor:pointer;font-size:13px;text-decoration:underline;padding:0;">Open full record</button>'
+          +   '<button id="reply-send" style="background:#1A1714;color:#FAF6EC;border:none;padding:12px 26px;font-family:\'JetBrains Mono\',monospace;font-size:11px;letter-spacing:.14em;text-transform:uppercase;border-radius:3px;cursor:pointer;">Send</button>'
+          + '</div>'
+          + '</div>';
+        document.body.appendChild(m);
+        m.addEventListener('click', function(e){ if (e.target === m) closeReply(); });
+        m.querySelector('#reply-close').onclick = closeReply;
+        m.querySelector('#reply-open').onclick = function(){ var id = reply.lead_id; closeReply(); if (window.Legacy && window.Legacy.openLead && id) window.Legacy.openLead(id); else showView(null,'inbox'); };
+        m.querySelectorAll('[data-rchan]').forEach(function(b){ b.onclick = function(){ setChannel(b.getAttribute('data-rchan')); }; });
+        m.querySelector('#reply-send').onclick = sendReply;
+        return m;
+      }
+      function setChannel(ch){
+        reply.channel = ch;
+        var m = document.getElementById('leg-reply'); if (!m) return;
+        m.querySelectorAll('[data-rchan]').forEach(function(b){
+          var on = b.getAttribute('data-rchan')===ch;
+          b.style.background = on ? '#1A1714' : '#fff';
+          b.style.color = on ? '#FAF6EC' : '#1A1714';
+          b.style.borderColor = on ? '#1A1714' : '#D9CFB7';
+        });
+        m.querySelector('#reply-subject').style.display = ch==='email' ? 'block' : 'none';
+      }
+      function closeReply(){ var m = document.getElementById('leg-reply'); if (m) m.style.display='none'; }
+      function openReply(row){
+        reply.lead_id = row.lead_id || null;
+        reply.row = row;
+        if (!reply.lead_id){ if (window.Legacy && window.Legacy.openLead) return; }
+        var m = replySheet(); m.style.display='flex';
+        m.querySelector('#reply-name').textContent = row.name || 'Client';
+        var q = m.querySelector('#reply-quote');
+        if (row.preview){ q.style.display='block'; q.textContent = '“'+row.preview+'”'; } else { q.style.display='none'; }
+        m.querySelector('#reply-subject').value = '';
+        m.querySelector('#reply-body').value = '';
+        m.querySelector('#reply-note').textContent = '';
+        m.querySelector('#reply-send').disabled = false;
+        // Default channel to how they reached out (calls & texts → Text).
+        setChannel(row.channel==='email' || row.channel==='portal' ? 'email' : 'sms');
+        setTimeout(function(){ try{ m.querySelector('#reply-body').focus(); }catch(_){} }, 40);
+      }
+      function sendReply(){
+        var m = document.getElementById('leg-reply'); if (!m) return;
+        var note = m.querySelector('#reply-note');
+        var sendBtn = m.querySelector('#reply-send');
+        var text = m.querySelector('#reply-body').value.trim();
+        var subject = m.querySelector('#reply-subject').value.trim();
+        if (!reply.lead_id){ note.style.color='#9B2C2C'; note.textContent='This number isn’t linked to a contact yet — triage it first.'; return; }
+        if (!text){ note.style.color='#9B2C2C'; note.textContent='Type a message first.'; return; }
+        if (reply.channel==='email' && !subject){ note.style.color='#9B2C2C'; note.textContent='Add a subject for the email.'; return; }
+        sendBtn.disabled = true; note.style.color='#7C6A4D'; note.textContent='Sending…';
+        var payload = { lead_id: reply.lead_id, channel: reply.channel, body: text };
+        if (reply.channel==='email') payload.subject = subject;
+        fetch('/api/crm/message', { method:'POST', credentials:'include', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload) })
+          .then(function(r){ return r.json().then(function(j){ return { ok:r.ok, j:j }; }); })
+          .then(function(res){
+            if (res.ok && res.j && res.j.status==='sent'){
+              note.style.color='#2E5C3D'; note.textContent = (reply.channel==='sms'?'Text':'Email')+' sent ✓';
+              setTimeout(closeReply, 900);
+            } else {
+              sendBtn.disabled=false; note.style.color='#9B2C2C';
+              note.textContent = (res.j && (res.j.error||res.j.message)) || 'Could not send. Try again.';
+            }
+          })
+          .catch(function(){ sendBtn.disabled=false; note.style.color='#9B2C2C'; note.textContent='Network error — try again.'; });
+      }
 
       // Background poll so the unread badge stays live from any view.
       load(false);
@@ -1377,6 +1470,20 @@
     .cur-modal .actions { display:flex; gap:10px; align-items:center; margin-top:18px; }
     .cur-result { font-size:13px; margin-top:12px; min-height:18px; line-height:1.5; }
     @media (max-width: 900px) { .cur { padding:18px; } .cur-grid { grid-template-columns:1fr; } .cur-side { position:static; } }
+    /* Phone: keep the curate tools thumb-usable — big tap targets, no cramped
+       side-by-side inputs, headline that fits, modal that uses the full width. */
+    @media (max-width: 620px) {
+      .cur-head h1.h-section { font-size:30px; }
+      .cur-head { margin-bottom:16px; }
+      .cur-head .btn { flex:1 1 100%; }
+      .cur-filters { grid-template-columns:1fr 1fr; padding:12px; gap:8px; }
+      .cur-modal { padding:0; align-items:flex-end; }
+      .cur-modal .box { max-width:none; max-height:94vh; border-top-left-radius:14px; border-top-right-radius:14px; padding:22px 18px calc(22px + env(safe-area-inset-bottom,0px)); }
+      .cur-modal .row { flex-direction:column; gap:0; }
+      .cur-modal input, .cur-modal textarea, .cur-modal select { font-size:16px; }  /* ≥16px stops iOS zoom-on-focus */
+      .cur-ed-meta input, .cur-ed-meta textarea, .cur-filters input, .cur-filters select { font-size:16px; }
+      .cur-incl { grid-template-columns:1fr; }
+    }
     </style>
     <section class="crm-view" data-view="curate">
       <div class="cur">
@@ -2757,26 +2864,24 @@
   <!-- ============ MOBILE BOTTOM NAV (phones only) ============
        Thumb-reachable primary nav for the four most-used destinations.
        Hidden on desktop (the sidebar is the desktop nav); shown ≤760px. -->
+  <!-- Refined mobile hub: the four on-the-go tools. Other views stay reachable
+       via the top tab strip (horizontally scrollable on a phone). -->
   <nav class="mobnav" aria-label="Primary">
-    <button class="mobnav-item on" data-mob="today" onclick="showView(event,'today')" aria-label="Today">
+    <button class="mobnav-item" data-mob="messages" onclick="showView(event,'messages')" aria-label="Talk">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
+      <span>Talk</span>
+    </button>
+    <button class="mobnav-item" data-mob="cal" onclick="showView(event,'cal')" aria-label="Calendar">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 9h18M8 2v4M16 2v4"/></svg>
-      <span>Today</span>
+      <span>Calendar</span>
     </button>
-    <button class="mobnav-item" data-mob="inbox" onclick="showView(event,'inbox')" aria-label="Inbox">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></svg>
-      <span>Inbox</span>
+    <button class="mobnav-item mobnav-add" data-new-lead aria-label="Add a contact">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v8M8 12h8"/></svg>
+      <span>Add</span>
     </button>
-    <button class="mobnav-item" data-mob="listings" onclick="showView(event,'listings')" aria-label="Deals">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/></svg>
-      <span>Deals</span>
-    </button>
-    <button class="mobnav-item" data-mob="tasks" onclick="showView(event,'tasks')" aria-label="Tasks">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M8 12l3 3 5-5"/></svg>
-      <span>Tasks</span>
-    </button>
-    <button class="mobnav-item" data-mob="updates" onclick="showView(event,'updates')" aria-label="Notes">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16v13H8l-4 4V4z"/><path d="M8 9h8M8 12.5h5"/></svg>
-      <span>Notes</span>
+    <button class="mobnav-item" data-mob="curate" onclick="showView(event,'curate')" aria-label="Curate">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/><path d="M9 21v-6h6v6"/></svg>
+      <span>Curate</span>
     </button>
   </nav>
 </div>
