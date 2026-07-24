@@ -48,7 +48,13 @@ export async function buildClientPayload(supa, coll) {
     }));
 
   return {
-    collection: { title: coll.title || '', intro_note: coll.intro_note || '', closing_note: coll.closing_note || '' },
+    collection: {
+      title: coll.title || '', intro_note: coll.intro_note || '', closing_note: coll.closing_note || '',
+      // Per-listing commute readout, when the agent turned it on and set a
+      // destination (the client's work/school address).
+      show_commute: (coll.show_commute === true) && !!(coll.commute_dest && String(coll.commute_dest).trim()),
+      commute_dest: coll.commute_dest || ''
+    },
     client: { first_name: coll.leads?.first_name || '' },
     agent: { name: agent.name, title: agent.title, dre_number: agent.dre_number, phone: agent.phone, email: agent.email, photo_url: agent.photo_url },
     brokerage: BROKERAGE,

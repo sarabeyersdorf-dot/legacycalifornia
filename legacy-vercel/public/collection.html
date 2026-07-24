@@ -216,17 +216,23 @@ body { background: var(--vellum); color: var(--ink); }
     var why = (l.why_note && l.agent_note) ? '<div class="why">Why I picked it · ' + esc(l.why_note) + '</div>' : '';
     var prio = l.priority ? '<span class="prio">See this one first</span><br>' : '';
 
+    var commute = (COMMUTE.on && l.city)
+      ? '<div class="commute2" data-commute-city="' + esc(l.city) + '" style="display:flex;align-items:center;gap:8px;margin:10px 0 2px;font-size:14px;font-weight:600;color:#3A5A3F;background:rgba(60,110,80,0.09);border-radius:8px;padding:8px 12px;"><span class="cm-ico" aria-hidden="true">🚗</span> <span class="cm-txt">Checking drive to ' + esc(COMMUTE.label || 'your destination') + '…</span></div>'
+      : '';
+
     return '<div class="card2" data-card="' + esc(l.id) + '">' + prio + gal +
       '<div class="pri">' + esc(l.price_label) + (l.ppsf_label ? '<span class="ppsf">' + esc(l.ppsf_label) + '</span>' : '') + '</div>' +
       '<div class="addr2">' + esc(l.address) + (l.city ? ', ' + esc(l.city) : '') + '</div>' +
-      '<div class="specs2">' + specs.join('') + '</div>' + note + why +
+      '<div class="specs2">' + specs.join('') + '</div>' + commute + note + why +
       reactBar(l.id) + '</div>';
   }
 
   var AGENT = {};
+  var COMMUTE = { on: false, dest: '', label: '' };
   function render(d) {
     AGENT = d.agent || {};
     var a = d.agent || {}, col = d.collection || {}, client = d.client || {};
+    COMMUTE = { on: !!col.show_commute, dest: col.commute_dest || '', label: (col.commute_dest || '').split(',')[0].trim() };
     var initial = (a.name || 'L').trim().charAt(0);
     var ph = a.photo_url ? '<img src="' + esc(a.photo_url) + '" alt="">' : esc(initial);
     var contact = '';
@@ -251,7 +257,34 @@ body { background: var(--vellum); color: var(--ink); }
     if (PREVIEW) html = previewChrome(d) + html;
     wrap.innerHTML = html;
     wire(d);
+    if (COMMUTE.on) fillCommutes();
     if (PREVIEW) wirePreview(d);
+  }
+
+  // Fill each listing's drive time to the client's commute destination. Batched
+  // by city so five homes in one town make one lookup. Rows with no data (e.g. a
+  // town/destination the router can't place, or no routing key yet) quietly hide.
+  function cmFmt(n) { var h = Math.floor(n / 60), m = Math.round(n % 60); return h > 0 ? (h + ' hr' + (m ? ' ' + m + ' min' : '')) : (m + ' min'); }
+  function fillCommutes() {
+    if (!COMMUTE.on || !COMMUTE.dest) return;
+    var byCity = {};
+    document.querySelectorAll('.commute2[data-commute-city]').forEach(function (el) {
+      var c = el.getAttribute('data-commute-city'); (byCity[c] = byCity[c] || []).push(el);
+    });
+    Object.keys(byCity).forEach(function (city) {
+      fetch('/api/commute?from=' + encodeURIComponent(city) + '&to=' + encodeURIComponent(COMMUTE.dest) + '&depart=midday')
+        .then(function (r) { return r.json(); })
+        .then(function (j) {
+          var els = byCity[city];
+          if (j && j.ok && j.minutes != null) {
+            var txt = cmFmt(j.minutes) + ' to ' + (COMMUTE.label || 'your destination') + (j.distance_mi ? ' · ' + j.distance_mi + ' mi' : '');
+            els.forEach(function (el) { var t = el.querySelector('.cm-txt'); if (t) t.textContent = txt; });
+          } else {
+            els.forEach(function (el) { el.remove(); });
+          }
+        })
+        .catch(function () { byCity[city].forEach(function (el) { el.remove(); }); });
+    });
   }
 
   function previewChrome(d) {

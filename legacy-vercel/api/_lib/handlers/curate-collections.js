@@ -279,6 +279,8 @@ async function patchCollection(supa, agent, req, res) {
   if ('intro_note' in b)   patch.intro_note = b.intro_note;
   if ('closing_note' in b) patch.closing_note = b.closing_note;
   if ('expires_at' in b)   patch.expires_at = b.expires_at || null;
+  if ('show_commute' in b) patch.show_commute = b.show_commute === true || b.show_commute === 'true';
+  if ('commute_dest' in b) patch.commute_dest = (b.commute_dest || '').toString().trim() || null;
   if ('status' in b) {
     if (!COLL_STATUS.includes(b.status)) return fail(res, 400, `status must be one of ${COLL_STATUS.join(', ')}`);
     patch.status = b.status;

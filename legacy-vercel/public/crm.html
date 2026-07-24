@@ -3233,6 +3233,8 @@ function selectLead(el) {
           '<input class="title-in" data-meta="title" placeholder="Collection title (e.g. Five for Karen)" value="' + esc(c.title || '') + '">' +
           '<textarea data-meta="intro_note" rows="2" placeholder="Intro note — “Hi Karen, five new ones this week…”">' + esc(c.intro_note || '') + '</textarea>' +
           '<textarea data-meta="closing_note" rows="2" placeholder="Closing note — “Tell me which speak to you.”">' + esc(c.closing_note || '') + '</textarea>' +
+          '<label class="cur-commute-toggle"><input type="checkbox" data-meta-check="show_commute"' + (c.show_commute ? ' checked' : '') + '> Show commute times on each listing</label>' +
+          '<input class="title-in" data-meta="commute_dest" placeholder="Commute destination — the client’s work/school address" value="' + esc(c.commute_dest || '') + '">' +
           clientPanel(c) +
         '</div>' +
         '<div class="cur-ed-acts">' +
@@ -3435,6 +3437,7 @@ function selectLead(el) {
   function saveMeta() {
     var patch = { id: state.active.id };
     root.querySelectorAll('[data-meta]').forEach(function (i) { patch[i.getAttribute('data-meta')] = i.value; });
+    root.querySelectorAll('[data-meta-check]').forEach(function (i) { patch[i.getAttribute('data-meta-check')] = !!i.checked; });
     api('collections', { method: 'PATCH', body: patch }).then(function (r) { if (r.ok && r.j.collection) { state.active = Object.assign(state.active, r.j.collection); loadCollections(); } });
   }
 
@@ -3489,6 +3492,7 @@ function selectLead(el) {
     }
   });
   root.addEventListener('change', function (e) {
+    if (e.target.hasAttribute && e.target.hasAttribute('data-meta-check')) { saveMeta(); return; }
     var row = e.target.closest && e.target.closest('[data-inc]');
     if (row && e.target.hasAttribute('data-f')) {
       var pid = row.getAttribute('data-inc');
