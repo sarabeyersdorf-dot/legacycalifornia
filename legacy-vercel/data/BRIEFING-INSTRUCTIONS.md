@@ -163,6 +163,40 @@ or escrow number in a deal's correspondence, capture it here. All keys optional:
 - Only what you provide shows a Call / Email link; a member with just a name
   shows name + role. Fill in email/phone the moment a deal's emails reveal them.
 
+## 1d. Compliance intake — the `"attributes"` object (lights up disclosure tasks)
+
+Add an `"attributes"` object to each **deal**, pulled from the contract +
+disclosure package. It drives the workflow checklist's *conditional* disclosure
+tasks (Lead-Based Paint, HOA, solar, tenant estoppel, Mello-Roos) and the
+deal-card **Intake ✓ / ⚠** chip. Until a deal has it, the CRM shows a
+**"⚠ Confirm compliance facts"** reminder for that deal; the moment you add the
+block, the reminder clears and the right disclosure tasks appear.
+
+```json
+"attributes": {
+  "year_built": 1965,        // < 1978 → Lead-Based Paint disclosure
+  "hoa": true,               // → HOA document tasks
+  "solar": true,             // → solar disclosure
+  "solar_leased": false,     // with solar → lease/PPA assumption task
+  "tenant_occupied": false,  // → tenant estoppel certificate
+  "mello_roos": false,       // → Mello-Roos / special-tax disclosure
+  "seller_type": "standard", // "reo" | "foreclosure" | "probate" → exemptions
+  "financing": "conventional", // "cash" → drops appraisal/loan tasks
+  "appraisal_waived": false,
+  "loan_waived": false,
+  "inspection_waived": false
+}
+```
+
+All keys optional — fill what the documents establish. A conditional task fires
+**only** when its fact is present AND true (the CRM never guesses a legal
+disclosure from prose), and an exemption only drops a task when you've stated the
+fact. Any non-empty `attributes` object clears the intake reminder, so add it
+once you know the core facts (year built, HOA, tenant, seller type).
+
+*(The same guidance, with a fuller field table, also lives in
+`legacy-vercel/data/ATTRIBUTES-INTAKE.md` — note the exact upper-case filename.)*
+
 ## 2. Listing media (so photos / videos load in the CRM)
 
 Add to the **deal** object:
