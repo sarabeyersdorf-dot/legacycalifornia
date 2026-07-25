@@ -263,6 +263,64 @@ async function promoteAttachedLeads(supa) {
   return promoted;
 }
 
+// ---------------------------------------------------------------------------
+// Rule-derived agent workflow checklist (SPEC_agent_workflow_checklist.md).
+// Ports BeClause's TaskDefinition sets (data/checklist_task_definitions.json)
+// into per-deal tasks that flow through the SAME agent_tasks → Tasks-tab pipe
+// as the daily briefing, distinguished by source='checklist'.
+//
+// v1 scope (deliberately narrow — see the review before build):
+//   • In-escrow deals only (stage='pending'), where a missed disclosure carries
+//     real liability. Widen STAGES to include 'preparing'/'listing' later.
+//   • REQUIRED tasks only. Conditional (trigger) tasks are skipped — the
+//     property-attribute intake facts (HOA, solar, pre-1978…) aren't on deals
+//     yet, so triggers can't be evaluated. Exemptions likewise can't be
+//     verified, so we don't drop tasks on unverifiable exemptions in v1.
+//   • No due dates. deals.json has no reliable acceptance date or contingency
+//     day fields yet, so tasks carry a PHASE label instead of a date/overdue.
+//   • pre_listing tasks are skipped for an already-in-escrow deal (retrospective
+//     noise — that prep is done by the time an offer is accepted).
+// Identity = stable source_key `checklist:<dealId>:<code>`, so check-offs
+// survive every re-sync (insert-only; existing rows are never rewritten).
+// ---------------------------------------------------------------------------
+const CHECKLIST_STAGES = new Set(['pending']);
+const PHASE_LABEL = { pre_listing: 'Pre-listing', offer: 'Offer', escrow: 'Escrow', contingency: 'Contingency', pre_close: 'Pre-close', closing: 'Closing' };
+const CAT_LABEL   = { document: 'Document', disclosure: 'Disclosure', inspection: 'Inspection', contingency: 'Contingency', closing: 'Closing', communication: 'Communication' };
+
+function checklistShortAddr(a) { return String(a || '').split(',')[0].trim(); }
+
+export function buildChecklistRows(deals, defs) {
+  const normAgent = (a) => { a = String(a || '').toLowerCase(); return /james/.test(a) ? 'james' : (/both/.test(a) ? 'both' : 'sara'); };
+  const rows = [];
+  for (const d of (deals || [])) {
+    if (!CHECKLIST_STAGES.has(d.stage)) continue;
+    const sets = [];
+    if (d.side === 'listing' || d.side === 'both') sets.push(defs.sell_side_tasks || []);
+    if (d.side === 'buyer'   || d.side === 'both') sets.push(defs.buy_side_tasks || []);
+    if (!sets.length) sets.push(defs.sell_side_tasks || []);   // unknown side → sell-side default
+    const client = ((d.client && String(d.client).trim()) || checklistShortAddr(d.address) || 'Deal').slice(0, 120);
+    const agent = normAgent(d.agent);
+    for (const list of sets) {
+      for (const t of list) {
+        if (t.requirement_level !== 'required') continue;   // v1: required only
+        if (t.phase === 'pre_listing') continue;            // retrospective for an in-escrow deal
+        rows.push({
+          agent,
+          client,
+          title: String(t.description || '').slice(0, 200),
+          sub: [PHASE_LABEL[t.phase] || t.phase, CAT_LABEL[t.category] || t.category].filter(Boolean).join(' · ').slice(0, 120),
+          note: null,
+          due_label: (PHASE_LABEL[t.phase] || t.phase || 'Workflow').slice(0, 40),
+          source: 'checklist',
+          source_key: `checklist:${d.id}:${t.code}`.slice(0, 120),
+          done: false
+        });
+      }
+    }
+  }
+  return rows;
+}
+
 export default async function handler(req, res) {
   if (handleOptions(req, res)) return;
 
@@ -444,6 +502,31 @@ export default async function handler(req, res) {
       }
     }
 
+    // Rule-derived workflow checklist (source='checklist'), reconciled
+    // independently of the briefing tasks. Insert-only by stable source_key so
+    // check-offs survive; prune only rows whose deal/task no longer applies.
+    let checklistWritten = 0, checklistPruned = 0;
+    try {
+      const checklistDefs = require('../../data/checklist_task_definitions.json');
+      const desired = buildChecklistRows(active, checklistDefs);
+      const desiredKeys = new Set(desired.map((r) => r.source_key));
+      const { data: existingCl } = await supa.from('agent_tasks').select('id, source_key').eq('source', 'checklist');
+      const haveKeys = new Set((existingCl || []).map((r) => r.source_key));
+      const toInsert = desired.filter((r) => !haveKeys.has(r.source_key));
+      if (toInsert.length) {
+        const { error: ce } = await supa.from('agent_tasks').insert(toInsert);
+        if (ce) throw new Error(`checklist insert: ${ce.message}`);
+        checklistWritten = toInsert.length;
+      }
+      const staleIds = (existingCl || []).filter((r) => !desiredKeys.has(r.source_key)).map((r) => r.id);
+      if (staleIds.length) {
+        await supa.from('agent_tasks').delete().in('id', staleIds);
+        checklistPruned = staleIds.length;
+      }
+    } catch (e) {
+      errors.push({ deal: 'checklist', error: e.message || String(e) });
+    }
+
     // Promote any lead attached to an in-escrow / closed deal to a CLIENT with
     // the matching side stage, so a contact who's under contract never lingers
     // in the roster as a "lead". Self-healing: runs every sync, only touches
@@ -484,6 +567,8 @@ export default async function handler(req, res) {
       deals_pruned: dealsPruned,
       documents_written: docsWritten,
       tasks_written: tasksWritten,
+      checklist_written: checklistWritten,
+      checklist_pruned: checklistPruned,
       leads_promoted: leadsPromoted,
       deal_errors: errors,
       deals_in_table: dealsInTable,
