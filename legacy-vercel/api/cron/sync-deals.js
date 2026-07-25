@@ -267,16 +267,40 @@ async function promoteAttachedLeads(supa) {
   return promoted;
 }
 
-// Auto-link a deal's client to it by NAME match, so an agent doesn't have to
-// wire every contact by hand. Conservative on purpose: exact normalized
-// full-name match, single lead only (ambiguous names are skipped, never
-// guessed), existing links are never duplicated, and only the deal's own client
-// name (top-level `client` / listing `client`) is used — not co-agents or
-// escrow. A wrong link would be visible on the contact card, where it can be
-// corrected. Returns the number of new links created.
+// Split a deal's `client` string into individual people. Handles couples
+// ("Roger & Kristin Quillen" → Roger Quillen + Kristin Quillen, sharing the
+// surname) and "A and B", "A / B", "A, B". A person needs a first AND last name
+// to be usable — a bare first name ("Jim & Yvonne" with no surname) is too thin
+// to make a real contact or match reliably, so it's dropped.
+function splitClientNames(raw) {
+  const s = String(raw || '').trim();
+  if (!s) return [];
+  const parts = s.split(/\s*(?:&|\band\b|\/|,|\+)\s*/i).map((p) => p.trim()).filter(Boolean);
+  // Shared surname = the last token of the LAST part, when that part has 2+ tokens.
+  const lastToks = (parts[parts.length - 1] || '').split(/\s+/);
+  const sharedLast = lastToks.length > 1 ? lastToks[lastToks.length - 1] : null;
+  const out = [];
+  for (const p of parts) {
+    const t = p.split(/\s+/).filter(Boolean);
+    let first, last;
+    if (t.length >= 2) { first = t.slice(0, -1).join(' '); last = t[t.length - 1]; }
+    else { first = t[0] || ''; last = sharedLast || ''; }     // bare first name inherits shared surname
+    if (first && last) out.push({ first, last });
+  }
+  return out;
+}
+
+// Auto-attach a deal's client to it, so an agent doesn't wire every contact by
+// hand. Conservative on purpose: matches an EXISTING contact by exact
+// normalized full name (single match only — ambiguous names are skipped, never
+// guessed), and when no contact exists it CREATES one from the deal's client
+// name (client-classified, assigned to the deal's agent). Existing links are
+// never duplicated; only the deal's own client name is used, not co-agents or
+// escrow. Everything it does is visible on the contact card, where a wrong link
+// can be corrected. Returns { linked, created }.
 async function autoLinkPartiesByName(supa, dealsJson) {
-  const { data: dealRows } = await supa.from('deals').select('id, source_key, side');
-  if (!dealRows || !dealRows.length) return 0;
+  const { data: dealRows } = await supa.from('deals').select('id, source_key, side, stage');
+  if (!dealRows || !dealRows.length) return { linked: 0, created: 0 };
   const bySrc = new Map(dealRows.map((d) => [d.source_key, d]));
 
   const { data: leads } = await supa.from('leads').select('id, first_name, last_name');
@@ -289,23 +313,56 @@ async function autoLinkPartiesByName(supa, dealsJson) {
     nameIx.get(n).push(l.id);
   }
 
-  let linked = 0;
+  // Which deals are already wired (have ≥1 party)? We won't AUTO-CREATE contacts
+  // for those — a deal the humans already linked shouldn't spawn new contacts
+  // from a possibly-messy client string (e.g. "Jim  Yvonne" with no surname).
+  const { data: allParties } = await supa.from('deal_parties').select('deal_id');
+  const wiredDeals = new Set((allParties || []).map((p) => p.deal_id));
+
+  let linked = 0, created = 0;
   for (const d of (dealsJson || [])) {
     const dr = bySrc.get(d.id);
     if (!dr) continue;
-    const names = [d.client, d.clientName, d.listing && d.listing.client].filter(Boolean);
-    for (const nm of names) {
-      const matches = nameIx.get(norm(nm));
-      if (!matches || matches.length !== 1) continue;   // no match, or ambiguous → skip
-      const leadId = matches[0];
-      const role = dr.side === 'buyer' ? 'buyer' : 'seller';
+    const role = dr.side === 'buyer' ? 'buyer' : 'seller';
+    const agent = /james/i.test(d.agent || '') ? 'james' : 'sara';
+    // De-dupe the person list drawn from all client-name sources on this deal.
+    const persons = [];
+    const seen = new Set();
+    for (const src of [d.client, d.clientName, d.listing && d.listing.client]) {
+      for (const p of splitClientNames(src)) {
+        const key = norm(`${p.first} ${p.last}`);
+        if (key && !seen.has(key)) { seen.add(key); persons.push(p); }
+      }
+    }
+    for (const p of persons) {
+      const key = norm(`${p.first} ${p.last}`);
+      const matches = nameIx.get(key);
+      if (matches && matches.length > 1) continue;      // ambiguous → skip, never guess
+      let leadId = matches && matches.length === 1 ? matches[0] : null;
+      if (!leadId) {
+        if (wiredDeals.has(dr.id)) continue;            // already-wired deal → don't spawn contacts
+        // No such contact — create one from the deal's client name.
+        const { data: ins, error: insErr } = await supa.from('leads').insert({
+          first_name:     p.first,
+          last_name:      p.last,
+          source:         'deal_auto',
+          lead_type:      role,
+          assigned_agent: agent,
+          contact_type:   'client',
+          notes:          `Auto-created from deal ${d.id} (${role}).`
+        }).select('id').single();
+        if (insErr || !ins) continue;
+        leadId = ins.id;
+        created++;
+        nameIx.set(key, [leadId]);                      // so a later deal reuses this contact
+      }
       const { data: ex } = await supa.from('deal_parties').select('deal_id').eq('deal_id', dr.id).eq('lead_id', leadId).limit(1);
       if (ex && ex.length) continue;                    // already linked
       const { error } = await supa.from('deal_parties').insert({ deal_id: dr.id, lead_id: leadId, role });
       if (!error) linked++;
     }
   }
-  return linked;
+  return { linked, created };
 }
 
 // ---------------------------------------------------------------------------
@@ -684,10 +741,11 @@ export default async function handler(req, res) {
     // the matching side stage, so a contact who's under contract never lingers
     // in the roster as a "lead". Self-healing: runs every sync, only touches
     // rows that need it, and never downgrades an existing client/past/sphere/DNC.
-    // Auto-link deal clients to their deals by name BEFORE promoting, so a
-    // freshly-linked party gets client-promoted in this same run.
-    let partiesLinked = 0;
-    try { partiesLinked = await autoLinkPartiesByName(supa, active); }
+    // Auto-link deal clients to their deals by name (creating the contact when
+    // none exists) BEFORE promoting, so a freshly-linked party gets
+    // client-promoted in this same run.
+    let partiesLinked = 0, contactsCreated = 0;
+    try { const alr = await autoLinkPartiesByName(supa, active); partiesLinked = alr.linked; contactsCreated = alr.created; }
     catch (e) { errors.push({ deal: 'auto-link-parties', error: e.message || String(e) }); }
 
     let leadsPromoted = 0;
@@ -730,6 +788,7 @@ export default async function handler(req, res) {
       checklist_pruned: checklistPruned,
       leads_promoted: leadsPromoted,
       parties_linked: partiesLinked,
+      contacts_created: contactsCreated,
       deal_errors: errors,
       deals_in_table: dealsInTable,
       // Agent party/escrow edits awaiting reconciliation into deals.json.
