@@ -439,12 +439,23 @@ async function editEvent(req, res, supa) {
     if (body.sub_kind !== undefined) {
       patch.sub_kind = typeof body.sub_kind === 'string' && body.sub_kind.trim() ? body.sub_kind.trim() : null;
     }
+    // Multi-day / all-day: turning it ON sets the span; turning it OFF clears it
+    // back to the picked start time (already applied above via date+time).
+    if (body.all_day !== undefined) {
+      const allDay = body.all_day === true && /^\d{4}-\d{2}-\d{2}$/.test(String(body.end_date || ''));
+      patch.all_day = allDay;
+      patch.ends_at = allDay && parseDateTime(body.end_date, '12:00') ? parseDateTime(body.end_date, '12:00').toISOString() : null;
+    }
   }
   if (!Object.keys(patch).length) return fail(res, 400, 'no updatable fields provided');
 
   const table = source === 'tour' ? 'tours' : 'appointments';
   let { data, error } = await supa.from(table).update(patch).eq('id', id).select('id').single();
-  // Degrade gracefully if 027 (sub_kind) hasn't run yet.
+  // Degrade gracefully if db/045 (all_day/ends_at) or 027 (sub_kind) haven't run.
+  if (error && /all_day|ends_at/i.test(error.message || '')) {
+    const { all_day, ends_at, ...safe } = patch;
+    ({ data, error } = await supa.from(table).update(safe).eq('id', id).select('id').single());
+  }
   if (error && /sub_kind/i.test(error.message || '')) {
     const { sub_kind, ...safe } = patch;
     ({ data, error } = await supa.from(table).update(safe).eq('id', id).select('id').single());

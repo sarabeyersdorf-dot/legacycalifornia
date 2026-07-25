@@ -4515,10 +4515,13 @@
           <div><label style="${M_LAB}">Title</label><input data-f-title value="${esc(ed.title || '')}" style="${M_INPUT}"></div>
         `}
         <div style="display:flex;gap:10px;">
-          <div style="flex:1;"><label style="${M_LAB}">Date</label><input data-f-date type="date" value="${esc(ed.date || '')}" style="${M_INPUT}"></div>
-          <div style="flex:0 0 130px;"><label style="${M_LAB}">Time</label><select data-f-time style="${M_INPUT}">${timeOptionsHtml(ed.time || '')}</select></div>
-          <div style="flex:0 0 110px;"><label style="${M_LAB}">Minutes</label><input data-f-dur type="number" min="15" step="15" value="${esc(ed.duration_minutes || 30)}" style="${M_INPUT}"></div>
+          <div style="flex:1;"><label style="${M_LAB}">${isTour ? 'Date' : 'Start date'}</label><input data-f-date type="date" value="${esc(ed.date || '')}" style="${M_INPUT}"></div>
+          <div data-time-cell style="flex:0 0 130px;"><label style="${M_LAB}">Time</label><select data-f-time style="${M_INPUT}">${timeOptionsHtml(ed.time || '')}</select></div>
+          <div data-dur-cell style="flex:0 0 110px;"><label style="${M_LAB}">Minutes</label><input data-f-dur type="number" min="15" step="15" value="${esc(ed.duration_minutes || 30)}" style="${M_INPUT}"></div>
         </div>
+        ${!isTour ? `
+        <label style="display:flex;align-items:center;gap:8px;font-size:13px;color:#3A332B;"><input data-f-multiday type="checkbox" ${ed.all_day ? 'checked' : ''}> Spans multiple days (e.g. a holiday)</label>
+        <div data-enddate-cell style="display:${ed.all_day ? 'block' : 'none'};"><label style="${M_LAB}">End date</label><input data-f-enddate type="date" value="${esc(ed.end_date || '')}" style="${M_INPUT}"></div>` : ''}
         <div><label style="${M_LAB}">Notes</label><textarea data-f-notes rows="2" style="${M_INPUT}">${esc(ed.notes || '')}</textarea></div>
         <div style="display:flex;gap:10px;margin-top:8px;align-items:center;">
           <button type="button" data-save style="${M_INK}">Save changes</button>
@@ -4528,11 +4531,26 @@
     m.body.querySelector('[data-cancel]').addEventListener('click', m.close);
     const kindSelE = m.body.querySelector('[data-f-kind]');
     if (kindSelE) kindSelE.addEventListener('change', () => { const ins = m.body.querySelector('[data-e-insp]'); if (ins) ins.style.display = kindSelE.value === 'inspection' ? 'block' : 'none'; });
+    // Multi-day toggle (appointments only) — mirror the create form.
+    const multiCbE  = m.body.querySelector('[data-f-multiday]');
+    const endCellE  = m.body.querySelector('[data-enddate-cell]');
+    const timeCellE = m.body.querySelector('[data-time-cell]');
+    const durCellE  = m.body.querySelector('[data-dur-cell]');
+    const syncMultiE = () => {
+      const on = multiCbE && multiCbE.checked;
+      if (endCellE)  endCellE.style.display  = on ? 'block' : 'none';
+      if (timeCellE) timeCellE.style.display = on ? 'none' : 'block';
+      if (durCellE)  durCellE.style.display  = on ? 'none' : 'block';
+    };
+    if (multiCbE) { multiCbE.addEventListener('change', syncMultiE); syncMultiE(); }
     const saveBtn = m.body.querySelector('[data-save]');
     saveBtn.addEventListener('click', async () => {
       const date = m.body.querySelector('[data-f-date]').value;
-      const time = m.body.querySelector('[data-f-time]').value;
-      if (!date || !time) { m.err.textContent = 'Pick a date and time.'; return; }
+      const multiDay = !!(multiCbE && multiCbE.checked);
+      const endDate = m.body.querySelector('[data-f-enddate]') ? m.body.querySelector('[data-f-enddate]').value : '';
+      const time = multiDay ? '12:00' : m.body.querySelector('[data-f-time]').value;
+      if (!date || !time) { m.err.textContent = multiDay ? 'Pick a start date.' : 'Pick a date and time.'; return; }
+      if (multiDay && (!endDate || endDate < date)) { m.err.textContent = 'Pick an end date on or after the start date.'; return; }
       const payload = { id: e.id, source: e.source, date, time, duration_minutes: parseInt(m.body.querySelector('[data-f-dur]').value, 10) || 30, notes: m.body.querySelector('[data-f-notes]').value.trim() };
       if (isTour) payload.tour_type = m.body.querySelector('[data-f-type]').value;
       else {
@@ -4542,6 +4560,8 @@
         payload.title = t;
         const sk = m.body.querySelector('[data-f-subkind]');
         if (sk) payload.sub_kind = sk.value.trim() || null;
+        payload.all_day = multiDay;                     // always send so turning it OFF works
+        if (multiDay) payload.end_date = endDate;
       }
       saveBtn.disabled = true; saveBtn.textContent = 'Saving…'; m.err.textContent = '';
       const r = await sendJSON('/api/crm/calendar', 'PATCH', payload);
