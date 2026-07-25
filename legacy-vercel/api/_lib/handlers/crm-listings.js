@@ -124,6 +124,7 @@ export default async function handler(req, res) {
   try {
     const supa = adminClient();
     const BASE      = 'source_key, address, city, stage, side, agent, list_price, sale_price, coe_date, photo_url, video_url, matterport_url, escrow_officer, title_company, co_agent';
+    const COLS_ATTRS = BASE + ', mls_number, listing_meta, stage_override, photo_override, party_details, attributes';
     const COLS_FULL = BASE + ', mls_number, listing_meta, stage_override, photo_override, party_details';
     const COLS_MLS  = BASE + ', mls_number, stage_override, photo_override';
     const COLS      = BASE;   // ultimate fallback — no stage_override/photo_override (pre-024/026)
@@ -146,8 +147,9 @@ export default async function handler(req, res) {
 
     // Prefer the full column set; degrade gracefully if listing_meta (019) or
     // mls_number (013) aren't in the table yet.
-    let dealsRes = await dealsQuery(COLS_FULL);
-    let usedCols = 'full';
+    let dealsRes = await dealsQuery(COLS_ATTRS);
+    let usedCols = 'attrs';
+    if (dealsRes.error) { dealsRes = await dealsQuery(COLS_FULL); usedCols = 'full'; }   // pre-043: no attributes column
     if (dealsRes.error) { dealsRes = await dealsQuery(COLS_MLS); usedCols = 'mls'; }
     if (dealsRes.error) { dealsRes = await dealsQuery(COLS); usedCols = 'base'; }
     const { data, error } = dealsRes;
@@ -226,6 +228,11 @@ export default async function handler(req, res) {
         has_video:  !!d.video_url,
         has_tour:   !!d.matterport_url,
         stage:      stage,
+        // Compliance intake status for the deal-card chip. 'complete' once Cowork
+        // has written the attributes block; 'needed' while it hasn't. Only
+        // meaningful for in-escrow deals (where the checklist consumes it) — the
+        // card decides whether to show it. Undefined column (pre-043) → 'needed'.
+        intake: (d.attributes && typeof d.attributes === 'object' && !Array.isArray(d.attributes) && Object.keys(d.attributes).length) ? 'complete' : 'needed',
         // People + escrow (deals.json prose merged with the agent's overlay).
         parties:       resolveParties(d),
         party_summary: partySummary(resolveParties(d))

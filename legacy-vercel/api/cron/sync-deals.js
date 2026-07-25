@@ -131,6 +131,10 @@ function mapDeal(d) {
     // v1.5 client-portal content: "What I need from you" + "Good to know".
     client_tasks:   Array.isArray(d.clientTasks) ? d.clientTasks : null,
     good_to_know:   Array.isArray(d.goodToKnow) ? d.goodToKnow : null,
+    // Compliance intake facts Cowork reads from the contract + disclosures
+    // (data/ATTRIBUTES-INTAKE.md). Drives the checklist's conditional tasks and
+    // the deal-card "Intake" chip. Fail-soft below until db/043 adds the column.
+    attributes:     (d.attributes && typeof d.attributes === 'object' && !Array.isArray(d.attributes)) ? d.attributes : null,
     updated_at: new Date().toISOString()
   };
 }
@@ -304,6 +308,43 @@ function clAddDays(s, n) {
 }
 function clFmt(s) { const [y, m, d] = String(s).split('-').map(Number); return `${CL_MONTHS[m - 1]} ${d}`; }
 
+// --- Trigger / exemption evaluation against the deal's `attributes` block ----
+// Cowork writes `attributes` per deal (see data/ATTRIBUTES-INTAKE.md) from the
+// contract + disclosure package. Absent → the conditional layer stays dark for
+// that deal (we never GUESS a legal disclosure trigger) and it earns a
+// self-clearing "confirm compliance facts" reminder instead.
+export function hasAttributes(d) {
+  const a = d && d.attributes;
+  return !!(a && typeof a === 'object' && !Array.isArray(a) && Object.keys(a).length);
+}
+function triggerTrue(key, a) {
+  switch (key) {
+    case 'is_hoa':              return a.hoa === true;
+    case 'pre_1978':            return Number.isFinite(+a.year_built) && +a.year_built > 0 && +a.year_built < 1978;
+    case 'has_solar':           return a.solar === true;
+    case 'solar_leased':        return a.solar === true && a.solar_leased === true;
+    case 'mello_roos':
+    case 'special_tax_district': return a.mello_roos === true;
+    case 'is_tenant_occupied':  return a.tenant_occupied === true;
+    default:                    return false;
+  }
+}
+// Exemptions are only honored when we can VERIFY them from explicit facts —
+// never inferred — so an unverifiable exemption can't silently drop a required
+// disclosure. All key off the attributes block (present-only).
+function exemptionMatch(key, a) {
+  switch (key) {
+    case 'reo':               return a.seller_type === 'reo';
+    case 'foreclosure':       return a.seller_type === 'foreclosure';
+    case 'probate_court':     return a.seller_type === 'probate' || a.seller_type === 'probate_court';
+    case 'cash_purchase':     return a.financing === 'cash' || a.financing_type === 'cash';
+    case 'appraisal_waived':  return a.appraisal_waived === true;
+    case 'loan_waived':       return a.loan_waived === true;
+    case 'inspection_waived': return a.inspection_waived === true;
+    default:                  return false;
+  }
+}
+
 // The deal's contract clock: Day 0 (acceptance) + per-contingency day counts.
 // null day0 → no dates (acceptance not read yet, or clock paused).
 function checklistClock(d) {
@@ -342,10 +383,20 @@ export function buildChecklistRows(deals, defs) {
     const client = ((d.client && String(d.client).trim()) || checklistShortAddr(d.address) || 'Deal').slice(0, 120);
     const agent = normAgent(d.agent);
     const clock = checklistClock(d);
+    const attrs = hasAttributes(d) ? d.attributes : null;
     for (const list of sets) {
       for (const t of list) {
-        if (t.requirement_level !== 'required') continue;   // v1: required only
         if (t.phase === 'pre_listing') continue;            // retrospective for an in-escrow deal
+        const level = t.requirement_level;
+        if (level !== 'required' && level !== 'conditional') continue;   // v1: no 'optional'
+        // Exemptions — honored only when we can verify them from the attributes.
+        if (attrs && Array.isArray(t.exemptions) && t.exemptions.some((k) => exemptionMatch(k, attrs))) continue;
+        // Conditional (trigger) tasks fire ONLY when the intake facts are present
+        // AND a trigger is satisfied — never guessed from absent data.
+        if (level === 'conditional') {
+          if (!attrs) continue;
+          if (!Array.isArray(t.triggers) || !t.triggers.some((k) => triggerTrue(k, attrs))) continue;
+        }
         const due = checklistDueDate(t, clock);
         rows.push({
           agent,
@@ -360,6 +411,23 @@ export function buildChecklistRows(deals, defs) {
           done: false
         });
       }
+    }
+    // Self-clearing signal: an in-escrow deal with no intake block yet gets ONE
+    // reminder so Sara sees at a glance which deals Cowork still owes facts on.
+    // It's pruned automatically the moment `attributes` lands (then the real
+    // conditional tasks appear in its place).
+    if (!attrs) {
+      rows.push({
+        agent,
+        client,
+        title: '⚠ Confirm compliance facts (HOA · solar · pre-1978 · tenant · seller type) to finish this deal’s checklist',
+        sub: 'Compliance intake',
+        note: null,
+        due_label: 'Needed',
+        source: 'checklist',
+        source_key: `checklist:${d.id}:_intake`.slice(0, 120),
+        done: false
+      });
     }
   }
   return rows;
@@ -440,8 +508,8 @@ export default async function handler(req, res) {
         // referenced before its migration runs, retry without them rather than
         // dropping the whole deal — a missing column must never blank the list.
         // They're restored automatically on the next sync once migrated.
-        if (wErr && /(listing_meta|timeline|milestones|agent_note|client_tasks|good_to_know|contacts)/i.test(wErr.message || '')) {
-          const { listing_meta, timeline, milestones, agent_note, client_tasks, good_to_know, contacts, ...safe } = mapped;
+        if (wErr && /(listing_meta|timeline|milestones|agent_note|client_tasks|good_to_know|contacts|attributes)/i.test(wErr.message || '')) {
+          const { listing_meta, timeline, milestones, agent_note, client_tasks, good_to_know, contacts, attributes, ...safe } = mapped;
           ({ error: wErr, id: dealId } = await writeDeal(safe));
         }
         if (wErr) throw new Error(`${ex ? 'update' : 'insert'}: ${wErr.message}`);

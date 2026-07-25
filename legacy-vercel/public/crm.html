@@ -1571,6 +1571,8 @@
     .lst-badge.closed  { background: var(--linen); color: var(--ink-mute); }
     .lst-badge.selling { background: #EAF0F6; color: #2B4A6B; border-color: #C3D4E6; }
     .lst-badge.buying  { background: #F6EFE8; color: #6B4A2B; border-color: #E6D2C3; }
+    .lst-badge.intake-ok   { background: #E8F0EA; color: #2E5C3D; border-color: #BFD8C6; }
+    .lst-badge.intake-need { background: #F6ECE1; color: #8A5A2B; border-color: #E6D2B9; }
     .lst-card .lk { font-family: var(--mono); font-size: 10px; letter-spacing: .1em; text-transform: uppercase; color: var(--brass); text-decoration: none; margin-top: 6px; }
     .lst-actions { margin-top: 10px; display: flex; gap: 8px; flex-wrap: wrap; align-items: stretch; }
     .lst-accept, .lst-restore { font-family: var(--mono); font-size: 9.5px; letter-spacing: .12em; text-transform: uppercase; padding: 7px 12px; border: 1px solid var(--ink); background: var(--ink); color: var(--shell); cursor: pointer; transition: opacity .12s; }
@@ -4571,11 +4573,19 @@ function selectLead(el) {
         '</div>';
     }
     var lc = (window.LegacyDealColors && window.LegacyDealColors.get(d.source_key)) || null;
+    // Compliance-intake chip — only for in-escrow deals, where the workflow
+    // checklist consumes the facts. ✓ once Cowork has written the attributes
+    // block; ⚠ while it hasn't (some conditional tasks can't generate yet).
+    var intake = (d.stage === 'pending')
+      ? (d.intake === 'complete'
+          ? '<span class="lst-badge intake-ok" title="Compliance intake complete — checklist facts captured">Intake ✓</span>'
+          : '<span class="lst-badge intake-need" title="Compliance facts not captured yet — some checklist tasks can’t generate until Cowork logs them">Intake ⚠</span>')
+      : '';
     return '<div class="lst-card" data-source-key="' + esc(d.source_key || '') + '"' + (lc ? ' style="border-top:5px solid ' + lc.border + ';"' : '') + ' role="link" tabindex="0">' + ph + '<div class="bd">' +
       '<div class="pr">' + esc(fmtUSD(d.price)) + '</div>' +
       '<div class="ad">' + esc(d.address || '') + (d.city ? ' · ' + esc(d.city) : '') + '</div>' +
       '<div class="mt"><span class="lst-badge ' + state.tab + '">' + badge(state.tab) + '</span>' + sideBadge +
-        '<span class="lst-badge">' + (d.agent === 'james' ? 'James' : 'Sara') + '</span>' + tour + '</div>' +
+        '<span class="lst-badge">' + (d.agent === 'james' ? 'James' : 'Sara') + '</span>' + tour + intake + '</div>' +
       (d.coe_date ? '<div style="font-size:11px;color:var(--ink-mute);">COE ' + esc(d.coe_date) + '</div>' : '') +
       (window.LegacyDealParties ? window.LegacyDealParties.summaryHtml(d.party_summary, d.source_key) : '') +
       '<span class="lk">Deal page ↗ · client view + agent console</span>' +
