@@ -1,6 +1,6 @@
 {
-  "version": 2.9,
-  "lastUpdated": "2026-07-24",
+  "version": 3.0,
+  "lastUpdated": "2026-07-25",
   "updatedBy": "Claude",
   "tasks": [
     {
@@ -430,7 +430,8 @@
       "agent": "james",
       "client": "Wendell",
       "title": "Update deals.json BEO alert \u2014 Buyer Early Occupancy Addendum is now fully executed via Authentisign (7/20, Brandi Jenkins forwarding). Change language from 'arranged' to 'executed'.",
-      "done": false
+      "done": true,
+      "note": " | CLOSED 2026-07-25: BEO fully executed confirmed in EX folder ('Buyer Early Occupancy Addendum fully executed - 625pdf.pdf'); no action needed."
     },
     {
       "agent": "sara",
@@ -443,15 +444,15 @@
     {
       "agent": "sara",
       "client": "433 Hwy 4",
-      "title": "433 seller-carry REVISED 7/24: Herfords want PRIVATE $100K note — not through escrow. ADD3 (price reduction to $1.2M) + loan cont extension to Aug 5 out for Herford signatures. Note is private promissory note between buyer and sellers outside escrow; no SFA, no 2nd DOT through escrow. File both docs in Ex when signed; update CRM sale price to $1.2M.",
-      "done": false,
+      "title": "433 seller-carry REVISED 7/24: Herfords want PRIVATE $100K note \u2014 not through escrow. ADD3 (price reduction to $1.2M) + loan cont extension to Aug 5 out for Herford signatures. Note is private promissory note between buyer and sellers outside escrow; no SFA, no 2nd DOT through escrow. File both docs in Ex when signed; update CRM sale price to $1.2M.",
+      "done": true,
       "dateAdded": "2026-07-23",
-      "note": "ADD3 terms confirmed by Sara 7/24. Both ADD3 and ETA3 (loan cont ext to Aug 5) now out for Herford (seller) signatures via Neriah."
+      "note": "ADD3 terms confirmed by Sara 7/24. Both ADD3 and ETA3 (loan cont ext to Aug 5) now out for Herford (seller) signatures via Neriah. | SUPERSEDED 2026-07-25: Private note outside escrow rejected by Placer Title underwriting (2nd DOT must record simultaneously with 1st). ETA3 fully executed 7/24 (all parties signed per Glide). New task added: review SFA + get Herfords to sign ADD3+SFA."
     },
     {
       "agent": "sara",
       "client": "433 Hwy 4",
-      "title": "Chase buyer signature on LA AVID in Homeligh — Sara added her AVID to the Homeligh disclosure package 7/24 and notified Neriah; Elizabeth Dawson (buyer) still needs to sign. Follow up with Neriah Davis (neriahd@gmail.com) to confirm buyer reviews and signs the AVID in Homeligh.",
+      "title": "Chase buyer signature on LA AVID in Homeligh \u2014 Sara added her AVID to the Homeligh disclosure package 7/24 and notified Neriah; Elizabeth Dawson (buyer) still needs to sign. Follow up with Neriah Davis (neriahd@gmail.com) to confirm buyer reviews and signs the AVID in Homeligh.",
       "done": false,
       "dateAdded": "2026-07-24"
     },
@@ -531,6 +532,42 @@
       "title": "COE DELAYED 7/24 \u2014 lender Kim (Prime Residential) waiting on rent appraisal on Castles' primary residence before funding; follow up with Kim for appraisal ETA and revised COE date; notify Ashley Cuslidge at Placer Title (209-736-9553) and Guy & Adrianna Castle",
       "done": false,
       "dateAdded": "2026-07-24"
+    },
+    {
+      "agent": "james",
+      "client": "695 Feather",
+      "title": "URGENT: Escrow amendment re prelim item #12 (OC Title, Tanya Salgado, sent 7/24 9:18 PM) \u2014 needs buyer (Ashley Robinson) AND seller (Dee Bradley) signatures; James acknowledged 7/24 but not confirmed complete; get both sides signed and returned to Tanya ASAP",
+      "done": false
+    },
+    {
+      "agent": "sara",
+      "client": "Skyline",
+      "title": "ShowingTime showing request \u2014 467 Skyline Dr, Sunday 7/26 1:00 PM; confirm or decline via ShowingTime app. Also: HomeLight property info packet viewed 7/25 (interest signal).",
+      "done": false
+    },
+    {
+      "agent": "both",
+      "client": "Wendell",
+      "title": "CRITICAL \u2014 Order to Sell (bankruptcy court approval) received 2026-07-24 7:57 PM from Audrey Burton / attorney Ken Fugate ('You are good to go'). James forwarded to Sara. THIS IS Day 0 \u2014 all contingency and COE clocks start 2026-07-24. Confirm Day 0 with Ken Fugate and escrow officer Amanda Boitano (Placer Title).",
+      "done": false
+    },
+    {
+      "agent": "both",
+      "client": "Wendell",
+      "title": "Closing documents and funds must route to Chapter 13 trustee Tracy Updike (P.O. Box 11550, South Bend IN 46634, case #25-31761 In re Marshall Guthrie) per attorney Ken Fugate \u2014 NOT to seller directly. Update escrow instructions with Amanda Boitano (Placer Title).",
+      "done": false
+    },
+    {
+      "agent": "sara",
+      "client": "433 Hwy 4",
+      "title": "ETA3 fully executed 2026-07-24 (all parties signed per Glide). SUPERSEDES private-note task. NEW: review SFA Neriah Davis sent 7/24 \u2014 verify it requires 2nd DOT to record simultaneously with 1st (Placer Title/Ashley Cuslidge requirement; prior private-note structure was rejected by underwriting). Then get Herfords to sign ADD3 (price $1.2M) + SFA.",
+      "done": false
+    },
+    {
+      "agent": "james",
+      "client": "Baldwin",
+      "title": "CRITICAL RISK flagged 2026-07-24: COE 8/3 at real risk. No loan confirmation from Kim Hesser. No contractor bid back (outreach to COASTCOUNTRYCONST@gmail.com 7/23, no reply). No appraisal requested. Extension may be overdue. No BIW on remaining inspections. Resolve today: call Kim, follow up contractor, confirm appraisal ordered.",
+      "done": false
     }
   ],
   "deals": [
@@ -1191,7 +1228,7 @@
           "status": "next",
           "col": "closing",
           "badge": "Delayed",
-          "desc": "COE DELAYED beyond 7/24. Lender Kim (Prime Residential) is waiting on a rent appraisal on the Castles' primary residence before funding. Revised COE date TBD — contact Kim for ETA."
+          "desc": "COE DELAYED beyond 7/24. Lender Kim (Prime Residential) is waiting on a rent appraisal on the Castles' primary residence before funding. Revised COE date TBD \u2014 contact Kim for ETA."
         }
       ],
       "agentNote": {
