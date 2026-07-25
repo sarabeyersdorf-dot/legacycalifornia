@@ -77,12 +77,20 @@ them.
 
 ## 1. Deals — the `"deals"` array (one object per transaction)
 
+> **One-time backfill — do this on your next run:** go through **every** deal in
+> the array and make sure each one has a top-level `"client"` field with the
+> client's full name(s), pulled from that deal's executed documents. Most deals
+> are missing it today. This is what lets the CRM auto-attach each contact to
+> their deal, so an agent never has to link them by hand. Match the CRM contact's
+> spelling exactly (full first + last name). After this, keep setting `"client"`
+> on every new deal as it comes in.
+
 Find the deal by `"address"` (or `"id"`) and update:
 
 | Field | Meaning |
 |---|---|
 | `"agent"` | **`"sara"` or `"james"`** — whose deal it is. **Always set this.** Routes the deal to the right desk / seller portal. |
-| `"client"` | **The client's name(s)** — on a BUYER-side deal, the buyer(s); on a listing, the seller(s). **Pull this from the executed documents** (the RPA / purchase agreement names the parties) when a deal comes in, and set it here. Shows on the Deals/Listings roster and the briefing calendar. e.g. `"client": "Roger & Kristin Quillen"`. |
+| `"client"` | **REQUIRED on every deal — the client's full name(s).** On a BUYER-side deal, the buyer(s); on a listing, the seller(s); on a dual deal, the primary client. **Pull this from the executed documents** (the RPA / purchase agreement names the parties). Use each person's **full legal name** exactly as it appears in the CRM contact (first + last), so the CRM can auto-match it — e.g. `"client": "Shomari Turner"`; two people as `"client": "Roger & Kristin Quillen"`. This is what auto-links the contact to their deal: once the name matches a CRM contact, that contact's card shows the deal (and the deal shows the client). A deal with no `client` can't auto-link — the agent has to wire it by hand. Shows on the Deals/Listings roster and the briefing calendar. |
 | `"side"` | `"listing"`/`"seller"` = sell-side · `"buyer"` = buy-side · `"both"` = dual agency |
 | `"stage"` | `"offer"` = we have an offer out/in on it, not yet accepted · `"listing"` = on market · `"pending"` = in escrow · `"closed"` = funded · `"preparing"` = future listing |
 | `"stage": "offer"` | **Use for any property we have an offer on that isn't accepted yet** — an offer we WROTE for a buyer client (set `"side": "buyer"`), or an offer RECEIVED on one of our listings (`"side": "listing"`). These show under the **Offers** tab of the Deals and Offers view. When the offer is accepted, either set `"stage": "pending"` here, or Sara flips it with the card's "Mark accepted → escrow" toggle (that override self-heals once you move it to `"pending"` in this file). |
@@ -303,7 +311,7 @@ use a **task**.
 
 ## Rules of thumb
 
-- Every deal gets an `"agent"`; every task gets an `"agent"`.
+- Every deal gets an `"agent"` AND a `"client"` (full name, matching the CRM contact so it auto-links); every task gets an `"agent"`.
 - Numbers are bare (no `$`, no commas). Dates are `"YYYY-MM-DD"`.
 - Change only what Sara mentioned; leave everything else intact.
 - Always bump `"version"` + `"lastUpdated"`, and keep valid JSON.
