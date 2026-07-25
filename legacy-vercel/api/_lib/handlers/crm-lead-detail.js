@@ -105,7 +105,7 @@ async function readLead(req, res) {
     if (!id) return fail(res, 400, 'id required');
 
     const supa = adminClient();
-    const [lead, messages, events, saved, tours, offers, notes, tasks, appts, dealMsgs, dealParties] = await Promise.all([
+    const [lead, messages, events, saved, tours, offers, notes, tasks, appts, dealMsgs, dealParties, related] = await Promise.all([
       supa.from('leads').select('*').eq('id', id).single(),
       supa.from('messages').select('*').eq('lead_id', id).order('created_at'),
       supa.from('lead_events').select('*').eq('lead_id', id).order('created_at', { ascending: false }).limit(50),
@@ -122,6 +122,10 @@ async function readLead(req, res) {
       // The deal(s) this contact is a party to — so the card can show "in the
       // Baldwin deal · in escrow" and flip to "Closed · <date>" when it closes.
       supa.from('deal_parties').select('role, deals(source_key, address, city, stage, side, coe_date, agent, list_price, sale_price)')
+        .eq('lead_id', id).then((r) => r, () => ({ data: [] })),
+      // Related contacts (spouse, etc.) — shown on the card, each linking to
+      // their own record. Degrades to empty until db/044 runs.
+      supa.from('lead_relationships').select('relationship, related:related_lead_id(id, first_name, last_name, email, phone, contact_type)')
         .eq('lead_id', id).then((r) => r, () => ({ data: [] }))
     ]);
 
@@ -158,6 +162,8 @@ async function readLead(req, res) {
       appointments:     appts.data     || [],
       // Deals this contact belongs to (deduped by source_key), newest-first.
       deals:            dedupeDeals((dealParties && dealParties.data) || []),
+      // Related contacts (spouse, etc.) — flattened for the card.
+      related:          ((related && related.data) || []).filter((r) => r.related).map((r) => ({ ...r.related, relationship: r.relationship })),
       collections:      await curatedForLead(supa, id, events.data || []).catch(() => [])
     });
   } catch (e) {

@@ -3898,6 +3898,7 @@ function selectLead(el) {
         '<label>Send by</label><div class="row"><label style="flex:1;display:flex;gap:6px;align-items:center;font-size:13px;text-transform:none;letter-spacing:0;color:var(--ink);"><input type="radio" name="pmChan" value="sms" ' + (chan === 'sms' ? 'checked' : '') + ' style="width:auto;"> Text</label>' +
           '<label style="flex:1;display:flex;gap:6px;align-items:center;font-size:13px;text-transform:none;letter-spacing:0;color:var(--ink);"><input type="radio" name="pmChan" value="email" ' + (chan === 'email' ? 'checked' : '') + ' style="width:auto;"> Email</label></div>' +
         '<label>To</label><input id="pmTo" value="' + esc(chan === 'sms' ? (d.client_phone || '') : (d.client_email || '')) + '" placeholder="phone or email">' +
+        '<label>CC — also send to <span style="text-transform:none;letter-spacing:0;color:var(--ink-mute);font-weight:400;">(e.g. a spouse; separate several with commas)</span></label><input id="pmCc" value="" placeholder="another email or phone…">' +
         '<div id="pmPreview"></div>' +
         '<div style="margin-top:10px;"><a href="/collection.html?preview=' + encodeURIComponent(state.active.id) + '" target="_blank" class="btn-link" style="font-size:11px;">Open the full page they’ll land on ↗</a></div>' +
         '<div class="actions"><button class="btn btn-brass btn-sm" id="pmSend">Send now</button><button class="btn-link" id="pmX" style="margin-left:auto;">Cancel</button></div><div class="cur-result" id="pmR"></div>';
@@ -3916,11 +3917,17 @@ function selectLead(el) {
         var ch = m.querySelector('input[name="pmChan"]:checked').value;
         var to = m.querySelector('#pmTo').value.trim();
         if (!to) { m.querySelector('#pmR').textContent = 'Enter a phone or email.'; return; }
+        var cc = (m.querySelector('#pmCc').value || '').split(',').map(function (s) { return s.trim(); }).filter(Boolean);
         var btn = m.querySelector('#pmSend'); btn.disabled = true; btn.textContent = 'Sending…';
-        api('push', { method: 'POST', body: { collection_id: state.active.id, channel: ch, to: to } }).then(function (rr) {
+        api('push', { method: 'POST', body: { collection_id: state.active.id, channel: ch, to: to, cc: cc } }).then(function (rr) {
           btn.disabled = false; btn.textContent = 'Send now';
           var R = m.querySelector('#pmR');
-          if (rr.ok && rr.j.pushed) { R.style.color = '#2E5C3D'; R.textContent = '✓ Sent to ' + to + '. The collection is now live.'; loadCollections(); if (state.active) openCollection(state.active.id); }
+          if (rr.ok && rr.j.pushed) {
+            var n = 1 + ((rr.j.cc_sent && rr.j.cc_sent.length) || 0);
+            R.style.color = '#2E5C3D';
+            R.textContent = '✓ Sent to ' + n + (n === 1 ? ' recipient' : ' recipients') + '. The collection is now live.';
+            loadCollections(); if (state.active) openCollection(state.active.id);
+          }
           else if (rr.ok && rr.j.note) { R.style.color = '#8a6d3b'; R.textContent = '⚠ ' + rr.j.note + ' (link is live; check Twilio/Resend keys)'; }
           else { R.style.color = '#8B3A3A'; R.textContent = '✗ ' + ((rr.j && rr.j.error) || 'Failed.'); }
         });

@@ -137,8 +137,50 @@ export default async function handler(req, res) {
       }
     }
 
+    // ---- CC — send the same collection to additional recipients (e.g. a
+    // spouse), so more than one client gets it in one action. Same link + body;
+    // each is validated against the channel, de-duped against the primary, and
+    // logged to that person's thread when their email/phone matches a contact.
+    const cc_sent = [], cc_failed = [];
+    let ccList = Array.isArray(b?.cc) ? b.cc : (typeof b?.cc === 'string' ? b.cc.split(',') : []);
+    ccList = [...new Set(ccList.map((s) => String(s || '').trim()).filter(Boolean))]
+      .filter((r) => (channel === 'email' ? /@/.test(r) : /\d/.test(r)))    // match the channel
+      .filter((r) => r.toLowerCase() !== String(to).toLowerCase());          // not the primary
+    for (const rcpt of ccList) {
+      try {
+        let ccOk = false, ccSid = null;
+        if (channel === 'sms') {
+          const pr = await sendSMS({ to: rcpt, body: bodyText, signAs: agent });
+          ccOk = !pr.skipped; ccSid = pr.sid || null;
+        } else {
+          const provider = pickEmailProvider();
+          if (provider) { const pr = await provider.send({ agent, to: rcpt, toName: null, subject: msg.subject, text: msg.text, html: msg.html }); ccOk = !pr.skipped; }
+        }
+        (ccOk ? cc_sent : cc_failed).push(rcpt);
+        // Log to a matching contact's thread (exact email, or exact phone).
+        if (ccOk) {
+          const q = channel === 'email'
+            ? supa.from('leads').select('id').eq('email', rcpt.toLowerCase()).maybeSingle()
+            : supa.from('leads').select('id').eq('phone', rcpt).maybeSingle();
+          const { data: ccLead } = await q;
+          if (ccLead?.id) {
+            const nowIso = new Date().toISOString();
+            await supa.from('messages').insert({
+              lead_id: ccLead.id, direction: 'outbound', channel,
+              body: channel === 'sms' ? bodyText : `Collection pushed: ${link}`,
+              subject: channel === 'email' ? `Collection: ${coll.title || 'homes for you'}` : null,
+              status: 'sent', ai_generated: false, approved_by: agent, approved_at: nowIso,
+              twilio_sid: channel === 'sms' ? ccSid : null
+            }).then(() => {}, () => {});
+            await supa.from('leads').update({ last_contact_at: nowIso }).eq('id', ccLead.id).then(() => {}, () => {});
+          }
+        }
+      } catch (_) { cc_failed.push(rcpt); }
+    }
+
     return ok(res, {
       pushed: sentOk, channel, to, link, message_id,
+      cc_sent, cc_failed,
       provider: providerResult,
       note: providerResult.skipped ? 'Provider not configured — link generated but message not delivered.' : undefined
     });

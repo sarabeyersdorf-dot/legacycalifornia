@@ -2211,6 +2211,7 @@
     const appts    = payload.appointments || [];
     const collections = payload.collections || [];
     const deals    = payload.deals || [];
+    const related  = payload.related || [];
 
     const initials = initialsOf(lead.first_name, lead.last_name, lead.email);
     // Comms on this lead speak as the agent who owns it (assigned_agent), so a
@@ -2284,6 +2285,33 @@
         <button class="btn-link lp-editlink" data-detail-action="edit-consent" style="font-size:12px;background:none;border:none;cursor:pointer;padding:0;color:var(--brass);">Update contact</button>
       </div>
       ${dealsHtml}
+      ${related.length ? `<div style="margin-top:10px;display:flex;flex-wrap:wrap;gap:8px;align-items:center;max-width:540px;">
+        <span style="font-family:var(--mono);font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-mute);">Related</span>
+        ${related.map((r) => `<button type="button" class="lp-related-chip" data-open-related="${escHtml(r.id)}" style="background:var(--shell);border:1px solid var(--rule);border-radius:14px;padding:4px 11px;cursor:pointer;font-size:12.5px;color:var(--ink);display:inline-flex;gap:6px;align-items:center;">${escHtml([r.first_name, r.last_name].filter(Boolean).join(' ') || 'Contact')}<span style="color:var(--ink-mute);font-size:11px;">${escHtml(r.relationship || 'related')}</span></button>`).join('')}
+        <button type="button" class="btn-link" data-detail-action="add-related" style="font-size:12px;background:none;border:none;cursor:pointer;padding:0;color:var(--brass);">+ Add</button>
+      </div>` : `<div style="margin-top:8px;"><button type="button" class="btn-link" data-detail-action="add-related" style="font-size:12px;background:none;border:none;cursor:pointer;padding:0;color:var(--brass);">+ Add spouse / related contact</button></div>`}
+      <div data-related-editor style="display:none;margin-top:10px;padding:14px 16px;background:var(--shell);border:1px solid var(--rule);font-size:13px;max-width:540px;">
+        <div style="font-family:var(--mono);font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-mute);margin-bottom:10px;">Add a related contact — creates their own card</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px 10px;margin-bottom:10px;">
+          <label style="display:flex;flex-direction:column;gap:3px;font-size:11px;color:var(--ink-mute);">First name<input data-rel-first style="${fld}"></label>
+          <label style="display:flex;flex-direction:column;gap:3px;font-size:11px;color:var(--ink-mute);">Last name<input data-rel-last value="${escHtml(lead.last_name || '')}" style="${fld}"></label>
+          <label style="display:flex;flex-direction:column;gap:3px;font-size:11px;color:var(--ink-mute);">Email<input data-rel-email type="email" style="${fld}"></label>
+          <label style="display:flex;flex-direction:column;gap:3px;font-size:11px;color:var(--ink-mute);">Phone<input data-rel-phone style="${fld}"></label>
+          <label style="display:flex;flex-direction:column;gap:3px;font-size:11px;color:var(--ink-mute);">Relationship
+            <select data-rel-type style="${fld}">
+              <option value="spouse">Spouse</option><option value="partner">Partner</option>
+              <option value="co-buyer">Co-buyer</option><option value="co-seller">Co-seller</option>
+              <option value="parent">Parent</option><option value="child">Child</option>
+              <option value="family">Family</option><option value="other">Other</option>
+            </select>
+          </label>
+        </div>
+        <div style="display:flex;gap:10px;align-items:center;">
+          <button class="btn btn-ink btn-sm" data-detail-action="save-related">Add contact</button>
+          <button class="btn-link" data-detail-action="cancel-related" style="font-size:12px;background:none;border:none;cursor:pointer;color:var(--ink-mute);">Cancel</button>
+          <span data-rel-result style="font-size:12.5px;margin-left:auto;"></span>
+        </div>
+      </div>
       <div data-consent-editor style="display:none;margin-top:10px;padding:14px 16px;background:var(--shell);border:1px solid var(--rule);font-size:13px;max-width:540px;">
         <div style="font-family:var(--mono);font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-mute);margin-bottom:10px;">Update contact</div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px 10px;margin-bottom:12px;">
@@ -2807,6 +2835,48 @@
         selectLeadId(lead.id, true); // force refresh so header pills reflect the change
       });
     }
+
+    // Related-contact editor — toggle, save (creates their own card + links
+    // both ways), and clicking a related chip opens that contact.
+    (function () {
+      const panel = detailEl.querySelector('[data-related-editor]');
+      detailEl.querySelectorAll('[data-detail-action="add-related"]').forEach((btn) => {
+        btn.addEventListener('click', () => { if (panel) { panel.style.display = 'block'; const f = panel.querySelector('[data-rel-first]'); if (f) f.focus(); } });
+      });
+      if (panel) {
+        const cancel = panel.querySelector('[data-detail-action="cancel-related"]');
+        if (cancel) cancel.addEventListener('click', () => { panel.style.display = 'none'; });
+        const save = panel.querySelector('[data-detail-action="save-related"]');
+        const result = panel.querySelector('[data-rel-result]');
+        if (save) save.addEventListener('click', async () => {
+          const first = (panel.querySelector('[data-rel-first]').value || '').trim();
+          if (!first) { result.style.color = '#9B2C2C'; result.textContent = 'First name required.'; return; }
+          const body = {
+            lead_id: lead.id, first_name: first,
+            last_name: (panel.querySelector('[data-rel-last]').value || '').trim(),
+            email:     (panel.querySelector('[data-rel-email]').value || '').trim(),
+            phone:     (panel.querySelector('[data-rel-phone]').value || '').trim(),
+            relationship: panel.querySelector('[data-rel-type]').value
+          };
+          save.disabled = true; save.textContent = 'Adding…'; result.style.color = '';
+          const r = await window.Legacy.api('/api/crm/related-contact', { method: 'POST', body });
+          save.disabled = false; save.textContent = 'Add contact';
+          if (r.ok && r.json && r.json.related) {
+            result.style.color = '#2E5C3D'; result.textContent = r.json.created_new ? 'Added ✓' : 'Linked existing ✓';
+            setTimeout(() => { loadLead(lead.id); }, 550);
+          } else {
+            result.style.color = '#9B2C2C'; result.textContent = (r.json && r.json.error) || 'Could not add.';
+          }
+        });
+      }
+      detailEl.querySelectorAll('[data-open-related]').forEach((chip) => {
+        chip.addEventListener('click', () => {
+          const rid = chip.getAttribute('data-open-related');
+          if (rid && window.Legacy && window.Legacy.openLead) window.Legacy.openLead(rid);
+          else if (rid && typeof selectLeadId === 'function') selectLeadId(rid, true);
+        });
+      });
+    })();
 
     // Wire the composer (channel toggle, Note/Internal placeholders, Send).
     wireComposer(detailEl, lead);
