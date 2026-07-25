@@ -319,7 +319,7 @@ async function autoLinkPartiesByName(supa, dealsJson) {
   const { data: allParties } = await supa.from('deal_parties').select('deal_id');
   const wiredDeals = new Set((allParties || []).map((p) => p.deal_id));
 
-  let linked = 0, created = 0;
+  let linked = 0, created = 0, spousesRelated = 0;
   for (const d of (dealsJson || [])) {
     const dr = bySrc.get(d.id);
     if (!dr) continue;
@@ -334,6 +334,7 @@ async function autoLinkPartiesByName(supa, dealsJson) {
         if (key && !seen.has(key)) { seen.add(key); persons.push(p); }
       }
     }
+    const resolvedIds = [];                             // leadIds resolved for this deal, in order
     for (const p of persons) {
       const key = norm(`${p.first} ${p.last}`);
       const matches = nameIx.get(key);
@@ -356,13 +357,28 @@ async function autoLinkPartiesByName(supa, dealsJson) {
         created++;
         nameIx.set(key, [leadId]);                      // so a later deal reuses this contact
       }
+      resolvedIds.push(leadId);
       const { data: ex } = await supa.from('deal_parties').select('deal_id').eq('deal_id', dr.id).eq('lead_id', leadId).limit(1);
       if (ex && ex.length) continue;                    // already linked
       const { error } = await supa.from('deal_parties').insert({ deal_id: dr.id, lead_id: leadId, role });
       if (!error) linked++;
     }
+    // A deal whose client was TWO people (a couple) → relate them as spouses,
+    // symmetrically, so the tie shows on both cards. Only for a clean pair, and
+    // only when the relationship isn't already recorded. Fail-soft until db/044.
+    if (persons.length === 2 && resolvedIds.length === 2 && resolvedIds[0] !== resolvedIds[1]) {
+      const [a, b2] = resolvedIds;
+      const { data: exRel } = await supa.from('lead_relationships').select('lead_id').eq('lead_id', a).eq('related_lead_id', b2).limit(1).then((r) => r, () => ({ data: null }));
+      if (!exRel || !exRel.length) {
+        const { error: rErr } = await supa.from('lead_relationships').upsert([
+          { lead_id: a,  related_lead_id: b2, relationship: 'spouse' },
+          { lead_id: b2, related_lead_id: a,  relationship: 'spouse' }
+        ], { onConflict: 'lead_id,related_lead_id', ignoreDuplicates: true }).then((r) => r, (e) => ({ error: e }));
+        if (!rErr) spousesRelated++;
+      }
+    }
   }
-  return { linked, created };
+  return { linked, created, spouses_related: spousesRelated };
 }
 
 // ---------------------------------------------------------------------------
@@ -744,8 +760,8 @@ export default async function handler(req, res) {
     // Auto-link deal clients to their deals by name (creating the contact when
     // none exists) BEFORE promoting, so a freshly-linked party gets
     // client-promoted in this same run.
-    let partiesLinked = 0, contactsCreated = 0;
-    try { const alr = await autoLinkPartiesByName(supa, active); partiesLinked = alr.linked; contactsCreated = alr.created; }
+    let partiesLinked = 0, contactsCreated = 0, spousesRelated = 0;
+    try { const alr = await autoLinkPartiesByName(supa, active); partiesLinked = alr.linked; contactsCreated = alr.created; spousesRelated = alr.spouses_related; }
     catch (e) { errors.push({ deal: 'auto-link-parties', error: e.message || String(e) }); }
 
     let leadsPromoted = 0;
@@ -789,6 +805,7 @@ export default async function handler(req, res) {
       leads_promoted: leadsPromoted,
       parties_linked: partiesLinked,
       contacts_created: contactsCreated,
+      spouses_related: spousesRelated,
       deal_errors: errors,
       deals_in_table: dealsInTable,
       // Agent party/escrow edits awaiting reconciliation into deals.json.
