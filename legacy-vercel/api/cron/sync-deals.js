@@ -276,8 +276,12 @@ async function promoteAttachedLeads(supa) {
 //     property-attribute intake facts (HOA, solar, pre-1978…) aren't on deals
 //     yet, so triggers can't be evaluated. Exemptions likewise can't be
 //     verified, so we don't drop tasks on unverifiable exemptions in v1.
-//   • No due dates. deals.json has no reliable acceptance date or contingency
-//     day fields yet, so tasks carry a PHASE label instead of a date/overdue.
+//   • Real due dates where Cowork has read the contract. The deal's `timeline`
+//     (acceptance = Day 0, per-contingency `overrides`, paused clock) is the
+//     SAME source the briefing calendar uses (deal-timeline.js), so a task's
+//     date equals the calendar's. When acceptance is absent (offer just in) or
+//     the clock is paused (e.g. bankruptcy-court sale), the task carries only a
+//     phase label — no invented date.
 //   • pre_listing tasks are skipped for an already-in-escrow deal (retrospective
 //     noise — that prep is done by the time an offer is accepted).
 // Identity = stable source_key `checklist:<dealId>:<code>`, so check-offs
@@ -286,8 +290,45 @@ async function promoteAttachedLeads(supa) {
 const CHECKLIST_STAGES = new Set(['pending']);
 const PHASE_LABEL = { pre_listing: 'Pre-listing', offer: 'Offer', escrow: 'Escrow', contingency: 'Contingency', pre_close: 'Pre-close', closing: 'Closing' };
 const CAT_LABEL   = { document: 'Document', disclosure: 'Disclosure', inspection: 'Inspection', contingency: 'Contingency', closing: 'Closing', communication: 'Communication' };
+const CL_MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+const CL_DEFAULT_CONTINGENCY_DAYS = 17;  // CA RPA default (mirrors deal-timeline.js)
 
 function checklistShortAddr(a) { return String(a || '').split(',')[0].trim(); }
+// Add whole days to a 'YYYY-MM-DD' date, calendar-sense (mirrors
+// deal-timeline.js addDays so checklist dates == briefing-calendar dates).
+function clAddDays(s, n) {
+  const [y, m, d] = String(s).split('-').map(Number);
+  const dt = new Date(Date.UTC(y, m - 1, d));
+  dt.setUTCDate(dt.getUTCDate() + n);
+  return `${dt.getUTCFullYear()}-${String(dt.getUTCMonth() + 1).padStart(2, '0')}-${String(dt.getUTCDate()).padStart(2, '0')}`;
+}
+function clFmt(s) { const [y, m, d] = String(s).split('-').map(Number); return `${CL_MONTHS[m - 1]} ${d}`; }
+
+// The deal's contract clock: Day 0 (acceptance) + per-contingency day counts.
+// null day0 → no dates (acceptance not read yet, or clock paused).
+function checklistClock(d) {
+  const tl = (d && d.timeline) || {};
+  if (Object.prototype.hasOwnProperty.call(tl, 'clockStart') && tl.clockStart === null) return null; // paused
+  const isDate = (v) => typeof v === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(v);
+  const day0 = isDate(tl.clockStart) ? tl.clockStart
+            : isDate(tl.acceptance)  ? tl.acceptance
+            : isDate(d && d.openEscrowDate) ? d.openEscrowDate : null;
+  if (!day0) return null;
+  const base = Number.isFinite(+tl.contingencyDays) ? +tl.contingencyDays : CL_DEFAULT_CONTINGENCY_DAYS;
+  return { day0, overrides: tl.overrides || {}, base };
+}
+// A task's due date from the clock: N days from acceptance, or the named
+// contingency's period (override, else the 17-day default).
+function checklistDueDate(t, clock) {
+  if (!clock) return null;
+  if (Number.isFinite(+t.days_from_acceptance)) return clAddDays(clock.day0, +t.days_from_acceptance);
+  if (t.days_from_contingency) {
+    const kind = String(t.days_from_contingency).replace(/_days$/, '');   // inspection_days → inspection
+    const days = Number.isFinite(+clock.overrides[kind]) ? +clock.overrides[kind] : clock.base;
+    return clAddDays(clock.day0, days);
+  }
+  return null;
+}
 
 export function buildChecklistRows(deals, defs) {
   const normAgent = (a) => { a = String(a || '').toLowerCase(); return /james/.test(a) ? 'james' : (/both/.test(a) ? 'both' : 'sara'); };
@@ -300,17 +341,20 @@ export function buildChecklistRows(deals, defs) {
     if (!sets.length) sets.push(defs.sell_side_tasks || []);   // unknown side → sell-side default
     const client = ((d.client && String(d.client).trim()) || checklistShortAddr(d.address) || 'Deal').slice(0, 120);
     const agent = normAgent(d.agent);
+    const clock = checklistClock(d);
     for (const list of sets) {
       for (const t of list) {
         if (t.requirement_level !== 'required') continue;   // v1: required only
         if (t.phase === 'pre_listing') continue;            // retrospective for an in-escrow deal
+        const due = checklistDueDate(t, clock);
         rows.push({
           agent,
           client,
           title: String(t.description || '').slice(0, 200),
           sub: [PHASE_LABEL[t.phase] || t.phase, CAT_LABEL[t.category] || t.category].filter(Boolean).join(' · ').slice(0, 120),
           note: null,
-          due_label: (PHASE_LABEL[t.phase] || t.phase || 'Workflow').slice(0, 40),
+          // Real date when the contract's been read; else the phase label.
+          due_label: (due ? `Due ${clFmt(due)}` : (PHASE_LABEL[t.phase] || t.phase || 'Workflow')).slice(0, 40),
           source: 'checklist',
           source_key: `checklist:${d.id}:${t.code}`.slice(0, 120),
           done: false
