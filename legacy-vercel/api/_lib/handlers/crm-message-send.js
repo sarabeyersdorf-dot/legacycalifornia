@@ -37,17 +37,27 @@ function pickEmailProvider() {
 }
 
 // Same minimal branded wrapper used by /api/crm/approve. Kept inline (small
-// enough not to warrant a shared helper at this scale).
-function bodyToHtml(text) {
+// enough not to warrant a shared helper at this scale). Signs with the SENDING
+// agent's own identity (name · title · DRE · phone) — never a hard-coded name —
+// so James's emails are signed James, not Sara.
+function bodyToHtml(text, agent) {
   const safe = (text || '').replace(/[&<>]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]));
   const paragraphs = safe.split(/\n\s*\n/).map((p) =>
     `<p style="font-size:15px;line-height:1.6;color:#3A332B;margin:0 0 16px;">${p.replace(/\n/g, '<br>')}</p>`
   ).join('');
+  const a = agent || {};
+  const esc = (s) => String(s == null ? '' : s).replace(/[&<>]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]));
+  const sig = [
+    esc(a.name || 'Legacy Properties'),
+    a.title ? esc(a.title) : null,
+    a.dre_number ? `DRE #${esc(a.dre_number)}` : null,
+    a.phone ? esc(a.phone) : null
+  ].filter(Boolean).join(' · ');
   return `<div style="font-family:Georgia,'Cormorant Garamond',serif;color:#1A1714;max-width:560px;margin:0 auto;padding:32px 28px;background:#FAF6EC;">
     <div style="font-family:'Courier New',monospace;font-size:10px;letter-spacing:.22em;text-transform:uppercase;color:#7C6A4D;margin-bottom:18px;">Legacy Properties</div>
     ${paragraphs}
     <hr style="border:none;border-top:1px solid #D9CFB7;margin:24px 0 16px;">
-    <p style="font-size:13px;line-height:1.55;color:#7C6A4D;margin:0;">Sara Cooper · Broker-Owner · DRE #02141987 · 209-559-4966<br><a href="https://legacycalifornia.com" style="color:#7C6A4D;">legacycalifornia.com</a></p>
+    <p style="font-size:13px;line-height:1.55;color:#7C6A4D;margin:0;">${sig}<br><a href="https://legacycalifornia.com" style="color:#7C6A4D;">legacycalifornia.com</a></p>
   </div>`;
 }
 
@@ -90,6 +100,14 @@ export default async function handler(req, res) {
 
     const sentBy = profile.role === 'agent_james' ? 'james' : 'sara';
     const nowIso = new Date().toISOString();
+
+    // The sending agent's own identity, for the email signature (so James's
+    // emails sign James). Fail-soft: if the lookup errors, sign with the brand.
+    let senderAgent = null;
+    if (channel === 'email') {
+      const { data: ag } = await supa.from('agents').select('name, title, dre_number, phone, email').eq('agent_key', sentBy).maybeSingle();
+      senderAgent = ag || null;
+    }
 
     // ---- Insert the messages row (transient status while we await provider)
     // Must be a value in the messages.status CHECK ('draft' | 'pending_approval'
@@ -141,7 +159,7 @@ export default async function handler(req, res) {
           toName:  [lead.first_name, lead.last_name].filter(Boolean).join(' ') || null,
           subject,
           text,
-          html:    bodyToHtml(text)
+          html:    bodyToHtml(text, senderAgent)
         });
         sentPatch = {
           status:        providerResult.skipped ? 'failed' : 'sent',

@@ -2210,6 +2210,7 @@
     const tasks    = payload.tasks || [];
     const appts    = payload.appointments || [];
     const collections = payload.collections || [];
+    const deals    = payload.deals || [];
 
     const initials = initialsOf(lead.first_name, lead.last_name, lead.email);
     // Comms on this lead speak as the agent who owns it (assigned_agent), so a
@@ -2248,12 +2249,41 @@
     const showSell = (side === 'seller' || side === 'both');
     const fld = 'font:inherit;font-size:13px;padding:6px 8px;border:1px solid var(--rule);background:#fff;color:var(--ink);';
     const cap = 'font-family:var(--mono);font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-mute);min-width:72px;';
+    // The deal(s) this contact is a party to. A live deal shows its stage + COE;
+    // a closed one flips to "Closed · <date>" with a green rail. Links to the
+    // deal page. This is what tells the agent "this contact is in the Baldwin
+    // deal" — the payoff of linking them.
+    const DEAL_STAGE_LABEL = { pending: 'In escrow', offer: 'Offer out', listing: 'On market', preparing: 'Preparing to list', closed: 'Closed', dead: 'Fell through', inactive: 'Inactive', dispute: 'In dispute', 'buyer-prospect': 'Prospect' };
+    const fmtDealDate = (s) => { if (!s) return ''; const dd = new Date(s); if (isNaN(dd)) return ''; const MO = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']; return `${MO[dd.getUTCMonth()]} ${dd.getUTCDate()}`; };
+    const dealsHtml = deals.length ? `
+      <div style="margin-top:10px;display:flex;flex-direction:column;gap:6px;max-width:540px;">
+        ${deals.map((dl) => {
+          const closed = dl.stage === 'closed';
+          const roleLabel = (dl.roles && dl.roles[0]) ? dl.roles[0].replace(/^./, (c) => c.toUpperCase()) : '';
+          const statusLabel = DEAL_STAGE_LABEL[dl.stage] || dl.stage || '';
+          const dateLabel = dl.coe_date ? (closed ? `Closed ${fmtDealDate(dl.coe_date)}` : `COE ${fmtDealDate(dl.coe_date)}`) : (closed ? 'Closed' : '');
+          // For a closed deal the date label already reads "Closed <date>", so
+          // don't also show the standalone "Closed" status — avoids "Closed · Closed".
+          const meta = (closed ? [roleLabel, dateLabel || 'Closed'] : [roleLabel, statusLabel, dateLabel]).filter(Boolean).map(escHtml).join(' · ');
+          const url = `/seller.html?deal=${encodeURIComponent(dl.source_key)}`;
+          return `<a href="${url}" target="_blank" rel="noopener" style="display:flex;align-items:center;gap:10px;text-decoration:none;background:var(--shell);border:1px solid var(--rule);border-left:4px solid ${closed ? '#2E5C3D' : 'var(--brass)'};padding:9px 12px;color:var(--ink);">
+            <span aria-hidden="true" style="font-size:15px;">🏡</span>
+            <span style="flex:1;min-width:0;">
+              <span style="font-weight:600;font-size:13.5px;">${escHtml(dl.address || dl.source_key)}</span>
+              ${meta ? `<span style="display:block;font-size:11.5px;color:var(--ink-mute);">${meta}</span>` : ''}
+            </span>
+            <span style="font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--brass);white-space:nowrap;">Deal ↗</span>
+          </a>`;
+        }).join('')}
+      </div>` : '';
+
     const contactEditorHtml = `
       <div style="margin-top:6px;display:flex;gap:12px;flex-wrap:wrap;align-items:center;font-size:13px;color:var(--ink-soft);">
         ${lead.phone ? `<span>📞 ${escHtml(lead.phone)}</span>` : ''}
         ${lead.email ? `<span>✉ ${escHtml(lead.email)}</span>` : ''}
         <button class="btn-link lp-editlink" data-detail-action="edit-consent" style="font-size:12px;background:none;border:none;cursor:pointer;padding:0;color:var(--brass);">Update contact</button>
       </div>
+      ${dealsHtml}
       <div data-consent-editor style="display:none;margin-top:10px;padding:14px 16px;background:var(--shell);border:1px solid var(--rule);font-size:13px;max-width:540px;">
         <div style="font-family:var(--mono);font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-mute);margin-bottom:10px;">Update contact</div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px 10px;margin-bottom:12px;">
@@ -2326,8 +2356,11 @@
       ? `<div style="padding:16px;opacity:.55;font-style:italic;">No conversation yet.</div>`
       : otherMessages.map((m) => {
           const them = m.direction === 'inbound';
-          const who  = them ? fullName(lead) : leadAgent.full;
-          const init = them ? initials : leadAgent.initials;
+          // Outbound: attribute to WHO ACTUALLY SENT it (messages.approved_by),
+          // not the lead's assigned agent — so James's send never shows as Sara.
+          const sender = them ? null : agentInfo(m.approved_by || lead.assigned_agent);
+          const who  = them ? fullName(lead) : sender.full;
+          const init = them ? initials : sender.initials;
           return `
             <div class="msg-bubble ${them ? 'them' : 'us'}">
               <div class="avatar avatar-sm">${escHtml(init)}</div>

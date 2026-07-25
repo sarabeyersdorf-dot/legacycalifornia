@@ -105,7 +105,7 @@ async function readLead(req, res) {
     if (!id) return fail(res, 400, 'id required');
 
     const supa = adminClient();
-    const [lead, messages, events, saved, tours, offers, notes, tasks, appts, dealMsgs] = await Promise.all([
+    const [lead, messages, events, saved, tours, offers, notes, tasks, appts, dealMsgs, dealParties] = await Promise.all([
       supa.from('leads').select('*').eq('id', id).single(),
       supa.from('messages').select('*').eq('lead_id', id).order('created_at'),
       supa.from('lead_events').select('*').eq('lead_id', id).order('created_at', { ascending: false }).limit(50),
@@ -118,7 +118,11 @@ async function readLead(req, res) {
       // Inbound texts/calls live in deal_messages, keyed by contact_id. Pull
       // them in so this lead's conversation shows texts alongside portal/email.
       supa.from('deal_messages').select('id, direction, channel, content, call_duration_seconds, raw_phone_number, created_at')
-        .eq('contact_id', id).order('created_at').then((r) => r, () => ({ data: [] }))
+        .eq('contact_id', id).order('created_at').then((r) => r, () => ({ data: [] })),
+      // The deal(s) this contact is a party to — so the card can show "in the
+      // Baldwin deal · in escrow" and flip to "Closed · <date>" when it closes.
+      supa.from('deal_parties').select('role, deals(source_key, address, city, stage, side, coe_date, agent, list_price, sale_price)')
+        .eq('lead_id', id).then((r) => r, () => ({ data: [] }))
     ]);
 
     if (lead.error || !lead.data) return fail(res, 404, 'lead not found');
@@ -152,11 +156,36 @@ async function readLead(req, res) {
       notes:            notes.data    || [],
       tasks:            tasks.data     || [],
       appointments:     appts.data     || [],
+      // Deals this contact belongs to (deduped by source_key), newest-first.
+      deals:            dedupeDeals((dealParties && dealParties.data) || []),
       collections:      await curatedForLead(supa, id, events.data || []).catch(() => [])
     });
   } catch (e) {
     return fail(res, 500, e.message);
   }
+}
+
+// deal_parties rows → a clean per-deal list (a contact can appear on a deal in
+// more than one role; collapse to one entry, keeping the roles).
+function dedupeDeals(rows) {
+  const by = new Map();
+  for (const r of rows) {
+    const d = r.deals; if (!d || !d.source_key) continue;
+    const cur = by.get(d.source_key);
+    if (cur) { if (r.role && !cur.roles.includes(r.role)) cur.roles.push(r.role); continue; }
+    by.set(d.source_key, {
+      source_key: d.source_key, address: d.address || null, city: d.city || null,
+      stage: d.stage || null, side: d.side || null, coe_date: d.coe_date || null,
+      agent: d.agent || null, list_price: d.list_price || null, sale_price: d.sale_price || null,
+      roles: r.role ? [r.role] : []
+    });
+  }
+  // Closed deals last, otherwise by soonest COE.
+  return [...by.values()].sort((a, b) => {
+    const ac = a.stage === 'closed' ? 1 : 0, bc = b.stage === 'closed' ? 1 : 0;
+    if (ac !== bc) return ac - bc;
+    return String(a.coe_date || '9999').localeCompare(String(b.coe_date || '9999'));
+  });
 }
 
 // Curated searches sent to this lead + their live engagement (opens,

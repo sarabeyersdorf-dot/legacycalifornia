@@ -267,6 +267,47 @@ async function promoteAttachedLeads(supa) {
   return promoted;
 }
 
+// Auto-link a deal's client to it by NAME match, so an agent doesn't have to
+// wire every contact by hand. Conservative on purpose: exact normalized
+// full-name match, single lead only (ambiguous names are skipped, never
+// guessed), existing links are never duplicated, and only the deal's own client
+// name (top-level `client` / listing `client`) is used — not co-agents or
+// escrow. A wrong link would be visible on the contact card, where it can be
+// corrected. Returns the number of new links created.
+async function autoLinkPartiesByName(supa, dealsJson) {
+  const { data: dealRows } = await supa.from('deals').select('id, source_key, side');
+  if (!dealRows || !dealRows.length) return 0;
+  const bySrc = new Map(dealRows.map((d) => [d.source_key, d]));
+
+  const { data: leads } = await supa.from('leads').select('id, first_name, last_name');
+  const norm = (s) => String(s || '').toLowerCase().replace(/[^a-z\s]/g, '').replace(/\s+/g, ' ').trim();
+  const nameIx = new Map();
+  for (const l of (leads || [])) {
+    const n = norm(`${l.first_name || ''} ${l.last_name || ''}`);
+    if (!n) continue;
+    if (!nameIx.has(n)) nameIx.set(n, []);
+    nameIx.get(n).push(l.id);
+  }
+
+  let linked = 0;
+  for (const d of (dealsJson || [])) {
+    const dr = bySrc.get(d.id);
+    if (!dr) continue;
+    const names = [d.client, d.clientName, d.listing && d.listing.client].filter(Boolean);
+    for (const nm of names) {
+      const matches = nameIx.get(norm(nm));
+      if (!matches || matches.length !== 1) continue;   // no match, or ambiguous → skip
+      const leadId = matches[0];
+      const role = dr.side === 'buyer' ? 'buyer' : 'seller';
+      const { data: ex } = await supa.from('deal_parties').select('deal_id').eq('deal_id', dr.id).eq('lead_id', leadId).limit(1);
+      if (ex && ex.length) continue;                    // already linked
+      const { error } = await supa.from('deal_parties').insert({ deal_id: dr.id, lead_id: leadId, role });
+      if (!error) linked++;
+    }
+  }
+  return linked;
+}
+
 // ---------------------------------------------------------------------------
 // Rule-derived agent workflow checklist (SPEC_agent_workflow_checklist.md).
 // Ports BeClause's TaskDefinition sets (data/checklist_task_definitions.json)
@@ -643,6 +684,12 @@ export default async function handler(req, res) {
     // the matching side stage, so a contact who's under contract never lingers
     // in the roster as a "lead". Self-healing: runs every sync, only touches
     // rows that need it, and never downgrades an existing client/past/sphere/DNC.
+    // Auto-link deal clients to their deals by name BEFORE promoting, so a
+    // freshly-linked party gets client-promoted in this same run.
+    let partiesLinked = 0;
+    try { partiesLinked = await autoLinkPartiesByName(supa, active); }
+    catch (e) { errors.push({ deal: 'auto-link-parties', error: e.message || String(e) }); }
+
     let leadsPromoted = 0;
     try { leadsPromoted = await promoteAttachedLeads(supa); }
     catch (e) { errors.push({ deal: 'lead-promotion', error: e.message || String(e) }); }
@@ -682,6 +729,7 @@ export default async function handler(req, res) {
       checklist_written: checklistWritten,
       checklist_pruned: checklistPruned,
       leads_promoted: leadsPromoted,
+      parties_linked: partiesLinked,
       deal_errors: errors,
       deals_in_table: dealsInTable,
       // Agent party/escrow edits awaiting reconciliation into deals.json.
