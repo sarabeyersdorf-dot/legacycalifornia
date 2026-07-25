@@ -168,6 +168,7 @@ async function listWeek(req, res, supa) {
   const apptQuery = (cols) => supa.from('appointments').select(cols)
     .gte('starts_at', startISO).lt('starts_at', endISO)
     .order('starts_at', { ascending: true });
+  const APPT_COLS_MD = 'id, lead_id, title, kind, sub_kind, all_day, ends_at, starts_at, duration_minutes, notes, visibility, client_label, leads(first_name,last_name,email)';
   const APPT_COLS    = 'id, lead_id, title, kind, sub_kind, starts_at, duration_minutes, notes, visibility, client_label, leads(first_name,last_name,email)';
   const APPT_COLS_FB = 'id, lead_id, title, kind, starts_at, duration_minutes, notes, visibility, client_label, leads(first_name,last_name,email)';
 
@@ -176,10 +177,11 @@ async function listWeek(req, res, supa) {
       .select('id, lead_id, scheduled_at, duration_minutes, tour_type, status, notes, visibility, client_label, leads(first_name,last_name,email), properties(address,city)')
       .gte('scheduled_at', startISO).lt('scheduled_at', endISO).neq('status', 'cancelled')
       .order('scheduled_at', { ascending: true }),
-    apptQuery(APPT_COLS)
+    apptQuery(APPT_COLS_MD)
   ]);
   if (toursRes.error) return fail(res, 500, `tours: ${toursRes.error.message}`);
-  // Degrade gracefully if 027 (sub_kind) hasn't run yet — re-query without it.
+  // Degrade gracefully if db/045 (all_day/ends_at) or 027 (sub_kind) haven't run.
+  if (apptRes.error && /all_day|ends_at/i.test(apptRes.error.message || '')) apptRes = await apptQuery(APPT_COLS);
   if (apptRes.error && /sub_kind/i.test(apptRes.error.message || '')) apptRes = await apptQuery(APPT_COLS_FB);
   const apptMissing = apptRes.error && /relation .*appointments.* does not exist/i.test(apptRes.error.message || '');
   if (apptRes.error && !apptMissing) return fail(res, 500, `appointments: ${apptRes.error.message}`);
@@ -216,6 +218,38 @@ async function listWeek(req, res, supa) {
   }
 
   for (const a of apptRes.data || []) {
+    // Multi-day / all-day event (e.g. a holiday) → emit one all-day marker per
+    // day it covers within this range, so it shows across the month/agenda.
+    if (a.all_day && a.ends_at) {
+      const s = laParts(new Date(a.starts_at));
+      const e2 = laParts(new Date(a.ends_at));
+      const lead = a.leads || {};
+      const label = KIND_LABEL[a.kind] || (a.kind ? a.kind.charAt(0).toUpperCase() + a.kind.slice(1) : 'Event');
+      const who = [lead.first_name, lead.last_name].filter(Boolean).join(' ') || null;
+      const startKey = dkey(s), endKey = dkey(e2);
+      let cur = { y: s.y, m: s.m, d: s.d };
+      for (let guard = 0; guard < 62; guard++) {
+        const k = dkey(cur);
+        if (dayIndex[k] != null) {
+          events.push({
+            id: a.id, source: 'appointment', cls: KIND_CLS[a.kind] || 'block', kind: a.kind || 'block',
+            title: a.title || label, sub: a.notes || who || label, status: 'confirmed',
+            date: k, day: dayIndex[k], hour: 0, minute: 0, duration_minutes: 0,
+            all_day: true, time_label: 'All day', end_label: '',
+            kind_label: label, sub_kind: a.sub_kind || null,
+            client_email: lead.email || null, client_name: who,
+            lead_id: a.lead_id || null, shared: a.visibility === 'client', client_label: a.client_label || null,
+            location: null,
+            edit: { source: 'appointment', kind: a.kind || 'block', title: a.title || '', sub_kind: a.sub_kind || null,
+              date: startKey, time: '12:00', duration_minutes: Number(a.duration_minutes) || 1440,
+              email: lead.email || '', notes: a.notes || '', all_day: true, end_date: endKey }
+          });
+        }
+        if (k === endKey) break;
+        cur = ymdShift(cur.y, cur.m, cur.d, 1);
+      }
+      continue;
+    }
     const start = new Date(a.starts_at);
     const p = laParts(start);
     if (dayIndex[dkey(p)] == null) continue;
@@ -295,6 +329,10 @@ async function createOrInvite(req, res, supa, agent) {
   const duration = Math.max(15, Math.min(480, parseInt(body?.duration_minutes, 10) || 30));
   const notes = typeof body?.notes === 'string' ? body.notes.trim() : null;
   const kind = typeof body?.kind === 'string' ? body.kind.trim().toLowerCase() : 'tour';
+  // Multi-day / all-day span (a holiday, a block over several days). Only for
+  // appointments — a tour is a timed showing.
+  const isAllDay = body?.all_day === true && /^\d{4}-\d{2}-\d{2}$/.test(String(body?.end_date || ''));
+  const endsAt = isAllDay ? parseDateTime(body.end_date, '12:00') : null;
 
   // Appointment (call / block / open / meeting / listing_appt / showing /
   // follow_up / inspection). A client email is optional — supplying one links
@@ -311,12 +349,18 @@ async function createOrInvite(req, res, supa, agent) {
       leadId = data?.id || null;
     }
     const rowBase = { title, kind, starts_at: scheduled.toISOString(), duration_minutes: duration, agent, lead_id: leadId, notes };
-    let ins = await supa.from('appointments').insert({ ...rowBase, sub_kind: subKind })
-      .select('id, title, kind, starts_at, duration_minutes').single();
-    // Degrade gracefully if 027 (sub_kind) hasn't been run yet — the sub-type is
-    // still carried in the derived title, so nothing is lost.
+    if (isAllDay && endsAt) { rowBase.all_day = true; rowBase.ends_at = endsAt.toISOString(); }
+    const SEL = 'id, title, kind, starts_at, duration_minutes';
+    let ins = await supa.from('appointments').insert({ ...rowBase, sub_kind: subKind }).select(SEL).single();
+    // Degrade gracefully if db/045 (all_day/ends_at) or 027 (sub_kind) haven't
+    // run yet — strip the missing column and retry so nothing is lost.
+    if (ins.error && /all_day|ends_at/i.test(ins.error.message || '')) {
+      const { all_day, ends_at, ...base } = rowBase;
+      ins = await supa.from('appointments').insert({ ...base, sub_kind: subKind }).select(SEL).single();
+    }
     if (ins.error && /sub_kind/i.test(ins.error.message || '')) {
-      ins = await supa.from('appointments').insert(rowBase).select('id, title, kind, starts_at, duration_minutes').single();
+      const { all_day, ends_at, ...base } = rowBase;
+      ins = await supa.from('appointments').insert(base).select(SEL).single();
     }
     if (ins.error) return fail(res, 500, `appointment create: ${ins.error.message}`);
     let invite = null;

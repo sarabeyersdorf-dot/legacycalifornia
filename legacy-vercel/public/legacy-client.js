@@ -4114,8 +4114,9 @@
         if (e.sub) subBits.push(esc(e.sub));
         if (e.deal_address && (!e.sub || String(e.sub).indexOf(e.deal_address) < 0)) subBits.push(esc(e.deal_address));
         const subHtml = subBits.length ? `<span class="cal-ag-sub">${subBits.join(' · ')}</span>` : '';
+        const timeText = e.all_day ? 'All day' : `${esc(e.time_label)}–${esc(e.end_label)}`;
         html += `<div class="cal-ag-row" data-ev-key="${esc(e.source)}:${esc(e.id)}"${c ? ` style="border-left:3px solid ${c.border};padding-left:11px;"` : ''}>
-          <span class="cal-ag-time">${esc(e.time_label)}–${esc(e.end_label)}</span>
+          <span class="cal-ag-time">${timeText}</span>
           <span class="cal-ag-dot ${esc(e.cls)}"${c ? ` style="background:${c.border}"` : ''}></span>
           <span class="cal-ag-title">${esc(e.title)}${subHtml}</span>
           <span class="cal-ag-kind">${esc(e.kind_label || '')}</span>
@@ -4159,6 +4160,18 @@
       const col = root.querySelector(`[data-cal-col="${e.day}"]`);
       if (!col) return;
       const c = dealColorFor(e.deal_key);
+      // All-day (multi-day) events don't sit on the hour grid — pin a slim band
+      // at the very top of the day column.
+      if (e.all_day) {
+        const band = document.createElement('div');
+        band.className = 'calw-ev block';
+        band.style.cssText = 'top:0;left:2px;right:2px;height:20px;min-height:0;font-size:9.5px;display:flex;align-items:center;opacity:.9;';
+        band.setAttribute('data-ev-key', `${e.source}:${e.id}`);
+        band.title = `All day · ${e.title}`;
+        band.innerHTML = `<span class="ti" style="font-style:normal;">${esc(e.title)}</span>`;
+        col.appendChild(band);
+        return;
+      }
       const el = document.createElement('div');
       el.className = `calw-ev ${c ? 'deal' : (['tour', 'call', 'block', 'open'].includes(e.cls) ? e.cls : 'tour')}`;
       el.style.top = `${Math.round((e.hour * 60 + e.minute) * (CAL_ROW_H / 60))}px`;
@@ -4284,6 +4297,30 @@
   // ---- Calendar create / edit / detail modals ---------------------------
   function mondayOf(dt) { const x = new Date(dt); const day = (x.getDay() + 6) % 7; x.setDate(x.getDate() - day); x.setHours(0, 0, 0, 0); return x; }
 
+  // A reliable time picker: a <select> of 15-minute slots. The native
+  // <input type=time> was unusable on the phone (only Cancel/Clear showed, no
+  // way to set a time), so appointments couldn't be saved. Values are "HH:MM"
+  // (24h) to match the API; labels are friendly 12-hour.
+  function timeOptionsHtml(selected) {
+    let out = '', sel = selected || '';
+    for (let h = 0; h < 24; h++) {
+      for (let mm = 0; mm < 60; mm += 15) {
+        const v = `${String(h).padStart(2, '0')}:${String(mm).padStart(2, '0')}`;
+        const h12 = (h % 12) || 12, ap = h < 12 ? 'AM' : 'PM';
+        out += `<option value="${v}"${v === sel ? ' selected' : ''}>${h12}:${String(mm).padStart(2, '0')} ${ap}</option>`;
+      }
+    }
+    return out;
+  }
+  // Sensible default (next quarter hour, min 8:00 AM) so a new event opens ready.
+  function defaultTimeSlot() {
+    const n = new Date(); let h = n.getHours(), mm = Math.ceil(n.getMinutes() / 15) * 15;
+    if (mm === 60) { mm = 0; h += 1; }
+    if (h < 8) { h = 8; mm = 0; }
+    if (h > 20) { h = 9; mm = 0; }
+    return `${String(h).padStart(2, '0')}:${String(mm).padStart(2, '0')}`;
+  }
+
   function openEventCreate(prefill) {
     prefill = prefill || {};
     const m = modalShell('Add to calendar', 'A tour is tied to a client; a listing appt, showing, follow-up, inspection, call, or block is a general event (add a client email to share it to their portal).');
@@ -4325,14 +4362,17 @@
           </div>
           <div><label style="${M_LAB}">Title <span style="text-transform:none;letter-spacing:0;">(optional)</span></label><input data-f-title placeholder="Auto-named from the type if left blank" style="${M_INPUT}"></div>
           <div><label style="${M_LAB}">Client email <span style="text-transform:none;letter-spacing:0;">(optional · lets you share to their portal)</span></label><input data-f-apptemail type="email" placeholder="client@example.com" style="${M_INPUT}"></div>
+          <label style="display:flex;align-items:flex-start;gap:8px;font-size:13px;color:#3A332B;line-height:1.4;"><input data-f-apptinvite type="checkbox" style="margin-top:3px;"> Email a calendar invite (to the client + any CC below)</label>
         </div>
         <div style="display:flex;gap:10px;">
           <div style="flex:1;"><label style="${M_LAB}">Date</label><input data-f-date type="date" style="${M_INPUT}"></div>
-          <div style="flex:0 0 120px;"><label style="${M_LAB}">Time</label><input data-f-time type="time" style="${M_INPUT}"></div>
-          <div style="flex:0 0 110px;"><label style="${M_LAB}">Minutes</label><input data-f-dur type="number" min="15" step="15" value="30" style="${M_INPUT}"></div>
+          <div data-time-cell style="flex:0 0 130px;"><label style="${M_LAB}">Time</label><select data-f-time style="${M_INPUT}">${timeOptionsHtml(defaultTimeSlot())}</select></div>
+          <div data-dur-cell style="flex:0 0 110px;"><label style="${M_LAB}">Minutes</label><input data-f-dur type="number" min="15" step="15" value="30" style="${M_INPUT}"></div>
         </div>
+        <label style="display:flex;align-items:center;gap:8px;font-size:13px;color:#3A332B;"><input data-f-multiday type="checkbox"> Spans multiple days (e.g. a holiday)</label>
+        <div data-enddate-cell style="display:none;"><label style="${M_LAB}">End date</label><input data-f-enddate type="date" style="${M_INPUT}"></div>
         <div><label style="${M_LAB}">Link to deal <span style="text-transform:none;letter-spacing:0;">(optional)</span></label><select data-f-deal style="${M_INPUT}"><option value="">No deal</option></select></div>
-        <div><label style="${M_LAB}">Additional invitees <span style="text-transform:none;letter-spacing:0;">(comma-separated emails — TC, lender, co-op agent; both agents are included automatically)</span></label><input data-f-invitees placeholder="tc@title.com, lender@bank.com" style="${M_INPUT}"></div>
+        <div><label style="${M_LAB}">CC — also send the invite to <span style="text-transform:none;letter-spacing:0;">(comma-separated emails — a spouse, co-op agent, TC, lender; both agents are included automatically)</span></label><input data-f-invitees placeholder="spouse@example.com, tc@title.com" style="${M_INPUT}"></div>
         <div><label style="${M_LAB}">Notes</label><textarea data-f-notes rows="2" style="${M_INPUT}"></textarea></div>
         <div style="display:flex;gap:10px;margin-top:8px;align-items:center;">
           <button type="button" data-save style="${M_INK}">Add event</button>
@@ -4354,6 +4394,20 @@
       saveBtn.textContent = isTour ? 'Schedule tour' : 'Add event';
     };
     kindSel.addEventListener('change', syncKind); syncKind();
+
+    // Multi-day toggle — reveal the end date, hide time/minutes (an all-day span
+    // like a holiday has no clock time).
+    const multiCb   = m.body.querySelector('[data-f-multiday]');
+    const endCell   = m.body.querySelector('[data-enddate-cell]');
+    const timeCell  = m.body.querySelector('[data-time-cell]');
+    const durCell   = m.body.querySelector('[data-dur-cell]');
+    const syncMulti = () => {
+      const on = multiCb.checked;
+      endCell.style.display = on ? 'block' : 'none';
+      timeCell.style.display = on ? 'none' : 'block';
+      durCell.style.display = on ? 'none' : 'block';
+    };
+    multiCb.addEventListener('change', syncMulti); syncMulti();
 
     // Client search → fills the email/name fields (tour AND general events).
     const csIn = m.body.querySelector('[data-f-clientsearch]');
@@ -4401,8 +4455,13 @@
     saveBtn.addEventListener('click', async () => {
       const kind = kindSel.value;
       const date = m.body.querySelector('[data-f-date]').value;
-      const time = m.body.querySelector('[data-f-time]').value;
-      if (!date || !time) { m.err.textContent = 'Pick a date and time.'; return; }
+      const multiDay = multiCb.checked;
+      const endDate = m.body.querySelector('[data-f-enddate]').value;
+      // Multi-day (all-day) events run at noon so timezone never rolls the date;
+      // single events use the picked time.
+      const time = multiDay ? '12:00' : m.body.querySelector('[data-f-time]').value;
+      if (!date || !time) { m.err.textContent = multiDay ? 'Pick a start date.' : 'Pick a date and time.'; return; }
+      if (multiDay && (!endDate || endDate < date)) { m.err.textContent = 'Pick an end date on or after the start date.'; return; }
       let notesVal = m.body.querySelector('[data-f-notes]').value.trim();
       const dealSelEl = m.body.querySelector('[data-f-deal]');
       if (dealSelEl && dealSelEl.value) {
@@ -4411,6 +4470,7 @@
       }
       const inviteesRaw = (m.body.querySelector('[data-f-invitees]').value || '').split(',').map((x) => x.trim()).filter(Boolean);
       const common = { date, time, duration_minutes: parseInt(m.body.querySelector('[data-f-dur]').value, 10) || 30, notes: notesVal, invitees: inviteesRaw };
+      if (multiDay) { common.all_day = true; common.end_date = endDate; }
       let payload;
       if (kind === 'tour') {
         const email = m.body.querySelector('[data-f-email]').value.trim();
@@ -4424,6 +4484,7 @@
         if (title) payload.title = title;   // optional — the server auto-names structured types
         const email = m.body.querySelector('[data-f-apptemail]').value.trim();
         if (email) payload.email = email;    // optional — links the lead so it can be shared
+        if (email && m.body.querySelector('[data-f-apptinvite]').checked) payload.send_invite = true;
         if (kind === 'inspection') {
           payload.sub_kind = subSel.value === '__other' ? (subOther.value.trim() || null) : subSel.value;
         }
@@ -4455,7 +4516,7 @@
         `}
         <div style="display:flex;gap:10px;">
           <div style="flex:1;"><label style="${M_LAB}">Date</label><input data-f-date type="date" value="${esc(ed.date || '')}" style="${M_INPUT}"></div>
-          <div style="flex:0 0 120px;"><label style="${M_LAB}">Time</label><input data-f-time type="time" value="${esc(ed.time || '')}" style="${M_INPUT}"></div>
+          <div style="flex:0 0 130px;"><label style="${M_LAB}">Time</label><select data-f-time style="${M_INPUT}">${timeOptionsHtml(ed.time || '')}</select></div>
           <div style="flex:0 0 110px;"><label style="${M_LAB}">Minutes</label><input data-f-dur type="number" min="15" step="15" value="${esc(ed.duration_minutes || 30)}" style="${M_INPUT}"></div>
         </div>
         <div><label style="${M_LAB}">Notes</label><textarea data-f-notes rows="2" style="${M_INPUT}">${esc(ed.notes || '')}</textarea></div>
