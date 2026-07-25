@@ -1,5 +1,5 @@
 {
-  "version": 3.0,
+  "version": "3.1",
   "lastUpdated": "2026-07-25",
   "updatedBy": "Claude",
   "tasks": [
@@ -605,7 +605,10 @@
       },
       "correspondence": [],
       "notes": "CLOSED 6/15/2026. Final closing statement + broker package received from Fidelity National Title (Renee Shamblin). Seller Caroline Selfridge requested soft copies of final signed docs.",
-      "alerts": []
+      "alerts": [],
+      "attributes": {
+        "seller_type": "standard"
+      }
     },
     {
       "id": "5134-little-john",
@@ -642,7 +645,10 @@
       },
       "correspondence": [],
       "notes": "CLOSED/recorded ~6/19/2026 (Copperopolis). Buyer signed, closing funds in, seller docs released to record via Placer Title (Ashley Cuslidge). EMD received (Chase screenshots), VLPA executed, HOA docs received.",
-      "alerts": []
+      "alerts": [],
+      "attributes": {
+        "seller_type": "standard"
+      }
     },
     {
       "id": "625-larkspur",
@@ -683,7 +689,10 @@
       "alerts": [
         "CLOSED \u2014 confirmed by Sara 7/5/2026",
         "SIP deposit due back (~1100) \u2014 escrow release instruction PUSHED 7/10 (same route as Heaton Moor's 7/7); watch for the release to the Hanns"
-      ]
+      ],
+      "attributes": {
+        "seller_type": "standard"
+      }
     },
     {
       "id": "7094-heaton-moor",
@@ -721,7 +730,10 @@
       "alerts": [
         "RECORDED 6/24/2026 \u2014 deal closed",
         "SIP HOLDBACK RESOLVED \u2705 \u2014 ADM No 1 fully executed 7/7 (Authentisign); Sara sent release instruction to Amanda (Placer); checks mailed 7/7 (3808.21 seller / 1191.79 buyer)"
-      ]
+      ],
+      "attributes": {
+        "seller_type": "standard"
+      }
     },
     {
       "id": "9985-wendell",
@@ -958,7 +970,14 @@
         "Court email read 7/20 (CASE # 25-31761 Marshall Guthrie, forwarded by James 7/19) \u2014 NOT a court approval notice. Court has NOT signed off yet. All contingency clocks still frozen.",
         "Audry bounced email RESOLVED 7/20 \u2014 correct email found; FHA Amendatory Clause resent.",
         "\ud83d\udea8 BREAKTHROUGH 7/21: JUDGE HAS SIGNED \u2014 Audry emailed Amanda (Placer): 'the judge has signed the document needed for closing escrow. As soon as I have a copy I will forward to you.' Attorney needs signed settlement statement to record after close. Audry: 'Please prepare us for closing \u2014 we can move to close once we have this signed document.' Document not yet in hand \u2014 delivery of written notice to buyer starts all clocks. IMMINENT: notify James, Kim Hesser (lender), David & Stacy, and get COE date from escrow."
-      ]
+      ],
+      "attributes": {
+        "seller_type": "probate",
+        "financing": "fha",
+        "appraisal_waived": false,
+        "loan_waived": false,
+        "inspection_waived": false
+      }
     },
     {
       "id": "8235-baldwin",
@@ -1161,7 +1180,14 @@
         "FHA 203(k) rehab loan \u2014 watch lender/appraisal milestones",
         "Escrow/title CONFIRMED: Chicago Title, Order #FSST-5312600364 (Sara 6/24); full NHD report received 6/23",
         "Buyer Contingency Removal #1 now filed in EX (7/14) and added to docs{} \u2014 distinct from the ETA1 extension already logged (per James Gmail review 7/17)"
-      ]
+      ],
+      "attributes": {
+        "seller_type": "standard",
+        "financing": "fha",
+        "appraisal_waived": false,
+        "loan_waived": false,
+        "inspection_waived": false
+      }
     },
     {
       "id": "7230-latigo",
@@ -1434,7 +1460,15 @@
         "Final walkthrough now confirmed Friday 7/17; COE Mon 7/20",
         "Appraisal STILL not back as of 7/13 (was due Fri 7/10) -- Sara re-chasing lender",
         "NEW 7/17: Buyer Contingency Removal #2 (\"Final\") executed by both Castles 7/16, filed in Ex 7/17 \u2014 likely clears the last two contingencies (appraisal & loan) ahead of Monday 7/20 COE, but checkboxes unverifiable from text extraction; Sara should confirm visually."
-      ]
+      ],
+      "attributes": {
+        "seller_type": "standard",
+        "financing": "conventional",
+        "tenant_occupied": false,
+        "appraisal_waived": false,
+        "loan_waived": false,
+        "inspection_waived": false
+      }
     },
     {
       "id": "offer-6240-michel",
@@ -1466,7 +1500,10 @@
       "alerts": [
         "OFFER DEAD 7/12 \u2014 SCO1 expired unaccepted; seller firm at 434000"
       ],
-      "archivedDate": "2026-07-13"
+      "archivedDate": "2026-07-13",
+      "attributes": {
+        "seller_type": "standard"
+      }
     },
     {
       "id": "offer-992-iroquois",
@@ -1499,7 +1536,10 @@
       "alerts": [
         "OFFER DEAD 7/12 \u2014 seller rejected 130000 highest & best; pivoted to 695 Feather Dr showing 7/12"
       ],
-      "archivedDate": "2026-07-13"
+      "archivedDate": "2026-07-13",
+      "attributes": {
+        "seller_type": "standard"
+      }
     },
     {
       "id": "1111-dunbar",
@@ -1565,7 +1605,10 @@
       ],
       "correspondence": [],
       "notes": "Commercial office building. Offering memo complete. Prelim received. Trust docs and lease amendments on file.",
-      "alerts": []
+      "alerts": [],
+      "attributes": {
+        "seller_type": "standard"
+      }
     },
     {
       "id": "433-hwy4",
@@ -1831,7 +1874,15 @@
         "LISTING EXTENDED to 8/18/2026 via MOD \u2014 covers through COE 8/10 \u2705",
         "NEW 7/17: Appraisal contingency extended one more day to 7/17 (second ETA, sellers signed this morning) \u2014 appraisal report is back per lender but value not yet confirmed; loan contingency still 7/23, COE still 8/10",
         "NEW 7/18: [CR-B] Buyer Contingency Removal No. 2 executed 7/17 (Glide), filed in Ex \u2014 content/scope not verified this run; confirm before treating appraisal/loan contingencies as removed"
-      ]
+      ],
+      "attributes": {
+        "seller_type": "standard",
+        "tenant_occupied": true,
+        "financing": "conventional",
+        "appraisal_waived": false,
+        "loan_waived": false,
+        "inspection_waived": false
+      }
     },
     {
       "id": "467-skyline",
@@ -1942,7 +1993,11 @@
         "Price reduction to 89000 COMPLETE \u2705 \u2014 MOT confirmed & MLS price change finished 7/10",
         "Kerstin Breidenthal traveling ~2 weeks \u2014 wants a SHOWING when back (~7/23); reminder set for 7/23; disclosure link texted 7/8",
         "New buyer interest: Ben Furr (BRBC signed 7/12, ph 336-254-1433) \u2014 met with Sara 7/12"
-      ]
+      ],
+      "attributes": {
+        "seller_type": "standard",
+        "tenant_occupied": false
+      }
     },
     {
       "id": "9568-sheep-ranch",
@@ -2003,7 +2058,10 @@
       "notes": "Listing agreement executed. Prelim and disclosures received. Showing was requested for Wed 6/24 1:00 PM by agent Loretta Kilpatrick \u2014 CANCELED by the agent (per Sara 6/25). Escrow P-698773 cancellation: buyer SIGNED 7/7; now awaiting SELLER signature so Placer can close it out.",
       "alerts": [
         "Escrow P-698773 cancellation \u2014 buyer signed 7/7; SELLER (Sean) signature still pending \u2014 said he'd sign, chased 7/10"
-      ]
+      ],
+      "attributes": {
+        "seller_type": "standard"
+      }
     },
     {
       "id": "fowler",
@@ -2039,7 +2097,10 @@
       },
       "correspondence": [],
       "notes": "Manufactured home. Listing agreement with modification of terms. Manufactured home listing addendum executed.",
-      "alerts": []
+      "alerts": [],
+      "attributes": {
+        "seller_type": "standard"
+      }
     },
     {
       "id": "hovey",
@@ -2074,7 +2135,10 @@
         "ACTIVE MEDIATION \u2014 Filed April 1, 2026. Commission case in progress.",
         "ON HOLD \u2014 Sara asked Mike Fluetsch to postpone until retainer funds available (next closing); then send full docs for deeper review",
         "Coterie adjuster Emmanuel Isaac active on claim BM-PL-26-00016 \u2014 Sara replied 7/9, awaiting his response; loop in Mike before agreeing to anything"
-      ]
+      ],
+      "attributes": {
+        "seller_type": "standard"
+      }
     },
     {
       "id": "preparing-14281-cobb",
@@ -2122,7 +2186,10 @@
       "notes": "Preparing to list \u2014 Adrianna & Guy Castle's home (they are the 7230 Latigo buyers). Listing appointment Sat 7/11 10:00 AM (on CRM calendar). UPDATE 7/12: listing agreement signed via Authentisign; now an active listing. Sellers Adrianna & Guy Castle are also the 7230 Latigo buyers.",
       "alerts": [
         "Listing agreement executed 7/12 -- now an active listing; list price TBD (CMA on file, not yet confirmed in deals.json)"
-      ]
+      ],
+      "attributes": {
+        "seller_type": "standard"
+      }
     },
     {
       "id": "preparing-1510-malvick",
@@ -2314,7 +2381,10 @@
         "Active listing \u2014 expires 12/18/2026",
         "Escrow pre-opened with Ashley at Placer Title; prelim received 6/29 (P-708410)",
         "1 inquiry from ListTrac (6/28) \u2014 Sara following up"
-      ]
+      ],
+      "attributes": {
+        "seller_type": "standard"
+      }
     },
     {
       "id": "preparing-1789-love-creek",
@@ -2364,7 +2434,10 @@
       },
       "correspondence": [],
       "notes": "Vacant land listing, Angels Camp. Seller-signed Vacant Land Listing Agreement (12/24), AAA, Additional Signature Addendum 2, MOT 2026 on file (_Listings/Land/701 Mark Twain Rd). Flyer + marketing assets (plat map, OnX, conceptual land-use study, Utica Park plan) ready. Partner-supplied parcel docs (1977 PM, 2021 RS) on file.",
-      "alerts": []
+      "alerts": [],
+      "attributes": {
+        "seller_type": "standard"
+      }
     },
     {
       "id": "635-s-main",
@@ -2388,7 +2461,10 @@
       },
       "correspondence": [],
       "notes": "Vacant land listing (Sultana commercial district), Angels Camp. Seller-signed Vacant Land Listing Agreement (12/24), AAA, Additional Signature Addendum 2, MOT 2026 on file (_Listings/Land/635 S Main St). Flyer + marketing assets (plat maps, OnX, commercial-zone maps) ready. A past buyer VLPA sits in Duds/635 Main St \u2014 dead offer, not active.",
-      "alerts": []
+      "alerts": [],
+      "attributes": {
+        "seller_type": "standard"
+      }
     },
     {
       "id": "2000-gun-club",
@@ -2412,7 +2488,10 @@
       },
       "correspondence": [],
       "notes": "Vacant land listing (Frogtown area), Angels Camp. Seller-signed Vacant Land Listing Agreement (12/24), AAA, Additional Signature Addendum 2, MOT 2026 on file (_Listings/Land/2000 Gun Club Rd). Flyer + marketing assets (plat map, OnX topo/POI) ready.",
-      "alerts": []
+      "alerts": [],
+      "attributes": {
+        "seller_type": "standard"
+      }
     },
     {
       "id": "590-598-s-main",
@@ -2436,7 +2515,10 @@
       },
       "correspondence": [],
       "notes": "Vacant land listing (community-commercial zone), Angels Camp. Seller-signed Vacant Land Listing Agreement (12/24), AAA, Additional Signature Addendum 2, MOT 2026 on file (_Listings/Land/590-598 S Main St). Flyer + marketing assets (plat map, OnX, parcel lines, proposed neighbor fence) ready.",
-      "alerts": []
+      "alerts": [],
+      "attributes": {
+        "seller_type": "standard"
+      }
     },
     {
       "id": "1350-love-st",
@@ -2458,7 +2540,10 @@
       },
       "correspondence": [],
       "notes": "Vacant land, Angels Camp Townsite (Lot 10 Blk 5), APN 060-010-036-000, Calaveras County. Title Pro property profile on file (_Listings/Land/1350 Love St). Photos shot 5/17/25 + 6/19/25, corrected set plus new photos 1/9/26. Listing agreement SIGNED (per Sara 7/6) and FILED in the ex folder (Sara 7/7).",
-      "alerts": []
+      "alerts": [],
+      "attributes": {
+        "seller_type": "standard"
+      }
     },
     {
       "id": "buyer-roger-quillen",
@@ -2678,7 +2763,14 @@
         "EMD confirmed received by escrow 7/16",
         "NEEDS CONFIRMATION: what Dee Bradley (listing agent) committed to doing \"Monday\" 7/20 per her 7/17 email \u2014 content unclear from snippet",
         "\"Page 17\" = RPA escrow acknowledgment (695 feather escrow acknowledgement.pdf) filed in EX \u2014 confirmed 7/23"
-      ]
+      ],
+      "attributes": {
+        "seller_type": "standard",
+        "financing": "cash",
+        "appraisal_waived": true,
+        "loan_waived": true,
+        "inspection_waived": false
+      }
     }
   ]
 }
