@@ -1,6 +1,6 @@
 {
-  "version": "3.1",
-  "lastUpdated": "2026-07-25",
+  "version": "3.2",
+  "lastUpdated": "2026-07-27",
   "updatedBy": "Claude",
   "tasks": [
     {
@@ -568,7 +568,16 @@
       "client": "Baldwin",
       "title": "CRITICAL RISK flagged 2026-07-24: COE 8/3 at real risk. No loan confirmation from Kim Hesser. No contractor bid back (outreach to COASTCOUNTRYCONST@gmail.com 7/23, no reply). No appraisal requested. Extension may be overdue. No BIW on remaining inspections. Resolve today: call Kim, follow up contractor, confirm appraisal ordered.",
       "done": false
-    }
+    },
+    {"agent": "sara", "client": "Skyline/Lead", "title": "HOT LEAD: Call Kerstin Breidenthal NOW — (408) 612-5906", "note": "Ylopo alert 7/25: back browsing after 16 days silent; said she'd return ~7/23 to see Skyline. Added 2026-07-27.", "done": false},
+    {"agent": "sara", "client": "Skyline", "title": "Skyline: Follow up with Scott Greiner — 7/26 1 PM showing happened; get buyer feedback", "note": "Showing was Sunday 7/26 1 PM. Outcome unknown. Added 2026-07-27.", "done": false},
+    {"agent": "james", "client": "695 Feather", "title": "695 Feather: Buyer Ashley signed MH Addendum 7/25 (Authentisign) — confirm = item #12, get Dee Bradley (seller) to sign", "note": "Authentisign complete 7/25 8:59 PM. File in EX as 'MH Add from escrow buyer signed.pdf'. Return to Tanya Salgado tanyas@octitle.com, escrow #2473532-TS. Added 2026-07-27.", "done": false},
+    {"agent": "james", "client": "695 Feather", "title": "695 Feather: Get Ashley Robinson Proof of Funds — Bert Andrews removed by ADM2, his POF is now invalid", "note": "ADM2 executed 7/24 removes Bert. Ashley must provide own POF to Tanya Salgado. Added 2026-07-27.", "done": false},
+    {"agent": "sara", "client": "Latigo", "title": "Latigo: Review and file corrected BA AVID from James (7/24 email) in Latigo EX folder", "note": "James forwarded corrected Latigo BA AVID (Kylie Windley et al.) 7/24. Confirm correct final version then file. Added 2026-07-27.", "done": false},
+    {"agent": "james", "client": "Wendell", "title": "Wendell: Verify signed AVID is physically in EX folder — Audry Burton said 7/22 it still needed to be written up", "note": "deals.json shows received but Audry's 7/22 email says still writing it up. Day 3 of court clock. Added 2026-07-27.", "done": false},
+    {"agent": "james", "client": "Baldwin", "title": "Baldwin: Schedule final walkthrough with Shomari Turner for Tuesday 7/29 (2 days)", "note": "COE 8/3 = 7 days. Final walkthrough must happen ~7/29. Coordinate with listing agent. Added 2026-07-27.", "done": false},
+    {"agent": "james", "client": "Admin", "title": "Fix CRM email signature — James's CRM outgoing emails display Sara Cooper's name, not James's", "note": "James flagged in 7/24 email. Update in CRM settings. Added 2026-07-27.", "done": false},
+    {"agent": "sara", "client": "Lead", "title": "Roger & Kim Quillen — 7/22 second showing outcome unknown; check FUB or ShowingTime", "note": "Roger re-engaged 7/19, second showing scheduled 7/22. No Gmail follow-up visible. Added 2026-07-27.", "done": false}
   ],
   "deals": [
     {
