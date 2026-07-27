@@ -135,7 +135,9 @@ async function alertAgentOnReaction(supa, coll, row) {
     const agent = await agentIdentity(supa, coll.agent);
     if (agent.phone) {
       const cmt = row.comment ? ` — “${row.comment.slice(0, 120)}”` : '';
-      await sendSMS({ to: agent.phone, body: `${title}${cmt}. Open desk: legacycalifornia.vercel.app/crm.html — Legacy` });
+      // Desk URL follows PUBLIC_SITE_URL (flips to the custom domain via one env var).
+      const desk = (process.env.PUBLIC_SITE_URL || 'https://legacycalifornia.vercel.app').replace(/^https?:\/\//, '').replace(/\/+$/, '') + '/crm.html';
+      await sendSMS({ to: agent.phone, body: `${title}${cmt}. Open desk: ${desk} — Legacy` });
     }
   }
 }

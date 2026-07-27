@@ -7,11 +7,15 @@
 import { shapeListing } from './handlers/curate-search.js';
 
 export const BROKERAGE = { name: 'Legacy Properties', broker: 'Sara Cooper', broker_title: 'Broker-Owner', broker_dre: '02141987' };
-// The share links in outgoing SMS/email are built from this. It MUST be a
-// domain this app actually serves — legacycalifornia.com is not connected to
-// the Vercel project (client links there 404), so default to the production
-// .vercel.app domain and let PUBLIC_SITE_URL take over when a custom domain
-// is wired up.
+// The canonical site origin — every client-facing link (curated collection
+// shares, seller-portal links, the calendar .ics feed) and the agent "open the
+// desk" SMS build from PUBLIC_SITE_URL. It MUST be a domain this app actually
+// serves. Default stays the always-live .vercel.app domain so nothing breaks
+// before a custom domain's DNS resolves; the single switch to go live on the
+// real domain is setting PUBLIC_SITE_URL=https://legacycalifornia.com in Vercel
+// once legacycalifornia.com is added to the project and its DNS is pointing at
+// Vercel (and legacycalifornia.com is added to iHomeFinder's authorized domains
+// so the IDX widgets render there too).
 export const SITE = (process.env.PUBLIC_SITE_URL || 'https://legacycalifornia.vercel.app').replace(/\/+$/, '');
 
 export function disclaimer(agentName, dre) {

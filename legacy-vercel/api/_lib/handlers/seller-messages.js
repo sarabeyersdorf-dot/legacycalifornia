@@ -74,7 +74,10 @@ export default async function handler(req, res) {
       supa.from('leads').update({ last_contact_at: new Date().toISOString() }).eq('id', lead.id).then(() => {}, () => {});
       try {
         const agent = await agentIdentity(supa, lead.assigned_agent === 'james' ? 'james' : 'sara');
-        if (agent.phone) await sendSMS({ to: agent.phone, body: `${lead.first_name || 'A client'} messaged you on their portal: “${text.slice(0, 140)}” Reply from the desk: legacycalifornia.vercel.app/crm.html — Legacy` });
+        // Desk URL follows PUBLIC_SITE_URL so it flips to the custom domain with
+        // one env-var change (falls back to the .vercel.app domain until set).
+        const desk = (process.env.PUBLIC_SITE_URL || 'https://legacycalifornia.vercel.app').replace(/^https?:\/\//, '').replace(/\/+$/, '') + '/crm.html';
+        if (agent.phone) await sendSMS({ to: agent.phone, body: `${lead.first_name || 'A client'} messaged you on their portal: “${text.slice(0, 140)}” Reply from the desk: ${desk} — Legacy` });
       } catch (_) {}
       return ok(res, { sent: true, id: row.id, created_at: row.created_at });
     }
