@@ -1,5 +1,5 @@
 {
-  "version": "3.2",
+  "version": "3.3",
   "lastUpdated": "2026-07-27",
   "updatedBy": "Claude",
   "tasks": [
@@ -577,7 +577,11 @@
     {"agent": "james", "client": "Wendell", "title": "Wendell: Verify signed AVID is physically in EX folder — Audry Burton said 7/22 it still needed to be written up", "note": "deals.json shows received but Audry's 7/22 email says still writing it up. Day 3 of court clock. Added 2026-07-27.", "done": false},
     {"agent": "james", "client": "Baldwin", "title": "Baldwin: Schedule final walkthrough with Shomari Turner for Tuesday 7/29 (2 days)", "note": "COE 8/3 = 7 days. Final walkthrough must happen ~7/29. Coordinate with listing agent. Added 2026-07-27.", "done": false},
     {"agent": "james", "client": "Admin", "title": "Fix CRM email signature — James's CRM outgoing emails display Sara Cooper's name, not James's", "note": "James flagged in 7/24 email. Update in CRM settings. Added 2026-07-27.", "done": false},
-    {"agent": "sara", "client": "Lead", "title": "Roger & Kim Quillen — 7/22 second showing outcome unknown; check FUB or ShowingTime", "note": "Roger re-engaged 7/19, second showing scheduled 7/22. No Gmail follow-up visible. Added 2026-07-27.", "done": false}
+    {"agent": "sara", "client": "Lead", "title": "Roger & Kim Quillen — 7/22 second showing outcome unknown; check FUB or ShowingTime", "note": "Roger re-engaged 7/19, second showing scheduled 7/22. No Gmail follow-up visible. Added 2026-07-27.", "done": false},
+    {"agent": "james", "client": "695 Feather", "title": "695 Feather: File fully executed MH Addendum — both Ashley Robinson AND Dee Bradley signed via Authentisign 7/25 8:59 PM; James forwarded completion notification 7/27; download and file in 695 Feather Ex folder", "note": "Authentisign completion 7/25 8:59 PM. Both buyer (Ashley Robinson) and seller (Dee Bradley) signed. This is prelim item #12 (OC Title escrow #2473532-TS). File PDF in EX. Added 2026-07-27.", "dateAdded": "2026-07-27", "done": false},
+    {"agent": "sara", "client": "433 Hwy 4", "title": "433: Coordinate tenant Dana ↔ buyer Elizabeth Dawson meeting — Dana avail Mon 7/28 after 2pm / Thu 7/31 before 10am / Fri 8/1 all day; Elizabeth expected late August; contact Neriah Davis to schedule", "note": "Dana (yoga studio tenant) must meet Elizabeth Dawson (buyer) per access protocol. Neriah Davis (neriahd@gmail.com) coordinating. Added 2026-07-27.", "dateAdded": "2026-07-27", "done": false},
+    {"agent": "sara", "client": "433 Hwy 4", "title": "433: Confirm Jim Heryford signed ADD3 ($1.2M price reduction) + SFA ($100K 2nd DOT seller carry) — Yvonne signed 7/24 via Authentisign; Jim status unconfirmed. SFA requires 2nd DOT to record simultaneously with 1st at closing (Placer Title underwriting requirement).", "note": "Check with Neriah Davis (neriahd@gmail.com). Ashley Cuslidge at Placer Title confirmed simultaneous 2nd DOT recording required — lender's original 30-day post-close plan rejected by underwriting. Added 2026-07-27.", "dateAdded": "2026-07-27", "done": false},
+    {"agent": "sara", "client": "433 Hwy 4", "title": "433: Download + file Sara's Glide listing-agent AVID (Glide cert e47c5a62, completed ~7/19) in 433 Ex folder", "note": "Glide certificate e47c5a62. Sara's LA AVID completed ~7/19. Separate from the AVID already in Homeligh. File original in 433 EX. Added 2026-07-27.", "dateAdded": "2026-07-27", "done": false}
   ],
   "deals": [
     {
@@ -860,7 +864,7 @@
         "note": "Bankruptcy court sale (ADM1) \u2014 all contingency + COE periods start only on seller's written notice of court approval"
       },
       "contacts": {
-        "coAgent": "Audry M Burton / Brandi Jenkins (Busy Bee Realty) - listing/seller side",
+        "coAgent": "Audrey Burton (audreybusybeerealty@gmail.com) / Brandi Jenkins (Bjenkins.RE@outlook.com) — Busy Bee Realty, listing/seller side",
         "escrow": "Amanda Boitano (Placer Title, Angels Camp) - Escrow #P-704376 (asst Hope Lopez)",
         "lender": "Kimberly (Kim) Hesser, Prime Residential (khesser@primeres.com, 209-768-8277)",
         "title": "Placer Title"
