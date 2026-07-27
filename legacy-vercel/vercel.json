@@ -51,6 +51,12 @@
   ],
   "redirects": [
     {
+      "source": "/:path*",
+      "has": [{ "type": "host", "value": "www.legacycalifornia.com" }],
+      "destination": "https://legacycalifornia.com/:path*",
+      "permanent": true
+    },
+    {
       "source": "/listings",
       "destination": "/property-search.html",
       "permanent": true
