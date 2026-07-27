@@ -9,13 +9,16 @@
 // unauthenticated, so the secret in the URL is what gates it. Set
 // PERSONAL_SMS_SECRET in Vercel; without it the endpoint is closed.
 //
-// Body (JSON or form-encoded; field names are flexible):
-//   agent      'sara' | 'james'                 whose phone forwarded it
-//   direction  'inbound'|'in'|'received'  OR    (default: inbound)
-//              'outbound'|'out'|'sent'
-//   phone      the OTHER party's number   OR    from / to
-//   text       the message                OR    message / body / content
-//   ts         optional timestamp (ms or ISO)
+// Works with any "paste-a-URL" SMS-forwarder app: it reads GET or POST, and
+// pulls the fields out of the query string AND/OR the body under every common
+// name the popular apps use — you don't have to customize the app's payload.
+//
+// Recognized fields (any of these aliases; JSON, form, or query-string):
+//   the number   sender / from / phone / msisdn / number / address / source
+//   the message  message / text / body / content / msg / sms
+//   agent        agent  ('james' anywhere → James, else Sara)      (optional)
+//   direction    direction / dir  ('out'|'sent' → outbound)  default inbound
+//   ts           timestamp / ts / sentStamp / receivedStamp        (optional)
 //
 // Privacy by design: a text is only stored when its number matches an existing
 // CRM contact. Personal (non-client) texts don't match, so they're dropped and
@@ -49,7 +52,8 @@ const pick = (o, ...keys) => { for (const k of keys) { if (o[k] != null && Strin
 
 export default async function handler(req, res) {
   if (req.method === 'OPTIONS') { res.statusCode = 204; return res.end(); }
-  if (req.method !== 'POST') { res.statusCode = 405; return res.end('method_not_allowed'); }
+  // Accept GET and POST — "paste-a-URL" forwarder apps use either one.
+  if (req.method !== 'POST' && req.method !== 'GET') { res.statusCode = 405; return res.end('method_not_allowed'); }
 
   const secret = process.env.PERSONAL_SMS_SECRET;
   const key = req.query?.key || '';
@@ -59,13 +63,19 @@ export default async function handler(req, res) {
   const ok = (extra) => { res.statusCode = 200; res.setHeader('Content-Type', 'application/json'); res.end(JSON.stringify({ ok: true, ...extra })); };
 
   try {
-    const b = await readBody(req);
+    // Read fields from the query string AND the body (minus the secret), so it
+    // works whether the app sends GET params or a fixed POST payload.
+    const body = req.method === 'POST' ? await readBody(req) : {};
+    const { key: _k, ...q } = (req.query || {});
+    const b = { ...q, ...body };
+
     const agent = /james/i.test(String(pick(b, 'agent') || '')) ? 'james' : 'sara';
     const dirRaw = String(pick(b, 'direction', 'dir') || 'inbound').toLowerCase();
     const direction = /out|sent/.test(dirRaw) ? 'outbound' : 'inbound';
-    const text = pick(b, 'text', 'message', 'body', 'content');
-    // The OTHER party's number: explicit `phone`, else from/to by direction.
-    const phone = pick(b, 'phone') || (direction === 'outbound' ? pick(b, 'to', 'from') : pick(b, 'from', 'to'));
+    const text = pick(b, 'text', 'message', 'body', 'content', 'msg', 'sms');
+    // The OTHER party's number, under whatever name the app uses.
+    const phone = pick(b, 'phone', 'sender', 'msisdn', 'number', 'address', 'source')
+      || (direction === 'outbound' ? pick(b, 'to', 'from') : pick(b, 'from', 'to'));
 
     if (!text || !phone) return ok({ stored: false, reason: 'missing text or phone' });
 
