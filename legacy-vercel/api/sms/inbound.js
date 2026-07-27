@@ -101,9 +101,19 @@ export default async function handler(req, res) {
     if (!want) return ok({ stored: false, reason: 'unparseable phone' });
 
     // Match to a contact. No match → drop (keeps personal texts out of the CRM).
-    const { data: leads } = await supa.from('leads').select('id, phone').not('phone', 'is', null).limit(5000);
+    // Phones are stored in mixed human formats, so we normalize in JS rather
+    // than SQL. Page through all of them so a large lead list can't hide a match.
+    let leads = [];
+    for (let from = 0; from < 40000; from += 1000) {
+      const { data: page, error: pErr } = await supa.from('leads')
+        .select('id, phone').not('phone', 'is', null)
+        .order('id', { ascending: true }).range(from, from + 999);
+      if (pErr) break;
+      leads = leads.concat(page || []);
+      if (!page || page.length < 1000) break;
+    }
     const hit = (leads || []).find((l) => normPhone(l.phone) === want);
-    if (!hit) return ok({ stored: false, reason: 'no matching contact' });
+    if (!hit) return ok({ stored: false, reason: 'no matching contact', searched: want, scanned: leads.length });
 
     // Light dedupe — SMS forwarder apps can re-POST on flaky networks. Skip an
     // identical text on the same thread within the last 90 seconds.
