@@ -55,8 +55,25 @@ export default async function handler(req, res) {
   // Accept GET and POST — "paste-a-URL" forwarder apps use either one.
   if (req.method !== 'POST' && req.method !== 'GET') { res.statusCode = 405; return res.end('method_not_allowed'); }
 
-  const secret = process.env.PERSONAL_SMS_SECRET;
-  const key = req.query?.key || '';
+  // Trim both sides — a stray newline/space pasted into the Vercel value or the
+  // URL is the most common reason a correct-looking secret still won't match.
+  const secret = (process.env.PERSONAL_SMS_SECRET || '').trim();
+  const key = String(req.query?.key || '').trim();
+
+  // Safe diagnostic: ?debug=1 reports only whether the secret is set and how the
+  // lengths compare — never the value — so we can tell a missing env var from a
+  // truncated/mismatched key. Reveals no secret content.
+  if (String(req.query?.debug || '') === '1') {
+    res.statusCode = 200; res.setHeader('Content-Type', 'application/json');
+    return res.end(JSON.stringify({
+      debug: true,
+      secret_set: !!secret,
+      secret_len: secret.length,
+      key_received_len: key.length,
+      match: !!secret && key === secret
+    }));
+  }
+
   if (!secret || key !== secret) { res.statusCode = 403; return res.end('forbidden'); }
 
   // Always answer 200 so a hiccup never makes the forwarder app retry-storm.
