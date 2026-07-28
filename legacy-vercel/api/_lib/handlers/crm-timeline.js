@@ -269,10 +269,16 @@ export default async function handler(req, res) {
         const { error: uErr } = await supa.from('deal_timeline_items').update(patch).eq('id', p.item_id);
         if (uErr) return fail(res, 500, uErr.message);
       }
-      const { error } = await supa.from('deal_timeline_proposals')
-        .update({ status: op === 'approve' ? 'approved' : 'rejected', decided_by: who, decided_at: new Date().toISOString() })
-        .eq('id', p.id);
-      if (error) return fail(res, 500, error.message);
+      // Optional agent note — the "why" behind a rejection (or approval). On a
+      // reject it's the correction Cowork reads back so it fixes its scan.
+      const note = typeof b?.note === 'string' ? (b.note.trim().slice(0, 600) || null) : null;
+      const decided = { status: op === 'approve' ? 'approved' : 'rejected', decided_by: who, decided_at: new Date().toISOString() };
+      let upd = await supa.from('deal_timeline_proposals').update({ ...decided, decision_note: note }).eq('id', p.id);
+      // Degrade gracefully if db/048 (decision_note) hasn't run yet.
+      if (upd.error && /decision_note|column/i.test(upd.error.message || '')) {
+        upd = await supa.from('deal_timeline_proposals').update(decided).eq('id', p.id);
+      }
+      if (upd.error) return fail(res, 500, upd.error.message);
       return ok(res, { [op === 'approve' ? 'approved' : 'rejected']: true });
     }
 

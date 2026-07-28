@@ -77,6 +77,30 @@ export default async function handler(req, res) {
       }
     } catch (_) { /* migration 040 not run yet */ }
 
+    // Rejected timeline proposals (db/048): when the agent rejects a proposed
+    // update, that's Cowork's cue it got a contract/scan wrong. Return the recent
+    // rejections with the agent's correction note so Cowork fixes it (e.g. sets
+    // the deal's timeline.remaining/removed, or re-reads the doc). Fail-soft.
+    let rejected_proposals = [];
+    try {
+      const since = new Date(Date.now() - 21 * 86400000).toISOString();
+      const { data: pRows, error: pErr } = await supa.from('deal_timeline_proposals')
+        .select('item_key, address, change, reason, decision_note, decided_by, decided_at')
+        .eq('status', 'rejected').gte('decided_at', since)
+        .order('decided_at', { ascending: false }).limit(50);
+      if (!pErr && Array.isArray(pRows)) {
+        rejected_proposals = pRows.map((p) => ({
+          item_key:     p.item_key || null,
+          address:      p.address || null,
+          proposed:     p.change || null,            // what Cowork/cron had proposed
+          reason:       p.reason || null,            // its original evidence sentence
+          agent_note:   p.decision_note || null,     // the agent's correction
+          rejected_by:  p.decided_by || null,
+          rejected_at:  p.decided_at || null
+        }));
+      }
+    } catch (_) { /* db/048 not run yet */ }
+
     return ok(res, {
       generated_at: new Date().toISOString(),
       counts: {
@@ -84,12 +108,14 @@ export default async function handler(req, res) {
         done:       tasks.filter((t) => t.done).length,
         open:       tasks.filter((t) => !t.done).length,
         with_notes: tasks.filter((t) => t.agent_note).length,
-        attention:  tasks.filter((t) => t.needs_attention).length
+        attention:  tasks.filter((t) => t.needs_attention).length,
+        rejected_proposals: rejected_proposals.length
       },
       // The list Cowork should act on first: flagged or annotated.
       needs_review: tasks.filter((t) => t.needs_attention || t.agent_note),
       tasks,
-      deal_portal_notes
+      deal_portal_notes,
+      rejected_proposals
     });
   } catch (e) {
     return fail(res, 500, e.message);

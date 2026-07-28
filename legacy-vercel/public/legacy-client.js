@@ -600,25 +600,38 @@
           <p>${escapeHtml(pr.reason || '')}</p>
           <div class="nc-foot"><div class="nc-foot-l"><span>Applies to the seller's page the moment you approve</span></div>
             <div class="nc-foot-r">
-              <button class="btn btn-ghost btn-sm" data-tl-reject="${escapeHtml(pr.id)}">Dismiss</button>
+              <button class="btn btn-ghost btn-sm" data-tl-reject="${escapeHtml(pr.id)}">Reject</button>
               <button class="btn btn-ink btn-sm" data-tl-approve="${escapeHtml(pr.id)}">Approve</button>
             </div></div>
+          <div data-reject-panel style="display:none;margin-top:10px;">
+            <textarea data-reject-note rows="2" placeholder="What's off? Cowork reads this to correct itself — e.g. “CRB No. 2 removes all but the loan” or “misread — not signed yet.”" style="width:100%;font:inherit;font-size:13px;line-height:1.5;padding:8px 10px;border:1px solid #D9CFB7;background:#fff;"></textarea>
+            <div style="display:flex;gap:8px;margin-top:6px;">
+              <button class="btn btn-ghost btn-sm" data-reject-cancel>Cancel</button>
+              <button class="btn btn-ink btn-sm" data-reject-send="${escapeHtml(pr.id)}">Send rejection</button>
+            </div>
+          </div>
           <div data-result style="font-size:13px;margin-top:8px;min-height:18px;"></div>
         </div>`;
       needs.appendChild(card);
-      card.querySelectorAll('[data-tl-approve],[data-tl-reject]').forEach((btn) => {
-        btn.addEventListener('click', async () => {
-          const approve = btn.hasAttribute('data-tl-approve');
-          btn.disabled = true; btn.textContent = approve ? 'Applying…' : 'Dismissing…';
-          const r = await api('/api/crm/timeline', { body: { op: approve ? 'approve' : 'reject', proposal_id: pr.id } });
-          const resEl = card.querySelector('[data-result]');
-          if (r.ok) {
-            card.style.opacity = '.5';
-            card.querySelectorAll('button').forEach((b) => { b.disabled = true; });
-            resEl.style.color = '#2E5C3D';
-            resEl.textContent = approve ? '✓ Applied — the seller page is updated.' : 'Dismissed.';
-          } else { btn.disabled = false; btn.textContent = approve ? 'Approve' : 'Dismiss'; resEl.style.color = '#9B2C2C'; resEl.textContent = r.json?.error || 'Failed — try again.'; }
-        });
+      const resEl = card.querySelector('[data-result]');
+      const rejectPanel = card.querySelector('[data-reject-panel]');
+      const footR = card.querySelector('.nc-foot-r');
+      card.querySelector('[data-tl-approve]').addEventListener('click', async (e) => {
+        const btn = e.currentTarget; btn.disabled = true; btn.textContent = 'Applying…';
+        const r = await api('/api/crm/timeline', { body: { op: 'approve', proposal_id: pr.id } });
+        if (r.ok) { card.style.opacity = '.5'; card.querySelectorAll('button').forEach((b) => { b.disabled = true; }); resEl.style.color = '#2E5C3D'; resEl.textContent = '✓ Applied — the seller page is updated.'; }
+        else { btn.disabled = false; btn.textContent = 'Approve'; resEl.style.color = '#9B2C2C'; resEl.textContent = r.json?.error || 'Failed — try again.'; }
+      });
+      // Reject reveals a reason box (the correction Cowork reads back). Sending
+      // it rejects the proposal WITHOUT applying the change — the item stays live.
+      card.querySelector('[data-tl-reject]').addEventListener('click', () => { if (footR) footR.style.display = 'none'; rejectPanel.style.display = 'block'; const ta = rejectPanel.querySelector('[data-reject-note]'); if (ta) ta.focus(); });
+      card.querySelector('[data-reject-cancel]').addEventListener('click', () => { rejectPanel.style.display = 'none'; if (footR) footR.style.display = ''; });
+      card.querySelector('[data-reject-send]').addEventListener('click', async (e) => {
+        const btn = e.currentTarget; const note = (rejectPanel.querySelector('[data-reject-note]').value || '').trim();
+        btn.disabled = true; btn.textContent = 'Sending…';
+        const r = await api('/api/crm/timeline', { body: { op: 'reject', proposal_id: pr.id, note } });
+        if (r.ok) { card.style.opacity = '.5'; card.querySelectorAll('button,textarea').forEach((b) => { b.disabled = true; }); resEl.style.color = '#2E5C3D'; resEl.textContent = note ? '✓ Rejected — Cowork will see your note.' : '✓ Rejected — the item stays live.'; }
+        else { btn.disabled = false; btn.textContent = 'Send rejection'; resEl.style.color = '#9B2C2C'; resEl.textContent = r.json?.error || 'Failed — try again.'; }
       });
     });
 

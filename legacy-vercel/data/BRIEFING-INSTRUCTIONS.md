@@ -122,6 +122,25 @@ counter), NOT escrow open. All keys optional; keep it as accurate as you can:
 - **Contingency removal (CR):** when a CR is executed, set `"remaining"` to just
   the contingencies still active (e.g. 7230 Latigo CR1 → `["appraisal","loan"]`),
   or `"removed"` to the ones taken out. Removed ones stop generating deadlines.
+- **⚠ BACKFILL — do this on your next run:** review every active escrow's
+  executed CRs and set `remaining`/`removed` on each. This was under-maintained,
+  so the calendar and Deadline Watch have been showing already-removed
+  contingencies. Known example: **433 E Hwy 4** — CRB (Buyer Contingency Removal)
+  No. 2 removes everything **except the loan**, so set
+  `"remaining": ["loan"]` on 433's timeline. Do the same for the others from
+  each deal's executed CRs.
+- **When you can't read a doc or aren't sure a contingency cleared, do NOT guess.**
+  Leave it in `remaining` (so the deadline keeps showing) and file a *pending*
+  timeline proposal (`op:'propose'`) describing what you think happened — the
+  agent decides. Guessing wrong hides a live deadline; a pending proposal is the
+  safe fallback.
+- **Read the agent's rejections.** `GET /api/crm/briefing-feedback` now returns a
+  `rejected_proposals` array: each is a proposal the agent **rejected**, with your
+  original `reason`, the change you `proposed`, and the agent's correction in
+  `agent_note` (e.g. "CRB No. 2 removes all but the loan"). Treat each as a
+  directive: fix the deal's `timeline` (or docs) to match the note, and don't
+  re-file the same proposal. This is the loop that lets the agent reply to your
+  scan when you misread a document.
 - **Overrides / COE:** e.g. 433 E Hwy 4 has a 25-day loan (`"overrides":{"loan":25}`)
   and COE 8/10. COE never lands on a weekend/holiday — the calendar rolls it to
   the next business day automatically (so an 8/1 Saturday COE shows 8/3).

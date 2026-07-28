@@ -114,7 +114,11 @@
             '<span style="color:' + GOLD + ';font-size:10.5px;font-weight:600;letter-spacing:.08em;">' + esc((p.item_key || '').replace(/^custom:/, '').replace(/_/g, ' ').toUpperCase()) + '</span>' +
             '<span style="flex:1;min-width:220px;color:rgba(250,246,236,.85);">' + esc(p.reason || 'Proposed update') + '</span>' +
             chip('Approve', 'background:#2E5C3D;border-color:#2E5C3D;', 'data-ac-approve="' + esc(p.id) + '"') +
-            chip('Dismiss', '', 'data-ac-reject="' + esc(p.id) + '"') +
+            chip('Reject', '', 'data-ac-reject="' + esc(p.id) + '"') +
+            '<div data-ac-reject-box="' + esc(p.id) + '" style="display:none;flex-basis:100%;gap:8px;align-items:center;margin-top:4px;">' +
+              '<input data-ac-reject-note placeholder="What&#39;s off? Cowork reads this — e.g. &quot;CRB No. 2 removes all but loan&quot;" style="flex:1;min-width:200px;font:inherit;font-size:12.5px;padding:6px 9px;border-radius:5px;border:1px solid rgba(250,246,236,.3);background:rgba(250,246,236,.08);color:' + PAPER + ';"> ' +
+              chip('Send rejection', 'background:#2E5C3D;border-color:#2E5C3D;', 'data-ac-reject-send="' + esc(p.id) + '"') +
+            '</div>' +
           '</div>';
         }).join('') +
       '</div>' +
@@ -163,12 +167,31 @@
         setTimeout(function () { location.href = '/crm.html'; }, 250);
         return;
       }
-      var ap = e.target.closest('[data-ac-approve]'), rj = e.target.closest('[data-ac-reject]');
-      if (ap || rj) {
-        var id = (ap || rj).getAttribute(ap ? 'data-ac-approve' : 'data-ac-reject');
-        (ap || rj).disabled = true; (ap || rj).textContent = '…';
-        api('/api/crm/timeline', { method: 'POST', body: { op: ap ? 'approve' : 'reject', proposal_id: id } })
-          .then(function (r) { if (r.ok) location.reload(); else (ap || rj).textContent = 'Failed'; });
+      var ap = e.target.closest('[data-ac-approve]');
+      if (ap) {
+        var aid = ap.getAttribute('data-ac-approve');
+        ap.disabled = true; ap.textContent = '…';
+        api('/api/crm/timeline', { method: 'POST', body: { op: 'approve', proposal_id: aid } })
+          .then(function (r) { if (r.ok) location.reload(); else ap.textContent = 'Failed'; });
+        return;
+      }
+      // Reject reveals a reason box; the change is NOT applied and the item stays
+      // live. The note flows back to Cowork so it corrects its scan.
+      var rj = e.target.closest('[data-ac-reject]');
+      if (rj) {
+        var rid = rj.getAttribute('data-ac-reject');
+        var box = bar.querySelector('[data-ac-reject-box="' + rid + '"]');
+        if (box) { box.style.display = 'flex'; var inp = box.querySelector('[data-ac-reject-note]'); if (inp) inp.focus(); }
+        return;
+      }
+      var rs = e.target.closest('[data-ac-reject-send]');
+      if (rs) {
+        var sid = rs.getAttribute('data-ac-reject-send');
+        var sbox = bar.querySelector('[data-ac-reject-box="' + sid + '"]');
+        var note = sbox ? (sbox.querySelector('[data-ac-reject-note]').value || '').trim() : '';
+        rs.disabled = true; rs.textContent = '…';
+        api('/api/crm/timeline', { method: 'POST', body: { op: 'reject', proposal_id: sid, note: note } })
+          .then(function (r) { if (r.ok) location.reload(); else rs.textContent = 'Failed'; });
         return;
       }
       var dn = e.target.closest('[data-ac-done]'), wv = e.target.closest('[data-ac-waive]');
