@@ -2390,13 +2390,14 @@
           const who  = them ? fullName(lead) : sender.full;
           const init = them ? initials : sender.initials;
           return `
-            <div class="msg-bubble ${them ? 'them' : 'us'}">
+            <div class="msg-bubble ${them ? 'them' : 'us'}" data-msg-id="${escHtml(m.id)}" data-msg-source="${escHtml(m._source || 'messages')}">
               <div class="avatar avatar-sm">${escHtml(init)}</div>
               <div>
                 <div class="mb-head">
                   <span class="mb-name">${escHtml(who)}</span>
                   <span class="mb-when">${escHtml(fmtRel(m.created_at))}</span>
-                  <span class="mb-ch">${m.channel === 'sms' ? 'SMS' : 'Email'}</span>
+                  <span class="mb-ch">${m.channel === 'call' ? 'Call' : (m.channel === 'sms' ? 'SMS' : 'Email')}</span>
+                  <button type="button" class="mb-del" data-msg-del aria-label="Delete message" title="Delete this message">&times;</button>
                 </div>
                 <p class="mb-text">${escHtml(m.body || '')}</p>
               </div>
@@ -2880,6 +2881,35 @@
 
     // Wire the composer (channel toggle, Note/Internal placeholders, Send).
     wireComposer(detailEl, lead);
+
+    // Per-message delete on each conversation bubble. Two-tap confirm; the row
+    // fades and the card reloads so the thread reflects the removal.
+    detailEl.querySelectorAll('.msg-bubble [data-msg-del]').forEach((btn) => {
+      const bubble = btn.closest('.msg-bubble');
+      let armed = false, timer = null;
+      btn.addEventListener('click', async (ev) => {
+        ev.stopPropagation();
+        if (!armed) {
+          armed = true;
+          btn.textContent = 'Delete?';
+          btn.classList.add('armed');
+          timer = setTimeout(() => { armed = false; btn.innerHTML = '&times;'; btn.classList.remove('armed'); }, 3500);
+          return;
+        }
+        clearTimeout(timer);
+        btn.disabled = true;
+        btn.textContent = '…';
+        const r = await window.Legacy.api('/api/crm/message-delete', {
+          body: { id: bubble && bubble.dataset.msgId, source: bubble && bubble.dataset.msgSource }
+        });
+        if (r.ok && r.json && r.json.deleted) {
+          if (bubble) { bubble.style.transition = 'opacity .2s'; bubble.style.opacity = '0'; }
+          setTimeout(() => loadLead(lead.id), 220);
+        } else {
+          btn.disabled = false; armed = false; btn.innerHTML = '&times;'; btn.classList.remove('armed');
+        }
+      });
+    });
 
     // Wire the shared-with-client toggles + inline labels.
     const sharedPanel = detailEl.querySelector('[data-shared-panel]');

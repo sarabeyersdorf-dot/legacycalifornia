@@ -118,7 +118,7 @@ async function readLead(req, res) {
       // Inbound texts/calls live in deal_messages, keyed by contact_id. Pull
       // them in so this lead's conversation shows texts alongside portal/email.
       supa.from('deal_messages').select('id, direction, channel, content, call_duration_seconds, raw_phone_number, created_at')
-        .eq('contact_id', id).order('created_at').then((r) => r, () => ({ data: [] })),
+        .eq('contact_id', id).neq('status', 'dismissed').order('created_at').then((r) => r, () => ({ data: [] })),
       // The deal(s) this contact is a party to — so the card can show "in the
       // Baldwin deal · in escrow" and flip to "Closed · <date>" when it closes.
       supa.from('deal_parties').select('role, deals(source_key, address, city, stage, side, coe_date, agent, list_price, sale_price)')

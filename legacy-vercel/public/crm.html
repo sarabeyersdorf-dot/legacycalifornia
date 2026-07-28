@@ -821,11 +821,13 @@
         var c = CHAN[r.channel] || CHAN.sms;
         var unread = isUnread(r);
         var triage = r.needs_review ? '<span class="msg-triage">Unknown #</span>' : '';
-        return '<div class="msg-item'+(unread?' unread':'')+'" data-msg-key="'+esc(r.key||'')+'" data-msg-lead="'+esc(r.lead_id||'')+'" data-msg-review="'+(r.needs_review?'1':'')+'">'
+        return '<div class="msg-item'+(unread?' unread':'')+'" data-msg-key="'+esc(r.key||'')+'" data-msg-lead="'+esc(r.lead_id||'')+'" data-msg-source="'+esc(r.source||'')+'" data-msg-review="'+(r.needs_review?'1':'')+'">'
           + (unread ? '<span class="msg-dot"></span>' : '<span style="width:7px;flex:none;"></span>')
           + '<span class="msg-chan" style="background:'+c.bg+';color:'+c.fg+';">'+c.label+'</span>'
           + '<div class="msg-body"><div class="msg-top"><span class="msg-name">'+esc(r.name||'Unknown')+triage+'</span><span class="msg-time">'+ago(r.created_at)+'</span></div>'
-          + '<div class="msg-preview">'+esc(r.preview||'(no text)')+'</div></div></div>';
+          + '<div class="msg-preview">'+esc(r.preview||'(no text)')+'</div></div>'
+          + '<button class="msg-del" type="button" data-msg-del aria-label="Delete message" title="Delete this message" style="flex:none;align-self:center;margin-left:6px;background:transparent;border:none;color:#B8AE97;font-size:20px;line-height:1;cursor:pointer;padding:4px 8px;border-radius:4px;">&times;</button>'
+          + '</div>';
       }
       function renderList(){
         var list = document.querySelector('[data-msgs-list]'); if (!list) return;
@@ -862,6 +864,37 @@
         if (f){ state.filter = f.getAttribute('data-msgf');
           document.querySelectorAll('[data-msgs-filter] .chip').forEach(function(c){ c.classList.toggle('on', c===f); });
           renderList(); return; }
+        // Delete — two-tap confirm so a stray tap never nukes a message. Must run
+        // before the row-open handler below (the button sits inside the row).
+        var del = e.target.closest('[data-msg-del]');
+        if (del){
+          e.stopPropagation();
+          var host = del.closest('[data-msg-lead]');
+          var dkey = host ? host.getAttribute('data-msg-key') : '';
+          var dsrc = host ? host.getAttribute('data-msg-source') : '';
+          if (!del.getAttribute('data-armed')){
+            del.setAttribute('data-armed','1');
+            del.innerHTML = 'Delete?';
+            del.style.color = '#8B3A3A'; del.style.fontSize = '12px'; del.style.fontWeight = '700';
+            del.style.letterSpacing = '.04em';
+            del._t = setTimeout(function(){ if(!del) return; del.removeAttribute('data-armed'); del.innerHTML='&times;'; del.style.color='#B8AE97'; del.style.fontSize='20px'; del.style.fontWeight=''; }, 3500);
+            return;
+          }
+          clearTimeout(del._t); del.disabled = true; del.innerHTML = '…';
+          fetch('/api/crm/message-delete', { method:'POST', credentials:'include', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ id: dkey, source: dsrc }) })
+            .then(function(r){ return r.ok ? r.json() : null; })
+            .then(function(j){
+              if (j && j.deleted){
+                state.rows = state.rows.filter(function(r){ return r.key !== dkey; });
+                renderList(); setBadge(unreadCount());
+              } else {
+                del.disabled=false; del.removeAttribute('data-armed'); del.innerHTML='&times;';
+                del.style.color='#B8AE97'; del.style.fontSize='20px'; del.style.fontWeight='';
+              }
+            })
+            .catch(function(){ del.disabled=false; del.removeAttribute('data-armed'); del.innerHTML='&times;'; del.style.color='#B8AE97'; del.style.fontSize='20px'; del.style.fontWeight=''; });
+          return;
+        }
         var item = e.target.closest('[data-msg-lead]');
         if (item){
           var lead = item.getAttribute('data-msg-lead');
