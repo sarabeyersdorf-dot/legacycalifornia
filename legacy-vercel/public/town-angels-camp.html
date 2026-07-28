@@ -518,16 +518,25 @@
         <span class="eyebrow">Plate VI · Currently in the field</span>
         <h2 class="h-section" style="margin-top:10px;">Homes for sale<br><em>in Angels Camp.</em></h2>
       </div>
-      <p class="lede right">Updated continuously from the MLS.</p>
+      <p class="lede right">Every home currently for sale in Angels Camp — live from the MLS.</p>
     </div>
 
-    <!-- Interim: office featured-listings gallery (same as the other town pages),
-         so the section renders real homes. Swap for a city Saved Search / Property
-         Gallery embed to show the full Angels Camp market. -->
+    <!-- Full Angels Camp market — iHomeFinder saved-search gallery (id 3019721,
+         featured:false → pulls the whole MLS for the city, not office inventory). -->
     <div class="idx-embed idx-feature-gallery">
       <script>
         document.currentScript.replaceWith(ihfKestrel.render({
-          component: "gallerySliderWidget"
+          "component": "gallerySliderWidget",
+          "rows": 2,
+          "navigation": true,
+          "nav": "top",
+          "auto": true,
+          "maxResults": 25,
+          "status": "active",
+          "sort": "ds",
+          "featured": false,
+          "effect": "slide",
+          "id": 3019721
         }));
       </script>
     </div>
