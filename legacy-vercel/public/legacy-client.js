@@ -4194,7 +4194,7 @@
       // at the very top of the day column.
       if (e.all_day) {
         const band = document.createElement('div');
-        band.className = 'calw-ev block';
+        band.className = 'calw-ev ' + (e.cls === 'coe' || e.cls === 'deadline' ? e.cls : 'block');
         band.style.cssText = 'top:0;left:2px;right:2px;height:20px;min-height:0;font-size:9.5px;display:flex;align-items:center;opacity:.9;';
         band.setAttribute('data-ev-key', `${e.source}:${e.id}`);
         band.title = `All day · ${e.title}`;
@@ -4661,6 +4661,24 @@
 
   function openEventDetail(e) {
     if (!e) return;
+    // Deadlines/COE are derived from the deal's dates — read-only, no edit/cancel.
+    if (e.source === 'deadline' || e.readonly) {
+      const m = modalShell(e.title, e.kind_label || 'Deadline');
+      const rows = [
+        ['When', `${esc(dayLabel(e))}${e.weekend ? ' · falls on a weekend/holiday — act by the prior business day' : ''}`],
+        e.deal_address ? ['Deal', esc(e.deal_address)] : null,
+        e.client_name ? ['Client', esc(e.client_name)] : null,
+        e.notes ? ['Detail', esc(e.notes)] : null
+      ].filter(Boolean);
+      m.body.innerHTML = `
+        <div style="display:flex;flex-direction:column;gap:10px;font-size:14px;color:#1A1714;">
+          ${rows.map(([k, v]) => `<div><span style="${M_LAB}">${k}</span><div style="margin-top:2px;">${v}</div></div>`).join('')}
+          <div style="font-size:12px;color:#7A6F60;border-top:1px solid #E4DAC4;padding-top:9px;line-height:1.5;">Calculated from the deal’s dates — it moves automatically if the contract dates change, so there’s nothing to edit here.</div>
+          <div style="display:flex;gap:10px;margin-top:4px;"><button type="button" data-act="close" style="${M_INK};margin-left:auto;">Close</button></div>
+        </div>`;
+      m.body.querySelector('[data-act="close"]').addEventListener('click', m.close);
+      return;
+    }
     const m = modalShell(e.title, e.kind_label || '');
     const rows = [
       ['When', `${esc(dayLabel(e))} · ${esc(e.time_label)}–${esc(e.end_label)}`],

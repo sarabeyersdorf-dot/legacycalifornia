@@ -16,6 +16,7 @@ import { adminClient } from '../supabase.js';
 import { getCallerProfile, isAgent } from '../auth.js';
 import { handleOptions, readJson, ok, fail } from '../cors.js';
 import { sendEmail, resendConfigured } from '../resend.js';
+import { timelineEvents } from '../deal-timeline.js';
 
 const EMAIL_RE = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
 const TZ = 'America/Los_Angeles';
@@ -314,6 +315,61 @@ async function listWeek(req, res, supa) {
     .filter((d) => d.source_key)
     .map((d) => ({ key: d.source_key, address: d.address || d.source_key, stage: d.stage }))
     .sort((a, b) => (STAGE_ORDER[a.stage] ?? 9) - (STAGE_ORDER[b.stage] ?? 9) || String(a.address).localeCompare(String(b.address)));
+
+  // ---- Transaction deadlines: COE + contingency dates from the deal record ---
+  // The same RPA math the Cowork briefing uses (deal-timeline.js), surfaced on
+  // the calendar the agent actually looks at. Because these are DERIVED from the
+  // deal's dates, they can never drift the way a hand-typed "COE" event does.
+  const firstKey = days[0]?.date, lastKey = days[days.length - 1]?.date;
+  const DEAL_TL_COLS = 'source_key, agent, address, stage, coe_date, escrow_open_date, loan_contingency_days, timeline, listing_meta';
+  let tlDeals = await supa.from('deals').select(DEAL_TL_COLS).in('stage', ['pending', 'offer']);
+  if (tlDeals.error) tlDeals = await supa.from('deals').select('source_key, agent, address, stage, coe_date, escrow_open_date, loan_contingency_days').in('stage', ['pending', 'offer']);
+  const pushDeadline = (o) => events.push({
+    source: 'deadline', readonly: true, status: 'deadline',
+    hour: 0, minute: 0, duration_minutes: 0, all_day: true, end_label: '',
+    client_email: null, lead_id: null, shared: false, client_label: null, ...o
+  });
+  for (const d of (tlDeals.data || [])) {
+    let tlEvents = [];
+    try { tlEvents = timelineEvents(d, { todayStr: firstKey, endStr: lastKey }); } catch (_) { tlEvents = []; }
+    const addrShort = d.address ? String(d.address).split(',')[0] : (d.source_key || '');
+    // Most deals put every contingency on the same 17-day date — collapse those
+    // into one "Contingency deadline" event per date so the day isn't a stack of
+    // five identical bands. COE stays its own event.
+    const contByDate = {};
+    for (const ev of tlEvents) {
+      const di = dayIndex[ev.start];
+      if (di == null) continue;
+      if (ev.type === 'coe') {
+        pushDeadline({
+          id: `${ev.deal || d.source_key}:coe:${ev.start}`, cls: 'coe', kind: 'coe', type: 'coe',
+          title: ev.title, sub: ev.notes || '', date: ev.start, day: di,
+          time_label: 'Close', kind_label: 'Close of escrow',
+          client: ev.client || null, client_name: ev.client || null,
+          location: ev.location || null, notes: ev.notes || '',
+          deal_key: ev.deal || d.source_key || null, deal_address: ev.location || null,
+          deal_stage: d.stage || null, weekend: !!ev.weekend
+        });
+      } else if (ev.type === 'deadline') {
+        (contByDate[ev.start] = contByDate[ev.start] || { di, evs: [], client: ev.client, location: ev.location, weekend: ev.weekend, deal: ev.deal }).evs.push(ev);
+      }
+    }
+    for (const [date, g] of Object.entries(contByDate)) {
+      const labels = g.evs.map((e) => String(e.title).split(' — ')[0].replace(/ contingency$/i, ''));
+      const many = g.evs.length > 1;
+      pushDeadline({
+        id: `${g.deal || d.source_key}:cont:${date}`, cls: 'deadline', kind: 'deadline', type: 'deadline',
+        title: many ? `Contingency deadline — ${addrShort}` : g.evs[0].title,
+        sub: many ? labels.join(', ') : (g.evs[0].notes || ''),
+        date, day: g.di, time_label: 'Deadline', kind_label: many ? `${g.evs.length} contingencies` : 'Deadline',
+        client: g.client || null, client_name: g.client || null,
+        location: g.location || null,
+        notes: many ? `${labels.join(', ')}. ${g.evs[0].notes || ''}`.trim() : (g.evs[0].notes || ''),
+        deal_key: g.deal || d.source_key || null, deal_address: g.location || null,
+        deal_stage: d.stage || null, weekend: !!g.weekend
+      });
+    }
+  }
 
   events.sort((x, y) => (x.day - y.day) || (x.hour * 60 + x.minute) - (y.hour * 60 + y.minute));
   return ok(res, { week_offset: weekOffset, week_label: weekLabel, days, events, deals });

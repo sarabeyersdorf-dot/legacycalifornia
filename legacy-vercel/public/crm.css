@@ -569,6 +569,17 @@
 .calw-ev.deal .t { color: rgba(26,23,20,0.6); }
 .calw-ev.deal .ti { color: #1A1714; font-style: italic; font-family: var(--serif); }
 
+/* Transaction deadlines (derived from the deal) — COE in ink, contingency
+   deadlines in a warning red, so they read differently from bookable events. */
+.cal-ag-dot.deadline { background: #9B2C2C; }
+.cal-ag-dot.coe { background: var(--brass); }
+.calw-ev.deadline { background: #F6E4E0; color: #7A2119; border-left-color: #9B2C2C; }
+.calw-ev.deadline .ti { font-style: normal; font-family: var(--mono); font-size: 10px; color: #7A2119; }
+.calw-ev.coe { background: var(--ink); color: var(--shell); border-left-color: var(--brass-bright); }
+.calw-ev.coe .ti { font-style: normal; font-family: var(--mono); font-size: 10px; color: var(--shell); }
+.calm-ev.deadline { border-left-color: #9B2C2C; background: #F6E4E0; color: #7A2119; }
+.calm-ev.coe { border-left-color: var(--brass-bright); background: var(--ink); color: var(--shell); }
+
 /* ---- Calendar on a phone ---- */
 @media (max-width: 760px) {
   .cal { padding: 16px 14px 40px; }
