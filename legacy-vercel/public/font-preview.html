@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Legacy · Headline font options</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;1,9..144,300;1,9..144,400&family=Playfair+Display:ital,wght@0,400;0,500;1,400;1,500&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Newsreader:ital,opsz,wght@0,6..72,300;0,6..72,400;0,6..72,500;1,6..72,300;1,6..72,400&family=Libre+Caslon+Display&family=Marcellus&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --parchment:#F2ECDF; --vellum:#E8DFCC; --shell:#FAF6EC;
+    --ink:#1B1813; --ink-soft:#4A4136; --ink-mute:#7A6F60; --ink-faint:#A89C8A;
+    --brass:#8C6E3D; --brass-bright:#C99E5A; --rule:rgba(27,24,19,0.10);
+    --sans:'Inter',system-ui,sans-serif; --mono:'JetBrains Mono',monospace;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{background:var(--parchment);color:var(--ink);font-family:var(--sans);line-height:1.6;padding:0 0 80px;-webkit-font-smoothing:antialiased;}
+  .wrap{max-width:1040px;margin:0 auto;padding:0 28px;}
+  .eyebrow{font-family:var(--mono);font-size:10px;letter-spacing:.22em;text-transform:uppercase;color:var(--brass);display:block;}
+  .top{padding:56px 0 34px;border-bottom:1px solid var(--rule);}
+  .top h1{font-family:'Fraunces',serif;font-style:italic;font-weight:300;font-size:clamp(34px,5vw,54px);line-height:1.02;margin:12px 0 16px;}
+  .top p{font-size:15.5px;color:var(--ink-soft);max-width:70ch;margin-bottom:10px;}
+  .top .note{font-size:13.5px;color:var(--ink-mute);max-width:70ch;}
+  .legend{display:flex;flex-wrap:wrap;gap:8px;margin-top:20px;}
+  .legend b{font-family:var(--mono);font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;background:var(--vellum);border:1px solid var(--rule);border-radius:3px;padding:4px 9px;color:var(--ink-mute);font-weight:400;}
+
+  .opt{padding:40px 0;border-bottom:1px solid var(--rule);}
+  .opt-h{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;margin-bottom:26px;}
+  .opt-name{font-family:var(--mono);font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink);font-weight:400;}
+  .opt-tag{font-size:13px;color:var(--ink-mute);}
+  .pick{font-family:var(--mono);font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:#2E5C3D;background:#E8F0EA;border:1px solid #BFD8C6;border-radius:20px;padding:3px 10px;}
+  .card{background:var(--shell);border:1px solid var(--rule);padding:34px 36px;}
+
+  /* Per-font display class — only the SERIF (headlines) changes; body stays Inter. */
+  .wordmark{display:flex;flex-direction:column;line-height:1;margin-bottom:26px;}
+  .wordmark .w{font-size:44px;font-weight:500;letter-spacing:-.01em;}
+  .wordmark .s{font-family:var(--mono);font-size:9.5px;letter-spacing:.28em;text-transform:uppercase;color:var(--ink-mute);margin-top:8px;}
+  .hero{font-style:italic;font-weight:300;font-size:clamp(38px,6vw,60px);line-height:.98;letter-spacing:-.01em;margin:6px 0 22px;}
+  .hero em{color:var(--brass);font-style:italic;}
+  .h-sec{font-style:italic;font-weight:400;font-size:34px;line-height:1.05;margin:0 0 8px;}
+  .h-mid{font-weight:500;font-size:23px;line-height:1.2;margin:22px 0 6px;}
+  .read{font-weight:400;font-size:19px;line-height:1.35;color:var(--ink-2,#2E2A22);max-width:34ch;margin-top:4px;}
+  .body{font-family:var(--sans);font-size:15px;line-height:1.65;color:var(--ink-soft);max-width:62ch;margin-top:18px;}
+
+  /* Font assignments */
+  .f-fraunces .wordmark .w,.f-fraunces .hero,.f-fraunces .h-sec,.f-fraunces .h-mid,.f-fraunces .read{font-family:'Fraunces',serif;}
+  .f-playfair .wordmark .w,.f-playfair .hero,.f-playfair .h-sec,.f-playfair .h-mid,.f-playfair .read{font-family:'Playfair Display',serif;}
+  .f-cormorant .wordmark .w,.f-cormorant .hero,.f-cormorant .h-sec,.f-cormorant .h-mid,.f-cormorant .read{font-family:'Cormorant Garamond',serif;}
+  .f-newsreader .wordmark .w,.f-newsreader .hero,.f-newsreader .h-sec,.f-newsreader .h-mid,.f-newsreader .read{font-family:'Newsreader',serif;}
+  .f-caslon .wordmark .w,.f-caslon .hero,.f-caslon .h-sec,.f-caslon .h-mid,.f-caslon .read{font-family:'Libre Caslon Display',serif;}
+  /* Cormorant runs light — nudge weight so it doesn't read too thin. */
+  .f-cormorant .wordmark .w{font-weight:600;} .f-cormorant .hero{font-weight:500;} .f-cormorant .h-mid{font-weight:600;}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <div class="top">
+    <span class="eyebrow">Legacy Properties · design review</span>
+    <h1>Choosing the headline font.</h1>
+    <p>Fraunces (what the site uses now) is characterful and luxury, but its soft, high-contrast letterforms can get hard to read — especially in the light italic and at smaller heading sizes. Here are four alternatives that keep the boutique-luxury feel while reading more cleanly. Each block below shows the same real elements from your site.</p>
+    <p class="note"><strong>Only the headline serif changes.</strong> Body copy, labels, and the mono eyebrows stay exactly as they are. Scan for readability — the wordmark, the big italic greeting, the section title, and the mid-size line. When one feels right, tell me its name and I'll switch the whole site to it.</p>
+    <div class="legend"><b>Current: Fraunces</b><b>Playfair Display</b><b>Cormorant Garamond</b><b>Newsreader</b><b>Libre Caslon</b></div>
+  </div>
+
+  <!-- FRAUNCES (current) -->
+  <section class="opt f-fraunces">
+    <div class="opt-h"><span class="opt-name">Fraunces</span><span class="opt-tag">Current — soft, quirky, high fashion. The readability complaint.</span></div>
+    <div class="card">
+      <div class="wordmark"><span class="w">Legacy</span><span class="s">Properties · Angels Camp CA</span></div>
+      <div class="hero">Good morning, <em>Sara.</em></div>
+      <div class="h-sec">Legacy's listings.</div>
+      <div class="h-mid">Boutique luxury real estate</div>
+      <div class="read">Calaveras, Amador &amp; Tuolumne — live from the MLS, never a stale plate.</div>
+      <p class="body">Body text stays Inter across every option, so paragraphs like this one read the same. Only the serif headlines above change from block to block.</p>
+    </div>
+  </section>
+
+  <!-- PLAYFAIR -->
+  <section class="opt f-playfair">
+    <div class="opt-h"><span class="opt-name">Playfair Display</span><span class="opt-tag">Classic real-estate luxury — crisp, confident, very legible.</span><span class="pick">Recommended</span></div>
+    <div class="card">
+      <div class="wordmark"><span class="w">Legacy</span><span class="s">Properties · Angels Camp CA</span></div>
+      <div class="hero">Good morning, <em>Sara.</em></div>
+      <div class="h-sec">Legacy's listings.</div>
+      <div class="h-mid">Boutique luxury real estate</div>
+      <div class="read">Calaveras, Amador &amp; Tuolumne — live from the MLS, never a stale plate.</div>
+      <p class="body">Body text stays Inter across every option, so paragraphs like this one read the same. Only the serif headlines above change from block to block.</p>
+    </div>
+  </section>
+
+  <!-- CORMORANT -->
+  <section class="opt f-cormorant">
+    <div class="opt-h"><span class="opt-name">Cormorant Garamond</span><span class="opt-tag">The most boutique / airy — elegant and refined (runs delicate).</span></div>
+    <div class="card">
+      <div class="wordmark"><span class="w">Legacy</span><span class="s">Properties · Angels Camp CA</span></div>
+      <div class="hero">Good morning, <em>Sara.</em></div>
+      <div class="h-sec">Legacy's listings.</div>
+      <div class="h-mid">Boutique luxury real estate</div>
+      <div class="read">Calaveras, Amador &amp; Tuolumne — live from the MLS, never a stale plate.</div>
+      <p class="body">Body text stays Inter across every option, so paragraphs like this one read the same. Only the serif headlines above change from block to block.</p>
+    </div>
+  </section>
+
+  <!-- NEWSREADER -->
+  <section class="opt f-newsreader">
+    <div class="opt-h"><span class="opt-name">Newsreader</span><span class="opt-tag">Modern editorial — warm and the easiest to read at every size.</span><span class="pick">Most readable</span></div>
+    <div class="card">
+      <div class="wordmark"><span class="w">Legacy</span><span class="s">Properties · Angels Camp CA</span></div>
+      <div class="hero">Good morning, <em>Sara.</em></div>
+      <div class="h-sec">Legacy's listings.</div>
+      <div class="h-mid">Boutique luxury real estate</div>
+      <div class="read">Calaveras, Amador &amp; Tuolumne — live from the MLS, never a stale plate.</div>
+      <p class="body">Body text stays Inter across every option, so paragraphs like this one read the same. Only the serif headlines above change from block to block.</p>
+    </div>
+  </section>
+
+  <!-- LIBRE CASLON -->
+  <section class="opt f-caslon">
+    <div class="opt-h"><span class="opt-name">Libre Caslon Display</span><span class="opt-tag">Timeless &amp; bookish — already on-brand (your documents use Caslon).</span></div>
+    <div class="card">
+      <div class="wordmark"><span class="w">Legacy</span><span class="s">Properties · Angels Camp CA</span></div>
+      <div class="hero">Good morning, <em>Sara.</em></div>
+      <div class="h-sec">Legacy's listings.</div>
+      <div class="h-mid">Boutique luxury real estate</div>
+      <div class="read">Calaveras, Amador &amp; Tuolumne — live from the MLS, never a stale plate.</div>
+      <p class="body">Body text stays Inter across every option, so paragraphs like this one read the same. Only the serif headlines above change from block to block.</p>
+    </div>
+  </section>
+
+  <div style="padding:34px 0 0;">
+    <p class="eyebrow" style="color:var(--ink-mute);">How to pick</p>
+    <p style="font-size:15px;color:var(--ink-soft);max-width:64ch;margin-top:8px;">Scroll on both your laptop and your phone. Look at the big italic greeting and the section title — that's where Fraunces gets muddy. Reply with a name (e.g. "go with Playfair" or "Newsreader") and I'll roll it across the whole site in one change. Want a blend — say, one font for the wordmark and another for headings? I can do that too.</p>
+  </div>
+</div>
+
+</body>
+</html>
