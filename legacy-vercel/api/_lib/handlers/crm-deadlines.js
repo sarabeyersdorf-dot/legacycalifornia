@@ -63,13 +63,23 @@ export default async function handler(req, res) {
       const agent = normAgent(d.agent);
       const contByDate = {};
       for (const ev of evs) {
+        const dc = dayDiff(ev.start, todayStr);
         if (ev.type === 'coe') {
+          // COE keeps a small overdue grace — a just-missed close is a real
+          // signal (it either recorded or slipped and needs a new date).
+          if (dc < -3) continue;
           rows.push({
-            type: 'coe', date: ev.start, days: dayDiff(ev.start, todayStr),
+            type: 'coe', date: ev.start, days: dc,
             label: 'Close of escrow', deal: d.source_key || null, address: addrShort,
-            client: ev.client || null, agent, weekend: !!ev.weekend, overdue: dayDiff(ev.start, todayStr) < 0
+            client: ev.client || null, agent, weekend: !!ev.weekend, overdue: dc < 0
           });
         } else if (ev.type === 'deadline') {
+          // Contingencies are forward-looking only. A past contingency date is
+          // almost always one that was satisfied/removed but not yet declared in
+          // the deal's timeline (no `removed`/`remaining` list) — showing it as
+          // "overdue" here is a false alarm. Genuinely un-removed ones are
+          // surfaced by the decision queue's "confirm removal" proposals instead.
+          if (dc < 0) continue;
           (contByDate[ev.start] = contByDate[ev.start] || { client: ev.client, weekend: ev.weekend, labels: [] })
             .labels.push(String(ev.title).split(' — ')[0].replace(/ contingency$/i, ''));
         }
