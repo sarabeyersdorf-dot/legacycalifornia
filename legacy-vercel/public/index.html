@@ -582,6 +582,34 @@
   </div>
 </section>
 
+<!-- Force the homepage MLS feed to 4 cards per row. iHomeFinder's Kestrel widget
+     renders inside an OPEN shadow root, so a normal stylesheet can't reach its
+     Material-UI grid items — we inject the rule into the shadow root instead.
+     Each listing card is a `.ui-grid-item` that contains `.ihf-listing-result-cell`;
+     we set those to 25% width (4-up), stepping down to 2-up / 1-up on smaller
+     screens. Polls briefly because the widget renders asynchronously. -->
+<script>
+(function () {
+  var CSS =
+    '.ui-grid-item:has(.ihf-listing-result-cell){flex-basis:25% !important;max-width:25% !important;}' +
+    '@media (max-width:1024px){.ui-grid-item:has(.ihf-listing-result-cell){flex-basis:50% !important;max-width:50% !important;}}' +
+    '@media (max-width:600px){.ui-grid-item:has(.ihf-listing-result-cell){flex-basis:100% !important;max-width:100% !important;}}';
+  function inject() {
+    var host = document.querySelector('.idx-home-feed .ihf-container') || document.querySelector('.idx-home-feed [class*="ihf-container"]');
+    if (!host || !host.shadowRoot) return false;
+    if (host.shadowRoot.getElementById('legacy-4up')) return true;
+    if (!host.shadowRoot.querySelector('.ihf-listing-result-cell')) return false; // wait for cards
+    var st = document.createElement('style');
+    st.id = 'legacy-4up';
+    st.textContent = CSS;
+    host.shadowRoot.appendChild(st);
+    return true;
+  }
+  var tries = 0;
+  var iv = setInterval(function () { if (inject() || ++tries > 60) clearInterval(iv); }, 250);
+})();
+</script>
+
 <!-- ============ RELOCATE — Bay to Foothills signature service ============ -->
 <section class="section relocate-promo" style="background: var(--ink); color: var(--shell); padding: 100px var(--gutter);">
   <div class="section-inner">
