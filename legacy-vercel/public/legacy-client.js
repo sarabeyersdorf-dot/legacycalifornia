@@ -4360,8 +4360,10 @@
           <option value="tour">Client tour</option>
           <option value="listing_appt">Listing appt</option>
           <option value="showing">Showing</option>
+          <option value="walkthrough">Walkthrough</option>
           <option value="follow_up">Follow-up</option>
           <option value="inspection">Inspection</option>
+          <option value="appraisal">Appraisal</option>
           <option value="call">Call</option>
           <option value="block">Block / personal</option>
           <option value="open">Open house</option>
@@ -4469,12 +4471,24 @@
 
     // Deal linking → stamps the notes so the command center picks it up.
     const dealSel = m.body.querySelector('[data-f-deal]');
+    // Picking a deal auto-fills the client from that deal's primary linked party,
+    // so you don't have to search the contact separately. (Answers "will link to
+    // deal populate the client?" — yes, as long as the deal has a linked client.)
+    const fillFromDeal = async (sourceKey) => {
+      if (!sourceKey) return;
+      try {
+        const r = await window.Legacy.api('/api/crm/deal-client?deal=' + encodeURIComponent(sourceKey), { method: 'GET' });
+        const c = r && r.ok && r.json && r.json.client;
+        if (c && (c.email || c.name)) applyClient(c.name || '', c.email || '');
+      } catch (_) {}
+    };
+    if (dealSel) dealSel.addEventListener('change', () => fillFromDeal(dealSel.value));
     fetch('/api/crm/listings', { credentials: 'include' }).then((r) => r.ok ? r.json() : null).then((j) => {
       if (!j || !dealSel) return;
       const all = [].concat(j.pending || [], j.offers || [], j.active || [], j.preparing || []);
       dealSel.innerHTML = '<option value="">No deal</option>' + all.map((d) =>
         `<option value="${esc(d.source_key || '')}" data-addr="${esc(d.address || '')}">${esc(d.address || d.source_key)}${d.stage ? ' · ' + esc(d.stage) : ''}</option>`).join('');
-      if (prefill.deal) dealSel.value = prefill.deal;
+      if (prefill.deal) { dealSel.value = prefill.deal; if (!prefill.email) fillFromDeal(prefill.deal); }
     }).catch(() => {});
 
     // Prefill from a client page ("Schedule" on a lead) or a deal.
@@ -4533,7 +4547,7 @@
     const ed = e.edit || {};
     const isTour = e.source === 'tour';
     const m = modalShell('Edit event', isTour ? 'Reschedule or update this tour.' : 'Update this event.');
-    const apptKinds = [['listing_appt', 'Listing appt'], ['showing', 'Showing'], ['follow_up', 'Follow-up'], ['inspection', 'Inspection'], ['call', 'Call'], ['block', 'Block / personal'], ['open', 'Open house'], ['meeting', 'Meeting']];
+    const apptKinds = [['listing_appt', 'Listing appt'], ['showing', 'Showing'], ['walkthrough', 'Walkthrough'], ['follow_up', 'Follow-up'], ['inspection', 'Inspection'], ['appraisal', 'Appraisal'], ['call', 'Call'], ['block', 'Block / personal'], ['open', 'Open house'], ['meeting', 'Meeting']];
     m.body.innerHTML = `
       <div style="display:flex;flex-direction:column;gap:10px;">
         ${isTour ? `

@@ -21,16 +21,18 @@ const EMAIL_RE = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
 const TZ = 'America/Los_Angeles';
 const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 const DOW = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
-const APPT_KINDS = ['call', 'block', 'open', 'meeting', 'listing_appt', 'showing', 'follow_up', 'inspection'];
+const APPT_KINDS = ['call', 'block', 'open', 'meeting', 'listing_appt', 'showing', 'follow_up', 'inspection', 'walkthrough', 'appraisal'];
 // Map each kind to one of the four calendar colour classes (tour/call/block/open).
 const KIND_CLS = {
   call: 'call', block: 'block', open: 'open', meeting: 'call',
-  listing_appt: 'open', showing: 'tour', follow_up: 'call', inspection: 'block'
+  listing_appt: 'open', showing: 'tour', follow_up: 'call', inspection: 'block',
+  walkthrough: 'tour', appraisal: 'block'
 };
 // Short human label per kind (the little tag on each event).
 const KIND_LABEL = {
   call: 'Call', block: 'Block', open: 'Open house', meeting: 'Meeting',
-  listing_appt: 'Listing appt', showing: 'Showing', follow_up: 'Follow-up', inspection: 'Inspection'
+  listing_appt: 'Listing appt', showing: 'Showing', follow_up: 'Follow-up', inspection: 'Inspection',
+  walkthrough: 'Walkthrough', appraisal: 'Appraisal'
 };
 // A sensible default title when the agent doesn't type one — inspections fold in
 // their sub-type ("Home inspection"), everything else uses its kind label.
