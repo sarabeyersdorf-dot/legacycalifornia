@@ -556,22 +556,23 @@
       <div>
         <span class="hairline-brass" style="margin-bottom: 16px;"></span>
         <span class="eyebrow">On the market now · Updated continuously from MLS</span>
-        <h2 class="h-section" style="margin-top: 10px;">Sara's active listings.</h2>
+        <h2 class="h-section" style="margin-top: 10px;">Legacy's listings.</h2>
       </div>
       <p class="lede right">Every home Legacy currently represents across Calaveras, Amador &amp; Tuolumne — live from the MLS, never a stale plate.</p>
     </div>
 
-    <!-- Sara's active listings — iHomeFinder's own featured-listing widget,
-         rendered INLINE (no iframe). Renders live MLS cards on the deployed
-         domain; if IDX is unavailable the CTA buttons below still navigate. -->
+    <!-- Legacy's listings — iHomeFinder's own featured-listing widget, rendered
+         INLINE (no iframe). Shows ALL of the office's listings across every
+         property type (residential, land, commercial) and BOTH active + pending
+         — pending cards carry iHomeFinder's own status badge; if IDX is
+         unavailable the CTA buttons still navigate. -->
     <div class="idx-embed idx-home-feed">
 <script>
 	document.currentScript.replaceWith(ihfKestrel.render({
 		"component": "featuredListingSearchWidget",
-		"propertyType": "SFR",
-		"status": "active",
+		"status": ["active", "pending"],
 		"sort": "ds",
-		"resultsPerPage": 15
+		"resultsPerPage": 24
 	}));
 </script>
     </div>
