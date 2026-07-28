@@ -3714,6 +3714,7 @@ function selectLead(el) {
         });
       return;
     }
+    if ((t = e.target.closest('[data-text]'))) { textModal(); return; }
     if ((t = e.target.closest('[data-schedule]'))) { scheduleModal(); return; }
     if ((t = e.target.closest('[data-push]'))) { pushModal(); return; }
     if ((t = e.target.closest('[data-copylink]'))) { copyLink(t); return; }
@@ -3817,12 +3818,41 @@ function selectLead(el) {
       '</div>' +
       '<div class="cc-acts">' +
         (tel ? '<a class="btn btn-ghost btn-sm" href="tel:' + esc(tel) + '">Call</a>' : '') +
-        (tel ? '<a class="btn btn-ghost btn-sm" href="sms:' + esc(tel) + '">Text</a>' : '') +
+        (tel ? '<button class="btn btn-ghost btn-sm" data-text>Text</button>' : '') +
         (c.client_email ? '<a class="btn btn-ghost btn-sm" href="mailto:' + esc(c.client_email) + '">Email</a>' : '') +
         '<button class="btn btn-ghost btn-sm" data-push>Share…</button>' +
         '<button class="btn btn-brass btn-sm" data-schedule>Schedule tour</button>' +
       '</div>' +
     '</div>';
+  }
+
+  // Text the attached client from the Legacy Twilio number, in-app — the reply
+  // lands in the CRM thread (not on your personal phone via Phone Link).
+  function textModal() {
+    var c = state.active;
+    if (!c || !c.client_lead_id) { curToast('Attach a client first.', false); return; }
+    if (!c.client_phone) { curToast('No phone on file for this client.', false); return; }
+    var m = modal('<h3>Text ' + esc(c.client_name || 'your client') + '.</h3>' +
+      '<p class="sub">Sends from your Legacy number via Twilio — it lands in the CRM thread, not your phone.</p>' +
+      '<div style="font-size:12px;color:var(--ink-mute);margin-bottom:6px;">To ' + esc(c.client_phone) + '</div>' +
+      '<textarea id="txtB" rows="4" placeholder="Type your text…" style="width:100%;"></textarea>' +
+      '<div id="txtNote" style="font-size:12px;min-height:16px;margin-top:6px;"></div>' +
+      '<div class="actions"><button class="btn btn-brass btn-sm" id="txtGo">Send text</button><button class="btn-link" id="txtX" style="margin-left:auto;">Cancel</button></div>');
+    m.querySelector('#txtX').addEventListener('click', m._close);
+    m.querySelector('#txtGo').addEventListener('click', function () {
+      var body = (m.querySelector('#txtB').value || '').trim();
+      var note = m.querySelector('#txtNote');
+      if (!body) { note.style.color = '#9B2C2C'; note.textContent = 'Type a message first.'; return; }
+      var btn = this; btn.disabled = true; btn.textContent = 'Sending…';
+      fetch('/api/crm/message', { method: 'POST', credentials: 'include', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ lead_id: c.client_lead_id, channel: 'sms', body: body }) })
+        .then(function (r) { return r.json().then(function (j) { return { ok: r.ok, j: j }; }); })
+        .then(function (r) {
+          if (r.ok && r.j && r.j.status === 'sent') { m._close(); curToast('Text sent ✓', true); }
+          else { btn.disabled = false; btn.textContent = 'Send text'; note.style.color = '#9B2C2C'; note.textContent = (r.j && (r.j.error || r.j.message)) || 'Could not send.'; }
+        })
+        .catch(function () { btn.disabled = false; btn.textContent = 'Send text'; note.style.color = '#9B2C2C'; note.textContent = 'Network error — try again.'; });
+    });
   }
 
   function scheduleModal() {

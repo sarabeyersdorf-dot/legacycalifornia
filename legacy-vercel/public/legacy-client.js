@@ -570,7 +570,11 @@
     if (!needs) return;
     needs.querySelectorAll('.need-card').forEach(el => el.remove());
     const approvals = brief.timeline_approvals || [];
-    const nudges = brief.collection_nudges || [];
+    // Follow-ups land per agent: yours show by default; the broker gets a toggle
+    // to reveal the other agent's (each nudge is tagged mine:true/false).
+    const allNudges = brief.collection_nudges || [];
+    const nudges = allNudges.filter((n) => n.mine !== false);
+    const otherNudges = allNudges.filter((n) => n.mine === false);
     const total = approvals.length + nudges.length + drafts.length;
 
     const eyebrow = needs.querySelector('.eyebrow');
@@ -635,20 +639,21 @@
       });
     });
 
-    nudges.forEach((n) => {
+    const renderNudge = (n, beforeEl) => {
       const card = document.createElement('article');
       card.className = 'need-card q-cli';
+      const ownerTag = n.mine === false ? ` · <strong style="text-transform:capitalize;">${escapeHtml(n.agent || 'agent')}</strong>'s client` : '';
       card.innerHTML = `
         <div class="nc-rank">…</div>
         <div class="nc-body">
-          <div class="nc-meta"><span class="nc-tag" style="color:#2E5C3D;">Client · curated collection</span></div>
+          <div class="nc-meta"><span class="nc-tag" style="color:#2E5C3D;">Client · curated collection${ownerTag}</span></div>
           <h3>${escapeHtml(n.client_name || 'Your client')} hasn't reacted to “${escapeHtml(n.title)}”</h3>
           <p>Pushed ${n.days_since_push} days ago${n.opens_since_push ? ` · opened ${n.opens_since_push}× since` : ' · not opened yet'}. Worth a nudge.</p>
           <div class="nc-foot"><div class="nc-foot-l"></div><div class="nc-foot-r">
             <button class="btn btn-ghost btn-sm" data-open-curate>Open collection →</button>
           </div></div>
         </div>`;
-      needs.appendChild(card);
+      if (beforeEl) needs.insertBefore(card, beforeEl); else needs.appendChild(card);
       card.querySelector('[data-open-curate]').addEventListener('click', () => {
         if (typeof window.showView === 'function') window.showView(null, 'curate');
         // Open THIS client's collection, not just the Curate tab.
@@ -656,7 +661,26 @@
           setTimeout(() => window.LegacyCurate.open(n.collection_id), 80);
         }
       });
-    });
+    };
+    nudges.forEach((n) => renderNudge(n));
+
+    // Broker toggle — reveal the other agent's follow-ups on demand.
+    if (otherNudges.length) {
+      const toggle = document.createElement('button');
+      toggle.className = 'btn btn-ghost btn-sm';
+      toggle.style.cssText = 'margin:4px 0 8px;align-self:flex-start;';
+      toggle.textContent = `＋ Show ${otherNudges.length} follow-up${otherNudges.length === 1 ? '' : 's'} on the other agent's clients`;
+      let shown = false;
+      toggle.addEventListener('click', () => {
+        if (shown) return;
+        shown = true;
+        otherNudges.forEach((n) => renderNudge(n, toggle));
+        toggle.textContent = `Showing all agents' follow-ups`;
+        toggle.disabled = true;
+        toggle.style.opacity = '.6';
+      });
+      needs.appendChild(toggle);
+    }
 
     paintQuietAsks(drafts, { embedded: true, queueEmpty: total === 0 });
   }

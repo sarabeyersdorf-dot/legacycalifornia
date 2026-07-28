@@ -175,15 +175,16 @@ export default async function handler(req, res) {
     // Fail-soft: the brief must load even if the curate tables are missing.
     result.collection_nudges = [];
     try {
+      const callerAgent = profile.role === 'agent_james' ? 'james' : 'sara';
       let cq = supa
         .from('curated_collections')
-        .select('id, title, share_token, client_lead_id, updated_at, leads(first_name,last_name)')
+        .select('id, title, share_token, client_lead_id, agent, updated_at, leads(first_name,last_name)')
         .eq('status', 'active')
         .not('client_lead_id', 'is', null)
         .order('updated_at', { ascending: false })
-        .limit(8);
-      // James sees only his own collection nudges (he can't open Sara's); the
-      // broker sees both, and can now open either from the curate view.
+        .limit(12);
+      // James sees only his own nudges. The broker sees both, tagged per agent
+      // + a `mine` flag, so the UI shows hers by default with an "all" toggle.
       if (profile.role === 'agent_james') cq = cq.eq('agent', 'james');
       const { data: colls } = await cq;
       for (const c of (colls || [])) {
@@ -204,18 +205,25 @@ export default async function handler(req, res) {
           .select('id', { count: 'exact', head: true })
           .eq('collection_id', c.id).eq('event_type', 'open').gte('created_at', pushedAt);
         const clientName = c.leads ? [c.leads.first_name, c.leads.last_name].filter(Boolean).join(' ') : 'Your client';
+        const nAgent = c.agent === 'james' ? 'james' : 'sara';
+        const mine = nAgent === callerAgent;
         const nudge = {
           collection_id: c.id, title: c.title || 'collection',
           client_name: clientName, days_since_push: days,
-          opens_since_push: opensSince || 0, pushed_at: pushedAt
+          opens_since_push: opensSince || 0, pushed_at: pushedAt,
+          agent: nAgent, mine
         };
         result.collection_nudges.push(nudge);
-        result.signals.unshift({
-          id: `nudge:${c.id}`, lead_id: c.client_lead_id,
-          time_iso: pushedAt, time: `${days}d ago`,
-          body: `${clientName} hasn't reacted to “${nudge.title}” — pushed ${days} days ago${(opensSince || 0) ? ` (opened ${opensSince}× since)` : ' (not opened yet)'} . Worth a nudge.`,
-          tag: 'Follow up'
-        });
+        // Only the caller's own nudges join their "What's happening" feed; the
+        // other agent's live only in the decision queue behind the broker toggle.
+        if (mine) {
+          result.signals.unshift({
+            id: `nudge:${c.id}`, lead_id: c.client_lead_id,
+            time_iso: pushedAt, time: `${days}d ago`,
+            body: `${clientName} hasn't reacted to “${nudge.title}” — pushed ${days} days ago${(opensSince || 0) ? ` (opened ${opensSince}× since)` : ' (not opened yet)'} . Worth a nudge.`,
+            tag: 'Follow up'
+          });
+        }
       }
     } catch (_) { /* nudges are a bonus, never a blocker */ }
 
