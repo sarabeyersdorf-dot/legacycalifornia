@@ -287,9 +287,20 @@ buyer-side too — it does NOT have to be inside the `listing` block):
 - **⚠ Backfill this now** alongside the contingency backfill: set `commission`
   on all five active escrows (e.g. **7230 Latigo → its buyer-broker % from the
   accepted offer**, or the exact dollars from Sara's commission demand).
-- **While you're in Latigo:** its `timeline.coeNote` is **stale** — it still says
-  "COE DELAYED … revised date TBD," but Latigo now closes **7/28**. Clear or
-  rewrite that note so it doesn't contradict the live COE date.
+- **While you're in Latigo:** its close-of-escrow is showing **stale "Delayed"**
+  text to the seller. Fix BOTH places (they're independent):
+  1. `timeline.coeNote` — still says "COE DELAYED … revised date TBD." Clear or
+     rewrite it; Latigo now closes **7/28**.
+  2. the **`milestones` entry** `{"label":"Close of Escrow", "badge":"Delayed",
+     "col":"closing", "desc":"COE DELAYED beyond 7/24…"}` — change `badge` to a
+     current value (e.g. `"Closing today"` / `"On track"`, or `"Done"` once it
+     records) and rewrite the `desc`. **This milestone badge is what renders
+     "Delayed" on the seller portal's road-to-close**, so the note alone isn't
+     enough — the milestone must be updated too.
+- **General rule:** milestone `badge`/`desc` and `coeNote` are *authored text* you
+  own in deals.json. The site's crons only republish them verbatim — they never
+  auto-correct stale wording. Whenever a date slips or un-slips, update the
+  milestone and the note in the same pass so the portal never shows a stale state.
 
 ## 3. Documents in the client portal
 
