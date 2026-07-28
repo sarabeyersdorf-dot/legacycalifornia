@@ -129,6 +129,14 @@ counter), NOT escrow open. All keys optional; keep it as accurate as you can:
   No. 2 removes everything **except the loan**, so set
   `"remaining": ["loan"]` on 433's timeline. Do the same for the others from
   each deal's executed CRs.
+  - **Confirm the backfill in that run's briefing.** Add a short
+    **"Contingency backfill"** section that lists every active escrow with the
+    `remaining` you set and the source (e.g. `433 E Hwy 4 → remaining:["loan"]
+    (CRB No. 2, 2026-07-…)`; `7230 Latigo → remaining:["appraisal","loan"] (CR1)`).
+    For any deal you could NOT resolve (doc unreadable / unsure), list it under
+    **"Needs Sara's eyes"** with why, and file a pending proposal rather than
+    guessing. Sara asked to spot-check this, so make it explicit, one line per
+    escrow.
 - **When you can't read a doc or aren't sure a contingency cleared, do NOT guess.**
   Leave it in `remaining` (so the deadline keeps showing) and file a *pending*
   timeline proposal (`op:'propose'`) describing what you think happened — the
