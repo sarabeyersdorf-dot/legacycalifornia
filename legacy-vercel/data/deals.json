@@ -1,6 +1,6 @@
 {
-  "version": "3.4",
-  "lastUpdated": "2026-07-27",
+  "version": "3.5",
+  "lastUpdated": "2026-07-28",
   "updatedBy": "Claude",
   "tasks": [
     {
@@ -581,7 +581,12 @@
     {"agent": "james", "client": "695 Feather", "title": "695 Feather: File fully executed MH Addendum — both Ashley Robinson AND Dee Bradley signed via Authentisign 7/25 8:59 PM; James forwarded completion notification 7/27; download and file in 695 Feather Ex folder", "note": "Authentisign completion 7/25 8:59 PM. Both buyer (Ashley Robinson) and seller (Dee Bradley) signed. This is prelim item #12 (OC Title escrow #2473532-TS). File PDF in EX. Added 2026-07-27.", "dateAdded": "2026-07-27", "done": false},
     {"agent": "sara", "client": "433 Hwy 4", "title": "433: Coordinate tenant Dana ↔ buyer Elizabeth Dawson meeting — Dana avail Mon 7/28 after 2pm / Thu 7/31 before 10am / Fri 8/1 all day; Elizabeth expected late August; contact Neriah Davis to schedule", "note": "Dana (yoga studio tenant) must meet Elizabeth Dawson (buyer) per access protocol. Neriah Davis (neriahd@gmail.com) coordinating. Added 2026-07-27.", "dateAdded": "2026-07-27", "done": false},
     {"agent": "sara", "client": "433 Hwy 4", "title": "433: Confirm Jim Heryford signed ADD3 ($1.2M price reduction) + SFA ($100K 2nd DOT seller carry) — Yvonne signed 7/24 via Authentisign; Jim status unconfirmed. SFA requires 2nd DOT to record simultaneously with 1st at closing (Placer Title underwriting requirement).", "note": "Check with Neriah Davis (neriahd@gmail.com). Ashley Cuslidge at Placer Title confirmed simultaneous 2nd DOT recording required — lender's original 30-day post-close plan rejected by underwriting. Added 2026-07-27.", "dateAdded": "2026-07-27", "done": false},
-    {"agent": "sara", "client": "433 Hwy 4", "title": "433: Download + file Sara's Glide listing-agent AVID (Glide cert e47c5a62, completed ~7/19) in 433 Ex folder", "note": "Glide certificate e47c5a62. Sara's LA AVID completed ~7/19. Separate from the AVID already in Homeligh. File original in 433 EX. Added 2026-07-27.", "dateAdded": "2026-07-27", "done": false}
+    {"agent": "sara", "client": "433 Hwy 4", "title": "433: Download + file Sara's Glide listing-agent AVID (Glide cert e47c5a62, completed ~7/19) in 433 Ex folder", "note": "Glide certificate e47c5a62. Sara's LA AVID completed ~7/19. Separate from the AVID already in Homeligh. File original in 433 EX. Added 2026-07-27.", "dateAdded": "2026-07-27", "done": false},
+    {"agent": "sara", "client": "Latigo", "title": "LATIGO COE 7/28 — URGENT: Send BRBC to Ashley Cuslidge (acuslidge@placertitle.com / 209-736-9553). Ashley requested 3:05 PM 7/28. Buyers signing at Placer Title today.", "note": "COE day 7/28. Buyers at Placer 11am. Send BRBC immediately. Added 2026-07-28.", "dateAdded": "2026-07-28", "done": false},
+    {"agent": "sara", "client": "Latigo", "title": "Latigo: COE TODAY 7/28 — monitor for fund & record confirmation. Kim Hesser (Prime Residential) expects same-day. ETA1 buffer through 7/29. Post-COE: update deal stage to closed in CRM.", "note": "Closing statement + wiring instructions sent to Castles 3:09 PM 7/28 with Kim CC'd. Added 2026-07-28.", "dateAdded": "2026-07-28", "done": false},
+    {"agent": "sara", "client": "433 Hwy 4", "title": "433: Promissory note vesting BLANK — Herfords carrying $100K note for Elizabeth Dawson. Yvonne sent unsigned note 7/28 4:24 AM; title-vesting section is BLANK. Contact Neriah Davis (neriahd@gmail.com) to get Dawson's vesting info (how she holds title). Dawson signs note at COE 8/10.", "note": "New info 7/28. Seller carry-back note discovered via Gmail. Must resolve before COE 8/10. Added 2026-07-28.", "dateAdded": "2026-07-28", "done": false},
+    {"agent": "sara", "client": "433 Hwy 4", "title": "433: File Add3 + ETA3 in Ex folder — Authentisign 'Add3, ETA3' completion 7/27 9:20 PM. James R Heryford accepted 9:19 PM. Download from Authentisign and file in 433 E Hwy 4 Ex. Separate from ETA No. 3 executed 7/24 via Glide.", "note": "New Authentisign signing completed 7/27. Different from Glide ETA3. Added 2026-07-28.", "dateAdded": "2026-07-28", "done": false},
+    {"agent": "both", "client": "CRM", "title": "CRM: 7 pending timeline approvals need manual decision — Latigo: cont_loan; 433: nhd/cont_inspection/cont_title/cont_insurance; Baldwin: cont_appraisal/cont_insurance/cont_loan. CRM → Timeline tab → Approvals. Reconcile engine did not auto-apply any (conservative).", "note": "Timeline reconcile run 7/28: auto_applied=[]. All 7 proposals require Sara/James decision. Added 2026-07-28.", "dateAdded": "2026-07-28", "done": false}
   ],
   "deals": [
     {
@@ -1315,10 +1320,10 @@
       "listPrice": null,
       "salePrice": 615000,
       "openEscrowDate": "2026-06-23",
-      "closingDate": null,
+      "closingDate": "2026-07-28",
       "timeline": {
         "acceptance": "2026-06-19",
-        "coe": "2026-07-24",
+        "coe": "2026-07-28",
         "remaining": [
           "appraisal",
           "loan"
@@ -1347,7 +1352,9 @@
         "CR1_BIW": "executed 7/6 (Authentisign) \u2014 CR1 removes ALL contingencies except appraisal & loan; Mitzi received copy via CC; FILED in Ex 7/9",
         "buyerAgentAVID": "Sent 7/8, Mitzi CC'd -- Kylie confirmed receipt 7/13, resolved",
         "prelimBuyerInitialed": "Listing side (Kylie) says still missing the buyer-initialed copy as of 7/13 -- needs sending",
-        "CR2_final": "FULLY EXECUTED 7/16 (Authentisign \"Final_Buyer Contingency Removal #2 - 6/24\") by both buyers \u2014 Guy Castle 1:55 PM PDT, Adrianna Castle 3:58 PM PDT; CC'd to Mitzi Windley same day; filed in Ex 7/17. Titled \"Final\" and follows CR1 (which removed all contingencies except appraisal & loan) \u2014 likely removes the remaining appraisal/loan contingencies, but the checkboxes are not machine-readable from the PDF text extraction, so this could NOT be visually confirmed which boxes were checked. Recommend Sara visually open the PDF to confirm before treating all contingencies as removed."
+        "CR2_final": "FULLY EXECUTED 7/16 (Authentisign \"Final_Buyer Contingency Removal #2 - 6/24\") by both buyers \u2014 Guy Castle 1:55 PM PDT, Adrianna Castle 3:58 PM PDT; CC'd to Mitzi Windley same day; filed in Ex 7/17. Titled \"Final\" and follows CR1 (which removed all contingencies except appraisal & loan) \u2014 likely removes the remaining appraisal/loan contingencies, but the checkboxes are not machine-readable from the PDF text extraction, so this could NOT be visually confirmed which boxes were checked. Recommend Sara visually open the PDF to confirm before treating all contingencies as removed.",
+        "ETA1_latigo": "Executed 7/27 (Authentisign 'Extension of Time Amendment #1 - 12/25') \u2014 extends COE through 7/29 as safety buffer; Kim Hesser (lender) expects to close 7/28. Forwarded to Kylie & Mitzi Windley same evening by Sara.",
+        "VPC": "Signed complete 7/27 (Authentisign 'Verification of Property Condition - 6/24') \u2014 buyers verified property condition; file in Ex."
       },
       "clientDocuments": [
         {
@@ -1462,6 +1469,7 @@
       "correspondence": [],
       "notes": "Buyer-side. OFFER ACCEPTED (confirmed by Sara 6/22/2026). Offer (CA RPA) signed via Authentisign and sent to listing agents Kylie & Mitzi Windley (Chase International) 6/14/2026. Initially REJECTED 6/16 (seller objected to 'remove all debris' term and called price too low). Deal REVIVED: seller counter (SCO1) received 6/18 via Kylie Windley. Buyer counter at $615,000 (highest and best) sent 6/19 and ACCEPTED. salePrice $615,000 CONFIRMED by Sara 6/22. ESCROW OPENED 6/23 with Ashley Cuslidge at Placer Title (Order P-708659). Buyers: Adrianna & Guy Castle. VEHICLE/TRAILER ADDENDUM (buyer responsible for removing remaining vehicles & trailers, per Mitzi 6/20) sent out for buyer signatures 6/23 with Mitzi CC'd to receive once signed \u2014 SELLER STILL NEEDS TO SIGN. TITLE RESOLVED 6/29: Placer's underwriter had balked at insuring the Sheriff's-sale title, but Ashley confirmed 6/29 that WESTCOR will insure \u2014 proceeding with Westcor as underwriter, transaction STAYS AT PLACER (P-708659); 7/20 COE no longer threatened. FINANCING CHANGED AGAIN (per Sara 6/29): buyers had switched from 20% down to the GSFA 'Assist to Own' grant + family gift, BUT the buyer GOT A RAISE and NO LONGER QUALIFIES for GSFA \u2014 financing must be re-worked (likely back to conventional); RPA terms to be updated to reflect whatever the new financing is. EMD: Adrianna brought $1k to Placer 6/29; remaining $9k being dropped via Placer's mail slot 7/2\u20137/3 (Adrianna spoke w/ Ashley \u2014 Placer closed 7/3 holiday & Ashley out 7/6+, confirm it posts Mon 7/6); EMD Addendum #2 signing complete 6/29, forwarded to Mitzi for seller signature. UPDATE 7/2: seller disclosures received 7/2 & Adrianna signed/accepted them same day (Authentisign); buyers DECLINED well & septic inspections (Adrianna 7/2 \u2014 Sara had held off ordering inspections pending the seller's recent reports to save the buyers money). Buyer-facing timeline generated 6/23 (7230_Latigo_Buyer_Timeline.html in deal folder). Key dates from acceptance 6/19: deposit $10k by 6/24; seller docs ~6/26; all buyer contingencies (inspection/appraisal/loan/title/insurance, 17 days) 7/6; final walkthrough ~7/15; COE 30 days = 7/19 (Sun) rolls to ~7/20. Inspections TBD; home warranty waived in contract. UPDATE 7/13: final walkthrough now confirmed Friday 7/17 (buyers doing it then, per Sara's email to Kylie/Mitzi) -- supersedes earlier ~7/15 estimate. Appraisal still not back; Sara re-chasing lender 7/13. CORRECTION 7/13: Addendum 1 (vehicle/trailer) was already filed in Ex \u2014 Kylie's 7/13 email attachment was a duplicate, not a new item needing download.",
       "alerts": [
+        "\ud83d\udfe2 COE TODAY 7/28 \u2014 Buyers signing at Placer Title 11am; fund/record same day attempted. ETA1 gives buffer through 7/29. Closing statement + wiring instructions sent to Castles 3:09 PM with Kim Hesser CC. \u26a0\ufe0f Ashley Cuslidge requested BRBC at 3:05 PM 7/28 ('I don't have any documentation regarding this') \u2014 forward immediately to acuslidge@placertitle.com (209.736.9553).",
         "COE CONFIRMED 7/24 (Kim/lender confirmed 7/20 per Sara's call) \u2014 lender had requested extension from 7/20; now Thursday July 24. Watch for signing instructions from Placer Title (209.736.9553).",
         "CR1 + BIW EXECUTED 7/6 (Authentisign) \u2014 all contingencies removed EXCEPT appraisal & loan; Mitzi has copy via CC",
         "TITLE WOBBLE RESOLVED 7/6/7: Amanda (Placer) said Westcor declined, then reversed same day \u2014 'file can proceed'; written confirmation obtained (Sara 7/7); 7/20 COE holds",
@@ -1801,7 +1809,9 @@
         "ETA1": "EXECUTED 7/10 by all parties (Authentisign 7:43 AM; Jim signed before leaving for Idaho) \u2014 extends LOAN contingency to 7/23 and APPRAISAL to 7/16, COE unchanged 8/10; forwarded to Neriah/Melissa 7/10, FILED in Ex",
         "correctedFHDS": "Reissued and sent for signatures 7/13 per Sara (original 7/6 version had unchecked boxes per Melissa)",
         "ETA2_appraisal": "NEW 7/17: Second Extension of Time Amendment executed \u2014 extends the APPRAISAL contingency to 7/17/2026 (today), signed by sellers James R Heryford (8:40 AM PDT) and Yvonne Heryford (8:38 AM PDT) via Authentisign; sent by Sara 7/17 8:37 AM after lender (Clayton, Atlas Mortgage) requested one more day 7/16. Per Sara's cover message: \"the appraisal is back, the lender has not informed on if it came in at value or not.\" Filed in Ex 7/17. Only seller signatures appear on this envelope \u2014 buyer-side execution not visible in this document.",
-        "contingencyRemoval2_CRB": "[CR-B] Buyer Contingency Removal No. 2 \u2014 all parties signed via Glide 7/17 (Glide notification 7:19 PM); filed in Ex 7/17 10:05 PM. Scope NOT yet visually verified \u2014 likely addresses the remaining appraisal/loan contingencies given the same-day ETA2 appraisal extension to 7/17, but this has not been confirmed by opening the document. Sara to confirm scope before treating those contingencies as resolved."
+        "contingencyRemoval2_CRB": "[CR-B] Buyer Contingency Removal No. 2 \u2014 all parties signed via Glide 7/17 (Glide notification 7:19 PM); filed in Ex 7/17 10:05 PM. Scope NOT yet visually verified \u2014 likely addresses the remaining appraisal/loan contingencies given the same-day ETA2 appraisal extension to 7/17, but this has not been confirmed by opening the document. Sara to confirm scope before treating those contingencies as resolved.",
+        "Add3_ETA3": "Authentisign 'Add3, ETA3' signing complete 7/27 9:20 PM \u2014 James R Heryford accepted/signed 9:19 PM. File in Ex. (Separate from ETA No. 3 executed 7/24 via Glide for loan contingency extension.)",
+        "promissoryNote": "Seller carry-back note: Herfords carrying promissory note for buyer Elizabeth Dawson. Yvonne sent unsigned note 7/28 4:24 AM \u2014 section for title-holding (how Dawson holds title) is BLANK. Coordinate with Neriah Davis to get Dawson's vesting info; Dawson to sign note alongside all other closing docs at 8/10 COE."
       },
       "clientDocuments": [
         {
@@ -1887,7 +1897,10 @@
         "COE 8/10/2026 \u2014 final walkthrough 8/5",
         "LISTING EXTENDED to 8/18/2026 via MOD \u2014 covers through COE 8/10 \u2705",
         "NEW 7/17: Appraisal contingency extended one more day to 7/17 (second ETA, sellers signed this morning) \u2014 appraisal report is back per lender but value not yet confirmed; loan contingency extended to 8/5 per ETA3, COE still 8/10",
-        "NEW 7/18: [CR-B] Buyer Contingency Removal No. 2 executed 7/17 (Glide), filed in Ex \u2014 content/scope not verified this run; confirm before treating appraisal/loan contingencies as removed"
+        "NEW 7/18: [CR-B] Buyer Contingency Removal No. 2 executed 7/17 (Glide), filed in Ex \u2014 content/scope not verified this run; confirm before treating appraisal/loan contingencies as removed",
+        "NEW 7/27: Add3 + ETA3 signed complete via Authentisign (Heryford accepted 9:19 PM) \u2014 file in Ex.",
+        "NEW 7/28: SELLER CARRY NOTE \u2014 Herfords carrying promissory note for Elizabeth Dawson. Yvonne sent signed note 7/28; title-vesting section BLANK (Dawson must fill in how she holds title). Contact Neriah Davis to get vesting info; Dawson signs at closing 8/10.",
+        "NEW 7/28: Yoga tenant meeting \u2014 Sara asked Neriah 7/25 for Elizabeth to meet yoga tenant Dana. Neriah: Elizabeth won't be in area until end of August. Schedule meeting with Dana post-COE 8/10."
       ],
       "attributes": {
         "seller_type": "standard",
