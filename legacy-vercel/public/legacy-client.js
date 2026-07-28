@@ -4404,7 +4404,10 @@
         <label style="display:flex;align-items:center;gap:8px;font-size:13px;color:#3A332B;"><input data-f-multiday type="checkbox"> Spans multiple days (e.g. a holiday)</label>
         <div data-enddate-cell style="display:none;"><label style="${M_LAB}">End date</label><input data-f-enddate type="date" style="${M_INPUT}"></div>
         <div><label style="${M_LAB}">Link to deal <span style="text-transform:none;letter-spacing:0;">(optional)</span></label><select data-f-deal style="${M_INPUT}"><option value="">No deal</option></select></div>
-        <div><label style="${M_LAB}">CC — also send the invite to <span style="text-transform:none;letter-spacing:0;">(comma-separated emails — a spouse, co-op agent, TC, lender; both agents are included automatically)</span></label><input data-f-invitees placeholder="spouse@example.com, tc@title.com" style="${M_INPUT}"></div>
+        <div><label style="${M_LAB}">CC — also send the invite to <span style="text-transform:none;letter-spacing:0;">(search a contact to add, or type emails — a spouse, co-op agent, TC, lender; both agents are included automatically)</span></label>
+          <input data-f-ccsearch placeholder="Search your contacts by name, email, phone…" style="${M_INPUT}" autocomplete="off">
+          <div data-f-ccresults style="position:relative;"></div>
+          <input data-f-invitees placeholder="spouse@example.com, tc@title.com" style="${M_INPUT};margin-top:8px;"></div>
         <div><label style="${M_LAB}">Notes</label><textarea data-f-notes rows="2" style="${M_INPUT}"></textarea></div>
         <div style="display:flex;gap:10px;margin-top:8px;align-items:center;">
           <button type="button" data-save style="${M_INK}">Add event</button>
@@ -4469,6 +4472,41 @@
       if (pick) applyClient(pick.getAttribute('data-cs-name'), pick.getAttribute('data-cs-email'));
     });
 
+    // CC field — merge emails in without duplicating, and never re-add whoever
+    // is already the client. Used by the CC contact search and deal auto-attach.
+    const inviteesEl = m.body.querySelector('[data-f-invitees]');
+    const addInvitees = (emails) => {
+      if (!inviteesEl || !emails || !emails.length) return;
+      const clientEmail = ((m.body.querySelector('[data-f-apptemail]') || {}).value
+        || (m.body.querySelector('[data-f-email]') || {}).value || '').trim().toLowerCase();
+      const cur = inviteesEl.value.split(',').map((x) => x.trim()).filter(Boolean);
+      const seen = new Set(cur.map((e) => e.toLowerCase()));
+      if (clientEmail) seen.add(clientEmail);
+      emails.forEach((e) => { const k = String(e || '').trim().toLowerCase(); if (k && !seen.has(k)) { cur.push(String(e).trim()); seen.add(k); } });
+      inviteesEl.value = cur.join(', ');
+    };
+    // CC contact search — same autocomplete as the Client field; clicking a
+    // result appends that contact's email to the CC list.
+    const ccIn = m.body.querySelector('[data-f-ccsearch]');
+    const ccRes = m.body.querySelector('[data-f-ccresults]');
+    let ccT;
+    if (ccIn) ccIn.addEventListener('input', () => {
+      clearTimeout(ccT);
+      const q = ccIn.value.trim();
+      if (q.length < 2) { ccRes.innerHTML = ''; return; }
+      ccT = setTimeout(async () => {
+        const r = await window.Legacy.api('/api/crm/roster?bucket=all&q=' + encodeURIComponent(q) + '&limit=8', { method: 'GET' });
+        const people = (r.ok && r.json && r.json.people) || [];
+        ccRes.innerHTML = people.length ? `<div style="position:absolute;z-index:50;left:0;right:0;background:#fff;border:1px solid #D9CFB7;max-height:200px;overflow:auto;">${people.map((pp) => `<div data-cc-pick data-cc-email="${esc(pp.email || '')}" style="padding:8px 12px;cursor:${pp.email ? 'pointer' : 'default'};font-size:13.5px;border-bottom:1px solid #EFE7D6;${pp.email ? '' : 'opacity:.5;'}">${esc(pp.name)} <span style="color:#7A6F60;font-size:12px;">${esc(pp.email || (pp.phone ? pp.phone + ' · no email' : 'no email'))}</span></div>`).join('')}</div>` : '';
+      }, 300);
+    });
+    if (ccRes) ccRes.addEventListener('click', (e) => {
+      const pick = e.target.closest('[data-cc-pick]');
+      if (!pick) return;
+      const email = pick.getAttribute('data-cc-email');
+      if (email) { addInvitees([email]); ccIn.value = ''; ccRes.innerHTML = ''; }
+    });
+
     // Deal linking → stamps the notes so the command center picks it up.
     const dealSel = m.body.querySelector('[data-f-deal]');
     // Picking a deal auto-fills the client from that deal's primary linked party,
@@ -4478,8 +4516,13 @@
       if (!sourceKey) return;
       try {
         const r = await window.Legacy.api('/api/crm/deal-client?deal=' + encodeURIComponent(sourceKey), { method: 'GET' });
-        const c = r && r.ok && r.json && r.json.client;
+        const j = r && r.ok && r.json;
+        const c = j && j.client;
         if (c && (c.email || c.name)) applyClient(c.name || '', c.email || '');
+        // More than one client on the deal (couple / co-buyers)? Attach the rest
+        // automatically by CC'ing their emails — no need to add them by hand.
+        const extras = ((j && j.parties) || []).slice(1).map((p) => p.email).filter(Boolean);
+        if (extras.length) addInvitees(extras);
       } catch (_) {}
     };
     if (dealSel) dealSel.addEventListener('change', () => fillFromDeal(dealSel.value));
