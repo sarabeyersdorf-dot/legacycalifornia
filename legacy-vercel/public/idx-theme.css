@@ -157,6 +157,26 @@
   margin-top: 8px;
 }
 
+/* Homepage "Sara's active listings" → 4 MLS cards per row instead of iHomeFinder's
+   default 3. The widget renders its own markup client-side, so we target its card
+   grid/results container by class pattern and force a 4-up grid (responsive down
+   to 2 on tablets, 1 on phones). */
+.idx-home-feed [class*="grid"],
+.idx-home-feed [class*="results"] {
+  display: grid !important;
+  grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+  gap: 22px !important;
+  align-items: stretch !important;
+}
+@media (max-width: 1024px) {
+  .idx-home-feed [class*="grid"],
+  .idx-home-feed [class*="results"] { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
+}
+@media (max-width: 600px) {
+  .idx-home-feed [class*="grid"],
+  .idx-home-feed [class*="results"] { grid-template-columns: 1fr !important; }
+}
+
 /* ── Legacy (pre-Kestrel) iHomeFinder class names, just in case ── */
 .idx-embed .ihf-price        { font-family: var(--serif) !important; color: var(--brass) !important; }
 .idx-embed .ihf-grid-result,
