@@ -497,6 +497,7 @@
       paintReportsFunnel(briefRes.json.funnel || null);
     }
     paintNeedsQueue(briefRes.ok ? briefRes.json : {}, inboxRes.ok ? (inboxRes.json.messages || []) : []);
+    paintDeadlineWatch();
     loadLeadHygiene();
     startTodayPulse();
     if (pipelineRes.ok) paintPipelineStats(pipelineRes.json);
@@ -993,6 +994,40 @@
         body.appendChild(more);
       }
     });
+  }
+
+  // Deadline Watch — one ranked, day-counted list of the next contingency/COE
+  // deadlines across every active deal (the briefing's Deadline Watch, live).
+  async function paintDeadlineWatch() {
+    const sec = document.querySelector('[data-deadline-watch]');
+    const list = document.querySelector('[data-dw-list]');
+    if (!sec || !list) return;
+    let rows = [];
+    try {
+      const r = await api('/api/crm/deadlines', { method: 'GET' });
+      if (r.ok && Array.isArray(r.json.deadlines)) rows = r.json.deadlines;
+    } catch (_) {}
+    if (!rows.length) { sec.style.display = 'none'; return; }
+    if (window.LegacyDealColors) { try { await window.LegacyDealColors.ready(); } catch (_) {} }
+    const MO = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    const fmtD = (s) => { if (!s) return ''; return `${MO[+s.slice(5, 7) - 1]} ${+s.slice(8, 10)}`; };
+    const shown = rows.slice(0, 12);
+    list.innerHTML = shown.map((d) => {
+      const c = d.deal && window.LegacyDealColors ? window.LegacyDealColors.get(d.deal) : null;
+      const dd = d.days;
+      const cnt = d.overdue ? `${Math.abs(dd)}d late` : (dd === 0 ? 'Today' : dd === 1 ? 'Tomorrow' : `${dd} days`);
+      const urg = d.overdue ? 'over' : (dd <= 2 ? 'soon' : (dd <= 7 ? 'wk' : ''));
+      const agentTag = d.agent && d.agent !== 'sara' ? ` · ${d.agent}` : '';
+      const sub = [d.address, d.client].filter(Boolean).join(' · ') + agentTag;
+      return `<div class="dw-row${d.type === 'coe' ? ' coe' : ''}"${c ? ` style="border-left-color:${c.border};"` : ''}${d.client ? ` data-open-person="${escapeHtml(d.client)}" style="cursor:pointer;${c ? `border-left-color:${c.border};` : ''}"` : ''}>
+        <span class="dw-days ${urg}">${escapeHtml(cnt)}</span>
+        <span class="dw-main"><strong>${escapeHtml(d.label)}</strong><span class="dw-sub">${escapeHtml(sub)}</span></span>
+        <span class="dw-date">${escapeHtml(fmtD(d.date))}${d.weekend ? ' ⚠' : ''}</span>
+      </div>`;
+    }).join('');
+    const more = rows.length > shown.length ? `<div class="dw-more">+${rows.length - shown.length} more on the calendar</div>` : '';
+    if (more) list.insertAdjacentHTML('beforeend', more);
+    sec.style.display = '';
   }
 
   function paintReportsFunnel(funnel) {

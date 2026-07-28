@@ -64,6 +64,7 @@ import dealsLite         from '../_lib/handlers/crm-deals-lite.js';
 import dealsMotion        from '../_lib/handlers/crm-deals-motion.js';
 import messages           from '../_lib/handlers/crm-messages.js';
 import messageDelete      from '../_lib/handlers/crm-message-delete.js';
+import deadlines          from '../_lib/handlers/crm-deadlines.js';
 import emailOauthStart    from '../_lib/handlers/crm-email-oauth-start.js';
 import emailOauthCallback from '../_lib/handlers/crm-email-oauth-callback.js';
 import emailAccounts      from '../_lib/handlers/crm-email-accounts.js';
@@ -110,6 +111,7 @@ const TABLE = {
   'deals-motion':      dealsMotion,
   'messages':          messages,
   'message-delete':    messageDelete,
+  'deadlines':         deadlines,
   'email-oauth-start':    emailOauthStart,
   'email-oauth-callback': emailOauthCallback,
   'email-accounts':       emailAccounts

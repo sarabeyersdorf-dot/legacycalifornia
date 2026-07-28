@@ -757,6 +757,23 @@
    ============================================================ */
 .today { padding: 36px; max-width: 1500px; margin: 0 auto; }
 
+/* — Deadline watch — the ranked cross-deal countdown — */
+.dw { margin: 0 0 24px; }
+.dw-head { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+.dw-list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px 16px; }
+@media (max-width: 900px) { .dw-list { grid-template-columns: 1fr; } }
+.dw-row { display: flex; align-items: center; gap: 12px; padding: 9px 12px; background: #fff; border: 1px solid var(--rule); border-left: 3px solid var(--brass); border-radius: 4px; }
+.dw-row.coe { background: var(--linen); }
+.dw-days { flex: 0 0 auto; min-width: 74px; text-align: center; font-family: var(--mono); font-size: 11px; letter-spacing: .03em; font-weight: 700; padding: 4px 8px; border-radius: 3px; background: var(--vellum); color: var(--ink-mute); }
+.dw-days.wk { background: #F1E9D6; color: #7C6A4D; }
+.dw-days.soon { background: #F6E7C6; color: #8A6D1E; }
+.dw-days.over { background: #F3DDD8; color: #9B2C2C; }
+.dw-main { flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; gap: 1px; }
+.dw-main strong { font-size: 13.5px; color: var(--ink); font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.dw-sub { font-size: 11.5px; color: var(--ink-mute); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.dw-date { flex: 0 0 auto; font-family: var(--mono); font-size: 10.5px; letter-spacing: .06em; color: var(--ink-faint); text-transform: uppercase; }
+.dw-more { grid-column: 1 / -1; font-size: 11.5px; color: var(--ink-faint); font-style: italic; padding: 2px 4px; }
+
 /* — Brief header — */
 .today-brief {
   display: grid;
