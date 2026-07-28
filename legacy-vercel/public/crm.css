@@ -777,8 +777,8 @@
 /* — Brief header — */
 .today-brief {
   display: grid;
-  grid-template-columns: 1fr 1.15fr;   /* give the Closing-soon panel more room */
-  gap: 44px;
+  grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.6fr);  /* Closing-soon gets the lion's share */
+  gap: 40px;
   align-items: end;
   padding-bottom: 32px;
   border-bottom: 1px solid var(--rule);
@@ -797,11 +797,11 @@
   font-size: 20px; line-height: 1.4; color: var(--ink-soft);
   max-width: 540px;
 }
-.tb-r { display: flex; flex-direction: column; gap: 18px; align-items: flex-end; }
+.tb-r { display: flex; flex-direction: column; gap: 18px; align-items: stretch; }
 .tb-pulse {
   width: 100%;
   background: var(--shell); border: 1px solid var(--rule);
-  padding: 18px 22px; display: flex; flex-direction: column; gap: 6px;
+  padding: 20px 26px; display: flex; flex-direction: column; gap: 6px;
 }
 .tb-pulse .label-cap { color: var(--brass); margin-bottom: 8px; }
 .tb-pulse-row {
@@ -1414,8 +1414,8 @@ body { overflow: hidden; }
 .tb-esc-main { display: flex; align-items: center; gap: 10px; min-width: 0; flex: 1; }
 .tb-esc-dot { width: 9px; height: 9px; border-radius: 50%; flex: none; }
 .tb-esc-txt { min-width: 0; display: flex; flex-direction: column; gap: 1px; }
-.tb-esc-addr { font-family: var(--serif); font-size: 15px; color: var(--ink); line-height: 1.2; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.tb-esc-sub { font-size: 11px; color: var(--ink-mute); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.tb-esc-addr { font-family: var(--serif); font-size: 16.5px; color: var(--ink); line-height: 1.2; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.tb-esc-sub { font-size: 11.5px; color: var(--ink-mute); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .tb-esc-count { flex: none; font-family: var(--mono); font-size: 11.5px; font-weight: 600; letter-spacing: 0.03em; padding: 5px 11px; border-radius: 20px; white-space: nowrap; }
 .tb-esc-count.ok   { background: rgba(60,110,80,0.12);  color: #2F7A4D; }
 .tb-esc-count.near { background: rgba(176,120,44,0.15);  color: #9A6A1E; }

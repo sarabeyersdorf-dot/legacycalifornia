@@ -557,8 +557,13 @@ function shapeDealsInMotion(deals) {
     // Offer = step 1 on the track, escrow = step 2.
     const trackIdx = inEscrow ? 2 : (isOffer ? 1 : 0);
     const price = d.sale_price || d.list_price || null;
-    const coe = d.coe_date ? new Date(d.coe_date) : null;
-    const daysToCoe = coe ? Math.round((coe.getTime() - Date.now()) / 86400000) : null;
+    // Whole-CALENDAR-day difference in Pacific time. Comparing a UTC-midnight
+    // coe_date against the current instant made a same-day close read as −1 by
+    // late morning Pacific ("1 day late" instead of "Closes today"); anchor both
+    // to their calendar date so a COE today is 0 all day.
+    const laToday = new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Los_Angeles', year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date());
+    const dayNum = (s) => Date.UTC(+String(s).slice(0, 4), +String(s).slice(5, 7) - 1, +String(s).slice(8, 10));
+    const daysToCoe = d.coe_date ? Math.round((dayNum(d.coe_date) - dayNum(laToday)) / 86400000) : null;
     const stageLabel = inEscrow
       ? (daysToCoe == null ? 'In escrow'
           : daysToCoe >= 0 ? `In escrow · ${daysToCoe} day${daysToCoe === 1 ? '' : 's'} to close`
