@@ -295,6 +295,26 @@
       </div>
 
     </div>
+
+    <!-- Live market report — iHomeFinder, updated continuously from the MLS.
+         Sits beneath the hand-built snapshot above as the authoritative live layer. -->
+    <div class="town-marketreport">
+      <div class="tmr-head">
+        <span class="hairline-brass"></span>
+        <span class="eyebrow">Live from the MLS · updated continuously</span>
+        <h3 class="tmr-title">The Murphys market report.</h3>
+      </div>
+      <div class="idx-embed idx-market-report">
+        <script>
+          document.currentScript.replaceWith(ihfKestrel.render({
+            "component": "marketReportWidget",
+            "id": 3013776,
+            "marketReportTypeId": 1
+          }));
+        </script>
+      </div>
+    </div>
+
   </div>
 </section>
 

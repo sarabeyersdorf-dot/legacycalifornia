@@ -757,3 +757,21 @@
   .pick-row { grid-template-columns: 60px 1fr; }
   .pick-cap { grid-column: 1 / -1; text-align: left; padding-top: 0; }
 }
+
+/* ── Live market report (iHomeFinder) — companion beneath the hand-built vitals ── */
+.town-marketreport {
+  margin-top: 48px;
+  padding-top: 40px;
+  border-top: 1px solid rgba(27, 24, 19, 0.12);
+}
+.tmr-head { margin-bottom: 26px; }
+.tmr-head .hairline-brass { margin-bottom: 12px; }
+.tmr-title {
+  font-family: var(--serif);
+  font-weight: 500;
+  font-size: clamp(24px, 3.2vw, 34px);
+  line-height: 1.08;
+  margin-top: 8px;
+  color: var(--ink);
+}
+.idx-market-report { margin-top: 8px; }

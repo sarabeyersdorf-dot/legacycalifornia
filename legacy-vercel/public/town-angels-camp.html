@@ -281,6 +281,25 @@
         <div class="live-row"><span>Healthcare</span><span class="dots"><i></i><i></i><i></i><i></i><i></i></span></div>
       </div>
     </div>
+
+    <!-- Live market report — iHomeFinder, updated continuously from the MLS. -->
+    <div class="town-marketreport">
+      <div class="tmr-head">
+        <span class="hairline-brass"></span>
+        <span class="eyebrow">Live from the MLS · updated continuously</span>
+        <h3 class="tmr-title">The Angels Camp market report.</h3>
+      </div>
+      <div class="idx-embed idx-market-report">
+        <script>
+          document.currentScript.replaceWith(ihfKestrel.render({
+            "component": "marketReportWidget",
+            "id": 3019717,
+            "marketReportTypeId": 1
+          }));
+        </script>
+      </div>
+    </div>
+
   </div>
 </section>
 
@@ -499,25 +518,14 @@
         <span class="eyebrow">Plate VI · Currently in the field</span>
         <h2 class="h-section" style="margin-top:10px;">Homes for sale<br><em>in Angels Camp.</em></h2>
       </div>
-      <p class="lede right">Live from the MLS — every home currently for sale in Angels Camp.</p>
+      <p class="lede right">Every home currently for sale in Angels Camp — live from the MLS.</p>
     </div>
 
-    <!-- Live MLS listings in Angels Camp — iHomeFinder search filtered by city.
-         Replaces the old hardcoded placeholder cards (fake stock listings). -->
-    <div class="idx-embed idx-town-feed">
-      <script>
-        document.currentScript.replaceWith(ihfKestrel.render({
-          "component": "featuredListingSearchWidget",
-          "city": "Angels Camp",
-          "status": ["active", "pending"],
-          "sort": "ds",
-          "resultsPerPage": 12
-        }));
-      </script>
-    </div>
-
-    <div style="text-align:center; margin-top:40px;">
-      <a href="property-search.html" class="btn btn-ghost">See all Angels Camp listings</a>
+    <!-- Live MLS listings gallery for Angels Camp goes here once the iHomeFinder
+         Saved Search / Property Gallery embed is added. The old hardcoded
+         placeholder cards (fake stock listings) have been removed. -->
+    <div style="text-align:center; margin-top:20px;">
+      <a href="property-search.html" class="btn btn-ghost">Browse every Angels Camp listing</a>
     </div>
   </div>
 </section>
