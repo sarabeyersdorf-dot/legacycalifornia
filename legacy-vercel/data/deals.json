@@ -1,5 +1,5 @@
 {
-  "version": "3.6",
+  "version": "3.7",
   "lastUpdated": "2026-07-28",
   "updatedBy": "Claude",
   "tasks": [
@@ -1274,17 +1274,17 @@
         {
           "date": "2026-07-28",
           "label": "Close of Escrow",
-          "status": "next",
+          "status": "done",
           "col": "closing",
-          "badge": "Closing Today",
-          "desc": "Buyers signed loan docs at Placer Title at 11am today and are waiting for the lender to fund and county to record. Expected to close today, July 28."
+          "badge": "Done",
+          "desc": "Recorded July 28, 2026. Buyers signed loan docs at Placer Title at 11am, lender funded, and the county recorded the deed the same day. Congratulations — you are homeowners!"
         }
       ],
       "agentNote": {
         "author": "sara",
-        "status": "draft",
+        "status": "sent",
         "updated": "2026-07-28",
-        "body": "Guy and Adrianna, you signed your loan documents at Placer Title this morning and we are waiting for the lender to fund and the county to record. Congratulations — we are closing today!"
+        "body": "Guy and Adrianna, it is OFFICIAL — your home has recorded and you are homeowners! Congratulations! The keys are yours. It has been such a pleasure working with you both and I am so excited for you. Welcome home!"
       },
       "clientTasks": [
         {
@@ -1315,12 +1315,12 @@
       ],
       "address": "7230 Latigo",
       "city": "CA",
-      "stage": "pending",
+      "stage": "closed",
       "type": "residential",
       "side": "buyer",
       "agent": "sara",
       "listing": {
-        "commission": "3%"
+        "commission": "2.5% from seller — BRBC buyer-side 0.5% waived by Sara 7/28 at buyers' request; that 0.5% applied to Echo listing (1143 Echo St) commission instead"
       },
       "listPrice": null,
       "salePrice": 615000,
@@ -1330,7 +1330,7 @@
         "acceptance": "2026-06-19",
         "coe": "2026-07-28",
         "remaining": [],
-        "coeNote": "Closing in progress 7/28 — buyers signed at Placer Title 11am, awaiting lender funding and county recordation. ETA1 buffer through 7/29."
+        "coeNote": "RECORDED 7/28/2026. Buyers signed at Placer Title 11am, lender funded, county recorded same day. Deal closed."
       },
       "contacts": {
         "coAgent": "Kylie Windley / Mitzi Windley (Chase International)",
@@ -1813,7 +1813,7 @@
         "ETA2_appraisal": "NEW 7/17: Second Extension of Time Amendment executed \u2014 extends the APPRAISAL contingency to 7/17/2026 (today), signed by sellers James R Heryford (8:40 AM PDT) and Yvonne Heryford (8:38 AM PDT) via Authentisign; sent by Sara 7/17 8:37 AM after lender (Clayton, Atlas Mortgage) requested one more day 7/16. Per Sara's cover message: \"the appraisal is back, the lender has not informed on if it came in at value or not.\" Filed in Ex 7/17. Only seller signatures appear on this envelope \u2014 buyer-side execution not visible in this document.",
         "contingencyRemoval2_CRB": "[CR-B] Buyer Contingency Removal No. 2 \u2014 all parties signed via Glide 7/17 (Glide notification 7:19 PM); filed in Ex 7/17 10:05 PM. Scope NOT yet visually verified \u2014 likely addresses the remaining appraisal/loan contingencies given the same-day ETA2 appraisal extension to 7/17, but this has not been confirmed by opening the document. Sara to confirm scope before treating those contingencies as resolved.",
         "Add3_ETA3": "Authentisign 'Add3, ETA3' signing complete 7/27 9:20 PM \u2014 James R Heryford accepted/signed 9:19 PM. File in Ex. (Separate from ETA No. 3 executed 7/24 via Glide for loan contingency extension.)",
-        "promissoryNote": "Seller carry-back note: Herfords carrying promissory note for buyer Elizabeth Dawson. Yvonne sent unsigned note 7/28 4:24 AM \u2014 section for title-holding (how Dawson holds title) is BLANK. Coordinate with Neriah Davis to get Dawson's vesting info; Dawson to sign note alongside all other closing docs at 8/10 COE."
+        "promissoryNote": "Seller carry-back note: Herfords carrying promissory note for buyer Elizabeth Dawson. Yvonne sent unsigned note 7/28 4:24 AM. VESTING CONFIRMED 7/28: Elizabeth Tara Dawson, an unmarried woman (per Ashley Cuslidge/escrow) \u2014 fill into promissory note before COE 8/10. NOTE: Heryford signature on promissory note still pending Yvonne's approval. DO NOT notify Neriah or escrow of the ADD3 price reduction ($1.3M \u2192 $1.2M) until Heryford(s) sign the $100K note and Yvonne approves \u2014 holding notification as of 7/28."
       },
       "clientDocuments": [
         {
@@ -1902,7 +1902,8 @@
         "NEW 7/18: [CR-B] Buyer Contingency Removal No. 2 executed 7/17 (Glide), filed in Ex \u2014 content/scope not verified this run; confirm before treating appraisal/loan contingencies as removed",
         "NEW 7/27: Add3 + ETA3 signed complete via Authentisign (Heryford accepted 9:19 PM) \u2014 file in Ex.",
         "NEW 7/28: SELLER CARRY NOTE \u2014 Herfords carrying promissory note for Elizabeth Dawson. Yvonne sent signed note 7/28; title-vesting section BLANK (Dawson must fill in how she holds title). Contact Neriah Davis to get vesting info; Dawson signs at closing 8/10.",
-        "NEW 7/28: Yoga tenant meeting \u2014 Sara asked Neriah 7/25 for Elizabeth to meet yoga tenant Dana. Neriah: Elizabeth won't be in area until end of August. Schedule meeting with Dana post-COE 8/10."
+        "NEW 7/28: Yoga tenant meeting \u2014 Sara asked Neriah 7/25 for Elizabeth to meet yoga tenant Dana. Neriah: Elizabeth won't be in area until end of August. Schedule meeting with Dana post-COE 8/10.",
+        "NEW 7/28: PRICE REDUCTION HOLD \u2014 ADD3 reduces sale price $1.3M \u2192 $1.2M. DO NOT notify Neriah or escrow until Heryford(s) sign the $100K carry-back promissory note AND Yvonne approves. Vesting confirmed (Elizabeth Tara Dawson, an unmarried woman) \u2014 fill into note. CRM salePrice remains $1,300,000 until hold is lifted."
       ],
       "attributes": {
         "seller_type": "standard",
@@ -2205,6 +2206,10 @@
       "salePrice": null,
       "openEscrowDate": null,
       "closingDate": null,
+      "listing": {
+        "client": "Adrianna & Guy Castle",
+        "commission": "3.5% \u2014 includes 0.5% from Latigo BRBC that buyers retained and applied here (agreed 7/28)"
+      },
       "contacts": {
         "seller": "Adrianna & Guy Castle"
       },
@@ -2212,9 +2217,10 @@
         "listingAgreement": "EXECUTED 7/12 (Authentisign 'Residential Listing Agreement - Exclusive'); filed in _Listings/1143 Echo/Ex/"
       },
       "correspondence": [],
-      "notes": "Preparing to list \u2014 Adrianna & Guy Castle's home (they are the 7230 Latigo buyers). Listing appointment Sat 7/11 10:00 AM (on CRM calendar). UPDATE 7/12: listing agreement signed via Authentisign; now an active listing. Sellers Adrianna & Guy Castle are also the 7230 Latigo buyers.",
+      "notes": "Preparing to list \u2014 Adrianna & Guy Castle's home (they are the 7230 Latigo buyers; Latigo recorded 7/28). Listing appointment Sat 7/11 10:00 AM (on CRM calendar). UPDATE 7/12: listing agreement signed via Authentisign; now an active listing. Sellers Adrianna & Guy Castle are also the 7230 Latigo buyers.",
       "alerts": [
-        "Listing agreement executed 7/12 -- now an active listing; list price TBD (CMA on file, not yet confirmed in deals.json)"
+        "Listing agreement executed 7/12 -- now an active listing; list price TBD (CMA on file, not yet confirmed in deals.json)",
+        "NEW 7/28: Commission updated to 3.5% \u2014 buyers retained 0.5% from Latigo BRBC and Sara applied it to this listing instead of collecting at Latigo close. Latigo commission was 2.5% from seller only."
       ],
       "attributes": {
         "seller_type": "standard"
