@@ -1,0 +1,832 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Shenandoah Valley, Amador County CA — Legacy Properties</title>
+<link rel="stylesheet" href="legacy.css">
+<link rel="stylesheet" href="town.css">
+<link rel="stylesheet" href="idx-theme.css">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+<link rel="stylesheet" href="town-map.css">
+<style>.town-hero .th-veil{background-image:linear-gradient(180deg,rgba(27,24,19,0.72) 0%,rgba(27,24,19,0.68) 30%,rgba(27,24,19,0.40) 52%,rgba(27,24,19,0.54) 74%,rgba(27,24,19,0.86) 100%)}.town-hero .th-eyebrow .eyebrow{color:#E3C489;text-shadow:0 1px 3px rgba(27,24,19,0.75)}.town-hero .th-title,.town-hero .th-tag{text-shadow:0 2px 10px rgba(27,24,19,0.55)}</style>
+<script src="https://kestrel.idxhome.com/ihf-kestrel.js"></script>
+<script>
+  window.ihfKestrel = window.ihfKestrel || {};
+  ihfKestrel.config = {
+    platform: "custom",
+    activationToken: "d77ab7ae-7afe-403d-89cf-61bd60bbf806",
+  };
+</script>
+</head>
+<body class="paper" data-screen-label="Town · Shenandoah Valley">
+
+<!-- ============ TOP NAV ============ -->
+<header class="topnav">
+  <div class="topnav-bar1">
+    <span>Boutique luxury real estate · Calaveras · Amador · Tuolumne</span>
+    <span><a href="tel:2095594966">(209) 559-4966</a> · <a href="mailto:SaraSellsCalifornia@gmail.com">SaraSellsCalifornia@gmail.com</a></span>
+  </div>
+  <nav class="topnav-bar2">
+    <div class="topnav-links">
+      <a href="property-search.html">Listings</a>
+      <a href="towns.html" class="active">Communities</a>
+      <a href="relocate.html">Relocate</a>
+      <a href="valuation.html">Sellers</a>
+      <a href="market-report.html">Markets</a>
+    </div>
+    <a href="index.html" class="wordmark">
+      <span class="wordmark-word">Legacy</span>
+      <span class="wordmark-sub">Properties · Angels Camp CA</span>
+    </a>
+    <div class="topnav-links right">
+      <a href="ledger.html">The Ledger</a>
+      <a href="dashboard.html">Sign In</a>
+      <a href="find-my-match.html" class="btn btn-ink btn-sm" style="padding:10px 18px;">Find My Match</a>
+    </div>
+  </nav>
+</header>
+
+<!-- ============ BREADCRUMB ============ -->
+<div class="town-breadcrumb">
+  <div class="town-breadcrumb-inner">
+    <a href="index.html">Legacy</a>
+    <span class="sep">→</span>
+    <a href="towns.html">Communities</a>
+    <span class="sep">→</span>
+    <span class="cur">Shenandoah Valley</span>
+    <span class="spacer"></span>
+    <span class="mono small">Vol. XXII · Plate VII — Gold Country Survey</span>
+  </div>
+</div>
+
+<!-- ============ HERO ============ -->
+<section class="town-hero" data-season="fall">
+  <div class="th-frame th-frame-spring" style="background-color:#2E2A22; background-image:url('art/towns/shenandoah-valley-vines-spring.jpg');"></div>
+  <div class="th-frame th-frame-summer" style="background-color:#2E2A22; background-image:url('art/towns/shenandoah-valley-vines-summer.jpg');"></div>
+  <div class="th-frame th-frame-fall"   style="background-color:#2E2A22; background-image:url('art/towns/shenandoah-valley-vines-fall.jpg');"></div>
+  <div class="th-frame th-frame-winter" style="background-color:#2E2A22; background-image:url('art/towns/shenandoah-valley-vines-winter.jpg');"></div>
+  <div class="th-veil"></div>
+
+  <div class="th-inner">
+    <div class="th-eyebrow">
+      <span class="tick"></span>
+      <span class="eyebrow">Amador County · Elevation 1,100–1,900 ft · AVA established 1983</span>
+    </div>
+    <h1 class="th-title">
+      Shenandoah
+      <span class="it">Valley.</span>
+    </h1>
+    <p class="th-tag">— Forty wineries on one road, and the oldest Zinfandel vines in America</p>
+
+    <div class="th-meta">
+      <div class="th-meta-row">
+        <span class="label-cap">Plymouth pop.</span><span class="num">1,073</span>
+      </div>
+      <div class="th-meta-row">
+        <span class="label-cap">Sacramento</span><span class="num">50 min</span>
+      </div>
+      <div class="th-meta-row">
+        <span class="label-cap">San Francisco</span><span class="num">2 hr 20 min</span>
+      </div>
+      <div class="th-meta-row">
+        <span class="label-cap">Oldest vines</span><span class="num">1869</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="th-season">
+    <span class="label-cap" style="color:rgba(250,246,236,0.6);">A year in the Valley —</span>
+    <div class="th-season-track" role="tablist">
+      <button class="th-sn" data-s="spring" data-quote="<em>Bud break, and the hills go green.</em> Mustard between the rows, daffodils on the ridge, tasting rooms with the doors propped open.">Spring</button>
+      <button class="th-sn" data-s="summer" data-quote="<em>Ninety-five by two, sixty-two by ten.</em> The valley's whole trick is the night air off the Sierra — it's why the Zin ripens without cooking.">Summer</button>
+      <button class="th-sn th-sn-on" data-s="fall" data-quote="<em>Harvest.</em> Gondolas on Shenandoah Road before sunrise, crush pads running past dark, the smell of fermenting fruit for six straight weeks.">Autumn</button>
+      <button class="th-sn" data-s="winter" data-quote="<em>Pruning weather.</em> Bare oaks, green hills, storms coming over the ridge. The tasting rooms empty out — and the winemakers finally sit down with you.">Winter</button>
+    </div>
+    <span class="th-season-quote" id="seasonQuote">
+      <em>Harvest.</em> Gondolas on Shenandoah Road before sunrise, crush pads
+      running past dark, the smell of fermenting fruit for six straight weeks.
+    </span>
+  </div>
+</section>
+
+<!-- ============ JUMP RAIL ============ -->
+<nav class="town-jump" id="jumpRail">
+  <div class="town-jump-inner">
+    <a href="#story" class="jump-on">The story</a>
+    <a href="#vitals">Market vitals</a>
+    <a href="#mainst">Shenandoah Road</a>
+    <a href="#zin">Old-vine Zinfandel</a>
+    <a href="#picks">Sara's picks</a>
+    <a href="#listings">Listings</a>
+    <a href="#letter">A letter</a>
+  </div>
+</nav>
+
+<!-- ============ THE STORY ============ -->
+<section class="section town-story" id="story" style="background:var(--parchment);">
+  <div class="section-inner">
+    <div class="story-grid">
+      <div class="story-side">
+        <span class="hairline-brass"></span>
+        <span class="eyebrow">Field notes · § I</span>
+        <h2 class="h-section" style="margin-top:14px;">Not a town.<br><em>A valley with</em> a road through it.</h2>
+      </div>
+      <div class="story-body">
+        <p class="lede">Shenandoah Valley is the rarest thing in California wine: a serious appellation that never got discovered, never got priced out, and never stopped being farmland.</p>
+        <p>Gold miners planted the first vines here in the 1850s to keep themselves supplied. When the gold went, the vines stayed — and because Amador was too remote to be worth ripping out during Prohibition, some of those plantings are still in the ground. The Original Grandpère Vineyard, off Steiner Road, has been producing Zinfandel since 1869. It is the oldest documented Zinfandel planting in the United States.</p>
+        <p>What you buy here is not a Main Street. It's a ridge, a draw, a stand of blue oaks, and a view down a valley where every third driveway ends at a crush pad. Plymouth — pop. 1,073, two stoplights' worth of town — is the front door. Fiddletown is the back one. Everything between is granite, decomposed granite, and a hundred and seventy years of somebody's grandfather being right about where to plant.</p>
+      </div>
+    </div>
+
+    <div class="fit-strip">
+      <div class="fit-h">
+        <span class="label-cap">Who the Valley is for —</span>
+      </div>
+      <div class="fit-cards">
+        <article class="fit-card">
+          <div class="fit-num">01</div>
+          <h4>The planter</h4>
+          <p>Ten to forty acres, decomposed granite, a well with real numbers behind it. Barbera in the ground by the second spring. Bonded by year five, or never — both are fine here.</p>
+        </article>
+        <article class="fit-card">
+          <div class="fit-num">02</div>
+          <h4>The Sacramento escapee</h4>
+          <p>Fifty minutes from Fair Oaks, and the commute runs the wrong way against traffic. Keeps the Sacramento job, trades the cul-de-sac for a ridge.</p>
+        </article>
+        <article class="fit-card">
+          <div class="fit-num">03</div>
+          <h4>The hospitality buyer</h4>
+          <p>Looking for the guest cottage, the event lawn, the barn with power to it. Amador's short-term-rental market runs hot every harvest and every wedding season.</p>
+        </article>
+        <article class="fit-card">
+          <div class="fit-num">04</div>
+          <h4>The land holder</h4>
+          <p>Buying acreage with water, an ag exemption, and a fence line that predates the county. Not building yet. Fully intends to.</p>
+        </article>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ VITALS ============ -->
+<section class="section town-vitals" id="vitals" style="background:var(--vellum);">
+  <div class="section-inner">
+    <div class="section-h">
+      <div>
+        <span class="hairline-brass"></span>
+        <span class="eyebrow">Market intelligence · § II</span>
+        <h2 class="h-section" style="margin-top:10px;">The Shenandoah Valley market<br><em>at a glance.</em></h2>
+      </div>
+      <p class="lede right">Trailing twelve months across Plymouth, Fiddletown and the Shenandoah Road corridor. Sourced from MLS and walked by Sara, personally.</p>
+    </div>
+
+    <div class="vitals-grid">
+
+      <div class="vitals-card vitals-card-wide">
+        <div class="vc-head">
+          <span class="label-cap">Median sale price</span>
+          <span class="vc-trend up">+5.6% YoY</span>
+        </div>
+        <div class="vc-num">$629,000</div>
+        <div class="vc-sub">12-month rolling · sourced 12 May 2026</div>
+        <svg class="vc-spark" viewBox="0 0 600 120" preserveAspectRatio="none">
+          <defs>
+            <linearGradient id="vcFillSv" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%"  stop-color="#C99E5A" stop-opacity="0.30"/>
+              <stop offset="100%" stop-color="#C99E5A" stop-opacity="0"/>
+            </linearGradient>
+          </defs>
+          <g stroke="rgba(27,24,19,0.06)">
+            <line x1="0" y1="30"  x2="600" y2="30"/>
+            <line x1="0" y1="60"  x2="600" y2="60"/>
+            <line x1="0" y1="90"  x2="600" y2="90"/>
+          </g>
+          <path class="vc-area" d="M0,92 L50,90 L100,84 L150,86 L200,76 L250,72 L300,66 L350,68 L400,56 L450,50 L500,46 L550,36 L600,28 L600,120 L0,120 Z" fill="url(#vcFillSv)"/>
+          <path class="vc-line" d="M0,92 L50,90 L100,84 L150,86 L200,76 L250,72 L300,66 L350,68 L400,56 L450,50 L500,46 L550,36 L600,28"
+                fill="none" stroke="#8C6E3D" stroke-width="2"/>
+          <g fill="#8C6E3D">
+            <circle cx="0" cy="92" r="2.5"/><circle cx="100" cy="84" r="2.5"/>
+            <circle cx="200" cy="76" r="2.5"/><circle cx="300" cy="66" r="2.5"/>
+            <circle cx="400" cy="56" r="2.5"/><circle cx="500" cy="46" r="2.5"/>
+            <circle cx="600" cy="28" r="3.5" stroke="#1B1813" stroke-width="1.5" fill="#C99E5A"/>
+          </g>
+        </svg>
+        <div class="vc-axis">
+          <span>Jun '25</span><span>Sep</span><span>Dec</span><span>Mar '26</span><span>May '26</span>
+        </div>
+      </div>
+
+      <div class="vitals-card">
+        <span class="label-cap">Days on market</span>
+        <div class="vc-num small">34</div>
+        <div class="vc-sub"><span class="chg dn">−9 days</span> vs. last year</div>
+        <div class="dot-rule">
+          <span style="left:0%"></span>
+          <span style="left:20%"></span>
+          <span style="left:40%"></span>
+          <span style="left:60%; background:var(--brass);"></span>
+          <span style="left:80%"></span>
+        </div>
+        <div class="vc-axis"><span>fast</span><span></span><span>slow</span></div>
+      </div>
+
+      <div class="vitals-card">
+        <span class="label-cap">Active listings</span>
+        <div class="vc-num small">31</div>
+        <div class="vc-sub"><span class="chg up">+6</span> since last month</div>
+        <div class="bar-rule">
+          <div class="bar-fill" style="width:64%"></div>
+        </div>
+        <div class="vc-axis"><span>tight</span><span></span><span>loose</span></div>
+      </div>
+
+      <div class="vitals-card">
+        <span class="label-cap">Sale-to-list ratio</span>
+        <div class="vc-num small">98.1<span class="suffix">%</span></div>
+        <div class="vc-sub"><span class="chg dn">−0.4 pts</span> vs. county</div>
+        <div class="dial">
+          <svg viewBox="0 0 100 60">
+            <path d="M10,55 A40,40 0 0,1 90,55" fill="none" stroke="rgba(27,24,19,0.10)" stroke-width="5"/>
+            <path d="M10,55 A40,40 0 0,1 84,46" fill="none" stroke="#8C6E3D" stroke-width="5" stroke-linecap="round"/>
+          </svg>
+        </div>
+      </div>
+
+      <div class="vitals-card">
+        <span class="label-cap">Per sq. ft.</span>
+        <div class="vc-num small">$358</div>
+        <div class="vc-sub"><span class="chg up">+2.4%</span> trailing 12</div>
+        <div class="dot-rule">
+          <span style="left:10%"></span>
+          <span style="left:30%; background:var(--brass);"></span>
+          <span style="left:50%"></span>
+          <span style="left:70%"></span>
+          <span style="left:90%"></span>
+        </div>
+      </div>
+
+      <div class="vitals-card">
+        <span class="label-cap">Buyer origin</span>
+        <div class="origin">
+          <div class="origin-row"><span>Sacramento</span><span class="ob"><span style="width:44%"></span></span><span class="op">44%</span></div>
+          <div class="origin-row"><span>Bay Area</span><span class="ob"><span style="width:33%"></span></span><span class="op">33%</span></div>
+          <div class="origin-row"><span>Out-of-state</span><span class="ob"><span style="width:14%"></span></span><span class="op">14%</span></div>
+          <div class="origin-row"><span>Local</span><span class="ob"><span style="width:9%"></span></span><span class="op">9%</span></div>
+        </div>
+      </div>
+
+      <div class="vitals-card vitals-card-meta">
+        <span class="label-cap">Liveability index</span>
+        <div class="live-row"><span>Ag / vineyard land</span><span class="dots"><i></i><i></i><i></i><i></i><i></i></span></div>
+        <div class="live-row"><span>Well &amp; water depth</span><span class="dots"><i></i><i></i><i></i><i class="off"></i><i class="off"></i></span></div>
+        <div class="live-row"><span>Fire risk</span><span class="dots"><i></i><i></i><i></i><i></i><i class="off"></i></span></div>
+        <div class="live-row"><span>Broadband</span><span class="dots"><i></i><i></i><i></i><i class="off"></i><i class="off"></i></span></div>
+        <div class="live-row"><span>Snow load</span><span class="dots"><i></i><i class="off"></i><i class="off"></i><i class="off"></i><i class="off"></i></span></div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ============ SHENANDOAH ROAD MAP ============ -->
+<section class="section town-mainst" id="mainst" style="background:var(--parchment);">
+  <div class="section-inner">
+    <div class="section-h">
+      <div>
+        <span class="hairline-brass"></span>
+        <span class="eyebrow">Plate III · A driving diagram</span>
+        <h2 class="h-section" style="margin-top:10px;">One road,<br><em>twenty-six stops.</em></h2>
+      </div>
+      <p class="lede right">Shenandoah Road runs northeast out of Plymouth and doesn't stop being interesting for nine miles. Hover any pin. Filter by what you're after.</p>
+    </div>
+
+    <div class="mainst-filters">
+      <button class="ms-filter ms-on" data-cat="all">All <span class="ct">26</span></button>
+      <button class="ms-filter" data-cat="wine">Wineries <span class="ct">14</span></button>
+      <button class="ms-filter" data-cat="eat">Eat <span class="ct">4</span></button>
+      <button class="ms-filter" data-cat="stay">Stay <span class="ct">4</span></button>
+      <button class="ms-filter" data-cat="shop">Shop <span class="ct">2</span></button>
+      <button class="ms-filter" data-cat="do">Do <span class="ct">2</span></button>
+    </div>
+
+    <div class="ms-source" id="msSource" style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin:0 0 18px;padding-bottom:16px;border-bottom:1px solid var(--rule);">
+      <span class="label-cap" style="color:var(--ink-mute);">Map source —</span>
+      <div style="display:flex;gap:8px;">
+        <button class="ms-filter ms-on" data-src="legacy">Legacy field notes</button>
+        <button class="ms-filter" data-src="ava">Amador Vintners · 50+ wineries</button>
+      </div>
+      <span class="mono" style="font-size:10px;color:var(--ink-faint);margin-left:auto;">Second view courtesy of the <a href="https://amadorwine.com/winery-map/" target="_blank" rel="noopener" style="color:var(--brass);">Amador County Vintners Association</a></span>
+    </div>
+
+    <div class="tm-editor" id="tmEditor">
+      <span class="tm-editor-lead">Drag any pin to its true location. <strong>Your placements save in this browser.</strong> When the map looks right, hit Copy coordinates and send them over to publish for everyone.</span>
+      <div class="tm-editor-actions">
+        <button class="tm-btn ghost" data-act="reset">Reset pins</button>
+        <button class="tm-btn" data-act="copy">Copy coordinates</button>
+      </div>
+      <span class="tm-editor-msg"></span>
+    </div>
+    <div class="mainst-board">
+      <div class="mainst-map mainst-map--live" id="mainstMap"><div id="townMapCanvas" class="town-map-canvas"></div></div>
+      <div class="mainst-map" id="avaMap" style="display:none;padding:0;overflow:hidden;"><iframe title="Amador County Winery Locator" src="https://www.google.com/maps/d/embed?mid=1IUYbszCa-K5pIk8YfmXbwHFeQ-n1Tec&amp;ehbc=2E312F" style="width:100%;height:100%;min-height:560px;border:0;display:block;" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe></div>
+      <aside class="mainst-rail">
+        <div class="ms-rail-head">
+          <span class="label-cap">Detail</span>
+          <span class="mono" id="msCount" style="font-size:10px;color:var(--ink-faint);">26 places</span>
+        </div>
+        <div class="ms-rail-card" id="msRailCard">
+          <span class="ms-rail-tag" id="msTag">Hover the map</span>
+          <h3 class="ms-rail-name" id="msName">Nine miles of<br>somebody's life work.</h3>
+          <p class="ms-rail-desc" id="msDesc">Filter by category, hover any pin, or — if you'd rather we just built you an itinerary — <a href="#letter" style="color:var(--brass); text-decoration: underline;">drop us a line</a>.</p>
+          <ul class="ms-rail-list" id="msList"></ul>
+        </div>
+      </aside>
+    </div>
+  </div>
+</section>
+
+<!-- ============ SIGNATURE: OLD-VINE ZINFANDEL ============ -->
+<section class="section town-wine" id="zin" style="background:var(--ink); color:var(--shell);">
+  <div class="section-inner">
+    <div class="section-h" style="border-bottom-color: rgba(250,246,236,0.1);">
+      <div>
+        <span class="hairline-brass" style="background:var(--brass-bright);"></span>
+        <span class="eyebrow" style="color:var(--brass-bright);">Plate IV · The signature</span>
+        <h2 class="h-section" style="color:var(--shell); margin-top:10px;">Vines planted in 1869,<br><em style="color:var(--brass-bright);">still bearing fruit.</em></h2>
+      </div>
+      <p class="lede right" style="color:rgba(250,246,236,0.7);">Amador is old-vine Zinfandel country and California's Barbera capital. Tasting fees run $10–$20, waived on almost any purchase, and the person pouring is frequently the person who farmed it.</p>
+    </div>
+
+    <div class="wine-grid">
+      <article class="wine-card">
+        <div class="wine-letter">I</div>
+        <div class="wine-name">Original Grandpère</div>
+        <div class="wine-house">Planted 1869</div>
+        <div class="wine-flight">
+          <span>Oldest documented Zin vines in the U.S.</span><span>Head-trained, dry-farmed</span><span>Fruit sold to a handful of producers</span>
+        </div>
+        <div class="wine-foot"><span>Steiner Road</span><span>·</span><span>Not open to the public</span></div>
+      </article>
+      <article class="wine-card">
+        <div class="wine-letter">II</div>
+        <div class="wine-name">Sobon Estate</div>
+        <div class="wine-house">Organic · 1856 cellar</div>
+        <div class="wine-flight">
+          <span>Rocky Top Zin</span><span>Cooke Vineyard Zin</span><span>Roussanne</span>
+        </div>
+        <div class="wine-foot"><span>Free tasting</span><span>·</span><span>9:30–5 daily</span></div>
+      </article>
+      <article class="wine-card">
+        <div class="wine-letter">III</div>
+        <div class="wine-name">Scott Harvey Wines</div>
+        <div class="wine-house">Grandpère fruit</div>
+        <div class="wine-flight">
+          <span>Vineyard 1869 Zin</span><span>Mountain Selection Barbera</span><span>J&amp;S Reserve</span>
+        </div>
+        <div class="wine-foot"><span>$15 flight</span><span>·</span><span>11–5 daily</span></div>
+      </article>
+      <article class="wine-card">
+        <div class="wine-letter">IV</div>
+        <div class="wine-name">Vino Noceto</div>
+        <div class="wine-house">Sangiovese specialists</div>
+        <div class="wine-flight">
+          <span>Normale Sangiovese</span><span>Riserva</span><span>Frivolo Moscato</span>
+        </div>
+        <div class="wine-foot"><span>$15 flight</span><span>·</span><span>11–4 daily</span></div>
+      </article>
+      <article class="wine-card">
+        <div class="wine-letter">V</div>
+        <div class="wine-name">Story Winery</div>
+        <div class="wine-house">Canyon-edge, 1973</div>
+        <div class="wine-flight">
+          <span>Mission (1894 vines)</span><span>Picnic Hill Zin</span><span>Chenin Blanc</span>
+        </div>
+        <div class="wine-foot"><span>$10 flight</span><span>·</span><span>Cons. River overlook</span></div>
+      </article>
+      <article class="wine-card">
+        <div class="wine-letter">VI</div>
+        <div class="wine-name">Andis Wines</div>
+        <div class="wine-house">Modern architecture</div>
+        <div class="wine-flight">
+          <span>Painted Fields</span><span>Barbera</span><span>Semillon</span>
+        </div>
+        <div class="wine-foot"><span>$15 flight</span><span>·</span><span>11–5 daily</span></div>
+      </article>
+    </div>
+
+    <div class="wine-foot-strip">
+      <div>
+        <span class="label-cap" style="color:var(--brass-bright);">Valley math —</span>
+        <span class="wf-stat">40+ <em>wineries</em></span>
+        <span class="wf-stat">9 <em>miles of road</em></span>
+        <span class="wf-stat">1869 <em>oldest vines</em></span>
+        <span class="wf-stat">#1 <em>Barbera county in CA</em></span>
+      </div>
+      <a href="find-my-match.html" class="btn btn-brass btn-sm">Plan a Valley weekend</a>
+    </div>
+  </div>
+</section>
+
+<!-- ============ SARA'S PICKS ============ -->
+<section class="section town-picks" id="picks" style="background:var(--vellum);">
+  <div class="section-inner">
+    <div class="section-h">
+      <div>
+        <span class="hairline-brass"></span>
+        <span class="eyebrow">Plate V · The personal list</span>
+        <h2 class="h-section" style="margin-top:10px;">Sara's standing<br><em>recommendations.</em></h2>
+      </div>
+      <p class="lede right">Amador is the county I send people to when they think they already know California wine. This is the list as it stands today.</p>
+    </div>
+
+    <div class="picks-tabs">
+      <button class="pick-tab pick-tab-on" data-tab="eat">Eat <span class="ct">04</span></button>
+      <button class="pick-tab" data-tab="drink">Drink <span class="ct">04</span></button>
+      <button class="pick-tab" data-tab="stay">Stay <span class="ct">04</span></button>
+      <button class="pick-tab" data-tab="do">Do <span class="ct">04</span></button>
+      <button class="pick-tab" data-tab="sec">Secret <span class="ct">02</span></button>
+    </div>
+
+    <div class="picks-board">
+      <!-- EAT -->
+      <div class="pick-pane pick-pane-on" data-pane="eat">
+        <article class="pick-row">
+          <span class="pick-num">01</span>
+          <div class="pick-body">
+            <h4>Taste — Plymouth</h4>
+            <p>The reason people drive up from Sacramento on a Tuesday. A serious kitchen in a two-stoplight town, with a wine list that finally does the county justice. Book two weeks out.</p>
+            <div class="pick-tags"><span>Date</span><span>$$$</span><span>Reserve</span></div>
+          </div>
+          <div class="pick-cap"><span class="label-cap">When</span><span>Dinner · Thu–Mon</span></div>
+        </article>
+        <article class="pick-row">
+          <span class="pick-num">02</span>
+          <div class="pick-body">
+            <h4>Amador Vintage Market</h4>
+            <p>Build the picnic here before you drive out Shenandoah Road. Sandwiches, cheese, olives, a cooler if you didn't bring one. Every tasting room has a lawn — use it.</p>
+            <div class="pick-tags"><span>Picnic</span><span>$$</span><span>Walk-in</span></div>
+          </div>
+          <div class="pick-cap"><span class="label-cap">When</span><span>Daytime · daily</span></div>
+        </article>
+        <article class="pick-row">
+          <span class="pick-num">03</span>
+          <div class="pick-body">
+            <h4>Rest — Amador City</h4>
+            <p>Fifteen minutes south, and worth the detour. Small, precise, seasonal. The kind of room you'd expect in a city three hundred times the size.</p>
+            <div class="pick-tags"><span>Tasting menu</span><span>$$$</span><span>Reserve</span></div>
+          </div>
+          <div class="pick-cap"><span class="label-cap">When</span><span>Dinner · Wed–Sun</span></div>
+        </article>
+        <article class="pick-row">
+          <span class="pick-num">04</span>
+          <div class="pick-body">
+            <h4>Marlene &amp; Glen's — Plymouth</h4>
+            <p>Diner breakfast with the ranchers and the vineyard crews, at the hour when they're actually eating. Go before eight. Order the biscuits.</p>
+            <div class="pick-tags"><span>Breakfast</span><span>$</span><span>Cash-friendly</span></div>
+          </div>
+          <div class="pick-cap"><span class="label-cap">When</span><span>Early · daily</span></div>
+        </article>
+      </div>
+
+      <!-- DRINK -->
+      <div class="pick-pane" data-pane="drink">
+        <article class="pick-row">
+          <span class="pick-num">01</span>
+          <div class="pick-body">
+            <h4>Scott Harvey Wines</h4>
+            <p>Where I take anyone who says they don't like Zinfandel. His Vineyard 1869 bottling comes off the Grandpère vines — the oldest in the country — and the argument ends in about four minutes.</p>
+            <div class="pick-tags"><span>Zinfandel</span><span>$$</span><span>1869 vines</span></div>
+          </div>
+          <div class="pick-cap"><span class="label-cap">When</span><span>11–5 daily</span></div>
+        </article>
+        <article class="pick-row">
+          <span class="pick-num">02</span>
+          <div class="pick-body">
+            <h4>Sobon Estate</h4>
+            <p>Organic, unpretentious, and free to taste. The 1856 stone cellar is a museum you can drink in. Best value flight in the county.</p>
+            <div class="pick-tags"><span>Historic</span><span>Free</span></div>
+          </div>
+          <div class="pick-cap"><span class="label-cap">When</span><span>9:30–5 daily</span></div>
+        </article>
+        <article class="pick-row">
+          <span class="pick-num">03</span>
+          <div class="pick-body">
+            <h4>Story Winery</h4>
+            <p>Perched on the edge of the Cosumnes canyon with 1894 Mission vines out back. Take the flight to the picnic tables and don't check your phone.</p>
+            <div class="pick-tags"><span>View</span><span>$</span><span>Picnic</span></div>
+          </div>
+          <div class="pick-cap"><span class="label-cap">When</span><span>Afternoons</span></div>
+        </article>
+        <article class="pick-row">
+          <span class="pick-num">04</span>
+          <div class="pick-body">
+            <h4>Bella Grace Vineyards</h4>
+            <p>Barbera done properly, and a cave tasting that's genuinely cool in August. Their Plymouth tasting room is the easy in-town version.</p>
+            <div class="pick-tags"><span>Barbera</span><span>$$</span><span>Cave</span></div>
+          </div>
+          <div class="pick-cap"><span class="label-cap">When</span><span>11–5 daily</span></div>
+        </article>
+      </div>
+
+      <!-- STAY -->
+      <div class="pick-pane" data-pane="stay">
+        <article class="pick-row">
+          <span class="pick-num">01</span>
+          <div class="pick-body">
+            <h4>The Rest Hotel — Amador City</h4>
+            <p>Nine rooms above the restaurant, in a gold-rush building on a bend in the highway. The most considered hotel in the county. Walk downstairs to dinner.</p>
+            <div class="pick-tags"><span>Boutique</span><span>$$$</span></div>
+          </div>
+          <div class="pick-cap"><span class="label-cap">From</span><span>$275 / nt</span></div>
+        </article>
+        <article class="pick-row">
+          <span class="pick-num">02</span>
+          <div class="pick-body">
+            <h4>Amador Harvest Inn</h4>
+            <p>B&amp;B on the Deaver property, right on the pond, right in the middle of the wineries. You can walk to three tasting rooms. Do.</p>
+            <div class="pick-tags"><span>B&amp;B</span><span>$$</span><span>In the vines</span></div>
+          </div>
+          <div class="pick-cap"><span class="label-cap">From</span><span>$205 / nt</span></div>
+        </article>
+        <article class="pick-row">
+          <span class="pick-num">03</span>
+          <div class="pick-body">
+            <h4>Shenandoah Inn — Plymouth</h4>
+            <p>Simple, clean, quiet, and positioned exactly where you want to be at 9 a.m. on a tasting day. Pool in summer.</p>
+            <div class="pick-tags"><span>Inn</span><span>$$</span></div>
+          </div>
+          <div class="pick-cap"><span class="label-cap">From</span><span>$165 / nt</span></div>
+        </article>
+        <article class="pick-row">
+          <span class="pick-num">04</span>
+          <div class="pick-body">
+            <h4>Glashaus — New Melones</h4>
+            <p>Our glass dome on twenty private acres above the lake. An hour south, and the single best way to understand what living up here actually feels like. <a href="https://www.airbnb.com/rooms/919731657397440702" target="_blank" rel="noopener">Book it direct on Airbnb →</a></p>
+            <div class="pick-tags"><span>Glass dome</span><span>Lake view</span><span>Book direct</span></div>
+          </div>
+          <div class="pick-cap"><span class="label-cap">Rated</span><span><a href="https://www.airbnb.com/rooms/919731657397440702" target="_blank" rel="noopener">4.92 · Airbnb</a></span></div>
+        </article>
+      </div>
+
+      <!-- DO -->
+      <div class="pick-pane" data-pane="do">
+        <article class="pick-row">
+          <span class="pick-num">01</span>
+          <div class="pick-body">
+            <h4>Amador Flower Farm</h4>
+            <p>Fourteen acres of daylilies and demonstration gardens on Shenandoah Road. Free, shaded, and the best possible thing to do between the third and fourth tasting room.</p>
+            <div class="pick-tags"><span>Garden</span><span>Free</span></div>
+          </div>
+          <div class="pick-cap"><span class="label-cap">When</span><span>Peak bloom: June</span></div>
+        </article>
+        <article class="pick-row">
+          <span class="pick-num">02</span>
+          <div class="pick-body">
+            <h4>Chew Kee Store — Fiddletown</h4>
+            <p>An 1850s rammed-earth Chinese herb shop, preserved with its contents intact. Ten minutes from the wineries and completely unlike anything else in the state.</p>
+            <div class="pick-tags"><span>History</span><span>Free</span><span>Limited hours</span></div>
+          </div>
+          <div class="pick-cap"><span class="label-cap">When</span><span>Sat afternoons, Apr–Oct</span></div>
+        </article>
+        <article class="pick-row">
+          <span class="pick-num">03</span>
+          <div class="pick-body">
+            <h4>Indian Grinding Rock SHP</h4>
+            <p>Chaw'se — over a thousand mortar holes worn into one limestone outcrop, plus a reconstructed Miwok village. Twenty-five minutes east, and the most important place in the county.</p>
+            <div class="pick-tags"><span>State park</span><span>25 min</span></div>
+          </div>
+          <div class="pick-cap"><span class="label-cap">When</span><span>Year-round</span></div>
+        </article>
+        <article class="pick-row">
+          <span class="pick-num">04</span>
+          <div class="pick-body">
+            <h4>Amador County Fair — Plymouth</h4>
+            <p>Late July, four days, and the whole county turns out. If you're deciding whether you'd actually fit here, go to the fair before you go to an open house.</p>
+            <div class="pick-tags"><span>Community</span><span>Annual</span></div>
+          </div>
+          <div class="pick-cap"><span class="label-cap">When</span><span>Late July</span></div>
+        </article>
+      </div>
+
+      <!-- SECRETS -->
+      <div class="pick-pane" data-pane="sec">
+        <article class="pick-row">
+          <span class="pick-num">01</span>
+          <div class="pick-body">
+            <h4>Shenandoah Road at 6:40 a.m. in September</h4>
+            <p>Harvest runs at night to keep the fruit cold. Drive out before sunrise during crush and you'll pass gondolas coming the other way with the lights still on. Nobody tells visitors to do this.</p>
+            <div class="pick-tags"><span>Harvest</span><span>Free</span></div>
+          </div>
+          <div class="pick-cap"><span class="label-cap">When</span><span>Sept–early Oct</span></div>
+        </article>
+        <article class="pick-row">
+          <span class="pick-num">02</span>
+          <div class="pick-body">
+            <h4>January in the tasting rooms</h4>
+            <p>Dead season. No crowds, no pour line, and the winemaker has time. Ask what's still in barrel. This is when serious buyers actually learn the valley.</p>
+            <div class="pick-tags"><span>Off-season</span><span>Insider</span></div>
+          </div>
+          <div class="pick-cap"><span class="label-cap">When</span><span>Jan–Feb, weekdays</span></div>
+        </article>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ LISTINGS ============ -->
+<section class="section" id="listings" style="background:var(--parchment);">
+  <div class="section-inner">
+    <div class="section-h">
+      <div>
+        <span class="hairline-brass"></span>
+        <span class="eyebrow">Plate VI · Currently in the field</span>
+        <h2 class="h-section" style="margin-top:10px;">Homes and vineyard land<br><em>in the Valley.</em></h2>
+      </div>
+      <p class="lede right">Plymouth, Fiddletown and the Shenandoah Road corridor. Updated continuously from MLS.</p>
+    </div>
+
+    <div class="idx-embed idx-feature-gallery">
+      <script>
+        document.currentScript.replaceWith(ihfKestrel.render({
+          component: "gallerySliderWidget"
+        }));
+      </script>
+    </div>
+
+    <div style="text-align:center; margin-top:40px;">
+      <a href="property-search.html" class="btn btn-ghost">See all Shenandoah Valley listings</a>
+    </div>
+  </div>
+</section>
+
+<!-- ============ LETTER FROM SARA ============ -->
+<section class="section town-letter" id="letter" style="background:var(--vellum);">
+  <div class="section-inner">
+    <article class="letter-card">
+      <div class="letter-head">
+        <span class="hairline-brass"></span>
+        <span class="eyebrow">A note from your agent · § VII</span>
+      </div>
+      <div class="letter-grid">
+        <div class="letter-photo">
+          <img src="art/sara-headshot.png" alt="Sara Cooper">
+          <div class="letter-stamp">
+            <span class="ls-cir">SC</span>
+            <span class="ls-lbl">Sara Cooper · Owner-Broker</span>
+          </div>
+        </div>
+        <div class="letter-body">
+          <p class="letter-open">A few words on Shenandoah Valley —</p>
+          <p>People find their way to Amador after Napa prices them out and Sonoma bores them. What surprises them is that this isn't a discount version of either. It's an older wine region than most of Napa, farmed by families who never sold, and it has never once tried to be charming at you.</p>
+          <p>Buying here is different from buying in a town. You are buying dirt, aspect, and water. I will ask you about your well before I ask you about your kitchen — because on a ten-acre parcel off Steiner or Bell Road, the well log is the property. I'll also tell you honestly which parcels have the granite that makes Zinfandel worth farming and which just have a nice view, and those are not always the same parcels.</p>
+          <p>The other thing to know: this is a real community, not a weekend one. Plymouth has a fair, a hardware store, and a volunteer fire department that will know your name. That's a feature for some buyers and a shock for others. I'd rather you find out in June than in escrow.</p>
+          <p>If the Valley is on your list, come drive it with me. We'll start at the market in Plymouth, run the road to Fiddletown, and I'll show you what's actually for sale — including the two or three parcels that never make it to the MLS.</p>
+          <p class="letter-sign">— Sara</p>
+        </div>
+      </div>
+
+      <div class="letter-contact">
+        <a href="tel:2095594966"><span class="glyph">◇</span> (209) 559-4966</a>
+        <a href="mailto:SaraSellsCalifornia@gmail.com"><span class="glyph">◇</span> SaraSellsCalifornia@gmail.com</a>
+        <a href="find-my-match.html"><span class="glyph">◇</span> Schedule a Valley drive</a>
+      </div>
+    </article>
+  </div>
+</section>
+
+<!-- ============ NEIGHBORING TOWNS ============ -->
+<section class="section" style="background:var(--parchment);">
+  <div class="section-inner">
+    <div class="section-h">
+      <div>
+        <span class="hairline-brass"></span>
+        <span class="eyebrow">Plate VIII · Adjacent</span>
+        <h2 class="h-section" style="margin-top:10px;">Towns nearby.</h2>
+      </div>
+      <p class="lede right">Five more characters in the same story — the closest is fifteen minutes down Highway 49.</p>
+    </div>
+
+    <div class="nearby-grid">
+      <a href="town-sutter-creek.html" class="nearby-card">
+        <div class="nb-img" style="background-image:url('art/towns/sutter-creek-mainst.jpg');"></div>
+        <div class="nb-body">
+          <span class="nb-dist">15 min south</span>
+          <h4>Sutter Creek</h4>
+          <p>Antiques, Amador wine, history.</p>
+        </div>
+      </a>
+      <a href="town-angels-camp.html" class="nearby-card">
+        <div class="nb-img" style="background-image:url('art/towns/angels-camp-mainst-fall.jpg');"></div>
+        <div class="nb-body">
+          <span class="nb-dist">45 min south</span>
+          <h4>Angels Camp</h4>
+          <p>Frog Jubilee, Twain country.</p>
+        </div>
+      </a>
+      <a href="town-murphys.html" class="nearby-card">
+        <div class="nb-img" style="background-image:url('art/towns/murphys-mainst-summer.jpg');"></div>
+        <div class="nb-body">
+          <span class="nb-dist">55 min south</span>
+          <h4>Murphys</h4>
+          <p>Twenty-two tasting rooms, four blocks.</p>
+        </div>
+      </a>
+      <a href="town-copperopolis.html" class="nearby-card">
+        <div class="nb-img" style="background-image:url('art/towns/copperopolis-lake-tulloch.jpg');"></div>
+        <div class="nb-body">
+          <span class="nb-dist">65 min south</span>
+          <h4>Copperopolis</h4>
+          <p>Lake estates, golf, big sky.</p>
+        </div>
+      </a>
+      <a href="river-mountain.html" class="nearby-card">
+        <div class="nb-img" style="background-image:url('art/towns/rm-mokelumne-rapids.jpg');"></div>
+        <div class="nb-body">
+          <span class="nb-dist">30 min southeast</span>
+          <h4>River &amp; Mountain</h4><p>Rural parcels &amp; lifestyle.</p>
+        </div>
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- ============ CTA ============ -->
+<section class="cta">
+  <span class="hairline-brass" style="margin: 0 auto 20px;"></span>
+  <span class="eyebrow">Begin your Shenandoah Valley chapter</span>
+  <h2 class="cta-h">Drive the road<br><em>with us.</em></h2>
+  <p class="cta-sub">An afternoon, a picnic from the market, and a candid read on which parcels are worth the water.</p>
+  <div class="cta-ctas">
+    <a href="find-my-match.html" class="btn btn-ink">Find my Valley match</a>
+    <a href="tel:2095594966" class="btn btn-ghost">Call (209) 559-4966</a>
+  </div>
+</section>
+
+<!-- ============ FOOTER ============ -->
+<footer class="footer">
+  <div class="footer-inner">
+    <div class="footer-top">
+      <div>
+        <a href="index.html" class="wordmark" style="align-items: flex-start;">
+          <span class="wordmark-word">Legacy</span>
+          <span class="wordmark-sub">Properties · Angels Camp CA</span>
+        </a>
+        <p class="footer-tagline">Every home has a story. We help you find yours — or tell the one you've already lived.</p>
+      </div>
+      <div>
+        <h4>Communities</h4>
+        <a href="town-murphys.html">Murphys</a>
+        <a href="town-arnold.html">Arnold</a>
+        <a href="town-sutter-creek.html">Sutter Creek</a>
+        <a href="town-shenandoah-valley.html">Shenandoah Valley</a>
+        <a href="river-mountain.html">River &amp; Mountain</a>
+        <a href="town-angels-camp.html">Angels Camp</a>
+        <a href="town-copperopolis.html">Copperopolis</a>
+      </div>
+      <div>
+        <h4>Buy &amp; sell</h4>
+        <a href="property-search.html">Search all listings</a>
+        <a href="valuation.html">What's my home worth?</a>
+        <a href="find-my-match.html">Request a tour</a>
+      </div>
+      <div>
+        <h4>Connect</h4>
+        <a href="tel:2095594966">(209) 559-4966</a>
+        <a href="mailto:SaraSellsCalifornia@gmail.com">SaraSellsCalifornia@gmail.com</a>
+        <a href="ledger.html">The Ledger</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <div>© 2026 Legacy Properties · All rights reserved</div>
+      <div>Sara Cooper, Broker · DRE #02141987 · Equal Housing Opportunity</div>
+    </div>
+  </div>
+</footer>
+
+<script src="town.js"></script>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+<script src="town-map.js"></script>
+<script>
+(function(){
+  var wrap=document.getElementById('msSource'); if(!wrap) return;
+  var legacy=document.getElementById('mainstMap'), ava=document.getElementById('avaMap'),
+      editor=document.getElementById('tmEditor'), filters=document.querySelector('.mainst-filters'),
+      rail=document.querySelector('.mainst-rail'), board=document.querySelector('.mainst-board');
+  wrap.addEventListener('click',function(e){
+    var b=e.target.closest('button[data-src]'); if(!b) return;
+    var isLegacy=b.dataset.src==='legacy';
+    wrap.querySelectorAll('button[data-src]').forEach(function(x){x.classList.toggle('ms-on',x===b);});
+    legacy.style.display=isLegacy?'':'none';
+    ava.style.display=isLegacy?'none':'';
+    if(editor) editor.style.display=isLegacy?'':'none';
+    if(filters) filters.style.display=isLegacy?'':'none';
+    if(rail) rail.style.display=isLegacy?'':'none';
+    if(board) board.style.gridTemplateColumns=isLegacy?'':'1fr';
+    if(isLegacy) window.dispatchEvent(new Event('resize'));
+  });
+})();
+</script>
+<script>LegacyTownMap.init({"town":"shenandoah-valley","center":[38.5137,-120.8163],"zoom":13,"unit":"places","catMeta":{"wine":{"label":"Winery","letter":"W","color":"#8C6E3D"},"eat":{"label":"Restaurant","letter":"E","color":"#5E7886"},"stay":{"label":"Stay","letter":"S","color":"#4F6B4A"},"shop":{"label":"Shop","letter":"P","color":"#A6824A"},"do":{"label":"To do","letter":"D","color":"#6E5732"}},"pois":[{"name":"Sobon Estate","cat":"wine","desc":"Organic estate in an 1856 stone cellar. Free tasting, and a museum you can drink in.","lat":38.5104,"lng":-120.7864},{"name":"Shenandoah Vineyards","cat":"wine","desc":"Sobon's sister label. Deep Amador Zin and an art-filled tasting room.","lat":38.5088,"lng":-120.7910},{"name":"Scott Harvey Wines","cat":"wine","desc":"Vineyard 1869 Zinfandel off the Grandpère vines, plus a benchmark Barbera.","lat":38.5060,"lng":-120.7990},{"name":"Story Winery","cat":"wine","desc":"1894 Mission vines on the edge of the Cosumnes canyon. Best picnic view in the valley.","lat":38.5030,"lng":-120.7620},{"name":"Vino Noceto","cat":"wine","desc":"Sangiovese specialists. Normale, Riserva, and the Frivolo Moscato.","lat":38.4991,"lng":-120.8230},{"name":"Andis Wines","cat":"wine","desc":"Modern steel-and-glass winery. Painted Fields and a serious Barbera.","lat":38.4990,"lng":-120.8290},{"name":"Bella Grace Vineyards","cat":"wine","desc":"Barbera done properly, plus a cave tasting that's cool in August.","lat":38.5147,"lng":-120.8168},{"name":"Helwig Winery","cat":"wine","desc":"Ridge-top amphitheater with a hundred-mile view. Summer concerts.","lat":38.5210,"lng":-120.8060},{"name":"Deaver Vineyards","cat":"wine","desc":"Sixth-generation family vineyard. Pond, lawn, old-vine Zin.","lat":38.5085,"lng":-120.7842},{"name":"Cooper Vineyards","cat":"wine","desc":"Barbera and Syrah under the oaks. Unfussy, family-run.","lat":38.5109,"lng":-120.7955},{"name":"Dobra Zemlja","cat":"wine","desc":"Cave tasting, big reds, and a pour that does not hold back.","lat":38.5115,"lng":-120.7885},{"name":"Terre Rouge / Easton","cat":"wine","desc":"Rhone varietals and old-vine Zin from one of the valley's founding producers.","lat":38.5070,"lng":-120.7770},{"name":"Amador Cellars","cat":"wine","desc":"Small family production. Estate Zin, Barbera, and a shaded patio.","lat":38.5030,"lng":-120.8175},{"name":"Jeff Runquist Wines","cat":"wine","desc":"Single-vineyard reds sourced across California. Consistently decorated.","lat":38.5010,"lng":-120.8100},{"name":"Taste Restaurant","cat":"eat","desc":"The county's destination kitchen, in a two-stoplight town. Book two weeks out.","lat":38.4816,"lng":-120.8446},{"name":"Amador Vintage Market","cat":"eat","desc":"Build the picnic here before you drive out Shenandoah Road.","lat":38.4820,"lng":-120.8438},{"name":"Marlene & Glen's Diner","cat":"eat","desc":"Breakfast with the vineyard crews. Go before eight.","lat":38.4812,"lng":-120.8452},{"name":"Rest — Amador City","cat":"eat","desc":"Small, precise, seasonal. Fifteen minutes south and worth the detour.","lat":38.4192,"lng":-120.8231},{"name":"The Rest Hotel","cat":"stay","desc":"Nine rooms above the restaurant in a gold-rush building. The county's best hotel.","lat":38.4194,"lng":-120.8235},{"name":"Amador Harvest Inn","cat":"stay","desc":"B&B on the Deaver pond, walking distance to three tasting rooms.","lat":38.5079,"lng":-120.7855},{"name":"Shenandoah Inn","cat":"stay","desc":"Simple, quiet, and positioned exactly where you want to start a tasting day.","lat":38.4838,"lng":-120.8430},{"name":"Plymouth House Inn","cat":"stay","desc":"1857 Victorian B&B a block off Main. Porch, garden, breakfast.","lat":38.4823,"lng":-120.8461},{"name":"Amador Flower Farm","cat":"shop","desc":"Fourteen acres of daylilies and a nursery, right on Shenandoah Road.","lat":38.5062,"lng":-120.8005},{"name":"Fiddletown General Store","cat":"shop","desc":"The back door of the valley. Provisions, gossip, and a porch.","lat":38.5045,"lng":-120.7250},{"name":"Chew Kee Store Museum","cat":"do","desc":"1850s rammed-earth Chinese herb shop, preserved with its contents intact.","lat":38.5048,"lng":-120.7259},{"name":"Amador County Fairgrounds","cat":"do","desc":"Late July, four days, and the whole county turns out.","lat":38.4780,"lng":-120.8398}]});</script>
+</body>
+</html>
