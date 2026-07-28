@@ -22,8 +22,12 @@ window.LegacyTownMap = (function () {
     if (!canvas || typeof L === 'undefined') return;
 
     var storeKey = 'legacy:townmap:' + cfg.town;
+    // Pins are LOCKED for the public — the map must read accurate and can't be
+    // shoved around by visitors. Dragging (and the saved-position overrides + the
+    // editor bar) turn on only in authoring mode: add ?editmap=1 to the URL.
+    var editMode = /[?&]editmap=1/.test(location.search) || /editmap/.test(location.hash);
     var saved = {};
-    try { saved = JSON.parse(localStorage.getItem(storeKey) || '{}'); } catch (e) { saved = {}; }
+    if (editMode) { try { saved = JSON.parse(localStorage.getItem(storeKey) || '{}'); } catch (e) { saved = {}; } }
 
     var map = L.map(canvas, {
       center: cfg.center, zoom: cfg.zoom,
@@ -64,7 +68,7 @@ window.LegacyTownMap = (function () {
 
     cfg.pois.forEach(function (p) {
       var pos = saved[p.name] || [p.lat, p.lng];
-      var mk = L.marker(pos, { icon: icon(p.cat), draggable: true, keyboard: true });
+      var mk = L.marker(pos, { icon: icon(p.cat), draggable: editMode, keyboard: editMode });
       mk._poi = p;
       mk.addTo(map);
       mk.on('mouseover', function(){ showInRail(p); });
@@ -114,9 +118,10 @@ window.LegacyTownMap = (function () {
     });
     applyFilter('all');
 
-    // ── Editor bar (drag-to-place helper for Sara) ──────────────
+    // ── Editor bar (drag-to-place helper for Sara) — authoring mode only ──
     var bar = document.getElementById('tmEditor');
-    if (bar) {
+    if (bar && !editMode) bar.style.display = 'none';
+    if (bar && editMode) {
       var msg = bar.querySelector('.tm-editor-msg');
       var copyBtn = bar.querySelector('[data-act="copy"]');
       var resetBtn = bar.querySelector('[data-act="reset"]');

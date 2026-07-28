@@ -499,46 +499,21 @@
         <span class="eyebrow">Plate VI · Currently in the field</span>
         <h2 class="h-section" style="margin-top:10px;">Homes for sale<br><em>in Angels Camp.</em></h2>
       </div>
-      <p class="lede right">Three on the boards this morning. Sara walks these herself.</p>
+      <p class="lede right">Live from the MLS — every home currently for sale in Angels Camp.</p>
     </div>
 
-    <div class="list-grid">
-      <a href="featured-listings.html" class="prop-card">
-        <div class="prop-photo">
-          <img src="https://images.unsplash.com/photo-1568605114967-8130f3a36994?w=800&q=85" alt="">
-          <div class="prop-tags"><span class="pill-status pill-new">Just listed</span></div>
-        </div>
-        <div class="prop-body">
-          <div class="prop-price">$399,000</div>
-          <div class="prop-address">2733 Emco Road<br>Mokelumne Hill, CA 95245</div>
-          <div class="prop-specs"><span>3 Bd</span><span>2 Ba</span><span>Single family</span></div>
-          <div class="prop-foot"><span class="prop-match">Listed by Sara</span><span class="label-cap" style="color:var(--ink-faint);">Plate I</span></div>
-        </div>
-      </a>
-      <a href="featured-listings.html" class="prop-card">
-        <div class="prop-photo">
-          <img src="https://images.unsplash.com/photo-1600585154526-990dced4db0d?w=800&q=85" alt="">
-          <div class="prop-tags"><span class="pill-status pill-brass">Active</span></div>
-        </div>
-        <div class="prop-body">
-          <div class="prop-price">$529,000</div>
-          <div class="prop-address">214 Greenhorn Creek Way<br>Angels Camp, CA 95222</div>
-          <div class="prop-specs"><span>4 Bd</span><span>3 Ba</span><span>Golf community</span></div>
-          <div class="prop-foot"><span class="prop-match">Listed by Sara</span><span class="label-cap" style="color:var(--ink-faint);">Plate II</span></div>
-        </div>
-      </a>
-      <a href="featured-listings.html" class="prop-card">
-        <div class="prop-photo">
-          <img src="https://images.unsplash.com/photo-1502082553048-f009c37129b9?w=800&q=85" alt="">
-          <div class="prop-tags"><span class="pill-status pill-warm">Land</span></div>
-        </div>
-        <div class="prop-body">
-          <div class="prop-price">$33,000</div>
-          <div class="prop-address">1350 Love Street<br>Angels Camp, CA 95222</div>
-          <div class="prop-specs"><span>Land</span><span>0.4 ac</span><span>In-town</span></div>
-          <div class="prop-foot"><span class="prop-match">Listed by Sara</span><span class="label-cap" style="color:var(--ink-faint);">Plate III</span></div>
-        </div>
-      </a>
+    <!-- Live MLS listings in Angels Camp — iHomeFinder search filtered by city.
+         Replaces the old hardcoded placeholder cards (fake stock listings). -->
+    <div class="idx-embed idx-town-feed">
+      <script>
+        document.currentScript.replaceWith(ihfKestrel.render({
+          "component": "featuredListingSearchWidget",
+          "city": "Angels Camp",
+          "status": ["active", "pending"],
+          "sort": "ds",
+          "resultsPerPage": 12
+        }));
+      </script>
     </div>
 
     <div style="text-align:center; margin-top:40px;">
