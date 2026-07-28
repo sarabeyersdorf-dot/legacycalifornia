@@ -681,20 +681,24 @@ export default async function handler(req, res) {
     // Preserve, across the re-sync, the done checkmark AND the agents'
     // note-back-to-briefing + attention flag (matched by agent|client|title),
     // so a re-sync never wipes an agent's feedback.
+    // Scope to the rows THIS sync owns: source='briefing' AND source_key IS NULL.
+    // Keyed briefing rows (bulkSync 'brief:*') and auto rows ('auto:*') are
+    // managed by their own insert-only pipelines — the wholesale wipe below must
+    // not touch them, or a checked-off keyed task reopens every hour.
     let hasFbCols = true, prior = [];
     {
       const r = await supa.from('agent_tasks')
         .select('agent, client, title, done, agent_note, attention, agent_note_by, agent_note_at')
-        .eq('source', 'briefing');
+        .eq('source', 'briefing').is('source_key', null);
       if (r.error) {
         hasFbCols = false;
-        const r2 = await supa.from('agent_tasks').select('agent, client, title, done').eq('source', 'briefing');
+        const r2 = await supa.from('agent_tasks').select('agent, client, title, done').eq('source', 'briefing').is('source_key', null);
         prior = r2.data || [];
       } else prior = r.data || [];
     }
     const keepBy = new Map(prior.map((t) => [sig(t.agent, t.client, t.title), t]));
 
-    await supa.from('agent_tasks').delete().eq('source', 'briefing');
+    await supa.from('agent_tasks').delete().eq('source', 'briefing').is('source_key', null);
     if (tasks.length) {
       const rows = tasks.map((t) => {
         const agent  = normAgent(t.agent);

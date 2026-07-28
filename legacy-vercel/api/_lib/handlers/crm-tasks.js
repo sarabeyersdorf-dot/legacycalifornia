@@ -48,7 +48,8 @@ export async function bulkSync(req, res) {
       note: (r.note || '').toString().slice(0, 600) || null,
       due_label: (r.due_label || 'Today').toString().slice(0, 40),
       done: false,
-      source_key: r.source_key.toString().slice(0, 120)
+      source: 'briefing',   // Cowork's own tasks — read back via briefing-feedback
+      source_key: r.source_key.toString().slice(0, 120)   // keyed, so the sync-deals wipe skips them
     }));
   if (!clean.length) return ok(res, { created: 0, skipped: rows.length });
   const keys = clean.map((r) => r.source_key);
@@ -230,7 +231,10 @@ export async function autoSync(req, res) {
   const have = new Set((existing || []).map((e) => e.source_key));
   const fresh = rows.filter((r) => !have.has(r.source_key));
   if (fresh.length) {
-    const { error } = await supa.from('agent_tasks').insert(fresh);
+    // source:'auto' keeps these out of the deals.json 'briefing' lane, so the
+    // hourly sync-deals wipe can't delete them (and they self-heal via the sweep
+    // above). Without this, a checked-off auto task reopened every hour.
+    const { error } = await supa.from('agent_tasks').insert(fresh.map((r) => ({ ...r, source: 'auto' })));
     if (error) return fail(res, 500, error.message);
   }
   return ok(res, { created: fresh.length, considered: rows.length, auto_completed: autoCompleted,
