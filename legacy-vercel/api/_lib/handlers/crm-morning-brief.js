@@ -175,13 +175,17 @@ export default async function handler(req, res) {
     // Fail-soft: the brief must load even if the curate tables are missing.
     result.collection_nudges = [];
     try {
-      const { data: colls } = await supa
+      let cq = supa
         .from('curated_collections')
         .select('id, title, share_token, client_lead_id, updated_at, leads(first_name,last_name)')
         .eq('status', 'active')
         .not('client_lead_id', 'is', null)
         .order('updated_at', { ascending: false })
         .limit(8);
+      // James sees only his own collection nudges (he can't open Sara's); the
+      // broker sees both, and can now open either from the curate view.
+      if (profile.role === 'agent_james') cq = cq.eq('agent', 'james');
+      const { data: colls } = await cq;
       for (const c of (colls || [])) {
         const { data: pushRows } = await supa.from('messages')
           .select('created_at')

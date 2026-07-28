@@ -32,10 +32,13 @@ export default async function handler(req, res) {
 
   const supa  = adminClient();
   const agent = agentKey(profile);
+  // The broker-owner (Sara / admin) oversees both agents' collections — so she
+  // can open a nudge for James's client. James stays scoped to his own.
+  const broker = profile.role === 'agent_sara' || profile.role === 'admin';
 
   try {
-    if (req.method === 'GET' && req.query?.id) return getOne(supa, agent, req.query.id, res);
-    if (req.method === 'GET')                  return listAll(supa, agent, res);
+    if (req.method === 'GET' && req.query?.id) return getOne(supa, agent, broker, req.query.id, res);
+    if (req.method === 'GET')                  return listAll(supa, agent, broker, res);
     if (req.method === 'POST')                 return postAction(supa, agent, req, res);
     if (req.method === 'PATCH')                return patchCollection(supa, agent, req, res);
     if (req.method === 'DELETE')               return deleteCollection(supa, agent, req, res);
@@ -45,16 +48,17 @@ export default async function handler(req, res) {
   }
 }
 
-async function listAll(supa, agent, res) {
-  const { data, error } = await supa
+async function listAll(supa, agent, broker, res) {
+  let q = supa
     .from('curated_collections')
-    .select('id, title, status, share_token, client_lead_id, intro_note, created_at, updated_at, leads(first_name,last_name), collection_listings(included), collection_reactions(id)')
-    .eq('agent', agent)
+    .select('id, title, status, share_token, client_lead_id, agent, intro_note, created_at, updated_at, leads(first_name,last_name), collection_listings(included), collection_reactions(id)')
     .order('updated_at', { ascending: false });
+  if (!broker) q = q.eq('agent', agent);
+  const { data, error } = await q;
   if (error) return fail(res, 500, error.message);
   const collections = (data || []).map((c) => ({
     id: c.id, title: c.title, status: c.status, share_token: c.share_token,
-    client_lead_id: c.client_lead_id,
+    client_lead_id: c.client_lead_id, agent: c.agent || null,
     client_name: c.leads ? [c.leads.first_name, c.leads.last_name].filter(Boolean).join(' ') : null,
     included_count: (c.collection_listings || []).filter((l) => l.included).length,
     listing_count:  (c.collection_listings || []).length,
@@ -65,11 +69,13 @@ async function listAll(supa, agent, res) {
   return ok(res, { collections });
 }
 
-async function getOne(supa, agent, id, res) {
-  const { data: c, error } = await supa
+async function getOne(supa, agent, broker, id, res) {
+  let q = supa
     .from('curated_collections')
     .select('*, leads(first_name,last_name,email,phone)')
-    .eq('id', id).eq('agent', agent).maybeSingle();
+    .eq('id', id);
+  if (!broker) q = q.eq('agent', agent);
+  const { data: c, error } = await q.maybeSingle();
   if (error) return fail(res, 500, error.message);
   if (!c)    return fail(res, 404, 'collection not found');
 
