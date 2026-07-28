@@ -308,14 +308,37 @@ export default async function handler(req, res) {
         const s = /^(\d{4}-\d{2}-\d{2})/.exec(String(d || ''));
         return s ? new Date(s[1] + 'T12:00:00Z').toLocaleDateString('en-US', { month: 'short', day: 'numeric', timeZone: 'UTC' }) : '';
       };
-      road = deal.milestones.map((m) => ({
-        date: msLabel(m && m.date),
-        label: sanitize((m && m.label) || ''),
-        description: sanitize((m && (m.desc || m.description)) || ''),
-        status: ['done', 'next', 'upcoming', 'key'].includes(m && m.status) ? m.status : 'upcoming',
-        badge: sanitize((m && m.badge) || ''),
-        col: (m && m.col) || null
-      }));
+      // Safety net for a stale "Delayed" close: authored milestone text can lag
+      // reality (a COE slips, then un-slips, but Cowork hasn't rewritten the
+      // badge yet). If a closing milestone still reads "Delayed" but the deal's
+      // COE is actually today or in the future, show a current state instead so
+      // the seller never sees a contradiction. Pacific calendar-day comparison.
+      const laToday = new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Los_Angeles', year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date());
+      const dayNum = (s) => Date.UTC(+String(s).slice(0, 4), +String(s).slice(5, 7) - 1, +String(s).slice(8, 10));
+      const coeStr = deal.coe_date ? String(deal.coe_date).slice(0, 10) : null;
+      const coeDays = coeStr ? Math.round((dayNum(coeStr) - dayNum(laToday)) / 86400000) : null;
+      road = deal.milestones.map((m) => {
+        const item = {
+          date: msLabel(m && m.date),
+          label: sanitize((m && m.label) || ''),
+          description: sanitize((m && (m.desc || m.description)) || ''),
+          status: ['done', 'next', 'upcoming', 'key'].includes(m && m.status) ? m.status : 'upcoming',
+          badge: sanitize((m && m.badge) || ''),
+          col: (m && m.col) || null
+        };
+        const isClosing = item.col === 'closing' || /close of escrow|escrow clos|closing/i.test(item.label);
+        const looksDelayed = /delay/i.test(item.badge) || /delay/i.test(item.description);
+        if (isClosing && looksDelayed && item.status !== 'done' && coeDays != null && coeDays >= 0) {
+          item.badge = coeDays === 0 ? 'Closing today' : 'On track';
+          if (/delay/i.test(item.description)) {
+            const coeLabel = coeStr ? msLabel(coeStr) : '';
+            item.description = coeDays === 0
+              ? `On track to close today${coeLabel ? ` (${coeLabel})` : ''}.`
+              : `On track to close${coeLabel ? ` ${coeLabel}` : ''}.`;
+          }
+        }
+        return item;
+      });
     }
 
     // Next: the curated deal_timeline_items (rich contractual timeline) for a deal
