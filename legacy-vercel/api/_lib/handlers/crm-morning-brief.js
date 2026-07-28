@@ -303,9 +303,12 @@ export default async function handler(req, res) {
     // behind a "—" in the CRM. Surface it so it gets fixed. Fail-soft.
     result.data_gaps = [];
     try {
+      // Only flag ACTIVE escrows (pending) missing a price — that's an actionable
+      // data gap. Closed deals are excluded: a past close needs no attention, and
+      // pre-CRM closed imports would otherwise clutter "What's happening" forever.
       let dq = supa.from('deals')
         .select('source_key, address, city, stage, agent')
-        .in('stage', ['pending', 'closed'])
+        .eq('stage', 'pending')
         .is('list_price', null).is('sale_price', null)
         .limit(25);
       if (profile.role === 'agent_james') dq = dq.eq('agent', 'james');

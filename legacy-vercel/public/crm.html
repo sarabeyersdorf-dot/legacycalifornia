@@ -3452,6 +3452,9 @@ function selectLead(el) {
   }
 
   // ---- open / render a collection -----------------------------------------
+  // Let the morning-brief collection nudge deep-link straight to a client's
+  // collection (it lives in a different script), instead of just switching tabs.
+  window.LegacyCurate = { open: function (id) { if (!id) return; ensureLoaded(); openCollection(id); } };
   function openCollection(id) {
     api('collections?id=' + encodeURIComponent(id)).then(function (r) {
       if (!r.ok) { alert((r.j && r.j.error) || 'Could not open collection'); return; }

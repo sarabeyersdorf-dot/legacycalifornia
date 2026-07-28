@@ -651,6 +651,10 @@
       needs.appendChild(card);
       card.querySelector('[data-open-curate]').addEventListener('click', () => {
         if (typeof window.showView === 'function') window.showView(null, 'curate');
+        // Open THIS client's collection, not just the Curate tab.
+        if (n.collection_id && window.LegacyCurate && window.LegacyCurate.open) {
+          setTimeout(() => window.LegacyCurate.open(n.collection_id), 80);
+        }
       });
     });
 
