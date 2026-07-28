@@ -264,6 +264,33 @@ Preparing-to-list tab). Everything is optional; include what you have:
 Future listings you're tracking before they hit the market: set the deal
 `"stage": "preparing"` — they appear under the roster's **Preparing** tab.
 
+## 2c. Commission — populate it on EVERY active deal (buyer AND seller side)
+
+The Today page's **"Closing soon"** panel and its expected-income totals need a
+commission per deal. Put a top-level **`"commission"`** on the deal (works for
+buyer-side too — it does NOT have to be inside the `listing` block):
+
+```json
+{ "id": "7230-latigo", "side": "buyer", "salePrice": 615000,
+  "commission": "2.5%" }        // percent of price → CRM computes the dollars
+```
+
+- **Where to read it:** the **accepted offer / RPA** carries the buyer-broker
+  compensation (buyer side); the **listing agreement** carries the listing
+  commission (seller side). Pull it from those executed docs.
+- **Percent or dollars — both work.** `"2.5%"` (a `%` or a bare number ≤ 100) is
+  a percent applied to the sale price. `"$15,375"` (a `$` or a number > 100) is a
+  flat dollar amount — use this straight off the **commission demand you send to
+  escrow** when you want the exact figure rather than a computed estimate.
+- A deal with no `commission` shows **"commission n/a"** and is left out of the
+  income totals — so fill it in for every active escrow.
+- **⚠ Backfill this now** alongside the contingency backfill: set `commission`
+  on all five active escrows (e.g. **7230 Latigo → its buyer-broker % from the
+  accepted offer**, or the exact dollars from Sara's commission demand).
+- **While you're in Latigo:** its `timeline.coeNote` is **stale** — it still says
+  "COE DELAYED … revised date TBD," but Latigo now closes **7/28**. Clear or
+  rewrite that note so it doesn't contradict the live COE date.
+
 ## 3. Documents in the client portal
 
 ### The simple way — just drop the files in (use this for most transactions)

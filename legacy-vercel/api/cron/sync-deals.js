@@ -81,8 +81,12 @@ function docStatus(val) {
 function mergeMeta(d) {
   const base = d.listing || d.listingMeta || null;
   const client = d.client || d.clientName || (base && base.client) || null;
-  if (!base && !client) return null;
-  return { ...(base || {}), ...(client ? { client } : {}) };
+  // A top-level `commission` folds in so BUYER-side deals (no listing block)
+  // carry one too — it's the buyer-broker comp from the accepted offer. Accepts
+  // a percent ("2.5%") or a flat dollar amount from the commission demand.
+  const commission = d.commission ?? (base && base.commission) ?? null;
+  if (!base && !client && commission == null) return null;
+  return { ...(base || {}), ...(client ? { client } : {}), ...(commission != null ? { commission } : {}) };
 }
 
 function mapDeal(d) {

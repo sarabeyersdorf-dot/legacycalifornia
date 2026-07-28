@@ -570,10 +570,20 @@ function shapeDealsInMotion(deals) {
           : 'Closing overdue')
       : (isOffer ? (d.side === 'buyer' ? 'Offer out' : 'Offer in') : 'On market');
     const agentName = d.agent === 'james' ? 'James' : 'Sara';
-    // Commission (internal): percent from listing_meta against the live price.
+    // Commission (internal). The value may be a PERCENT ("2.5%" / "2.5") applied
+    // to the price, or a flat DOLLAR amount ("$15,375" / 15375) straight off the
+    // commission demand. Heuristic: a "%" or a bare number ≤ 100 is a percent;
+    // a "$" or a number > 100 is a dollar figure.
     const commRaw = d.listing_meta && d.listing_meta.commission;
-    const commPct = commRaw != null ? parseFloat(String(commRaw)) : null;
-    const commUsd = (price && commPct != null && Number.isFinite(commPct)) ? Math.round(price * commPct / 100) : null;
+    let commPct = null, commUsd = null;
+    if (commRaw != null && String(commRaw).trim() !== '') {
+      const s = String(commRaw).trim();
+      const num = parseFloat(s.replace(/[^0-9.]/g, ''));
+      if (Number.isFinite(num)) {
+        if (/\$/.test(s) || (!/%/.test(s) && num > 100)) commUsd = Math.round(num);
+        else { commPct = num; commUsd = price ? Math.round(price * num / 100) : null; }
+      }
+    }
     return {
       lead_id:     d.source_key,
       lead_name:   `${sideLabel(d.side)} · ${agentName}`,
