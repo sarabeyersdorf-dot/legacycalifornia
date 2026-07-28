@@ -306,6 +306,7 @@
           .dl-client { font-size:12px; color:oklch(0.52 0.01 60); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
           .dl-statusdot { width:5px; height:5px; flex:none; border-radius:50%; }
           .dl-status { font-size:12px; color:oklch(0.5 0.01 60); white-space:nowrap; }
+          .dl-docgap { font-size:10.5px; font-weight:600; letter-spacing:.02em; color:#9B2C2C; background:oklch(0.6 0.16 25 / 0.12); border:1px solid oklch(0.6 0.16 25 / 0.28); border-radius:3px; padding:1px 6px; white-space:nowrap; cursor:pointer; }
           .dl-parties { font-size:11px; color:oklch(0.5 0.01 60); margin-top:4px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:100%; }
           .dl-touchline { display:flex; align-items:center; gap:7px; margin-top:4px; }
           .dl-touch { font-size:12px; color:oklch(0.55 0.01 60); }
@@ -434,7 +435,7 @@
             h+='<div class="dl-deal"><div class="dl-spine" style="background:'+S.solid+'"></div>';
             h+='<span class="dl-avatar" style="background:'+S.soft+';color:'+S.deep+'">'+esc(initialsOf(d.client))+'</span><div style="min-width:0">';
             h+='<div class="dl-addr" data-open="'+esc(d.id)+'" title="Open this deal’s page">'+esc(d.address)+'</div>';
-            h+='<div class="dl-clientline"><span class="dl-client">'+esc(d.client)+'</span><span class="dl-statusdot" style="background:'+sk.c+'"></span><span class="dl-status">'+esc(sk.label)+'</span></div>';
+            h+='<div class="dl-clientline"><span class="dl-client">'+esc(d.client)+'</span><span class="dl-statusdot" style="background:'+sk.c+'"></span><span class="dl-status">'+esc(sk.label)+'</span>'+((d.docs_missing||0)>0?'<span class="dl-docgap" data-open="'+esc(d.id)+'" title="'+d.docs_missing+' required document'+(d.docs_missing>1?'s':'')+' not on file — open the deal to see which">'+d.docs_missing+' doc'+(d.docs_missing>1?'s':'')+' missing</span>':'')+'</div>';
             h+='<div class="dl-touchline"><span class="dl-touch">Last touch '+fmt(d.lastTouch)+'</span>';
             if(stale){ var sc=sd>=14?'oklch(0.55 0.16 25)':'oklch(0.55 0.12 65)'; h+='<span class="dl-stale" style="color:'+sc+';background:'+alpha(sd>=14?'oklch(0.6 0.16 25)':'oklch(0.6 0.12 65)',0.12)+'">'+sd+'d quiet</span>'; }
             h+='</div>';
@@ -1848,10 +1849,12 @@
     .cc-tl-item .s { font-size: 11px; color: var(--ink-mute); }
     .cc-tl-item.done .s { color: #2E5C3D; }
     .cc-doc { display: flex; gap: 8px; align-items: baseline; padding: 5px 0; font-family: var(--sans); font-size: 13.5px; }
-    .cc-doc .ok { color: #2E5C3D; } .cc-doc .no { color: var(--ink-faint); } .cc-doc .cal { color: var(--brass); }
+    .cc-doc .ok { color: #2E5C3D; } .cc-doc .no { color: var(--ink-faint); } .cc-doc .cal { color: var(--brass); } .cc-doc .gap { color: #9B2C2C; font-weight: 700; }
     .cc-doc .st { font-size: 11px; color: var(--ink-mute); }
+    .cc-doc .st.miss { color: #9B2C2C; font-weight: 600; }
     .cc-doc-h { font-family: var(--sans); font-size: 10.5px; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; color: var(--ink-mute); margin: 10px 0 4px; }
     .cc-doc-h.out { color: #8A2C3B; }
+    .cc-doc-h.miss { color: #9B2C2C; }
     .cc-empty { font-family: var(--sans); font-size: 13px; color: var(--ink-mute); padding: 6px 0; }
     </style>
     <!-- PEOPLE / ROSTER VIEW — browsable lists behind Leads/Clients/Past/Sphere -->
@@ -2368,11 +2371,13 @@
             var dx = root.querySelector('[data-cc-docs]');
             if (dx) {
               var docs = (j && j.documents) || [];
-              var recv = docs.filter(function(d){ return ['signed','on_file','received'].indexOf(d.status)>=0 || !d.status; });
-              var out  = docs.filter(function(d){ return recv.indexOf(d)<0; });
+              var recv = docs.filter(function(d){ return ['signed','on_file','received'].indexOf(d.status)>=0 || (!d.status && d.status !== 'missing'); });
+              var miss = docs.filter(function(d){ return d.status === 'missing'; });
+              var out  = docs.filter(function(d){ return recv.indexOf(d)<0 && miss.indexOf(d)<0; });
               dx.innerHTML = docs.length
                 ? ('<div class="cc-doc-h">On file · '+recv.length+'</div>' + recv.map(function(d){ return '<div class="cc-doc"><span class="ok">✓</span>'+esc(d.name)+'</div>'; }).join('')
-                  + (out.length ? '<div class="cc-doc-h out">Outstanding · '+out.length+'</div>' + out.map(function(d){ return '<div class="cc-doc"><span class="no">○</span>'+esc(d.name)+' <span class="st">'+esc(d.status||'')+'</span></div>'; }).join('') : ''))
+                  + (miss.length ? '<div class="cc-doc-h miss">Not on file · '+miss.length+'</div>' + miss.map(function(d){ return '<div class="cc-doc"><span class="gap">✗</span>'+esc(d.name)+' <span class="st miss">missing</span></div>'; }).join('') : '')
+                  + (out.length ? '<div class="cc-doc-h out">In progress · '+out.length+'</div>' + out.map(function(d){ return '<div class="cc-doc"><span class="no">○</span>'+esc(d.name)+' <span class="st">'+esc(d.status||'')+'</span></div>'; }).join('') : ''))
                 : '<div class="cc-empty">No documents recorded for this deal yet.</div>';
             }
             var lk = root.querySelector('[data-cc-linked]');

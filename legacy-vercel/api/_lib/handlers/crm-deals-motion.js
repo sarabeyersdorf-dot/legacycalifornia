@@ -103,11 +103,13 @@ export default async function handler(req, res) {
     const endISO   = new Date(nowMs + 120 * 86400000).toISOString(); // ~4 months forward
 
     // 2. Parallel enrichment queries (each fail-soft) -----------------------
-    const [partiesRes, itemsRes, toursRes, apptRes] = await Promise.all([
+    const [partiesRes, itemsRes, docsRes, toursRes, apptRes] = await Promise.all([
       supa.from('deal_parties').select('deal_id, lead_id, role').in('deal_id', dealIds),
       supa.from('deal_timeline_items')
         .select('deal_id, title, due_date, status, kind')
         .in('deal_id', dealIds).eq('kind', 'contingency')
+        .then((r) => r, () => ({ data: [] })),
+      supa.from('deal_documents').select('deal_id').eq('status', 'missing').in('deal_id', dealIds)
         .then((r) => r, () => ({ data: [] })),
       supa.from('tours')
         .select('id, lead_id, scheduled_at, duration_minutes, tour_type, status, notes, leads(first_name,last_name), properties(address)')
@@ -130,6 +132,12 @@ export default async function handler(req, res) {
     }
     appts = appts || [];
     const tours = toursRes?.data || [];
+
+    // Missing-document count per deal (compliance file gaps → 'missing' rows).
+    const docsMissingByDeal = new Map();
+    for (const row of (docsRes?.data || [])) {
+      docsMissingByDeal.set(row.deal_id, (docsMissingByDeal.get(row.deal_id) || 0) + 1);
+    }
 
     // lead_id → deal_id (first party wins), and per-deal client name ---------
     const leadToDeal = new Map();
@@ -247,6 +255,7 @@ export default async function handler(req, res) {
         contingencies: contingencies.length ? contingencies : null,
         events: events.length ? events.map((e) => ({ label: e.label, vendor: e.vendor, iso: e.iso, time: e.time, state: e.state, kind: e.kind })) : null,
         next_event: nextEvent ? { label: nextEvent.label, iso: nextEvent.iso } : null,
+        docs_missing:  docsMissingByDeal.get(d.id) || 0,
         // People + escrow (deals.json prose merged with the agent's overlay).
         parties:       resolveParties(d),
         party_summary: partySummary(resolveParties(d))

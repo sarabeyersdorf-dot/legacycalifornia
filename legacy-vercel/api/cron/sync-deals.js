@@ -159,18 +159,21 @@ function mapDocs(dealId, d) {
     const rawState = isObj ? (val.status ?? val.state ?? val.value) : val;
     const url      = isObj ? (val.url || val.link || val.href || val.file || null) : null;
     const status = docStatus(rawState);
-    if (!status) continue;
     const base = token.split('_')[0];
     const label = DOC_LABELS[token] || DOC_LABELS[base];
     if (!label) continue;                       // no human name → skip (never raw keys)
+    // A null/empty value in the compliance map means Cowork expects this doc but
+    // it is NOT on file yet → surface it as 'missing' (was silently dropped),
+    // internal-only, so the CRM shows the same file-gap the briefing does.
+    const missing = !status;
     out.push({
       deal_id: dealId,
       doc_type: base.slice(0, 12),
       name: label[0],
       sub: label[1] || null,
-      status,
+      status: status || 'missing',
       doc_url: url ? String(url) : null,         // link to the executed document, if provided
-      client_safe: !hasFlat,                     // hidden from the portal once a curated list exists
+      client_safe: missing ? false : !hasFlat,   // missing docs never reach the portal
       updated_at: new Date().toISOString()
     });
   }

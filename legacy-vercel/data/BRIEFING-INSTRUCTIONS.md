@@ -286,6 +286,30 @@ A value can also carry a link: `{ "status": "signed", "url": "…" }`. Use this
 only when Sara is tracking document *status*; for "just show the client the
 files," use `clientDocuments` above.
 
+**Missing documents — set the token to `null`.** The CRM now surfaces file
+gaps: any known document token you include with a **null** (or empty) value is
+shown as **"Not on file"** in that deal's Command Center Documents panel, and
+the deal's ledger row gets a red **"N docs missing"** chip. This is how your
+compliance scan (e.g. "433 is missing TDS, SPQ, NHD, AVID, FHDS") becomes
+visible and actionable inside the CRM instead of only in the briefing. So when
+a required disclosure/document is expected but not yet in the Ex folder, include
+its token with `null` rather than omitting it:
+
+```json
+"docs": {
+  "RPA": "executed",
+  "TDS": null,        // expected, not on file → shows as "Not on file"
+  "SPQ": null,
+  "AVID": "received"
+}
+```
+
+Only tokens with a human label are shown (RPA, TDS, SPQ, NHD, AVID, FHDS/WFA,
+EMD, prelim, contingencyRemoval, etc. — the same vocabulary you already use).
+A token you omit entirely is treated as "not tracked," not "missing" — so to
+flag a gap, null it explicitly. Once the document lands, change the value to its
+status (`"received"`, `"signed"`, …) and the gap clears automatically.
+
 ## 3b. Portal visibility — what you own vs. the CRM's live toggles
 
 There are two ways things reach a client's portal, and they don't overlap —
