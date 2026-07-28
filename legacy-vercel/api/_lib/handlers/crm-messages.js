@@ -44,7 +44,7 @@ export default async function handler(req, res) {
   try {
     // 1. Inbound rows from `messages` (portal / email) ----------------------
     let mq = supa.from('messages')
-      .select('id, lead_id, direction, channel, body, subject, created_at, leads(first_name, last_name, phone)')
+      .select('id, lead_id, direction, channel, body, subject, created_at, leads(first_name, last_name, phone, assigned_agent)')
       .eq('direction', 'inbound')
       .order('created_at', { ascending: false }).limit(limit);
     if (since) mq = mq.gt('created_at', since);
@@ -65,8 +65,8 @@ export default async function handler(req, res) {
     const contactIds = [...new Set(dealRows.map((r) => r.contact_id).filter(Boolean))];
     const nameById = new Map();
     if (contactIds.length) {
-      const { data: leadRows } = await supa.from('leads').select('id, first_name, last_name, phone').in('id', contactIds);
-      for (const l of (leadRows || [])) nameById.set(l.id, { name: [l.first_name, l.last_name].filter(Boolean).join(' '), phone: l.phone });
+      const { data: leadRows } = await supa.from('leads').select('id, first_name, last_name, phone, assigned_agent').in('id', contactIds);
+      for (const l of (leadRows || [])) nameById.set(l.id, { name: [l.first_name, l.last_name].filter(Boolean).join(' '), phone: l.phone, agent: l.assigned_agent || null });
     }
 
     const feed = [];
@@ -83,6 +83,7 @@ export default async function handler(req, res) {
         lead_id: m.lead_id || null,
         name: name || (lead.phone || null),
         phone: lead.phone || null,
+        agent: lead.assigned_agent || null,   // whose client → who should handle it
         preview: preview(m.subject ? `${m.subject} — ${m.body}` : m.body, 160),
         created_at: m.created_at,
         status: 'active',
@@ -105,6 +106,7 @@ export default async function handler(req, res) {
         lead_id: d.contact_id || null,
         name: (info && info.name) || d.raw_phone_number || null,
         phone: (info && info.phone) || d.raw_phone_number || null,
+        agent: (info && info.agent) || null,   // whose client → who should handle it
         preview: preview(body, 160),
         created_at: d.created_at,
         status: d.status || 'active',

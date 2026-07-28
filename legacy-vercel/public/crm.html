@@ -784,6 +784,7 @@
     .msg-time { font-size: 12px; color: var(--ink-faint); margin-left: auto; white-space: nowrap; flex: none; }
     .msg-preview { font-size: 13.5px; color: var(--ink-soft); margin-top: 3px; line-height: 1.45; }
     .msg-triage { font-family: var(--mono); font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: #8B3A3A; border: 1px solid #d9b7b7; background: #fbeeee; padding: 1px 7px; border-radius: 3px; margin-left: 6px; }
+    .msg-agent { flex: none; font-family: var(--mono); font-size: 10px; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-mute); background: var(--vellum); border: 1px solid var(--rule); padding: 1px 7px; border-radius: 3px; }
     .msg-dot { width: 7px; height: 7px; border-radius: 50%; background: #8B3A3A; flex: none; margin-top: 8px; }
     @media (max-width: 900px) { .msgs { padding: 18px; } }
     </style>
@@ -827,14 +828,17 @@
       function unreadCount(){ return state.rows.filter(isUnread).length; }
       function setBadge(n){ var el = document.querySelector('[data-msg-unread]'); if (!el) return; if (n>0){ el.textContent = n>9?'9+':String(n); el.style.display=''; } else { el.style.display='none'; } }
 
+      function agentName(a){ a=String(a||'').toLowerCase(); return a==='james'?'James':a==='both'?'Both':a==='sara'?'Sara':''; }
       function rowHTML(r){
         var c = CHAN[r.channel] || CHAN.sms;
         var unread = isUnread(r);
         var triage = r.needs_review ? '<span class="msg-triage">Unknown #</span>' : '';
+        var who = agentName(r.agent);
+        var whoTag = who ? '<span class="msg-agent" title="This client is handled by '+esc(who)+'">for '+esc(who)+'</span>' : '';
         return '<div class="msg-item'+(unread?' unread':'')+'" data-msg-key="'+esc(r.key||'')+'" data-msg-lead="'+esc(r.lead_id||'')+'" data-msg-source="'+esc(r.source||'')+'" data-msg-review="'+(r.needs_review?'1':'')+'">'
           + (unread ? '<span class="msg-dot"></span>' : '<span style="width:7px;flex:none;"></span>')
           + '<span class="msg-chan" style="background:'+c.bg+';color:'+c.fg+';">'+c.label+'</span>'
-          + '<div class="msg-body"><div class="msg-top"><span class="msg-name">'+esc(r.name||'Unknown')+triage+'</span><span class="msg-time">'+ago(r.created_at)+'</span></div>'
+          + '<div class="msg-body"><div class="msg-top"><span class="msg-name">'+esc(r.name||'Unknown')+triage+'</span>'+whoTag+'<span class="msg-time">'+ago(r.created_at)+'</span></div>'
           + '<div class="msg-preview">'+esc(r.preview||'(no text)')+'</div></div>'
           + '<button class="msg-del" type="button" data-msg-del aria-label="Delete message" title="Delete this message" style="flex:none;align-self:center;margin-left:6px;background:transparent;border:none;color:#B8AE97;font-size:20px;line-height:1;cursor:pointer;padding:4px 8px;border-radius:4px;">&times;</button>'
           + '</div>';
