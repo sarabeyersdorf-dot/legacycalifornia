@@ -7,7 +7,6 @@
 <link rel="stylesheet" href="legacy.css">
 <link rel="stylesheet" href="town.css">
 <link rel="stylesheet" href="idx-theme.css">
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
 <link rel="stylesheet" href="town-map.css">
 <style>.town-hero .th-veil{background-image:linear-gradient(180deg,rgba(27,24,19,0.72) 0%,rgba(27,24,19,0.68) 30%,rgba(27,24,19,0.40) 52%,rgba(27,24,19,0.54) 74%,rgba(27,24,19,0.86) 100%)}.town-hero .th-eyebrow .eyebrow{color:#E3C489;text-shadow:0 1px 3px rgba(27,24,19,0.75)}.town-hero .th-title,.town-hero .th-tag{text-shadow:0 2px 10px rgba(27,24,19,0.55)}</style>
 <script src="https://kestrel.idxhome.com/ihf-kestrel.js"></script>
@@ -298,50 +297,15 @@
         <span class="eyebrow">Plate III · A driving diagram</span>
         <h2 class="h-section" style="margin-top:10px;">One road,<br><em>twenty-six stops.</em></h2>
       </div>
-      <p class="lede right">Shenandoah Road runs northeast out of Plymouth and doesn't stop being interesting for nine miles. Hover any pin. Filter by what you're after.</p>
+      <p class="lede right">Shenandoah Road runs northeast out of Plymouth and doesn't stop being interesting for nine miles.</p>
     </div>
 
-    <div class="mainst-filters">
-      <button class="ms-filter ms-on" data-cat="all">All <span class="ct">26</span></button>
-      <button class="ms-filter" data-cat="wine">Wineries <span class="ct">14</span></button>
-      <button class="ms-filter" data-cat="eat">Eat <span class="ct">4</span></button>
-      <button class="ms-filter" data-cat="stay">Stay <span class="ct">4</span></button>
-      <button class="ms-filter" data-cat="shop">Shop <span class="ct">2</span></button>
-      <button class="ms-filter" data-cat="do">Do <span class="ct">2</span></button>
-    </div>
-
-    <div class="ms-source" id="msSource" style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin:0 0 18px;padding-bottom:16px;border-bottom:1px solid var(--rule);">
-      <span class="label-cap" style="color:var(--ink-mute);">Map source —</span>
-      <div style="display:flex;gap:8px;">
-        <button class="ms-filter ms-on" data-src="legacy">Legacy field notes</button>
-        <button class="ms-filter" data-src="ava">Amador Vintners · 50+ wineries</button>
-      </div>
-      <span class="mono" style="font-size:10px;color:var(--ink-faint);margin-left:auto;">Second view courtesy of the <a href="https://amadorwine.com/winery-map/" target="_blank" rel="noopener" style="color:var(--brass);">Amador County Vintners Association</a></span>
-    </div>
-
-    <div class="tm-editor" id="tmEditor">
-      <span class="tm-editor-lead">Drag any pin to its true location. <strong>Your placements save in this browser.</strong> When the map looks right, hit Copy coordinates and send them over to publish for everyone.</span>
-      <div class="tm-editor-actions">
-        <button class="tm-btn ghost" data-act="reset">Reset pins</button>
-        <button class="tm-btn" data-act="copy">Copy coordinates</button>
-      </div>
-      <span class="tm-editor-msg"></span>
-    </div>
-    <div class="mainst-board">
-      <div class="mainst-map mainst-map--live" id="mainstMap"><div id="townMapCanvas" class="town-map-canvas"></div></div>
-      <div class="mainst-map" id="avaMap" style="display:none;padding:0;overflow:hidden;"><iframe title="Amador County Winery Locator" src="https://www.google.com/maps/d/embed?mid=1IUYbszCa-K5pIk8YfmXbwHFeQ-n1Tec&amp;ehbc=2E312F" style="width:100%;height:100%;min-height:560px;border:0;display:block;" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe></div>
-      <aside class="mainst-rail">
-        <div class="ms-rail-head">
-          <span class="label-cap">Detail</span>
-          <span class="mono" id="msCount" style="font-size:10px;color:var(--ink-faint);">26 places</span>
-        </div>
-        <div class="ms-rail-card" id="msRailCard">
-          <span class="ms-rail-tag" id="msTag">Hover the map</span>
-          <h3 class="ms-rail-name" id="msName">Nine miles of<br>somebody's life work.</h3>
-          <p class="ms-rail-desc" id="msDesc">Filter by category, hover any pin, or — if you'd rather we just built you an itinerary — <a href="#letter" style="color:var(--brass); text-decoration: underline;">drop us a line</a>.</p>
-          <ul class="ms-rail-list" id="msList"></ul>
-        </div>
-      </aside>
+        <div class="mainst-map mainst-map--live">
+      <iframe
+        title="Amador County winery map — Amador Vintners"
+        src="https://www.google.com/maps/d/embed?mid=1IUYbszCa-K5pIk8YfmXbwHFeQ-n1Tec&ehbc=2E312F"
+        style="width:100%;height:100%;border:0;display:block;"
+        loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
     </div>
   </div>
 </section>
@@ -814,28 +778,5 @@
 </footer>
 
 <script src="town.js"></script>
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
-<script src="town-map.js"></script>
-<script>
-(function(){
-  var wrap=document.getElementById('msSource'); if(!wrap) return;
-  var legacy=document.getElementById('mainstMap'), ava=document.getElementById('avaMap'),
-      editor=document.getElementById('tmEditor'), filters=document.querySelector('.mainst-filters'),
-      rail=document.querySelector('.mainst-rail'), board=document.querySelector('.mainst-board');
-  wrap.addEventListener('click',function(e){
-    var b=e.target.closest('button[data-src]'); if(!b) return;
-    var isLegacy=b.dataset.src==='legacy';
-    wrap.querySelectorAll('button[data-src]').forEach(function(x){x.classList.toggle('ms-on',x===b);});
-    legacy.style.display=isLegacy?'':'none';
-    ava.style.display=isLegacy?'none':'';
-    if(editor) editor.style.display=isLegacy?'':'none';
-    if(filters) filters.style.display=isLegacy?'':'none';
-    if(rail) rail.style.display=isLegacy?'':'none';
-    if(board) board.style.gridTemplateColumns=isLegacy?'':'1fr';
-    if(isLegacy) window.dispatchEvent(new Event('resize'));
-  });
-})();
-</script>
-<script>LegacyTownMap.init({"town":"shenandoah-valley","center":[38.5137,-120.8163],"zoom":13,"unit":"places","catMeta":{"wine":{"label":"Winery","letter":"W","color":"#8C6E3D"},"eat":{"label":"Restaurant","letter":"E","color":"#5E7886"},"stay":{"label":"Stay","letter":"S","color":"#4F6B4A"},"shop":{"label":"Shop","letter":"P","color":"#A6824A"},"do":{"label":"To do","letter":"D","color":"#6E5732"}},"pois":[{"name":"Sobon Estate","cat":"wine","desc":"Organic estate in an 1856 stone cellar. Free tasting, and a museum you can drink in.","lat":38.5104,"lng":-120.7864},{"name":"Shenandoah Vineyards","cat":"wine","desc":"Sobon's sister label. Deep Amador Zin and an art-filled tasting room.","lat":38.5088,"lng":-120.7910},{"name":"Scott Harvey Wines","cat":"wine","desc":"Vineyard 1869 Zinfandel off the Grandpère vines, plus a benchmark Barbera.","lat":38.5060,"lng":-120.7990},{"name":"Story Winery","cat":"wine","desc":"1894 Mission vines on the edge of the Cosumnes canyon. Best picnic view in the valley.","lat":38.5030,"lng":-120.7620},{"name":"Vino Noceto","cat":"wine","desc":"Sangiovese specialists. Normale, Riserva, and the Frivolo Moscato.","lat":38.4991,"lng":-120.8230},{"name":"Andis Wines","cat":"wine","desc":"Modern steel-and-glass winery. Painted Fields and a serious Barbera.","lat":38.4990,"lng":-120.8290},{"name":"Bella Grace Vineyards","cat":"wine","desc":"Barbera done properly, plus a cave tasting that's cool in August.","lat":38.5147,"lng":-120.8168},{"name":"Helwig Winery","cat":"wine","desc":"Ridge-top amphitheater with a hundred-mile view. Summer concerts.","lat":38.5210,"lng":-120.8060},{"name":"Deaver Vineyards","cat":"wine","desc":"Sixth-generation family vineyard. Pond, lawn, old-vine Zin.","lat":38.5085,"lng":-120.7842},{"name":"Cooper Vineyards","cat":"wine","desc":"Barbera and Syrah under the oaks. Unfussy, family-run.","lat":38.5109,"lng":-120.7955},{"name":"Dobra Zemlja","cat":"wine","desc":"Cave tasting, big reds, and a pour that does not hold back.","lat":38.5115,"lng":-120.7885},{"name":"Terre Rouge / Easton","cat":"wine","desc":"Rhone varietals and old-vine Zin from one of the valley's founding producers.","lat":38.5070,"lng":-120.7770},{"name":"Amador Cellars","cat":"wine","desc":"Small family production. Estate Zin, Barbera, and a shaded patio.","lat":38.5030,"lng":-120.8175},{"name":"Jeff Runquist Wines","cat":"wine","desc":"Single-vineyard reds sourced across California. Consistently decorated.","lat":38.5010,"lng":-120.8100},{"name":"Taste Restaurant","cat":"eat","desc":"The county's destination kitchen, in a two-stoplight town. Book two weeks out.","lat":38.4816,"lng":-120.8446},{"name":"Amador Vintage Market","cat":"eat","desc":"Build the picnic here before you drive out Shenandoah Road.","lat":38.4820,"lng":-120.8438},{"name":"Marlene & Glen's Diner","cat":"eat","desc":"Breakfast with the vineyard crews. Go before eight.","lat":38.4812,"lng":-120.8452},{"name":"Rest — Amador City","cat":"eat","desc":"Small, precise, seasonal. Fifteen minutes south and worth the detour.","lat":38.4192,"lng":-120.8231},{"name":"The Rest Hotel","cat":"stay","desc":"Nine rooms above the restaurant in a gold-rush building. The county's best hotel.","lat":38.4194,"lng":-120.8235},{"name":"Amador Harvest Inn","cat":"stay","desc":"B&B on the Deaver pond, walking distance to three tasting rooms.","lat":38.5079,"lng":-120.7855},{"name":"Shenandoah Inn","cat":"stay","desc":"Simple, quiet, and positioned exactly where you want to start a tasting day.","lat":38.4838,"lng":-120.8430},{"name":"Plymouth House Inn","cat":"stay","desc":"1857 Victorian B&B a block off Main. Porch, garden, breakfast.","lat":38.4823,"lng":-120.8461},{"name":"Amador Flower Farm","cat":"shop","desc":"Fourteen acres of daylilies and a nursery, right on Shenandoah Road.","lat":38.5062,"lng":-120.8005},{"name":"Fiddletown General Store","cat":"shop","desc":"The back door of the valley. Provisions, gossip, and a porch.","lat":38.5045,"lng":-120.7250},{"name":"Chew Kee Store Museum","cat":"do","desc":"1850s rammed-earth Chinese herb shop, preserved with its contents intact.","lat":38.5048,"lng":-120.7259},{"name":"Amador County Fairgrounds","cat":"do","desc":"Late July, four days, and the whole county turns out.","lat":38.4780,"lng":-120.8398}]});</script>
 </body>
 </html>

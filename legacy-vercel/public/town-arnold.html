@@ -6,7 +6,6 @@
 <title>Arnold, CA — Legacy Properties</title>
 <link rel="stylesheet" href="legacy.css">
 <link rel="stylesheet" href="town.css">
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
 <link rel="stylesheet" href="town-map.css">
 <link rel="stylesheet" href="idx-theme.css">
 <script src="https://kestrel.idxhome.com/ihf-kestrel.js"></script>
@@ -266,39 +265,15 @@
         <span class="eyebrow">Plate III · A walking diagram</span>
         <h2 class="h-section" style="margin-top:10px;">Twelve trailheads,<br><em>one ridge.</em></h2>
       </div>
-      <p class="lede right">From a paved fifteen-minute giant sequoia stroll to a serious thirteen-mile ridge — hover any pin to see distance, elevation, season.</p>
+      <p class="lede right">From a paved fifteen-minute giant sequoia stroll to a serious thirteen-mile ridge — the range fans out in every direction from Arnold.</p>
     </div>
 
-    <div class="mainst-filters">
-      <button class="ms-filter ms-on" data-cat="all">All <span class="ct">12</span></button>
-      <button class="ms-filter" data-cat="wine">Easy <span class="ct">4</span></button>
-      <button class="ms-filter" data-cat="eat">Moderate <span class="ct">5</span></button>
-      <button class="ms-filter" data-cat="stay">Strenuous <span class="ct">3</span></button>
-    </div>
-
-    <div class="tm-editor" id="tmEditor">
-      <span class="tm-editor-lead">Drag any pin to its true location. <strong>Your placements save in this browser.</strong> When the map looks right, hit Copy coordinates and send them over to publish for everyone.</span>
-      <div class="tm-editor-actions">
-        <button class="tm-btn ghost" data-act="reset">Reset pins</button>
-        <button class="tm-btn" data-act="copy">Copy coordinates</button>
-      </div>
-      <span class="tm-editor-msg"></span>
-    </div>
-    <div class="mainst-board">
-      <div class="mainst-map mainst-map--live" id="mainstMap"><div id="townMapCanvas" class="town-map-canvas"></div></div>
-
-      <aside class="mainst-rail">
-        <div class="ms-rail-head">
-          <span class="label-cap">Detail</span>
-          <span class="mono" id="msCount" style="font-size:10px;color:var(--ink-faint);">12 trails</span>
-        </div>
-        <div class="ms-rail-card" id="msRailCard">
-          <span class="ms-rail-tag" id="msTag">Hover the map</span>
-          <h3 class="ms-rail-name" id="msName">Twelve trails<br>from the door.</h3>
-          <p class="ms-rail-desc" id="msDesc">Sara's family hikes most of these. Ask which ones the kids actually finish.</p>
-          <ul class="ms-rail-list" id="msList"></ul>
-        </div>
-      </aside>
+        <div class="mainst-map mainst-map--live">
+      <iframe
+        title="Map of Arnold, California"
+        src="https://www.google.com/maps?q=Arnold,%20CA&z=12&output=embed"
+        style="width:100%;height:100%;border:0;display:block;"
+        loading="lazy" referrerpolicy="no-referrer-when-downgrade" allowfullscreen></iframe>
     </div>
   </div>
 </section>
@@ -622,8 +597,5 @@
 </footer>
 
 <script src="town.js"></script>
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
-<script src="town-map.js"></script>
-<script>LegacyTownMap.init({"town":"arnold","center":[38.3,-120.2],"zoom":10,"unit":"trails","catMeta":{"wine":{"label":"Easy","letter":"E","color":"#5B8C5A"},"eat":{"label":"Moderate","letter":"M","color":"#B8922A"},"stay":{"label":"Strenuous","letter":"S","color":"#1B1813"}},"pois":[{"name":"North Grove Loop","cat":"wine","desc":"1.5 mi · 50 ft · year-round. The introductory sequoia walk. Paved.","lat":38.27807,"lng":-120.30939},{"name":"South Grove","cat":"wine","desc":"5 mi · 600 ft · May–Oct. The Agassiz Tree, less-traveled.","lat":38.2566,"lng":-120.2718},{"name":"Cottage Springs Pond","cat":"wine","desc":"0.8 mi · flat · year-round. Dogs, kids, picnics.","lat":38.3175,"lng":-120.2055},{"name":"White Pines Lake","cat":"wine","desc":"1.2 mi · loop · year-round. Trout, paddle boats, in-town.","lat":38.244,"lng":-120.361},{"name":"Sourgrass Bridge","cat":"eat","desc":"3 mi · 400 ft · Apr–Nov. Swimming holes, the rope swing.","lat":38.2877,"lng":-120.2447},{"name":"Bull Run","cat":"eat","desc":"4.5 mi · 700 ft · May–Oct. Granite domes, summit views.","lat":38.513,"lng":-119.898},{"name":"Spicer Reservoir Trail","cat":"eat","desc":"6 mi · 500 ft · Jun–Oct. Granite, alpine lake, trout.","lat":38.3905,"lng":-120.064},{"name":"Lava Bomb","cat":"eat","desc":"3.8 mi · 800 ft · Jun–Oct. Volcanic outcrop, sunset spot.","lat":38.262,"lng":-120.26},{"name":"Beaver Creek","cat":"eat","desc":"5 mi · 600 ft · May–Oct. Cascades, swimming holes.","lat":38.266,"lng":-120.27},{"name":"Sandy Meadow → Lake Alpine","cat":"stay","desc":"9 mi · 1,400 ft · Jul–Oct. Granite ridges, lake views.","lat":38.473,"lng":-120.008},{"name":"Pinecrest → Camp Nine","cat":"stay","desc":"13 mi · 2,100 ft · Jul–Oct. Day pack, river finish, shuttle required.","lat":38.09,"lng":-120.447},{"name":"Mokelumne Coast to Crest","cat":"stay","desc":"11 mi · 1,800 ft · Jun–Oct. The connoisseur's day. Bring water.","lat":38.498,"lng":-120.215}],"fitToPins":true,"fitMaxZoom":12});</script>
 </body>
 </html>

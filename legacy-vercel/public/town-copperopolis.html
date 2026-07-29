@@ -6,7 +6,6 @@
 <title>Copperopolis, CA — Legacy Properties</title>
 <link rel="stylesheet" href="legacy.css">
 <link rel="stylesheet" href="town.css">
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
 <link rel="stylesheet" href="town-map.css">
 <link rel="stylesheet" href="idx-theme.css">
 <script src="https://kestrel.idxhome.com/ihf-kestrel.js"></script>
@@ -269,37 +268,12 @@
       <p class="lede right">Lake Tulloch is built like a horseshoe — long, narrow, wrapped around the town in four arms. Each arm holds its own gated community.</p>
     </div>
 
-    <div class="mainst-filters">
-      <button class="ms-filter ms-on" data-cat="all">All <span class="ct">14</span></button>
-      <button class="ms-filter" data-cat="wine">Communities <span class="ct">6</span></button>
-      <button class="ms-filter" data-cat="eat">Marinas <span class="ct">3</span></button>
-      <button class="ms-filter" data-cat="stay">Golf <span class="ct">2</span></button>
-      <button class="ms-filter" data-cat="shop">Town <span class="ct">3</span></button>
-    </div>
-
-    <div class="tm-editor" id="tmEditor">
-      <span class="tm-editor-lead">Drag any pin to its true location. <strong>Your placements save in this browser.</strong> When the map looks right, hit Copy coordinates and send them over to publish for everyone.</span>
-      <div class="tm-editor-actions">
-        <button class="tm-btn ghost" data-act="reset">Reset pins</button>
-        <button class="tm-btn" data-act="copy">Copy coordinates</button>
-      </div>
-      <span class="tm-editor-msg"></span>
-    </div>
-    <div class="mainst-board">
-      <div class="mainst-map mainst-map--live" id="mainstMap"><div id="townMapCanvas" class="town-map-canvas"></div></div>
-
-      <aside class="mainst-rail">
-        <div class="ms-rail-head">
-          <span class="label-cap">Detail</span>
-          <span class="mono" id="msCount" style="font-size:10px;color:var(--ink-faint);">14 places</span>
-        </div>
-        <div class="ms-rail-card" id="msRailCard">
-          <span class="ms-rail-tag" id="msTag">Hover the map</span>
-          <h3 class="ms-rail-name" id="msName">Six communities,<br>one golf club,<br>one square.</h3>
-          <p class="ms-rail-desc" id="msDesc">Each community is its own world. Sara will walk you through which one your boat (and your tolerance for jet-skis) wants to live in.</p>
-          <ul class="ms-rail-list" id="msList"></ul>
-        </div>
-      </aside>
+        <div class="mainst-map mainst-map--live">
+      <iframe
+        title="Map of Lake Tulloch, California"
+        src="https://www.google.com/maps?q=Lake%20Tulloch,%20CA&z=13&output=embed"
+        style="width:100%;height:100%;border:0;display:block;"
+        loading="lazy" referrerpolicy="no-referrer-when-downgrade" allowfullscreen></iframe>
     </div>
   </div>
 </section>
@@ -632,8 +606,5 @@
 </footer>
 
 <script src="town.js"></script>
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
-<script src="town-map.js"></script>
-<script>LegacyTownMap.init({"town":"copperopolis","center":[37.92,-120.635],"zoom":12,"unit":"spots","catMeta":{"wine":{"label":"Community","letter":"C","color":"#8C6E3D"},"eat":{"label":"Marina","letter":"M","color":"#5E7886"},"stay":{"label":"Golf","letter":"G","color":"#4F6B4A"},"shop":{"label":"Town","letter":"T","color":"#A6824A"}},"pois":[{"name":"Connor Estates","cat":"wine","desc":"Gated since the early '90s. Private launch ramp, docks, tennis courts — some of the lake's best waterfront.","lat":37.8835,"lng":-120.6515},{"name":"Copper Cove","cat":"wine","desc":"The big subdivision — and the one that allows short-term rentals. Black Creek beach and swim area, the most boats on the lake.","lat":37.895,"lng":-120.645},{"name":"Poker Flat","cat":"wine","desc":"Lake Tulloch Shores. Central, lots-with-docks, a private launch, lively summer weekends.","lat":37.872,"lng":-120.63},{"name":"Calypso Bay","cat":"wine","desc":"Quiet gated community, stunning lake-and-foothill views, newer waterfront homes.","lat":37.8682,"lng":-120.615},{"name":"Peninsula Estates","cat":"wine","desc":"Gated, late-'90s. Forty-six near-level waterfront parcels — minimal stairs to the water — on the north end.","lat":37.876,"lng":-120.6082},{"name":"Sanguinetti Estates","cat":"wine","desc":"A smaller gated enclave — dock-out homes, modern builds, eastern morning light.","lat":37.8802,"lng":-120.6005},{"name":"Lake Tulloch Marina","cat":"eat","desc":"The main marina. Rentals, fuel, slip directory.","lat":37.8767,"lng":-120.6386},{"name":"Poker Flat Marina","cat":"eat","desc":"Smaller, quieter, locals' marina. The fuel dock is the social hub.","lat":37.87,"lng":-120.6282},{"name":"Drifters Marina","cat":"eat","desc":"East-end. Wakeboard rentals. Tie up at Drifters Bar & Grill.","lat":37.8652,"lng":-120.6102},{"name":"Copper Valley Resort","cat":"stay","desc":"Greg Norman, 2002. Public-access championship course. The bar at sunset.","lat":37.956,"lng":-120.6362},{"name":"The Lodge at Copper Valley","cat":"stay","desc":"Resort homes, the spa, on-course rentals. The drop-in-with-clubs option.","lat":37.9582,"lng":-120.6342},{"name":"Copper Town Square","cat":"shop","desc":"Mock-historic main square. Market, café, hardware, post office.","lat":37.9799,"lng":-120.6388},{"name":"Gold Dust Pizza","cat":"shop","desc":"Town Square pizza joint. Big pies, salads, a patio.","lat":37.9795,"lng":-120.6392},{"name":"Copper Valley Grocery","cat":"shop","desc":"The only proper grocery for fifteen miles. Slim aisles, kind staff.","lat":37.9805,"lng":-120.638}]});</script>
 </body>
 </html>
