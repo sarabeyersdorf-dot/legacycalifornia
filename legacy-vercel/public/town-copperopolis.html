@@ -474,46 +474,27 @@
         <span class="eyebrow">Plate V · Currently in the field</span>
         <h2 class="h-section" style="margin-top:10px;">Homes for sale<br><em>in Copperopolis.</em></h2>
       </div>
-      <p class="lede right">Three on the boards. The dock-out property goes first.</p>
+      <p class="lede right">Every home for sale in Copperopolis — live from the MLS.</p>
     </div>
 
-    <div class="list-grid">
-      <a href="featured-listings.html" class="prop-card">
-        <div class="prop-photo">
-          <img src="https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=800&q=85" alt="">
-          <div class="prop-tags"><span class="pill-status pill-new">Just listed</span></div>
-        </div>
-        <div class="prop-body">
-          <div class="prop-price">$1,195,000</div>
-          <div class="prop-address">42 Connor Estates Dr<br>Copperopolis, CA 95228</div>
-          <div class="prop-specs"><span>4 Bd</span><span>3 Ba</span><span>Dock-out</span></div>
-          <div class="prop-foot"><span class="prop-match">Listed by Sara</span><span class="label-cap" style="color:var(--ink-faint);">Plate I</span></div>
-        </div>
-      </a>
-      <a href="featured-listings.html" class="prop-card">
-        <div class="prop-photo">
-          <img src="https://images.unsplash.com/photo-1583608205776-bfd35f0d9f83?w=800&q=85" alt="">
-          <div class="prop-tags"><span class="pill-status pill-brass">Active</span></div>
-        </div>
-        <div class="prop-body">
-          <div class="prop-price">$685,000</div>
-          <div class="prop-address">218 Copper Valley Dr<br>Copperopolis, CA 95228</div>
-          <div class="prop-specs"><span>3 Bd</span><span>2 Ba</span><span>Golf community</span></div>
-          <div class="prop-foot"><span class="prop-match">Listed by Sara</span><span class="label-cap" style="color:var(--ink-faint);">Plate II</span></div>
-        </div>
-      </a>
-      <a href="featured-listings.html" class="prop-card">
-        <div class="prop-photo">
-          <img src="https://images.unsplash.com/photo-1605276374104-dee2a0ed3cd6?w=800&q=85" alt="">
-          <div class="prop-tags"><span class="pill-status">Pending</span></div>
-        </div>
-        <div class="prop-body">
-          <div class="prop-price">$425,000</div>
-          <div class="prop-address">88 Poker Flat Rd<br>Copperopolis, CA 95228</div>
-          <div class="prop-specs"><span>3 Bd</span><span>2 Ba</span><span>Lake view</span></div>
-          <div class="prop-foot"><span class="prop-match">Listed by Sara</span><span class="label-cap" style="color:var(--ink-faint);">Plate III</span></div>
-        </div>
-      </a>
+    <div class="idx-embed idx-feature-gallery">
+      <script>
+        // Full market — iHomeFinder saved-search gallery (id 3019723, featured:false
+        // → the whole MLS for the city, not just office inventory).
+        document.currentScript.replaceWith(ihfKestrel.render({
+          "component": "gallerySliderWidget",
+          "rows": 2,
+          "navigation": true,
+          "nav": "top",
+          "auto": true,
+          "maxResults": 25,
+          "status": "active",
+          "sort": "ds",
+          "featured": false,
+          "effect": "slide",
+          "id": 3019723
+        }));
+      </script>
     </div>
 
     <div style="text-align:center; margin-top:40px;">
@@ -578,7 +559,7 @@
       </a>
       <a href="river-mountain.html" class="nearby-card">
         <div class="nb-img" style="background-image:url('art/towns/rm-mokelumne-rapids.jpg');"></div>
-        <div class="nb-body"><span class="nb-dist">40 min east</span><h4>River &amp; Mountain</h4><p>Rural parcels &amp; lifestyle.</p></div>
+        <div class="nb-body"><span class="nb-dist">40 min east</span><h4>Waterfront Lakes and Rivers</h4><p>Lakes, rivers &amp; waterfront.</p></div>
       </a>
       <a href="town-arnold.html" class="nearby-card">
         <div class="nb-img" style="background-image:url('art/towns/arnold-aspens-fall.jpg');"></div>
@@ -620,7 +601,7 @@
         <a href="town-arnold.html">Arnold</a>
         <a href="town-sutter-creek.html">Sutter Creek</a>
         <a href="town-shenandoah-valley.html">Shenandoah Valley</a>
-        <a href="river-mountain.html">River &amp; Mountain</a>
+        <a href="river-mountain.html">Waterfront Lakes and Rivers</a>
         <a href="town-angels-camp.html">Angels Camp</a>
         <a href="town-copperopolis.html">Copperopolis</a>
       </div>

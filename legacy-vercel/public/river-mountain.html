@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>River & Mountain Lifestyle — Legacy Properties</title>
+<title>Waterfront Lakes and Rivers — Legacy Properties</title>
 <link rel="stylesheet" href="legacy.css">
 <link rel="stylesheet" href="town.css">
 <style>
@@ -218,7 +218,7 @@
   };
 </script>
 </head>
-<body class="paper" data-screen-label="River &amp; Mountain Lifestyle">
+<body class="paper" data-screen-label="Waterfront Lakes and Rivers">
 
 <header class="topnav">
   <div class="topnav-bar1">
@@ -250,7 +250,7 @@
     <span class="sep">→</span>
     <a href="towns.html">Communities</a>
     <span class="sep">→</span>
-    <span class="cur">River &amp; Mountain Lifestyle</span>
+    <span class="cur">Waterfront Lakes and Rivers</span>
     <span class="spacer"></span>
     <span class="mono small">Vol. XXII · Plate VII — Lifestyle Category</span>
   </div>
@@ -267,7 +267,7 @@
       <span class="eyebrow">A lifestyle, not a town · Calaveras · Amador · El Dorado outliers</span>
     </div>
     <h1 class="th-title">
-      River &amp; mountain,
+      Waterfront lakes &amp; rivers,
       <span class="it">year-round.</span>
     </h1>
     <p class="th-tag">— For the buyers who chose the creek over the town. Wilseyville. Mountain Ranch. West Point. Placerville. Glencoe. Sheep Ranch. Anywhere a year-round watercourse marks the property line.</p>
@@ -698,16 +698,25 @@
         <span class="eyebrow">Plate VI · Currently in the field</span>
         <h2 class="h-section" style="margin-top:10px;">Rural parcels<br><em>on the boards.</em></h2>
       </div>
-      <p class="lede right">Three lifestyle properties this week. James has walked each one.</p>
+      <p class="lede right">Every waterfront, lake and river property currently for sale — live from the MLS.</p>
     </div>
 
     <div class="idx-embed idx-feature-gallery">
       <script>
-        // Sara's real active (featured) listings, live from the iHomeFinder feed.
-        // Each card links to its real IDX detail page. Renders on the deployed,
-        // token-authorized domain (legacycalifornia.vercel.app) — not in local preview.
+        // Full Waterfront / Lakes & Rivers market — iHomeFinder saved-search
+        // gallery (id 3019726, featured:false → whole MLS, not office inventory).
         document.currentScript.replaceWith(ihfKestrel.render({
-          component: "gallerySliderWidget"
+          "component": "gallerySliderWidget",
+          "rows": 2,
+          "navigation": true,
+          "nav": "top",
+          "auto": true,
+          "maxResults": 25,
+          "status": "active",
+          "sort": "ds",
+          "featured": false,
+          "effect": "slide",
+          "id": 3019726
         }));
       </script>
     </div>
@@ -818,7 +827,7 @@
         <a href="town-shenandoah-valley.html">Shenandoah Valley</a>
         <a href="town-angels-camp.html">Angels Camp</a>
         <a href="town-copperopolis.html">Copperopolis</a>
-        <a href="river-mountain.html">River &amp; Mountain</a>
+        <a href="river-mountain.html">Waterfront Lakes and Rivers</a>
       </div>
       <div>
         <h4>Services</h4>

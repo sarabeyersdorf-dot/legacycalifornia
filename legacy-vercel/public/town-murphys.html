@@ -666,16 +666,25 @@
         <span class="eyebrow">Plate VI · Currently in the field</span>
         <h2 class="h-section" style="margin-top:10px;">Homes for sale<br><em>in Murphys.</em></h2>
       </div>
-      <p class="lede right">Three residences active this morning. Updated continuously from MLS.</p>
+      <p class="lede right">Every home for sale in Murphys — live from the MLS.</p>
     </div>
 
     <div class="idx-embed idx-feature-gallery">
       <script>
-        // Sara's real active (featured) listings, live from the iHomeFinder feed.
-        // Each card links to its real IDX detail page. Renders on the deployed,
-        // token-authorized domain (legacycalifornia.vercel.app) — not in local preview.
+        // Full Murphys market — iHomeFinder saved-search gallery (id 3019722,
+        // featured:false → the whole MLS for the city, not just office inventory).
         document.currentScript.replaceWith(ihfKestrel.render({
-          component: "gallerySliderWidget"
+          "component": "gallerySliderWidget",
+          "rows": 2,
+          "navigation": true,
+          "nav": "top",
+          "auto": true,
+          "maxResults": 25,
+          "status": "active",
+          "sort": "ds",
+          "featured": false,
+          "effect": "slide",
+          "id": 3019722
         }));
       </script>
     </div>
@@ -769,7 +778,7 @@
         <div class="nb-img" style="background-image:url('art/towns/rm-mokelumne-rapids.jpg');"></div>
         <div class="nb-body">
           <span class="nb-dist">35 min south</span>
-          <h4>River &amp; Mountain</h4><p>Rural parcels &amp; lifestyle.</p>
+          <h4>Waterfront Lakes and Rivers</h4><p>Lakes, rivers &amp; waterfront.</p>
         </div>
       </a>
     </div>
@@ -805,7 +814,7 @@
         <a href="town-arnold.html">Arnold</a>
         <a href="town-sutter-creek.html">Sutter Creek</a>
         <a href="town-shenandoah-valley.html">Shenandoah Valley</a>
-        <a href="river-mountain.html">River &amp; Mountain</a>
+        <a href="river-mountain.html">Waterfront Lakes and Rivers</a>
         <a href="town-angels-camp.html">Angels Camp</a>
         <a href="town-copperopolis.html">Copperopolis</a>
       </div>

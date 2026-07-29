@@ -648,8 +648,20 @@
 
     <div class="idx-embed idx-feature-gallery">
       <script>
+        // Full Shenandoah Valley market — iHomeFinder saved-search gallery
+        // (id 3019724, featured:false → whole MLS for the area, not office inventory).
         document.currentScript.replaceWith(ihfKestrel.render({
-          component: "gallerySliderWidget"
+          "component": "gallerySliderWidget",
+          "rows": 2,
+          "navigation": true,
+          "nav": "top",
+          "auto": true,
+          "maxResults": 25,
+          "status": "active",
+          "sort": "ds",
+          "featured": false,
+          "effect": "slide",
+          "id": 3019724
         }));
       </script>
     </div>
@@ -744,7 +756,7 @@
         <div class="nb-img" style="background-image:url('art/towns/rm-mokelumne-rapids.jpg');"></div>
         <div class="nb-body">
           <span class="nb-dist">30 min southeast</span>
-          <h4>River &amp; Mountain</h4><p>Rural parcels &amp; lifestyle.</p>
+          <h4>Waterfront Lakes and Rivers</h4><p>Lakes, rivers &amp; waterfront.</p>
         </div>
       </a>
     </div>
@@ -780,7 +792,7 @@
         <a href="town-arnold.html">Arnold</a>
         <a href="town-sutter-creek.html">Sutter Creek</a>
         <a href="town-shenandoah-valley.html">Shenandoah Valley</a>
-        <a href="river-mountain.html">River &amp; Mountain</a>
+        <a href="river-mountain.html">Waterfront Lakes and Rivers</a>
         <a href="town-angels-camp.html">Angels Camp</a>
         <a href="town-copperopolis.html">Copperopolis</a>
       </div>
