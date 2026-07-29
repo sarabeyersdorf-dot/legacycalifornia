@@ -1,6 +1,6 @@
 {
-  "version": "3.7",
-  "lastUpdated": "2026-07-28",
+  "version": "3.8",
+  "lastUpdated": "2026-07-29",
   "updatedBy": "Claude",
   "tasks": [
     {
@@ -870,7 +870,7 @@
       "openEscrowDate": null,
       "closingDate": null,
       "timeline": {
-        "clockStart": null,
+        "clockStart": "2026-07-24",
         "note": "Bankruptcy court sale (ADM1) \u2014 all contingency + COE periods start only on seller's written notice of court approval"
       },
       "contacts": {
