@@ -9,7 +9,8 @@
   },
   "scripts": {
     "dev": "vercel dev",
-    "deploy": "vercel --prod"
+    "deploy": "vercel --prod",
+    "sitemap": "node scripts/gen-sitemap.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.45.0"

@@ -1,0 +1,50 @@
+# legacycalifornia.com
+User-agent: *
+Allow: /
+
+# AI retrieval crawlers — explicitly allowed.
+# These are what put the site into ChatGPT, Perplexity and Claude answers.
+User-agent: OAI-SearchBot
+Allow: /
+
+User-agent: ChatGPT-User
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: Perplexity-User
+Allow: /
+
+User-agent: Claude-SearchBot
+Allow: /
+
+User-agent: Claude-User
+Allow: /
+
+User-agent: Bingbot
+Allow: /
+
+User-agent: Applebot
+Allow: /
+
+# Training crawlers — also allowed. Blocking these does not protect
+# citations and does reduce entity grounding.
+User-agent: GPTBot
+Allow: /
+
+User-agent: ClaudeBot
+Allow: /
+
+User-agent: Google-Extended
+Allow: /
+
+User-agent: CCBot
+Allow: /
+
+# Utility pages with no unique content
+Disallow: /dashboard.html
+Disallow: /property-organizer.html
+Disallow: /email-alerts.html
+
+Sitemap: https://legacycalifornia.com/sitemap.xml
