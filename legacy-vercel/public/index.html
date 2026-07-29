@@ -922,7 +922,7 @@
           <div>
             <div class="agent-name">Sara Cooper</div>
             <div class="agent-title">Owner / Broker · She/Her</div>
-            <div class="agent-bio">Top producer across the Sierra foothills. 107 closings to date, 23 in the last twelve months. 5.0 ★ on Zillow.</div>
+            <div class="agent-bio">Top producer across the Sierra foothills. <span data-stat="closingsTotal">107</span> closings to date, <span data-stat="closingsTrailing12">23</span> in the last twelve months. <span data-stat="zillowRating">5.0</span> ★ on Zillow.</div>
             <div class="agent-spec"><span>Listing agent</span><span>Buyer's agent</span><span>Relocation</span></div>
           </div>
         </div>
@@ -1229,6 +1229,19 @@ function setJourney(el) {
 
   if (vidA.readyState >= 1) start();
   else vidA.addEventListener('loadedmetadata', start, { once: true });
+})();
+</script>
+<!-- Live brokerage stats (hybrid: static 107 for crawlers, live count for humans) -->
+<script>
+(function () {
+  fetch('/api/stats').then(function (r) { return r.ok ? r.json() : null; }).then(function (s) {
+    if (!s) return;
+    var map = { closingsTotal: s.closingsTotal, closingsTrailing12: s.closingsTrailing12, zillowRating: s.zillowRating };
+    document.querySelectorAll('[data-stat]').forEach(function (el) {
+      var k = el.getAttribute('data-stat');
+      if (map[k] != null) el.textContent = (k === 'zillowRating' ? Number(map[k]).toFixed(1) : map[k]);
+    });
+  }).catch(function () {});
 })();
 </script>
 </body>
