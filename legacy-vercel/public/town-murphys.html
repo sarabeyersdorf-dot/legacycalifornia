@@ -7,7 +7,6 @@
 <link rel="stylesheet" href="legacy.css">
 <link rel="stylesheet" href="town.css">
 <link rel="stylesheet" href="idx-theme.css">
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
 <link rel="stylesheet" href="town-map.css">
 <script src="https://kestrel.idxhome.com/ihf-kestrel.js"></script>
 <script>
@@ -324,47 +323,18 @@
     <div class="section-h">
       <div>
         <span class="hairline-brass"></span>
-        <span class="eyebrow">Plate III · A walking diagram</span>
-        <h2 class="h-section" style="margin-top:10px;">Four blocks,<br><em>twenty-four reasons.</em></h2>
+        <span class="eyebrow">Plate III · On the map</span>
+        <h2 class="h-section" style="margin-top:10px;">Right in the<br><em>heart of it.</em></h2>
       </div>
-      <p class="lede right">Hover any pin. Filter by what you're hungry for. The whole town fits on one map — that's the point.</p>
+      <p class="lede right">Downtown Murphys and the surrounding Calaveras foothills. Pan, zoom, or drop into Street View.</p>
     </div>
 
-    <div class="mainst-filters">
-      <button class="ms-filter ms-on" data-cat="all">All <span class="ct">21</span></button>
-      <button class="ms-filter" data-cat="wine">Tasting rooms <span class="ct">8</span></button>
-      <button class="ms-filter" data-cat="eat">Eat <span class="ct">4</span></button>
-      <button class="ms-filter" data-cat="stay">Stay <span class="ct">4</span></button>
-      <button class="ms-filter" data-cat="shop">Shop <span class="ct">3</span></button>
-      <button class="ms-filter" data-cat="do">Do <span class="ct">2</span></button>
-    </div>
-
-    <div class="tm-editor" id="tmEditor">
-      <span class="tm-editor-lead">Drag any pin to its true location. <strong>Your placements save in this browser.</strong> When the map looks right, hit Copy coordinates and send them over to publish for everyone.</span>
-      <div class="tm-editor-actions">
-        <button class="tm-btn ghost" data-act="reset">Reset pins</button>
-        <button class="tm-btn" data-act="copy">Copy coordinates</button>
-      </div>
-      <span class="tm-editor-msg"></span>
-    </div>
-    <div class="mainst-board">
-
-      <!-- Editorial street map -->
-      <div class="mainst-map mainst-map--live" id="mainstMap"><div id="townMapCanvas" class="town-map-canvas"></div></div>
-
-      <!-- Detail rail -->
-      <aside class="mainst-rail">
-        <div class="ms-rail-head">
-          <span class="label-cap">Detail</span>
-          <span class="mono" id="msCount" style="font-size:10px;color:var(--ink-faint);">24 places</span>
-        </div>
-        <div class="ms-rail-card" id="msRailCard">
-          <span class="ms-rail-tag" id="msTag">Hover the map</span>
-          <h3 class="ms-rail-name" id="msName">Twenty-four ways<br>to spend an afternoon.</h3>
-          <p class="ms-rail-desc" id="msDesc">Filter by category, hover any pin, or — if you'd rather we just made a reservation — <a href="#letter" style="color:var(--brass); text-decoration: underline;">drop us a line</a>.</p>
-          <ul class="ms-rail-list" id="msList"></ul>
-        </div>
-      </aside>
+    <div class="mainst-map mainst-map--live">
+      <iframe
+        title="Map of Murphys, California"
+        src="https://www.google.com/maps?q=Murphys,%20CA&z=14&output=embed"
+        style="width:100%;height:100%;border:0;display:block;"
+        loading="lazy" referrerpolicy="no-referrer-when-downgrade" allowfullscreen></iframe>
     </div>
   </div>
 </section>
@@ -836,8 +806,5 @@
 </footer>
 
 <script src="town.js"></script>
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
-<script src="town-map.js"></script>
-<script>LegacyTownMap.init({"town":"murphys","center":[38.1376,-120.4632],"zoom":16,"unit":"places","catMeta":{"wine":{"label":"Tasting room","letter":"W","color":"#8C6E3D"},"eat":{"label":"Restaurant","letter":"E","color":"#5E7886"},"stay":{"label":"Stay","letter":"S","color":"#4F6B4A"},"shop":{"label":"Shop","letter":"P","color":"#A6824A"},"do":{"label":"To do","letter":"D","color":"#6E5732"}},"pois":[{"name":"Ironstone Vineyards","cat":"wine","desc":"Estate winery & amphitheater. Award-winning Cabernet.","lat":38.128869,"lng":-120.462341},{"name":"Newsome Harlow","cat":"wine","desc":"Boutique reds. Tasting room on Algiers.","lat":38.137384,"lng":-120.462825},{"name":"Gossamer","cat":"wine","desc":"Low-intervention whites. Skin-contact Vermentino is the move.","lat":38.137544,"lng":-120.463866},{"name":"Vina Moda","cat":"wine","desc":"Iberian varietals in a converted machine shop. Quietly excellent.","lat":38.13724,"lng":-120.459198},{"name":"Lavender Ridge","cat":"wine","desc":"Lavender field, brie pairing, courtyard.","lat":38.137561,"lng":-120.464231},{"name":"Milliaire Winery","cat":"wine","desc":"Old gas-station-turned-winery. Murphys cliché in the best way.","lat":38.137772,"lng":-120.462223},{"name":"Tanner Vineyards","cat":"wine","desc":"High-elevation Pinot. The quiet darling of the strip.","lat":38.137569,"lng":-120.464659},{"name":"Black Sheep Winery","cat":"wine","desc":"Cinsault and Tempranillo. Year-round bocce court.","lat":38.137282,"lng":-120.45997},{"name":"V Restaurant","cat":"eat","desc":"Seasonal California. Date-night anchor of Main.","lat":38.1375,"lng":-120.4576},{"name":"Murphys Historic Hotel","cat":"stay","desc":"Pouring since 1856. Mark Twain slept here. So can you.","lat":38.137603,"lng":-120.465078},{"name":"Murphys Suites","cat":"stay","desc":"Modern boutique. Walk to everything.","lat":38.134135,"lng":-120.454692},{"name":"Dunbar House 1880","cat":"stay","desc":"B&B in a Victorian. The garden. The breakfast. The cat.","lat":38.137156,"lng":-120.460797},{"name":"Marisolio Tasting Bar","cat":"shop","desc":"Olive oils & vinegars. Mid-tasting palate cleanser.","lat":38.138168,"lng":-120.467023},{"name":"Aria","cat":"shop","desc":"Independent bookshop. Mountain reads.","lat":38.137881,"lng":-120.464971},{"name":"The Spice Tin","cat":"shop","desc":"Spices, salts, oils, sass.","lat":38.13827,"lng":-120.465476},{"name":"Murphys Park","cat":"do","desc":"Creekside playground, gazebo, July 4 institution.","lat":38.136666,"lng":-120.463748},{"name":"Mercer Caverns","cat":"do","desc":"Crystalline cavern, 1885 discovery. Seven minutes out.","lat":38.151534,"lng":-120.478052},{"name":"Grounds","cat":"eat","desc":"Breakfast institution. Counter seats, the burrito.","lat":38.1376,"lng":-120.4578},{"name":"Alchemy Market","cat":"eat","desc":"Cheese, charcuterie, wine bar. Sara's lunch spot.","lat":38.1366,"lng":-120.4557},{"name":"Firewood","cat":"eat","desc":"Pizza & tacos under string lights. Dog-friendly patio.","lat":38.1369,"lng":-120.4561},{"name":"Querencia","cat":"stay","desc":"Adults-only boutique inn — six suites, hot tubs, quiet.","lat":38.145189,"lng":-120.472644}]});</script>
 </body>
 </html>
