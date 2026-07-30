@@ -1,8 +1,38 @@
 {
-  "version": "3.8",
-  "lastUpdated": "2026-07-29",
+  "version": "3.9",
+  "lastUpdated": "2026-07-30",
   "updatedBy": "Claude",
   "tasks": [
+    {
+      "agent": "sara",
+      "client": "433",
+      "title": "Review assignment of rents deed — Yvonne Heryford sent scanned doc (7/30 AM); prepare final version for Herfords to sign before COE 8/10",
+      "done": false
+    },
+    {
+      "agent": "sara",
+      "client": "433",
+      "title": "Confirm pest credit dollar amount with Elizabeth — path agreed (pest + shed row; contractor work post-close); get credit amount in writing before 8/5 walkthrough",
+      "done": false
+    },
+    {
+      "agent": "james",
+      "client": "Baldwin",
+      "title": "🔴 COE 8/3 = 4 days — call Kim Hesser today for loan/appraisal status; confirm contractor bid; CR2 needed before closing",
+      "done": false
+    },
+    {
+      "agent": "james",
+      "client": "Baldwin",
+      "title": "Verify final walkthrough happened 7/29; get VPC signed by Shomari Turner and filed in EX",
+      "done": false
+    },
+    {
+      "agent": "sara",
+      "client": "Skyline",
+      "title": "Kerstin Breidenthal showing Sat 8/1 1PM — confirm appointment; get Scott Greiner (7/26) feedback if not yet received",
+      "done": false
+    },
     {
       "agent": "james",
       "client": "Wendell",
@@ -1103,7 +1133,7 @@
       "closingDate": "2026-08-03",
       "timeline": {
         "acceptance": "2026-06-17",
-        "coe": "2026-08-01"
+        "coe": "2026-08-03"
       },
       "contacts": {
         "coAgent": "Allyson Overturf (PMZ Real Estate) - listing/seller side",
