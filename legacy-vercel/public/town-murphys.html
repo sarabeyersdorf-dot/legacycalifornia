@@ -218,9 +218,8 @@
 </script>
 <!-- seo:head:end -->
 <link rel="stylesheet" href="legacy.css">
-<link rel="stylesheet" href="town.css">
+<link rel="stylesheet" href="legacy-ui.css">
 <link rel="stylesheet" href="idx-theme.css">
-<link rel="stylesheet" href="town-map.css">
 <script src="https://kestrel.idxhome.com/ihf-kestrel.js"></script>
 <script>
   window.ihfKestrel = window.ihfKestrel || {};
@@ -230,50 +229,139 @@
   };
 </script>
 </head>
-<body class="paper" data-screen-label="Town · Murphys">
+<body class="paper lg-page" data-screen-label="Town · Murphys">
+<div class="lg-progress"></div>
 
 <!-- ============ TOP NAV ============ -->
-<header class="topnav">
-  <div class="topnav-bar1">
-    <span>Boutique luxury real estate · Calaveras · Amador · Tuolumne</span>
-    <span><a href="tel:2095594966">(209) 559-4966</a> · <a href="mailto:SaraSellsCalifornia@gmail.com">SaraSellsCalifornia@gmail.com</a></span>
-  </div>
-  <nav class="topnav-bar2">
-    <div class="topnav-links">
-      <a href="property-search.html">Listings</a>
-      <a href="towns.html" class="active">Communities</a>
-      <a href="relocate.html">Relocate</a>
-      <a href="valuation.html">Sellers</a>
-      <a href="market-report.html">Markets</a>
-    </div>
-    <a href="index.html" class="wordmark">
-      <span class="wordmark-word">Legacy</span>
-      <span class="wordmark-sub">Properties · Angels Camp CA</span>
-    </a>
-    <div class="topnav-links right">
-      <a href="ledger.html">The Ledger</a>
-      <a href="dashboard.html">Sign In</a>
-      <a href="find-my-match.html" class="btn btn-ink btn-sm" style="padding:10px 18px;">Find My Match</a>
-    </div>
-  </nav>
-</header>
-
-<!-- ============ BREADCRUMB ============ -->
-<div class="town-breadcrumb">
-  <div class="town-breadcrumb-inner">
-    <a href="index.html">Legacy</a>
-    <span class="sep">→</span>
-    <a href="towns.html">Communities</a>
-    <span class="sep">→</span>
-    <span class="cur">Murphys</span>
-    <span class="spacer"></span>
-    <span class="mono small">Vol. XXII · Plate I — Gold Country Survey</span>
-  </div>
+<!-- ============ TOP STRIP + HEADER ============ -->
+<div style="background:var(--lg-ink);color:rgba(255,253,248,.72);font-family:var(--lg-mono);font-size:10.5px;letter-spacing:.13em;text-transform:uppercase;display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;padding:9px var(--lg-gut)">
+  <span>Boutique real estate &middot; Calaveras &middot; Amador &middot; Tuolumne</span>
+  <span style="display:flex;gap:14px">
+    <a href="tel:2095594966" style="color:inherit;text-decoration:none">(209) 559-4966</a>
+    <a href="mailto:SaraSellsCalifornia@gmail.com" style="color:var(--lg-c2);text-decoration:none">SaraSellsCalifornia@gmail.com</a>
+  </span>
 </div>
+<header class="lg-header"><div class="lg-header__in">
+  <a class="lg-mark" href="index.html">
+    <span class="lg-mark__badge"><span>L</span></span>
+    <span class="lg-mark__txt"><b>Legacy</b><i>Properties · Angels Camp</i></span>
+  </a>
+  <nav class="lg-nav" id="siteNav">
+    <a href="property-search.html">Listings</a>
+    <a href="towns.html" aria-current="page">Communities</a>
+    <a href="relocate.html">Relocate</a>
+    <a href="valuation.html">Sellers</a>
+    <a href="market-report.html">Markets</a>
+    <a href="ledger.html">The Ledger</a>
+    <a href="dashboard.html">Sign In</a>
+    <a href="find-my-match.html" class="lg-btn" style="padding:11px 22px">Find My Match</a>
+  </nav>
+  <button class="lg-navtoggle" data-lg-nav="#siteNav" aria-expanded="false">Menu</button>
+</div></header>
 
-<!-- ============ HERO ============ -->
+<!-- Page-scoped lg styling for the kept interactive pieces (season hero, jump
+     rail scrollspy, picks tabs). town.js drives them by these classes/ids. -->
+<style>
+  .tc{max-width:var(--lg-max);margin:0 auto;padding:0 var(--lg-gut)}
+  /* breadcrumb */
+  .t-crumb{font-family:var(--lg-mono);font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--lg-ink-mute);display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:16px var(--lg-gut) 0;max-width:var(--lg-max);margin:0 auto}
+  .t-crumb a{color:var(--lg-a1);text-decoration:none}.t-crumb .sp{flex:1}
+  /* season hero */
+  .town-hero{position:relative;min-height:clamp(580px,66vw,840px);display:flex;flex-direction:column;justify-content:flex-end;overflow:hidden;background:var(--lg-ink)}
+  .th-frame{position:absolute;inset:0;background-size:cover;background-position:center 42%;opacity:0;transition:opacity 1.2s ease}
+  .town-hero[data-season="spring"] .th-frame-spring,.town-hero[data-season="summer"] .th-frame-summer,.town-hero[data-season="fall"] .th-frame-fall,.town-hero[data-season="winter"] .th-frame-winter{opacity:1}
+  .th-veil{position:absolute;inset:0;z-index:1;background:linear-gradient(180deg,rgba(23,20,15,.4),rgba(23,20,15,.12) 38%,rgba(23,20,15,.82))}
+  .th-inner{position:relative;z-index:2;width:100%;max-width:var(--lg-max);margin:0 auto;padding:0 var(--lg-gut) 30px;color:#fff}
+  .th-eyebrow{display:inline-flex;align-items:center;gap:10px;background:rgba(255,253,248,.16);backdrop-filter:blur(6px);border:1px solid rgba(255,253,248,.3);border-radius:100px;padding:7px 16px;font-family:var(--lg-mono);font-size:10px;letter-spacing:.18em;text-transform:uppercase;font-weight:600}
+  .th-eyebrow .tick{width:7px;height:7px;border-radius:50%;background:var(--lg-c2);animation:lg-ping 2.4s ease-out infinite}
+  .th-eyebrow .eyebrow{color:#fff}
+  .th-title{font-family:var(--lg-serif);font-style:italic;font-weight:600;font-size:clamp(46px,8vw,104px);line-height:.95;margin:18px 0 0;text-shadow:0 4px 30px rgba(23,20,15,.35)}
+  .th-title .it{color:var(--lg-sun)}
+  .th-tag{font-family:var(--lg-serif);font-style:italic;font-size:clamp(17px,2.1vw,23px);color:rgba(255,253,248,.92);margin-top:14px}
+  .th-meta{display:flex;flex-wrap:wrap;gap:14px 34px;margin-top:20px}
+  .th-meta-row{display:flex;flex-direction:column;gap:2px}
+  .th-meta .label-cap{font-family:var(--lg-mono);font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;color:rgba(255,253,248,.6)}
+  .th-meta .num{font-family:var(--lg-serif);font-style:italic;font-size:22px;color:#fff}
+  .th-season{position:relative;z-index:2;width:100%;max-width:var(--lg-max);margin:0 auto;padding:16px var(--lg-gut) 26px;display:flex;flex-wrap:wrap;align-items:center;gap:12px 16px}
+  .th-season>.label-cap{font-family:var(--lg-mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase}
+  .th-season-track{display:flex;gap:8px;flex-wrap:wrap}
+  .th-sn{font-family:var(--lg-mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;font-weight:700;padding:8px 15px;border-radius:100px;border:1px solid rgba(255,253,248,.35);background:rgba(255,253,248,.08);color:rgba(255,253,248,.85);cursor:pointer;transition:all var(--lg-fast)}
+  .th-sn.th-sn-on{background:var(--lg-sun);border-color:var(--lg-sun);color:var(--lg-ink)}
+  .th-season-quote{flex:1 1 260px;min-width:220px;font-family:var(--lg-serif);font-style:italic;font-size:15px;color:rgba(255,253,248,.9);line-height:1.4}
+  .th-season-quote em{color:var(--lg-sun)}
+  /* jump rail */
+  .town-jump{position:sticky;top:72px;z-index:40;background:color-mix(in srgb,var(--lg-cream) 92%,transparent);backdrop-filter:blur(12px) saturate(1.2);border-bottom:1px solid rgba(23,20,15,.08)}
+  .town-jump-inner{max-width:var(--lg-max);margin:0 auto;display:flex;gap:26px;overflow-x:auto;padding:14px var(--lg-gut);font-family:var(--lg-mono);font-size:11px;letter-spacing:.09em;text-transform:uppercase;font-weight:600}
+  .town-jump a{color:var(--lg-ink-mute);text-decoration:none;white-space:nowrap;padding:4px 0;border-bottom:2px solid transparent;transition:color var(--lg-fast)}
+  .town-jump a.jump-on{color:var(--lg-a1);border-bottom-color:var(--lg-c1)}
+  /* facts table */
+  .facts{max-width:840px;margin-top:26px}
+  .facts-row{display:flex;justify-content:space-between;align-items:baseline;gap:24px;padding:15px 2px;border-top:1px solid rgba(23,20,15,.1)}
+  .facts-row:last-of-type{border-bottom:1px solid rgba(23,20,15,.1)}
+  .facts-row .k{font-family:var(--lg-mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--lg-ink-mute);white-space:nowrap}
+  .facts-row .v{font-family:var(--lg-serif);font-style:italic;font-size:21px;color:var(--lg-ink);text-align:right;line-height:1.2}
+  .facts-row .v .sub{font-style:normal;font-family:var(--lg-mono);font-size:11px;color:var(--lg-ink-faint)}
+  /* wine cards */
+  .wine-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px;margin-top:6px}
+  .wine-card{background:rgba(255,253,248,.06);border:1px solid rgba(255,253,248,.14);border-radius:var(--lg-r);padding:24px;transition:transform var(--lg-fast) var(--lg-ease),background var(--lg-fast)}
+  .wine-card:hover{transform:translateY(-4px);background:rgba(255,253,248,.1)}
+  .wine-letter{font-family:var(--lg-serif);font-style:italic;font-size:30px;color:var(--lg-sun);line-height:1}
+  .wine-name{font-family:var(--lg-serif);font-style:italic;font-size:24px;color:#fff;margin-top:6px}
+  .wine-house{font-family:var(--lg-mono);font-size:10px;letter-spacing:.13em;text-transform:uppercase;color:rgba(255,253,248,.6);margin-top:4px}
+  .wine-flight{display:flex;flex-direction:column;gap:4px;margin-top:12px;font-size:13.5px;color:rgba(255,253,248,.82)}
+  .wine-foot{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px;font-family:var(--lg-mono);font-size:10px;letter-spacing:.08em;color:rgba(255,253,248,.55)}
+  .wine-walk{display:flex;flex-wrap:wrap;align-items:center;gap:12px 26px;margin-top:28px;padding-top:22px;border-top:1px solid rgba(255,253,248,.14)}
+  .wf-stat{font-family:var(--lg-serif);font-style:italic;font-size:26px;color:#fff}
+  .wf-stat em{font-style:normal;font-family:var(--lg-mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,253,248,.6);margin-left:6px}
+  /* picks */
+  .picks-tabs{display:flex;gap:10px;flex-wrap:wrap;margin:26px 0 24px}
+  .pick-tab{font-family:var(--lg-mono);font-size:11px;letter-spacing:.11em;text-transform:uppercase;font-weight:700;padding:11px 20px;border-radius:100px;border:2px solid var(--lg-sand);background:var(--lg-white);color:var(--lg-ink-soft);cursor:pointer;display:inline-flex;align-items:center;gap:8px;transition:all var(--lg-fast)}
+  .pick-tab .ct{font-family:var(--lg-serif);font-style:italic;opacity:.7}
+  .pick-tab.pick-tab-on{background:var(--lg-c1-deep);border-color:var(--lg-c1-deep);color:#fff}
+  .pick-pane{display:none}.pick-pane.pick-pane-on{display:block}
+  .pick-row{display:grid;grid-template-columns:auto 1fr auto;gap:20px;align-items:start;padding:22px 2px;border-top:1px solid rgba(23,20,15,.09)}
+  .pick-num{font-family:var(--lg-serif);font-style:italic;font-size:26px;color:var(--lg-a1);line-height:1}
+  .pick-body h4{font-family:var(--lg-serif);font-style:italic;font-size:22px;color:var(--lg-ink);margin:0 0 6px}
+  .pick-body p{font-size:14.5px;color:var(--lg-ink-soft);line-height:1.6;margin:0}
+  .pick-body p a{color:var(--lg-a1)}
+  .pick-tags{display:flex;gap:7px;flex-wrap:wrap;margin-top:11px}
+  .pick-tags span{font-family:var(--lg-mono);font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--lg-ink-mute);background:var(--lg-sand);border-radius:100px;padding:4px 10px}
+  .pick-cap{font-family:var(--lg-mono);font-size:10.5px;letter-spacing:.06em;color:var(--lg-ink-mute);text-align:right;white-space:nowrap}
+  .pick-cap .label-cap{display:block;color:var(--lg-ink-faint);margin-bottom:3px}
+  @media(max-width:760px){.pick-row{grid-template-columns:auto 1fr;gap:14px}.pick-cap{grid-column:2;text-align:left;white-space:normal}}
+  /* map + nearby + letter */
+  .town-map{border-radius:var(--lg-r);overflow:hidden;box-shadow:var(--lg-sh);height:clamp(360px,46vw,520px);margin-top:8px}
+  .nearby-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:16px;margin-top:8px}
+  .nearby-card{display:block;text-decoration:none;background:var(--lg-white);border-radius:var(--lg-r);overflow:hidden;box-shadow:var(--lg-sh-sm);transition:transform var(--lg-med) var(--lg-ease),box-shadow var(--lg-med)}
+  .nearby-card:hover{transform:translateY(-5px);box-shadow:var(--lg-sh)}
+  .nb-img{aspect-ratio:16/10;background-size:cover;background-position:center}
+  .nb-body{padding:18px 20px}
+  .nb-dist{font-family:var(--lg-mono);font-size:9.5px;letter-spacing:.13em;text-transform:uppercase;color:var(--lg-a1)}
+  .nb-body h4{font-family:var(--lg-serif);font-style:italic;font-size:22px;color:var(--lg-ink);margin:4px 0 4px}
+  .nb-body p{font-size:13.5px;color:var(--lg-ink-soft);margin:0}
+  .letter-card{background:var(--lg-white);border-radius:var(--lg-r-lg);box-shadow:var(--lg-sh);padding:clamp(28px,4vw,48px)}
+  .letter-grid{display:grid;grid-template-columns:200px 1fr;gap:36px;align-items:start;margin-top:20px}
+  .letter-photo img{width:140px;height:140px;border-radius:50%;object-fit:cover;box-shadow:var(--lg-sh-sm)}
+  .letter-stamp{margin-top:14px}.ls-cir{display:inline-flex;width:34px;height:34px;border-radius:50%;background:var(--lg-c1);color:#fff;align-items:center;justify-content:center;font-family:var(--lg-serif);font-style:italic}
+  .ls-lbl{display:block;font-family:var(--lg-mono);font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--lg-ink-mute);margin-top:8px}
+  .letter-open{font-family:var(--lg-serif);font-style:italic;font-size:24px;color:var(--lg-ink);margin:0 0 12px}
+  .letter-body p{font-size:15.5px;color:var(--lg-ink-soft);line-height:1.7;margin:0 0 14px}
+  .letter-sign{font-family:var(--lg-serif);font-style:italic;font-size:26px;color:var(--lg-a1)!important}
+  .letter-contact{display:flex;flex-wrap:wrap;gap:10px 26px;margin-top:24px;padding-top:20px;border-top:1px solid rgba(23,20,15,.1);font-family:var(--lg-mono);font-size:11.5px;letter-spacing:.06em}
+  .letter-contact a{color:var(--lg-ink);text-decoration:none}.letter-contact a:last-child{color:var(--lg-a1)}
+  @media(max-width:700px){.letter-grid{grid-template-columns:1fr;gap:20px}.letter-photo img{width:110px;height:110px}}
+  .faq-q h3{font-family:var(--lg-serif);font-style:italic;font-size:23px;color:var(--lg-ink);margin:0 0 8px}
+  .faq-q p{color:var(--lg-ink-soft);line-height:1.65;margin:0;font-size:15px}
+</style>
+
+<!-- Breadcrumb -->
+<nav class="t-crumb" aria-label="Breadcrumb">
+  <a href="index.html">Legacy</a><span>&rarr;</span><a href="towns.html">Communities</a><span>&rarr;</span><span>Murphys</span>
+  <span class="sp"></span><span>Plate I &mdash; Gold Country Survey</span>
+</nav>
+
+<!-- ============ HERO (season scrubber preserved) ============ -->
 <section class="town-hero" data-season="summer">
-  <!-- Season-aware background frames (cross-fade) -->
   <div class="th-frame th-frame-spring" style="background-image:url('art/towns/murphys-mainst-spring.jpg');"></div>
   <div class="th-frame th-frame-summer" style="background-image:url('art/towns/murphys-mainst-summer.jpg');"></div>
   <div class="th-frame th-frame-fall"   style="background-image:url('art/towns/murphys-vineyard-fall.jpg');"></div>
@@ -281,49 +369,30 @@
   <div class="th-veil"></div>
 
   <div class="th-inner">
-    <div class="th-eyebrow">
-      <span class="tick"></span>
-      <span class="eyebrow">Calaveras County · Elevation 2,171 ft · Established 1848</span>
-    </div>
-    <h1 class="th-title">
-      Murphys,
-      <span class="it">California.</span>
-    </h1>
-    <p class="th-tag">— The Queen of the Sierra · twenty-two tasting rooms in a four-block walk</p>
-
+    <div class="th-eyebrow"><span class="tick"></span><span class="eyebrow">Calaveras County · Elevation 2,171 ft · Established 1848</span></div>
+    <h1 class="th-title">Murphys, <span class="it">California.</span></h1>
+    <p class="th-tag">The Queen of the Sierra &middot; twenty-two tasting rooms in a four-block walk</p>
     <div class="th-meta">
-      <div class="th-meta-row">
-        <span class="label-cap">Population</span><span class="num">2,226</span>
-      </div>
-      <div class="th-meta-row">
-        <span class="label-cap">San Francisco</span><span class="num">2 hr 30 min</span>
-      </div>
-      <div class="th-meta-row">
-        <span class="label-cap">Lake Tahoe</span><span class="num">2 hr 10 min</span>
-      </div>
-      <div class="th-meta-row">
-        <span class="label-cap">Snow days / yr</span><span class="num">7</span>
-      </div>
+      <div class="th-meta-row"><span class="label-cap">Population</span><span class="num">2,226</span></div>
+      <div class="th-meta-row"><span class="label-cap">San Francisco</span><span class="num">2 hr 30 min</span></div>
+      <div class="th-meta-row"><span class="label-cap">Lake Tahoe</span><span class="num">2 hr 10 min</span></div>
+      <div class="th-meta-row"><span class="label-cap">Snow days / yr</span><span class="num">7</span></div>
     </div>
   </div>
 
-  <!-- Season scrubber -->
   <div class="th-season">
-    <span class="label-cap" style="color:rgba(250,246,236,0.6);">A year in Murphys —</span>
+    <span class="label-cap" style="color:rgba(255,253,248,0.6)">A year in Murphys &mdash;</span>
     <div class="th-season-track" role="tablist">
       <button class="th-sn" data-s="spring" data-quote="<em>Mustard in the vineyards.</em> Wisteria over the porches. Tasting rooms open at noon — and Main is yours by three.">Spring</button>
       <button class="th-sn th-sn-on" data-s="summer" data-quote="<em>Long evenings on Main Street.</em> Outdoor tasting, peach season, twilight that holds till nine.">Summer</button>
       <button class="th-sn" data-s="fall" data-quote="<em>The crush.</em> Grapes in bins on every block. Sweater weather by six, fire pits by eight.">Autumn</button>
       <button class="th-sn" data-s="winter" data-quote="<em>Snow once a fortnight.</em> Cellar tastings, wood smoke, the hotel bar full by four. The town belongs to the locals.">Winter</button>
     </div>
-    <span class="th-season-quote" id="seasonQuote">
-      <em>Long evenings on Main Street.</em> Outdoor tasting, peach season,
-      twilight that holds till nine.
-    </span>
+    <span class="th-season-quote" id="seasonQuote"><em>Long evenings on Main Street.</em> Outdoor tasting, peach season, twilight that holds till nine.</span>
   </div>
 </section>
 
-<!-- ============ JUMP RAIL ============ -->
+<!-- ============ JUMP RAIL (scrollspy preserved) ============ -->
 <nav class="town-jump" id="jumpRail">
   <div class="town-jump-inner">
     <a href="#story" class="jump-on">The story</a>
@@ -337,587 +406,227 @@
 </nav>
 
 <!-- ============ THE STORY ============ -->
-<section class="section town-story" id="story" style="background:var(--parchment);">
-  <div class="section-inner">
-    <div class="story-grid">
-      <div class="story-side">
-        <span class="hairline-brass"></span>
-        <span class="eyebrow">Field notes · § I</span>
-        <h2 class="h-section" style="margin-top:14px;">What is Murphys,<br>California <em>known for?</em></h2>
-        <p style="margin-top:12px; font-family:var(--serif); font-style:italic; font-size:18px; color:var(--ink-mute); line-height:1.4;">A four-block town that punches well above its weight.</p>
-      </div>
-      <div class="story-body">
-        <p class="lede">Murphys, California is a Gold Rush–era wine town in Calaveras County, sitting at 2,171 feet in the Sierra Nevada foothills. Murphys is known for more than two dozen wine tasting rooms along a walkable four-block Main Street, the 1856 Murphys Historic Hotel, and its position at the gateway to Calaveras Big Trees State Park.</p>
-        <p class="lede">Founded by two Irish brothers in the spring of 1848, Murphys grew up around a creek, a wagon road, and the promise of gold. The gold thinned. The town didn't.</p>
-        <p>Today, four blocks of Main Street hold more wine tasting rooms than most California towns thirty times its size — paired with a working hotel that's been pouring drinks since 1856, a stone-walled creekside park, and a quiet, fierce sense that the rest of the world can pass on through.</p>
-        <p>Most of Legacy's clients come for the wine. They stay for the way Main Street still empties out by ten — and the way the sky over Murphys Park still holds every star you forgot you could see.</p>
-      </div>
+<section class="lg-sec" id="story"><div class="lg-wrap">
+  <div class="lg-grid" style="grid-template-columns:.85fr 1.15fr;gap:48px;align-items:start">
+    <div>
+      <div class="lg-kicker lg-rv"><span>Field notes · § I</span></div>
+      <h2 class="lg-display lg-h2 lg-rv lg-d1" style="margin:14px 0 10px">What is Murphys, California <em>known for?</em></h2>
+      <p class="lg-rv lg-d2" style="font-family:var(--lg-serif);font-style:italic;font-size:19px;color:var(--lg-ink-mute);line-height:1.4">A four-block town that punches well above its weight.</p>
     </div>
-
-    <!-- Personality strip: who fits here -->
-    <div class="fit-strip">
-      <div class="fit-h">
-        <span class="label-cap">Who Murphys is for —</span>
-      </div>
-      <div class="fit-cards">
-        <article class="fit-card">
-          <div class="fit-num">01</div>
-          <h4>The Bay refugee</h4>
-          <p>Trading a peninsula condo for an 1880 cottage with a covered porch. Keeping the consulting work, swapping the commute.</p>
-        </article>
-        <article class="fit-card">
-          <div class="fit-num">02</div>
-          <h4>The vineyard romantic</h4>
-          <p>Five acres, a Zin clone, a tractor older than the buyer. Pouring at the gate by year three.</p>
-        </article>
-        <article class="fit-card">
-          <div class="fit-num">03</div>
-          <h4>The second-home couple</h4>
-          <p>Sacramento or Silicon Valley primary. Murphys is the place the kids learn to love. December weekends, August weddings.</p>
-        </article>
-        <article class="fit-card">
-          <div class="fit-num">04</div>
-          <h4>The legacy buyer</h4>
-          <p>An estate parcel with a name, a creek, and a fence line that has been a fence line since the gold rush. Built to outlast its first owners.</p>
-        </article>
-      </div>
+    <div class="lg-prose lg-rv lg-d1">
+      <p class="lg-lead">Murphys, California is a Gold Rush&ndash;era wine town in Calaveras County, sitting at 2,171 feet in the Sierra Nevada foothills. Murphys is known for more than two dozen wine tasting rooms along a walkable four-block Main Street, the 1856 Murphys Historic Hotel, and its position at the gateway to Calaveras Big Trees State Park.</p>
+      <p>Founded by two Irish brothers in the spring of 1848, Murphys grew up around a creek, a wagon road, and the promise of gold. The gold thinned. The town didn't.</p>
+      <p>Today, four blocks of Main Street hold more wine tasting rooms than most California towns thirty times its size &mdash; paired with a working hotel that's been pouring drinks since 1856, a stone-walled creekside park, and a quiet, fierce sense that the rest of the world can pass on through.</p>
+      <p>Most of Legacy's clients come for the wine. They stay for the way Main Street still empties out by ten &mdash; and the way the sky over Murphys Park still holds every star you forgot you could see.</p>
     </div>
   </div>
-</section>
-
-<!-- ============ AT A GLANCE (facts table, AI-retrievable) ============ -->
-<section class="section" id="facts" style="background:var(--parchment);">
-  <div class="section-inner">
-    <div class="section-h">
-      <div>
-        <span class="hairline-brass"></span>
-        <span class="eyebrow">Murphys · at a glance</span>
-        <h2 class="h-section" style="margin-top:10px;">Murphys, California<br><em>by the numbers.</em></h2>
-      </div>
-      <p class="lede right">The durable facts buyers ask first. Current prices are in the live market report below, not hand-kept here.</p>
-    </div>
-    <div style="max-width:820px; margin-top:24px;">
-<div style="display:flex; justify-content:space-between; align-items:baseline; gap:24px; padding:16px 0; border-top:1px solid var(--rule);"><span style="font-family:var(--mono); font-size:11px; letter-spacing:0.1em; text-transform:uppercase; color:var(--ink-mute); white-space:nowrap;">County</span><span style="font-family:var(--serif); font-size:22px; color:var(--ink); text-align:right; line-height:1.2;">Calaveras County</span></div>
-<div style="display:flex; justify-content:space-between; align-items:baseline; gap:24px; padding:16px 0; border-top:1px solid var(--rule);"><span style="font-family:var(--mono); font-size:11px; letter-spacing:0.1em; text-transform:uppercase; color:var(--ink-mute); white-space:nowrap;">Elevation</span><span style="font-family:var(--serif); font-size:22px; color:var(--ink); text-align:right; line-height:1.2;">2,171 ft</span></div>
-<div style="display:flex; justify-content:space-between; align-items:baseline; gap:24px; padding:16px 0; border-top:1px solid var(--rule);"><span style="font-family:var(--mono); font-size:11px; letter-spacing:0.1em; text-transform:uppercase; color:var(--ink-mute); white-space:nowrap;">Population</span><span style="font-family:var(--serif); font-size:22px; color:var(--ink); text-align:right; line-height:1.2;">2,226 <span style="color:var(--ink-faint);">(2020 Census)</span></span></div>
-<div style="display:flex; justify-content:space-between; align-items:baseline; gap:24px; padding:16px 0; border-top:1px solid var(--rule);"><span style="font-family:var(--mono); font-size:11px; letter-spacing:0.1em; text-transform:uppercase; color:var(--ink-mute); white-space:nowrap;">Water — in town</span><span style="font-family:var(--serif); font-size:22px; color:var(--ink); text-align:right; line-height:1.2;">Union Public Utility District</span></div>
-<div style="display:flex; justify-content:space-between; align-items:baseline; gap:24px; padding:16px 0; border-top:1px solid var(--rule);"><span style="font-family:var(--mono); font-size:11px; letter-spacing:0.1em; text-transform:uppercase; color:var(--ink-mute); white-space:nowrap;">Water — outlying</span><span style="font-family:var(--serif); font-size:22px; color:var(--ink); text-align:right; line-height:1.2;">Private wells common</span></div>
-<div style="display:flex; justify-content:space-between; align-items:baseline; gap:24px; padding:16px 0; border-top:1px solid var(--rule);"><span style="font-family:var(--mono); font-size:11px; letter-spacing:0.1em; text-transform:uppercase; color:var(--ink-mute); white-space:nowrap;">Schools</span><span style="font-family:var(--serif); font-size:22px; color:var(--ink); text-align:right; line-height:1.2;">Vallecito Union SD → Bret Harte Union High</span></div>
-<div style="display:flex; justify-content:space-between; align-items:baseline; gap:24px; padding:16px 0; border-top:1px solid var(--rule);"><span style="font-family:var(--mono); font-size:11px; letter-spacing:0.1em; text-transform:uppercase; color:var(--ink-mute); white-space:nowrap;">Wine tasting rooms</span><span style="font-family:var(--serif); font-size:22px; color:var(--ink); text-align:right; line-height:1.2;">20+ on Main Street</span></div>
-<div style="display:flex; justify-content:space-between; align-items:baseline; gap:24px; padding:16px 0; border-top:1px solid var(--rule);"><span style="font-family:var(--mono); font-size:11px; letter-spacing:0.1em; text-transform:uppercase; color:var(--ink-mute); white-space:nowrap;">Bay Area</span><span style="font-family:var(--serif); font-size:22px; color:var(--ink); text-align:right; line-height:1.2;">≈ 2 hr 30 min</span></div>
-<div style="display:flex; justify-content:space-between; align-items:baseline; gap:24px; padding:16px 0; border-top:1px solid var(--rule); border-bottom:1px solid var(--rule);"><span style="font-family:var(--mono); font-size:11px; letter-spacing:0.1em; text-transform:uppercase; color:var(--ink-mute); white-space:nowrap;">Nearby</span><span style="font-family:var(--serif); font-size:22px; color:var(--ink); text-align:right; line-height:1.2;">Calaveras Big Trees State Park</span></div>
-</div>
-<p style="margin-top:20px; font-family:var(--mono); font-size:11px; letter-spacing:0.1em; text-transform:uppercase; color:var(--ink-faint);">Last updated: July 2026</p>
+  <div class="lg-kicker lg-rv" style="margin-top:40px"><span>Who Murphys is for</span><span class="lg-rule"></span></div>
+  <div class="lg-grid lg-grid--4" style="margin-top:22px">
+    <div class="lg-point lg-rv" style="--lg-accent:var(--lg-a1)"><div class="lg-point__num">01</div><h4>The Bay refugee</h4><p>Trading a peninsula condo for an 1880 cottage with a covered porch. Keeping the consulting work, swapping the commute.</p></div>
+    <div class="lg-point lg-rv lg-d1" style="--lg-accent:var(--lg-a4)"><div class="lg-point__num">02</div><h4>The vineyard romantic</h4><p>Five acres, a Zin clone, a tractor older than the buyer. Pouring at the gate by year three.</p></div>
+    <div class="lg-point lg-rv lg-d2" style="--lg-accent:var(--lg-a3)"><div class="lg-point__num">03</div><h4>The second-home couple</h4><p>Sacramento or Silicon Valley primary. Murphys is the place the kids learn to love. December weekends, August weddings.</p></div>
+    <div class="lg-point lg-rv lg-d3" style="--lg-accent:var(--lg-a5)"><div class="lg-point__num">04</div><h4>The legacy buyer</h4><p>An estate parcel with a name, a creek, and a fence line that has been a fence line since the gold rush. Built to outlast its first owners.</p></div>
   </div>
-</section>
+</div></section>
 
-<!-- ============ VITALS ============ -->
-<section class="section town-vitals" id="vitals" style="background:var(--vellum);">
-  <div class="section-inner">
-    <div class="town-marketreport">
-      <div class="tmr-head">
-        <span class="hairline-brass"></span>
-        <span class="eyebrow">Live from the MLS · updated continuously</span>
-        <h3 class="tmr-title">What are current home prices in Murphys, CA?</h3>
-        <p style="margin-top:10px; max-width:640px; color:var(--ink-soft);">Murphys, California home prices are best read live. The report below pulls the current median price, days on market and active inventory for Murphys straight from the MLS, so the numbers stay current instead of going stale on the page.</p>
-      </div>
-      <div class="idx-embed idx-market-report">
-        <script>
-          document.currentScript.replaceWith(ihfKestrel.render({
-            "component": "marketReportWidget",
-            "id": 3019792,
-            "marketReportTypeId": 3
-          }));
-        </script>
-      </div>
-    </div>
-
+<!-- ============ AT A GLANCE (facts, AI-retrievable) ============ -->
+<section class="lg-sec lg-sec--tint" id="facts"><div class="lg-wrap">
+  <div class="lg-kicker lg-rv"><span>Murphys · at a glance</span><span class="lg-rule"></span></div>
+  <h2 class="lg-display lg-h2 lg-rv lg-d1" style="margin:14px 0 10px">Murphys, California <em>by the numbers.</em></h2>
+  <div class="lg-note lg-rv lg-d2" style="max-width:640px">The durable facts buyers ask first. Current prices are in the live market report below, not hand-kept here.</div>
+  <div class="facts lg-rv lg-d2">
+    <div class="facts-row"><span class="k">County</span><span class="v">Calaveras County</span></div>
+    <div class="facts-row"><span class="k">Elevation</span><span class="v">2,171 ft</span></div>
+    <div class="facts-row"><span class="k">Population</span><span class="v">2,226 <span class="sub">(2020 Census)</span></span></div>
+    <div class="facts-row"><span class="k">Water — in town</span><span class="v">Union Public Utility District</span></div>
+    <div class="facts-row"><span class="k">Water — outlying</span><span class="v">Private wells common</span></div>
+    <div class="facts-row"><span class="k">Schools</span><span class="v">Vallecito Union SD → Bret Harte Union High</span></div>
+    <div class="facts-row"><span class="k">Wine tasting rooms</span><span class="v">20+ on Main Street</span></div>
+    <div class="facts-row"><span class="k">Bay Area</span><span class="v">≈ 2 hr 30 min</span></div>
+    <div class="facts-row"><span class="k">Nearby</span><span class="v">Calaveras Big Trees State Park</span></div>
   </div>
-</section>
+  <p style="margin-top:18px;font-family:var(--lg-mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--lg-ink-faint)">Last updated: July 2026</p>
+</div></section>
 
-<!-- ============ MAIN STREET ============ -->
-<section class="section town-mainst" id="mainst" style="background:var(--parchment);">
-  <div class="section-inner">
-    <div class="section-h">
-      <div>
-        <span class="hairline-brass"></span>
-        <span class="eyebrow">Plate III · On the map</span>
-        <h2 class="h-section" style="margin-top:10px;">Right in the<br><em>heart of it.</em></h2>
-      </div>
-      <p class="lede right">Downtown Murphys and the surrounding Calaveras foothills. Pan, zoom, or drop into Street View.</p>
-    </div>
-
-    <div class="mainst-map mainst-map--live">
-      <iframe
-        title="Map of Murphys, California"
-        src="https://www.google.com/maps?q=Murphys,%20CA&z=14&output=embed"
-        style="width:100%;height:100%;border:0;display:block;"
-        loading="lazy" referrerpolicy="no-referrer-when-downgrade" allowfullscreen></iframe>
-    </div>
+<!-- ============ VITALS — live IDX market report ============ -->
+<section class="lg-sec" id="vitals"><div class="lg-wrap">
+  <div class="lg-kicker lg-rv"><span>Live from the MLS · updated continuously</span><span class="lg-rule"></span></div>
+  <h2 class="lg-display lg-h2 lg-rv lg-d1" style="margin:14px 0 10px">What are current home prices in <em>Murphys, CA?</em></h2>
+  <div class="lg-note lg-rv lg-d2" style="max-width:660px">Murphys home prices are best read live. The report below pulls the current median price, days on market and active inventory for Murphys straight from the MLS, so the numbers stay current instead of going stale on the page.</div>
+  <div class="idx-embed idx-market-report" style="margin-top:26px">
+    <script>
+      document.currentScript.replaceWith(ihfKestrel.render({
+        "component": "marketReportWidget",
+        "id": 3019792,
+        "marketReportTypeId": 3
+      }));
+    </script>
   </div>
-</section>
+</div></section>
+
+<!-- ============ MAIN STREET — map ============ -->
+<section class="lg-sec lg-sec--tint" id="mainst"><div class="lg-wrap">
+  <div class="lg-kicker lg-rv"><span>On the map</span><span class="lg-rule"></span></div>
+  <h2 class="lg-display lg-h2 lg-rv lg-d1" style="margin:14px 0 10px">Right in the <em>heart of it.</em></h2>
+  <div class="lg-note lg-rv lg-d2" style="max-width:640px">Downtown Murphys and the surrounding Calaveras foothills. Pan, zoom, or drop into Street View.</div>
+  <div class="town-map lg-rv lg-d2">
+    <iframe title="Map of Murphys, California" src="https://www.google.com/maps?q=Murphys,%20CA&z=14&output=embed" style="width:100%;height:100%;border:0;display:block;" loading="lazy" referrerpolicy="no-referrer-when-downgrade" allowfullscreen></iframe>
+  </div>
+</div></section>
 
 <!-- ============ WINE ============ -->
-<section class="section town-wine" id="wine" style="background:var(--ink); color:var(--shell);">
-  <div class="section-inner">
-    <div class="section-h" style="border-bottom-color: rgba(250,246,236,0.1);">
-      <div>
-        <span class="hairline-brass" style="background:var(--brass-bright);"></span>
-        <span class="eyebrow" style="color:var(--brass-bright);">Plate IV · The signature</span>
-        <h2 class="h-section" style="color:var(--shell); margin-top:10px;">How many wineries &amp;<br>tasting rooms does <em style="color:var(--brass-bright);">Murphys have?</em></h2>
-      </div>
-      <p class="lede right" style="color:rgba(250,246,236,0.7);">No appointment. No agenda. Most rooms pour for $15–$25, almost all waived with a two-bottle purchase. Pace yourself.</p>
-    </div>
+<section class="lg-sec lg-sec--ink" id="wine"><div class="lg-wrap">
+  <div class="lg-kicker lg-rv"><span>The signature</span></div>
+  <h2 class="lg-display lg-h2 lg-rv lg-d1" style="margin:14px 0 10px">How many wineries &amp; tasting rooms does <em>Murphys have?</em></h2>
+  <p class="lg-rv lg-d2" style="font-family:var(--lg-serif);font-style:italic;font-size:20px;color:rgba(255,253,248,.78);max-width:660px">No appointment. No agenda. Most rooms pour for $15&ndash;$25, almost all waived with a two-bottle purchase. Pace yourself.</p>
+  <div class="wine-grid lg-rv lg-d2">
+    <article class="wine-card"><div class="wine-letter">I</div><div class="wine-name">Ironstone</div><div class="wine-house">Estate</div><div class="wine-flight"><span>Cab Franc</span><span>Obsession Symphony</span><span>Estate Reserve</span></div><div class="wine-foot"><span>$25 flight</span><span>·</span><span>10–5 daily</span></div></article>
+    <article class="wine-card"><div class="wine-letter">II</div><div class="wine-name">Newsome Harlow</div><div class="wine-house">Boutique reds</div><div class="wine-flight"><span>Big Joe Zin</span><span>Lavinia GSM</span><span>The Tipping Point</span></div><div class="wine-foot"><span>$20 flight</span><span>·</span><span>11–5 Thu–Mon</span></div></article>
+    <article class="wine-card"><div class="wine-letter">III</div><div class="wine-name">Gossamer</div><div class="wine-house">Low-intervention</div><div class="wine-flight"><span>Skin-contact Vermentino</span><span>Chenin Pét-Nat</span><span>Counoise Rosé</span></div><div class="wine-foot"><span>$15 flight</span><span>·</span><span>12–5 Fri–Sun</span></div></article>
+    <article class="wine-card"><div class="wine-letter">IV</div><div class="wine-name">Vina Moda</div><div class="wine-house">Iberian-leaning</div><div class="wine-flight"><span>Tempranillo</span><span>Garnacha</span><span>Albariño</span></div><div class="wine-foot"><span>$20 flight</span><span>·</span><span>11–5 daily</span></div></article>
+    <article class="wine-card"><div class="wine-letter">V</div><div class="wine-name">Lavender Ridge</div><div class="wine-house">Provence in the Sierra</div><div class="wine-flight"><span>Rosé</span><span>Mourvèdre</span><span>Brie + lavender pairing</span></div><div class="wine-foot"><span>$22 flight</span><span>·</span><span>11–5 daily</span></div></article>
+    <article class="wine-card"><div class="wine-letter">VI</div><div class="wine-name">Black Sheep</div><div class="wine-house">Year-round bocce</div><div class="wine-flight"><span>True Frogs Zin</span><span>Cinsault</span><span>Tempranillo</span></div><div class="wine-foot"><span>$15 flight</span><span>·</span><span>12–5 Fri–Sun</span></div></article>
+  </div>
+  <div class="wine-walk lg-rv">
+    <span class="label-cap" style="font-family:var(--lg-mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--lg-sun)">Walking math &mdash;</span>
+    <span class="wf-stat">22 <em>rooms</em></span><span class="wf-stat">0.4 <em>miles end-to-end</em></span><span class="wf-stat">9 <em>min, sober</em></span><span class="wf-stat">3 <em>weekend passport options</em></span>
+  </div>
+</div></section>
 
-    <div class="wine-grid">
-      <article class="wine-card">
-        <div class="wine-letter">I</div>
-        <div class="wine-name">Ironstone</div>
-        <div class="wine-house">Estate</div>
-        <div class="wine-flight">
-          <span>Cab Franc</span><span>Obsession Symphony</span><span>Estate Reserve</span>
-        </div>
-        <div class="wine-foot"><span>$25 flight</span><span>·</span><span>10–5 daily</span></div>
-      </article>
-      <article class="wine-card">
-        <div class="wine-letter">II</div>
-        <div class="wine-name">Newsome Harlow</div>
-        <div class="wine-house">Boutique reds</div>
-        <div class="wine-flight">
-          <span>Big Joe Zin</span><span>Lavinia GSM</span><span>The Tipping Point</span>
-        </div>
-        <div class="wine-foot"><span>$20 flight</span><span>·</span><span>11–5 Thu–Mon</span></div>
-      </article>
-      <article class="wine-card">
-        <div class="wine-letter">III</div>
-        <div class="wine-name">Gossamer</div>
-        <div class="wine-house">Low-intervention</div>
-        <div class="wine-flight">
-          <span>Skin-contact Vermentino</span><span>Chenin Pét-Nat</span><span>Counoise Rosé</span>
-        </div>
-        <div class="wine-foot"><span>$15 flight</span><span>·</span><span>12–5 Fri–Sun</span></div>
-      </article>
-      <article class="wine-card">
-        <div class="wine-letter">IV</div>
-        <div class="wine-name">Vina Moda</div>
-        <div class="wine-house">Iberian-leaning</div>
-        <div class="wine-flight">
-          <span>Tempranillo</span><span>Garnacha</span><span>Albariño</span>
-        </div>
-        <div class="wine-foot"><span>$20 flight</span><span>·</span><span>11–5 daily</span></div>
-      </article>
-      <article class="wine-card">
-        <div class="wine-letter">V</div>
-        <div class="wine-name">Lavender Ridge</div>
-        <div class="wine-house">Provence in the Sierra</div>
-        <div class="wine-flight">
-          <span>Rosé</span><span>Mourvèdre</span><span>Brie + lavender pairing</span>
-        </div>
-        <div class="wine-foot"><span>$22 flight</span><span>·</span><span>11–5 daily</span></div>
-      </article>
-      <article class="wine-card">
-        <div class="wine-letter">VI</div>
-        <div class="wine-name">Black Sheep</div>
-        <div class="wine-house">Year-round bocce</div>
-        <div class="wine-flight">
-          <span>True Frogs Zin</span><span>Cinsault</span><span>Tempranillo</span>
-        </div>
-        <div class="wine-foot"><span>$15 flight</span><span>·</span><span>12–5 Fri–Sun</span></div>
-      </article>
-    </div>
+<!-- ============ SARA'S PICKS (tabs preserved) ============ -->
+<section class="lg-sec lg-sec--tint" id="picks"><div class="lg-wrap">
+  <div class="lg-kicker lg-rv"><span>The personal list</span><span class="lg-rule"></span></div>
+  <h2 class="lg-display lg-h2 lg-rv lg-d1" style="margin:14px 0 8px">Sara's standing <em>recommendations.</em></h2>
+  <div class="lg-note lg-rv lg-d2" style="max-width:680px">Years of out-of-town clients, dozens of revised opinions. This is the list as it stands today.</div>
 
-    <div class="wine-foot-strip">
-      <div>
-        <span class="label-cap" style="color:var(--brass-bright);">Walking math —</span>
-        <span class="wf-stat">22 <em>rooms</em></span>
-        <span class="wf-stat">0.4 <em>miles end-to-end</em></span>
-        <span class="wf-stat">9 <em>min, sober</em></span>
-        <span class="wf-stat">3 <em>weekend passport options</em></span>
-      </div>
-      <a href="#" class="btn btn-brass btn-sm">Reserve a tasting weekend</a>
+  <div class="picks-tabs">
+    <button class="pick-tab pick-tab-on" data-tab="eat">Eat <span class="ct">04</span></button>
+    <button class="pick-tab" data-tab="drink">Drink <span class="ct">04</span></button>
+    <button class="pick-tab" data-tab="stay">Stay <span class="ct">04</span></button>
+    <button class="pick-tab" data-tab="do">Do <span class="ct">04</span></button>
+    <button class="pick-tab" data-tab="sec">Secret <span class="ct">02</span></button>
+  </div>
+
+  <div class="picks-board">
+    <div class="pick-pane pick-pane-on" data-pane="eat">
+      <article class="pick-row"><span class="pick-num">01</span><div class="pick-body"><h4>Murphys Grade Oyster Joint</h4><p>The best oysters in the foothills, full stop. Raw bar, local bubbles, a counter worth lingering at. I send every seafood-missing transplant here first.</p><div class="pick-tags"><span>Oysters</span><span>$$$</span><span>Reserve</span></div></div><div class="pick-cap"><span class="label-cap">When</span><span>Dinner · Wed–Sun</span></div></article>
+      <article class="pick-row"><span class="pick-num">02</span><div class="pick-body"><h4>V Restaurant</h4><p>The seasonal California room I send every couple to. Order the duck; the lamb; the off-menu thing the server doesn't mention.</p><div class="pick-tags"><span>Date</span><span>$$$</span><span>Reserve</span></div></div><div class="pick-cap"><span class="label-cap">When</span><span>Dinner · Thu–Sun</span></div></article>
+      <article class="pick-row"><span class="pick-num">03</span><div class="pick-body"><h4>Doke Sushi</h4><p>Sushi on Main that surprises everyone. Sit at the bar and let them feed you. Omakase by reservation; go hungry.</p><div class="pick-tags"><span>Sushi</span><span>$$$</span><span>Reserve</span></div></div><div class="pick-cap"><span class="label-cap">When</span><span>Dinner · Tue–Sun</span></div></article>
+      <article class="pick-row"><span class="pick-num">04</span><div class="pick-body"><h4>Murphys Historic Hotel — Patio</h4><p>Outdoor dining under the elms. The 1856 dining room spills onto the patio when the evenings are warm. Order simply, sit late.</p><div class="pick-tags"><span>Outdoor</span><span>$$</span><span>Walk-in</span></div></div><div class="pick-cap"><span class="label-cap">When</span><span>Lunch & dinner daily</span></div></article>
+    </div>
+    <div class="pick-pane" data-pane="drink">
+      <article class="pick-row"><span class="pick-num">01</span><div class="pick-body"><h4>V Bar</h4><p>The fine-dining side of V, and some of the best cocktails in town. Scotty works the bar in an intimate, low-lit room — tell him what you like and let him build it. My standing pre-dinner ritual.</p><div class="pick-tags"><span>Cocktails</span><span>$$$</span><span>Intimate</span></div></div><div class="pick-cap"><span class="label-cap">When</span><span>5 pm – close · Thu–Sun</span></div></article>
+      <article class="pick-row"><span class="pick-num">02</span><div class="pick-body"><h4>Murphys Historic Hotel Bar</h4><p>Mark Twain's room is upstairs. The bar has been pouring since 1856. Sit at the wood, order a Manhattan.</p><div class="pick-tags"><span>History</span><span>$$</span></div></div><div class="pick-cap"><span class="label-cap">When</span><span>3 pm – close</span></div></article>
+      <article class="pick-row"><span class="pick-num">03</span><div class="pick-body"><h4>Newsome Harlow</h4><p>Where my serious-wine clients go. The Big Joe Zinfandel will end the conversation about whether you like Zinfandel.</p><div class="pick-tags"><span>Tasting</span><span>$$</span></div></div><div class="pick-cap"><span class="label-cap">When</span><span>11–5 Thu–Mon</span></div></article>
+      <article class="pick-row"><span class="pick-num">04</span><div class="pick-body"><h4>Lavender Ridge</h4><p>The brie-and-lavender pairing is exactly as good as it sounds. Sit in the courtyard. Don't rush.</p><div class="pick-tags"><span>Outdoor</span><span>$$</span></div></div><div class="pick-cap"><span class="label-cap">When</span><span>11–5 daily</span></div></article>
+    </div>
+    <div class="pick-pane" data-pane="stay">
+      <article class="pick-row"><span class="pick-num">01</span><div class="pick-body"><h4>Glashaus</h4><p>The glass dome James and I built on twenty private acres above New Melones Lake — 360° of water, foothills and stars through the glass, an outdoor clawfoot tub set right on the ancient rock. A guest-favorite Superhost stay, and the place I send buyers who want to feel what living up here actually feels like. <a href="https://www.airbnb.com/rooms/919731657397440702" target="_blank" rel="noopener">Book it direct on Airbnb →</a></p><div class="pick-tags"><span>Glass dome</span><span>Lake view</span><span>Book direct</span></div></div><div class="pick-cap"><span class="label-cap">Rated</span><span><a href="https://www.airbnb.com/rooms/919731657397440702" target="_blank" rel="noopener">4.92 · Airbnb</a></span></div></article>
+      <article class="pick-row"><span class="pick-num">02</span><div class="pick-body"><h4>Dunbar House 1880</h4><p>Victorian B&B with the kind of breakfast that makes you reconsider your life. Garden in the back.</p><div class="pick-tags"><span>B&B</span><span>$$$</span></div></div><div class="pick-cap"><span class="label-cap">From</span><span>$295 / nt</span></div></article>
+      <article class="pick-row"><span class="pick-num">03</span><div class="pick-body"><h4>Murphys Historic Hotel</h4><p>Stay in a room with a brass plate naming a 19th-century guest. The rooms are small. The hallways squeak. That's the point.</p><div class="pick-tags"><span>History</span><span>$$</span></div></div><div class="pick-cap"><span class="label-cap">From</span><span>$185 / nt</span></div></article>
+      <article class="pick-row"><span class="pick-num">04</span><div class="pick-body"><h4>Vineyard rental — Black Sheep Cottage</h4><p>One-bedroom on a working vineyard. Wake up to the rows. Walk to Main in fifteen.</p><div class="pick-tags"><span>Vineyard</span><span>$$$</span></div></div><div class="pick-cap"><span class="label-cap">From</span><span>$345 / nt</span></div></article>
+    </div>
+    <div class="pick-pane" data-pane="do">
+      <article class="pick-row"><span class="pick-num">01</span><div class="pick-body"><h4>Calaveras Big Trees State Park</h4><p>Giant sequoias, twenty minutes east. Walk the North Grove loop slowly. It rearranges things.</p><div class="pick-tags"><span>Outdoor</span><span>20 min</span></div></div><div class="pick-cap"><span class="label-cap">When</span><span>Year-round</span></div></article>
+      <article class="pick-row"><span class="pick-num">02</span><div class="pick-body"><h4>Mercer Caverns</h4><p>Discovered 1885. Forty-five minutes underground. The crystal aragonite is the showpiece.</p><div class="pick-tags"><span>Cave</span><span>7 min</span></div></div><div class="pick-cap"><span class="label-cap">When</span><span>Daily, hourly</span></div></article>
+      <article class="pick-row"><span class="pick-num">03</span><div class="pick-body"><h4>Bear Valley Resort</h4><p>Skiing forty minutes up Hwy 4. Smaller and stranger than Tahoe — that's the appeal.</p><div class="pick-tags"><span>Ski</span><span>40 min</span></div></div><div class="pick-cap"><span class="label-cap">When</span><span>Dec–Apr</span></div></article>
+      <article class="pick-row"><span class="pick-num">04</span><div class="pick-body"><h4>Stanislaus River — Camp Nine</h4><p>Class III–IV rafting an hour out. Sara will introduce you to the outfitter.</p><div class="pick-tags"><span>Water</span><span>60 min</span></div></div><div class="pick-cap"><span class="label-cap">When</span><span>May–Aug</span></div></article>
+    </div>
+    <div class="pick-pane" data-pane="sec">
+      <article class="pick-row"><span class="pick-num">01</span><div class="pick-body"><h4>The Murphys Park gazebo at 9 pm</h4><p>After Main Street empties. Bring a bottle and a sweater. Listen to the creek. That's it. That's the secret.</p><div class="pick-tags"><span>Quiet</span><span>Free</span></div></div><div class="pick-cap"><span class="label-cap">When</span><span>Anytime</span></div></article>
+      <article class="pick-row"><span class="pick-num">02</span><div class="pick-body"><h4>The barrel room at Tanner</h4><p>Ask for Mike. Ask about the high-elevation Pinot. If you're lucky he pours from the barrel.</p><div class="pick-tags"><span>Wine</span><span>Insider</span></div></div><div class="pick-cap"><span class="label-cap">When</span><span>By feel</span></div></article>
     </div>
   </div>
-</section>
+</div></section>
 
-<!-- ============ SARA'S PICKS ============ -->
-<section class="section town-picks" id="picks" style="background:var(--vellum);">
-  <div class="section-inner">
-    <div class="section-h">
-      <div>
-        <span class="hairline-brass"></span>
-        <span class="eyebrow">Plate V · The personal list</span>
-        <h2 class="h-section" style="margin-top:10px;">Sara's standing<br><em>recommendations.</em></h2>
-      </div>
-      <p class="lede right">Years of out-of-town clients, dozens of revised opinions. This is the list as it stands today.</p>
-    </div>
-
-    <div class="picks-tabs">
-      <button class="pick-tab pick-tab-on" data-tab="eat">Eat <span class="ct">04</span></button>
-      <button class="pick-tab" data-tab="drink">Drink <span class="ct">04</span></button>
-      <button class="pick-tab" data-tab="stay">Stay <span class="ct">04</span></button>
-      <button class="pick-tab" data-tab="do">Do <span class="ct">04</span></button>
-      <button class="pick-tab" data-tab="sec">Secret <span class="ct">02</span></button>
-    </div>
-
-    <div class="picks-board">
-      <!-- EAT -->
-      <div class="pick-pane pick-pane-on" data-pane="eat">
-        <article class="pick-row">
-          <span class="pick-num">01</span>
-          <div class="pick-body">
-            <h4>Murphys Grade Oyster Joint</h4>
-            <p>The best oysters in the foothills, full stop. Raw bar, local bubbles, a counter worth lingering at. I send every seafood-missing transplant here first.</p>
-            <div class="pick-tags"><span>Oysters</span><span>$$$</span><span>Reserve</span></div>
-          </div>
-          <div class="pick-cap"><span class="label-cap">When</span><span>Dinner · Wed–Sun</span></div>
-        </article>
-        <article class="pick-row">
-          <span class="pick-num">02</span>
-          <div class="pick-body">
-            <h4>V Restaurant</h4>
-            <p>The seasonal California room I send every couple to. Order the duck; the lamb; the off-menu thing the server doesn't mention.</p>
-            <div class="pick-tags"><span>Date</span><span>$$$</span><span>Reserve</span></div>
-          </div>
-          <div class="pick-cap"><span class="label-cap">When</span><span>Dinner · Thu–Sun</span></div>
-        </article>
-        <article class="pick-row">
-          <span class="pick-num">03</span>
-          <div class="pick-body">
-            <h4>Doke Sushi</h4>
-            <p>Sushi on Main that surprises everyone. Sit at the bar and let them feed you. Omakase by reservation; go hungry.</p>
-            <div class="pick-tags"><span>Sushi</span><span>$$$</span><span>Reserve</span></div>
-          </div>
-          <div class="pick-cap"><span class="label-cap">When</span><span>Dinner · Tue–Sun</span></div>
-        </article>
-        <article class="pick-row">
-          <span class="pick-num">04</span>
-          <div class="pick-body">
-            <h4>Murphys Historic Hotel — Patio</h4>
-            <p>Outdoor dining under the elms. The 1856 dining room spills onto the patio when the evenings are warm. Order simply, sit late.</p>
-            <div class="pick-tags"><span>Outdoor</span><span>$$</span><span>Walk-in</span></div>
-          </div>
-          <div class="pick-cap"><span class="label-cap">When</span><span>Lunch & dinner daily</span></div>
-        </article>
-      </div>
-
-      <!-- DRINK -->
-      <div class="pick-pane" data-pane="drink">
-        <article class="pick-row">
-          <span class="pick-num">01</span>
-          <div class="pick-body">
-            <h4>V Bar</h4>
-            <p>The fine-dining side of V, and some of the best cocktails in town. Scotty works the bar in an intimate, low-lit room — tell him what you like and let him build it. My standing pre-dinner ritual.</p>
-            <div class="pick-tags"><span>Cocktails</span><span>$$$</span><span>Intimate</span></div>
-          </div>
-          <div class="pick-cap"><span class="label-cap">When</span><span>5 pm – close · Thu–Sun</span></div>
-        </article>
-        <article class="pick-row">
-          <span class="pick-num">02</span>
-          <div class="pick-body">
-            <h4>Murphys Historic Hotel Bar</h4>
-            <p>Mark Twain's room is upstairs. The bar has been pouring since 1856. Sit at the wood, order a Manhattan.</p>
-            <div class="pick-tags"><span>History</span><span>$$</span></div>
-          </div>
-          <div class="pick-cap"><span class="label-cap">When</span><span>3 pm – close</span></div>
-        </article>
-        <article class="pick-row">
-          <span class="pick-num">03</span>
-          <div class="pick-body">
-            <h4>Newsome Harlow</h4>
-            <p>Where my serious-wine clients go. The Big Joe Zinfandel will end the conversation about whether you like Zinfandel.</p>
-            <div class="pick-tags"><span>Tasting</span><span>$$</span></div>
-          </div>
-          <div class="pick-cap"><span class="label-cap">When</span><span>11–5 Thu–Mon</span></div>
-        </article>
-        <article class="pick-row">
-          <span class="pick-num">04</span>
-          <div class="pick-body">
-            <h4>Lavender Ridge</h4>
-            <p>The brie-and-lavender pairing is exactly as good as it sounds. Sit in the courtyard. Don't rush.</p>
-            <div class="pick-tags"><span>Outdoor</span><span>$$</span></div>
-          </div>
-          <div class="pick-cap"><span class="label-cap">When</span><span>11–5 daily</span></div>
-        </article>
-      </div>
-
-      <!-- STAY -->
-      <div class="pick-pane" data-pane="stay">
-        <article class="pick-row">
-          <span class="pick-num">01</span>
-          <div class="pick-body">
-            <h4>Glashaus</h4>
-            <p>The glass dome James and I built on twenty private acres above New Melones Lake — 360° of water, foothills and stars through the glass, an outdoor clawfoot tub set right on the ancient rock. A guest-favorite Superhost stay, and the place I send buyers who want to feel what living up here actually feels like. <a href="https://www.airbnb.com/rooms/919731657397440702" target="_blank" rel="noopener">Book it direct on Airbnb →</a></p>
-            <div class="pick-tags"><span>Glass dome</span><span>Lake view</span><span>Book direct</span></div>
-          </div>
-          <div class="pick-cap"><span class="label-cap">Rated</span><span><a href="https://www.airbnb.com/rooms/919731657397440702" target="_blank" rel="noopener">4.92 · Airbnb</a></span></div>
-        </article>
-        <article class="pick-row">
-          <span class="pick-num">02</span>
-          <div class="pick-body">
-            <h4>Dunbar House 1880</h4>
-            <p>Victorian B&B with the kind of breakfast that makes you reconsider your life. Garden in the back.</p>
-            <div class="pick-tags"><span>B&B</span><span>$$$</span></div>
-          </div>
-          <div class="pick-cap"><span class="label-cap">From</span><span>$295 / nt</span></div>
-        </article>
-        <article class="pick-row">
-          <span class="pick-num">03</span>
-          <div class="pick-body">
-            <h4>Murphys Historic Hotel</h4>
-            <p>Stay in a room with a brass plate naming a 19th-century guest. The rooms are small. The hallways squeak. That's the point.</p>
-            <div class="pick-tags"><span>History</span><span>$$</span></div>
-          </div>
-          <div class="pick-cap"><span class="label-cap">From</span><span>$185 / nt</span></div>
-        </article>
-        <article class="pick-row">
-          <span class="pick-num">04</span>
-          <div class="pick-body">
-            <h4>Vineyard rental — Black Sheep Cottage</h4>
-            <p>One-bedroom on a working vineyard. Wake up to the rows. Walk to Main in fifteen.</p>
-            <div class="pick-tags"><span>Vineyard</span><span>$$$</span></div>
-          </div>
-          <div class="pick-cap"><span class="label-cap">From</span><span>$345 / nt</span></div>
-        </article>
-      </div>
-
-      <!-- DO -->
-      <div class="pick-pane" data-pane="do">
-        <article class="pick-row">
-          <span class="pick-num">01</span>
-          <div class="pick-body">
-            <h4>Calaveras Big Trees State Park</h4>
-            <p>Giant sequoias, twenty minutes east. Walk the North Grove loop slowly. It rearranges things.</p>
-            <div class="pick-tags"><span>Outdoor</span><span>20 min</span></div>
-          </div>
-          <div class="pick-cap"><span class="label-cap">When</span><span>Year-round</span></div>
-        </article>
-        <article class="pick-row">
-          <span class="pick-num">02</span>
-          <div class="pick-body">
-            <h4>Mercer Caverns</h4>
-            <p>Discovered 1885. Forty-five minutes underground. The crystal aragonite is the showpiece.</p>
-            <div class="pick-tags"><span>Cave</span><span>7 min</span></div>
-          </div>
-          <div class="pick-cap"><span class="label-cap">When</span><span>Daily, hourly</span></div>
-        </article>
-        <article class="pick-row">
-          <span class="pick-num">03</span>
-          <div class="pick-body">
-            <h4>Bear Valley Resort</h4>
-            <p>Skiing forty minutes up Hwy 4. Smaller and stranger than Tahoe — that's the appeal.</p>
-            <div class="pick-tags"><span>Ski</span><span>40 min</span></div>
-          </div>
-          <div class="pick-cap"><span class="label-cap">When</span><span>Dec–Apr</span></div>
-        </article>
-        <article class="pick-row">
-          <span class="pick-num">04</span>
-          <div class="pick-body">
-            <h4>Stanislaus River — Camp Nine</h4>
-            <p>Class III–IV rafting an hour out. Sara will introduce you to the outfitter.</p>
-            <div class="pick-tags"><span>Water</span><span>60 min</span></div>
-          </div>
-          <div class="pick-cap"><span class="label-cap">When</span><span>May–Aug</span></div>
-        </article>
-      </div>
-
-      <!-- SECRETS -->
-      <div class="pick-pane" data-pane="sec">
-        <article class="pick-row">
-          <span class="pick-num">01</span>
-          <div class="pick-body">
-            <h4>The Murphys Park gazebo at 9 pm</h4>
-            <p>After Main Street empties. Bring a bottle and a sweater. Listen to the creek. That's it. That's the secret.</p>
-            <div class="pick-tags"><span>Quiet</span><span>Free</span></div>
-          </div>
-          <div class="pick-cap"><span class="label-cap">When</span><span>Anytime</span></div>
-        </article>
-        <article class="pick-row">
-          <span class="pick-num">02</span>
-          <div class="pick-body">
-            <h4>The barrel room at Tanner</h4>
-            <p>Ask for Mike. Ask about the high-elevation Pinot. If you're lucky he pours from the barrel.</p>
-            <div class="pick-tags"><span>Wine</span><span>Insider</span></div>
-          </div>
-          <div class="pick-cap"><span class="label-cap">When</span><span>By feel</span></div>
-        </article>
-      </div>
-    </div>
+<!-- ============ LISTINGS — live IDX gallery ============ -->
+<section class="lg-sec" id="listings"><div class="lg-wrap">
+  <div class="lg-kicker lg-rv"><span>Currently in the field</span><span class="lg-rule"></span></div>
+  <h2 class="lg-display lg-h2 lg-rv lg-d1" style="margin:14px 0 10px">Homes for sale <em>in Murphys.</em></h2>
+  <div class="lg-note lg-rv lg-d2" style="max-width:560px">Every home for sale in Murphys &mdash; live from the MLS.</div>
+  <div class="idx-embed idx-feature-gallery" style="margin-top:26px">
+    <script>
+      // Full Murphys market — iHomeFinder saved-search gallery (id 3019722,
+      // featured:false → the whole MLS for the city, not just office inventory).
+      document.currentScript.replaceWith(ihfKestrel.render({
+        "component": "gallerySliderWidget",
+        "rows": 2,
+        "navigation": true,
+        "nav": "top",
+        "auto": true,
+        "maxResults": 25,
+        "status": "active",
+        "sort": "ds",
+        "featured": false,
+        "id": 3019722
+      }));
+    </script>
   </div>
-</section>
-
-<!-- ============ LISTINGS IN MURPHYS ============ -->
-<section class="section" id="listings" style="background:var(--parchment);">
-  <div class="section-inner">
-    <div class="section-h">
-      <div>
-        <span class="hairline-brass"></span>
-        <span class="eyebrow">Plate VI · Currently in the field</span>
-        <h2 class="h-section" style="margin-top:10px;">Homes for sale<br><em>in Murphys.</em></h2>
-      </div>
-      <p class="lede right">Every home for sale in Murphys — live from the MLS.</p>
-    </div>
-
-    <div class="idx-embed idx-feature-gallery">
-      <script>
-        // Full Murphys market — iHomeFinder saved-search gallery (id 3019722,
-        // featured:false → the whole MLS for the city, not just office inventory).
-        document.currentScript.replaceWith(ihfKestrel.render({
-          "component": "gallerySliderWidget",
-          "rows": 2,
-          "navigation": true,
-          "nav": "top",
-          "auto": true,
-          "maxResults": 25,
-          "status": "active",
-          "sort": "ds",
-          "featured": false,
-          "effect": "slide",
-          "id": 3019722
-        }));
-      </script>
-    </div>
-
-  </div>
-</section>
+</div></section>
 
 <!-- ============ LETTER FROM SARA ============ -->
-<section class="section town-letter" id="letter" style="background:var(--vellum);">
-  <div class="section-inner">
-    <article class="letter-card">
-      <div class="letter-head">
-        <span class="hairline-brass"></span>
-        <span class="eyebrow">A note from your agent · § VII</span>
+<section class="lg-sec lg-sec--tint" id="letter"><div class="lg-wrap">
+  <article class="letter-card lg-rv">
+    <div class="lg-kicker"><span>A note from your agent · § VII</span><span class="lg-rule"></span></div>
+    <div class="letter-grid">
+      <div class="letter-photo">
+        <img src="art/sara-headshot.png" alt="Sara Cooper">
+        <div class="letter-stamp"><span class="ls-cir">SC</span><span class="ls-lbl">Sara Cooper · Owner-Broker</span></div>
       </div>
-      <div class="letter-grid">
-        <div class="letter-photo">
-          <img src="art/sara-headshot.png" alt="Sara Cooper">
-          <div class="letter-stamp">
-            <span class="ls-cir">SC</span>
-            <span class="ls-lbl">Sara Cooper · Owner-Broker</span>
-          </div>
-        </div>
-        <div class="letter-body">
-          <p class="letter-open">A few words on Murphys —</p>
-          <p>I came to the Gold Country in 1999 and never left, and I've spent years making my living within four blocks of Main Street since. Murphys is the town that taught me the difference between a place that looks charming on a Saturday and a place that <em>is</em> charming on a Tuesday morning in February.</p>
-          <p>If you're moving here from the Bay or Sacramento, three things will surprise you. The grocery store knows your name within a month. Snow falls maybe seven times a year and the kids treat it like a holiday. And the wine — once you've poured at six rooms run by the people who own them, you'll never quite drink a tasting-room flight the same way again.</p>
-          <p>If Murphys is on your list, I'd love to walk it with you. Coffee at Grounds, an hour on Main, then we'll see what's actually for sale that fits the version of life you're picturing.</p>
-          <p class="letter-sign">— Sara</p>
-        </div>
+      <div class="letter-body">
+        <p class="letter-open">A few words on Murphys &mdash;</p>
+        <p>I came to the Gold Country in 1999 and never left, and I've spent years making my living within four blocks of Main Street since. Murphys is the town that taught me the difference between a place that looks charming on a Saturday and a place that <em>is</em> charming on a Tuesday morning in February.</p>
+        <p>If you're moving here from the Bay or Sacramento, three things will surprise you. The grocery store knows your name within a month. Snow falls maybe seven times a year and the kids treat it like a holiday. And the wine &mdash; once you've poured at six rooms run by the people who own them, you'll never quite drink a tasting-room flight the same way again.</p>
+        <p>If Murphys is on your list, I'd love to walk it with you. Coffee at Grounds, an hour on Main, then we'll see what's actually for sale that fits the version of life you're picturing.</p>
+        <p class="letter-sign">&mdash; Sara</p>
       </div>
-
-      <div class="letter-contact">
-        <a href="tel:2095594966"><span class="glyph">◇</span> (209) 559-4966</a>
-        <a href="mailto:SaraSellsCalifornia@gmail.com"><span class="glyph">◇</span> SaraSellsCalifornia@gmail.com</a>
-        <a href="find-my-match.html"><span class="glyph">◇</span> Schedule a Murphys walk</a>
-      </div>
-    </article>
-  </div>
-</section>
+    </div>
+    <div class="letter-contact">
+      <a href="tel:2095594966">◇&nbsp; (209) 559-4966</a>
+      <a href="mailto:SaraSellsCalifornia@gmail.com">◇&nbsp; SaraSellsCalifornia@gmail.com</a>
+      <a href="find-my-match.html">◇&nbsp; Schedule a Murphys walk</a>
+    </div>
+  </article>
+</div></section>
 
 <!-- ============ NEIGHBORING TOWNS ============ -->
-<section class="section" style="background:var(--parchment);">
-  <div class="section-inner">
-    <div class="section-h">
-      <div>
-        <span class="hairline-brass"></span>
-        <span class="eyebrow">Plate VIII · Adjacent</span>
-        <h2 class="h-section" style="margin-top:10px;">Towns nearby.</h2>
-      </div>
-      <p class="lede right">Five more characters in the same story. Each within forty minutes of Main Street.</p>
-    </div>
-
-    <div class="nearby-grid">
-      <a href="town-arnold.html" class="nearby-card">
-        <div class="nb-img" style="background-image:url('art/towns/arnold-aspens-fall.jpg');"></div>
-        <div class="nb-body">
-          <span class="nb-dist">22 min east</span>
-          <h4>Arnold</h4>
-          <p>Pines, cabins, ski-adjacent.</p>
-        </div>
-      </a>
-      <a href="town-angels-camp.html" class="nearby-card">
-        <div class="nb-img" style="background-image:url('art/towns/angels-camp-mainst-fall.jpg');"></div>
-        <div class="nb-body">
-          <span class="nb-dist">12 min south</span>
-          <h4>Angels Camp</h4>
-          <p>Frog Jubilee, Twain country.</p>
-        </div>
-      </a>
-      <a href="town-copperopolis.html" class="nearby-card">
-        <div class="nb-img" style="background-image:url('art/towns/copperopolis-lake-tulloch.jpg');"></div>
-        <div class="nb-body">
-          <span class="nb-dist">28 min southwest</span>
-          <h4>Copperopolis</h4>
-          <p>Lake estates, golf, big sky.</p>
-        </div>
-      </a>
-      <a href="town-sutter-creek.html" class="nearby-card">
-        <div class="nb-img" style="background-image:url('art/towns/sutter-creek-mainst.jpg');"></div>
-        <div class="nb-body">
-          <span class="nb-dist">38 min northwest</span>
-          <h4>Sutter Creek</h4>
-          <p>Antiques, Amador wine, history.</p>
-        </div>
-      </a>
-      <a href="river-mountain.html" class="nearby-card">
-        <div class="nb-img" style="background-image:url('art/towns/rm-mokelumne-rapids.jpg');"></div>
-        <div class="nb-body">
-          <span class="nb-dist">35 min south</span>
-          <h4>Waterfront Lakes and Rivers</h4><p>Lakes, rivers &amp; waterfront.</p>
-        </div>
-      </a>
-    </div>
+<section class="lg-sec"><div class="lg-wrap">
+  <div class="lg-kicker lg-rv"><span>Adjacent</span><span class="lg-rule"></span></div>
+  <h2 class="lg-display lg-h2 lg-rv lg-d1" style="margin:14px 0 8px">Towns nearby.</h2>
+  <div class="lg-note lg-rv lg-d2" style="max-width:620px">Five more characters in the same story. Each within forty minutes of Main Street.</div>
+  <div class="nearby-grid lg-rv lg-d2">
+    <a href="town-arnold.html" class="nearby-card"><div class="nb-img" style="background-image:url('art/towns/arnold-aspens-fall.jpg');"></div><div class="nb-body"><span class="nb-dist">22 min east</span><h4>Arnold</h4><p>Pines, cabins, ski-adjacent.</p></div></a>
+    <a href="town-angels-camp.html" class="nearby-card"><div class="nb-img" style="background-image:url('art/towns/angels-camp-mainst-fall.jpg');"></div><div class="nb-body"><span class="nb-dist">12 min south</span><h4>Angels Camp</h4><p>Frog Jubilee, Twain country.</p></div></a>
+    <a href="town-copperopolis.html" class="nearby-card"><div class="nb-img" style="background-image:url('art/towns/copperopolis-lake-tulloch.jpg');"></div><div class="nb-body"><span class="nb-dist">28 min southwest</span><h4>Copperopolis</h4><p>Lake estates, golf, big sky.</p></div></a>
+    <a href="town-sutter-creek.html" class="nearby-card"><div class="nb-img" style="background-image:url('art/towns/sutter-creek-mainst.jpg');"></div><div class="nb-body"><span class="nb-dist">38 min northwest</span><h4>Sutter Creek</h4><p>Antiques, Amador wine, history.</p></div></a>
+    <a href="river-mountain.html" class="nearby-card"><div class="nb-img" style="background-image:url('art/towns/rm-mokelumne-rapids.jpg');"></div><div class="nb-body"><span class="nb-dist">35 min south</span><h4>Waterfront Lakes &amp; Rivers</h4><p>Lakes, rivers &amp; waterfront.</p></div></a>
   </div>
-</section>
+</div></section>
 
 <!-- ============ CTA ============ -->
-<section class="cta">
-  <span class="hairline-brass" style="margin: 0 auto 20px;"></span>
-  <span class="eyebrow">Begin your Murphys chapter</span>
-  <h2 class="cta-h">Walk Main Street<br><em>with us.</em></h2>
-  <p class="cta-sub">An afternoon, a list, a candid read on what's actually on the market.</p>
-  <div class="cta-ctas">
-    <a href="find-my-match.html" class="btn btn-ink">Find my Murphys match</a>
-    <a href="tel:2095594966" class="btn btn-ghost">Call (209) 559-4966</a>
+<section class="lg-sec lg-sec--ink"><div class="lg-wrap" style="text-align:center">
+  <div class="lg-kicker lg-rv" style="justify-content:center"><span>Begin your Murphys chapter</span></div>
+  <h2 class="lg-display lg-rv lg-d1" style="margin:16px 0 14px;font-size:clamp(38px,6vw,74px);line-height:.98">Walk Main Street<br><em>with us.</em></h2>
+  <p class="lg-rv lg-d2" style="font-family:var(--lg-serif);font-style:italic;font-size:21px;color:rgba(255,253,248,.85);max-width:600px;margin:0 auto">An afternoon, a list, a candid read on what's actually on the market.</p>
+  <div class="lg-rv lg-d3" style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:28px">
+    <a href="find-my-match.html" class="lg-btn lg-btn--gold">Find my Murphys match</a>
+    <a href="tel:2095594966" class="lg-btn lg-btn--ghost">Call (209) 559-4966</a>
   </div>
-</section>
+</div></section>
 
-<!-- ============ FOOTER ============ -->
-<!-- ============ FAQ + ENTITY + SOURCES (AI-retrievable) ============ -->
-<section class="section" id="faq" style="background:var(--parchment);">
-  <div class="section-inner">
-    <div class="section-h">
-      <div>
-        <span class="hairline-brass"></span>
-        <span class="eyebrow">Murphys · common questions</span>
-        <h2 class="h-section" style="margin-top:10px;">Buying in Murphys,<br><em>answered.</em></h2>
-      </div>
-    </div>
-    <div style="margin-top:24px; display:flex; flex-direction:column; gap:26px; max-width:820px;">
-      <div>
-        <h3 style="font-family:var(--serif); font-size:22px; color:var(--ink); margin-bottom:8px;">Is a Murphys home on city water or a private well?</h3>
-        <p style="color:var(--ink-soft); line-height:1.6;">Homes inside the Murphys townsite are typically served by the Union Public Utility District, while outlying and vineyard parcels around Murphys are frequently on private wells. Whether a Murphys property is on district water or a well changes both the inspection and the loan, so confirm it before writing an offer.</p>
-      </div>
-      <div>
-        <h3 style="font-family:var(--serif); font-size:22px; color:var(--ink); margin-bottom:8px;">What school district serves Murphys, California?</h3>
-        <p style="color:var(--ink-soft); line-height:1.6;">Murphys is served by the Vallecito Union School District for elementary and middle grades, with high-school students attending Bret Harte Union High School in nearby Angels Camp.</p>
-      </div>
-      <div>
-        <h3 style="font-family:var(--serif); font-size:22px; color:var(--ink); margin-bottom:8px;">How far is Murphys from the Bay Area and Sacramento?</h3>
-        <p style="color:var(--ink-soft); line-height:1.6;">Murphys sits at 2,171 feet on the Highway 4 corridor in Calaveras County, roughly 2 hours 30 minutes from San Francisco and about 2 hours from Sacramento by car.</p>
-      </div>
-      <div>
-        <h3 style="font-family:var(--serif); font-size:22px; color:var(--ink); margin-bottom:8px;">Does Murphys have wildfire risk and insurance considerations?</h3>
-        <p style="color:var(--ink-soft); line-height:1.6;">Like much of the Sierra foothills, parts of Calaveras County fall within CAL FIRE Fire Hazard Severity Zones, and wildfire insurance is a real line item for Murphys buyers. Confirm a specific parcel's designation with the CAL FIRE address lookup and get an insurance quote early in escrow.</p>
-      </div>
-      <div>
-        <h3 style="font-family:var(--serif); font-size:22px; color:var(--ink); margin-bottom:8px;">Where can I see current Murphys home prices?</h3>
-        <p style="color:var(--ink-soft); line-height:1.6;">Current Murphys median price, days on market and active inventory are published in the live market report on this page, pulled continuously from the MLS rather than kept by hand.</p>
-      </div>
-    </div>
-    <p style="margin-top:34px; padding-top:22px; border-top:1px solid var(--rule); color:var(--ink-soft); line-height:1.6; max-width:820px;">Sara Cooper, Broker at Legacy Properties (CA DRE #02141987), works across the Sierra foothills of Calaveras, Amador and Tuolumne counties, including Murphys, with 23 closings in the trailing twelve months. Reach Sara at <a href="tel:2095594966" style="color:var(--brass);">(209) 559-4966</a>.</p>
-    <p style="margin-top:16px; font-family:var(--mono); font-size:11px; letter-spacing:0.06em; color:var(--ink-faint); max-width:820px;">Sources: <a href="https://www.car.org/marketdata" target="_blank" rel="noopener" style="color:var(--ink-mute);">California Association of REALTORS®</a> · <a href="https://osfm.fire.ca.gov/what-we-do/community-wildfire-preparedness-and-mitigation/fire-hazard-severity-zones" target="_blank" rel="noopener" style="color:var(--ink-mute);">CAL FIRE Fire Hazard Severity Zones</a> · <a href="https://www.unionpud.com/" target="_blank" rel="noopener" style="color:var(--ink-mute);">Union Public Utility District</a> · <a href="https://en.wikipedia.org/wiki/Murphys,_California" target="_blank" rel="noopener" style="color:var(--ink-mute);">U.S. Census / Murphys, California</a>.</p>
+<!-- ============ FAQ (AI-retrievable) ============ -->
+<section class="lg-sec lg-sec--tint" id="faq"><div class="lg-wrap">
+  <div class="lg-kicker lg-rv"><span>Murphys · common questions</span><span class="lg-rule"></span></div>
+  <h2 class="lg-display lg-h2 lg-rv lg-d1" style="margin:14px 0 24px">Buying in Murphys, <em>answered.</em></h2>
+  <div style="display:flex;flex-direction:column;gap:24px;max-width:840px">
+    <div class="faq-q lg-rv"><h3>Is a Murphys home on city water or a private well?</h3><p>Homes inside the Murphys townsite are typically served by the Union Public Utility District, while outlying and vineyard parcels around Murphys are frequently on private wells. Whether a Murphys property is on district water or a well changes both the inspection and the loan, so confirm it before writing an offer.</p></div>
+    <div class="faq-q lg-rv"><h3>What school district serves Murphys, California?</h3><p>Murphys is served by the Vallecito Union School District for elementary and middle grades, with high-school students attending Bret Harte Union High School in nearby Angels Camp.</p></div>
+    <div class="faq-q lg-rv"><h3>How far is Murphys from the Bay Area and Sacramento?</h3><p>Murphys sits at 2,171 feet on the Highway 4 corridor in Calaveras County, roughly 2 hours 30 minutes from San Francisco and about 2 hours from Sacramento by car.</p></div>
+    <div class="faq-q lg-rv"><h3>Does Murphys have wildfire risk and insurance considerations?</h3><p>Like much of the Sierra foothills, parts of Calaveras County fall within CAL FIRE Fire Hazard Severity Zones, and wildfire insurance is a real line item for Murphys buyers. Confirm a specific parcel's designation with the CAL FIRE address lookup and get an insurance quote early in escrow.</p></div>
+    <div class="faq-q lg-rv"><h3>Where can I see current Murphys home prices?</h3><p>Current Murphys median price, days on market and active inventory are published in the live market report on this page, pulled continuously from the MLS rather than kept by hand.</p></div>
   </div>
+  <p style="margin-top:32px;padding-top:22px;border-top:1px solid rgba(23,20,15,.12);color:var(--lg-ink-soft);line-height:1.6;max-width:840px;font-size:14.5px">Sara Cooper, Broker at Legacy Properties (CA DRE #02141987), works across the Sierra foothills of Calaveras, Amador and Tuolumne counties, including Murphys, with 23 closings in the trailing twelve months. Reach Sara at <a href="tel:2095594966" style="color:var(--lg-a1)">(209) 559-4966</a>.</p>
+  <p style="margin-top:14px;font-family:var(--lg-mono);font-size:10.5px;letter-spacing:.05em;color:var(--lg-ink-faint);max-width:840px">Sources: <a href="https://www.car.org/marketdata" target="_blank" rel="noopener" style="color:var(--lg-ink-mute)">California Association of REALTORS®</a> · <a href="https://osfm.fire.ca.gov/what-we-do/community-wildfire-preparedness-and-mitigation/fire-hazard-severity-zones" target="_blank" rel="noopener" style="color:var(--lg-ink-mute)">CAL FIRE Fire Hazard Severity Zones</a> · <a href="https://www.unionpud.com/" target="_blank" rel="noopener" style="color:var(--lg-ink-mute)">Union Public Utility District</a> · <a href="https://en.wikipedia.org/wiki/Murphys,_California" target="_blank" rel="noopener" style="color:var(--lg-ink-mute)">U.S. Census / Murphys, California</a>.</p>
   <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -932,48 +641,43 @@
   ]
 }
   </script>
-</section>
+</div></section>
 
-<footer class="footer">
-  <div class="footer-inner">
-    <div class="footer-top">
-      <div>
-        <a href="index.html" class="wordmark" style="align-items: flex-start;">
-          <span class="wordmark-word">Legacy</span>
-          <span class="wordmark-sub">Properties · Angels Camp CA</span>
-        </a>
-        <p class="footer-tagline">Every home has a story. We help you find yours — or tell the one you've already lived.</p>
-      </div>
-      <div>
-        <h4>Communities</h4>
-        <a href="town-murphys.html">Murphys</a>
-        <a href="town-arnold.html">Arnold</a>
-        <a href="town-sutter-creek.html">Sutter Creek</a>
-        <a href="town-shenandoah-valley.html">Shenandoah Valley</a>
-        <a href="river-mountain.html">Waterfront Lakes and Rivers</a>
-        <a href="town-angels-camp.html">Angels Camp</a>
-        <a href="town-copperopolis.html">Copperopolis</a>
-      </div>
-      <div>
-        <h4>Buy &amp; sell</h4>
-        <a href="property-search.html">Search all listings</a>
-        <a href="valuation.html">What's my home worth?</a>
-        <a href="find-my-match.html">Request a tour</a>
-      </div>
-      <div>
-        <h4>Connect</h4>
-        <a href="tel:2095594966">(209) 559-4966</a>
-        <a href="mailto:SaraSellsCalifornia@gmail.com">SaraSellsCalifornia@gmail.com</a>
-        <a href="ledger.html">The Ledger</a>
-      </div>
+<!-- ============ FOOTER ============ -->
+<footer class="lg-footer"><div class="lg-wrap">
+  <div class="lg-footer__cols">
+    <div>
+      <a href="index.html" class="lg-mark"><span class="lg-mark__badge"><span>L</span></span><span class="lg-mark__txt"><b>Legacy</b><i>Properties · Angels Camp</i></span></a>
+      <p style="font-family:var(--lg-serif);font-style:italic;font-size:16px;color:var(--lg-ink-soft);line-height:1.5;margin-top:16px;max-width:260px">Every home has a story. We help you find yours &mdash; or tell the one you've already lived.</p>
     </div>
-    <div class="footer-bottom">
-      <div>© 2026 Legacy Properties · All rights reserved</div>
-      <div>Sara Cooper, Broker · DRE #02141987 · Equal Housing Opportunity</div>
+    <div><h5>Communities</h5>
+      <a href="town-murphys.html">Murphys</a>
+      <a href="town-arnold.html">Arnold</a>
+      <a href="town-sutter-creek.html">Sutter Creek</a>
+      <a href="town-shenandoah-valley.html">Shenandoah Valley</a>
+      <a href="river-mountain.html">Waterfront Lakes &amp; Rivers</a>
+      <a href="town-angels-camp.html">Angels Camp</a>
+      <a href="town-copperopolis.html">Copperopolis</a>
+    </div>
+    <div><h5>Buy &amp; sell</h5>
+      <a href="property-search.html">Search all listings</a>
+      <a href="valuation.html">What's my home worth?</a>
+      <a href="find-my-match.html">Request a tour</a>
+    </div>
+    <div><h5>Connect</h5>
+      <a href="tel:2095594966">(209) 559-4966</a>
+      <a href="mailto:SaraSellsCalifornia@gmail.com">Email Sara</a>
+      <a href="ledger.html">The Ledger</a>
     </div>
   </div>
-</footer>
+  <div class="lg-footer__bot">
+    <span>&copy; 2026 Legacy Properties &middot; All rights reserved</span>
+    <span>Sara Cooper, Broker &middot; DRE #02141987 &middot; Equal Housing Opportunity</span>
+  </div>
+</div></footer>
 
+
+<script src="legacy-ui.js" defer></script>
 <script src="town.js"></script>
 </body>
 </html>

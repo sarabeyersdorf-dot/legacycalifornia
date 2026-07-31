@@ -218,7 +218,7 @@
 </script>
 <!-- seo:head:end -->
 <link rel="stylesheet" href="legacy.css">
-<link rel="stylesheet" href="town.css">
+<link rel="stylesheet" href="legacy-ui.css">
 <link rel="stylesheet" href="idx-theme.css">
 <script src="https://kestrel.idxhome.com/ihf-kestrel.js"></script>
 <script>
@@ -229,45 +229,277 @@
   };
 </script>
 </head>
-<body class="paper" data-screen-label="Town · Sutter Creek">
+<body class="paper lg-page" data-screen-label="Town · Sutter Creek">
+<div class="lg-progress"></div>
 
-<header class="topnav">
-  <div class="topnav-bar1">
-    <span>Boutique luxury real estate · Calaveras · Amador · Tuolumne</span>
-    <span><a href="tel:2095594966">(209) 559-4966</a> · <a href="mailto:SaraSellsCalifornia@gmail.com">SaraSellsCalifornia@gmail.com</a></span>
-  </div>
-  <nav class="topnav-bar2">
-    <div class="topnav-links">
-      <a href="listings.html">Listings</a>
-      <a href="towns.html" class="active">Communities</a>
-      <a href="relocate.html">Relocate</a>
-      <a href="seller.html">Sellers</a>
-    </div>
-    <a href="index.html" class="wordmark">
-      <span class="wordmark-word">Legacy</span>
-      <span class="wordmark-sub">Properties · Angels Camp CA</span>
-    </a>
-    <div class="topnav-links right">
-      <a href="index.html#ledger">The Ledger</a>
-      <a href="dashboard.html">Sign In</a>
-      <a href="platform.html" class="btn btn-ink btn-sm" style="padding:10px 18px;">Find My Match</a>
-    </div>
-  </nav>
-</header>
-
-<div class="town-breadcrumb">
-  <div class="town-breadcrumb-inner">
-    <a href="index.html">Legacy</a>
-    <span class="sep">→</span>
-    <a href="towns.html">Communities</a>
-    <span class="sep">→</span>
-    <span class="cur">Sutter Creek</span>
-    <span class="spacer"></span>
-    <span class="mono small">Vol. XXII · Plate III — Gold Country Survey</span>
-  </div>
+<!-- ============ TOP NAV ============ -->
+<!-- ============ TOP STRIP + HEADER ============ -->
+<div style="background:var(--lg-ink);color:rgba(255,253,248,.72);font-family:var(--lg-mono);font-size:10.5px;letter-spacing:.13em;text-transform:uppercase;display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;padding:9px var(--lg-gut)">
+  <span>Boutique real estate &middot; Calaveras &middot; Amador &middot; Tuolumne</span>
+  <span style="display:flex;gap:14px">
+    <a href="tel:2095594966" style="color:inherit;text-decoration:none">(209) 559-4966</a>
+    <a href="mailto:SaraSellsCalifornia@gmail.com" style="color:var(--lg-c2);text-decoration:none">SaraSellsCalifornia@gmail.com</a>
+  </span>
 </div>
+<header class="lg-header"><div class="lg-header__in">
+  <a class="lg-mark" href="index.html">
+    <span class="lg-mark__badge"><span>L</span></span>
+    <span class="lg-mark__txt"><b>Legacy</b><i>Properties · Angels Camp</i></span>
+  </a>
+  <nav class="lg-nav" id="siteNav">
+    <a href="property-search.html">Listings</a>
+    <a href="towns.html" aria-current="page">Communities</a>
+    <a href="relocate.html">Relocate</a>
+    <a href="valuation.html">Sellers</a>
+    <a href="market-report.html">Markets</a>
+    <a href="ledger.html">The Ledger</a>
+    <a href="dashboard.html">Sign In</a>
+    <a href="find-my-match.html" class="lg-btn" style="padding:11px 22px">Find My Match</a>
+  </nav>
+  <button class="lg-navtoggle" data-lg-nav="#siteNav" aria-expanded="false">Menu</button>
+</div></header>
 
-<!-- HERO -->
+<!-- Page-scoped lg styling for the kept interactive pieces (season hero, jump
+     rail scrollspy, picks tabs). town.js drives them by these classes/ids. -->
+<style>
+  .tc{max-width:var(--lg-max);margin:0 auto;padding:0 var(--lg-gut)}
+  /* breadcrumb */
+  .t-crumb{font-family:var(--lg-mono);font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--lg-ink-mute);display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:16px var(--lg-gut) 0;max-width:var(--lg-max);margin:0 auto}
+  .t-crumb a{color:var(--lg-a1);text-decoration:none}.t-crumb .sp{flex:1}
+  /* season hero */
+  .town-hero{position:relative;min-height:clamp(580px,66vw,840px);display:flex;flex-direction:column;justify-content:flex-end;overflow:hidden;background:var(--lg-ink)}
+  .th-frame{position:absolute;inset:0;background-size:cover;background-position:center 42%;opacity:0;transition:opacity 1.2s ease}
+  .town-hero[data-season="spring"] .th-frame-spring,.town-hero[data-season="summer"] .th-frame-summer,.town-hero[data-season="fall"] .th-frame-fall,.town-hero[data-season="winter"] .th-frame-winter{opacity:1}
+  .th-veil{position:absolute;inset:0;z-index:1;background:linear-gradient(180deg,rgba(23,20,15,.4),rgba(23,20,15,.12) 38%,rgba(23,20,15,.82))}
+  .th-inner{position:relative;z-index:2;width:100%;max-width:var(--lg-max);margin:0 auto;padding:0 var(--lg-gut) 30px;color:#fff}
+  .th-eyebrow{display:inline-flex;align-items:center;gap:10px;background:rgba(255,253,248,.16);backdrop-filter:blur(6px);border:1px solid rgba(255,253,248,.3);border-radius:100px;padding:7px 16px;font-family:var(--lg-mono);font-size:10px;letter-spacing:.18em;text-transform:uppercase;font-weight:600}
+  .th-eyebrow .tick{width:7px;height:7px;border-radius:50%;background:var(--lg-c2);animation:lg-ping 2.4s ease-out infinite}
+  .th-eyebrow .eyebrow{color:#fff}
+  .th-title{font-family:var(--lg-serif);font-style:italic;font-weight:600;font-size:clamp(46px,8vw,104px);line-height:.95;margin:18px 0 0;text-shadow:0 4px 30px rgba(23,20,15,.35)}
+  .th-title .it{color:var(--lg-sun)}
+  .th-tag{font-family:var(--lg-serif);font-style:italic;font-size:clamp(17px,2.1vw,23px);color:rgba(255,253,248,.92);margin-top:14px}
+  .th-meta{display:flex;flex-wrap:wrap;gap:14px 34px;margin-top:20px}
+  .th-meta-row{display:flex;flex-direction:column;gap:2px}
+  .th-meta .label-cap{font-family:var(--lg-mono);font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;color:rgba(255,253,248,.6)}
+  .th-meta .num{font-family:var(--lg-serif);font-style:italic;font-size:22px;color:#fff}
+  .th-season{position:relative;z-index:2;width:100%;max-width:var(--lg-max);margin:0 auto;padding:16px var(--lg-gut) 26px;display:flex;flex-wrap:wrap;align-items:center;gap:12px 16px}
+  .th-season>.label-cap{font-family:var(--lg-mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase}
+  .th-season-track{display:flex;gap:8px;flex-wrap:wrap}
+  .th-sn{font-family:var(--lg-mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;font-weight:700;padding:8px 15px;border-radius:100px;border:1px solid rgba(255,253,248,.35);background:rgba(255,253,248,.08);color:rgba(255,253,248,.85);cursor:pointer;transition:all var(--lg-fast)}
+  .th-sn.th-sn-on{background:var(--lg-sun);border-color:var(--lg-sun);color:var(--lg-ink)}
+  .th-season-quote{flex:1 1 260px;min-width:220px;font-family:var(--lg-serif);font-style:italic;font-size:15px;color:rgba(255,253,248,.9);line-height:1.4}
+  .th-season-quote em{color:var(--lg-sun)}
+  /* jump rail */
+  .town-jump{position:sticky;top:72px;z-index:40;background:color-mix(in srgb,var(--lg-cream) 92%,transparent);backdrop-filter:blur(12px) saturate(1.2);border-bottom:1px solid rgba(23,20,15,.08)}
+  .town-jump-inner{max-width:var(--lg-max);margin:0 auto;display:flex;gap:26px;overflow-x:auto;padding:14px var(--lg-gut);font-family:var(--lg-mono);font-size:11px;letter-spacing:.09em;text-transform:uppercase;font-weight:600}
+  .town-jump a{color:var(--lg-ink-mute);text-decoration:none;white-space:nowrap;padding:4px 0;border-bottom:2px solid transparent;transition:color var(--lg-fast)}
+  .town-jump a.jump-on{color:var(--lg-a1);border-bottom-color:var(--lg-c1)}
+  /* facts table */
+  .facts{max-width:840px;margin-top:26px}
+  .facts-row{display:flex;justify-content:space-between;align-items:baseline;gap:24px;padding:15px 2px;border-top:1px solid rgba(23,20,15,.1)}
+  .facts-row:last-of-type{border-bottom:1px solid rgba(23,20,15,.1)}
+  .facts-row .k{font-family:var(--lg-mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--lg-ink-mute);white-space:nowrap}
+  .facts-row .v{font-family:var(--lg-serif);font-style:italic;font-size:21px;color:var(--lg-ink);text-align:right;line-height:1.2}
+  .facts-row .v .sub{font-style:normal;font-family:var(--lg-mono);font-size:11px;color:var(--lg-ink-faint)}
+  /* wine cards */
+  .wine-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px;margin-top:6px}
+  .wine-card{background:rgba(255,253,248,.06);border:1px solid rgba(255,253,248,.14);border-radius:var(--lg-r);padding:24px;transition:transform var(--lg-fast) var(--lg-ease),background var(--lg-fast)}
+  .wine-card:hover{transform:translateY(-4px);background:rgba(255,253,248,.1)}
+  .wine-letter{font-family:var(--lg-serif);font-style:italic;font-size:30px;color:var(--lg-sun);line-height:1}
+  .wine-name{font-family:var(--lg-serif);font-style:italic;font-size:24px;color:#fff;margin-top:6px}
+  .wine-house{font-family:var(--lg-mono);font-size:10px;letter-spacing:.13em;text-transform:uppercase;color:rgba(255,253,248,.6);margin-top:4px}
+  .wine-flight{display:flex;flex-direction:column;gap:4px;margin-top:12px;font-size:13.5px;color:rgba(255,253,248,.82)}
+  .wine-foot{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px;font-family:var(--lg-mono);font-size:10px;letter-spacing:.08em;color:rgba(255,253,248,.55)}
+  .wine-walk{display:flex;flex-wrap:wrap;align-items:center;gap:12px 26px;margin-top:28px;padding-top:22px;border-top:1px solid rgba(255,253,248,.14)}
+  .wf-stat{font-family:var(--lg-serif);font-style:italic;font-size:26px;color:#fff}
+  .wf-stat em{font-style:normal;font-family:var(--lg-mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,253,248,.6);margin-left:6px}
+  /* picks */
+  .picks-tabs{display:flex;gap:10px;flex-wrap:wrap;margin:26px 0 24px}
+  .pick-tab{font-family:var(--lg-mono);font-size:11px;letter-spacing:.11em;text-transform:uppercase;font-weight:700;padding:11px 20px;border-radius:100px;border:2px solid var(--lg-sand);background:var(--lg-white);color:var(--lg-ink-soft);cursor:pointer;display:inline-flex;align-items:center;gap:8px;transition:all var(--lg-fast)}
+  .pick-tab .ct{font-family:var(--lg-serif);font-style:italic;opacity:.7}
+  .pick-tab.pick-tab-on{background:var(--lg-c1-deep);border-color:var(--lg-c1-deep);color:#fff}
+  .pick-pane{display:none}.pick-pane.pick-pane-on{display:block}
+  .pick-row{display:grid;grid-template-columns:auto 1fr auto;gap:20px;align-items:start;padding:22px 2px;border-top:1px solid rgba(23,20,15,.09)}
+  .pick-num{font-family:var(--lg-serif);font-style:italic;font-size:26px;color:var(--lg-a1);line-height:1}
+  .pick-body h4{font-family:var(--lg-serif);font-style:italic;font-size:22px;color:var(--lg-ink);margin:0 0 6px}
+  .pick-body p{font-size:14.5px;color:var(--lg-ink-soft);line-height:1.6;margin:0}
+  .pick-body p a{color:var(--lg-a1)}
+  .pick-tags{display:flex;gap:7px;flex-wrap:wrap;margin-top:11px}
+  .pick-tags span{font-family:var(--lg-mono);font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--lg-ink-mute);background:var(--lg-sand);border-radius:100px;padding:4px 10px}
+  .pick-cap{font-family:var(--lg-mono);font-size:10.5px;letter-spacing:.06em;color:var(--lg-ink-mute);text-align:right;white-space:nowrap}
+  .pick-cap .label-cap{display:block;color:var(--lg-ink-faint);margin-bottom:3px}
+  @media(max-width:760px){.pick-row{grid-template-columns:auto 1fr;gap:14px}.pick-cap{grid-column:2;text-align:left;white-space:normal}}
+  /* map + nearby + letter */
+  .town-map{border-radius:var(--lg-r);overflow:hidden;box-shadow:var(--lg-sh);height:clamp(360px,46vw,520px);margin-top:8px}
+  .nearby-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:16px;margin-top:8px}
+  .nearby-card{display:block;text-decoration:none;background:var(--lg-white);border-radius:var(--lg-r);overflow:hidden;box-shadow:var(--lg-sh-sm);transition:transform var(--lg-med) var(--lg-ease),box-shadow var(--lg-med)}
+  .nearby-card:hover{transform:translateY(-5px);box-shadow:var(--lg-sh)}
+  .nb-img{aspect-ratio:16/10;background-size:cover;background-position:center}
+  .nb-body{padding:18px 20px}
+  .nb-dist{font-family:var(--lg-mono);font-size:9.5px;letter-spacing:.13em;text-transform:uppercase;color:var(--lg-a1)}
+  .nb-body h4{font-family:var(--lg-serif);font-style:italic;font-size:22px;color:var(--lg-ink);margin:4px 0 4px}
+  .nb-body p{font-size:13.5px;color:var(--lg-ink-soft);margin:0}
+  .letter-card{background:var(--lg-white);border-radius:var(--lg-r-lg);box-shadow:var(--lg-sh);padding:clamp(28px,4vw,48px)}
+  .letter-grid{display:grid;grid-template-columns:200px 1fr;gap:36px;align-items:start;margin-top:20px}
+  .letter-photo img{width:140px;height:140px;border-radius:50%;object-fit:cover;box-shadow:var(--lg-sh-sm)}
+  .letter-stamp{margin-top:14px}.ls-cir{display:inline-flex;width:34px;height:34px;border-radius:50%;background:var(--lg-c1);color:#fff;align-items:center;justify-content:center;font-family:var(--lg-serif);font-style:italic}
+  .ls-lbl{display:block;font-family:var(--lg-mono);font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--lg-ink-mute);margin-top:8px}
+  .letter-open{font-family:var(--lg-serif);font-style:italic;font-size:24px;color:var(--lg-ink);margin:0 0 12px}
+  .letter-body p{font-size:15.5px;color:var(--lg-ink-soft);line-height:1.7;margin:0 0 14px}
+  .letter-sign{font-family:var(--lg-serif);font-style:italic;font-size:26px;color:var(--lg-a1)!important}
+  .letter-contact{display:flex;flex-wrap:wrap;gap:10px 26px;margin-top:24px;padding-top:20px;border-top:1px solid rgba(23,20,15,.1);font-family:var(--lg-mono);font-size:11.5px;letter-spacing:.06em}
+  .letter-contact a{color:var(--lg-ink);text-decoration:none}.letter-contact a:last-child{color:var(--lg-a1)}
+  @media(max-width:700px){.letter-grid{grid-template-columns:1fr;gap:20px}.letter-photo img{width:110px;height:110px}}
+  .faq-q h3{font-family:var(--lg-serif);font-style:italic;font-size:23px;color:var(--lg-ink);margin:0 0 8px}
+  .faq-q p{color:var(--lg-ink-soft);line-height:1.65;margin:0;font-size:15px}
+
+  /* --- Sutter Creek Main Street pin map (migrated from town.css/town-map.css; uses legacy.css vars) --- */
+/* ============================================================
+   MAIN STREET
+   ============================================================ */
+.mainst-filters {
+  display: flex; flex-wrap: wrap; gap: 0;
+  margin-bottom: 28px;
+  border: 1px solid var(--rule);
+  background: var(--shell);
+  max-width: max-content;
+}
+.ms-filter {
+  padding: 12px 22px;
+  font-family: var(--mono); font-size: 10px; letter-spacing: 0.14em;
+  text-transform: uppercase;
+  background: none; border: none;
+  border-right: 1px solid var(--rule);
+  color: var(--ink-mute);
+  cursor: pointer;
+  transition: all .15s;
+  display: inline-flex; align-items: center; gap: 8px;
+}
+.ms-filter:last-child { border-right: none; }
+.ms-filter:hover { color: var(--brass); }
+.ms-filter.ms-on { background: var(--ink); color: var(--shell); }
+.ms-filter .ct {
+  font-size: 9px; opacity: 0.55; font-weight: 500;
+}
+.mainst-board {
+  display: grid;
+  grid-template-columns: 1.7fr 1fr;
+  gap: 0;
+  border: 1px solid var(--rule);
+  background: var(--shell);
+  min-height: 600px;
+}
+.mainst-map {
+  position: relative;
+  border-right: 1px solid var(--rule);
+  overflow: hidden;
+}
+.mainst-map svg { display: block; width: 100%; height: 100%; }
+.ms-pin {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  background: none; border: none; padding: 0; cursor: pointer;
+  display: flex; align-items: center; gap: 6px;
+}
+.ms-pin-dot {
+  width: 26px; height: 26px;
+  background: var(--shell);
+  border: 1.5px solid var(--ink);
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--mono); font-size: 10px; font-weight: 700;
+  color: var(--ink); letter-spacing: 0;
+  box-shadow: 0 4px 10px -4px rgba(27,24,19,0.35);
+  transition: all .18s;
+}
+.ms-pin[data-cat="wine"] .ms-pin-dot { background: var(--brass); color: var(--shell); border-color: var(--brass); }
+.ms-pin[data-cat="eat"] .ms-pin-dot { background: var(--oxblood); color: var(--shell); border-color: var(--oxblood); }
+.ms-pin[data-cat="stay"] .ms-pin-dot { background: var(--ink); color: var(--shell); }
+.ms-pin[data-cat="shop"] .ms-pin-dot { background: var(--moss); color: var(--shell); border-color: var(--moss); }
+.ms-pin[data-cat="do"]   .ms-pin-dot { background: var(--shell); color: var(--ink); }
+.ms-pin-tip {
+  font-family: var(--mono); font-size: 9px; letter-spacing: 0.12em;
+  text-transform: uppercase;
+  background: var(--ink); color: var(--shell);
+  padding: 4px 9px;
+  opacity: 0; transform: translateX(-4px);
+  transition: all .18s;
+  white-space: nowrap; pointer-events: none;
+}
+.ms-pin:hover .ms-pin-dot,
+.ms-pin.ms-pin-on .ms-pin-dot { transform: scale(1.18); }
+.ms-pin:hover .ms-pin-tip,
+.ms-pin.ms-pin-on .ms-pin-tip { opacity: 1; transform: translateX(0); }
+.ms-pin.ms-pin-dim .ms-pin-dot {
+  opacity: 0.18; filter: grayscale(1);
+}
+.ms-pin.ms-pin-dim { pointer-events: none; }
+/* Rail */
+.mainst-rail {
+  padding: 28px 32px;
+  display: flex; flex-direction: column;
+  background: var(--shell);
+}
+.ms-rail-head {
+  display: flex; justify-content: space-between; align-items: center;
+  padding-bottom: 14px; border-bottom: 1px solid var(--rule);
+  margin-bottom: 22px;
+}
+.ms-rail-head .label-cap { color: var(--brass); }
+.ms-rail-tag {
+  display: inline-block;
+  font-family: var(--mono); font-size: 9px; letter-spacing: 0.16em;
+  text-transform: uppercase; color: var(--ink-faint);
+  margin-bottom: 14px;
+}
+.ms-rail-name {
+  font-family: var(--serif); font-style: italic; font-weight: 400;
+  font-size: 32px; line-height: 1.1; color: var(--ink);
+  margin-bottom: 18px;
+}
+.ms-rail-desc { font-size: 13.5px; line-height: 1.7; color: var(--ink-soft); }
+.ms-rail-list { list-style: none; padding: 0; margin: 18px 0 0; }
+.ms-rail-list li {
+  font-family: var(--mono); font-size: 11px; letter-spacing: 0.04em;
+  color: var(--ink-soft);
+  padding: 8px 0; border-bottom: 1px solid var(--rule-soft);
+  display: flex; align-items: center; gap: 10px;
+}
+.ms-rail-list li::before {
+  content: ''; display: block;
+  width: 6px; height: 6px; background: var(--brass);
+}
+@media (max-width: 800px) {
+  .th-meta { grid-template-columns: repeat(2, 1fr); gap: 24px; }
+  .story-grid { grid-template-columns: 1fr; gap: 36px; }
+  .fit-cards { grid-template-columns: 1fr; }
+  .mainst-board { grid-template-columns: 1fr; }
+  .mainst-map { aspect-ratio: 5/3; }
+  .vitals-grid { grid-template-columns: 1fr 1fr; }
+  .vitals-card { grid-column: span 2; }
+  .letter-grid { grid-template-columns: 1fr; }
+  .nearby-grid { grid-template-columns: 1fr 1fr; }
+  .wine-grid { grid-template-columns: 1fr; }
+  .list-grid { grid-template-columns: 1fr; }
+  .pick-row { grid-template-columns: 60px 1fr; }
+  .pick-cap { grid-column: 1 / -1; text-align: left; padding-top: 0; }
+}
+/* Hard pixel anchor so the grid cell can't stretch the Leaflet container into
+   a feedback loop (it has no intrinsic height of its own). */
+.mainst-board { align-items: start; }
+.mainst-map.mainst-map--live { height: 560px !important; align-self: start; overflow: hidden; }
+@media (max-width: 700px) {
+  .mainst-map.mainst-map--live, #townMapCanvas.town-map-canvas { height: 420px !important; }
+}
+</style>
+
+<!-- Breadcrumb -->
+<nav class="t-crumb" aria-label="Breadcrumb">
+  <a href="index.html">Legacy</a><span>&rarr;</span><a href="towns.html">Communities</a><span>&rarr;</span><span>Sutter Creek</span>
+  <span class="sp"></span><span>Vol. XXII &middot; Plate III &mdash; Gold Country Survey</span>
+</nav>
+
+<!-- ============ HERO (season scrubber preserved) ============ -->
 <section class="town-hero" data-season="fall">
   <div class="th-frame th-frame-spring" style="background-image:url('art/towns/sutter-creek-mainst.jpg');"></div>
   <div class="th-frame th-frame-summer" style="background-image:url('art/towns/sutter-creek-summer-creek.jpg');"></div>
@@ -308,7 +540,7 @@
   </div>
 </section>
 
-<!-- JUMP -->
+<!-- ============ JUMP RAIL (scrollspy preserved) ============ -->
 <nav class="town-jump" id="jumpRail">
   <div class="town-jump-inner">
     <a href="#story" class="jump-on">The story</a>
@@ -320,228 +552,83 @@
   </div>
 </nav>
 
-<!-- STORY -->
-<section class="section town-story" id="story" style="background:var(--parchment);">
-  <div class="section-inner">
-    <div class="story-grid">
-      <div class="story-side">
-        <span class="hairline-brass"></span>
-        <span class="eyebrow">Field notes · § I</span>
-        <h2 class="h-section" style="margin-top:14px;">What is Sutter Creek,<br>California <em>known for?</em></h2>
-        <p style="margin-top:12px; font-family:var(--serif); font-style:italic; font-size:18px; color:var(--ink-mute); line-height:1.4;">Sutter Creek, the “Jewel of the Motherlode,” is an Amador County Gold Rush town at about 1,188 feet — a preserved historic Main Street of antique shops at the front door of Shenandoah Valley wine country.</p>
-      </div>
-      <div class="story-body">
-        <p class="lede">A creek, a stamp mill, a six-block Main Street of false-front shops, Italianates, and a working theatre that's been seated since 1919. Most of what was built in Sutter Creek a hundred and fifty years ago is still standing.</p>
-        <p>The town was named for John Sutter — yes, that one — who tried his hand at logging here in 1846 before Marshall's discovery upriver changed his life. The town that took his name became one of the Mother Lode's most productive, then quietly stopped, then quietly endured.</p>
-        <p>Today, Sutter Creek is the front door of Amador wine country. Fourteen minutes east up the road, the Shenandoah Valley grows some of the oldest Zinfandel vines in California. Many of Sara's buyers come for the wine, stay for the town, and then realize the town is the better story.</p>
-      </div>
+<!-- ============ THE STORY ============ -->
+<section class="lg-sec" id="story"><div class="lg-wrap">
+  <div class="lg-grid" style="grid-template-columns:.85fr 1.15fr;gap:48px;align-items:start">
+    <div>
+      <div class="lg-kicker lg-rv"><span>Field notes · § I</span></div>
+      <h2 class="lg-display lg-h2 lg-rv lg-d1" style="margin:14px 0 10px">What is Sutter Creek, California <em>known for?</em></h2>
+      <p class="lg-rv lg-d2" style="font-family:var(--lg-serif);font-style:italic;font-size:19px;color:var(--lg-ink-mute);line-height:1.4">Sutter Creek, the “Jewel of the Motherlode,” is an Amador County Gold Rush town at about 1,188 feet — a preserved historic Main Street of antique shops at the front door of Shenandoah Valley wine country.</p>
     </div>
-
-    <div class="fit-strip">
-      <div class="fit-h"><span class="label-cap">Who Sutter Creek is for —</span></div>
-      <div class="fit-cards">
-        <article class="fit-card">
-          <div class="fit-num">01</div>
-          <h4>The Victorian romantic</h4>
-          <p>An 1880s Italianate with the original molding, a porch swing, a back garden that came with two Meyer lemons.</p>
-        </article>
-        <article class="fit-card">
-          <div class="fit-num">02</div>
-          <h4>The Amador wine couple</h4>
-          <p>Ten minutes to the Shenandoah, an hour to Murphys, a barrel program at home and another at a friend's vineyard.</p>
-        </article>
-        <article class="fit-card">
-          <div class="fit-num">03</div>
-          <h4>The Sacramento weekender</h4>
-          <p>An hour from Midtown, ten minutes off Hwy 49. A second home that hosts every spring birthday on the porch.</p>
-        </article>
-        <article class="fit-card">
-          <div class="fit-num">04</div>
-          <h4>The shopkeeper</h4>
-          <p>A storefront with an apartment upstairs. A small business that doesn't ask much, gives a lot back.</p>
-        </article>
-      </div>
+    <div class="lg-prose lg-rv lg-d1">
+      <p class="lg-lead">A creek, a stamp mill, a six-block Main Street of false-front shops, Italianates, and a working theatre that's been seated since 1919. Most of what was built in Sutter Creek a hundred and fifty years ago is still standing.</p>
+      <p>The town was named for John Sutter — yes, that one — who tried his hand at logging here in 1846 before Marshall's discovery upriver changed his life. The town that took his name became one of the Mother Lode's most productive, then quietly stopped, then quietly endured.</p>
+      <p>Today, Sutter Creek is the front door of Amador wine country. Fourteen minutes east up the road, the Shenandoah Valley grows some of the oldest Zinfandel vines in California. Many of Sara's buyers come for the wine, stay for the town, and then realize the town is the better story.</p>
     </div>
   </div>
-</section>
+  <div class="lg-kicker lg-rv" style="margin-top:40px"><span>Who Sutter Creek is for</span><span class="lg-rule"></span></div>
+  <div class="lg-grid lg-grid--4" style="margin-top:22px">
+    <div class="lg-point lg-rv" style="--lg-accent:var(--lg-a1)"><div class="lg-point__num">01</div><h4>The Victorian romantic</h4><p>An 1880s Italianate with the original molding, a porch swing, a back garden that came with two Meyer lemons.</p></div>
+    <div class="lg-point lg-rv lg-d1" style="--lg-accent:var(--lg-a4)"><div class="lg-point__num">02</div><h4>The Amador wine couple</h4><p>Ten minutes to the Shenandoah, an hour to Murphys, a barrel program at home and another at a friend's vineyard.</p></div>
+    <div class="lg-point lg-rv lg-d2" style="--lg-accent:var(--lg-a3)"><div class="lg-point__num">03</div><h4>The Sacramento weekender</h4><p>An hour from Midtown, ten minutes off Hwy 49. A second home that hosts every spring birthday on the porch.</p></div>
+    <div class="lg-point lg-rv lg-d3" style="--lg-accent:var(--lg-a5)"><div class="lg-point__num">04</div><h4>The shopkeeper</h4><p>A storefront with an apartment upstairs. A small business that doesn't ask much, gives a lot back.</p></div>
+  </div>
+</div></section>
 
-<!-- HISTORIC BLOCKS — map -->
-<section class="section" id="mainst" style="background:var(--parchment);">
-  <div class="section-inner">
-    <div class="section-h">
-      <div>
-        <span class="hairline-brass"></span>
-        <span class="eyebrow">Plate III · A walking diagram</span>
-        <h2 class="h-section" style="margin-top:10px;">Six blocks,<br><em>National Register</em>.</h2>
-      </div>
-      <p class="lede right">Hover any building. The whole town is a working museum of pre-1900 commercial architecture — and the antique store inside it.</p>
+<!-- ============ HISTORIC BLOCKS — map ============ -->
+<section class="lg-sec lg-sec--tint" id="mainst"><div class="lg-wrap">
+  <style>
+    .sc-dir{display:flex;flex-direction:column;gap:20px}
+    .sc-grp h4{font-family:var(--lg-mono);font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--lg-a1);margin:0 0 10px;padding-bottom:8px;border-bottom:1px solid rgba(23,20,15,.12)}
+    .sc-shop{display:flex;flex-direction:column;gap:1px;text-decoration:none;padding:9px 12px;margin:0 -12px;border-radius:10px;transition:background var(--lg-fast)}
+    .sc-shop:hover{background:var(--lg-white)}
+    .sc-shop b{font-family:var(--lg-serif);font-style:italic;font-size:19px;color:var(--lg-ink);font-weight:600;line-height:1.15}
+    .sc-shop span{font-family:var(--lg-mono);font-size:11px;letter-spacing:.03em;color:var(--lg-ink-mute)}
+    .sc-shop .arw{color:var(--lg-a1);opacity:0;transition:opacity var(--lg-fast)}
+    .sc-shop:hover .arw{opacity:1}
+    @media(max-width:860px){.sc-maprow{grid-template-columns:1fr !important}}
+  </style>
+  <div class="lg-kicker lg-rv"><span>Main Street · the historic blocks</span><span class="lg-rule"></span></div>
+  <h2 class="lg-display lg-h2 lg-rv lg-d1" style="margin:14px 0 10px">The shops of <em>Main Street.</em></h2>
+  <div class="lg-note lg-rv lg-d2" style="max-width:700px">Six walkable blocks on the National Register &mdash; antique rooms, galleries, and boutiques, most in pre-1900 storefronts. Every address is on Main Street (Hwy 49); tap any shop to open it on the map.</div>
+
+  <div class="lg-grid sc-maprow lg-rv lg-d2" style="grid-template-columns:1.05fr .95fr;gap:26px;margin-top:26px;align-items:start">
+    <div class="town-map" style="height:clamp(440px,54vw,600px)">
+      <iframe title="Map of Main Street, Sutter Creek, California" src="https://www.google.com/maps?q=Main+Street,+Sutter+Creek,+CA+95685&amp;z=16&amp;output=embed" style="width:100%;height:100%;border:0;display:block" loading="lazy" referrerpolicy="no-referrer-when-downgrade" allowfullscreen></iframe>
     </div>
-
-    <div class="mainst-filters">
-      <button class="ms-filter ms-on" data-cat="all">All <span class="ct">18</span></button>
-      <button class="ms-filter" data-cat="wine">Antiques <span class="ct">6</span></button>
-      <button class="ms-filter" data-cat="eat">Eat <span class="ct">5</span></button>
-      <button class="ms-filter" data-cat="stay">Stay <span class="ct">3</span></button>
-      <button class="ms-filter" data-cat="shop">Galleries <span class="ct">2</span></button>
-      <button class="ms-filter" data-cat="do">Landmarks <span class="ct">2</span></button>
-    </div>
-
-    <div class="mainst-board">
-      <div class="mainst-map" id="mainstMap">
-        <svg viewBox="0 0 1000 600" preserveAspectRatio="xMidYMid meet">
-          <defs>
-            <pattern id="grainSc" x="0" y="0" width="2" height="2" patternUnits="userSpaceOnUse">
-              <rect width="2" height="2" fill="#EFE7D6"/>
-              <rect width="1" height="1" fill="#E8DFCC" opacity="0.5"/>
-            </pattern>
-          </defs>
-          <rect width="1000" height="600" fill="url(#grainSc)"/>
-
-          <!-- Sutter Creek (the actual creek) -->
-          <path d="M-20,540 Q200,510 460,530 T1020,500" fill="none" stroke="#9DB5C2" stroke-width="9" opacity="0.55"/>
-          <path d="M-20,540 Q200,510 460,530 T1020,500" fill="none" stroke="#7E9AAA" stroke-width="1" opacity="0.6" stroke-dasharray="3 4"/>
-          <text x="780" y="518" font-family="Cormorant Garamond" font-style="italic" font-size="14" fill="#5E7886">Sutter Creek</text>
-
-          <!-- Main Street (Hwy 49) -->
-          <rect x="0" y="240" width="1000" height="56" fill="#E0D5BB"/>
-          <line x1="0" y1="268" x2="1000" y2="268" stroke="#1B1813" stroke-opacity="0.35" stroke-dasharray="14 8"/>
-          <text x="500" y="284" text-anchor="middle" font-family="JetBrains Mono" font-size="11" letter-spacing="6" fill="rgba(27,24,19,0.55)" font-weight="500">— MAIN STREET · HWY 49 —</text>
-
-          <!-- Cross streets -->
-          <rect x="140" y="0"   width="22" height="240" fill="#E0D5BB"/>
-          <rect x="140" y="296" width="22" height="304" fill="#E0D5BB"/>
-          <rect x="370" y="0"   width="22" height="240" fill="#E0D5BB"/>
-          <rect x="370" y="296" width="22" height="304" fill="#E0D5BB"/>
-          <rect x="600" y="0"   width="22" height="240" fill="#E0D5BB"/>
-          <rect x="600" y="296" width="22" height="304" fill="#E0D5BB"/>
-          <rect x="830" y="0"   width="22" height="240" fill="#E0D5BB"/>
-          <rect x="830" y="296" width="22" height="304" fill="#E0D5BB"/>
-
-          <text x="151" y="14" text-anchor="middle" font-family="JetBrains Mono" font-size="8" fill="rgba(27,24,19,0.45)" letter-spacing="1">RANDOLPH</text>
-          <text x="381" y="14" text-anchor="middle" font-family="JetBrains Mono" font-size="8" fill="rgba(27,24,19,0.45)" letter-spacing="1">EUREKA</text>
-          <text x="611" y="14" text-anchor="middle" font-family="JetBrains Mono" font-size="8" fill="rgba(27,24,19,0.45)" letter-spacing="1">SPANISH ST</text>
-          <text x="841" y="14" text-anchor="middle" font-family="JetBrains Mono" font-size="8" fill="rgba(27,24,19,0.45)" letter-spacing="1">CHURCH</text>
-
-          <!-- Block labels -->
-          <text x="270" y="170" text-anchor="middle" font-family="Cormorant Garamond" font-style="italic" font-size="22" fill="rgba(27,24,19,0.35)">Upper Main</text>
-          <text x="500" y="170" text-anchor="middle" font-family="Cormorant Garamond" font-style="italic" font-size="22" fill="rgba(27,24,19,0.35)">Antique Row</text>
-          <text x="720" y="170" text-anchor="middle" font-family="Cormorant Garamond" font-style="italic" font-size="22" fill="rgba(27,24,19,0.35)">Lower Main</text>
-
-          <!-- Knight Foundry callout -->
-          <rect x="650" y="380" width="170" height="80" fill="none" stroke="rgba(58,74,56,0.35)" stroke-dasharray="4 3"/>
-          <text x="735" y="425" text-anchor="middle" font-family="Cormorant Garamond" font-style="italic" font-size="16" fill="rgba(58,74,56,0.6)">Knight Foundry</text>
-          <text x="735" y="442" text-anchor="middle" font-family="JetBrains Mono" font-size="8" letter-spacing="2" fill="rgba(58,74,56,0.5)">— est. 1873 —</text>
-
-          <!-- Compass -->
-          <g transform="translate(940,80)" font-family="JetBrains Mono" font-size="9" fill="rgba(27,24,19,0.55)">
-            <circle r="22" fill="none" stroke="rgba(27,24,19,0.25)"/>
-            <path d="M0,-20 L4,0 L0,4 L-4,0 Z" fill="#8C6E3D"/>
-            <text y="-26" text-anchor="middle">N</text>
-          </g>
-          <!-- Scale -->
-          <g transform="translate(40,560)" font-family="JetBrains Mono" font-size="8" fill="rgba(27,24,19,0.55)">
-            <line x1="0" y1="0" x2="100" y2="0" stroke="rgba(27,24,19,0.55)" stroke-width="1.5"/>
-            <line x1="0" y1="-4" x2="0" y2="4" stroke="rgba(27,24,19,0.55)"/>
-            <line x1="50" y1="-4" x2="50" y2="4" stroke="rgba(27,24,19,0.55)"/>
-            <line x1="100" y1="-4" x2="100" y2="4" stroke="rgba(27,24,19,0.55)"/>
-            <text x="0" y="18">0</text><text x="50" y="18">250 ft</text><text x="100" y="18">500 ft</text>
-          </g>
-        </svg>
-
-        <!-- Antiques -->
-        <button class="ms-pin" data-cat="wine" style="left:12%; top:36%;" data-name="Water Street Antiques" data-desc="Three floors of estate furniture. Bring a measuring tape.">
-          <span class="ms-pin-dot">A</span><span class="ms-pin-tip">Water St. Antiques</span>
-        </button>
-        <button class="ms-pin" data-cat="wine" style="left:24%; top:48%;" data-name="Fox &amp; Goose" data-desc="Curated mid-century, Victorian glass, the occasional brass bed.">
-          <span class="ms-pin-dot">A</span><span class="ms-pin-tip">Fox &amp; Goose</span>
-        </button>
-        <button class="ms-pin" data-cat="wine" style="left:42%; top:36%;" data-name="Sutter Creek Antiques" data-desc="Twelve dealers under one roof. Anchor of Antique Row.">
-          <span class="ms-pin-dot">A</span><span class="ms-pin-tip">Sutter Creek</span>
-        </button>
-        <button class="ms-pin" data-cat="wine" style="left:50%; top:48%;" data-name="The Pickle Barrel" data-desc="Quirky general store + collectibles. Sara's grandmother shopped here.">
-          <span class="ms-pin-dot">A</span><span class="ms-pin-tip">Pickle Barrel</span>
-        </button>
-        <button class="ms-pin" data-cat="wine" style="left:60%; top:36%;" data-name="Heirloom &amp; Co." data-desc="Estate jewelry, silver, watches. Locked cases for a reason.">
-          <span class="ms-pin-dot">A</span><span class="ms-pin-tip">Heirloom</span>
-        </button>
-        <button class="ms-pin" data-cat="wine" style="left:74%; top:48%;" data-name="Spanish St. Mercantile" data-desc="Architectural salvage. Doors, mantels, hardware.">
-          <span class="ms-pin-dot">A</span><span class="ms-pin-tip">Mercantile</span>
-        </button>
-
-        <!-- Eat -->
-        <button class="ms-pin" data-cat="eat" style="left:18%; top:64%;" data-name="Element" data-desc="Seasonal California small plates. Reserve.">
-          <span class="ms-pin-dot">E</span><span class="ms-pin-tip">Element</span>
-        </button>
-        <button class="ms-pin" data-cat="eat" style="left:32%; top:78%;" data-name="Sutter Creek Coffee Roasting" data-desc="House-roasted beans. The slow morning anchor.">
-          <span class="ms-pin-dot">E</span><span class="ms-pin-tip">Coffee Roasting</span>
-        </button>
-        <button class="ms-pin" data-cat="eat" style="left:46%; top:64%;" data-name="Susan's Place" data-desc="Wine bar + small plates on a creekside patio.">
-          <span class="ms-pin-dot">E</span><span class="ms-pin-tip">Susan's Place</span>
-        </button>
-        <button class="ms-pin" data-cat="eat" style="left:58%; top:80%;" data-name="Pizza Plus" data-desc="The local pizza joint. Order the meatlovers, two ranches.">
-          <span class="ms-pin-dot">E</span><span class="ms-pin-tip">Pizza Plus</span>
-        </button>
-        <button class="ms-pin" data-cat="eat" style="left:72%; top:64%;" data-name="Hotel Sutter" data-desc="The 1858 American Exchange, restored. New American in the dining room, whiskey in the saloon.">
-          <span class="ms-pin-dot">E</span><span class="ms-pin-tip">Hotel Sutter</span>
-        </button>
-
-        <!-- Stay -->
-        <button class="ms-pin" data-cat="stay" style="left:22%; top:14%;" data-name="The Foxes Inn" data-desc="Seven-room Victorian B&B. The four-poster suite is the one.">
-          <span class="ms-pin-dot">S</span><span class="ms-pin-tip">The Foxes Inn</span>
-        </button>
-        <button class="ms-pin" data-cat="stay" style="left:48%; top:14%;" data-name="Hanford House" data-desc="Mid-century-modern annex on a Victorian footprint. The rooftop.">
-          <span class="ms-pin-dot">S</span><span class="ms-pin-tip">Hanford House</span>
-        </button>
-        <button class="ms-pin" data-cat="stay" style="left:78%; top:14%;" data-name="Sutter Creek Inn" data-desc="California's first B&B, opened 1966. Seventeen rooms and rambling gardens.">
-          <span class="ms-pin-dot">S</span><span class="ms-pin-tip">Sutter Creek Inn</span>
-        </button>
-
-        <!-- Galleries -->
-        <button class="ms-pin" data-cat="shop" style="left:38%; top:22%;" data-name="Sutter Creek Gallery" data-desc="Local landscape painters. Always one painting of the creek.">
-          <span class="ms-pin-dot">G</span><span class="ms-pin-tip">SC Gallery</span>
-        </button>
-        <button class="ms-pin" data-cat="shop" style="left:66%; top:22%;" data-name="Theatre Gallery" data-desc="Tied to the 1919 theatre. Posters, prints, programs.">
-          <span class="ms-pin-dot">G</span><span class="ms-pin-tip">Theatre Gallery</span>
-        </button>
-
-        <!-- Landmarks -->
-        <button class="ms-pin" data-cat="do" style="left:30%; top:90%;" data-name="Sutter Creek Theatre" data-desc="1919 cinema, restored. Indie films, live music, Friday nights.">
-          <span class="ms-pin-dot">L</span><span class="ms-pin-tip">SC Theatre</span>
-        </button>
-        <button class="ms-pin" data-cat="do" style="left:73%; top:80%;" data-name="Knight Foundry" data-desc="The last water-powered foundry in America. Tours, working days.">
-          <span class="ms-pin-dot">L</span><span class="ms-pin-tip">Knight Foundry</span>
-        </button>
+    <div class="sc-dir">
+      <div class="sc-grp">
+        <h4>Antiques</h4>
+        <a class="sc-shop" href="https://www.google.com/maps/search/?api=1&amp;query=Sutter+Creek+Antiques+28+Main+St+Sutter+Creek+CA+95685" target="_blank" rel="noopener"><b>Sutter Creek Antiques</b><span>28 Main St &middot; (209) 267-5574 <span class="arw">&rarr;</span></span></a>
+        <a class="sc-shop" href="https://www.google.com/maps/search/?api=1&amp;query=Water+Street+Antiques+and+Interiors+33+Main+St+Sutter+Creek+CA+95685" target="_blank" rel="noopener"><b>Water Street Antiques &amp; Interiors</b><span>33 Main St &middot; (209) 267-0585 <span class="arw">&rarr;</span></span></a>
+        <a class="sc-shop" href="https://www.google.com/maps/search/?api=1&amp;query=Tigby+Hill+Vintage+65+Main+St+Sutter+Creek+CA+95685" target="_blank" rel="noopener"><b>Tigby Hill Vintage</b><span>65 Main St &middot; (209) 267-8314 <span class="arw">&rarr;</span></span></a>
+        <a class="sc-shop" href="https://www.google.com/maps/search/?api=1&amp;query=Old+Hotel+Antiques+68+Main+St+Sutter+Creek+CA+95685" target="_blank" rel="noopener"><b>Old Hotel Antiques</b><span>68 Main St &middot; est. 1973 &middot; (209) 267-5901 <span class="arw">&rarr;</span></span></a>
+        <a class="sc-shop" href="https://www.google.com/maps/search/?api=1&amp;query=Cozy+Collectibles+69+Main+St+Sutter+Creek+CA+95685" target="_blank" rel="noopener"><b>Cozy Collectibles</b><span>69 Main St &middot; (209) 267-0957 <span class="arw">&rarr;</span></span></a>
+        <a class="sc-shop" href="https://www.google.com/maps/search/?api=1&amp;query=The+Antique+Gardener+80+Main+St+Sutter+Creek+CA+95685" target="_blank" rel="noopener"><b>The Antique Gardener</b><span>80 Main St &middot; (209) 267-5551 <span class="arw">&rarr;</span></span></a>
+        <a class="sc-shop" href="https://www.google.com/maps/search/?api=1&amp;query=Creekside+Shops+22+Main+St+Sutter+Creek+CA+95685" target="_blank" rel="noopener"><b>Creekside Shops</b><span>22 &amp; 26 Main St &middot; (209) 267-5520 <span class="arw">&rarr;</span></span></a>
       </div>
-
-      <aside class="mainst-rail">
-        <div class="ms-rail-head">
-          <span class="label-cap">Detail</span>
-          <span class="mono" id="msCount" style="font-size:10px;color:var(--ink-faint);">18 places</span>
-        </div>
-        <div class="ms-rail-card" id="msRailCard">
-          <span class="ms-rail-tag" id="msTag">Hover the map</span>
-          <h3 class="ms-rail-name" id="msName">Seventeen rooms<br>on six blocks.</h3>
-          <p class="ms-rail-desc" id="msDesc">Filter by category to plan the afternoon — antique morning, lunch on the creek patio, theatre at seven.</p>
-          <ul class="ms-rail-list" id="msList"></ul>
-        </div>
-      </aside>
+      <div class="sc-grp">
+        <h4>Galleries</h4>
+        <a class="sc-shop" href="https://www.google.com/maps/search/?api=1&amp;query=Patricia+Stikeleather+Art+and+Photography+26+Main+St+Sutter+Creek+CA+95685" target="_blank" rel="noopener"><b>Patricia Stikeleather Art &amp; Photography</b><span>26 Main St &middot; (209) 267-5520 <span class="arw">&rarr;</span></span></a>
+        <a class="sc-shop" href="https://www.google.com/maps/search/?api=1&amp;query=Artfully+Rooted+54+Main+St+Sutter+Creek+CA+95685" target="_blank" rel="noopener"><b>Artfully Rooted</b><span>54 Main St &middot; (209) 267-8086 <span class="arw">&rarr;</span></span></a>
+      </div>
+      <div class="sc-grp">
+        <h4>Boutiques</h4>
+        <a class="sc-shop" href="https://www.google.com/maps/search/?api=1&amp;query=Sourgrass+Clothing+30+Main+St+Sutter+Creek+CA+95685" target="_blank" rel="noopener"><b>Sourgrass Clothing</b><span>30 Main St &middot; (530) 204-7144 <span class="arw">&rarr;</span></span></a>
+        <a class="sc-shop" href="https://www.google.com/maps/search/?api=1&amp;query=Tomorrows+Heirlooms+49+Main+St+Sutter+Creek+CA+95685" target="_blank" rel="noopener"><b>Tomorrow's Heirlooms</b><span>49 Main St &middot; (209) 267-5505 <span class="arw">&rarr;</span></span></a>
+        <a class="sc-shop" href="https://www.google.com/maps/search/?api=1&amp;query=Blondies+Boutique+70+Main+St+Sutter+Creek+CA+95685" target="_blank" rel="noopener"><b>Blondies Boutique</b><span>70 Main St &middot; (209) 267-8004 <span class="arw">&rarr;</span></span></a>
+      </div>
+      <p style="font-family:var(--lg-mono);font-size:10px;letter-spacing:.04em;color:var(--lg-ink-faint);margin-top:4px">Shops &amp; addresses from the Sutter Creek visitor directory (suttercreek.org).</p>
     </div>
   </div>
-</section>
+</div></section>
 
-<!-- WINE — Shenandoah -->
-<section class="section town-wine" id="wine" style="background:var(--ink); color:var(--shell);">
-  <div class="section-inner">
-    <div class="section-h" style="border-bottom-color: rgba(250,246,236,0.1);">
-      <div>
-        <span class="hairline-brass" style="background:var(--brass-bright);"></span>
-        <span class="eyebrow" style="color:var(--brass-bright);">Plate IV · The Shenandoah</span>
-        <h2 class="h-section" style="color:var(--shell); margin-top:10px;">Old-vine Zinfandel,<br><em style="color:var(--brass-bright);">fourteen minutes east.</em></h2>
-      </div>
-      <p class="lede right" style="color:rgba(250,246,236,0.7);">Amador's Shenandoah Valley grows some of the oldest Zinfandel vines in California. Many planted before 1900. Some before 1880.</p>
-    </div>
-
-    <div class="wine-grid">
+<!-- ============ WINE — Shenandoah ============ -->
+<section class="lg-sec lg-sec--ink" id="wine"><div class="lg-wrap">
+  <div class="lg-kicker lg-rv"><span>Plate IV · The Shenandoah</span></div>
+  <h2 class="lg-display lg-h2 lg-rv lg-d1" style="margin:14px 0 10px">Old-vine Zinfandel, <em>fourteen minutes east.</em></h2>
+  <p class="lg-rv lg-d2" style="font-family:var(--lg-serif);font-style:italic;font-size:20px;color:rgba(255,253,248,.78);max-width:660px">Amador's Shenandoah Valley grows some of the oldest Zinfandel vines in California. Many planted before 1900. Some before 1880.</p>
+  <div class="wine-grid lg-rv lg-d2">
       <article class="wine-card">
         <div class="wine-letter">I</div>
         <div class="wine-name">Story Winery</div>
@@ -584,31 +671,18 @@
         <div class="wine-flight"><span>Cabernet</span><span>Zinfandel Reserve</span><span>Estate Tempranillo</span></div>
         <div class="wine-foot"><span>$20 flight</span><span>·</span><span>11–5 daily</span></div>
       </article>
-    </div>
-
-    <div class="wine-foot-strip">
-      <div>
-        <span class="label-cap" style="color:var(--brass-bright);">Shenandoah math —</span>
-        <span class="wf-stat">34 <em>wineries in 18 sq miles</em></span>
-        <span class="wf-stat">1869 <em>oldest Amador vines</em></span>
-        <span class="wf-stat">14 <em>min from Main Street</em></span>
-      </div>
-      <a href="#" class="btn btn-brass btn-sm">Plan a Shenandoah day</a>
-    </div>
   </div>
-</section>
+  <div class="wine-walk lg-rv">
+    <span class="label-cap" style="font-family:var(--lg-mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--lg-sun)">Shenandoah math &mdash;</span>
+    <span class="wf-stat">34 <em>wineries in 18 sq miles</em></span><span class="wf-stat">1869 <em>oldest Amador vines</em></span><span class="wf-stat">14 <em>min from Main Street</em></span>
+  </div>
+</div></section>
 
-<!-- PICKS -->
-<section class="section town-picks" id="picks" style="background:var(--vellum);">
-  <div class="section-inner">
-    <div class="section-h">
-      <div>
-        <span class="hairline-brass"></span>
-        <span class="eyebrow">Plate V · The personal list</span>
-        <h2 class="h-section" style="margin-top:10px;">Sara's standing<br><em>recommendations.</em></h2>
-      </div>
-      <p class="lede right">Six blocks, a creek, the Shenandoah. This is the whole list.</p>
-    </div>
+<!-- ============ SARA'S PICKS (tabs preserved) ============ -->
+<section class="lg-sec lg-sec--tint" id="picks"><div class="lg-wrap">
+  <div class="lg-kicker lg-rv"><span>Plate V · The personal list</span><span class="lg-rule"></span></div>
+  <h2 class="lg-display lg-h2 lg-rv lg-d1" style="margin:14px 0 8px">Sara's standing <em>recommendations.</em></h2>
+  <div class="lg-note lg-rv lg-d2" style="max-width:680px">Six blocks, a creek, the Shenandoah. This is the whole list.</div>
 
     <div class="picks-tabs">
       <button class="pick-tab pick-tab-on" data-tab="eat">Eat <span class="ct">04</span></button>
@@ -756,22 +830,14 @@
         </article>
       </div>
     </div>
-  </div>
-</section>
+</div></section>
 
-<!-- LISTINGS -->
-<section class="section" id="listings" style="background:var(--parchment);">
-  <div class="section-inner">
-    <div class="section-h">
-      <div>
-        <span class="hairline-brass"></span>
-        <span class="eyebrow">Plate VI · Currently in the field</span>
-        <h2 class="h-section" style="margin-top:10px;">Homes for sale<br><em>in Sutter Creek.</em></h2>
-      </div>
-      <p class="lede right">Every home for sale in Sutter Creek — live from the MLS.</p>
-    </div>
-
-    <div class="idx-embed idx-feature-gallery">
+<!-- ============ LISTINGS — live IDX gallery ============ -->
+<section class="lg-sec" id="listings"><div class="lg-wrap">
+  <div class="lg-kicker lg-rv"><span>Plate VI · Currently in the field</span><span class="lg-rule"></span></div>
+  <h2 class="lg-display lg-h2 lg-rv lg-d1" style="margin:14px 0 10px">Homes for sale <em>in Sutter Creek.</em></h2>
+  <div class="lg-note lg-rv lg-d2" style="max-width:560px">Every home for sale in Sutter Creek &mdash; live from the MLS.</div>
+  <div class="idx-embed idx-feature-gallery" style="margin-top:26px">
       <script>
         // Full market — iHomeFinder saved-search gallery (id 3019725, featured:false
         // → the whole MLS for the city, not just office inventory).
@@ -789,57 +855,40 @@
           "id": 3019725
         }));
       </script>
-    </div>
-
   </div>
-</section>
+</div></section>
 
-<!-- LETTER -->
-<section class="section town-letter" id="letter" style="background:var(--vellum);">
-  <div class="section-inner">
-    <article class="letter-card">
-      <div class="letter-head">
-        <span class="hairline-brass"></span>
-        <span class="eyebrow">A note from your agent · § VII</span>
+<!-- ============ LETTER FROM SARA ============ -->
+<section class="lg-sec lg-sec--tint" id="letter"><div class="lg-wrap">
+  <article class="letter-card lg-rv">
+    <div class="lg-kicker"><span>A note from your agent · § VII</span><span class="lg-rule"></span></div>
+    <div class="letter-grid">
+      <div class="letter-photo">
+        <img src="art/sara-headshot.png" alt="Sara Cooper">
+        <div class="letter-stamp"><span class="ls-cir">SC</span><span class="ls-lbl">Sara Cooper · Owner-Broker</span></div>
       </div>
-      <div class="letter-grid">
-        <div class="letter-photo">
-          <img src="art/sara-headshot.png" alt="Sara Cooper">
-          <div class="letter-stamp">
-            <span class="ls-cir">SC</span>
-            <span class="ls-lbl">Sara Cooper · Owner-Broker</span>
-          </div>
-        </div>
-        <div class="letter-body">
-          <p class="letter-open">A few words on Sutter Creek —</p>
-          <p>Sutter Creek is the town I send people to when they tell me they want <em>old</em>. Real old. The bones of an 1880 Italianate. The smell of a foundry that still runs. A theatre seat that has held seven generations.</p>
-          <p>The market here is different from Murphys. Sacramento drives most of the demand — an hour up Highway 49 — which means inventory is thinner than the listing count suggests. Good Victorians get one shot. The cottages on Eureka Street tend to be quiet sales between people who know each other.</p>
-          <p>If old houses are your thing, we'll talk about foundations, knob-and-tube, lath-and-plaster, and the right contractors. I've done enough of these to know which questions matter and which are the realtor equivalent of small talk.</p>
-          <p class="letter-sign">— Sara</p>
-        </div>
+      <div class="letter-body">
+        <p class="letter-open">A few words on Sutter Creek &mdash;</p>
+        <p>Sutter Creek is the town I send people to when they tell me they want <em>old</em>. Real old. The bones of an 1880 Italianate. The smell of a foundry that still runs. A theatre seat that has held seven generations.</p>
+        <p>The market here is different from Murphys. Sacramento drives most of the demand — an hour up Highway 49 — which means inventory is thinner than the listing count suggests. Good Victorians get one shot. The cottages on Eureka Street tend to be quiet sales between people who know each other.</p>
+        <p>If old houses are your thing, we'll talk about foundations, knob-and-tube, lath-and-plaster, and the right contractors. I've done enough of these to know which questions matter and which are the realtor equivalent of small talk.</p>
+        <p class="letter-sign">&mdash; Sara</p>
       </div>
-      <div class="letter-contact">
-        <a href="tel:2095594966"><span class="glyph">◇</span> (209) 559-4966</a>
-        <a href="mailto:SaraSellsCalifornia@gmail.com"><span class="glyph">◇</span> SaraSellsCalifornia@gmail.com</a>
-        <a href="platform.html"><span class="glyph">◇</span> Walk Sutter Creek with Sara</a>
-      </div>
-    </article>
-  </div>
-</section>
-
-<!-- NEARBY -->
-<section class="section" style="background:var(--parchment);">
-  <div class="section-inner">
-    <div class="section-h">
-      <div>
-        <span class="hairline-brass"></span>
-        <span class="eyebrow">Plate VIII · Adjacent</span>
-        <h2 class="h-section" style="margin-top:10px;">Towns nearby.</h2>
-      </div>
-      <p class="lede right">Five more characters in the same story.</p>
     </div>
+    <div class="letter-contact">
+      <a href="tel:2095594966">◇&nbsp; (209) 559-4966</a>
+      <a href="mailto:SaraSellsCalifornia@gmail.com">◇&nbsp; SaraSellsCalifornia@gmail.com</a>
+      <a href="platform.html">◇&nbsp; Walk Sutter Creek with Sara</a>
+    </div>
+  </article>
+</div></section>
 
-    <div class="nearby-grid">
+<!-- ============ NEIGHBORING TOWNS ============ -->
+<section class="lg-sec"><div class="lg-wrap">
+  <div class="lg-kicker lg-rv"><span>Plate VIII · Adjacent</span><span class="lg-rule"></span></div>
+  <h2 class="lg-display lg-h2 lg-rv lg-d1" style="margin:14px 0 8px">Towns nearby.</h2>
+  <div class="lg-note lg-rv lg-d2" style="max-width:620px">Five more characters in the same story.</div>
+  <div class="nearby-grid lg-rv lg-d2">
       <a href="town-murphys.html" class="nearby-card">
         <div class="nb-img" style="background-image:url('art/towns/murphys-mainst-summer.jpg');"></div>
         <div class="nb-body"><span class="nb-dist">38 min southeast</span><h4>Murphys</h4><p>Wine country, Main Street.</p></div>
@@ -860,82 +909,51 @@
         <div class="nb-img" style="background-image:url('art/towns/rm-mokelumne-rapids.jpg');"></div>
         <div class="nb-body"><span class="nb-dist">62 min south</span><h4>Waterfront Lakes and Rivers</h4><p>Lakes, rivers &amp; waterfront.</p></div>
       </a>
-    </div>
   </div>
-</section>
+</div></section>
 
-<!-- CTA -->
-<section class="cta">
-  <span class="hairline-brass" style="margin: 0 auto 20px; background: var(--brass-bright);"></span>
-  <span class="eyebrow" style="color: var(--brass-bright);">Begin your Sutter Creek chapter</span>
-  <h2 class="cta-h">Old bones,<br><em>new lives.</em></h2>
-  <p class="cta-sub">An honest walk through the historic stock — and the contractors who can keep it standing.</p>
-  <div class="cta-ctas">
-    <a href="platform.html" class="btn btn-ink">Find my Sutter Creek match</a>
-    <a href="tel:2095594966" class="btn btn-ghost">Call (209) 559-4966</a>
+<!-- ============ CTA ============ -->
+<section class="lg-sec lg-sec--ink"><div class="lg-wrap" style="text-align:center">
+  <div class="lg-kicker lg-rv" style="justify-content:center"><span>Begin your Sutter Creek chapter</span></div>
+  <h2 class="lg-display lg-rv lg-d1" style="margin:16px 0 14px;font-size:clamp(38px,6vw,74px);line-height:.98">Old bones,<br><em>new lives.</em></h2>
+  <p class="lg-rv lg-d2" style="font-family:var(--lg-serif);font-style:italic;font-size:21px;color:rgba(255,253,248,.85);max-width:600px;margin:0 auto">An honest walk through the historic stock — and the contractors who can keep it standing.</p>
+  <div class="lg-rv lg-d3" style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:28px">
+    <a href="platform.html" class="lg-btn lg-btn--gold">Find my Sutter Creek match</a>
+    <a href="tel:2095594966" class="lg-btn lg-btn--ghost">Call (209) 559-4966</a>
   </div>
-</section>
+</div></section>
 
 <!-- ============ AT A GLANCE (facts, AI-retrievable) ============ -->
-<section class="section" id="facts" style="background:var(--parchment);">
-  <div class="section-inner">
-    <div class="section-h">
-      <div>
-        <span class="hairline-brass"></span>
-        <span class="eyebrow">Sutter Creek · at a glance</span>
-        <h2 class="h-section" style="margin-top:10px;">Sutter Creek, California<br><em>by the numbers.</em></h2>
-      </div>
-      <p class="lede right">The durable facts buyers ask first. Current prices are pulled live from the MLS, not hand-kept here.</p>
-    </div>
-    <div style="max-width:820px; margin-top:24px;">
-<div style="display:flex; justify-content:space-between; align-items:baseline; gap:24px; padding:16px 0; border-top:1px solid var(--rule);"><span style="font-family:var(--mono); font-size:11px; letter-spacing:0.1em; text-transform:uppercase; color:var(--ink-mute); white-space:nowrap;">County</span><span style="font-family:var(--serif); font-size:22px; color:var(--ink); text-align:right; line-height:1.2;">Amador County</span></div>
-<div style="display:flex; justify-content:space-between; align-items:baseline; gap:24px; padding:16px 0; border-top:1px solid var(--rule);"><span style="font-family:var(--mono); font-size:11px; letter-spacing:0.1em; text-transform:uppercase; color:var(--ink-mute); white-space:nowrap;">Elevation</span><span style="font-family:var(--serif); font-size:22px; color:var(--ink); text-align:right; line-height:1.2;">1,188 ft</span></div>
-<div style="display:flex; justify-content:space-between; align-items:baseline; gap:24px; padding:16px 0; border-top:1px solid var(--rule);"><span style="font-family:var(--mono); font-size:11px; letter-spacing:0.1em; text-transform:uppercase; color:var(--ink-mute); white-space:nowrap;">Population</span><span style="font-family:var(--serif); font-size:22px; color:var(--ink); text-align:right; line-height:1.2;">2,646 <span style="color:var(--ink-faint);">(2020 Census)</span></span></div>
-<div style="display:flex; justify-content:space-between; align-items:baseline; gap:24px; padding:16px 0; border-top:1px solid var(--rule);"><span style="font-family:var(--mono); font-size:11px; letter-spacing:0.1em; text-transform:uppercase; color:var(--ink-mute); white-space:nowrap;">Water</span><span style="font-family:var(--serif); font-size:22px; color:var(--ink); text-align:right; line-height:1.2;">Amador Water Agency</span></div>
-<div style="display:flex; justify-content:space-between; align-items:baseline; gap:24px; padding:16px 0; border-top:1px solid var(--rule);"><span style="font-family:var(--mono); font-size:11px; letter-spacing:0.1em; text-transform:uppercase; color:var(--ink-mute); white-space:nowrap;">Schools</span><span style="font-family:var(--serif); font-size:22px; color:var(--ink); text-align:right; line-height:1.2;">Amador County Unified School District</span></div>
-<div style="display:flex; justify-content:space-between; align-items:baseline; gap:24px; padding:16px 0; border-top:1px solid var(--rule);"><span style="font-family:var(--mono); font-size:11px; letter-spacing:0.1em; text-transform:uppercase; color:var(--ink-mute); white-space:nowrap;">Wine</span><span style="font-family:var(--serif); font-size:22px; color:var(--ink); text-align:right; line-height:1.2;">Front door to the Shenandoah Valley AVA</span></div>
-<div style="display:flex; justify-content:space-between; align-items:baseline; gap:24px; padding:16px 0; border-top:1px solid var(--rule);"><span style="font-family:var(--mono); font-size:11px; letter-spacing:0.1em; text-transform:uppercase; color:var(--ink-mute); white-space:nowrap;">Sacramento</span><span style="font-family:var(--serif); font-size:22px; color:var(--ink); text-align:right; line-height:1.2;">≈ 1 hr</span></div>
-<div style="display:flex; justify-content:space-between; align-items:baseline; gap:24px; padding:16px 0; border-top:1px solid var(--rule); border-bottom:1px solid var(--rule);"><span style="font-family:var(--mono); font-size:11px; letter-spacing:0.1em; text-transform:uppercase; color:var(--ink-mute); white-space:nowrap;">Known for</span><span style="font-family:var(--serif); font-size:22px; color:var(--ink); text-align:right; line-height:1.2;">“Jewel of the Motherlode” · Antique Row</span></div>
-</div>
-<p style="margin-top:20px; font-family:var(--mono); font-size:11px; letter-spacing:0.1em; text-transform:uppercase; color:var(--ink-faint);">Last updated: July 2026</p>
+<section class="lg-sec lg-sec--tint" id="facts"><div class="lg-wrap">
+  <div class="lg-kicker lg-rv"><span>Sutter Creek · at a glance</span><span class="lg-rule"></span></div>
+  <h2 class="lg-display lg-h2 lg-rv lg-d1" style="margin:14px 0 10px">Sutter Creek, California <em>by the numbers.</em></h2>
+  <div class="lg-note lg-rv lg-d2" style="max-width:640px">The durable facts buyers ask first. Current prices are pulled live from the MLS, not hand-kept here.</div>
+  <div class="facts lg-rv lg-d2">
+    <div class="facts-row"><span class="k">County</span><span class="v">Amador County</span></div>
+    <div class="facts-row"><span class="k">Elevation</span><span class="v">1,188 ft</span></div>
+    <div class="facts-row"><span class="k">Population</span><span class="v">2,646 <span class="sub">(2020 Census)</span></span></div>
+    <div class="facts-row"><span class="k">Water</span><span class="v">Amador Water Agency</span></div>
+    <div class="facts-row"><span class="k">Schools</span><span class="v">Amador County Unified School District</span></div>
+    <div class="facts-row"><span class="k">Wine</span><span class="v">Front door to the Shenandoah Valley AVA</span></div>
+    <div class="facts-row"><span class="k">Sacramento</span><span class="v">≈ 1 hr</span></div>
+    <div class="facts-row"><span class="k">Known for</span><span class="v">“Jewel of the Motherlode” · Antique Row</span></div>
   </div>
-</section>
+  <p style="margin-top:18px;font-family:var(--lg-mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--lg-ink-faint)">Last updated: July 2026</p>
+</div></section>
 
-<!-- ============ FAQ + ENTITY + SOURCES (AI-retrievable) ============ -->
-<section class="section" id="faq" style="background:var(--vellum);">
-  <div class="section-inner">
-    <div class="section-h">
-      <div>
-        <span class="hairline-brass"></span>
-        <span class="eyebrow">Sutter Creek · common questions</span>
-        <h2 class="h-section" style="margin-top:10px;">Buying in Sutter Creek,<br><em>answered.</em></h2>
-      </div>
-    </div>
-    <div style="margin-top:24px; display:flex; flex-direction:column; gap:26px; max-width:820px;">
-      <div>
-        <h3 style="font-family:var(--serif); font-size:22px; color:var(--ink); margin-bottom:8px;">What is Sutter Creek, California known for?</h3>
-        <p style="color:var(--ink-soft); line-height:1.6;">Sutter Creek, the “Jewel of the Motherlode,” is an Amador County Gold Rush town known for a well-preserved historic Main Street lined with antique shops, and for being the front door to Shenandoah Valley wine country.</p>
-      </div>
-      <div>
-        <h3 style="font-family:var(--serif); font-size:22px; color:var(--ink); margin-bottom:8px;">What county and water agency serve Sutter Creek?</h3>
-        <p style="color:var(--ink-soft); line-height:1.6;">Sutter Creek is in Amador County and served by the Amador Water Agency, with schools part of the Amador County Unified School District.</p>
-      </div>
-      <div>
-        <h3 style="font-family:var(--serif); font-size:22px; color:var(--ink); margin-bottom:8px;">How far is Sutter Creek from Sacramento?</h3>
-        <p style="color:var(--ink-soft); line-height:1.6;">Sutter Creek is about one hour from Sacramento, at roughly 1,188 feet in the Amador County foothills.</p>
-      </div>
-      <div>
-        <h3 style="font-family:var(--serif); font-size:22px; color:var(--ink); margin-bottom:8px;">Is Sutter Creek close to wine country?</h3>
-        <p style="color:var(--ink-soft); line-height:1.6;">Yes. Sutter Creek sits at the edge of the California Shenandoah Valley AVA — Amador County's old-vine Zinfandel and Barbera region — a short drive up Shenandoah Road.</p>
-      </div>
-      <div>
-        <h3 style="font-family:var(--serif); font-size:22px; color:var(--ink); margin-bottom:8px;">Where can I see current Sutter Creek home prices?</h3>
-        <p style="color:var(--ink-soft); line-height:1.6;">Current Sutter Creek median price, days on market and inventory change constantly, so Legacy Properties keeps them in a live, MLS-fed market report and search rather than as a hand-kept number here. Call Sara Cooper at (209) 559-4966 for a current read on Sutter Creek.</p>
-      </div>
-    </div>
-    <p style="margin-top:34px; padding-top:22px; border-top:1px solid var(--rule); color:var(--ink-soft); line-height:1.6; max-width:820px;">Sara Cooper, Broker at Legacy Properties (CA DRE #02141987), works across the Sierra foothills of Calaveras, Amador and Tuolumne counties, including Sutter Creek, with 23 closings in the trailing twelve months. Reach Sara at <a href="tel:2095594966" style="color:var(--brass);">(209) 559-4966</a>.</p>
-    <p style="margin-top:16px; font-family:var(--mono); font-size:11px; letter-spacing:0.06em; color:var(--ink-faint); max-width:820px;">Sources: <a href="https://www.car.org/marketdata" target="_blank" rel="noopener" style="color:var(--ink-mute);">California Association of REALTORS®</a> · <a href="https://osfm.fire.ca.gov/what-we-do/community-wildfire-preparedness-and-mitigation/fire-hazard-severity-zones" target="_blank" rel="noopener" style="color:var(--ink-mute);">CAL FIRE Fire Hazard Severity Zones</a> · <a href="https://amadorwater.gov/" target="_blank" rel="noopener" style="color:var(--ink-mute);">Amador Water Agency</a> · <a href="https://en.wikipedia.org/wiki/Sutter_Creek,_California" target="_blank" rel="noopener" style="color:var(--ink-mute);">U.S. Census / Sutter Creek, California</a>.</p>
+<!-- ============ FAQ (AI-retrievable) ============ -->
+<section class="lg-sec lg-sec--tint" id="faq"><div class="lg-wrap">
+  <div class="lg-kicker lg-rv"><span>Sutter Creek · common questions</span><span class="lg-rule"></span></div>
+  <h2 class="lg-display lg-h2 lg-rv lg-d1" style="margin:14px 0 24px">Buying in Sutter Creek, <em>answered.</em></h2>
+  <div style="display:flex;flex-direction:column;gap:24px;max-width:840px">
+    <div class="faq-q lg-rv"><h3>What is Sutter Creek, California known for?</h3><p>Sutter Creek, the “Jewel of the Motherlode,” is an Amador County Gold Rush town known for a well-preserved historic Main Street lined with antique shops, and for being the front door to Shenandoah Valley wine country.</p></div>
+    <div class="faq-q lg-rv"><h3>What county and water agency serve Sutter Creek?</h3><p>Sutter Creek is in Amador County and served by the Amador Water Agency, with schools part of the Amador County Unified School District.</p></div>
+    <div class="faq-q lg-rv"><h3>How far is Sutter Creek from Sacramento?</h3><p>Sutter Creek is about one hour from Sacramento, at roughly 1,188 feet in the Amador County foothills.</p></div>
+    <div class="faq-q lg-rv"><h3>Is Sutter Creek close to wine country?</h3><p>Yes. Sutter Creek sits at the edge of the California Shenandoah Valley AVA — Amador County's old-vine Zinfandel and Barbera region — a short drive up Shenandoah Road.</p></div>
+    <div class="faq-q lg-rv"><h3>Where can I see current Sutter Creek home prices?</h3><p>Current Sutter Creek median price, days on market and inventory change constantly, so Legacy Properties keeps them in a live, MLS-fed market report and search rather than as a hand-kept number here. Call Sara Cooper at (209) 559-4966 for a current read on Sutter Creek.</p></div>
   </div>
+  <p style="margin-top:32px;padding-top:22px;border-top:1px solid rgba(23,20,15,.12);color:var(--lg-ink-soft);line-height:1.6;max-width:840px;font-size:14.5px">Sara Cooper, Broker at Legacy Properties (CA DRE #02141987), works across the Sierra foothills of Calaveras, Amador and Tuolumne counties, including Sutter Creek, with 23 closings in the trailing twelve months. Reach Sara at <a href="tel:2095594966" style="color:var(--lg-a1)">(209) 559-4966</a>.</p>
+  <p style="margin-top:14px;font-family:var(--lg-mono);font-size:10.5px;letter-spacing:.05em;color:var(--lg-ink-faint);max-width:840px">Sources: <a href="https://www.car.org/marketdata" target="_blank" rel="noopener" style="color:var(--lg-ink-mute)">California Association of REALTORS®</a> · <a href="https://osfm.fire.ca.gov/what-we-do/community-wildfire-preparedness-and-mitigation/fire-hazard-severity-zones" target="_blank" rel="noopener" style="color:var(--lg-ink-mute)">CAL FIRE Fire Hazard Severity Zones</a> · <a href="https://amadorwater.gov/" target="_blank" rel="noopener" style="color:var(--lg-ink-mute)">Amador Water Agency</a> · <a href="https://en.wikipedia.org/wiki/Sutter_Creek,_California" target="_blank" rel="noopener" style="color:var(--lg-ink-mute)">U.S. Census / Sutter Creek, California</a>.</p>
   <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -985,48 +1003,43 @@
   ]
 }
   </script>
-</section>
+</div></section>
 
-<footer class="footer">
-  <div class="footer-inner">
-    <div class="footer-top">
-      <div>
-        <a href="index.html" class="wordmark" style="align-items: flex-start;">
-          <span class="wordmark-word">Legacy</span>
-          <span class="wordmark-sub">Properties · Angels Camp CA</span>
-        </a>
-        <p class="footer-tagline">Every home has a story. We help you find yours — or tell the one you've already lived.</p>
-      </div>
-      <div>
-        <h4>Communities</h4>
-        <a href="town-murphys.html">Murphys</a>
-        <a href="town-arnold.html">Arnold</a>
-        <a href="town-sutter-creek.html">Sutter Creek</a>
-        <a href="town-shenandoah-valley.html">Shenandoah Valley</a>
-        <a href="river-mountain.html">Waterfront Lakes and Rivers</a>
-        <a href="town-angels-camp.html">Angels Camp</a>
-        <a href="town-copperopolis.html">Copperopolis</a>
-      </div>
-      <div>
-        <h4>Buy &amp; sell</h4>
-        <a href="listings.html">Search all listings</a>
-        <a href="seller.html">What's my home worth?</a>
-        <a href="platform.html">Request a tour</a>
-      </div>
-      <div>
-        <h4>Connect</h4>
-        <a href="tel:2095594966">(209) 559-4966</a>
-        <a href="mailto:SaraSellsCalifornia@gmail.com">SaraSellsCalifornia@gmail.com</a>
-        <a href="index.html#ledger">The Ledger</a>
-      </div>
+<!-- ============ FOOTER ============ -->
+<footer class="lg-footer"><div class="lg-wrap">
+  <div class="lg-footer__cols">
+    <div>
+      <a href="index.html" class="lg-mark"><span class="lg-mark__badge"><span>L</span></span><span class="lg-mark__txt"><b>Legacy</b><i>Properties · Angels Camp</i></span></a>
+      <p style="font-family:var(--lg-serif);font-style:italic;font-size:16px;color:var(--lg-ink-soft);line-height:1.5;margin-top:16px;max-width:260px">Every home has a story. We help you find yours &mdash; or tell the one you've already lived.</p>
     </div>
-    <div class="footer-bottom">
-      <div>© 2026 Legacy Properties · All rights reserved</div>
-      <div>Sara Cooper, Broker · DRE #02141987 · Equal Housing Opportunity</div>
+    <div><h5>Communities</h5>
+      <a href="town-murphys.html">Murphys</a>
+      <a href="town-arnold.html">Arnold</a>
+      <a href="town-sutter-creek.html">Sutter Creek</a>
+      <a href="town-shenandoah-valley.html">Shenandoah Valley</a>
+      <a href="river-mountain.html">Waterfront Lakes &amp; Rivers</a>
+      <a href="town-angels-camp.html">Angels Camp</a>
+      <a href="town-copperopolis.html">Copperopolis</a>
+    </div>
+    <div><h5>Buy &amp; sell</h5>
+      <a href="property-search.html">Search all listings</a>
+      <a href="valuation.html">What's my home worth?</a>
+      <a href="find-my-match.html">Request a tour</a>
+    </div>
+    <div><h5>Connect</h5>
+      <a href="tel:2095594966">(209) 559-4966</a>
+      <a href="mailto:SaraSellsCalifornia@gmail.com">Email Sara</a>
+      <a href="ledger.html">The Ledger</a>
     </div>
   </div>
-</footer>
+  <div class="lg-footer__bot">
+    <span>&copy; 2026 Legacy Properties &middot; All rights reserved</span>
+    <span>Sara Cooper, Broker &middot; DRE #02141987 &middot; Equal Housing Opportunity</span>
+  </div>
+</div></footer>
 
+
+<script src="legacy-ui.js" defer></script>
 <script src="town.js"></script>
 </body>
 </html>

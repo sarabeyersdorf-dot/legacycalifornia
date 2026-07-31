@@ -178,7 +178,7 @@
 </script>
 <!-- seo:head:end -->
 <link rel="stylesheet" href="legacy.css">
-<link rel="stylesheet" href="town.css">
+<link rel="stylesheet" href="legacy-ui.css">
 <style>
 /* ============================================================
    WATERFRONT LAKES & RIVERS — lifestyle category page
@@ -391,43 +391,135 @@
   };
 </script>
 </head>
-<body class="paper" data-screen-label="Waterfront Lakes and Rivers">
+<body class="paper lg-page" data-screen-label="Waterfront Lakes and Rivers">
+<div class="lg-progress"></div>
 
-<header class="topnav">
-  <div class="topnav-bar1">
-    <span>Boutique luxury real estate · Calaveras · Amador · Tuolumne</span>
-    <span><a href="tel:2095594966">(209) 559-4966</a> · <a href="mailto:SaraSellsCalifornia@gmail.com">SaraSellsCalifornia@gmail.com</a></span>
-  </div>
-  <nav class="topnav-bar2">
-    <div class="topnav-links">
-      <a href="property-search.html">Listings</a>
-      <a href="towns.html" class="active">Communities</a>
-      <a href="relocate.html">Relocate</a>
-      <a href="valuation.html">Sellers</a>
-    </div>
-    <a href="index.html" class="wordmark">
-      <span class="wordmark-word">Legacy</span>
-      <span class="wordmark-sub">Properties · Angels Camp CA</span>
-    </a>
-    <div class="topnav-links right">
-      <a href="ledger.html">The Ledger</a>
-      <a href="dashboard.html">Sign In</a>
-      <a href="find-my-match.html" class="btn btn-ink btn-sm" style="padding:10px 18px;">Find My Match</a>
-    </div>
-  </nav>
-</header>
-
-<div class="town-breadcrumb">
-  <div class="town-breadcrumb-inner">
-    <a href="index.html">Legacy</a>
-    <span class="sep">→</span>
-    <a href="towns.html">Communities</a>
-    <span class="sep">→</span>
-    <span class="cur">Waterfront Lakes and Rivers</span>
-    <span class="spacer"></span>
-    <span class="mono small">Vol. XXII · Plate VII — Lifestyle Category</span>
-  </div>
+<!-- ============ TOP STRIP + HEADER ============ -->
+<div style="background:var(--lg-ink);color:rgba(255,253,248,.72);font-family:var(--lg-mono);font-size:10.5px;letter-spacing:.13em;text-transform:uppercase;display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;padding:9px var(--lg-gut)">
+  <span>Boutique real estate &middot; Calaveras &middot; Amador &middot; Tuolumne</span>
+  <span style="display:flex;gap:14px">
+    <a href="tel:2095594966" style="color:inherit;text-decoration:none">(209) 559-4966</a>
+    <a href="mailto:SaraSellsCalifornia@gmail.com" style="color:var(--lg-c2);text-decoration:none">SaraSellsCalifornia@gmail.com</a>
+  </span>
 </div>
+<header class="lg-header"><div class="lg-header__in">
+  <a class="lg-mark" href="index.html">
+    <span class="lg-mark__badge"><span>L</span></span>
+    <span class="lg-mark__txt"><b>Legacy</b><i>Properties · Angels Camp</i></span>
+  </a>
+  <nav class="lg-nav" id="siteNav">
+    <a href="property-search.html">Listings</a>
+    <a href="towns.html" aria-current="page">Communities</a>
+    <a href="relocate.html">Relocate</a>
+    <a href="valuation.html">Sellers</a>
+    <a href="market-report.html">Markets</a>
+    <a href="ledger.html">The Ledger</a>
+    <a href="dashboard.html">Sign In</a>
+    <a href="find-my-match.html" class="lg-btn" style="padding:11px 22px">Find My Match</a>
+  </nav>
+  <button class="lg-navtoggle" data-lg-nav="#siteNav" aria-expanded="false">Menu</button>
+</div></header>
+
+<!-- Page-scoped lg styling for the kept interactive pieces (season hero, jump
+     rail scrollspy, picks tabs). town.js drives them by these classes/ids. -->
+<style>
+  .tc{max-width:var(--lg-max);margin:0 auto;padding:0 var(--lg-gut)}
+  /* breadcrumb */
+  .t-crumb{font-family:var(--lg-mono);font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--lg-ink-mute);display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:16px var(--lg-gut) 0;max-width:var(--lg-max);margin:0 auto}
+  .t-crumb a{color:var(--lg-a1);text-decoration:none}.t-crumb .sp{flex:1}
+  /* season hero */
+  .town-hero{position:relative;min-height:clamp(580px,66vw,840px);display:flex;flex-direction:column;justify-content:flex-end;overflow:hidden;background:var(--lg-ink)}
+  .th-frame{position:absolute;inset:0;background-size:cover;background-position:center 42%;opacity:0;transition:opacity 1.2s ease}
+  .town-hero[data-season="spring"] .th-frame-spring,.town-hero[data-season="summer"] .th-frame-summer,.town-hero[data-season="fall"] .th-frame-fall,.town-hero[data-season="winter"] .th-frame-winter{opacity:1}
+  .th-veil{position:absolute;inset:0;z-index:1;background:linear-gradient(180deg,rgba(23,20,15,.4),rgba(23,20,15,.12) 38%,rgba(23,20,15,.82))}
+  .th-inner{position:relative;z-index:2;width:100%;max-width:var(--lg-max);margin:0 auto;padding:0 var(--lg-gut) 30px;color:#fff}
+  .th-eyebrow{display:inline-flex;align-items:center;gap:10px;background:rgba(255,253,248,.16);backdrop-filter:blur(6px);border:1px solid rgba(255,253,248,.3);border-radius:100px;padding:7px 16px;font-family:var(--lg-mono);font-size:10px;letter-spacing:.18em;text-transform:uppercase;font-weight:600}
+  .th-eyebrow .tick{width:7px;height:7px;border-radius:50%;background:var(--lg-c2);animation:lg-ping 2.4s ease-out infinite}
+  .th-eyebrow .eyebrow{color:#fff}
+  .th-title{font-family:var(--lg-serif);font-style:italic;font-weight:600;font-size:clamp(46px,8vw,104px);line-height:.95;margin:18px 0 0;text-shadow:0 4px 30px rgba(23,20,15,.35)}
+  .th-title .it{color:var(--lg-sun)}
+  .th-tag{font-family:var(--lg-serif);font-style:italic;font-size:clamp(17px,2.1vw,23px);color:rgba(255,253,248,.92);margin-top:14px}
+  .th-meta{display:flex;flex-wrap:wrap;gap:14px 34px;margin-top:20px}
+  .th-meta-row{display:flex;flex-direction:column;gap:2px}
+  .th-meta .label-cap{font-family:var(--lg-mono);font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;color:rgba(255,253,248,.6)}
+  .th-meta .num{font-family:var(--lg-serif);font-style:italic;font-size:22px;color:#fff}
+  .th-season{position:relative;z-index:2;width:100%;max-width:var(--lg-max);margin:0 auto;padding:16px var(--lg-gut) 26px;display:flex;flex-wrap:wrap;align-items:center;gap:12px 16px}
+  .th-season>.label-cap{font-family:var(--lg-mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase}
+  .th-season-track{display:flex;gap:8px;flex-wrap:wrap}
+  .th-sn{font-family:var(--lg-mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;font-weight:700;padding:8px 15px;border-radius:100px;border:1px solid rgba(255,253,248,.35);background:rgba(255,253,248,.08);color:rgba(255,253,248,.85);cursor:pointer;transition:all var(--lg-fast)}
+  .th-sn.th-sn-on{background:var(--lg-sun);border-color:var(--lg-sun);color:var(--lg-ink)}
+  .th-season-quote{flex:1 1 260px;min-width:220px;font-family:var(--lg-serif);font-style:italic;font-size:15px;color:rgba(255,253,248,.9);line-height:1.4}
+  .th-season-quote em{color:var(--lg-sun)}
+  /* jump rail */
+  .town-jump{position:sticky;top:72px;z-index:40;background:color-mix(in srgb,var(--lg-cream) 92%,transparent);backdrop-filter:blur(12px) saturate(1.2);border-bottom:1px solid rgba(23,20,15,.08)}
+  .town-jump-inner{max-width:var(--lg-max);margin:0 auto;display:flex;gap:26px;overflow-x:auto;padding:14px var(--lg-gut);font-family:var(--lg-mono);font-size:11px;letter-spacing:.09em;text-transform:uppercase;font-weight:600}
+  .town-jump a{color:var(--lg-ink-mute);text-decoration:none;white-space:nowrap;padding:4px 0;border-bottom:2px solid transparent;transition:color var(--lg-fast)}
+  .town-jump a.jump-on{color:var(--lg-a1);border-bottom-color:var(--lg-c1)}
+  /* facts table */
+  .facts{max-width:840px;margin-top:26px}
+  .facts-row{display:flex;justify-content:space-between;align-items:baseline;gap:24px;padding:15px 2px;border-top:1px solid rgba(23,20,15,.1)}
+  .facts-row:last-of-type{border-bottom:1px solid rgba(23,20,15,.1)}
+  .facts-row .k{font-family:var(--lg-mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--lg-ink-mute);white-space:nowrap}
+  .facts-row .v{font-family:var(--lg-serif);font-style:italic;font-size:21px;color:var(--lg-ink);text-align:right;line-height:1.2}
+  .facts-row .v .sub{font-style:normal;font-family:var(--lg-mono);font-size:11px;color:var(--lg-ink-faint)}
+  /* wine cards */
+  .wine-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px;margin-top:6px}
+  .wine-card{background:rgba(255,253,248,.06);border:1px solid rgba(255,253,248,.14);border-radius:var(--lg-r);padding:24px;transition:transform var(--lg-fast) var(--lg-ease),background var(--lg-fast)}
+  .wine-card:hover{transform:translateY(-4px);background:rgba(255,253,248,.1)}
+  .wine-letter{font-family:var(--lg-serif);font-style:italic;font-size:30px;color:var(--lg-sun);line-height:1}
+  .wine-name{font-family:var(--lg-serif);font-style:italic;font-size:24px;color:#fff;margin-top:6px}
+  .wine-house{font-family:var(--lg-mono);font-size:10px;letter-spacing:.13em;text-transform:uppercase;color:rgba(255,253,248,.6);margin-top:4px}
+  .wine-flight{display:flex;flex-direction:column;gap:4px;margin-top:12px;font-size:13.5px;color:rgba(255,253,248,.82)}
+  .wine-foot{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px;font-family:var(--lg-mono);font-size:10px;letter-spacing:.08em;color:rgba(255,253,248,.55)}
+  .wine-walk{display:flex;flex-wrap:wrap;align-items:center;gap:12px 26px;margin-top:28px;padding-top:22px;border-top:1px solid rgba(255,253,248,.14)}
+  .wf-stat{font-family:var(--lg-serif);font-style:italic;font-size:26px;color:#fff}
+  .wf-stat em{font-style:normal;font-family:var(--lg-mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,253,248,.6);margin-left:6px}
+  /* picks */
+  .picks-tabs{display:flex;gap:10px;flex-wrap:wrap;margin:26px 0 24px}
+  .pick-tab{font-family:var(--lg-mono);font-size:11px;letter-spacing:.11em;text-transform:uppercase;font-weight:700;padding:11px 20px;border-radius:100px;border:2px solid var(--lg-sand);background:var(--lg-white);color:var(--lg-ink-soft);cursor:pointer;display:inline-flex;align-items:center;gap:8px;transition:all var(--lg-fast)}
+  .pick-tab .ct{font-family:var(--lg-serif);font-style:italic;opacity:.7}
+  .pick-tab.pick-tab-on{background:var(--lg-c1-deep);border-color:var(--lg-c1-deep);color:#fff}
+  .pick-pane{display:none}.pick-pane.pick-pane-on{display:block}
+  .pick-row{display:grid;grid-template-columns:auto 1fr auto;gap:20px;align-items:start;padding:22px 2px;border-top:1px solid rgba(23,20,15,.09)}
+  .pick-num{font-family:var(--lg-serif);font-style:italic;font-size:26px;color:var(--lg-a1);line-height:1}
+  .pick-body h4{font-family:var(--lg-serif);font-style:italic;font-size:22px;color:var(--lg-ink);margin:0 0 6px}
+  .pick-body p{font-size:14.5px;color:var(--lg-ink-soft);line-height:1.6;margin:0}
+  .pick-body p a{color:var(--lg-a1)}
+  .pick-tags{display:flex;gap:7px;flex-wrap:wrap;margin-top:11px}
+  .pick-tags span{font-family:var(--lg-mono);font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--lg-ink-mute);background:var(--lg-sand);border-radius:100px;padding:4px 10px}
+  .pick-cap{font-family:var(--lg-mono);font-size:10.5px;letter-spacing:.06em;color:var(--lg-ink-mute);text-align:right;white-space:nowrap}
+  .pick-cap .label-cap{display:block;color:var(--lg-ink-faint);margin-bottom:3px}
+  @media(max-width:760px){.pick-row{grid-template-columns:auto 1fr;gap:14px}.pick-cap{grid-column:2;text-align:left;white-space:normal}}
+  /* map + nearby + letter */
+  .town-map{border-radius:var(--lg-r);overflow:hidden;box-shadow:var(--lg-sh);height:clamp(360px,46vw,520px);margin-top:8px}
+  .nearby-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:16px;margin-top:8px}
+  .nearby-card{display:block;text-decoration:none;background:var(--lg-white);border-radius:var(--lg-r);overflow:hidden;box-shadow:var(--lg-sh-sm);transition:transform var(--lg-med) var(--lg-ease),box-shadow var(--lg-med)}
+  .nearby-card:hover{transform:translateY(-5px);box-shadow:var(--lg-sh)}
+  .nb-img{aspect-ratio:16/10;background-size:cover;background-position:center}
+  .nb-body{padding:18px 20px}
+  .nb-dist{font-family:var(--lg-mono);font-size:9.5px;letter-spacing:.13em;text-transform:uppercase;color:var(--lg-a1)}
+  .nb-body h4{font-family:var(--lg-serif);font-style:italic;font-size:22px;color:var(--lg-ink);margin:4px 0 4px}
+  .nb-body p{font-size:13.5px;color:var(--lg-ink-soft);margin:0}
+  .letter-card{background:var(--lg-white);border-radius:var(--lg-r-lg);box-shadow:var(--lg-sh);padding:clamp(28px,4vw,48px)}
+  .letter-grid{display:grid;grid-template-columns:200px 1fr;gap:36px;align-items:start;margin-top:20px}
+  .letter-photo img{width:140px;height:140px;border-radius:50%;object-fit:cover;box-shadow:var(--lg-sh-sm)}
+  .letter-stamp{margin-top:14px}.ls-cir{display:inline-flex;width:34px;height:34px;border-radius:50%;background:var(--lg-c1);color:#fff;align-items:center;justify-content:center;font-family:var(--lg-serif);font-style:italic}
+  .ls-lbl{display:block;font-family:var(--lg-mono);font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--lg-ink-mute);margin-top:8px}
+  .letter-open{font-family:var(--lg-serif);font-style:italic;font-size:24px;color:var(--lg-ink);margin:0 0 12px}
+  .letter-body p{font-size:15.5px;color:var(--lg-ink-soft);line-height:1.7;margin:0 0 14px}
+  .letter-sign{font-family:var(--lg-serif);font-style:italic;font-size:26px;color:var(--lg-a1)!important}
+  .letter-contact{display:flex;flex-wrap:wrap;gap:10px 26px;margin-top:24px;padding-top:20px;border-top:1px solid rgba(23,20,15,.1);font-family:var(--lg-mono);font-size:11.5px;letter-spacing:.06em}
+  .letter-contact a{color:var(--lg-ink);text-decoration:none}.letter-contact a:last-child{color:var(--lg-a1)}
+  @media(max-width:700px){.letter-grid{grid-template-columns:1fr;gap:20px}.letter-photo img{width:110px;height:110px}}
+  .faq-q h3{font-family:var(--lg-serif);font-style:italic;font-size:23px;color:var(--lg-ink);margin:0 0 8px}
+  .faq-q p{color:var(--lg-ink-soft);line-height:1.65;margin:0;font-size:15px}
+</style>
+
+<!-- Breadcrumb -->
+<nav class="t-crumb" aria-label="Breadcrumb">
+  <a href="index.html">Legacy</a><span>&rarr;</span><a href="towns.html">Communities</a><span>&rarr;</span><span>Waterfront Lakes &amp; Rivers</span>
+  <span class="sp"></span><span>Vol. XXII &middot; Plate VII &mdash; Lifestyle Category</span>
+</nav>
 
 <!-- HERO -->
 <section class="town-hero" data-season="summer">
@@ -467,63 +559,35 @@
   </div>
 </nav>
 
-<!-- THESIS -->
-<section class="section" id="thesis" style="background: var(--parchment);">
-  <div class="section-inner">
-    <div class="story-grid">
-      <div class="story-side">
-        <span class="hairline-brass"></span>
-        <span class="eyebrow">Field notes · § I</span>
-        <h2 class="h-section" style="margin-top:14px;">Some buyers choose<br>a town. <em>You're</em><br>choosing the water.</h2>
-      </div>
-      <div class="story-body">
-        <p class="lede">There's a kind of buyer the foothills quietly attract. They don't want walkable Main Street. They want a dock they can step onto with a coffee, deep water off the end of it in October, and a boat that never sees a trailer from April to Thanksgiving.</p>
-        <p>This is who we cater to on Lake Tulloch, New Melones, New Hogan, Pardee, and Camanche — and along the Stanislaus, the Mokelumne, and the Calaveras where a home sits right on the river. Some of these are gated lake communities. Some are a single riverfront parcel at the end of a gravel road. What they share is a shoreline that's part of the deed.</p>
-        <p>The transactions look different. The questions look different — dock permits, water levels, shoreline setbacks, body-contact rules. We've been writing waterfront contracts for years, and James was reading water-agency shoreline agreements for a decade before that.</p>
-      </div>
+<!-- ============ THE THESIS ============ -->
+<section class="lg-sec" id="thesis"><div class="lg-wrap">
+  <div class="lg-grid" style="grid-template-columns:.85fr 1.15fr;gap:48px;align-items:start">
+    <div>
+      <div class="lg-kicker lg-rv"><span>Field notes · § I</span></div>
+      <h2 class="lg-display lg-h2 lg-rv lg-d1" style="margin:14px 0 10px">Some buyers choose a town. <em>You're</em> choosing the water.</h2>
+      <p class="lg-rv lg-d2" style="font-family:var(--lg-serif);font-style:italic;font-size:19px;color:var(--lg-ink-mute);line-height:1.4">The shoreline is part of the deed.</p>
     </div>
-
-    <div class="fit-strip">
-      <div class="fit-h"><span class="label-cap">Who this is for —</span></div>
-      <div class="fit-cards">
-        <article class="fit-card">
-          <div class="fit-num">01</div>
-          <h4>The lake-weekend family</h4>
-          <p>A ski boat, a swim dock, and kids who learn to slalom before they learn to drive. Tulloch or Camanche, close enough to the Bay for Friday nights.</p>
-        </article>
-        <article class="fit-card">
-          <div class="fit-num">02</div>
-          <h4>The dock-out buyer</h4>
-          <p>Private, deep-water frontage — not a shared launch. The buyer who asks about the drawdown curve and the dock permit before they ask about the kitchen.</p>
-        </article>
-        <article class="fit-card">
-          <div class="fit-num">03</div>
-          <h4>The riverfront romantic</h4>
-          <p>Frontage on the Stanislaus or the Mokelumne. A swimming hole below the deck, the sound of moving water at night, a house that's the opposite of a subdivision.</p>
-        </article>
-        <article class="fit-card">
-          <div class="fit-num">04</div>
-          <h4>The lakefront-estate buyer</h4>
-          <p>Big water frontage, a boathouse, room for the whole family at Thanksgiving. The kind of place you don't sell — you pass it down.</p>
-        </article>
-      </div>
+    <div class="lg-prose lg-rv lg-d1">
+      <p class="lg-lead">There's a kind of buyer the foothills quietly attract. They don't want walkable Main Street. They want a dock they can step onto with a coffee, deep water off the end of it in October, and a boat that never sees a trailer from April to Thanksgiving.</p>
+      <p>This is who we cater to on Lake Tulloch, New Melones, New Hogan, Pardee, and Camanche &mdash; and along the Stanislaus, the Mokelumne, and the Calaveras where a home sits right on the river. Some of these are gated lake communities. Some are a single riverfront parcel at the end of a gravel road. What they share is a shoreline that's part of the deed.</p>
+      <p>The transactions look different. The questions look different &mdash; dock permits, water levels, shoreline setbacks, body-contact rules. We've been writing waterfront contracts for years, and James was reading water-agency shoreline agreements for a decade before that.</p>
     </div>
   </div>
-</section>
+  <div class="lg-kicker lg-rv" style="margin-top:40px"><span>Who this is for</span><span class="lg-rule"></span></div>
+  <div class="lg-grid lg-grid--4" style="margin-top:22px">
+    <div class="lg-point lg-rv" style="--lg-accent:var(--lg-a1)"><div class="lg-point__num">01</div><h4>The lake-weekend family</h4><p>A ski boat, a swim dock, and kids who learn to slalom before they learn to drive. Tulloch or Camanche, close enough to the Bay for Friday nights.</p></div>
+    <div class="lg-point lg-rv lg-d1" style="--lg-accent:var(--lg-a4)"><div class="lg-point__num">02</div><h4>The dock-out buyer</h4><p>Private, deep-water frontage &mdash; not a shared launch. The buyer who asks about the drawdown curve and the dock permit before they ask about the kitchen.</p></div>
+    <div class="lg-point lg-rv lg-d2" style="--lg-accent:var(--lg-a3)"><div class="lg-point__num">03</div><h4>The riverfront romantic</h4><p>Frontage on the Stanislaus or the Mokelumne. A swimming hole below the deck, the sound of moving water at night, a house that's the opposite of a subdivision.</p></div>
+    <div class="lg-point lg-rv lg-d3" style="--lg-accent:var(--lg-a5)"><div class="lg-point__num">04</div><h4>The lakefront-estate buyer</h4><p>Big water frontage, a boathouse, room for the whole family at Thanksgiving. The kind of place you don't sell &mdash; you pass it down.</p></div>
+  </div>
+</div></section>
 
-<!-- FOUR ARCHETYPES -->
-<section class="section" id="archetypes" style="background: var(--vellum);">
-  <div class="section-inner">
-    <div class="section-h">
-      <div>
-        <span class="hairline-brass"></span>
-        <span class="eyebrow">Plate II · The properties we sell here</span>
-        <h2 class="h-section" style="margin-top:10px;">Four archetypes.<br><em>One sensibility.</em></h2>
-      </div>
-      <p class="lede right">After years of writing waterfront contracts, the properties start to sort themselves into four shapes. Yours is almost certainly one of them.</p>
-    </div>
-
-    <div class="archetypes">
+<!-- ============ FOUR ARCHETYPES ============ -->
+<section class="lg-sec lg-sec--tint" id="archetypes"><div class="lg-wrap">
+  <div class="lg-kicker lg-rv"><span>Plate II · The properties we sell here</span><span class="lg-rule"></span></div>
+  <h2 class="lg-display lg-h2 lg-rv lg-d1" style="margin:14px 0 10px">Four archetypes. <em>One sensibility.</em></h2>
+  <div class="lg-note lg-rv lg-d2" style="max-width:660px">After years of writing waterfront contracts, the properties start to sort themselves into four shapes. Yours is almost certainly one of them.</div>
+    <div class="archetypes lg-rv lg-d2" style="margin-top:26px">
       <article class="arch">
         <div class="arch-head">
           <div class="arch-num">I</div>
@@ -580,22 +644,14 @@
         </div>
       </article>
     </div>
-  </div>
-</section>
+</div></section>
 
-<!-- CONSTELLATION MAP -->
-<section class="section" id="map" style="background: var(--parchment);">
-  <div class="section-inner">
-    <div class="section-h">
-      <div>
-        <span class="hairline-brass"></span>
-        <span class="eyebrow">Plate III · The waters</span>
-        <h2 class="h-section" style="margin-top:10px;">Not a town.<br>A <em>watershed.</em></h2>
-      </div>
-      <p class="lede right">Hover any water. Five reservoirs and three rivers, each with its own rules — dock permits, drawdown, whether you can even swim. Where you buy decides which apply.</p>
-    </div>
-
-    <div class="constellation-board">
+<!-- ============ CONSTELLATION MAP (interactive pin map preserved) ============ -->
+<section class="lg-sec" id="map"><div class="lg-wrap">
+  <div class="lg-kicker lg-rv"><span>Plate III · The waters</span><span class="lg-rule"></span></div>
+  <h2 class="lg-display lg-h2 lg-rv lg-d1" style="margin:14px 0 10px">Not a town. A <em>watershed.</em></h2>
+  <div class="lg-note lg-rv lg-d2" style="max-width:660px">Hover any water. Five reservoirs and three rivers, each with its own rules &mdash; dock permits, drawdown, whether you can even swim. Where you buy decides which apply.</div>
+    <div class="constellation-board lg-rv lg-d2" style="margin-top:26px">
       <div class="constellation-map" id="cMap">
         <svg viewBox="0 0 1000 600" preserveAspectRatio="xMidYMid meet">
           <defs>
@@ -759,19 +815,13 @@
         </div>
       </aside>
     </div>
-  </div>
-</section>
+</div></section>
 
-<!-- CONSIDERATIONS -->
-<section class="considers" id="considers">
-  <div class="considers-inner">
-    <div class="considers-h">
-      <span class="hairline-brass" style="background: var(--brass-bright);"></span>
-      <span class="ed" style="display: block; margin-top: 14px;">Plate IV · What we'll ask before any offer</span>
-      <h2>Nine questions<br><em>before</em> the listing photos.</h2>
-    </div>
-
-    <div class="consider-grid">
+<!-- ============ CONSIDERATIONS ============ -->
+<section class="lg-sec lg-sec--ink" id="considers"><div class="lg-wrap">
+  <div class="lg-kicker lg-rv"><span>Plate IV · What we'll ask before any offer</span></div>
+  <h2 class="lg-display lg-h2 lg-rv lg-d1" style="margin:14px 0 10px">Nine questions <em>before</em> the listing photos.</h2>
+    <div class="consider-grid lg-rv lg-d2" style="margin-top:26px">
       <article class="consider">
         <span class="consider-num">01</span>
         <h4>Dock rights &amp; permits</h4>
@@ -818,22 +868,14 @@
         <p>Private ramp, marina slip, or HOA launch — and is it usable at low pool? A dock-out home is only as good as the water depth off the end of it in September.</p>
       </article>
     </div>
-  </div>
-</section>
+</div></section>
 
-<!-- LIFESTYLE SCENES -->
-<section class="section" id="scenes" style="background: var(--parchment);">
-  <div class="section-inner">
-    <div class="section-h">
-      <div>
-        <span class="hairline-brass"></span>
-        <span class="eyebrow">Plate V · A typical week</span>
-        <h2 class="h-section" style="margin-top:10px;">What the life<br><em>actually looks like.</em></h2>
-      </div>
-      <p class="lede right">Not the postcard. The Tuesday morning. The Sunday after dinner.</p>
-    </div>
-
-    <div class="scenes">
+<!-- ============ LIFESTYLE SCENES ============ -->
+<section class="lg-sec lg-sec--tint" id="scenes"><div class="lg-wrap">
+  <div class="lg-kicker lg-rv"><span>Plate V · A typical week</span><span class="lg-rule"></span></div>
+  <h2 class="lg-display lg-h2 lg-rv lg-d1" style="margin:14px 0 10px">What the life <em>actually looks like.</em></h2>
+  <div class="lg-note lg-rv lg-d2" style="max-width:640px">Not the postcard. The Tuesday morning. The Sunday after dinner.</div>
+    <div class="scenes lg-rv lg-d2">
       <article class="scene" style="--bg: url('https://images.unsplash.com/photo-1439066615861-d1af74d74000?w=600&q=80');">
         <div class="scene-cap">
           <span class="lbl">Tuesday · 6:42 AM</span>
@@ -859,22 +901,14 @@
         </div>
       </article>
     </div>
-  </div>
-</section>
+</div></section>
 
-<!-- LISTINGS -->
-<section class="section" id="listings" style="background: var(--vellum);">
-  <div class="section-inner">
-    <div class="section-h">
-      <div>
-        <span class="hairline-brass"></span>
-        <span class="eyebrow">Plate VI · Currently in the field</span>
-        <h2 class="h-section" style="margin-top:10px;">On the water<br><em>right now.</em></h2>
-      </div>
-      <p class="lede right">Every waterfront, lake and river property currently for sale — live from the MLS.</p>
-    </div>
-
-    <div class="idx-embed idx-feature-gallery">
+<!-- ============ LISTINGS — live IDX gallery ============ -->
+<section class="lg-sec" id="listings"><div class="lg-wrap">
+  <div class="lg-kicker lg-rv"><span>Plate VI · Currently in the field</span><span class="lg-rule"></span></div>
+  <h2 class="lg-display lg-h2 lg-rv lg-d1" style="margin:14px 0 10px">On the water <em>right now.</em></h2>
+  <div class="lg-note lg-rv lg-d2" style="max-width:560px">Every waterfront, lake and river property currently for sale &mdash; live from the MLS.</div>
+    <div class="idx-embed idx-feature-gallery" style="margin-top:26px">
       <script>
         // Full Waterfront / Lakes & Rivers market — iHomeFinder saved-search
         // gallery (id 3019726, featured:false → whole MLS, not office inventory).
@@ -893,56 +927,39 @@
         }));
       </script>
     </div>
+</div></section>
 
-  </div>
-</section>
-
-<!-- LETTER -->
-<section class="section town-letter" id="letter" style="background: var(--parchment);">
-  <div class="section-inner">
-    <article class="letter-card">
-      <div class="letter-head">
-        <span class="hairline-brass"></span>
-        <span class="eyebrow">A note from your agents · § VII</span>
+<!-- ============ LETTER FROM JAMES ============ -->
+<section class="lg-sec lg-sec--tint" id="letter"><div class="lg-wrap">
+  <article class="letter-card lg-rv">
+    <div class="lg-kicker"><span>A note from your agents · § VII</span><span class="lg-rule"></span></div>
+    <div class="letter-grid">
+      <div class="letter-photo">
+        <img src="art/james-headshot.png" alt="James Beyersdorf">
+        <div class="letter-stamp"><span class="ls-cir">JB</span><span class="ls-lbl">James Beyersdorf · Associate · Waterfront &amp; land specialist</span></div>
       </div>
-      <div class="letter-grid">
-        <div class="letter-photo">
-          <img src="art/james-headshot.png" alt="James Beyersdorf">
-          <div class="letter-stamp">
-            <span class="ls-cir">JB</span>
-            <span class="ls-lbl">James Beyersdorf · Associate · Waterfront &amp; land specialist</span>
-          </div>
-        </div>
-        <div class="letter-body">
-          <p class="letter-open">A few words on buying on the water —</p>
-          <p>I came to Calaveras for the water in 2014 and never left. Most of my buyers since have been chasing the same thing — a dock they can walk to with a coffee, a boat that stays in the slip, a shoreline that's part of the deed. Some find it on Tulloch, some on Camanche, some on a quiet stretch of the Stanislaus. The shape of the frontage matters more than the postal address.</p>
-          <p>What I tell every waterfront buyer the first time we sit down: this is not the kind of transaction you rush. <em>The questions matter more than the listing.</em> A dock permit. The drawdown curve. Where the high-water mark actually falls. A FEMA flood zone. Whether the lake even allows a swim dock. None of these show up in the photos. All of them decide whether the next ten years are the summer you pictured or a five-year correction.</p>
-          <p>Sara and I work these deals together. She runs marketing, negotiation, and the buyer-side of the close. I do the technical walk — the shoreline, the dock, the water level, the flood map. The combination is why we win these. The combination is also why we say no to some of them.</p>
-          <p class="letter-sign">— James</p>
-        </div>
+      <div class="letter-body">
+        <p class="letter-open">A few words on buying on the water &mdash;</p>
+        <p>I came to Calaveras for the water in 2014 and never left. Most of my buyers since have been chasing the same thing &mdash; a dock they can walk to with a coffee, a boat that stays in the slip, a shoreline that's part of the deed. Some find it on Tulloch, some on Camanche, some on a quiet stretch of the Stanislaus. The shape of the frontage matters more than the postal address.</p>
+        <p>What I tell every waterfront buyer the first time we sit down: this is not the kind of transaction you rush. <em>The questions matter more than the listing.</em> A dock permit. The drawdown curve. Where the high-water mark actually falls. A FEMA flood zone. Whether the lake even allows a swim dock. None of these show up in the photos. All of them decide whether the next ten years are the summer you pictured or a five-year correction.</p>
+        <p>Sara and I work these deals together. She runs marketing, negotiation, and the buyer-side of the close. I do the technical walk &mdash; the shoreline, the dock, the water level, the flood map. The combination is why we win these. The combination is also why we say no to some of them.</p>
+        <p class="letter-sign">&mdash; James</p>
       </div>
-      <div class="letter-contact">
-        <a href="tel:2095594966"><span class="glyph">◇</span> (209) 559-4966</a>
-        <a href="mailto:SaraSellsCalifornia@gmail.com"><span class="glyph">◇</span> SaraSellsCalifornia@gmail.com</a>
-        <a href="find-my-match.html"><span class="glyph">◇</span> Walk a shoreline with James</a>
-      </div>
-    </article>
-  </div>
-</section>
-
-<!-- NEARBY (other communities) -->
-<section class="section" style="background: var(--vellum);">
-  <div class="section-inner">
-    <div class="section-h">
-      <div>
-        <span class="hairline-brass"></span>
-        <span class="eyebrow">Plate VIII · Adjacent</span>
-        <h2 class="h-section" style="margin-top:10px;">Towns nearby.</h2>
-      </div>
-      <p class="lede right">When the water isn't quite the answer, a town might be.</p>
     </div>
+    <div class="letter-contact">
+      <a href="tel:2095594966">◇&nbsp; (209) 559-4966</a>
+      <a href="mailto:SaraSellsCalifornia@gmail.com">◇&nbsp; SaraSellsCalifornia@gmail.com</a>
+      <a href="find-my-match.html">◇&nbsp; Walk a shoreline with James</a>
+    </div>
+  </article>
+</div></section>
 
-    <div class="nearby-grid">
+<!-- ============ NEIGHBORING TOWNS ============ -->
+<section class="lg-sec" id="nearby"><div class="lg-wrap">
+  <div class="lg-kicker lg-rv"><span>Plate VIII · Adjacent</span><span class="lg-rule"></span></div>
+  <h2 class="lg-display lg-h2 lg-rv lg-d1" style="margin:14px 0 8px">Towns nearby.</h2>
+  <div class="lg-note lg-rv lg-d2" style="max-width:620px">When the water isn't quite the answer, a town might be.</div>
+    <div class="nearby-grid lg-rv lg-d2">
       <a href="town-murphys.html" class="nearby-card">
         <div class="nb-img" style="background-image:url('art/towns/murphys-mainst-summer.jpg');"></div>
         <div class="nb-body"><span class="nb-dist">~30 min south</span><h4>Murphys</h4><p>Wine country, Main Street.</p></div>
@@ -964,62 +981,53 @@
         <div class="nb-body"><span class="nb-dist">~45 min southwest</span><h4>Copperopolis</h4><p>Lake estates, golf.</p></div>
       </a>
     </div>
-  </div>
-</section>
+</div></section>
 
-<!-- CTA -->
-<section class="cta">
-  <span class="hairline-brass" style="margin: 0 auto 20px; background: var(--brass-bright);"></span>
-  <span class="eyebrow" style="color: var(--brass-bright);">Begin your waterfront chapter</span>
-  <h2 class="cta-h">Walk the shoreline<br><em>with us.</em></h2>
-  <p class="cta-sub">Half a day, three or four properties, a candid read on the dock, the water level, the shoreline, and the life.</p>
-  <div class="cta-ctas">
-    <a href="find-my-match.html" class="btn btn-ink">Start the conversation</a>
-    <a href="tel:2095594966" class="btn btn-ghost">Call (209) 559-4966</a>
+<!-- ============ CTA ============ -->
+<section class="lg-sec lg-sec--ink"><div class="lg-wrap" style="text-align:center">
+  <div class="lg-kicker lg-rv" style="justify-content:center"><span>Begin your waterfront chapter</span></div>
+  <h2 class="lg-display lg-rv lg-d1" style="margin:16px 0 14px;font-size:clamp(38px,6vw,74px);line-height:.98">Walk the shoreline<br><em>with us.</em></h2>
+  <p class="lg-rv lg-d2" style="font-family:var(--lg-serif);font-style:italic;font-size:21px;color:rgba(255,253,248,.85);max-width:600px;margin:0 auto">Half a day, three or four properties, a candid read on the dock, the water level, the shoreline, and the life.</p>
+  <div class="lg-rv lg-d3" style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:28px">
+    <a href="find-my-match.html" class="lg-btn lg-btn--gold">Start the conversation</a>
+    <a href="tel:2095594966" class="lg-btn lg-btn--ghost">Call (209) 559-4966</a>
   </div>
-</section>
+</div></section>
 
-<footer class="footer">
-  <div class="footer-inner">
-    <div class="footer-top">
-      <div>
-        <a href="index.html" class="wordmark" style="align-items: flex-start;">
-          <span class="wordmark-word">Legacy</span>
-          <span class="wordmark-sub">Properties · Angels Camp CA</span>
-        </a>
-        <p class="footer-tagline">Every home has a story. We help you find yours — or tell the one you've already lived.</p>
-      </div>
-      <div>
-        <h4>Communities</h4>
-        <a href="town-murphys.html">Murphys</a>
-        <a href="town-arnold.html">Arnold</a>
-        <a href="town-sutter-creek.html">Sutter Creek</a>
-        <a href="town-shenandoah-valley.html">Shenandoah Valley</a>
-        <a href="town-angels-camp.html">Angels Camp</a>
-        <a href="town-copperopolis.html">Copperopolis</a>
-        <a href="river-mountain.html">Waterfront Lakes and Rivers</a>
-      </div>
-      <div>
-        <h4>Services</h4>
-        <a href="relocate.html">Bay → Foothills</a>
-        <a href="property-search.html">Search listings</a>
-        <a href="valuation.html">Sellers</a>
-        <a href="find-my-match.html">Request a tour</a>
-      </div>
-      <div>
-        <h4>Connect</h4>
-        <a href="tel:2095594966">(209) 559-4966</a>
-        <a href="mailto:SaraSellsCalifornia@gmail.com">SaraSellsCalifornia@gmail.com</a>
-        <a href="ledger.html">The Ledger</a>
-      </div>
+<!-- ============ FOOTER ============ -->
+<footer class="lg-footer"><div class="lg-wrap">
+  <div class="lg-footer__cols">
+    <div>
+      <a href="index.html" class="lg-mark"><span class="lg-mark__badge"><span>L</span></span><span class="lg-mark__txt"><b>Legacy</b><i>Properties · Angels Camp</i></span></a>
+      <p style="font-family:var(--lg-serif);font-style:italic;font-size:16px;color:var(--lg-ink-soft);line-height:1.5;margin-top:16px;max-width:260px">Every home has a story. We help you find yours &mdash; or tell the one you've already lived.</p>
     </div>
-    <div class="footer-bottom">
-      <div>© 2026 Legacy Properties · All rights reserved</div>
-      <div>Sara Cooper, Broker · DRE #02141987 · Equal Housing Opportunity</div>
+    <div><h5>Communities</h5>
+      <a href="town-murphys.html">Murphys</a>
+      <a href="town-arnold.html">Arnold</a>
+      <a href="town-sutter-creek.html">Sutter Creek</a>
+      <a href="town-shenandoah-valley.html">Shenandoah Valley</a>
+      <a href="river-mountain.html">Waterfront Lakes &amp; Rivers</a>
+      <a href="town-angels-camp.html">Angels Camp</a>
+      <a href="town-copperopolis.html">Copperopolis</a>
+    </div>
+    <div><h5>Buy &amp; sell</h5>
+      <a href="property-search.html">Search all listings</a>
+      <a href="valuation.html">What's my home worth?</a>
+      <a href="find-my-match.html">Request a tour</a>
+    </div>
+    <div><h5>Connect</h5>
+      <a href="tel:2095594966">(209) 559-4966</a>
+      <a href="mailto:SaraSellsCalifornia@gmail.com">Email Sara</a>
+      <a href="ledger.html">The Ledger</a>
     </div>
   </div>
-</footer>
+  <div class="lg-footer__bot">
+    <span>&copy; 2026 Legacy Properties &middot; All rights reserved</span>
+    <span>Sara Cooper, Broker &middot; DRE #02141987 &middot; Equal Housing Opportunity</span>
+  </div>
+</div></footer>
 
+<script src="legacy-ui.js" defer></script>
 <script>
 (function () {
   const pins = document.querySelectorAll('.cm-pin');

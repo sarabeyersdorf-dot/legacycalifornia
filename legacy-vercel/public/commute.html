@@ -178,6 +178,7 @@
 <!-- seo:head:end -->
 <meta name="description" content="Honest, time-of-day-aware drive times from the Sierra foothills to SFO, Oakland, San Jose, Sacramento and Reno — sourced from real client logs, not Google's midday number.">
 <link rel="stylesheet" href="legacy.css">
+<link rel="stylesheet" href="legacy-ui.css">
 <link rel="stylesheet" href="tools.css">
 <style>
   /* ── Commute-specific ────────────────────────────────── */
@@ -393,37 +394,42 @@
   }
 </style>
 </head>
-<body class="paper" data-screen-label="Commute Tool">
+<body class="paper lg-page" data-screen-label="Commute Tool">
+<div class="lg-progress"></div>
 
-<!-- ============ TOP NAV ============ -->
-<header class="topnav">
-  <div class="topnav-bar1">
-    <span>Boutique luxury real estate · Calaveras · Amador · Tuolumne</span>
-    <span>
-      <a href="tel:2095594966">(209) 559-4966</a>
-      &nbsp;·&nbsp;
-      <a href="mailto:SaraSellsCalifornia@gmail.com">SaraSellsCalifornia@gmail.com</a>
-    </span>
-  </div>
-  <nav class="topnav-bar2">
-    <div class="topnav-links">
-      <a href="property-search.html">Listings</a>
-      <a href="towns.html">Communities</a>
-      <a href="relocate.html">Relocate</a>
-      <a href="valuation.html">Sellers</a>
-      <a href="market-report.html">Markets</a>
-    </div>
-    <a href="index.html" class="wordmark">
-      <span class="wordmark-word">Legacy Properties</span>
-      <span class="wordmark-sub">Every Home Has A Story</span>
-    </a>
-    <div class="topnav-links right">
-      <a href="ledger.html">The Ledger</a>
-      <a href="dashboard.html">Sign In</a>
-      <a href="find-my-match.html" class="btn btn-ink btn-sm" style="padding:10px 18px;">Find My Match</a>
-    </div>
+<!-- ============ TOP STRIP + HEADER ============ -->
+<div style="background:var(--lg-ink);color:rgba(255,253,248,.72);font-family:var(--lg-mono);font-size:10.5px;letter-spacing:.13em;text-transform:uppercase;display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;padding:9px var(--lg-gut)">
+  <span>Boutique real estate &middot; Calaveras &middot; Amador &middot; Tuolumne</span>
+  <span style="display:flex;gap:14px">
+    <a href="tel:2095594966" style="color:inherit;text-decoration:none">(209) 559-4966</a>
+    <a href="mailto:SaraSellsCalifornia@gmail.com" style="color:var(--lg-c2);text-decoration:none">SaraSellsCalifornia@gmail.com</a>
+  </span>
+</div>
+<header class="lg-header"><div class="lg-header__in">
+  <a class="lg-mark" href="index.html">
+    <span class="lg-mark__badge"><span>L</span></span>
+    <span class="lg-mark__txt"><b>Legacy</b><i>Properties · Angels Camp</i></span>
+  </a>
+  <nav class="lg-nav" id="siteNav">
+    <a href="property-search.html">Listings</a>
+    <a href="towns.html">Communities</a>
+    <a href="relocate.html">Relocate</a>
+    <a href="valuation.html">Sellers</a>
+    <a href="market-report.html">Markets</a>
+    <a href="ledger.html">The Ledger</a>
+    <a href="dashboard.html">Sign In</a>
+    <a href="find-my-match.html" class="lg-btn" style="padding:11px 22px">Find My Match</a>
   </nav>
-</header>
+  <button class="lg-navtoggle" data-lg-nav="#siteNav" aria-expanded="false">Menu</button>
+</div></header>
+
+<!-- Breadcrumb -->
+<nav class="t-crumb" aria-label="Breadcrumb" style="font-family:var(--lg-mono);font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--lg-ink-mute);max-width:var(--lg-max);margin:0 auto;padding:16px var(--lg-gut) 0;display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+  <a href="index.html" style="color:var(--lg-a1);text-decoration:none">Legacy</a><span>&rarr;</span>
+  <span>Commute &middot; Sierra Foothills</span>
+  <span style="flex:1"></span>
+  <span>The Honest Commute Calculator</span>
+</nav>
 
 <!-- ============ HERO ============ -->
 <section class="tool-hero">
@@ -896,104 +902,73 @@
 </section>
 
 <!-- ============ QUALITY OF LIFE ============ -->
-<section class="cm-qol">
-  <div class="cm-qol-inner">
-    <div class="section-h" style="border-color: rgba(250,246,236,0.20);">
-      <div>
-        <span class="hairline-brass" style="background: var(--brass-bright); margin-bottom: 16px;"></span>
-        <span class="eyebrow" style="color: var(--brass-bright);">§ IV · The other math</span>
-        <h2 class="h-section" style="color: var(--shell); margin-top: 10px;">What you<br><em style="color: var(--brass-bright);">get back.</em></h2>
-      </div>
-      <p class="lede right" style="color: rgba(250,246,236,0.7);">The commute calculation is one side of the ledger. The other is everything you're driving toward. Numbers we don't usually quantify, but we should.</p>
-    </div>
-
-    <div class="cm-qol-grid">
-      <div class="cm-qol-cell">
-        <div class="cm-qol-n">3,200</div>
-        <div class="cm-qol-l">Avg. sqft of home · for the same money you spend on a Bay Area 1,200 sqft condo</div>
-        <p class="cm-qol-p">The price-per-square-foot delta is the single biggest dollar conversion in foothills relocation. Most buyers more-than-double their footprint.</p>
-      </div>
-      <div class="cm-qol-cell">
-        <div class="cm-qol-n">488</div>
-        <div class="cm-qol-l">Hours of commute / yr · vs. 1,920 hrs at full RTO from Walnut Creek</div>
-        <p class="cm-qol-p">Hybrid 2-day from Murphys is net less driving than full-RTO Walnut Creek. The geography is paradoxically efficient.</p>
-      </div>
-      <div class="cm-qol-cell">
-        <div class="cm-qol-n">82°</div>
-        <div class="cm-qol-l">Avg. summer high · Arnold &amp; the higher Murphys parcels</div>
-        <p class="cm-qol-p">The Bay's mid-August fog isn't a luxury you give up. The Sacramento Valley's 108° heat isn't one you take on. Foothills land between them.</p>
-      </div>
-      <div class="cm-qol-cell">
-        <div class="cm-qol-n">14×</div>
-        <div class="cm-qol-l">Per-acre land cost · Bay (median) vs. foothills (median)</div>
-        <p class="cm-qol-p">If "more land" is on the wishlist at all, the change is closer to step-function than incremental. The math is unusual.</p>
-      </div>
-    </div>
+<section class="lg-sec lg-sec--ink"><div class="lg-wrap">
+  <div class="lg-kicker lg-rv"><span>§ IV · The other math</span><span class="lg-rule"></span></div>
+  <h2 class="lg-display lg-h2 lg-rv lg-d1" style="margin:14px 0 12px">What you <em>get back.</em></h2>
+  <div class="lg-note lg-rv lg-d2" style="background:rgba(255,253,248,.1);color:rgba(255,253,248,.9);border-left-color:var(--lg-sun);max-width:720px">The commute calculation is one side of the ledger. The other is everything you're driving toward. Numbers we don't usually quantify, but we should.</div>
+  <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:16px;margin-top:30px">
+    <div class="lg-point lg-rv" style="--lg-accent:var(--lg-c2)"><div class="lg-point__num">3,200</div><h4>Avg. sqft of home · for the same money you spend on a Bay Area 1,200 sqft condo</h4><p>The price-per-square-foot delta is the single biggest dollar conversion in foothills relocation. Most buyers more-than-double their footprint.</p></div>
+    <div class="lg-point lg-rv lg-d1" style="--lg-accent:var(--lg-a1)"><div class="lg-point__num">488</div><h4>Hours of commute / yr · vs. 1,920 hrs at full RTO from Walnut Creek</h4><p>Hybrid 2-day from Murphys is net less driving than full-RTO Walnut Creek. The geography is paradoxically efficient.</p></div>
+    <div class="lg-point lg-rv lg-d1" style="--lg-accent:var(--lg-a4)"><div class="lg-point__num">82&deg;</div><h4>Avg. summer high · Arnold &amp; the higher Murphys parcels</h4><p>The Bay's mid-August fog isn't a luxury you give up. The Sacramento Valley's 108° heat isn't one you take on. Foothills land between them.</p></div>
+    <div class="lg-point lg-rv lg-d2" style="--lg-accent:var(--lg-a3)"><div class="lg-point__num">14&times;</div><h4>Per-acre land cost · Bay (median) vs. foothills (median)</h4><p>If "more land" is on the wishlist at all, the change is closer to step-function than incremental. The math is unusual.</p></div>
   </div>
-</section>
+</div></section>
 
 <!-- ============ NEXT STEPS ============ -->
-<section class="tool-next">
-  <div class="tool-next-inner">
-    <div class="tool-next-col">
-      <span class="eyebrow" style="color: var(--brass-bright);">Next, if you're serious</span>
-      <h3>Pair this with the<br><em>relocation tool.</em></h3>
-      <p>Plug in your current Bay Area home value and we'll show you three real foothills listings that match your monthly cost — with commute, insurance and carrying costs already baked in.</p>
-      <div class="tool-next-ctas">
-        <a href="relocate.html" class="btn btn-brass">Open relocate</a>
-        <a href="find-my-match.html" class="btn" style="border: 1px solid var(--brass-bright); color: var(--brass-bright);">Talk to Sara</a>
+<section class="lg-sec lg-sec--tint"><div class="lg-wrap">
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:40px;align-items:start">
+    <div class="lg-rv">
+      <div class="lg-kicker"><span>Next, if you're serious</span><span class="lg-rule"></span></div>
+      <h2 class="lg-display lg-h2" style="margin:14px 0 14px">Pair this with the <em>relocation tool.</em></h2>
+      <p class="lg-prose">Plug in your current Bay Area home value and we'll show you three real foothills listings that match your monthly cost &mdash; with commute, insurance and carrying costs already baked in.</p>
+      <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:22px">
+        <a href="relocate.html" class="lg-btn lg-btn--gold">Open relocate</a>
+        <a href="find-my-match.html" class="lg-btn lg-btn--ghost">Talk to Sara</a>
       </div>
     </div>
-    <div class="tool-next-col tool-next-col-dim">
-      <span class="eyebrow">Adjacent tools</span>
-      <h3 style="color: var(--ink);">Run a<br><em style="color: var(--brass);">fire-zone check</em> on the same address.</h3>
-      <p style="color: var(--ink-soft);">Commute is one of two foothills numbers buyers under-budget for. The other is insurance. Same address, same report style — see the severity zone, premium estimates, and required mitigation.</p>
-      <div class="tool-next-ctas">
-        <a href="fire-zone.html" class="btn btn-ink">Fire-zone tool →</a>
+    <div class="lg-rv lg-d1">
+      <div class="lg-kicker"><span>Adjacent tools</span><span class="lg-rule"></span></div>
+      <h2 class="lg-display lg-h2" style="margin:14px 0 14px">Run a <em>fire-zone check</em> on the same address.</h2>
+      <p class="lg-prose">Commute is one of two foothills numbers buyers under-budget for. The other is insurance. Same address, same report style &mdash; see the severity zone, premium estimates, and required mitigation.</p>
+      <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:22px">
+        <a href="fire-zone.html" class="lg-btn">Fire-zone tool &rarr;</a>
       </div>
     </div>
   </div>
-</section>
+</div></section>
 
 <!-- ============ FOOTER ============ -->
-<footer class="footer">
-  <div class="footer-inner">
-    <div class="footer-top">
-      <div>
-        <a href="index.html" class="wordmark" style="align-items: flex-start;">
-          <span class="wordmark-word">Legacy Properties</span>
-          <span class="wordmark-sub">Every Home Has A Story</span>
-        </a>
-        <p class="footer-tagline">Every home has a story. We help you find yours — or tell the one you've already lived.</p>
-      </div>
-      <div>
-        <h4>Tools</h4>
-        <a href="fire-zone.html">Fire-zone &amp; insurance</a>
-        <a href="commute.html">Commute calculator</a>
-        <a href="relocate.html">Bay → Foothills relocation</a>
-        <a href="valuation.html">What's my home worth?</a>
-      </div>
-      <div>
-        <h4>The Ledger</h4>
-        <a href="ledger.html">Latest issue</a>
-        <a href="ledger.html#subscribe">Subscribe</a>
-        <a href="about.html">About Sara &amp; James</a>
-        <a href="how-we-work.html">How we work</a>
-      </div>
-      <div>
-        <h4>Connect</h4>
-        <a href="tel:2095594966">(209) 559-4966</a>
-        <a href="mailto:SaraSellsCalifornia@gmail.com">SaraSellsCalifornia@gmail.com</a>
-        <a href="https://www.instagram.com/legacypropertiesig/">Instagram</a>
-      </div>
+<footer class="lg-footer"><div class="lg-wrap">
+  <div class="lg-footer__cols">
+    <div>
+      <a href="index.html" class="lg-mark"><span class="lg-mark__badge"><span>L</span></span><span class="lg-mark__txt"><b>Legacy</b><i>Properties · Angels Camp</i></span></a>
+      <p style="font-family:var(--lg-serif);font-style:italic;font-size:16px;color:var(--lg-ink-soft);line-height:1.5;margin-top:16px;max-width:260px">Every home has a story. We help you find yours &mdash; or tell the one you've already lived.</p>
     </div>
-    <div class="footer-bottom">
-      <div>© 2026 Legacy Properties · All rights reserved · <a href="/privacy.html">Privacy Policy</a> · <a href="/sms-terms.html">SMS Terms</a></div>
-      <div>Sara Cooper, Broker · DRE #02141987 · Equal Housing Opportunity</div>
+    <div><h5>Tools</h5>
+      <a href="fire-zone.html">Fire-zone &amp; insurance</a>
+      <a href="commute.html">Commute calculator</a>
+      <a href="relocate.html">Bay &rarr; Foothills relocation</a>
+      <a href="valuation.html">What's my home worth?</a>
+    </div>
+    <div><h5>The Ledger</h5>
+      <a href="ledger.html">Latest issue</a>
+      <a href="ledger.html#subscribe">Subscribe</a>
+      <a href="about.html">About Sara &amp; James</a>
+      <a href="how-we-work.html">How we work</a>
+    </div>
+    <div><h5>Connect</h5>
+      <a href="tel:2095594966">(209) 559-4966</a>
+      <a href="mailto:SaraSellsCalifornia@gmail.com">SaraSellsCalifornia@gmail.com</a>
+      <a href="https://www.instagram.com/legacypropertiesig/">Instagram</a>
     </div>
   </div>
-</footer>
+  <div class="lg-footer__bot">
+    <span>&copy; 2026 Legacy Properties &middot; All rights reserved &middot; <a href="/privacy.html">Privacy Policy</a> &middot; <a href="/sms-terms.html">SMS Terms</a></span>
+    <span>Sara Cooper, Broker &middot; DRE #02141987 &middot; Equal Housing Opportunity</span>
+  </div>
+</div></footer>
 
+<script src="legacy-ui.js" defer></script>
 <script>
   // Per-town commute matrix data
   const CM_DATA = {

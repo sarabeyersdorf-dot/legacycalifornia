@@ -5,7 +5,36 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Your Legacy · Dashboard</title>
 <link rel="stylesheet" href="legacy.css">
+<link rel="stylesheet" href="legacy-ui.css">
 <style>
+/* Legacy UI re-theme — the app-shell markup + every data hook is unchanged;
+   this only re-points the app's design tokens at the lg system so the
+   dashboard reads as the same brand as the converted public site: terracotta
+   accent, warm sand/cream surfaces, Cormorant Garamond + Manrope (self-hosted
+   via legacy-ui.css's @font-face). */
+body {
+  /* Type */
+  --serif:        var(--lg-serif);   /* Playfair -> Cormorant Garamond */
+  --sans:         var(--lg-sans);    /* Inter    -> Manrope */
+  --mono:         var(--lg-mono);    /* JetBrains Mono (self-hosted) */
+  /* Ink */
+  --ink:          var(--lg-ink);
+  --ink-soft:     var(--lg-ink-soft);
+  --ink-mute:     var(--lg-ink-mute);
+  --ink-faint:    var(--lg-ink-faint);
+  /* Surfaces */
+  --parchment:    var(--lg-cream);   /* page canvas */
+  --shell:        var(--lg-white);   /* cards / panels / sidebar */
+  --vellum:       var(--lg-sand);    /* secondary surface */
+  --linen:        var(--lg-sand);    /* alt stripe / note fills */
+  /* Accents — terracotta is the site's signature */
+  --brass:        var(--lg-a1);      /* sunset terracotta, safe on light */
+  --brass-bright: var(--lg-sun);     /* warm highlight on dark panels */
+}
+/* lg-kicker feel: mono eyebrows go terracotta like the public site. The dark
+   digest eyebrow keeps its bright-on-dark tone via its own higher-specificity rule. */
+.eyebrow, .app-side-section, .dash-card-h .meta, .label-cap { color: var(--lg-a1); }
+.dash-greet h1 { font-weight: 500; letter-spacing: -0.01em; }
 /* Consumer dashboard */
 /* Wire-fraud warning — high-contrast, unmissable, never dismissible. */
 .wire-warn {

@@ -178,7 +178,7 @@
 </script>
 <!-- seo:head:end -->
 <link rel="stylesheet" href="legacy.css">
-<link rel="stylesheet" href="listings.css">
+<link rel="stylesheet" href="legacy-ui.css">
 <link rel="stylesheet" href="idx-theme.css">
 <script src="https://kestrel.idxhome.com/ihf-kestrel.js"></script>
 <script>
@@ -188,61 +188,61 @@
     activationToken: "d77ab7ae-7afe-403d-89cf-61bd60bbf806",
   };
 </script>
-<style>
-  .mr-grid { display:grid; grid-template-columns:1fr; gap:1px; background:var(--rule); border:1px solid var(--rule); }
-  .mr-card { background:var(--shell); padding:28px 30px; display:flex; flex-direction:column; gap:18px; min-width:0; }
-  .mr-card-h { display:flex; align-items:baseline; justify-content:space-between; gap:12px; padding-bottom:14px; border-bottom:1px solid var(--rule); }
-  .mr-card-h .mr-name { font-family:var(--serif); font-style:italic; font-weight:400; font-size:26px; color:var(--ink); line-height:1; }
-  .mr-card-h .mr-area { font-family:var(--mono); font-size:10px; letter-spacing:0.14em; text-transform:uppercase; color:var(--ink-mute); white-space:nowrap; }
-  .mr-card .idx-embed { min-height:60px; min-width:0; overflow-x:auto; }
-</style>
 </head>
-<body class="paper" data-screen-label="Market Report">
+<body class="paper lg-page" data-screen-label="Market Report">
+<div class="lg-progress"></div>
 
-<header class="topnav">
-  <div class="topnav-bar1">
-    <span>Boutique luxury real estate · Calaveras · Amador · Tuolumne</span>
-    <span><a href="tel:2095594966">(209) 559-4966</a> · <a href="mailto:SaraSellsCalifornia@gmail.com">SaraSellsCalifornia@gmail.com</a></span>
-  </div>
-  <nav class="topnav-bar2">
-    <div class="topnav-links">
-      <a href="property-search.html" class="active">Listings</a>
-      <a href="towns.html">Communities</a>
-      <a href="relocate.html">Relocate</a>
-      <a href="valuation.html">Sellers</a>
-      <a href="market-report.html" class="active">Markets</a>
-    </div>
-    <a href="index.html" class="wordmark">
-      <span class="wordmark-word">Legacy Properties</span>
-      <span class="wordmark-sub">Every Home Has A Story</span>
-    </a>
-    <div class="topnav-links right">
-      <a href="ledger.html">The Ledger</a>
-      <a href="dashboard.html">Sign In</a>
-      <a href="find-my-match.html" class="btn btn-ink btn-sm" style="padding:10px 18px;">Find My Match</a>
-    </div>
+<!-- ============ TOP STRIP + HEADER ============ -->
+<div style="background:var(--lg-ink);color:rgba(255,253,248,.72);font-family:var(--lg-mono);font-size:10.5px;letter-spacing:.13em;text-transform:uppercase;display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;padding:9px var(--lg-gut)">
+  <span>Boutique real estate &middot; Calaveras &middot; Amador &middot; Tuolumne</span>
+  <span style="display:flex;gap:14px">
+    <a href="tel:2095594966" style="color:inherit;text-decoration:none">(209) 559-4966</a>
+    <a href="mailto:SaraSellsCalifornia@gmail.com" style="color:var(--lg-c2);text-decoration:none">SaraSellsCalifornia@gmail.com</a>
+  </span>
+</div>
+<header class="lg-header"><div class="lg-header__in">
+  <a class="lg-mark" href="index.html">
+    <span class="lg-mark__badge"><span>L</span></span>
+    <span class="lg-mark__txt"><b>Legacy</b><i>Properties · Angels Camp</i></span>
+  </a>
+  <nav class="lg-nav" id="siteNav">
+    <a href="property-search.html">Listings</a>
+    <a href="towns.html">Communities</a>
+    <a href="relocate.html">Relocate</a>
+    <a href="valuation.html">Sellers</a>
+    <a href="market-report.html" aria-current="page">Markets</a>
+    <a href="ledger.html">The Ledger</a>
+    <a href="dashboard.html">Sign In</a>
+    <a href="find-my-match.html" class="lg-btn" style="padding:11px 22px">Find My Match</a>
   </nav>
-</header>
+  <button class="lg-navtoggle" data-lg-nav="#siteNav" aria-expanded="false">Menu</button>
+</div></header>
 
-<section class="section" style="padding-bottom: 40px;">
-  <div class="section-inner">
-    <div class="section-h">
-      <div>
-        <span class="hairline-brass" style="margin-bottom: 16px;"></span>
-        <span class="eyebrow">Market intelligence · Calaveras · Amador · Tuolumne</span>
-        <h2 class="h-section" style="margin-top: 10px;">What the foothills<br><em>are doing.</em></h2>
-      </div>
-      <p class="lede right">Live market data, pulled straight from the MLS — median price, days on market, and inventory by area. Pick a town and pull the current report.</p>
-    </div>
-  </div>
-</section>
+<!-- Page-scoped lg styling for the kept IDX market-report widgets. The
+     idx-embed + ihfKestrel.render scripts are preserved verbatim; only the
+     surrounding card chrome is restyled to the lg system. -->
+<style>
+  .mr-panel{background:var(--lg-white);border-radius:var(--lg-r);box-shadow:var(--lg-sh-sm);padding:26px 28px;display:flex;flex-direction:column;gap:16px;min-width:0;border-top:4px solid var(--lg-c1)}
+  .mr-panel-h{display:flex;align-items:baseline;justify-content:space-between;gap:12px;padding-bottom:14px;border-bottom:1px solid rgba(23,20,15,.1)}
+  .mr-panel-h .mr-name{font-family:var(--lg-serif);font-style:italic;font-weight:600;font-size:27px;color:var(--lg-ink);line-height:1}
+  .mr-panel-h .mr-area{font-family:var(--lg-mono);font-size:10px;letter-spacing:.13em;text-transform:uppercase;color:var(--lg-ink-mute);white-space:nowrap}
+  .mr-panel .idx-embed{min-height:60px;min-width:0;overflow-x:auto}
+</style>
 
-<section class="section" style="padding-top:0;">
-  <div class="section-inner">
-    <div class="mr-grid">
-      <article class="mr-card">
-        <div class="mr-card-h"><span class="mr-name">Murphys</span><span class="mr-area">Calaveras</span></div>
-        <div class="idx-embed">
+<!-- ============ HEADING ============ -->
+<section class="lg-sec"><div class="lg-wrap">
+  <div class="lg-kicker lg-rv"><span>Market intelligence · Calaveras · Amador · Tuolumne</span><span class="lg-rule"></span></div>
+  <h2 class="lg-display lg-h2 lg-rv lg-d1" style="margin:14px 0 10px">What the foothills <em>are doing.</em></h2>
+  <div class="lg-note lg-rv lg-d2" style="max-width:660px">Live market data, pulled straight from the MLS — median price, days on market, and inventory by area. Each report below pulls the current numbers for its town, so the figures stay current instead of going stale on the page.</div>
+</div></section>
+
+<!-- ============ MARKET REPORTS — live IDX widgets (2-up) ============ -->
+<section class="lg-sec lg-sec--tint" style="padding-top:0"><div class="lg-wrap">
+  <div class="lg-grid lg-grid--2" style="margin-top:26px;align-items:start">
+
+    <article class="mr-panel lg-rv">
+      <div class="mr-panel-h"><span class="mr-name">Murphys</span><span class="mr-area">Calaveras</span></div>
+      <div class="idx-embed">
 <script>
 	document.currentScript.replaceWith(ihfKestrel.render({
 		"component": "marketReportWidget",
@@ -250,11 +250,12 @@
 		"marketReportTypeId": 3
 	}));
 </script>
-        </div>
-      </article>
-      <article class="mr-card">
-        <div class="mr-card-h"><span class="mr-name">Arnold</span><span class="mr-area">Calaveras · Ebbetts Pass</span></div>
-        <div class="idx-embed">
+      </div>
+    </article>
+
+    <article class="mr-panel lg-rv lg-d1">
+      <div class="mr-panel-h"><span class="mr-name">Arnold</span><span class="mr-area">Calaveras · Ebbetts Pass</span></div>
+      <div class="idx-embed">
 <script>
 	document.currentScript.replaceWith(ihfKestrel.render({
 		"component": "marketReportWidget",
@@ -262,11 +263,12 @@
 		"marketReportTypeId": 3
 	}));
 </script>
-        </div>
-      </article>
-      <article class="mr-card">
-        <div class="mr-card-h"><span class="mr-name">Copperopolis</span><span class="mr-area">Calaveras · Lake Tulloch</span></div>
-        <div class="idx-embed">
+      </div>
+    </article>
+
+    <article class="mr-panel lg-rv lg-d2">
+      <div class="mr-panel-h"><span class="mr-name">Copperopolis</span><span class="mr-area">Calaveras · Lake Tulloch</span></div>
+      <div class="idx-embed">
 <script>
 	document.currentScript.replaceWith(ihfKestrel.render({
 		"component": "marketReportWidget",
@@ -274,11 +276,12 @@
 		"marketReportTypeId": 3
 	}));
 </script>
-        </div>
-      </article>
-      <article class="mr-card">
-        <div class="mr-card-h"><span class="mr-name">Angels Camp</span><span class="mr-area">Calaveras</span></div>
-        <div class="idx-embed">
+      </div>
+    </article>
+
+    <article class="mr-panel lg-rv lg-d3">
+      <div class="mr-panel-h"><span class="mr-name">Angels Camp</span><span class="mr-area">Calaveras</span></div>
+      <div class="idx-embed">
 <script>
 	document.currentScript.replaceWith(ihfKestrel.render({
 		"component": "marketReportWidget",
@@ -286,62 +289,45 @@
 		"marketReportTypeId": 3
 	}));
 </script>
-        </div>
-      </article>
+      </div>
+    </article>
+
+  </div>
+</div></section>
+
+<!-- ============ FOOTER ============ -->
+<footer class="lg-footer"><div class="lg-wrap">
+  <div class="lg-footer__cols">
+    <div>
+      <a href="index.html" class="lg-mark"><span class="lg-mark__badge"><span>L</span></span><span class="lg-mark__txt"><b>Legacy</b><i>Properties · Angels Camp</i></span></a>
+      <p style="font-family:var(--lg-serif);font-style:italic;font-size:16px;color:var(--lg-ink-soft);line-height:1.5;margin-top:16px;max-width:260px">Every home has a story. We help you find yours &mdash; or tell the one you've already lived.</p>
+    </div>
+    <div><h5>Communities</h5>
+      <a href="town-murphys.html">Murphys</a>
+      <a href="town-arnold.html">Arnold</a>
+      <a href="town-sutter-creek.html">Sutter Creek</a>
+      <a href="town-shenandoah-valley.html">Shenandoah Valley</a>
+      <a href="river-mountain.html">Waterfront Lakes &amp; Rivers</a>
+      <a href="town-angels-camp.html">Angels Camp</a>
+      <a href="town-copperopolis.html">Copperopolis</a>
+    </div>
+    <div><h5>Buy &amp; sell</h5>
+      <a href="property-search.html">Search all listings</a>
+      <a href="valuation.html">What's my home worth?</a>
+      <a href="find-my-match.html">Request a tour</a>
+    </div>
+    <div><h5>Connect</h5>
+      <a href="tel:2095594966">(209) 559-4966</a>
+      <a href="mailto:SaraSellsCalifornia@gmail.com">Email Sara</a>
+      <a href="ledger.html">The Ledger</a>
     </div>
   </div>
-</section>
-
-<footer class="footer">
-  <div class="footer-inner">
-    <div class="footer-top">
-      <div>
-        <a href="index.html" class="wordmark" style="align-items: flex-start;">
-          <span class="wordmark-word">Legacy Properties</span>
-          <span class="wordmark-sub">Every Home Has A Story</span>
-        </a>
-        <p class="footer-tagline">Every home has a story. We help you find yours — or tell the one you've already lived.</p>
-      </div>
-      <div>
-        <h4>Services</h4>
-        <a href="relocate.html">Bay → Foothills relocation</a>
-        <a href="towns.html">Communities</a>
-        <a href="valuation.html">Sellers</a>
-        <a href="property-search.html">Browse listings</a>
-        <a href="find-my-match.html">Request a tour</a>
-      </div>
-      <div>
-        <h4>Buy</h4>
-        <a href="property-search.html">Search all listings</a>
-        <a href="fire-zone.html">Fire-zone &amp; insurance tool</a>
-        <a href="commute.html">Commute calculator</a>
-        <a href="relocate.html">Bay → Foothills relocation</a>
-        <a href="find-my-match.html">Request a tour</a>
-      </div>
-      <div>
-        <h4>Sell</h4>
-        <a href="valuation.html">What's my home worth?</a>
-        <a href="how-we-work.html">Listing process</a>
-        <a href="how-we-work.html">How we work</a>
-        <a href="about.html">About Sara &amp; James</a>
-        <a href="valuation.html">Request a CMA</a>
-      </div>
-      <div>
-        <h4>Connect</h4>
-        <a href="tel:2095594966">(209) 559-4966</a>
-        <a href="mailto:SaraSellsCalifornia@gmail.com">SaraSellsCalifornia@gmail.com</a>
-        <a href="https://www.instagram.com/legacypropertiesig/">Instagram</a>
-        <a href="https://www.facebook.com/legacypropertiesfb/">Facebook</a>
-        <a href="https://www.youtube.com/LegacyPropertiesTV">YouTube</a>
-        <a href="ledger.html">The Ledger</a>
-      </div>
-    </div>
-    <div class="footer-bottom">
-      <div>© 2026 Legacy Properties · All rights reserved · <a href="/privacy.html">Privacy Policy</a> · <a href="/sms-terms.html">SMS Terms</a></div>
-      <div>Sara Cooper, Broker · DRE #02141987 · Equal Housing Opportunity</div>
-    </div>
+  <div class="lg-footer__bot">
+    <span>&copy; 2026 Legacy Properties &middot; All rights reserved &middot; <a href="/privacy.html">Privacy Policy</a> &middot; <a href="/sms-terms.html">SMS Terms</a></span>
+    <span>Sara Cooper, Broker &middot; DRE #02141987 &middot; Equal Housing Opportunity</span>
   </div>
-</footer>
+</div></footer>
 
+<script src="legacy-ui.js" defer></script>
 </body>
 </html>
