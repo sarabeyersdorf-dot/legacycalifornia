@@ -58,8 +58,7 @@ body.lp-restyle {
     <div class="app-side-section">Daily</div>
     <nav class="app-side-nav">
       <a href="#" class="active" onclick="showView(event,'today')">Today <span class="pill" data-roster-today>—</span></a>
-      <a href="#" onclick="showView(event,'tasks')">Tasks <span class="pill" data-roster-tasks>—</span></a>
-      <a href="#" onclick="showView(event,'updates')">Notes <span class="pill" data-roster-updates>—</span></a>
+      <a href="#" onclick="showView(event,'cowork')">Cowork <span class="pill" data-roster-tasks>—</span></a>
       <a href="#" onclick="showView(event,'inbox')">Inbox <span class="pill" data-roster-inbox>—</span></a>
       <a href="#" onclick="showView(event,'messages')">Messages <span class="pill" data-msg-unread style="display:none;background:#8B3A3A;color:#fff;">0</span></a>
       <a href="#" onclick="showView(event,'pipe')">Pipeline</a>
@@ -662,23 +661,46 @@ body.lp-restyle {
     .tsk-note-by { font-size: 11px; color: var(--ink-faint); white-space: nowrap; }
     @media (max-width: 900px) { .tsk { padding: 18px; } }
     </style>
-    <section class="crm-view" data-view="tasks">
-      <div class="tsk">
+    <!-- ============================================================
+         COWORK — one tab that merges the briefing task list with the
+         "tell Cowork something" composer. Composer writes agent_updates;
+         the task list reads/writes agent_tasks (done / reply / attention).
+         Replaces the old Tasks + Notes tabs.
+         ============================================================ -->
+    <section class="crm-view" data-view="cowork">
+      <div class="upd">
         <div class="cur-head"><div>
-          <span class="label-cap" style="color:var(--brass);">From your daily briefing</span>
-          <h1 class="h-section" style="font-size:38px;margin-top:6px;">Tasks.</h1>
+          <span class="label-cap" style="color:var(--brass);">Tell Cowork · it reads this into tomorrow's briefing</span>
+          <h1 class="h-section" style="font-size:38px;margin-top:6px;">Cowork.</h1>
         </div></div>
-        <div class="tsk-filter" data-tsk-filter>
-          <button class="chip on" data-tsk="open">Open <span data-tsk-c-open>—</span></button>
-          <button class="chip" data-tsk="done">Done <span data-tsk-c-done>—</span></button>
-          <button class="chip" data-tsk="all">All</button>
+
+        <!-- Composer — writes agent_updates (behaviour preserved from Notes) -->
+        <div class="upd-compose">
+          <textarea data-upd-text placeholder="A text you got, something James told you, anything for tomorrow's briefing…"></textarea>
+          <div class="upd-compose-row">
+            <select class="upd-deal-select" data-upd-deal-select><option value="">Tag a deal (optional)</option></select>
+            <div class="upd-contact-wrap" data-upd-contact-wrap>
+              <input type="text" data-upd-contact placeholder="Tag a contact (optional)" autocomplete="off">
+              <div class="upd-contact-results" data-upd-contact-results style="display:none;"></div>
+            </div>
+            <button class="btn btn-ink btn-sm" data-upd-save>Send to Cowork</button>
+          </div>
         </div>
-        <div class="tsk-filter" data-tsk-scope style="display:none;">
-          <button class="chip on" data-scope="all">Everyone</button>
-          <button class="chip" data-scope="james">James</button>
-          <button class="chip" data-scope="sara">Me</button>
+
+        <!-- Task list — grouped by deal, from the daily briefing -->
+        <div class="tsk-filter" data-tsk-filter>
+          <button class="chip on" data-tsk="mine">Mine <span data-tsk-c-mine>—</span></button>
+          <button class="chip" data-tsk="all">All <span data-tsk-c-all>—</span></button>
+          <button class="chip" data-tsk="attn">Needs attention <span data-tsk-c-attn>—</span></button>
+          <button class="chip" data-tsk-refresh title="Reload tasks" style="margin-left:auto;">⟳ Refresh</button>
         </div>
         <div data-tsk-list><div class="cur-empty">Loading tasks…</div></div>
+
+        <!-- Recently told Cowork (the running log) -->
+        <div style="margin-top:36px;">
+          <span class="label-cap" style="color:var(--ink-mute);">Recently told Cowork</span>
+          <div data-upd-list style="margin-top:10px;"><div class="cur-empty">Loading…</div></div>
+        </div>
       </div>
     </section>
 
@@ -719,26 +741,7 @@ body.lp-restyle {
     .upd-seen { font-family: var(--mono); font-size: 9px; letter-spacing: .08em; text-transform: uppercase; color: #2E5C3D; }
     @media (max-width: 900px) { .upd { padding: 18px; } }
     </style>
-    <section class="crm-view" data-view="updates">
-      <div class="upd">
-        <div class="cur-head"><div>
-          <span class="label-cap" style="color:var(--brass);">Log something Claude can't see yet</span>
-          <h1 class="h-section" style="font-size:38px;margin-top:6px;">Notes.</h1>
-        </div></div>
-        <div class="upd-compose">
-          <textarea data-upd-text placeholder="A text you got, something James told you, anything for tomorrow's briefing…"></textarea>
-          <div class="upd-compose-row">
-            <select class="upd-deal-select" data-upd-deal-select><option value="">Tag a deal (optional)</option></select>
-            <div class="upd-contact-wrap" data-upd-contact-wrap>
-              <input type="text" data-upd-contact placeholder="Tag a contact (optional)" autocomplete="off">
-              <div class="upd-contact-results" data-upd-contact-results style="display:none;"></div>
-            </div>
-            <button class="btn btn-ink btn-sm" data-upd-save>Log it</button>
-          </div>
-        </div>
-        <div data-upd-list><div class="cur-empty">Loading…</div></div>
-      </div>
-    </section>
+    <!-- (Notes tab merged into the Cowork tab above — composer + log live there now.) -->
 
     <!-- ============================================================
          INBOX VIEW
@@ -4327,50 +4330,62 @@ function selectLead(el) {
    text, note, check-off). Scoped per agent; broker can filter by agent. */
 (function () {
   'use strict';
-  var root = document.querySelector('.crm-view[data-view="tasks"]');
+  var root = document.querySelector('.crm-view[data-view="cowork"]');
   if (!root) return;
   document.addEventListener('lgc:dealcolors', function () { try { render(); } catch (_) {} });
   var esc = function (s) { return (s == null ? '' : String(s)).replace(/[&<>"]/g, function (c) { return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]); }); };
-  var state = { data: null, view: 'open', scope: 'all' }, loaded = false;
+  var state = { data: null, view: 'mine', broker: false }, loaded = false;
   function set(sel, v) { var el = root.querySelector(sel); if (el) el.textContent = String(v); }
   function ensure() { if (loaded) return; loaded = true; load(); }
-  document.addEventListener('click', function (e) { if (e.target.closest('[onclick*="\'tasks\'"]')) setTimeout(ensure, 0); });
-  // Load on page start too — so the Tasks count in the Daily nav is populated on
-  // refresh, not just after the Tasks tab is first opened.
+  document.addEventListener('click', function (e) { if (e.target.closest('[onclick*="\'cowork\'"]')) setTimeout(ensure, 0); });
+  // Load on page start too — so the open-task pill in the nav is populated on
+  // refresh, not just after the tab is first opened.
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', ensure); else ensure();
 
   function load() {
-    var url = '/api/crm/tasks' + (state.scope !== 'all' ? ('?scope=' + state.scope) : '');
-    fetch(url, { credentials: 'include' }).then(function (r) { return r.json(); }).then(function (j) {
-      state.data = j;
-      if (j.broker) { var sc = root.querySelector('[data-tsk-scope]'); if (sc) sc.style.display = 'flex'; }
+    // scope=all is honoured only for brokers; James gets his own tasks regardless.
+    fetch('/api/crm/tasks?scope=all', { credentials: 'include' }).then(function (r) { return r.json(); }).then(function (j) {
+      state.data = j; state.broker = !!j.broker;
       counts(); render();
       if (window.LegacyDealColors) window.LegacyDealColors.ready();
     }).catch(function () { var l = root.querySelector('[data-tsk-list]'); if (l) l.innerHTML = '<div class="cur-empty">Could not load tasks.</div>'; });
   }
+  // "Mine" = the signed-in agent's tasks. For a broker (Sara) that's sara/both;
+  // James is non-broker so the API already returns only his, and every filter is his.
+  function isMine(t) { return !state.broker || t.agent === 'sara' || t.agent === 'both'; }
+  function openTasks() { return ((state.data && state.data.tasks) || []).filter(function (t) { return !t.done; }); }
+  function forView(v) {
+    var open = openTasks();
+    if (v === 'attn') return open.filter(function (t) { return t.attention; });
+    if (v === 'mine') return open.filter(isMine);
+    return open; // all
+  }
   function counts() {
     if (!state.data) return;
-    set('[data-tsk-c-open]', state.data.open || 0); set('[data-tsk-c-done]', state.data.done || 0);
-    document.querySelectorAll('[data-roster-tasks]').forEach(function (e) { e.textContent = String(state.data.open || 0); });
+    set('[data-tsk-c-mine]', forView('mine').length);
+    set('[data-tsk-c-all]',  forView('all').length);
+    set('[data-tsk-c-attn]', forView('attn').length);
+    // Nav pill = the signed-in agent's own open tasks.
+    document.querySelectorAll('[data-roster-tasks]').forEach(function (e) { e.textContent = String(forView('mine').length); });
+  }
+  function dealMatch(t) {
+    try { return window.LegacyDealColors ? window.LegacyDealColors.match((t.source_key || '') + ' ' + (t.title || '') + ' ' + (t.client || '')) : null; } catch (_) { return null; }
   }
   function item(t) {
-    var who = state.data.broker ? '<span class="tsk-who">' + (t.agent === 'james' ? 'James' : t.agent === 'both' ? 'Both' : 'Me') + '</span>' : '';
-    var dm = null;
-    try { dm = window.LegacyDealColors ? window.LegacyDealColors.match((t.source_key || '') + ' ' + (t.title || '') + ' ' + (t.client || '')) : null; } catch (_) {}
-    var badgeStyle = 'cursor:pointer;text-decoration:underline;text-decoration-color:rgba(0,0,0,.25);text-underline-offset:2px;' + (dm ? 'background:' + dm.color.bg + ';color:' + dm.color.border + ';' : '');
-    var badge = t.client ? '<span class="tsk-badge ' + (t.agent === 'james' ? 'james' : t.agent === 'sara' ? 'sara' : '') + '" data-open-person="' + esc(t.client) + '" style="' + badgeStyle + '" title="Open ' + esc(t.client) + '">' + esc(t.client) + '</span>' : '';
+    var who = state.broker ? '<span class="tsk-who">' + (t.agent === 'james' ? 'James' : t.agent === 'both' ? 'Both' : 'Me') + '</span>' : '';
+    var dm = dealMatch(t);
     var railStyle = dm ? ' style="border-left:4px solid ' + dm.color.border + ';"' : '';
     var sub = (t.sub || t.due_label) ? '<div style="font-size:12px;color:var(--ink-mute);margin-top:2px;">' + esc([t.sub, t.due_label].filter(Boolean).join(' · ')) + '</div>' : '';
     var note = t.note ? '<div class="tsk-note">' + esc(t.note) + '</div>' : '';   // from the briefing (Cowork)
-    var flag = '<button class="tsk-flag' + (t.attention ? ' on' : '') + '" data-tsk-flag title="Flag this for the briefing">⚑</button>';
+    var flag = '<button class="tsk-flag' + (t.attention ? ' on' : '') + '" data-tsk-flag title="Flag as needs attention for the briefing">⚑</button>';
     var by = t.agent_note_by ? '<span class="tsk-note-by">— ' + esc(t.agent_note_by === 'james' ? 'James' : 'Sara') + '</span>' : '';
-    // Note back to the briefing — Cowork reads this and tunes the next agenda.
-    var fb = '<div class="tsk-feedback"><input class="tsk-note-in" data-tsk-note placeholder="Note back to the briefing…" value="' + esc(t.agent_note || '') + '">' + by + '</div>';
+    // Reply back to the briefing — Cowork reads this and tunes the next agenda.
+    var fb = '<div class="tsk-feedback"><input class="tsk-note-in" data-tsk-note placeholder="Reply to Cowork…" value="' + esc(t.agent_note || '') + '">' + by + '</div>';
     return '<div class="tsk-item' + (t.done ? ' done' : '') + (t.attention ? ' flagged' : '') + '"' + railStyle + ' data-tid="' + esc(t.id) + '">' +
-      '<input type="checkbox" data-tsk-check ' + (t.done ? 'checked' : '') + '>' +
-      '<div class="tsk-body"><div class="tsk-line">' + badge + '<span class="tsk-title">' + esc(t.title) + '</span>' + who + flag + '</div>' + sub + note + fb + '</div></div>';
+      '<input type="checkbox" data-tsk-check ' + (t.done ? 'checked' : '') + ' title="Mark done">' +
+      '<div class="tsk-body"><div class="tsk-line"><span class="tsk-title">' + esc(t.title) + '</span>' + who + flag + '</div>' + sub + note + fb + '</div></div>';
   }
-  // Save a note or attention flag back to the briefing.
+  // Save a reply or attention flag back to the briefing.
   function patchTask(id, body) {
     body.id = id;
     return fetch('/api/crm/tasks', { method: 'PATCH', credentials: 'include', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) })
@@ -4379,22 +4394,36 @@ function selectLead(el) {
         if (t) { if (body.agent_note !== undefined) t.agent_note = body.agent_note; if (body.attention !== undefined) t.attention = body.attention; }
       }).catch(function () {});
   }
+  // Group the filtered open tasks by deal, deal-coloured header, "N open" count.
   function render() {
     var list = root.querySelector('[data-tsk-list]');
-    var all = (state.data && state.data.tasks) || [];
-    var rows = state.view === 'open' ? all.filter(function (t) { return !t.done; })
-             : state.view === 'done' ? all.filter(function (t) { return t.done; }) : all;
-    list.innerHTML = rows.length ? rows.map(item).join('') : '<div class="cur-empty">Nothing here.</div>';
+    if (!list) return;
+    var rows = forView(state.view);
+    if (!rows.length) { list.innerHTML = '<div class="cur-empty">Nothing here — you’re clear.</div>'; return; }
+    var groups = {}, order = [];
+    rows.forEach(function (t) {
+      var key = (t.client || 'Unassigned').toString();
+      if (!groups[key]) { groups[key] = []; order.push(key); }
+      groups[key].push(t);
+    });
+    list.innerHTML = order.map(function (key) {
+      var ts = groups[key];
+      var dm = dealMatch(ts[0]);
+      var hdrColor = dm ? dm.color.border : 'var(--ink-mute)';
+      var head = '<div class="tsk-group-h" style="display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin:20px 0 4px;padding-bottom:6px;border-bottom:1px solid var(--rule);">' +
+        '<span style="font-family:var(--mono);font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:' + hdrColor + ';">' + esc(key) + '</span>' +
+        '<span style="font-family:var(--mono);font-size:10px;letter-spacing:.1em;color:var(--ink-mute);">' + ts.length + ' open</span></div>';
+      return head + ts.map(item).join('');
+    }).join('');
   }
   root.addEventListener('click', function (e) {
     var f = e.target.closest('[data-tsk]');
     if (f) { state.view = f.getAttribute('data-tsk'); root.querySelectorAll('[data-tsk]').forEach(function (b) { b.classList.toggle('on', b === f); }); render(); return; }
-    var sc = e.target.closest('[data-scope]');
-    if (sc) { state.scope = sc.getAttribute('data-scope'); root.querySelectorAll('[data-scope]').forEach(function (b) { b.classList.toggle('on', b === sc); }); load(); return; }
+    if (e.target.closest('[data-tsk-refresh]')) { load(); return; }
     var fl = e.target.closest('[data-tsk-flag]');
-    if (fl) { var el = fl.closest('[data-tid]'); var id = el.getAttribute('data-tid'); var on = !fl.classList.contains('on'); fl.classList.toggle('on', on); el.classList.toggle('flagged', on); patchTask(id, { attention: on }); return; }
+    if (fl) { var el = fl.closest('[data-tid]'); var id = el.getAttribute('data-tid'); var on = !fl.classList.contains('on'); fl.classList.toggle('on', on); el.classList.toggle('flagged', on); patchTask(id, { attention: on }); counts(); return; }
   });
-  // Save the note-back-to-briefing when the field loses focus.
+  // Save the reply-to-briefing when the field loses focus.
   root.addEventListener('focusout', function (e) {
     var ni = e.target.closest('[data-tsk-note]'); if (!ni) return;
     var el = ni.closest('[data-tid]'); if (!el) return;
@@ -4406,15 +4435,16 @@ function selectLead(el) {
   root.addEventListener('change', function (e) {
     var cb = e.target.closest('[data-tsk-check]'); if (!cb) return;
     var el = cb.closest('[data-tid]'); var id = el.getAttribute('data-tid'); var done = cb.checked;
-    el.classList.toggle('done', done);
+    // Fade the row out (no reload); drop it from the open list on success.
+    el.classList.add('done');
+    el.style.transition = 'opacity .35s ease, max-height .35s ease';
+    el.style.opacity = '0';
     fetch('/api/crm/tasks', { method: 'PATCH', credentials: 'include', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: id, done: done }) })
       .then(function (r) { return r.json(); }).then(function () {
         var t = (state.data.tasks || []).find(function (x) { return x.id === id; });
         if (t) t.done = done;
-        state.data.open = (state.data.tasks || []).filter(function (x) { return !x.done; }).length;
-        state.data.done = (state.data.tasks || []).filter(function (x) { return x.done; }).length;
-        counts(); if (state.view !== 'all') render();
-      }).catch(function () {});
+        setTimeout(function () { counts(); render(); }, 360);
+      }).catch(function () { el.style.opacity = '1'; el.classList.remove('done'); });
   });
 })();
 </script>
@@ -4432,7 +4462,7 @@ function selectLead(el) {
    new contact is a real leads row from the moment it's tagged. */
 (function () {
   'use strict';
-  var root = document.querySelector('.crm-view[data-view="updates"]');
+  var root = document.querySelector('.crm-view[data-view="cowork"]');
   if (!root) return;
   var esc = function (s) { return (s == null ? '' : String(s)).replace(/[&<>"]/g, function (c) { return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]); }); };
   // `address` sometimes already has city/state (and a trailing zip) baked in
@@ -4446,7 +4476,7 @@ function selectLead(el) {
   }
   var state = { data: null, deals: null, selectedContact: null }, loaded = false;
   function ensure() { if (loaded) return; loaded = true; load(); loadDeals(); }
-  document.addEventListener('click', function (e) { if (e.target.closest('[onclick*="\'updates\'"]')) setTimeout(ensure, 0); });
+  document.addEventListener('click', function (e) { if (e.target.closest('[onclick*="\'cowork\'"]')) setTimeout(ensure, 0); });
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', ensure); else ensure();
 
   function fmtWhen(iso) {
