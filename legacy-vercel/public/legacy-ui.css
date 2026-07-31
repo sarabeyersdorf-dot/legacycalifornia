@@ -1,0 +1,894 @@
+/* ==========================================================================
+   LEGACY UI — the Ledger design system, extracted for site-wide use
+   Legacy Properties · legacycalifornia.com
+   Built 2026-07-29 from Ledger_August_2026 (approved by Sara)
+
+   HOW THIS IS MEANT TO BE USED
+   ---------------------------------------------------------------------------
+   Every class here is namespaced `lg-`. That is deliberate. This file is
+   ADDITIVE — drop it in alongside the existing stylesheet and nothing changes
+   until you put an `lg-` class on something. There is no reset, no bare
+   element styling (except two opt-in scopes, `.lg-prose` and `.lg-page`), and
+   no `!important`. It cannot silently restyle a page you have not touched.
+
+   That matters here because `legacy-client.js` finds elements by id, class and
+   `data-bind`, and the dashboard / CRM / seller portal are full of data-binds.
+   Namespacing means you can restyle those pages by ADDING classes to existing
+   nodes rather than restructuring markup. Never rename or remove an existing
+   id, class, name or data-* attribute to make a style fit — add alongside.
+
+   SEASONAL THEMING
+   ---------------------------------------------------------------------------
+   Put `data-season` on <html> or <body>: summer | autumn | winter | spring.
+   Omit it and summer applies. Every colour below derives from that one
+   attribute, so a page re-themes with a single attribute change and no
+   stylesheet edits. lg-season.js sets it from the current month.
+========================================================================== */
+
+/* --------------------------------------------------------------------------
+   1. FONTS
+   Self-hosted (latin + latin-ext subsets) under /public/fonts. This replaces
+   the old Google Fonts @import so no request leaves the visitor's browser to
+   a third party, and there is no blocking round-trip to fonts.googleapis.com.
+   Font files + @font-face rules live in /fonts/legacy-fonts.css.
+   Fallbacks are still listed on each --lg-* family so nothing reflows badly.
+-------------------------------------------------------------------------- */
+@import url('/fonts/legacy-fonts.css');
+
+/* --------------------------------------------------------------------------
+   2. TOKENS
+-------------------------------------------------------------------------- */
+:root {
+  /* neutrals — warm, never grey. Grey is what makes a site feel corporate. */
+  --lg-cream:      #FFFAF0;
+  --lg-paper:      #FFF4E2;
+  --lg-sand:       #F6E7CE;
+  --lg-white:      #FFFDF8;
+  --lg-ink:        #17140F;
+  --lg-ink-2:      #2B2419;
+  --lg-ink-soft:   #4E4335;
+  /* --lg-ink-mute carries secondary text (footnotes, notes, meta). At 14px it
+     needs 4.5:1 on every surface we use; the original #7C6E5A measured 4.28
+     on the autumn tint, so it is nudged down. --lg-ink-faint is DECORATIVE
+     ONLY (tiny day labels beside a bolder value, arrow glyphs) — never use it
+     for text a reader has to read. */
+  --lg-ink-mute:   #6F624F;
+  --lg-ink-faint:  #A79684;   /* DECORATION ONLY — 2.4:1. Never put text in this. */
+
+  /* type */
+  --lg-serif: 'Cormorant Garamond', 'Iowan Old Style', Georgia, serif;
+  --lg-sans:  'Manrope', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --lg-mono:  'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+
+  /* rhythm */
+  --lg-max:  1240px;
+  --lg-gut:  30px;
+  --lg-r-sm: 12px;
+  --lg-r:    20px;
+  --lg-r-lg: 26px;
+
+  /* elevation — warm-tinted, never neutral black */
+  --lg-sh-sm: 0 2px 10px rgba(23,20,15,.06);
+  --lg-sh:    0 14px 40px -12px rgba(23,20,15,.22);
+  --lg-sh-lg: 0 30px 70px -20px rgba(23,20,15,.30);
+
+  /* motion — ONE easing curve everywhere. This is most of why it feels
+     coherent rather than like five people animated five components. */
+  --lg-ease: cubic-bezier(.22,.8,.28,1);
+  --lg-fast: .25s;
+  --lg-med:  .45s;
+  --lg-slow: .75s;
+
+  /* SUMMER (default) */
+  --lg-c1: #C4562E;  /* primary   — sunset terracotta */
+  --lg-c2: #E3A13A;  /* accent    — gold */
+  --lg-c3: #1F4A3B;  /* deep      — pine */
+  --lg-c4: #3F87AC;  /* cool      — sky */
+  --lg-c5: #8E3E62;  /* jewel     — plum */
+  --lg-tint: #FFF1DC;               /* section wash */
+  --lg-sky-a: #FFE0AE;              /* landscape: high sky */
+  --lg-sky-b: #F7A863;              /* landscape: mid sky */
+  --lg-sky-c: #DE6F49;              /* landscape: horizon */
+  --lg-hill-1: #2C6350;             /* landscape: nearest ridge */
+  --lg-hill-2: #3E7E60;
+  --lg-hill-3: #719E63;
+  --lg-hill-4: #AEBB74;             /* landscape: farthest ridge */
+  --lg-sun: #FFE597;
+
+  /* SAFE-ON-LIGHT ACCENTS — use these for accent-coloured TEXT.
+     The c-series above is tuned for fills, rules, borders and text on ink.
+     Several of them fail WCAG AA as text on a light background: summer gold
+     (--lg-c2) on the tint wash measures 2.0:1, which is why a gold stat value
+     read as washed out. These are the same hues pulled down until each clears
+     4.5:1 on the worst light surface we use.
+     RULE: set --lg-accent from the a-series, not the c-series. */
+  --lg-a1:#B44F2A; --lg-a2:#8F6525; --lg-a3:#1F4A3B; --lg-a4:#367494; --lg-a5:#8E3E62;
+  /* button fill: white-on-terracotta was 4.38:1, a hair under. */
+  --lg-c1-deep:#BE532D;
+}
+
+[data-season="autumn"] {
+  --lg-c1:#B0431F; --lg-c2:#D98518; --lg-c3:#5C4123; --lg-c4:#8A6A2E; --lg-c5:#7A2F3A;
+  --lg-tint:#FDECD6;
+  --lg-sky-a:#FFD59A; --lg-sky-b:#EE9450; --lg-sky-c:#C4522C;
+  --lg-hill-1:#5A3A22; --lg-hill-2:#7A4E26; --lg-hill-3:#A8712C; --lg-hill-4:#C99A45;
+  --lg-sun:#FFD782;
+  --lg-a1:#B0431F; --lg-a2:#985D11; --lg-a3:#5C4123; --lg-a4:#84662C; --lg-a5:#7A2F3A;
+  --lg-c1-deep:#B0431F;
+}
+[data-season="winter"] {
+  --lg-c1:#2F6383; --lg-c2:#6E92A8; --lg-c3:#24333D; --lg-c4:#3E7C6E; --lg-c5:#6B4A6E;
+  --lg-tint:#EAF1F5;
+  --lg-sky-a:#D7E6EE; --lg-sky-b:#A6C2D3; --lg-sky-c:#6E8FA6;
+  --lg-hill-1:#2A3A44; --lg-hill-2:#3C5260; --lg-hill-3:#5A7684; --lg-hill-4:#8FA7B2;
+  --lg-sun:#F2F7FA;
+  --lg-a1:#2F6383; --lg-a2:#546F80; --lg-a3:#24333D; --lg-a4:#3B7668; --lg-a5:#6B4A6E;
+  --lg-c1-deep:#2F6383;
+}
+[data-season="spring"] {
+  --lg-c1:#3E7A3C; --lg-c2:#C9A227; --lg-c3:#1F4A3B; --lg-c4:#4C90A8; --lg-c5:#A2506E;
+  --lg-tint:#EEF7E4;
+  --lg-sky-a:#E4F2CF; --lg-sky-b:#A8D08A; --lg-sky-c:#6FAE6A;
+  --lg-hill-1:#28503A; --lg-hill-2:#37704A; --lg-hill-3:#5C9A55; --lg-hill-4:#9CC262;
+  --lg-sun:#FFF3A8;
+  --lg-a1:#3E7A3C; --lg-a2:#856B1A; --lg-a3:#1F4A3B; --lg-a4:#3E7588; --lg-a5:#A2506E;
+  --lg-c1-deep:#3E7A3C;
+}
+
+/* --------------------------------------------------------------------------
+   3. OPT-IN PAGE SCOPE
+   Put `lg-page` on <body> only for pages you have fully converted. It sets
+   background, base font and colour. Do NOT put it on a page that still has
+   its old stylesheet doing the same job — you will get double-applied styles.
+-------------------------------------------------------------------------- */
+.lg-page {
+  background: var(--lg-cream);
+  color: var(--lg-ink);
+  font-family: var(--lg-sans);
+  font-size: 16.5px;
+  line-height: 1.68;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+.lg-wrap   { max-width: var(--lg-max); margin: 0 auto; padding: 0 var(--lg-gut); }
+.lg-narrow { max-width: 760px; margin: 0 auto; }
+
+/* --------------------------------------------------------------------------
+   4. MOTION PRIMITIVES
+
+   `lg-rv` = reveal on scroll. Starts invisible; lg-ui.js adds `.is-in` when
+   it enters the viewport. IMPORTANT: if the JS fails to load, anything with
+   lg-rv stays at opacity 0 — i.e. invisible content. lg-ui.js therefore adds
+   `lg-js` to <html> on boot, and the rule below only hides elements once JS
+   has confirmed it is running. No-JS and broken-JS both degrade to fully
+   visible content. Do not "simplify" this away.
+-------------------------------------------------------------------------- */
+.lg-js .lg-rv {
+  opacity: 0;
+  transform: translateY(26px);
+  transition: opacity var(--lg-slow) var(--lg-ease),
+              transform var(--lg-slow) var(--lg-ease);
+}
+.lg-js .lg-rv.is-in { opacity: 1; transform: none; }
+
+/* stagger — put on siblings so a row of cards cascades instead of popping */
+.lg-d1 { transition-delay: .07s } .lg-d2 { transition-delay: .14s }
+.lg-d3 { transition-delay: .21s } .lg-d4 { transition-delay: .28s }
+.lg-d5 { transition-delay: .35s } .lg-d6 { transition-delay: .42s }
+
+/* reading progress bar — fixed, 3px, gradient */
+.lg-progress {
+  position: fixed; top: 0; left: 0; height: 3px; width: 0; z-index: 200;
+  background: linear-gradient(90deg, var(--lg-c2), var(--lg-c1), var(--lg-c5));
+  transition: width .1s linear;
+}
+
+@keyframes lg-spin      { to { transform: rotate(360deg) } }
+@keyframes lg-drift     { from { transform: translateX(-16vw) } to { transform: translateX(116vw) } }
+@keyframes lg-pulse     { 0%,100% { opacity:.95; transform:scale(1) } 50% { opacity:1; transform:scale(1.045) } }
+@keyframes lg-slide     { to { transform: translateX(-50%) } }
+@keyframes lg-flap      { 0%,100% { transform: scaleY(1) } 50% { transform: scaleY(.35) } }
+@keyframes lg-ping {
+  0%   { box-shadow: 0 0 0 0 color-mix(in srgb, var(--lg-c2) 70%, transparent) }
+  70%  { box-shadow: 0 0 0 12px transparent }
+  100% { box-shadow: 0 0 0 0 transparent }
+}
+@keyframes lg-fly {
+  0%   { transform: translate(-8vw,10px) scale(.8); opacity: 0 }
+  12%  { opacity: .75 }
+  88%  { opacity: .75 }
+  100% { transform: translate(105vw,-70px) scale(1.05); opacity: 0 }
+}
+
+/* --------------------------------------------------------------------------
+   5. TYPE
+-------------------------------------------------------------------------- */
+.lg-eyebrow {
+  font-family: var(--lg-mono); font-size: 10.5px; letter-spacing: .24em;
+  text-transform: uppercase; font-weight: 600;
+}
+.lg-display {                       /* the big italic serif voice */
+  font-family: var(--lg-serif); font-style: italic; font-weight: 500;
+  line-height: 1.04; letter-spacing: -.012em;
+}
+.lg-h1 { font-size: clamp(46px, 8.4vw, 112px); line-height: .94; }
+.lg-h2 { font-size: clamp(34px, 4.8vw, 62px); }
+.lg-h3 { font-size: clamp(30px, 4vw, 50px); }
+.lg-h4 { font-size: clamp(24px, 2.6vw, 34px); }
+
+/* kicker: label + rule that draws the eye across. Use once per section. */
+.lg-kicker { display: flex; align-items: center; gap: 14px; }
+.lg-kicker > span:first-child {
+  font-family: var(--lg-mono); font-size: 11px; letter-spacing: .22em;
+  text-transform: uppercase; font-weight: 600; color: var(--lg-a1);
+}
+.lg-kicker .lg-rule {
+  flex: 1; height: 2px; border-radius: 2px;
+  background: linear-gradient(90deg, var(--lg-c1), transparent);
+}
+
+/* body copy scope — the ONLY place bare tags are styled */
+.lg-prose p       { font-size: 19px; line-height: 1.78; margin-bottom: 1.1em; color: var(--lg-ink-2); }
+.lg-prose p.lg-lead { font-size: 22px; color: var(--lg-ink); }
+.lg-prose p.lg-lead::first-letter {
+  font-family: var(--lg-serif); font-style: italic; font-weight: 600; float: left;
+  font-size: 92px; line-height: .74; padding: 8px 14px 0 0;
+  background: linear-gradient(150deg, var(--lg-c1), var(--lg-c5));
+  -webkit-background-clip: text; background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+.lg-prose h2, .lg-prose h3 {
+  font-family: var(--lg-serif); font-style: italic; font-weight: 600;
+  font-size: 33px; margin: 2.1em 0 .6em; color: var(--lg-ink);
+  display: flex; align-items: center; gap: 16px;
+}
+.lg-prose h2::before, .lg-prose h3::before {
+  content: ''; width: 34px; height: 3px; border-radius: 3px; flex-shrink: 0;
+  background: linear-gradient(90deg, var(--lg-c1), var(--lg-c2));
+}
+/* highlighter emphasis — a gold underlay, not bold-and-hope */
+.lg-prose strong {
+  font-weight: 700; color: var(--lg-ink);
+  background: linear-gradient(180deg, transparent 62%,
+              color-mix(in srgb, var(--lg-c2) 40%, transparent) 62%);
+}
+.lg-sig { font-family: var(--lg-serif); font-style: italic; font-size: 30px; color: var(--lg-a1); }
+/* The a-series is darkened FOR LIGHT SURFACES — on ink it inverts and fails
+   (winter measured 2.83:1 against --lg-ink). Gold is the accent that works on
+   dark. Same applies to any accent text you place inside .lg-sec--ink. */
+.lg-sec--ink .lg-sig,
+.lg-invite .lg-sig,
+.lg-feature .lg-sig { color: var(--lg-c2); }
+
+/* --------------------------------------------------------------------------
+   6. CONTROLS
+   Focus states are REQUIRED, not decorative. Do not remove the outline; if a
+   design needs it different, change the colour, keep the visibility.
+-------------------------------------------------------------------------- */
+.lg-btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 10px;
+  font-family: var(--lg-sans); font-size: 11.5px; font-weight: 800;
+  letter-spacing: .15em; text-transform: uppercase;
+  padding: 16px 32px; border: 0; border-radius: 100px; cursor: pointer;
+  text-decoration: none; background: var(--lg-c1-deep); color: var(--lg-white);
+  transition: transform var(--lg-fast) var(--lg-ease),
+              box-shadow var(--lg-fast) var(--lg-ease), background var(--lg-fast);
+}
+.lg-btn:hover { transform: translateY(-2px); box-shadow: var(--lg-sh); }
+.lg-btn:focus-visible { outline: 3px solid var(--lg-c4); outline-offset: 3px; }
+.lg-btn--gold  { background: var(--lg-c2); color: var(--lg-ink); }
+/* uses the safe accent: at 11.5px bold, --lg-c1 on cream measured 4.28:1 */
+.lg-btn--ghost { background: transparent; color: var(--lg-a1);
+                 box-shadow: inset 0 0 0 2px currentColor; }
+.lg-btn--ghost:hover { background: var(--lg-c1-deep); color: var(--lg-white); box-shadow: var(--lg-sh); }
+/* Over a hero — dark footage or a dusk sky — the terracotta ghost button drops
+   to roughly 2:1 against the background and fails WCAG AA. Inside a hero it
+   goes white, which holds up over anything the scrim leaves behind. */
+.lg-hero .lg-btn--ghost { color: var(--lg-white); }
+.lg-hero .lg-btn--ghost:hover { background: var(--lg-white); color: var(--lg-ink); }
+
+.lg-chip {
+  display: inline-flex; align-items: center; gap: 7px;
+  font-family: var(--lg-mono); font-size: 10px; letter-spacing: .13em;
+  text-transform: uppercase; font-weight: 600; padding: 7px 14px;
+  border-radius: 100px; cursor: pointer; text-decoration: none;
+  /* white, not tint — same reasoning as .lg-row__tag above */
+  background: var(--lg-white); color: var(--lg-a1);
+  border: 1px solid color-mix(in srgb, var(--lg-a1) 30%, transparent);
+  transition: all var(--lg-fast) var(--lg-ease);
+}
+.lg-chip:hover { background: var(--lg-c1-deep); color: var(--lg-white); transform: translateY(-2px); }
+.lg-chip:focus-visible { outline: 3px solid var(--lg-c4); outline-offset: 2px; }
+.lg-chip.is-on { background: var(--lg-ink); color: var(--lg-cream); border-color: var(--lg-ink); }
+
+/* form fields, dark-surface variant (for use inside .lg-invite / .lg-ink) */
+.lg-field {
+  width: 100%; background: rgba(255,253,248,.10);
+  border: 1px solid rgba(255,253,248,.24); border-radius: var(--lg-r-sm);
+  color: var(--lg-white); padding: 14px 16px;
+  font-family: var(--lg-sans); font-size: 14.5px; outline: none;
+  transition: border-color var(--lg-fast), background var(--lg-fast);
+}
+.lg-field::placeholder { color: rgba(255,253,248,.5); }
+.lg-field:focus { border-color: var(--lg-c2); background: rgba(255,253,248,.16); }
+.lg-field option { background: var(--lg-ink); color: var(--lg-white); }
+
+/* --------------------------------------------------------------------------
+   7. HEADER / NAV
+-------------------------------------------------------------------------- */
+.lg-header {
+  position: sticky; top: 0; z-index: 100;
+  background: color-mix(in srgb, var(--lg-cream) 88%, transparent);
+  backdrop-filter: blur(14px) saturate(1.3);
+  border-bottom: 1px solid rgba(23,20,15,.08);
+}
+.lg-header__in {
+  display: flex; align-items: center; justify-content: space-between; gap: 22px;
+  padding: 15px var(--lg-gut); max-width: var(--lg-max); margin: 0 auto;
+}
+.lg-mark { display: flex; align-items: center; gap: 11px; text-decoration: none; }
+.lg-mark__badge {
+  width: 34px; height: 34px; border-radius: 50%; flex-shrink: 0;
+  background: conic-gradient(from 200deg, var(--lg-c2), var(--lg-c1),
+              var(--lg-c5), var(--lg-c3), var(--lg-c2));
+  display: flex; align-items: center; justify-content: center;
+  color: #fff; font-family: var(--lg-serif); font-style: italic;
+  font-size: 17px; font-weight: 600;
+  animation: lg-spin 18s linear infinite;
+}
+/* counter-rotate the glyph so the ring spins but the L stays upright */
+.lg-mark__badge > * { animation: lg-spin 18s linear infinite reverse; }
+.lg-mark__txt b {
+  display: block; font-family: var(--lg-serif); font-style: italic;
+  font-weight: 600; font-size: 22px; line-height: 1;
+}
+.lg-mark__txt i {
+  display: block; font-family: var(--lg-mono); font-style: normal;
+  font-size: 7.5px; letter-spacing: .34em; text-transform: uppercase;
+  /* 7.5px is very small — use the stronger ink, not the muted one */
+  color: var(--lg-ink-soft); margin-top: 4px;
+}
+.lg-nav { display: flex; align-items: center; gap: 24px; }
+.lg-nav a {
+  position: relative; font-size: 12px; font-weight: 700; letter-spacing: .1em;
+  text-transform: uppercase; color: var(--lg-ink-soft);
+  padding: 4px 0; text-decoration: none; transition: color var(--lg-fast);
+}
+/* underline wipes in from the left rather than fading — reads as intentional */
+.lg-nav a::after {
+  content: ''; position: absolute; left: 0; right: 100%; bottom: 0;
+  height: 2px; border-radius: 2px; background: var(--lg-c1);
+  transition: right var(--lg-med) var(--lg-ease);
+}
+.lg-nav a:hover, .lg-nav a[aria-current] { color: var(--lg-a1); }
+.lg-nav a:hover::after, .lg-nav a[aria-current]::after { right: 0; }
+.lg-nav a:focus-visible { outline: 3px solid var(--lg-c4); outline-offset: 4px; }
+.lg-navtoggle {
+  display: none; background: var(--lg-tint); border: 0; border-radius: 100px;
+  padding: 10px 16px; font-family: var(--lg-mono); font-size: 10px;
+  letter-spacing: .14em; text-transform: uppercase; font-weight: 600;
+  color: var(--lg-a1); cursor: pointer;
+}
+
+/* --------------------------------------------------------------------------
+   8. HERO
+   The illustrated landscape lives in lg-hero.svg.html (a snippet you paste).
+   `.lg-hero__art` holds either that inline SVG or a real <img>. The scrim is
+   NOT optional — white text over a bright sky fails contrast without it.
+-------------------------------------------------------------------------- */
+.lg-hero {
+  position: relative; display: flex; align-items: flex-end; overflow: hidden;
+  /* Tracks viewport WIDTH deliberately. Sized off vh, a wide monitor produced a
+     3.4:1 hero and the SVG sky was cropped away entirely. */
+  min-height: clamp(440px, 38vw, 660px);
+  background: linear-gradient(180deg, var(--lg-sky-a), var(--lg-sky-b) 55%, var(--lg-sky-c));
+}
+.lg-hero--short { min-height: clamp(320px, 42vh, 440px); }   /* interior pages */
+.lg-hero__art { position: absolute; inset: 0; width: 100%; height: 100%; }
+.lg-hero__art svg,
+.lg-hero__art img,
+.lg-hero__art video { width: 100%; height: 100%; object-fit: cover; }
+
+/* VIDEO HERO — the homepage uses real drone footage, which beats any
+   illustration. The illustration is the FALLBACK, layered underneath: it shows
+   while the video buffers, if the video fails, and permanently for anyone with
+   reduced motion (see below). Markup order is fallback first, video second.
+   Never ship a video hero without that layer underneath — a black rectangle
+   on a slow connection is worse than a drawing. */
+.lg-hero__art--video { display: grid; }
+.lg-hero__art--video > * { grid-area: 1 / 1; }        /* stack, no absolute soup */
+.lg-hero__art--video video { position: relative; z-index: 1; }
+
+/* Autoplaying video is motion the visitor did not ask for, so reduced-motion
+   hides it and reveals the still illustration underneath. lg-ui.js also calls
+   pause() so the browser stops spending bandwidth on it, not just hides it. */
+@media (prefers-reduced-motion: reduce) {
+  .lg-hero__art--video video { display: none; }
+}
+.lg-hero__scrim {
+  position: absolute; inset: 0;
+  background: linear-gradient(180deg, transparent 40%, rgba(23,20,15,.55));
+}
+.lg-hero__in {
+  position: relative; z-index: 3; width: 100%;
+  max-width: var(--lg-max); margin: 0 auto;
+  padding: 0 var(--lg-gut) 46px; color: var(--lg-white);
+}
+.lg-hero h1 { text-shadow: 0 4px 30px rgba(23,20,15,.35); margin: 20px 0 0; }
+.lg-hero h1 em { font-style: italic; color: var(--lg-sun); }
+.lg-hero__strap {
+  font-family: var(--lg-serif); font-style: italic;
+  font-size: clamp(18px, 2.2vw, 25px);
+  color: rgba(255,253,248,.92); max-width: 46ch; margin-top: 16px;
+}
+.lg-hero__tag {
+  display: inline-flex; align-items: center; gap: 10px;
+  background: rgba(255,253,248,.16); backdrop-filter: blur(6px);
+  border: 1px solid rgba(255,253,248,.3); border-radius: 100px; padding: 8px 18px;
+  font-family: var(--lg-mono); font-size: 10.5px; letter-spacing: .22em;
+  text-transform: uppercase; font-weight: 600;
+}
+.lg-hero__tag .lg-dot {
+  width: 7px; height: 7px; border-radius: 50%; background: var(--lg-c2);
+  animation: lg-ping 2.4s ease-out infinite;
+}
+/* parallax targets. lg-ui.js reads data-depth (0.10 far → 0.40 near). */
+.lg-ridge { will-change: transform; }
+.lg-cloud { animation: lg-drift linear infinite; }
+.lg-bird  { animation: lg-fly 26s linear infinite; }
+.lg-flap  { animation: lg-flap 1.1s ease-in-out infinite;
+            transform-box: fill-box; transform-origin: center; }
+.lg-sun   { transform-origin: center; animation: lg-pulse 7s ease-in-out infinite; }
+.lg-rays  { transform-box: fill-box; transform-origin: center;
+            animation: lg-spin 70s linear infinite; }
+
+/* --------------------------------------------------------------------------
+   9. TICKER
+   Track must contain the item list TWICE — the -50% slide only loops
+   seamlessly if the second copy is identical. Pauses on hover so a reader
+   can actually finish reading an item.
+-------------------------------------------------------------------------- */
+.lg-ticker { position: relative; overflow: hidden; padding: 13px 0;
+             background: var(--lg-ink); color: var(--lg-cream); }
+.lg-ticker::before, .lg-ticker::after {
+  content: ''; position: absolute; top: 0; bottom: 0; width: 90px;
+  z-index: 2; pointer-events: none;
+}
+.lg-ticker::before { left: 0;  background: linear-gradient(90deg,  var(--lg-ink), transparent); }
+.lg-ticker::after  { right: 0; background: linear-gradient(270deg, var(--lg-ink), transparent); }
+.lg-ticker__track { display: flex; width: max-content; animation: lg-slide 46s linear infinite; }
+.lg-ticker:hover .lg-ticker__track { animation-play-state: paused; }
+.lg-tick {
+  display: inline-flex; align-items: center; gap: 12px; padding: 0 26px;
+  font-family: var(--lg-mono); font-size: 11px; letter-spacing: .13em;
+  text-transform: uppercase; white-space: nowrap; color: rgba(255,250,240,.62);
+}
+.lg-tick b { color: var(--lg-c2); font-weight: 600; }
+.lg-tick::after { content: '◆'; color: rgba(255,250,240,.24); font-size: 7px; margin-left: 14px; }
+
+/* --------------------------------------------------------------------------
+   10. SECTIONS
+   Alternate default → tint → default → ink down a page. That alternation is
+   doing most of the work of "not boring"; a page of all-cream reads flat no
+   matter how good the components are.
+-------------------------------------------------------------------------- */
+.lg-sec       { padding: 76px 0; position: relative; }
+.lg-sec--tint { background: var(--lg-tint); }
+.lg-sec--sand { background: linear-gradient(180deg, var(--lg-tint), var(--lg-sand)); }
+.lg-sec--ink  { background: var(--lg-ink); color: var(--lg-cream); }
+.lg-sec--ink .lg-eyebrow { color: var(--lg-c2); }
+
+.lg-badge {
+  display: inline-flex; align-items: center; gap: 12px;
+  padding: 9px 18px 9px 12px; border-radius: 100px;
+  background: var(--lg-white); box-shadow: var(--lg-sh-sm);
+  border: 1px solid rgba(23,20,15,.07);
+}
+.lg-badge__ic {
+  width: 26px; height: 26px; border-radius: 50%; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  background: color-mix(in srgb, var(--lg-accent, var(--lg-c1)) 15%, transparent);
+  color: var(--lg-accent, var(--lg-a1));
+}
+.lg-badge span {
+  font-family: var(--lg-mono); font-size: 10.5px; letter-spacing: .2em;
+  text-transform: uppercase; font-weight: 600; color: var(--lg-accent, var(--lg-a1));
+}
+
+/* callout — a bordered aside for caveats, methodology, "read this carefully" */
+.lg-note {
+  border-radius: 16px; padding: 22px 26px; font-size: 15.5px; line-height: 1.72;
+  color: var(--lg-ink-soft); background: var(--lg-white);
+  box-shadow: var(--lg-sh-sm); border-left: 5px solid var(--lg-c2);
+}
+.lg-note strong { color: var(--lg-ink); }
+
+/* --------------------------------------------------------------------------
+   11. CARDS & GRIDS
+-------------------------------------------------------------------------- */
+.lg-grid  { display: grid; gap: 22px; }
+.lg-grid--2 { grid-template-columns: repeat(auto-fit, minmax(290px, 1fr)); }
+.lg-grid--3 { grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); }
+.lg-grid--4 { grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); }
+
+.lg-card {
+  position: relative; overflow: hidden; border-radius: var(--lg-r);
+  background: var(--lg-white); box-shadow: var(--lg-sh-sm);
+  display: flex; flex-direction: column; text-decoration: none; color: inherit;
+  transition: transform var(--lg-med) var(--lg-ease),
+              box-shadow var(--lg-med) var(--lg-ease);
+}
+.lg-card:hover { transform: translateY(-6px); box-shadow: var(--lg-sh); }
+.lg-card:focus-visible { outline: 3px solid var(--lg-c4); outline-offset: 3px; }
+.lg-card__media { position: relative; overflow: hidden; aspect-ratio: 16/11; background: var(--lg-tint); }
+.lg-card__media img, .lg-card__media svg { width: 100%; height: 100%; object-fit: cover; }
+.lg-card__media img { transition: transform .7s var(--lg-ease); }
+.lg-card:hover .lg-card__media img { transform: scale(1.05); }
+.lg-card__body { padding: 22px 24px 24px; display: flex; flex-direction: column; gap: 10px; flex: 1; }
+.lg-card__meta {
+  font-family: var(--lg-mono); font-size: 10px; letter-spacing: .17em;
+  text-transform: uppercase; font-weight: 700; color: var(--lg-a1);
+}
+.lg-card__title { font-family: var(--lg-serif); font-style: italic; font-weight: 600;
+                  font-size: 25px; line-height: 1.14; }
+.lg-card__text  { font-size: 14.5px; color: var(--lg-ink-soft); line-height: 1.6; }
+.lg-card__more {
+  margin-top: auto; padding-top: 14px; display: flex; align-items: center; gap: 8px;
+  font-family: var(--lg-mono); font-size: 10.5px; letter-spacing: .13em;
+  text-transform: uppercase; font-weight: 600;
+  /* was --lg-ink-faint: 2.81:1. */
+  color: var(--lg-ink-mute);
+}
+.lg-card:hover .lg-card__more { color: var(--lg-a1); }
+.lg-card__more .lg-arrow { transition: transform var(--lg-fast) var(--lg-ease); }
+.lg-card:hover .lg-card__more .lg-arrow { transform: translateX(5px); }
+
+/* left-rule card with a ghosted numeral — for "three things" style lists */
+.lg-point { position: relative; border-radius: var(--lg-r); padding: 30px 28px;
+            background: var(--lg-white); box-shadow: var(--lg-sh-sm); overflow: hidden;
+            transition: transform var(--lg-med) var(--lg-ease), box-shadow var(--lg-med) var(--lg-ease); }
+.lg-point:hover { transform: translateY(-6px); box-shadow: var(--lg-sh); }
+.lg-point::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0;
+                    width: 5px; background: var(--lg-accent, var(--lg-c1)); }
+.lg-point__num { position: absolute; right: 16px; top: 6px;
+                 font-family: var(--lg-serif); font-style: italic; font-weight: 700;
+                 font-size: 78px; line-height: 1; color: var(--lg-accent, var(--lg-c1)); opacity: .14; }
+.lg-point h4 { position: relative; padding-top: 6px; margin-bottom: 13px;
+               font-family: var(--lg-serif); font-style: italic; font-weight: 600;
+               font-size: 26px; line-height: 1.14; }
+.lg-point p  { position: relative; font-size: 15.5px; line-height: 1.7; color: var(--lg-ink-soft); }
+
+/* --------------------------------------------------------------------------
+   12. STAT TILE
+
+   *** READ THIS BEFORE ANIMATING A NUMBER ***
+   Set --lg-accent per tile to rotate hue across a row.
+
+   There is NO count-up animation here and that is a deliberate, tested
+   decision. We built one for the Ledger and removed it: mid-animation the
+   Calaveras median rendered "$482,590" when the published figure was
+   $500,000. Anyone glancing mid-scroll, screenshotting to text a friend, or
+   crawling the page for an AI answer could capture a price that is not real.
+   These figures are cited, indexed, and attached to a licensed agent's name.
+
+   RULE: never interpolate the text of a price, median, rate, percentage,
+   count, or any other published figure. Animate the CONTAINER — clip, wipe,
+   rise, fade — so the value is correct in frame one and every frame after.
+   This applies site-wide: listing prices, valuation estimates, market stats,
+   dashboard figures. No exceptions.
+-------------------------------------------------------------------------- */
+.lg-stat {
+  position: relative; overflow: hidden; border-radius: var(--lg-r);
+  padding: 28px 26px 24px; background: var(--lg-white); box-shadow: var(--lg-sh-sm);
+  display: flex; flex-direction: column; gap: 8px;
+  transition: transform var(--lg-med) var(--lg-ease), box-shadow var(--lg-med) var(--lg-ease);
+}
+.lg-stat:hover { transform: translateY(-5px); box-shadow: var(--lg-sh); }
+.lg-stat::before { content: ''; position: absolute; top: 0; left: 0; right: 0;
+                   height: 5px; background: var(--lg-accent, var(--lg-c1)); }
+.lg-stat::after  { content: ''; position: absolute; right: -30px; bottom: -30px;
+                   width: 120px; height: 120px; border-radius: 50%;
+                   background: var(--lg-accent, var(--lg-c1)); opacity: .07; }
+.lg-stat__label {
+  position: relative; min-height: 2.7em; font-family: var(--lg-mono);
+  font-size: 10px; letter-spacing: .16em; text-transform: uppercase;
+  font-weight: 600; color: var(--lg-ink-mute);
+}
+/* the value: wipes up into place, correct from frame one */
+.lg-stat__value {
+  position: relative; font-family: var(--lg-serif); font-style: italic;
+  font-weight: 600; font-size: 52px; line-height: 1; padding-bottom: 11px;
+  color: var(--lg-accent, var(--lg-a1));
+  clip-path: inset(0 0 100% 0); transform: translateY(12px);
+  transition: clip-path var(--lg-slow) var(--lg-ease),
+              transform var(--lg-slow) var(--lg-ease);
+}
+.lg-stat__value.is-shown { clip-path: inset(0 0 0 0); transform: none; }
+.lg-stat__value::after {
+  content: ''; position: absolute; left: 0; bottom: 0; width: 0; height: 4px;
+  border-radius: 4px; background: var(--lg-accent, var(--lg-c1)); opacity: .55;
+  transition: width .9s var(--lg-ease) .25s;
+}
+.lg-stat__value.is-shown::after { width: 46px; }
+/* no JS? show it. Never hide a number behind a script. */
+html:not(.lg-js) .lg-stat__value { clip-path: none; transform: none; }
+html:not(.lg-js) .lg-stat__value::after { width: 46px; }
+
+.lg-stat__change { position: relative; display: inline-flex; align-items: center; gap: 6px;
+                   font-family: var(--lg-mono); font-size: 11px; font-weight: 600;
+                   color: var(--lg-ink-soft); }
+.lg-stat__change .lg-arw { font-size: 13px; line-height: 1; }
+.lg-stat__change.is-up   .lg-arw { color: #3E7A3C; }
+.lg-stat__change.is-down .lg-arw { color: var(--lg-a1); }
+.lg-stat__foot { position: relative; padding-top: 13px; margin-top: 6px;
+                 border-top: 1px solid rgba(23,20,15,.09);
+                 font-size: 13px; line-height: 1.62; color: var(--lg-ink-mute); }
+.lg-stat__foot strong { color: var(--lg-ink); }
+
+/* dark feature panel for one headline idea per section */
+.lg-feature {
+  position: relative; overflow: hidden; border-radius: 22px; padding: 40px;
+  color: var(--lg-cream); background: linear-gradient(140deg, var(--lg-c3), var(--lg-ink));
+}
+.lg-feature::after {
+  content: ''; position: absolute; right: -60px; top: -60px; width: 280px; height: 280px;
+  border-radius: 50%;
+  background: radial-gradient(circle, color-mix(in srgb, var(--lg-c2) 40%, transparent), transparent 70%);
+}
+.lg-feature h4 { position: relative; margin-bottom: 15px; font-family: var(--lg-serif);
+                 font-style: italic; font-weight: 500; font-size: 32px; color: var(--lg-c2); }
+.lg-feature p  { position: relative; max-width: 72ch; font-size: 17.5px;
+                 line-height: 1.72; color: rgba(255,250,240,.88); }
+
+/* --------------------------------------------------------------------------
+   13. LIST ROWS — events, listings, market tables, document lists
+-------------------------------------------------------------------------- */
+.lg-rows { }
+.lg-row {
+  display: grid; grid-template-columns: 152px 1fr auto; gap: 24px;
+  align-items: baseline; padding: 19px 0;
+  border-bottom: 1px solid rgba(23,20,15,.08);
+  transition: padding-left var(--lg-fast) var(--lg-ease), background var(--lg-fast);
+}
+.lg-row:last-child { border-bottom: 0; }
+.lg-row:hover { padding-left: 10px; }
+.lg-row__lead   { display: flex; flex-direction: column; gap: 3px; }
+.lg-row__lead b { font-family: var(--lg-serif); font-style: italic; font-weight: 600;
+                  font-size: 22px; line-height: 1.12; color: var(--lg-accent, var(--lg-a1)); }
+.lg-row__lead i { font-family: var(--lg-mono); font-style: normal; font-size: 9.5px;
+                  letter-spacing: .17em; text-transform: uppercase;
+                  /* was --lg-ink-faint: 2.5:1 at 9.5px. Real text needs real contrast. */
+                  color: var(--lg-ink-mute); font-weight: 600; }
+.lg-row__title  { font-size: 17.5px; font-weight: 700; color: var(--lg-ink); line-height: 1.35; }
+.lg-row__sub    { font-size: 14.5px; color: var(--lg-ink-soft); margin-top: 4px; }
+.lg-row__note   { font-size: 14px; color: var(--lg-ink-mute); margin-top: 8px; line-height: 1.65; }
+/* On WHITE, not on a wash of its own accent. Tinting the pill with the same
+   colour as its text is self-defeating: summer terracotta on a 15% terracotta
+   wash over the section tint measured 3.80:1. White keeps the colour fully
+   saturated and clears 4.5:1 with room to spare. */
+.lg-row__tag {
+  font-family: var(--lg-mono); font-size: 10.5px; font-weight: 600; letter-spacing: .05em;
+  white-space: nowrap; padding: 6px 13px; border-radius: 100px;
+  background: var(--lg-white);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--lg-accent, var(--lg-a1)) 30%, transparent);
+  color: var(--lg-accent, var(--lg-a1));
+}
+/* grouped rows with a coloured header and a counter */
+.lg-group { margin-bottom: 44px; }
+.lg-group__h {
+  display: flex; align-items: center; gap: 14px; margin-bottom: 4px;
+  padding-bottom: 14px; border-bottom: 2px solid var(--lg-accent, var(--lg-c1));
+}
+.lg-group__n {
+  width: 30px; height: 30px; border-radius: 50%; flex-shrink: 0;
+  /* white text on the accent — falls back to the deepened primary so the
+     numeral clears 4.5:1 even when no --lg-accent is set */
+  background: var(--lg-accent, var(--lg-c1-deep)); color: var(--lg-white);
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--lg-mono); font-size: 11px; font-weight: 600;
+}
+.lg-group__h h4 { font-family: var(--lg-serif); font-style: italic; font-weight: 600;
+                  font-size: 29px; color: var(--lg-ink); }
+
+/* panel wrapper for a row list */
+.lg-panel { border-radius: 22px; overflow: hidden; background: var(--lg-white); box-shadow: var(--lg-sh-sm); }
+.lg-panel__h { display: flex; align-items: center; gap: 14px; padding: 26px 30px 20px;
+               border-bottom: 1px solid rgba(23,20,15,.08); }
+.lg-panel__h h4 { font-family: var(--lg-serif); font-style: italic; font-weight: 600; font-size: 28px; }
+.lg-panel .lg-row { padding: 15px 30px; }
+.lg-panel .lg-row:hover { background: var(--lg-tint); padding-left: 30px; }
+
+/* --------------------------------------------------------------------------
+   14. INVITE PANEL — subscribe / capture / gated offer
+-------------------------------------------------------------------------- */
+.lg-invite {
+  position: relative; overflow: hidden; border-radius: 22px; padding: 34px 30px;
+  color: var(--lg-white); box-shadow: var(--lg-sh-lg);
+  background: linear-gradient(150deg, var(--lg-c3), var(--lg-ink) 55%, var(--lg-c5));
+}
+.lg-invite::before {
+  content: ''; position: absolute; inset: -40%; opacity: .5;
+  background: conic-gradient(from 0deg, transparent,
+              color-mix(in srgb, var(--lg-c2) 55%, transparent), transparent 40%);
+  animation: lg-spin 14s linear infinite;
+}
+.lg-invite__in { position: relative; z-index: 2; }
+.lg-invite h3 { font-family: var(--lg-serif); font-style: italic; font-weight: 500;
+                font-size: 31px; line-height: 1.08; margin: 12px 0; }
+.lg-invite p  { font-size: 14.5px; color: rgba(255,253,248,.78); line-height: 1.62; }
+.lg-invite form { display: flex; flex-direction: column; gap: 10px; margin-top: 22px; }
+.lg-invite__fine { margin-top: 15px; font-family: var(--lg-mono); font-size: 10px;
+                   letter-spacing: .06em; line-height: 1.75; color: rgba(255,253,248,.5); }
+.lg-invite__ok { display: none; margin-top: 15px; padding: 13px 16px; border-radius: var(--lg-r-sm);
+                 background: color-mix(in srgb, var(--lg-c2) 22%, transparent);
+                 border: 1px solid var(--lg-c2); font-size: 13.5px; color: var(--lg-c2); }
+.lg-invite__ok.is-shown { display: block; }
+
+/* avatar */
+.lg-av {
+  position: relative; overflow: hidden; flex-shrink: 0;
+  width: 52px; height: 52px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  background: linear-gradient(140deg, var(--lg-c2), var(--lg-c1));
+  color: var(--lg-white); font-family: var(--lg-serif); font-style: italic;
+  font-size: 23px; font-weight: 600;
+  box-shadow: 0 0 0 3px var(--lg-cream),
+              0 0 0 5px color-mix(in srgb, var(--lg-c1) 30%, transparent);
+}
+.lg-av img { width: 100%; height: 100%; object-fit: cover; }
+.lg-av--lg { width: 74px; height: 74px; font-size: 32px; }
+.lg-sec--ink .lg-av { box-shadow: 0 0 0 4px var(--lg-ink),
+                      0 0 0 6px color-mix(in srgb, var(--lg-c2) 45%, transparent); }
+
+/* pull-quote block on ink */
+.lg-quote { display: grid; grid-template-columns: auto 1fr; gap: 30px;
+            align-items: start; max-width: 900px; margin: 0 auto; }
+.lg-quote p { font-family: var(--lg-serif); font-style: italic;
+              font-size: clamp(21px, 2.4vw, 27px); line-height: 1.56;
+              color: rgba(255,250,240,.94); }
+
+/* --------------------------------------------------------------------------
+   15. DISCLOSURE — sources, methodology, FAQ, fine print
+-------------------------------------------------------------------------- */
+.lg-disclose { border-radius: 18px; overflow: hidden; background: var(--lg-white); box-shadow: var(--lg-sh-sm); }
+.lg-disclose summary {
+  cursor: pointer; list-style: none; padding: 22px 28px;
+  display: flex; justify-content: space-between; align-items: center; gap: 16px;
+  font-family: var(--lg-mono); font-size: 11px; letter-spacing: .18em;
+  text-transform: uppercase; font-weight: 600; color: var(--lg-ink-soft);
+  transition: color var(--lg-fast);
+}
+.lg-disclose summary::-webkit-details-marker { display: none; }
+.lg-disclose summary:hover { color: var(--lg-a1); }
+.lg-disclose summary:focus-visible { outline: 3px solid var(--lg-c4); outline-offset: -3px; }
+.lg-disclose__pm {
+  width: 28px; height: 28px; border-radius: 50%; flex-shrink: 0;
+  background: var(--lg-tint); color: var(--lg-a1);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px; font-weight: 700; transition: transform var(--lg-med) var(--lg-ease);
+}
+.lg-disclose[open] summary .lg-disclose__pm { transform: rotate(45deg); }
+.lg-disclose__row { display: grid; grid-template-columns: 1fr 1fr; gap: 22px;
+                    padding: 16px 28px; font-size: 13.5px;
+                    border-top: 1px solid rgba(23,20,15,.06); }
+.lg-disclose__row a { color: var(--lg-a1); font-weight: 600; word-break: break-word;
+  border-bottom: 1px solid color-mix(in srgb, var(--lg-c1) 35%, transparent); }
+
+/* flagged note with a marker */
+.lg-flag { display: grid; grid-template-columns: 26px 1fr; gap: 14px;
+           background: var(--lg-white); border-radius: 14px; padding: 16px 20px;
+           box-shadow: var(--lg-sh-sm); font-size: 15px; line-height: 1.68;
+           color: var(--lg-ink-soft); }
+.lg-flag__m { width: 26px; height: 26px; border-radius: 50%; flex-shrink: 0;
+              background: var(--lg-c2); color: var(--lg-ink);
+              display: flex; align-items: center; justify-content: center;
+              font-size: 13px; font-weight: 800; }
+
+/* --------------------------------------------------------------------------
+   16. FOOTER
+-------------------------------------------------------------------------- */
+.lg-footer { background: var(--lg-ink); color: rgba(255,250,240,.68);
+             padding: 60px 0 36px; font-size: 14.5px; }
+.lg-footer__cols { display: grid; grid-template-columns: 1.7fr 1fr 1fr 1fr; gap: 38px;
+                   padding-bottom: 34px; border-bottom: 1px solid rgba(255,250,240,.14); }
+.lg-footer h5 { font-family: var(--lg-mono); font-size: 10px; letter-spacing: .22em;
+                text-transform: uppercase; color: var(--lg-c2);
+                margin-bottom: 16px; font-weight: 600; }
+.lg-footer a { display: block; padding: 6px 0; color: rgba(255,250,240,.68);
+               text-decoration: none; transition: color var(--lg-fast), transform var(--lg-fast); }
+.lg-footer a:hover { color: var(--lg-c2); transform: translateX(3px); }
+.lg-footer a:focus-visible { outline: 3px solid var(--lg-c2); outline-offset: 2px; }
+.lg-footer .lg-mark__txt b { color: var(--lg-cream); }
+/* .45 alpha measured 4.41:1 on ink at 7.5px — nudged up */
+.lg-footer .lg-mark__txt i { color: rgba(255,250,240,.62); }
+.lg-footer__bot { display: flex; justify-content: space-between; gap: 20px; flex-wrap: wrap;
+                  padding-top: 26px; font-family: var(--lg-mono); font-size: 10px;
+                  /* .42 alpha measured 4.0:1 on ink — licence text must be readable */
+                  letter-spacing: .12em; text-transform: uppercase; color: rgba(255,250,240,.58); }
+
+/* --------------------------------------------------------------------------
+   17. STATES
+-------------------------------------------------------------------------- */
+.lg-state { padding: 110px var(--lg-gut); text-align: center; }
+.lg-state p { font-family: var(--lg-serif); font-style: italic; font-size: 26px; color: var(--lg-ink-mute); }
+.lg-spinner { width: 38px; height: 38px; margin: 0 auto 22px; border-radius: 50%;
+              border: 3px solid color-mix(in srgb, var(--lg-a1) 22%, transparent);
+              border-top-color: var(--lg-a1); animation: lg-spin .9s linear infinite; }
+/* skeleton for async content — better than a spinner where layout is known */
+.lg-skel { border-radius: 8px; background: linear-gradient(90deg,
+             var(--lg-sand) 25%, var(--lg-paper) 50%, var(--lg-sand) 75%);
+           background-size: 200% 100%; animation: lg-skel 1.4s ease-in-out infinite; }
+@keyframes lg-skel { to { background-position: -200% 0 } }
+
+.lg-sr {                                    /* screen-reader only */
+  position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+  overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0;
+}
+.lg-skip {                                  /* skip-to-content link */
+  position: absolute; left: -9999px; top: 0; z-index: 300;
+  background: var(--lg-ink); color: var(--lg-cream); padding: 14px 22px;
+  border-radius: 0 0 var(--lg-r-sm) 0; font-weight: 700;
+}
+.lg-skip:focus { left: 0; }
+
+/* --------------------------------------------------------------------------
+   18. RESPONSIVE
+-------------------------------------------------------------------------- */
+@media (max-width: 1000px) {
+  .lg-footer__cols { grid-template-columns: 1fr 1fr; }
+  .lg-disclose__row { grid-template-columns: 1fr; gap: 6px; }
+}
+@media (max-width: 720px) {
+  :root { --lg-gut: 22px; }
+  .lg-page { font-size: 16px; }
+  .lg-header { position: relative; }
+  .lg-nav { display: none; }
+  .lg-nav.is-open { display: flex; flex-direction: column; gap: 0;
+    position: absolute; top: 100%; left: 0; right: 0; padding: 10px var(--lg-gut) 20px;
+    background: var(--lg-white); box-shadow: var(--lg-sh); }
+  .lg-nav.is-open a { padding: 14px 0; border-bottom: 1px solid rgba(23,20,15,.07); }
+  .lg-navtoggle { display: block; }
+  .lg-hero { min-height: 400px; } .lg-hero__in { padding-bottom: 34px; }
+  .lg-sec { padding: 54px 0; }
+  .lg-prose p { font-size: 17.5px; } .lg-prose p.lg-lead { font-size: 19px; }
+  .lg-prose p.lg-lead::first-letter { font-size: 70px; }
+  .lg-prose h2, .lg-prose h3 { font-size: 27px; }
+  .lg-row { grid-template-columns: 1fr; gap: 7px; }
+  .lg-row__lead { flex-direction: row; align-items: baseline; gap: 9px; }
+  .lg-row__tag { justify-self: start; }
+  .lg-panel .lg-row:hover { padding-left: 30px; }
+  .lg-quote { grid-template-columns: 1fr; gap: 20px; }
+  .lg-feature { padding: 28px 24px; } .lg-feature p { font-size: 16.5px; }
+  .lg-stat__value { font-size: 44px; }
+  .lg-footer__cols { grid-template-columns: 1fr; gap: 28px; }
+}
+
+/* --------------------------------------------------------------------------
+   19. REDUCED MOTION
+   Non-negotiable. Vestibular disorders are real and this design leans hard on
+   movement. Everything must still be fully readable and reachable with all
+   motion off — which means reveals resolve to visible, not to hidden.
+-------------------------------------------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+  .lg-js .lg-rv { opacity: 1 !important; transform: none !important; }
+  .lg-stat__value { clip-path: none !important; transform: none !important; }
+  .lg-stat__value::after { width: 46px !important; }
+  html { scroll-behavior: auto !important; }
+}
+
+/* --------------------------------------------------------------------------
+   20. PRINT — sellers print CMAs and market reports. Make it not embarrassing.
+-------------------------------------------------------------------------- */
+@media print {
+  .lg-header, .lg-ticker, .lg-progress, .lg-navtoggle, .lg-invite, .lg-footer { display: none !important; }
+  .lg-page { background: #fff; color: #000; font-size: 11pt; }
+  .lg-rv { opacity: 1 !important; transform: none !important; }
+  .lg-sec { padding: 18pt 0; }
+  .lg-card, .lg-stat, .lg-panel, .lg-note { box-shadow: none; border: 1px solid #ccc; break-inside: avoid; }
+  .lg-hero { min-height: 0; background: none; color: #000; }
+  .lg-hero__art, .lg-hero__scrim { display: none; }
+  .lg-hero h1 { text-shadow: none; color: #000; }
+  a[href^="http"]::after { content: " (" attr(href) ")"; font-size: 8pt; color: #555; }
+}
