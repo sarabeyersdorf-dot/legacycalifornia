@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Legacy · Platform Overview</title>
 <link rel="stylesheet" href="legacy.css">
+<link rel="stylesheet" href="legacy-ui.css">
 <style>
 .hub-hero {
   position: relative;
@@ -348,31 +349,34 @@
 }
 </style>
 </head>
-<body class="paper" data-screen-label="Platform Overview">
+<body class="paper lg-page" data-screen-label="Platform Overview">
+<div class="lg-progress"></div>
 
-<!-- Minimal nav -->
-<header class="topnav">
-  <div class="topnav-bar1">
-    <span>Internal preview · Platform v1.0 · For review by Sara</span>
-    <span><a href="index.html">Public site</a> · <a href="mailto:SaraSellsCalifornia@gmail.com">SaraSellsCalifornia@gmail.com</a></span>
-  </div>
-  <nav class="topnav-bar2">
-    <div class="topnav-links">
-      <a href="#index">Surfaces</a>
-      <a href="#principle">Principles</a>
-      <a href="#replaces">Replaces</a>
-      <a href="#roadmap">Roadmap</a>
-    </div>
-    <a href="platform.html" class="wordmark">
-      <span class="wordmark-word">Legacy</span>
-      <span class="wordmark-sub">Platform overview</span>
-    </a>
-    <div class="topnav-links right">
-      <a href="index.html">Public site</a>
-      <a href="crm.html">Open the desk</a>
-    </div>
+<!-- ============ TOP STRIP + HEADER ============ -->
+<div style="background:var(--lg-ink);color:rgba(255,253,248,.72);font-family:var(--lg-mono);font-size:10.5px;letter-spacing:.13em;text-transform:uppercase;display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;padding:9px var(--lg-gut)">
+  <span>Boutique real estate &middot; Calaveras &middot; Amador &middot; Tuolumne</span>
+  <span style="display:flex;gap:14px">
+    <a href="tel:2095594966" style="color:inherit;text-decoration:none">(209) 559-4966</a>
+    <a href="mailto:SaraSellsCalifornia@gmail.com" style="color:var(--lg-c2);text-decoration:none">SaraSellsCalifornia@gmail.com</a>
+  </span>
+</div>
+<header class="lg-header"><div class="lg-header__in">
+  <a class="lg-mark" href="index.html">
+    <span class="lg-mark__badge"><span>L</span></span>
+    <span class="lg-mark__txt"><b>Legacy</b><i>Properties · Angels Camp</i></span>
+  </a>
+  <nav class="lg-nav" id="siteNav">
+    <a href="property-search.html">Listings</a>
+    <a href="towns.html">Communities</a>
+    <a href="relocate.html">Relocate</a>
+    <a href="valuation.html">Sellers</a>
+    <a href="market-report.html">Markets</a>
+    <a href="ledger.html">The Ledger</a>
+    <a href="dashboard.html">Sign In</a>
+    <a href="find-my-match.html" class="lg-btn" style="padding:11px 22px">Find My Match</a>
   </nav>
-</header>
+  <button class="lg-navtoggle" data-lg-nav="#siteNav" aria-expanded="false">Menu</button>
+</div></header>
 
 <!-- HERO -->
 <section class="hub-hero" id="hubHero" data-mode="video" data-comment-anchor="hero">
@@ -407,18 +411,12 @@
 </section>
 
 <!-- INDEX -->
-<section class="hub-index" id="index">
-  <div class="hub-index-inner">
-    <div class="hub-index-h">
-      <div>
-        <span class="hairline-brass" style="margin-bottom: 16px;"></span>
-        <span class="eyebrow">Index · Click through each surface</span>
-        <h2 class="h-section" style="margin-top: 10px;">The seven surfaces.</h2>
-      </div>
-      <p class="lede">Each one is a self-contained product, designed to feel like the others. Open any of them — they're real working prototypes.</p>
-    </div>
+<section class="lg-sec lg-sec--tint" id="index"><div class="lg-wrap">
+    <div class="lg-kicker lg-rv"><span>Index · Click through each surface</span><span class="lg-rule"></span></div>
+    <h2 class="lg-display lg-h2 lg-rv lg-d1" style="margin:14px 0 10px">The seven surfaces.</h2>
+    <div class="lg-note lg-rv lg-d2" style="max-width:640px">Each one is a self-contained product, designed to feel like the others. Open any of them — they're real working prototypes.</div>
 
-    <div class="surface-list">
+    <div class="surface-list" style="margin-top:34px">
       <a href="index.html" class="surface-row">
         <span class="surface-num">I</span>
         <div>
@@ -522,13 +520,11 @@
 </section>
 
 <!-- AI PRINCIPLE -->
-<section class="principle" id="principle">
-  <div class="principle-inner">
-    <span class="hairline-brass" style="margin: 0 auto 18px;"></span>
-    <span class="eyebrow" style="display: block; margin-bottom: 18px;">The AI principle</span>
-    <h2>Invisible, not absent.<br><em>Sara's voice. Always.</em></h2>
-    <p>The platform's intelligence is in the background. Every message a buyer or seller receives is from Sara — never a generic drip, never a chat-bot. The AI writes drafts; Sara approves; clients feel the relationship.</p>
-    <div class="principle-tenets">
+<section class="lg-sec" id="principle"><div class="lg-wrap" style="text-align:center">
+    <div class="lg-kicker lg-rv" style="justify-content:center"><span>The AI principle</span></div>
+    <h2 class="lg-display lg-rv lg-d1" style="margin:16px 0 14px;font-size:clamp(38px,6vw,74px);line-height:.98">Invisible, not absent.<br><em>Sara's voice. Always.</em></h2>
+    <p class="lg-rv lg-d2" style="font-family:var(--lg-serif);font-style:italic;font-size:21px;color:var(--lg-ink-soft);max-width:660px;margin:0 auto">The platform's intelligence is in the background. Every message a buyer or seller receives is from Sara — never a generic drip, never a chat-bot. The AI writes drafts; Sara approves; clients feel the relationship.</p>
+    <div class="principle-tenets" style="margin-top:48px">
       <div class="tenet">
         <div class="num">I</div>
         <h4>Drafts are queued, not sent.</h4>
@@ -549,13 +545,12 @@
 </section>
 
 <!-- REPLACES -->
-<section class="replaces" id="replaces">
+<section class="lg-sec lg-sec--ink" id="replaces"><div class="lg-wrap">
   <div class="replaces-inner">
     <div>
-      <span class="hairline-brass" style="background: var(--brass-bright); margin-bottom: 16px;"></span>
-      <span class="eyebrow" style="color: var(--brass-bright); display: block; margin-bottom: 16px;">What it replaces</span>
-      <h2>Two tools, one bill.<br><em>Goodbye to both.</em></h2>
-      <p>Follow Up Boss handles your inbox. Ylopo runs the ads and feed. Neither knows about the other. Legacy puts them in one room, and adds the parts they don't do well — the seller portal, the editorial voice, the personal pace.</p>
+      <div class="lg-kicker lg-rv"><span>What it replaces</span><span class="lg-rule"></span></div>
+      <h2 class="lg-display lg-h2 lg-rv lg-d1" style="margin:14px 0 10px">Two tools, one bill.<br><em>Goodbye to both.</em></h2>
+      <p class="lg-rv lg-d2" style="font-family:var(--lg-serif);font-style:italic;font-size:18px;color:rgba(255,253,248,.72);max-width:420px;line-height:1.5">Follow Up Boss handles your inbox. Ylopo runs the ads and feed. Neither knows about the other. Legacy puts them in one room, and adds the parts they don't do well — the seller portal, the editorial voice, the personal pace.</p>
     </div>
     <div class="compare">
       <div class="compare-col old">
@@ -588,20 +583,14 @@
       </div>
     </div>
   </div>
-</section>
+</div></section>
 
 <!-- ROADMAP -->
-<section class="roadmap" id="roadmap">
-  <div class="roadmap-inner">
-    <div class="roadmap-h">
-      <div>
-        <span class="hairline-brass" style="margin-bottom: 16px;"></span>
-        <span class="eyebrow">Looking ahead</span>
-        <h2 class="h-section" style="margin-top: 10px;">What comes next.</h2>
-      </div>
-      <p class="lede">v1.0 is what you see. v1.1 and v1.2 round out the platform around the same voice. Pace your call.</p>
-    </div>
-    <div class="road-grid">
+<section class="lg-sec lg-sec--tint" id="roadmap"><div class="lg-wrap">
+    <div class="lg-kicker lg-rv"><span>Looking ahead</span><span class="lg-rule"></span></div>
+    <h2 class="lg-display lg-h2 lg-rv lg-d1" style="margin:14px 0 10px">What comes next.</h2>
+    <div class="lg-note lg-rv lg-d2" style="max-width:640px">v1.0 is what you see. v1.1 and v1.2 round out the platform around the same voice. Pace your call.</div>
+    <div class="road-grid" style="margin-top:34px">
       <div class="road-col">
         <h4>v1.0 · Now</h4>
         <div class="when">In your hands today</div>
@@ -647,26 +636,45 @@
 </section>
 
 <!-- CTA -->
-<section class="hub-cta">
-  <span class="hairline-brass" style="background: var(--brass-bright); margin: 0 auto 18px;"></span>
-  <span class="eyebrow" style="color: var(--brass-bright); display: block; margin-bottom: 18px;">Ready when you are</span>
-  <h2>Open the desk.<br>See your <em>morning.</em></h2>
-  <p>The CRM is loaded with realistic state — 14 leads, 7 calendar events, two live offers on the Sutter listing.</p>
-  <div class="hub-cta-buttons">
-    <a href="crm.html" class="btn btn-brass">Open Sara's desk →</a>
-    <a href="index.html" class="btn btn-ghost" style="border-color: rgba(250,246,236,0.3); color: var(--shell);">Visit the public site</a>
+<section class="lg-sec lg-sec--ink"><div class="lg-wrap" style="text-align:center">
+  <div class="lg-kicker lg-rv" style="justify-content:center"><span>Ready when you are</span></div>
+  <h2 class="lg-display lg-rv lg-d1" style="margin:16px 0 14px;font-size:clamp(48px,7vw,96px);line-height:1">Open the desk.<br>See your <em>morning.</em></h2>
+  <p class="lg-rv lg-d2" style="font-family:var(--lg-serif);font-style:italic;font-size:22px;color:rgba(255,253,248,.72);max-width:600px;margin:0 auto">The CRM is loaded with realistic state — 14 leads, 7 calendar events, two live offers on the Sutter listing.</p>
+  <div class="hub-cta-buttons lg-rv lg-d3" style="margin-top:28px">
+    <a href="crm.html" class="lg-btn lg-btn--gold">Open Sara's desk →</a>
+    <a href="index.html" class="lg-btn lg-btn--ghost">Visit the public site</a>
   </div>
-</section>
+</div></section>
 
 <!-- Footer (minimal) -->
-<footer class="footer" style="padding: 48px var(--gutter) 28px;">
-  <div class="footer-inner">
-    <div class="footer-bottom" style="border: none; padding: 0;">
-      <div>Legacy platform · v1.0 preview · For Sara &amp; James</div>
-      <div><a href="index.html" style="display: inline; color: var(--brass-bright);">Begin at the public site →</a></div>
+<footer class="lg-footer"><div class="lg-wrap">
+  <div class="lg-footer__cols">
+    <div>
+      <a href="index.html" class="lg-mark"><span class="lg-mark__badge"><span>L</span></span><span class="lg-mark__txt"><b>Legacy</b><i>Properties · Angels Camp</i></span></a>
+      <p style="font-family:var(--lg-serif);font-style:italic;font-size:16px;color:var(--lg-ink-soft);line-height:1.5;margin-top:16px;max-width:260px">Every home has a story. We help you find yours &mdash; or tell the one you've already lived.</p>
+    </div>
+    <div><h5>Tools</h5>
+      <a href="mortgage-calculator.html">Mortgage calculator</a>
+      <a href="commute.html">Commute calculator</a>
+      <a href="fire-zone.html">Fire-zone &amp; insurance</a>
+      <a href="valuation.html">What's my home worth?</a>
+    </div>
+    <div><h5>Buy &amp; sell</h5>
+      <a href="property-search.html">Search all listings</a>
+      <a href="market-report.html">Market reports</a>
+      <a href="find-my-match.html">Request a tour</a>
+    </div>
+    <div><h5>Connect</h5>
+      <a href="tel:2095594966">(209) 559-4966</a>
+      <a href="mailto:SaraSellsCalifornia@gmail.com">Email Sara</a>
+      <a href="ledger.html">The Ledger</a>
     </div>
   </div>
-</footer>
+  <div class="lg-footer__bot">
+    <span>&copy; 2026 Legacy Properties &middot; All rights reserved</span>
+    <span>Sara Cooper, Broker &middot; DRE #02141987 &middot; Equal Housing Opportunity</span>
+  </div>
+</div></footer>
 
 <!-- ===================== TWEAKS + HERO VIDEO LOOP ===================== -->
 
@@ -875,5 +883,6 @@ const mount = document.getElementById('tweaks-mount');
 ReactDOM.createRoot(mount).render(<HubTweaks />);
 </script>
 
+<script src="legacy-ui.js" defer></script>
 </body>
 </html>
