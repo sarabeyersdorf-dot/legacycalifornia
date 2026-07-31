@@ -692,18 +692,31 @@ export default async function handler(req, res) {
     // Keyed briefing rows (bulkSync 'brief:*') and auto rows ('auto:*') are
     // managed by their own insert-only pipelines — the wholesale wipe below must
     // not touch them, or a checked-off keyed task reopens every hour.
-    let hasFbCols = true, prior = [];
+    let hasFbCols = true, hasBriefKey = true, prior = [];
     {
-      const r = await supa.from('agent_tasks')
-        .select('agent, client, title, done, agent_note, attention, agent_note_by, agent_note_at')
+      // Preferred: pull the feedback columns AND the stable brief_key (Fix 1).
+      let r = await supa.from('agent_tasks')
+        .select('agent, client, title, done, agent_note, attention, agent_note_by, agent_note_at, brief_key')
         .eq('source', 'briefing').is('source_key', null);
       if (r.error) {
+        // brief_key column not migrated yet — retry with just the feedback cols.
+        hasBriefKey = false;
+        r = await supa.from('agent_tasks')
+          .select('agent, client, title, done, agent_note, attention, agent_note_by, agent_note_at')
+          .eq('source', 'briefing').is('source_key', null);
+      }
+      if (r.error) {
+        // feedback columns absent too (older schema) — minimal select.
         hasFbCols = false;
         const r2 = await supa.from('agent_tasks').select('agent, client, title, done').eq('source', 'briefing').is('source_key', null);
         prior = r2.data || [];
       } else prior = r.data || [];
     }
-    const keepBy = new Map(prior.map((t) => [sig(t.agent, t.client, t.title), t]));
+    // Match a rebuilt task to its prior row by the stable brief_key first (survives
+    // title countdowns), then fall back to the agent|client|title signature so
+    // un-keyed tasks behave exactly as before.
+    const keepBySig = new Map(prior.map((t) => [sig(t.agent, t.client, t.title), t]));
+    const keepByKey = new Map(prior.filter((t) => t && t.brief_key).map((t) => [t.brief_key, t]));
 
     await supa.from('agent_tasks').delete().eq('source', 'briefing').is('source_key', null);
     if (tasks.length) {
@@ -712,7 +725,9 @@ export default async function handler(req, res) {
         const title  = String(t.title || t.task || '').slice(0, 300);
         const client = t.client ? String(t.client).slice(0, 80) : null;
         const s = sig(agent, client, title);
-        const kept = keepBy.get(s);
+        const taskKey = t.key ? String(t.key).slice(0, 120) : null;
+        // brief_key match first (stable across title countdowns), then signature.
+        const kept = (hasBriefKey && taskKey && keepByKey.get(taskKey)) || keepBySig.get(s);
         const row = {
           agent,
           client,
@@ -724,6 +739,7 @@ export default async function handler(req, res) {
           source:     'briefing',
           done:       kept ? !!kept.done : (t.done === true)
         };
+        if (hasBriefKey) row.brief_key = taskKey;
         if (hasFbCols && kept) {
           row.agent_note    = kept.agent_note ?? null;
           row.attention     = !!kept.attention;
