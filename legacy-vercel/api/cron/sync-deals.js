@@ -692,18 +692,31 @@ export default async function handler(req, res) {
     // Keyed briefing rows (bulkSync 'brief:*') and auto rows ('auto:*') are
     // managed by their own insert-only pipelines — the wholesale wipe below must
     // not touch them, or a checked-off keyed task reopens every hour.
-    let hasFbCols = true, prior = [];
+    let hasFbCols = true, hasBriefKey = true, prior = [];
     {
-      const r = await supa.from('agent_tasks')
-        .select('agent, client, title, done, agent_note, attention, agent_note_by, agent_note_at')
+      // Preferred: pull the feedback columns AND the stable brief_key (Fix 1).
+      let r = await supa.from('agent_tasks')
+        .select('agent, client, title, done, agent_note, attention, agent_note_by, agent_note_at, brief_key')
         .eq('source', 'briefing').is('source_key', null);
       if (r.error) {
+        // brief_key column not migrated yet — retry with just the feedback cols.
+        hasBriefKey = false;
+        r = await supa.from('agent_tasks')
+          .select('agent, client, title, done, agent_note, attention, agent_note_by, agent_note_at')
+          .eq('source', 'briefing').is('source_key', null);
+      }
+      if (r.error) {
+        // feedback columns absent too (older schema) — minimal select.
         hasFbCols = false;
         const r2 = await supa.from('agent_tasks').select('agent, client, title, done').eq('source', 'briefing').is('source_key', null);
         prior = r2.data || [];
       } else prior = r.data || [];
     }
-    const keepBy = new Map(prior.map((t) => [sig(t.agent, t.client, t.title), t]));
+    // Match a rebuilt task to its prior row by the stable brief_key first (survives
+    // title countdowns), then fall back to the agent|client|title signature so
+    // un-keyed tasks behave exactly as before.
+    const keepBySig = new Map(prior.map((t) => [sig(t.agent, t.client, t.title), t]));
+    const keepByKey = new Map(prior.filter((t) => t && t.brief_key).map((t) => [t.brief_key, t]));
 
     await supa.from('agent_tasks').delete().eq('source', 'briefing').is('source_key', null);
     if (tasks.length) {
@@ -712,7 +725,9 @@ export default async function handler(req, res) {
         const title  = String(t.title || t.task || '').slice(0, 300);
         const client = t.client ? String(t.client).slice(0, 80) : null;
         const s = sig(agent, client, title);
-        const kept = keepBy.get(s);
+        const taskKey = t.key ? String(t.key).slice(0, 120) : null;
+        // brief_key match first (stable across title countdowns), then signature.
+        const kept = (hasBriefKey && taskKey && keepByKey.get(taskKey)) || keepBySig.get(s);
         const row = {
           agent,
           client,
@@ -724,6 +739,7 @@ export default async function handler(req, res) {
           source:     'briefing',
           done:       kept ? !!kept.done : (t.done === true)
         };
+        if (hasBriefKey) row.brief_key = taskKey;
         if (hasFbCols && kept) {
           row.agent_note    = kept.agent_note ?? null;
           row.attention     = !!kept.attention;
@@ -742,12 +758,17 @@ export default async function handler(req, res) {
     // Rule-derived workflow checklist (source='checklist'), reconciled
     // independently of the briefing tasks. Insert-only by stable source_key so
     // check-offs survive; prune only rows whose deal/task no longer applies.
-    let checklistWritten = 0, checklistPruned = 0;
+    let checklistWritten = 0, checklistPruned = 0, checklistKept = 0;
     try {
       const checklistDefs = require('../../data/checklist_task_definitions.json');
       const desired = buildChecklistRows(active, checklistDefs);
       const desiredKeys = new Set(desired.map((r) => r.source_key));
-      const { data: existingCl } = await supa.from('agent_tasks').select('id, source_key').eq('source', 'checklist');
+      // Pull agent input too: buildChecklistRows only emits rows for stage='pending',
+      // so the moment a deal closes ALL its checklist keys leave the desired set. We
+      // must never hard-delete a row an agent responded to — that would erase James's
+      // notes on a deal the day it closes.
+      const { data: existingCl } = await supa.from('agent_tasks')
+        .select('id, source_key, agent_note, attention, done').eq('source', 'checklist');
       const haveKeys = new Set((existingCl || []).map((r) => r.source_key));
       const toInsert = desired.filter((r) => !haveKeys.has(r.source_key));
       if (toInsert.length) {
@@ -755,7 +776,17 @@ export default async function handler(req, res) {
         if (ce) throw new Error(`checklist insert: ${ce.message}`);
         checklistWritten = toInsert.length;
       }
-      const staleIds = (existingCl || []).filter((r) => !desiredKeys.has(r.source_key)).map((r) => r.id);
+      const stale = (existingCl || []).filter((r) => !desiredKeys.has(r.source_key));
+      // Preserve any stale row an agent touched (note or attention). The deal left
+      // 'pending', so the item is effectively resolved — mark it done to drop it from
+      // open lists while keeping the row + its note readable in the briefing.
+      const keepIds = stale.filter((r) => (r.agent_note || r.attention) && !r.done).map((r) => r.id);
+      if (keepIds.length) {
+        await supa.from('agent_tasks').update({ done: true }).in('id', keepIds);
+        checklistKept = keepIds.length;
+      }
+      // Only rows with NO agent input are safe to hard-delete.
+      const staleIds = stale.filter((r) => !r.agent_note && !r.attention).map((r) => r.id);
       if (staleIds.length) {
         await supa.from('agent_tasks').delete().in('id', staleIds);
         checklistPruned = staleIds.length;
@@ -813,6 +844,7 @@ export default async function handler(req, res) {
       tasks_written: tasksWritten,
       checklist_written: checklistWritten,
       checklist_pruned: checklistPruned,
+      checklist_kept: checklistKept,
       leads_promoted: leadsPromoted,
       parties_linked: partiesLinked,
       contacts_created: contactsCreated,
