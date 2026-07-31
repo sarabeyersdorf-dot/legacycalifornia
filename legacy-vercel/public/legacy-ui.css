@@ -553,13 +553,16 @@
 .lg-point:hover { transform: translateY(-6px); box-shadow: var(--lg-sh); }
 .lg-point::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0;
                     width: 5px; background: var(--lg-accent, var(--lg-c1)); }
-.lg-point__num { position: absolute; right: 16px; top: 6px;
+/* Numeral anchored bottom-right, not behind the heading — long titles used to
+   run over it. Text keeps clear of it via padding-right below. */
+.lg-point__num { position: absolute; right: 20px; bottom: 12px;
                  font-family: var(--lg-serif); font-style: italic; font-weight: 700;
-                 font-size: 78px; line-height: 1; color: var(--lg-accent, var(--lg-c1)); opacity: .14; }
-.lg-point h4 { position: relative; padding-top: 6px; margin-bottom: 13px;
+                 font-size: 62px; line-height: 1; color: var(--lg-accent, var(--lg-c1)); opacity: .16; }
+.lg-point h4 { position: relative; padding-top: 2px; margin-bottom: 13px;
                font-family: var(--lg-serif); font-style: italic; font-weight: 600;
                font-size: 26px; line-height: 1.14; }
-.lg-point p  { position: relative; font-size: 15.5px; line-height: 1.7; color: var(--lg-ink-soft); }
+.lg-point p  { position: relative; font-size: 15.5px; line-height: 1.7; color: var(--lg-ink-soft);
+               padding-right: 52px; }
 
 /* --------------------------------------------------------------------------
    12. STAT TILE
