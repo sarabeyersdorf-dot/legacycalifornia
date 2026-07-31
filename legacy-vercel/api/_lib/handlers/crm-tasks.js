@@ -38,6 +38,12 @@ export async function bulkSync(req, res) {
   const supa = adminClient();
   const b = await readJson(req);
   const rows = Array.isArray(b?.tasks) ? b.tasks.slice(0, 60) : [];
+  // Fix 2 — opt-in snapshot prune. When the briefing sets `prune: true` it is
+  // asserting that `tasks` is the COMPLETE set of currently-open keyed briefing
+  // tasks; any open keyed row it omits is stale and gets removed. Absent the
+  // flag this stays pure insert-only (fully backward-compatible), which is why
+  // keyed briefing tasks used to accumulate forever.
+  const doPrune = b?.prune === true;
   const clean = rows
     .filter((r) => r && typeof r.title === 'string' && r.title.trim() && typeof r.source_key === 'string' && r.source_key.trim())
     .map((r) => ({
@@ -60,7 +66,25 @@ export async function bulkSync(req, res) {
     const { error } = await supa.from('agent_tasks').insert(fresh);
     if (error) return fail(res, 500, error.message);
   }
-  return ok(res, { created: fresh.length, already_present: have.size });
+
+  // Snapshot prune — same shape as the checklist reconcile in sync-deals: keep
+  // rows in the desired set, delete the open keyed ones that fell out. Scoped to
+  // OPEN rows so completed history is never destroyed, and guarded on a non-empty
+  // payload so a malformed empty POST can't wipe the board.
+  let pruned = 0;
+  if (doPrune && clean.length) {
+    const desired = new Set(keys);
+    const { data: openKeyed } = await supa.from('agent_tasks')
+      .select('id, source_key')
+      .eq('source', 'briefing').eq('done', false).not('source_key', 'is', null);
+    const staleIds = (openKeyed || []).filter((r) => !desired.has(r.source_key)).map((r) => r.id);
+    if (staleIds.length) {
+      const { error: de } = await supa.from('agent_tasks').delete().in('id', staleIds);
+      if (de) return fail(res, 500, de.message);
+      pruned = staleIds.length;
+    }
+  }
+  return ok(res, { created: fresh.length, already_present: have.size, pruned });
 }
 
 async function list(req, res, profile) {

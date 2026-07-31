@@ -407,24 +407,34 @@ gives you compliance flags, write them here:
 
 ```json
 "tasks": [
-  { "agent": "james", "client": "Wendell",
+  { "agent": "james", "client": "Wendell", "key": "wendell-brbc-file",
     "title": "no BRBC in the EX folder (James owes); file a copy if signed",
-    "note": "James will provide and update his Ex file", "done": true },
-  { "agent": "james", "client": "Baldwin",
+    "note": "James will provide and update his Ex file", "due": "Aug 5", "done": true },
+  { "agent": "james", "client": "Baldwin", "key": "baldwin-fhds-chase",
     "title": "no fire-hardening disclosure (FHDS/WFA) on file; chase from listing side (Allyson)",
-    "note": "flag for james" },
-  { "agent": "sara", "title": "Send Patricia the CMA", "note": "due tonight" }
+    "note": "flag for james", "due": "Before COE 8/3" },
+  { "agent": "sara", "client": "Patricia", "key": "patricia-cma-send",
+    "title": "Send Patricia the CMA", "note": "due tonight", "due": "Today" }
 ]
 ```
 
-- `"agent"` — **required**: `"james"`, `"sara"`, or `"both"`. How it reaches the
-  right person. If Sara doesn't say whose, ask or default to `"sara"`.
+- `"agent"` — **required**: `"james"` or `"sara"`. Exactly one owner. **Do not use
+  `"both"`** — a task owned by "both" is owned by no one (0 of 3 such tasks have
+  ever been completed). If Sara doesn't say whose, ask or default to `"sara"`.
 - `"client"` — the badge (a last name); optional but nice.
-- `"title"` — the task / flag text.
+- `"key"` — **strongly recommended** for any recurring task: a **stable** id,
+  `<deal-short>-<action-slug>`, **with NO date or countdown suffix**. Use the
+  **same key every day** for the same underlying to-do. This is how a tick or
+  reply survives when the title's countdown ticks down ("4 days" → "3 days"). One
+  key per real task, forever. (See `TASKFLOW-CONTRACT.md` for why.)
+- `"title"` — the task / flag text. May carry a live countdown; the `key` is what
+  keeps the check-off attached, not the title.
+- `"due"` — **required**: a short due label ("Today", "Aug 5", "Before COE 8/3").
+  Every task gets one; a task with no due date never surfaces at the right time.
 - `"note"` — the "+ note" line; optional.
 - `"done"` — `true`/`false`; defaults to false. If James checks something off in
   the CRM it stays checked — don't flip it back to false unless Sara says it's
-  re-opened.
+  re-opened. **With a stable `key`, the tick now survives title edits too.**
 
 **Note vs task:** a deal `"notes"` = context on that transaction. A `"tasks"`
 entry = a to-do on someone's Today / Tasks screen. For "James needs to do X,"
