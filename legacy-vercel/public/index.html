@@ -795,15 +795,18 @@
       </svg>
     </div>
 
-    <!-- the real hero: existing footage. Native autoplay + loop, so it starts
-         and repeats on its own with no JS driving opacity. It is opaque while it
-         plays and sits ON TOP of the illustration, so the illustration is hidden
-         whenever the video is playing. The drawing shows through ONLY when the
-         video genuinely cannot play — a load failure, an unsupported codec, or a
-         reduced-motion visitor (CSS hides the video and legacy-ui.js drops it to
-         save bandwidth). Deliberately no dark backdrop and no JS opacity swap: a
-         failed video must reveal the drawing underneath, never a black box. -->
-    <video autoplay muted loop playsinline preload="auto" src="hero-video.mp4" aria-hidden="true"></video>
+    <!-- the real hero: existing footage, in TWO buffers for a seamless loop.
+         vidA has native autoplay (muted) so playback starts reliably without
+         waiting on JS. The inline crossfade near the bottom of the page hands
+         off ~1.6s before a buffer ends and fades the incoming buffer IN on top
+         of the still-opaque outgoing one — a soft dissolve at the loop point,
+         never a hard cut, and never a transparent gap for the illustration to
+         flash through. Visible-by-default is set inline (vidA opacity 1, vidB
+         opacity 0) so the footage shows even before the script runs; the drawing
+         underneath appears only if the video truly can't play (load failure,
+         unsupported codec, or reduced motion). -->
+    <video id="heroVidA" class="hero-video" autoplay muted playsinline preload="auto" src="hero-video.mp4" aria-hidden="true" style="opacity:1;z-index:2"></video>
+    <video id="heroVidB" class="hero-video" muted playsinline preload="auto" src="hero-video.mp4" aria-hidden="true" style="opacity:0;z-index:1"></video>
   </div>
 
   <!-- REQUIRED over video too — footage brightness varies shot to shot, and
@@ -1207,10 +1210,56 @@ function setJourney(el) {
   el.classList.add('is-on');
 }
 
-/* Hero video is now a single native autoplay+loop element (see the hero markup),
-   so there is no JS crossfade to run here. legacy-ui.js still handles the
-   reduced-motion case (pause + drop source) and removes the element if it fails
-   to load, at which point the illustration underneath shows. */
+/* ── Hero video: discreet dual-buffer loop ──
+   Two buffers of the same footage. vidA plays; ~1.6s before it ends, vidB is
+   brought to the top and faded IN over vidA — vidA stays fully opaque beneath
+   until vidB has covered it, then pauses and resets. They alternate, so the
+   loop is a soft dissolve, never a hard cut, and there is never a transparent
+   gap for the fallback illustration to flash through. (Visible-by-default is
+   set inline on the elements, so the footage still shows if this never runs.) */
+(function () {
+  const FADE_MS = 1400, FADE_TRIGGER = 1.6;
+  const vidA = document.getElementById('heroVidA');
+  const vidB = document.getElementById('heroVidB');
+  if (!vidA || !vidB) return;
+  let swapping = false, cleanup = null;
+
+  function crossfade(from, to) {
+    if (swapping) return;
+    swapping = true;
+    try { to.currentTime = 0; } catch (e) {}
+    const p = to.play(); if (p && p.catch) p.catch(() => {});
+    to.style.zIndex   = '2';                 // incoming on top
+    from.style.zIndex = '1';                 // outgoing stays opaque beneath
+    to.style.opacity  = '1';                 // fade IN over the opaque `from`
+    setTimeout(() => {
+      try { from.pause(); from.currentTime = 0; } catch (e) {}
+      from.style.opacity = '0';              // safe: it is underneath `to`
+      swapping = false;
+      watchEnd(to, from);
+    }, FADE_MS + 200);
+  }
+
+  function watchEnd(playing, waiting) {
+    if (cleanup) cleanup();
+    function check() {
+      if (swapping || !playing.duration || !isFinite(playing.duration)) return;
+      if (playing.currentTime >= playing.duration - FADE_TRIGGER) {
+        playing.removeEventListener('timeupdate', check);
+        crossfade(playing, waiting);
+      }
+    }
+    playing.addEventListener('timeupdate', check);
+    cleanup = () => playing.removeEventListener('timeupdate', check);
+  }
+
+  function start() {
+    const p = vidA.play(); if (p && p.catch) p.catch(() => {});   // redundant with autoplay, harmless
+    watchEnd(vidA, vidB);
+  }
+  if (vidA.readyState >= 1) start();
+  else vidA.addEventListener('loadedmetadata', start, { once: true });
+})();
 </script>
 <!-- Live brokerage stats (hybrid: static 107 for crawlers, live count for humans) -->
 <script>
