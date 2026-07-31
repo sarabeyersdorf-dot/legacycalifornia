@@ -178,295 +178,292 @@
 </script>
 <!-- seo:head:end -->
 <link rel="stylesheet" href="legacy.css">
-<link rel="stylesheet" href="about.css">
+<link rel="stylesheet" href="legacy-ui.css">
 </head>
-<body class="paper" data-screen-label="About Sara">
+<body class="paper lg-page" data-screen-label="About Sara">
+<div class="lg-progress"></div>
 
-<!-- ============ TOP NAV ============ -->
-<header class="topnav">
-  <div class="topnav-bar1">
-    <span>Boutique luxury real estate · Calaveras · Amador · Tuolumne</span>
-    <span><a href="tel:2095594966">(209) 559-4966</a> · <a href="mailto:SaraSellsCalifornia@gmail.com">SaraSellsCalifornia@gmail.com</a></span>
-  </div>
-  <nav class="topnav-bar2">
-    <div class="topnav-links">
-      <a href="property-search.html">Listings</a>
-      <a href="towns.html">Communities</a>
-      <a href="relocate.html">Relocate</a>
-      <a href="valuation.html">Sellers</a>
-      <a href="market-report.html">Markets</a>
-    </div>
-    <a href="index.html" class="wordmark">
-      <span class="wordmark-word">Legacy Properties</span>
-      <span class="wordmark-sub">Every Home Has A Story</span>
-    </a>
-    <div class="topnav-links right">
-      <a href="ledger.html">The Ledger</a>
-      <a href="dashboard.html">Sign In</a>
-      <a href="find-my-match.html" class="btn btn-ink btn-sm" style="padding:10px 18px;">Find My Match</a>
-    </div>
+<!-- ============ TOP STRIP + HEADER ============ -->
+<div style="background:var(--lg-ink);color:rgba(255,253,248,.72);font-family:var(--lg-mono);font-size:10.5px;letter-spacing:.13em;text-transform:uppercase;display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;padding:9px var(--lg-gut)">
+  <span>Boutique real estate &middot; Calaveras &middot; Amador &middot; Tuolumne</span>
+  <span style="display:flex;gap:14px">
+    <a href="tel:2095594966" style="color:inherit;text-decoration:none">(209) 559-4966</a>
+    <a href="mailto:SaraSellsCalifornia@gmail.com" style="color:var(--lg-c2);text-decoration:none">SaraSellsCalifornia@gmail.com</a>
+  </span>
+</div>
+<header class="lg-header"><div class="lg-header__in">
+  <a class="lg-mark" href="index.html">
+    <span class="lg-mark__badge"><span>L</span></span>
+    <span class="lg-mark__txt"><b>Legacy</b><i>Properties · Angels Camp</i></span>
+  </a>
+  <nav class="lg-nav" id="siteNav">
+    <a href="property-search.html">Listings</a>
+    <a href="towns.html">Communities</a>
+    <a href="relocate.html">Relocate</a>
+    <a href="valuation.html">Sellers</a>
+    <a href="market-report.html">Markets</a>
+    <a href="ledger.html">The Ledger</a>
+    <a href="dashboard.html">Sign In</a>
+    <a href="find-my-match.html" class="lg-btn" style="padding:11px 22px">Find My Match</a>
   </nav>
-</header>
+  <button class="lg-navtoggle" data-lg-nav="#siteNav" aria-expanded="false">Menu</button>
+</div></header>
 
-<main class="ab-wrap">
+<main>
 
-  <!-- ============ HERO ============ -->
-  <section class="ab-hero">
-    <div class="ab-hero-copy">
-      <div class="ab-hero-eyebrow">
-        <span class="rule"></span>
-        <span class="eyebrow">Profile · Broker-Owner</span>
-      </div>
-      <h1>She spent thirty years<br>telling other people's stories.<br><em>Now she tells yours.</em></h1>
-      <p class="ab-hero-lede">Before Sara sold a single home in the Gold Country, she spent three decades as a global publicist in electronic and dance music — shaping how artists were seen and heard, and learning the craft that turns out to matter most in real estate: how to tell a true story so well that the right people lean in.</p>
-      <div class="ab-hero-meta">
-        <span><b>Legacy Properties</b> · Broker-Owner</span>
-        <span>Calaveras · Amador · El Dorado</span>
+  <!-- ============ HERO (illustrated · Variant A) ============ -->
+  <section class="lg-hero lg-hero--short">
+    <div class="lg-hero__art" aria-hidden="true">
+      <svg viewBox="0 0 1440 720" preserveAspectRatio="xMidYMid slice" role="presentation">
+        <defs>
+          <linearGradient id="lgSky" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="var(--lg-sky-a)"/><stop offset="58%" stop-color="var(--lg-sky-b)"/><stop offset="100%" stop-color="var(--lg-sky-c)"/>
+          </linearGradient>
+          <radialGradient id="lgSunGlow"><stop offset="0%" stop-color="var(--lg-sun)"/><stop offset="100%" stop-color="var(--lg-sun)" stop-opacity="0"/></radialGradient>
+          <linearGradient id="lgH1" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="var(--lg-hill-4)"/><stop offset="100%" stop-color="var(--lg-hill-3)"/></linearGradient>
+          <linearGradient id="lgH2" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="var(--lg-hill-3)"/><stop offset="100%" stop-color="var(--lg-hill-2)"/></linearGradient>
+          <linearGradient id="lgH3" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="var(--lg-hill-2)"/><stop offset="100%" stop-color="var(--lg-hill-1)"/></linearGradient>
+        </defs>
+        <rect width="1440" height="720" fill="url(#lgSky)"/>
+        <g transform="translate(0,70)">
+          <g class="lg-sun">
+            <circle cx="360" cy="188" r="180" fill="url(#lgSunGlow)" opacity=".6"/>
+            <g class="lg-rays" opacity=".28"><g stroke="var(--lg-sun)" stroke-width="2.5" stroke-linecap="round">
+              <line x1="360" y1="70" x2="360" y2="30"/><line x1="360" y1="306" x2="360" y2="346"/>
+              <line x1="242" y1="188" x2="202" y2="188"/><line x1="478" y1="188" x2="518" y2="188"/>
+              <line x1="276" y1="104" x2="248" y2="76"/><line x1="444" y1="272" x2="472" y2="300"/>
+              <line x1="444" y1="104" x2="472" y2="76"/><line x1="276" y1="272" x2="248" y2="300"/>
+            </g></g>
+            <circle cx="360" cy="188" r="72" fill="var(--lg-sun)"/>
+          </g>
+          <g fill="#FFFDF8" opacity=".42">
+            <g class="lg-cloud" style="animation-duration:70s"><ellipse cx="900" cy="118" rx="86" ry="27"/><ellipse cx="958" cy="106" rx="58" ry="24"/><ellipse cx="848" cy="108" rx="46" ry="20"/></g>
+            <g class="lg-cloud" style="animation-duration:94s;animation-delay:-30s" opacity=".7"><ellipse cx="1180" cy="196" rx="104" ry="24"/><ellipse cx="1246" cy="184" rx="62" ry="21"/></g>
+          </g>
+          <g class="lg-bird" style="animation-delay:-4s"><g class="lg-flap" fill="none" stroke="var(--lg-hill-1)" stroke-width="2.6" stroke-linecap="round" opacity=".7"><path d="M300 250 q10 -9 20 0"/><path d="M320 250 q10 -9 20 0"/></g></g>
+          <g class="lg-bird" style="animation-delay:-13s"><g class="lg-flap" style="animation-delay:-.4s" fill="none" stroke="var(--lg-hill-1)" stroke-width="2.2" stroke-linecap="round" opacity=".55"><path d="M300 300 q8 -7 16 0"/><path d="M316 300 q8 -7 16 0"/></g></g>
+        </g>
+        <path class="lg-ridge" data-depth="0.10" fill="url(#lgH1)" opacity=".62" d="M0 452 L110 418 L206 442 L318 392 L430 430 L548 386 L664 424 L788 380 L900 420 L1020 384 L1140 424 L1266 392 L1380 428 L1440 410 L1440 720 L0 720 Z"/>
+        <path class="lg-ridge" data-depth="0.18" fill="url(#lgH2)" opacity=".82" d="M0 512 L128 470 L248 504 L372 452 L500 494 L628 448 L760 490 L890 446 L1020 488 L1150 450 L1290 492 L1440 456 L1440 720 L0 720 Z"/>
+        <g class="lg-ridge" data-depth="0.28"><path fill="url(#lgH3)" d="M0 574 L150 534 L290 570 L430 522 L578 566 L720 520 L868 562 L1010 518 L1160 560 L1300 522 L1440 562 L1440 720 L0 720 Z"/>
+          <g fill="var(--lg-hill-1)" opacity=".9"><path d="M214 566 q-4 -22 8 -30 q-14 -14 4 -22 q-2 -16 16 -14 q10 -14 22 -2 q18 -6 18 10 q16 4 8 18 q12 10 -2 20 q4 18 -14 20 z"/><rect x="248" y="562" width="7" height="20" rx="2"/><path d="M1058 560 q-5 -26 9 -35 q-16 -17 5 -26 q-2 -19 18 -16 q12 -17 26 -3 q21 -7 21 12 q19 5 9 21 q14 12 -2 24 q5 21 -17 23 z"/><rect x="1098" y="556" width="8" height="24" rx="2"/></g>
+        </g>
+        <path class="lg-ridge" data-depth="0.40" fill="var(--lg-hill-1)" d="M0 646 L180 618 L360 648 L540 612 L740 650 L940 614 L1130 650 L1310 618 L1440 646 L1440 720 L0 720 Z"/>
+      </svg>
+    </div>
+    <div class="lg-hero__scrim"></div>
+    <div class="lg-hero__in">
+      <div class="lg-hero__tag"><span class="lg-dot"></span><span>Profile &middot; Broker-Owner</span></div>
+      <h1 class="lg-display lg-h1">She spent thirty years telling other people's stories. <em>Now she tells yours.</em></h1>
+      <p class="lg-hero__strap">Before Sara sold a single home in the Gold Country, she spent three decades as a global publicist in electronic and dance music &mdash; shaping how artists were seen and heard, and learning the craft that turns out to matter most in real estate: how to tell a true story so well that the right people lean in.</p>
+      <div class="lg-hero__meta" style="display:flex;gap:16px;flex-wrap:wrap;margin-top:20px;font-family:var(--lg-mono);font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:rgba(255,253,248,.82)">
+        <span><b>Legacy Properties</b> &middot; Broker-Owner</span>
+        <span>Calaveras &middot; Amador &middot; El Dorado</span>
         <span>DRE <b>#02141987</b></span>
       </div>
-    </div>
-    <div class="ab-portrait">
-      <div class="ab-portrait-img">
-        <img src="art/sara-headshot.png" alt="Sara, Broker-Owner of Legacy Properties">
+      <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:24px">
+        <a href="find-my-match.html" class="lg-btn lg-btn--gold">Find my match</a>
+        <a href="valuation.html" class="lg-btn lg-btn--ghost">What's my home worth?</a>
       </div>
-      <div class="ab-portrait-cap">Sara · <em>Broker-Owner</em></div>
-      <div class="ab-portrait-vert">Every home has a story</div>
     </div>
   </section>
 
   <!-- ============ STORY ============ -->
-  <section class="ab-story">
-    <div class="ab-story-grid">
-      <aside class="ab-story-aside">
-        <span class="eyebrow">The Long Version</span>
-        <p class="ab-kicker">From the <em>press room</em><br>to the <em>foothills.</em></p>
-        <!-- vintage microphone motif -->
-        <svg class="ab-mic" viewBox="0 0 100 168" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-          <ellipse cx="50" cy="44" rx="30" ry="40" stroke="#8C6E3D" stroke-width="2"/>
-          <path d="M28 30 H72 M26 40 H74 M26 50 H74 M28 60 H72" stroke="#8C6E3D" stroke-width="1.4"/>
-          <rect x="44" y="84" width="12" height="6" stroke="#8C6E3D" stroke-width="1.6"/>
-          <path d="M34 90 Q34 104 50 104 Q66 104 66 90" stroke="#8C6E3D" stroke-width="1.6"/>
-          <path d="M50 104 V134" stroke="#8C6E3D" stroke-width="1.6"/>
-          <path d="M30 134 H70" stroke="#8C6E3D" stroke-width="1.6"/>
-          <path d="M22 150 Q50 138 78 150" stroke="#8C6E3D" stroke-width="1.6"/>
-        </svg>
-      </aside>
-
-      <div class="ab-prose">
-        <p class="lead drop">Sara's first career had nothing to do with square footage and everything to do with narrative. For more than thirty years she worked as a global publicist in electronic and dance music — the person who built an artist's reputation, shaped how the world saw them, and earned the trust of people who had every reason to be guarded. You learn things there that no licensing exam covers.</p>
-
-        <p>You learn that nothing sells itself — and that the truth, told with care, always lands harder than hype. You learn to find the real story underneath the noise, to earn trust before you ask for it, and to represent someone so faithfully that they recognize themselves in the result. Thirty years of that doesn't leave you — it becomes how you see everything.</p>
-
-        <div class="ab-pull">"Publicity and real estate are the same craft. You're never selling the thing. You're telling its story honestly enough that the right person feels it."</div>
-
-        <p>So when Sara turned that sensibility toward real estate, she didn't arrive as a typical agent with a typical pitch. She arrived as someone who already knew how to represent people well — how to hear what a buyer is really after underneath the bed-and-bath count, and how to present a seller's home so its story lands the moment you walk in.</p>
-
-        <p>That's the whole idea behind <strong>Legacy Properties</strong>, the boutique Gold Country brokerage she owns and runs. Small on purpose. Personal by design. A brokerage where every listing gets the attention of the person whose name is on the door — not a handoff to a junior whose name you'll never learn.</p>
-
-        <p>The brand carries the look of the life that built it: the warm, analog romance of a <strong>vintage microphone</strong> — chrome and ribbon and stage light — because the through-line of Sara's whole career has been the same. Give people a voice. Help them tell the story they came to tell. <strong>Every home has a story</strong> isn't a tagline she focus-grouped. It's the only way she's ever known how to work.</p>
-      </div>
-    </div>
-  </section>
-
-  <!-- ============ PHILOSOPHY BAND ============ -->
-  <section class="ab-band">
-    <div class="ab-band-inner">
-      <span class="eyebrow">The Philosophy</span>
-      <p class="ab-band-quote">Story-driven luxury.<br><em>Every home has a story.</em></p>
-      <p class="ab-band-sub">Luxury, to Sara, was never about the highest price per square foot. It's about the homes that hold a narrative — the 1880s cottage with a hundred winters in its beams, the lake place where three generations learned to swim, the vineyard estate waiting for its next chapter. Her job is to find the buyer who deserves that story, and to tell it well enough that they recognize it as theirs.</p>
-    </div>
-    <svg class="ab-band-mic" viewBox="0 0 100 168" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-      <ellipse cx="50" cy="44" rx="30" ry="40" stroke="#C99E5A" stroke-width="3"/>
-      <path d="M28 30 H72 M26 40 H74 M26 50 H74 M28 60 H72" stroke="#C99E5A" stroke-width="2.4"/>
-      <rect x="44" y="84" width="12" height="6" stroke="#C99E5A" stroke-width="2.6"/>
-      <path d="M34 90 Q34 104 50 104 Q66 104 66 90" stroke="#C99E5A" stroke-width="2.6"/>
-      <path d="M50 104 V134" stroke="#C99E5A" stroke-width="2.6"/>
-      <path d="M30 134 H70" stroke="#C99E5A" stroke-width="2.6"/>
-      <path d="M22 150 Q50 138 78 150" stroke="#C99E5A" stroke-width="2.6"/>
-    </svg>
-  </section>
-
-  <!-- ============ FACTS ============ -->
-  <section class="ab-facts">
-    <div class="ab-facts-h">
-      <h2 class="h-section">The <em>brokerage.</em></h2>
-      <p>Boutique by definition, not by accident. Legacy Properties is built to give Gold Country sellers and relocating buyers the kind of attention a volume shop structurally can't.</p>
-    </div>
-    <div class="ab-facts-grid">
-      <div class="ab-fact">
-        <div class="ab-fact-num">30<em>+</em></div>
-        <div class="ab-fact-label">Years as a global publicist in electronic &amp; dance music</div>
-      </div>
-      <div class="ab-fact">
-        <div class="ab-fact-num">3</div>
-        <div class="ab-fact-label">Counties covered — Calaveras, Amador, El Dorado</div>
-      </div>
-      <div class="ab-fact">
-        <div class="ab-fact-num">1</div>
-        <div class="ab-fact-label">Broker-Owner on every listing, start to close</div>
-      </div>
-      <div class="ab-fact">
-        <div class="ab-fact-num">&infin;</div>
-        <div class="ab-fact-label">Stories told — every home, every seller, every chapter</div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ============ COVERAGE ============ -->
-  <section class="ab-coverage">
-    <div class="ab-coverage-inner">
-      <div class="ab-coverage-h">
-        <h2 class="h-section">Where she <em>works.</em></h2>
-        <p>From the Calaveras foothills to the Amador wine country and up into El Dorado — the historic Gold Country towns Sara knows street by street.</p>
-      </div>
-      <div class="ab-towns">
-        <a href="town-angels-camp.html" class="ab-town">
-          <img src="art/towns/angels-camp-mainst-fall.jpg" alt="Angels Camp">
-          <div class="ab-town-grad"></div>
-          <div class="ab-town-label">
-            <div class="ab-town-name">Angels Camp</div>
-            <div class="ab-town-county">Calaveras County</div>
+  <section class="lg-sec"><div class="lg-wrap">
+    <div class="lg-kicker lg-rv"><span>The Long Version</span><span class="lg-rule"></span></div>
+    <h2 class="lg-display lg-h2 lg-rv lg-d1" style="margin:14px 0 30px">From the <em>press room</em><br>to the <em>foothills.</em></h2>
+    <div class="lg-grid lg-grid--2" style="gap:36px;align-items:start">
+      <div class="lg-rv" style="position:sticky;top:96px">
+        <div class="lg-card" style="overflow:hidden">
+          <div class="lg-card__media" style="aspect-ratio:4/5">
+            <img src="art/sara-headshot.png" alt="Sara, Broker-Owner of Legacy Properties">
           </div>
-        </a>
-        <a href="town-murphys.html" class="ab-town">
-          <img src="art/towns/murphys-mainst-summer.jpg" alt="Murphys">
-          <div class="ab-town-grad"></div>
-          <div class="ab-town-label">
-            <div class="ab-town-name">Murphys</div>
-            <div class="ab-town-county">Calaveras County</div>
-          </div>
-        </a>
-        <a href="towns.html" class="ab-town">
-          <div class="ab-town-frame"></div>
-          <div class="ab-town-grad"></div>
-          <div class="ab-town-label">
-            <div class="ab-town-name">San Andreas</div>
-            <div class="ab-town-county">Calaveras County</div>
-          </div>
-        </a>
-        <a href="town-copperopolis.html" class="ab-town">
-          <img src="art/towns/copperopolis-lake-tulloch.jpg" alt="Copperopolis">
-          <div class="ab-town-grad"></div>
-          <div class="ab-town-label">
-            <div class="ab-town-name">Copperopolis</div>
-            <div class="ab-town-county">Calaveras County</div>
-          </div>
-        </a>
-        <a href="town-sutter-creek.html" class="ab-town">
-          <img src="art/towns/sutter-creek-mainst.jpg" alt="Sutter Creek">
-          <div class="ab-town-grad"></div>
-          <div class="ab-town-label">
-            <div class="ab-town-name">Sutter Creek</div>
-            <div class="ab-town-county">Amador County</div>
-          </div>
-        </a>
-        <a href="town-arnold.html" class="ab-town">
-          <img src="art/towns/arnold-winter-mainst.jpg" alt="Arnold">
-          <div class="ab-town-grad"></div>
-          <div class="ab-town-label">
-            <div class="ab-town-name">Arnold</div>
-            <div class="ab-town-county">Calaveras County</div>
-          </div>
-        </a>
-      </div>
-    </div>
-  </section>
-
-  <!-- ============ JAMES ============ -->
-  <section class="ab-james">
-    <div class="ab-james-img">
-      <img src="art/james-headshot.png" alt="James Beyersdorf, affiliated agent">
-    </div>
-    <div>
-      <span class="eyebrow">Partner · In Work &amp; Life</span>
-      <h2>James Beyersdorf</h2>
-      <div class="ab-james-role">Affiliated Agent · Legacy Properties</div>
-      <p>James is Sara's husband and her partner on the ground — the second set of eyes at every showing, the steady hand on logistics, and the person who makes a boutique brokerage feel like it has the bandwidth of a much larger one. Buyers and sellers get two committed people on their side, who share a home and a standard.</p>
-      <p>Together they've built Legacy Properties around a simple promise: you'll always be working with one of them, never around them.</p>
-      <p style="margin-top:10px;"><a href="https://jamesbeyersdorf.com/" target="_blank" rel="noopener" style="font-family:var(--mono); font-size:11px; letter-spacing:0.14em; text-transform:uppercase; color:var(--brass); text-decoration:none;">More about James · jamesbeyersdorf.com →</a></p>
-    </div>
-  </section>
-
-  <!-- ============ CONTACT ============ -->
-  <section class="ab-contact">
-    <div class="ab-contact-inner">
-      <div>
-        <h2 class="h-section">Let's tell <em>your story.</em></h2>
-        <div class="ab-contact-rows">
-          <div class="ab-contact-row">
-            <span class="k">Phone</span>
-            <a class="v" href="tel:2095594966">(209) 559-4966</a>
-          </div>
-          <div class="ab-contact-row">
-            <span class="k">Email</span>
-            <a class="v" href="mailto:SaraSellsCalifornia@gmail.com">SaraSellsCalifornia@gmail.com</a>
-          </div>
-          <div class="ab-contact-row">
-            <span class="k">License</span>
-            <span class="v">DRE #02141987</span>
+          <div class="lg-card__body">
+            <div class="lg-card__title">Sara &middot; <em>Broker-Owner</em></div>
+            <div class="lg-card__meta">Every home has a story</div>
           </div>
         </div>
+        <!-- vintage microphone motif -->
+        <svg viewBox="0 0 100 168" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" style="display:block;width:64px;margin:22px auto 0">
+          <ellipse cx="50" cy="44" rx="30" ry="40" stroke="var(--lg-sun)" stroke-width="2"/>
+          <path d="M28 30 H72 M26 40 H74 M26 50 H74 M28 60 H72" stroke="var(--lg-sun)" stroke-width="1.4"/>
+          <rect x="44" y="84" width="12" height="6" stroke="var(--lg-sun)" stroke-width="1.6"/>
+          <path d="M34 90 Q34 104 50 104 Q66 104 66 90" stroke="var(--lg-sun)" stroke-width="1.6"/>
+          <path d="M50 104 V134" stroke="var(--lg-sun)" stroke-width="1.6"/>
+          <path d="M30 134 H70" stroke="var(--lg-sun)" stroke-width="1.6"/>
+          <path d="M22 150 Q50 138 78 150" stroke="var(--lg-sun)" stroke-width="1.6"/>
+        </svg>
       </div>
-      <div class="ab-contact-cta">
-        <a href="find-my-match.html" class="btn btn-ink">Find my match</a>
-        <a href="valuation.html" class="btn btn-ghost">What's my home worth?</a>
+
+      <div class="lg-prose lg-rv lg-d1">
+        <p>Sara's first career had nothing to do with square footage and everything to do with narrative. For more than thirty years she worked as a global publicist in electronic and dance music &mdash; the person who built an artist's reputation, shaped how the world saw them, and earned the trust of people who had every reason to be guarded. You learn things there that no licensing exam covers.</p>
+
+        <p>You learn that nothing sells itself &mdash; and that the truth, told with care, always lands harder than hype. You learn to find the real story underneath the noise, to earn trust before you ask for it, and to represent someone so faithfully that they recognize themselves in the result. Thirty years of that doesn't leave you &mdash; it becomes how you see everything.</p>
+
+        <blockquote style="font-family:var(--lg-serif);font-style:italic;font-size:22px;line-height:1.4;color:var(--lg-c1-deep);border-left:4px solid var(--lg-sun);padding:6px 0 6px 22px;margin:26px 0">"Publicity and real estate are the same craft. You're never selling the thing. You're telling its story honestly enough that the right person feels it."</blockquote>
+
+        <p>So when Sara turned that sensibility toward real estate, she didn't arrive as a typical agent with a typical pitch. She arrived as someone who already knew how to represent people well &mdash; how to hear what a buyer is really after underneath the bed-and-bath count, and how to present a seller's home so its story lands the moment you walk in.</p>
+
+        <p>That's the whole idea behind <strong>Legacy Properties</strong>, the boutique Gold Country brokerage she owns and runs. Small on purpose. Personal by design. A brokerage where every listing gets the attention of the person whose name is on the door &mdash; not a handoff to a junior whose name you'll never learn.</p>
+
+        <p>The brand carries the look of the life that built it: the warm, analog romance of a <strong>vintage microphone</strong> &mdash; chrome and ribbon and stage light &mdash; because the through-line of Sara's whole career has been the same. Give people a voice. Help them tell the story they came to tell. <strong>Every home has a story</strong> isn't a tagline she focus-grouped. It's the only way she's ever known how to work.</p>
       </div>
     </div>
-  </section>
+  </div></section>
+
+  <!-- ============ PHILOSOPHY BAND ============ -->
+  <section class="lg-sec lg-sec--tint"><div class="lg-wrap">
+    <div class="lg-kicker lg-rv"><span>The Philosophy</span><span class="lg-rule"></span></div>
+    <h2 class="lg-display lg-h2 lg-rv lg-d1" style="margin:14px 0 18px">Story-driven luxury.<br><em>Every home has a story.</em></h2>
+    <p class="lg-note lg-rv lg-d2" style="max-width:760px">Luxury, to Sara, was never about the highest price per square foot. It's about the homes that hold a narrative &mdash; the 1880s cottage with a hundred winters in its beams, the lake place where three generations learned to swim, the vineyard estate waiting for its next chapter. Her job is to find the buyer who deserves that story, and to tell it well enough that they recognize it as theirs.</p>
+  </div></section>
+
+  <!-- ============ FACTS ============ -->
+  <section class="lg-sec"><div class="lg-wrap">
+    <div class="lg-kicker lg-rv"><span>By the numbers</span><span class="lg-rule"></span></div>
+    <h2 class="lg-display lg-h2 lg-rv lg-d1" style="margin:14px 0 12px">The <em>brokerage.</em></h2>
+    <p class="lg-note lg-rv lg-d2" style="max-width:720px">Boutique by definition, not by accident. Legacy Properties is built to give Gold Country sellers and relocating buyers the kind of attention a volume shop structurally can't.</p>
+    <div class="lg-grid lg-grid--4 lg-rv lg-d2" style="margin-top:28px">
+      <div class="lg-stat" style="--lg-accent:var(--lg-a1)">
+        <div class="lg-stat__value">30+</div>
+        <div class="lg-stat__label">Years as a global publicist in electronic &amp; dance music</div>
+      </div>
+      <div class="lg-stat" style="--lg-accent:var(--lg-a4)">
+        <div class="lg-stat__value">3</div>
+        <div class="lg-stat__label">Counties covered &mdash; Calaveras, Amador, El Dorado</div>
+      </div>
+      <div class="lg-stat" style="--lg-accent:var(--lg-a3)">
+        <div class="lg-stat__value">1</div>
+        <div class="lg-stat__label">Broker-Owner on every listing, start to close</div>
+      </div>
+      <div class="lg-stat" style="--lg-accent:var(--lg-c2)">
+        <div class="lg-stat__value">&infin;</div>
+        <div class="lg-stat__label">Stories told &mdash; every home, every seller, every chapter</div>
+      </div>
+    </div>
+  </div></section>
+
+  <!-- ============ COVERAGE ============ -->
+  <section class="lg-sec lg-sec--tint"><div class="lg-wrap">
+    <div class="lg-kicker lg-rv"><span>Coverage area</span><span class="lg-rule"></span></div>
+    <h2 class="lg-display lg-h2 lg-rv lg-d1" style="margin:14px 0 12px">Where she <em>works.</em></h2>
+    <p class="lg-note lg-rv lg-d2" style="max-width:760px">From the Calaveras foothills to the Amador wine country and up into El Dorado &mdash; the historic Gold Country towns Sara knows street by street.</p>
+    <div class="lg-grid lg-grid--3 lg-rv lg-d2" style="margin-top:28px">
+      <a href="town-angels-camp.html" class="lg-card">
+        <div class="lg-card__media"><img src="art/towns/angels-camp-mainst-fall.jpg" alt="Angels Camp"></div>
+        <div class="lg-card__body">
+          <div class="lg-card__title">Angels Camp</div>
+          <div class="lg-card__meta">Calaveras County</div>
+        </div>
+      </a>
+      <a href="town-murphys.html" class="lg-card">
+        <div class="lg-card__media"><img src="art/towns/murphys-mainst-summer.jpg" alt="Murphys"></div>
+        <div class="lg-card__body">
+          <div class="lg-card__title">Murphys</div>
+          <div class="lg-card__meta">Calaveras County</div>
+        </div>
+      </a>
+      <a href="towns.html" class="lg-card">
+        <div class="lg-card__media"></div>
+        <div class="lg-card__body">
+          <div class="lg-card__title">San Andreas</div>
+          <div class="lg-card__meta">Calaveras County</div>
+        </div>
+      </a>
+      <a href="town-copperopolis.html" class="lg-card">
+        <div class="lg-card__media"><img src="art/towns/copperopolis-lake-tulloch.jpg" alt="Copperopolis"></div>
+        <div class="lg-card__body">
+          <div class="lg-card__title">Copperopolis</div>
+          <div class="lg-card__meta">Calaveras County</div>
+        </div>
+      </a>
+      <a href="town-sutter-creek.html" class="lg-card">
+        <div class="lg-card__media"><img src="art/towns/sutter-creek-mainst.jpg" alt="Sutter Creek"></div>
+        <div class="lg-card__body">
+          <div class="lg-card__title">Sutter Creek</div>
+          <div class="lg-card__meta">Amador County</div>
+        </div>
+      </a>
+      <a href="town-arnold.html" class="lg-card">
+        <div class="lg-card__media"><img src="art/towns/arnold-winter-mainst.jpg" alt="Arnold"></div>
+        <div class="lg-card__body">
+          <div class="lg-card__title">Arnold</div>
+          <div class="lg-card__meta">Calaveras County</div>
+        </div>
+      </a>
+    </div>
+  </div></section>
+
+  <!-- ============ JAMES ============ -->
+  <section class="lg-sec"><div class="lg-wrap">
+    <div class="lg-grid lg-grid--2" style="gap:36px;align-items:center">
+      <div class="lg-rv">
+        <div class="lg-card" style="max-width:420px">
+          <div class="lg-card__media" style="aspect-ratio:4/5"><img src="art/james-headshot.png" alt="James Beyersdorf, affiliated agent"></div>
+        </div>
+      </div>
+      <div class="lg-rv lg-d1">
+        <div class="lg-kicker"><span>Partner &middot; In Work &amp; Life</span><span class="lg-rule"></span></div>
+        <h2 class="lg-display lg-h2" style="margin:14px 0 6px">James Beyersdorf</h2>
+        <div style="font-family:var(--lg-mono);font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--lg-a1);margin-bottom:16px">Affiliated Agent &middot; Legacy Properties</div>
+        <div class="lg-prose">
+          <p>James is Sara's husband and her partner on the ground &mdash; the second set of eyes at every showing, the steady hand on logistics, and the person who makes a boutique brokerage feel like it has the bandwidth of a much larger one. Buyers and sellers get two committed people on their side, who share a home and a standard.</p>
+          <p>Together they've built Legacy Properties around a simple promise: you'll always be working with one of them, never around them.</p>
+        </div>
+        <p style="margin-top:14px"><a href="https://jamesbeyersdorf.com/" target="_blank" rel="noopener" style="font-family:var(--lg-mono);font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:var(--lg-a1);text-decoration:none">More about James &middot; jamesbeyersdorf.com &rarr;</a></p>
+      </div>
+    </div>
+  </div></section>
+
+  <!-- ============ CONTACT / CTA ============ -->
+  <section class="lg-sec lg-sec--ink"><div class="lg-wrap" style="text-align:center">
+    <div class="lg-kicker lg-rv" style="justify-content:center"><span>Begin the conversation</span></div>
+    <h2 class="lg-display lg-rv lg-d1" style="margin:16px 0 22px;font-size:clamp(38px,6vw,74px);line-height:.98">Let's tell <em>your story.</em></h2>
+    <div class="lg-rv lg-d2" style="display:flex;gap:22px;flex-wrap:wrap;justify-content:center;font-family:var(--lg-mono);font-size:11px;letter-spacing:.13em;text-transform:uppercase;color:rgba(255,253,248,.82);margin-bottom:28px">
+      <span>Phone &middot; <a href="tel:2095594966" style="color:var(--lg-sun);text-decoration:none">(209) 559-4966</a></span>
+      <span>Email &middot; <a href="mailto:SaraSellsCalifornia@gmail.com" style="color:var(--lg-sun);text-decoration:none">SaraSellsCalifornia@gmail.com</a></span>
+      <span>License &middot; DRE #02141987</span>
+    </div>
+    <div class="lg-rv lg-d3" style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap">
+      <a href="find-my-match.html" class="lg-btn lg-btn--gold">Find my match</a>
+      <a href="valuation.html" class="lg-btn lg-btn--ghost">What's my home worth?</a>
+    </div>
+  </div></section>
 
 </main>
 
 <!-- ============ FOOTER ============ -->
-<footer class="footer">
-  <div class="footer-inner">
-    <div class="footer-top">
-      <div>
-        <a href="index.html" class="wordmark" style="align-items: flex-start;">
-          <span class="wordmark-word">Legacy Properties</span>
-          <span class="wordmark-sub">Every Home Has A Story</span>
-        </a>
-        <p class="footer-tagline">Every home has a story. We help you find yours — or tell the one you've already lived.</p>
-      </div>
-      <div>
-        <h4>Services</h4>
-        <a href="relocate.html">Bay → Foothills relocation</a>
-        <a href="towns.html">Communities</a>
-        <a href="valuation.html">Sellers</a>
-        <a href="property-search.html">Browse listings</a>
-        <a href="find-my-match.html">Request a tour</a>
-      </div>
-      <div>
-        <h4>Buy</h4>
-        <a href="property-search.html">Search all listings</a>
-        <a href="fire-zone.html">Fire-zone &amp; insurance tool</a>
-        <a href="commute.html">Commute calculator</a>
-        <a href="relocate.html">Bay → Foothills relocation</a>
-        <a href="find-my-match.html">Request a tour</a>
-      </div>
-      <div>
-        <h4>Sell</h4>
-        <a href="valuation.html">What's my home worth?</a>
-        <a href="how-we-work.html">Listing process</a>
-        <a href="how-we-work.html">How we work</a>
-        <a href="about.html">About Sara &amp; James</a>
-        <a href="valuation.html">Request a CMA</a>
-      </div>
-      <div>
-        <h4>Connect</h4>
-        <a href="tel:2095594966">(209) 559-4966</a>
-        <a href="mailto:SaraSellsCalifornia@gmail.com">SaraSellsCalifornia@gmail.com</a>
-        <a href="https://www.instagram.com/legacypropertiesig/">Instagram</a>
-        <a href="https://www.facebook.com/legacypropertiesfb/">Facebook</a>
-        <a href="https://www.youtube.com/LegacyPropertiesTV">YouTube</a>
-        <a href="ledger.html">The Ledger</a>
-      </div>
+<footer class="lg-footer"><div class="lg-wrap">
+  <div class="lg-footer__cols">
+    <div>
+      <a href="index.html" class="lg-mark"><span class="lg-mark__badge"><span>L</span></span><span class="lg-mark__txt"><b>Legacy</b><i>Properties · Angels Camp</i></span></a>
+      <p style="font-family:var(--lg-serif);font-style:italic;font-size:16px;color:var(--lg-ink-soft);line-height:1.5;margin-top:16px;max-width:260px">Every home has a story. We help you find yours &mdash; or tell the one you've already lived.</p>
     </div>
-    <div class="footer-bottom">
-      <div>© 2026 Legacy Properties · All rights reserved · <a href="/privacy.html">Privacy Policy</a> · <a href="/sms-terms.html">SMS Terms</a></div>
-      <div>Sara Cooper, Broker · DRE #02141987 · Equal Housing Opportunity</div>
+    <div><h5>Services</h5>
+      <a href="relocate.html">California &rarr; Foothills relocation</a>
+      <a href="towns.html">Communities</a>
+      <a href="valuation.html">Sellers</a>
+      <a href="property-search.html">Browse listings</a>
+      <a href="find-my-match.html">Request a tour</a>
+    </div>
+    <div><h5>Buy &amp; sell</h5>
+      <a href="property-search.html">Search all listings</a>
+      <a href="valuation.html">What's my home worth?</a>
+      <a href="market-report.html">Market reports</a>
+      <a href="find-my-match.html">Request a tour</a>
+    </div>
+    <div><h5>Connect</h5>
+      <a href="tel:2095594966">(209) 559-4966</a>
+      <a href="mailto:SaraSellsCalifornia@gmail.com">Email Sara</a>
+      <a href="ledger.html">The Ledger</a>
     </div>
   </div>
-</footer>
+  <div class="lg-footer__bot">
+    <span>&copy; 2026 Legacy Properties &middot; All rights reserved &middot; <a href="/privacy.html" style="color:inherit">Privacy Policy</a> &middot; <a href="/sms-terms.html" style="color:inherit">SMS Terms</a></span>
+    <span>Sara Cooper, Broker &middot; DRE #02141987 &middot; Equal Housing Opportunity</span>
+  </div>
+</div></footer>
 
+<script src="legacy-ui.js" defer></script>
 </body>
 </html>
