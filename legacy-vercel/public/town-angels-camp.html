@@ -218,45 +218,7 @@
 </script>
 <!-- seo:head:end -->
 <link rel="stylesheet" href="legacy.css">
-<link rel="stylesheet" href="town.css">
-<style>
-/* Twain timeline */
-.twain-strip {
-  display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  gap: 1px;
-  background: rgba(250,246,236,0.10);
-  border: 1px solid rgba(250,246,236,0.10);
-  margin-top: 28px;
-}
-.twain-tile {
-  background: var(--ink);
-  padding: 28px 22px 22px;
-  position: relative;
-}
-.twain-yr {
-  font-family: var(--serif); font-style: italic; font-weight: 300;
-  font-size: 38px; color: var(--brass-bright); line-height: 1;
-  margin-bottom: 14px;
-}
-.twain-h {
-  font-family: var(--serif); font-style: italic; font-weight: 400;
-  font-size: 18px; color: var(--shell); line-height: 1.2;
-  margin-bottom: 10px;
-}
-.twain-b {
-  font-family: var(--sans); font-size: 12.5px; line-height: 1.55;
-  color: rgba(250,246,236,0.6);
-}
-.twain-tile::before {
-  content: ''; position: absolute; top: 28px; right: 22px;
-  width: 8px; height: 8px; border-radius: 50%;
-  background: var(--brass-bright); opacity: 0.55;
-}
-@media (max-width: 900px) {
-  .twain-strip { grid-template-columns: 1fr 1fr; }
-}
-</style>
+<link rel="stylesheet" href="legacy-ui.css">
 <link rel="stylesheet" href="idx-theme.css">
 <script src="https://kestrel.idxhome.com/ihf-kestrel.js"></script>
 <script>
@@ -267,46 +229,149 @@
   };
 </script>
 </head>
-<body class="paper" data-screen-label="Town · Angels Camp">
+<body class="paper lg-page" data-screen-label="Town · Angels Camp">
+<div class="lg-progress"></div>
 
-<header class="topnav">
-  <div class="topnav-bar1">
-    <span>Boutique luxury real estate · Calaveras · Amador · Tuolumne</span>
-    <span><a href="tel:2095594966">(209) 559-4966</a> · <a href="mailto:SaraSellsCalifornia@gmail.com">SaraSellsCalifornia@gmail.com</a></span>
-  </div>
-  <nav class="topnav-bar2">
-    <div class="topnav-links">
-      <a href="property-search.html">Listings</a>
-      <a href="towns.html" class="active">Communities</a>
-      <a href="relocate.html">Relocate</a>
-      <a href="valuation.html">Sellers</a>
-      <a href="market-report.html">Markets</a>
-    </div>
-    <a href="index.html" class="wordmark">
-      <span class="wordmark-word">Legacy</span>
-      <span class="wordmark-sub">Properties · Angels Camp CA</span>
-    </a>
-    <div class="topnav-links right">
-      <a href="ledger.html">The Ledger</a>
-      <a href="dashboard.html">Sign In</a>
-      <a href="find-my-match.html" class="btn btn-ink btn-sm" style="padding:10px 18px;">Find My Match</a>
-    </div>
-  </nav>
-</header>
-
-<div class="town-breadcrumb">
-  <div class="town-breadcrumb-inner">
-    <a href="index.html">Legacy</a>
-    <span class="sep">→</span>
-    <a href="towns.html">Communities</a>
-    <span class="sep">→</span>
-    <span class="cur">Angels Camp</span>
-    <span class="spacer"></span>
-    <span class="mono small">Vol. XXII · Plate V — Gold Country Survey · Legacy hometown</span>
-  </div>
+<!-- ============ TOP STRIP + HEADER ============ -->
+<div style="background:var(--lg-ink);color:rgba(255,253,248,.72);font-family:var(--lg-mono);font-size:10.5px;letter-spacing:.13em;text-transform:uppercase;display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;padding:9px var(--lg-gut)">
+  <span>Boutique real estate &middot; Calaveras &middot; Amador &middot; Tuolumne</span>
+  <span style="display:flex;gap:14px">
+    <a href="tel:2095594966" style="color:inherit;text-decoration:none">(209) 559-4966</a>
+    <a href="mailto:SaraSellsCalifornia@gmail.com" style="color:var(--lg-c2);text-decoration:none">SaraSellsCalifornia@gmail.com</a>
+  </span>
 </div>
+<header class="lg-header"><div class="lg-header__in">
+  <a class="lg-mark" href="index.html">
+    <span class="lg-mark__badge"><span>L</span></span>
+    <span class="lg-mark__txt"><b>Legacy</b><i>Properties · Angels Camp</i></span>
+  </a>
+  <nav class="lg-nav" id="siteNav">
+    <a href="property-search.html">Listings</a>
+    <a href="towns.html" aria-current="page">Communities</a>
+    <a href="relocate.html">Relocate</a>
+    <a href="valuation.html">Sellers</a>
+    <a href="market-report.html">Markets</a>
+    <a href="ledger.html">The Ledger</a>
+    <a href="dashboard.html">Sign In</a>
+    <a href="find-my-match.html" class="lg-btn" style="padding:11px 22px">Find My Match</a>
+  </nav>
+  <button class="lg-navtoggle" data-lg-nav="#siteNav" aria-expanded="false">Menu</button>
+</div></header>
 
-<!-- HERO -->
+<!-- Page-scoped lg styling for the kept interactive pieces (season hero, jump
+     rail scrollspy, picks tabs). town.js drives them by these classes/ids. -->
+<style>
+  .tc{max-width:var(--lg-max);margin:0 auto;padding:0 var(--lg-gut)}
+  /* breadcrumb */
+  .t-crumb{font-family:var(--lg-mono);font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--lg-ink-mute);display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:16px var(--lg-gut) 0;max-width:var(--lg-max);margin:0 auto}
+  .t-crumb a{color:var(--lg-a1);text-decoration:none}.t-crumb .sp{flex:1}
+  /* season hero */
+  .town-hero{position:relative;min-height:clamp(580px,66vw,840px);display:flex;flex-direction:column;justify-content:flex-end;overflow:hidden;background:var(--lg-ink)}
+  .th-frame{position:absolute;inset:0;background-size:cover;background-position:center 42%;opacity:0;transition:opacity 1.2s ease}
+  .town-hero[data-season="spring"] .th-frame-spring,.town-hero[data-season="summer"] .th-frame-summer,.town-hero[data-season="fall"] .th-frame-fall,.town-hero[data-season="winter"] .th-frame-winter{opacity:1}
+  .th-veil{position:absolute;inset:0;z-index:1;background:linear-gradient(180deg,rgba(23,20,15,.4),rgba(23,20,15,.12) 38%,rgba(23,20,15,.82))}
+  .th-inner{position:relative;z-index:2;width:100%;max-width:var(--lg-max);margin:0 auto;padding:0 var(--lg-gut) 30px;color:#fff}
+  .th-eyebrow{display:inline-flex;align-items:center;gap:10px;background:rgba(255,253,248,.16);backdrop-filter:blur(6px);border:1px solid rgba(255,253,248,.3);border-radius:100px;padding:7px 16px;font-family:var(--lg-mono);font-size:10px;letter-spacing:.18em;text-transform:uppercase;font-weight:600}
+  .th-eyebrow .tick{width:7px;height:7px;border-radius:50%;background:var(--lg-c2);animation:lg-ping 2.4s ease-out infinite}
+  .th-eyebrow .eyebrow{color:#fff}
+  .th-title{font-family:var(--lg-serif);font-style:italic;font-weight:600;font-size:clamp(46px,8vw,104px);line-height:.95;margin:18px 0 0;text-shadow:0 4px 30px rgba(23,20,15,.35)}
+  .th-title .it{color:var(--lg-sun)}
+  .th-tag{font-family:var(--lg-serif);font-style:italic;font-size:clamp(17px,2.1vw,23px);color:rgba(255,253,248,.92);margin-top:14px}
+  .th-meta{display:flex;flex-wrap:wrap;gap:14px 34px;margin-top:20px}
+  .th-meta-row{display:flex;flex-direction:column;gap:2px}
+  .th-meta .label-cap{font-family:var(--lg-mono);font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;color:rgba(255,253,248,.6)}
+  .th-meta .num{font-family:var(--lg-serif);font-style:italic;font-size:22px;color:#fff}
+  .th-season{position:relative;z-index:2;width:100%;max-width:var(--lg-max);margin:0 auto;padding:16px var(--lg-gut) 26px;display:flex;flex-wrap:wrap;align-items:center;gap:12px 16px}
+  .th-season>.label-cap{font-family:var(--lg-mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase}
+  .th-season-track{display:flex;gap:8px;flex-wrap:wrap}
+  .th-sn{font-family:var(--lg-mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;font-weight:700;padding:8px 15px;border-radius:100px;border:1px solid rgba(255,253,248,.35);background:rgba(255,253,248,.08);color:rgba(255,253,248,.85);cursor:pointer;transition:all var(--lg-fast)}
+  .th-sn.th-sn-on{background:var(--lg-sun);border-color:var(--lg-sun);color:var(--lg-ink)}
+  .th-season-quote{flex:1 1 260px;min-width:220px;font-family:var(--lg-serif);font-style:italic;font-size:15px;color:rgba(255,253,248,.9);line-height:1.4}
+  .th-season-quote em{color:var(--lg-sun)}
+  /* jump rail */
+  .town-jump{position:sticky;top:72px;z-index:40;background:color-mix(in srgb,var(--lg-cream) 92%,transparent);backdrop-filter:blur(12px) saturate(1.2);border-bottom:1px solid rgba(23,20,15,.08)}
+  .town-jump-inner{max-width:var(--lg-max);margin:0 auto;display:flex;gap:26px;overflow-x:auto;padding:14px var(--lg-gut);font-family:var(--lg-mono);font-size:11px;letter-spacing:.09em;text-transform:uppercase;font-weight:600}
+  .town-jump a{color:var(--lg-ink-mute);text-decoration:none;white-space:nowrap;padding:4px 0;border-bottom:2px solid transparent;transition:color var(--lg-fast)}
+  .town-jump a.jump-on{color:var(--lg-a1);border-bottom-color:var(--lg-c1)}
+  /* facts table */
+  .facts{max-width:840px;margin-top:26px}
+  .facts-row{display:flex;justify-content:space-between;align-items:baseline;gap:24px;padding:15px 2px;border-top:1px solid rgba(23,20,15,.1)}
+  .facts-row:last-of-type{border-bottom:1px solid rgba(23,20,15,.1)}
+  .facts-row .k{font-family:var(--lg-mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--lg-ink-mute);white-space:nowrap}
+  .facts-row .v{font-family:var(--lg-serif);font-style:italic;font-size:21px;color:var(--lg-ink);text-align:right;line-height:1.2}
+  .facts-row .v .sub{font-style:normal;font-family:var(--lg-mono);font-size:11px;color:var(--lg-ink-faint)}
+  /* wine cards */
+  .wine-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px;margin-top:6px}
+  .wine-card{background:rgba(255,253,248,.06);border:1px solid rgba(255,253,248,.14);border-radius:var(--lg-r);padding:24px;transition:transform var(--lg-fast) var(--lg-ease),background var(--lg-fast)}
+  .wine-card:hover{transform:translateY(-4px);background:rgba(255,253,248,.1)}
+  .wine-letter{font-family:var(--lg-serif);font-style:italic;font-size:30px;color:var(--lg-sun);line-height:1}
+  .wine-name{font-family:var(--lg-serif);font-style:italic;font-size:24px;color:#fff;margin-top:6px}
+  .wine-house{font-family:var(--lg-mono);font-size:10px;letter-spacing:.13em;text-transform:uppercase;color:rgba(255,253,248,.6);margin-top:4px}
+  .wine-flight{display:flex;flex-direction:column;gap:4px;margin-top:12px;font-size:13.5px;color:rgba(255,253,248,.82)}
+  .wine-foot{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px;font-family:var(--lg-mono);font-size:10px;letter-spacing:.08em;color:rgba(255,253,248,.55)}
+  .wine-walk{display:flex;flex-wrap:wrap;align-items:center;gap:12px 26px;margin-top:28px;padding-top:22px;border-top:1px solid rgba(255,253,248,.14)}
+  .wf-stat{font-family:var(--lg-serif);font-style:italic;font-size:26px;color:#fff}
+  .wf-stat em{font-style:normal;font-family:var(--lg-mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,253,248,.6);margin-left:6px}
+  /* picks */
+  .picks-tabs{display:flex;gap:10px;flex-wrap:wrap;margin:26px 0 24px}
+  .pick-tab{font-family:var(--lg-mono);font-size:11px;letter-spacing:.11em;text-transform:uppercase;font-weight:700;padding:11px 20px;border-radius:100px;border:2px solid var(--lg-sand);background:var(--lg-white);color:var(--lg-ink-soft);cursor:pointer;display:inline-flex;align-items:center;gap:8px;transition:all var(--lg-fast)}
+  .pick-tab .ct{font-family:var(--lg-serif);font-style:italic;opacity:.7}
+  .pick-tab.pick-tab-on{background:var(--lg-c1-deep);border-color:var(--lg-c1-deep);color:#fff}
+  .pick-pane{display:none}.pick-pane.pick-pane-on{display:block}
+  .pick-row{display:grid;grid-template-columns:auto 1fr auto;gap:20px;align-items:start;padding:22px 2px;border-top:1px solid rgba(23,20,15,.09)}
+  .pick-num{font-family:var(--lg-serif);font-style:italic;font-size:26px;color:var(--lg-a1);line-height:1}
+  .pick-body h4{font-family:var(--lg-serif);font-style:italic;font-size:22px;color:var(--lg-ink);margin:0 0 6px}
+  .pick-body p{font-size:14.5px;color:var(--lg-ink-soft);line-height:1.6;margin:0}
+  .pick-body p a{color:var(--lg-a1)}
+  .pick-tags{display:flex;gap:7px;flex-wrap:wrap;margin-top:11px}
+  .pick-tags span{font-family:var(--lg-mono);font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--lg-ink-mute);background:var(--lg-sand);border-radius:100px;padding:4px 10px}
+  .pick-cap{font-family:var(--lg-mono);font-size:10.5px;letter-spacing:.06em;color:var(--lg-ink-mute);text-align:right;white-space:nowrap}
+  .pick-cap .label-cap{display:block;color:var(--lg-ink-faint);margin-bottom:3px}
+  @media(max-width:760px){.pick-row{grid-template-columns:auto 1fr;gap:14px}.pick-cap{grid-column:2;text-align:left;white-space:normal}}
+  /* map + nearby + letter */
+  .town-map{border-radius:var(--lg-r);overflow:hidden;box-shadow:var(--lg-sh);height:clamp(360px,46vw,520px);margin-top:8px}
+  .nearby-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:16px;margin-top:8px}
+  .nearby-card{display:block;text-decoration:none;background:var(--lg-white);border-radius:var(--lg-r);overflow:hidden;box-shadow:var(--lg-sh-sm);transition:transform var(--lg-med) var(--lg-ease),box-shadow var(--lg-med)}
+  .nearby-card:hover{transform:translateY(-5px);box-shadow:var(--lg-sh)}
+  .nb-img{aspect-ratio:16/10;background-size:cover;background-position:center}
+  .nb-body{padding:18px 20px}
+  .nb-dist{font-family:var(--lg-mono);font-size:9.5px;letter-spacing:.13em;text-transform:uppercase;color:var(--lg-a1)}
+  .nb-body h4{font-family:var(--lg-serif);font-style:italic;font-size:22px;color:var(--lg-ink);margin:4px 0 4px}
+  .nb-body p{font-size:13.5px;color:var(--lg-ink-soft);margin:0}
+  .letter-card{background:var(--lg-white);border-radius:var(--lg-r-lg);box-shadow:var(--lg-sh);padding:clamp(28px,4vw,48px)}
+  .letter-grid{display:grid;grid-template-columns:200px 1fr;gap:36px;align-items:start;margin-top:20px}
+  .letter-photo img{width:140px;height:140px;border-radius:50%;object-fit:cover;box-shadow:var(--lg-sh-sm)}
+  .letter-stamp{margin-top:14px}.ls-cir{display:inline-flex;width:34px;height:34px;border-radius:50%;background:var(--lg-c1);color:#fff;align-items:center;justify-content:center;font-family:var(--lg-serif);font-style:italic}
+  .ls-lbl{display:block;font-family:var(--lg-mono);font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--lg-ink-mute);margin-top:8px}
+  .letter-open{font-family:var(--lg-serif);font-style:italic;font-size:24px;color:var(--lg-ink);margin:0 0 12px}
+  .letter-body p{font-size:15.5px;color:var(--lg-ink-soft);line-height:1.7;margin:0 0 14px}
+  .letter-sign{font-family:var(--lg-serif);font-style:italic;font-size:26px;color:var(--lg-a1)!important}
+  .letter-contact{display:flex;flex-wrap:wrap;gap:10px 26px;margin-top:24px;padding-top:20px;border-top:1px solid rgba(23,20,15,.1);font-family:var(--lg-mono);font-size:11.5px;letter-spacing:.06em}
+  .letter-contact a{color:var(--lg-ink);text-decoration:none}.letter-contact a:last-child{color:var(--lg-a1)}
+  @media(max-width:700px){.letter-grid{grid-template-columns:1fr;gap:20px}.letter-photo img{width:110px;height:110px}}
+  .faq-q h3{font-family:var(--lg-serif);font-style:italic;font-size:23px;color:var(--lg-ink);margin:0 0 8px}
+  .faq-q p{color:var(--lg-ink-soft);line-height:1.65;margin:0;font-size:15px}
+</style>
+
+<!-- Twain timeline (lg-tuned) -->
+<style>
+  .twain-strip{display:grid;grid-template-columns:repeat(5,1fr);gap:1px;background:rgba(255,253,248,.14);border:1px solid rgba(255,253,248,.14);border-radius:var(--lg-r);overflow:hidden;margin-top:28px}
+  .twain-tile{background:rgba(255,253,248,.06);padding:28px 22px 22px;position:relative;transition:background var(--lg-fast)}
+  .twain-tile:hover{background:rgba(255,253,248,.1)}
+  .twain-yr{font-family:var(--lg-serif);font-style:italic;font-weight:600;font-size:38px;color:var(--lg-sun);line-height:1;margin-bottom:14px}
+  .twain-h{font-family:var(--lg-serif);font-style:italic;font-weight:400;font-size:18px;color:#fff;line-height:1.2;margin-bottom:10px}
+  .twain-b{font-size:12.5px;line-height:1.55;color:rgba(255,253,248,.6)}
+  .twain-tile::before{content:'';position:absolute;top:28px;right:22px;width:8px;height:8px;border-radius:50%;background:var(--lg-sun);opacity:.55}
+  @media(max-width:900px){.twain-strip{grid-template-columns:1fr 1fr}}
+</style>
+
+<!-- Breadcrumb -->
+<nav class="t-crumb" aria-label="Breadcrumb">
+  <a href="index.html">Legacy</a><span>&rarr;</span><a href="towns.html">Communities</a><span>&rarr;</span><span>Angels Camp</span>
+  <span class="sp"></span><span>Vol. XXII &middot; Plate V &mdash; Gold Country Survey &middot; Legacy hometown</span>
+</nav>
+
+<!-- ============ HERO (season scrubber preserved) ============ -->
 <section class="town-hero" data-season="fall">
   <div class="th-frame th-frame-spring" style="background-image:url('art/towns/angels-camp-lake.jpg');"></div>
   <div class="th-frame th-frame-summer" style="background-image:url('art/towns/angels-camp-lake.jpg');"></div>
@@ -347,7 +412,7 @@
   </div>
 </section>
 
-<!-- JUMP -->
+<!-- ============ JUMP RAIL (scrollspy preserved) ============ -->
 <nav class="town-jump" id="jumpRail">
   <div class="town-jump-inner">
     <a href="#story" class="jump-on">The story</a>
@@ -358,376 +423,288 @@
   </div>
 </nav>
 
-<!-- STORY -->
-<section class="section town-story" id="story" style="background:var(--parchment);">
-  <div class="section-inner">
-    <div class="story-grid">
-      <div class="story-side">
-        <span class="hairline-brass"></span>
-        <span class="eyebrow">Field notes · § I</span>
-        <h2 class="h-section" style="margin-top:14px;">What is Angels Camp,<br>California <em>known for?</em></h2>
-        <p style="margin-top:12px; font-family:var(--serif); font-style:italic; font-size:18px; color:var(--ink-mute); line-height:1.4;">Angels Camp is the only incorporated city in Calaveras County, at 1,378 feet — home of the Calaveras County Fair &amp; Jumping Frog Jubilee made famous by Mark Twain.</p>
-      </div>
-      <div class="story-body">
-        <p class="lede">In the winter of 1865 an unknown young writer named Samuel Clemens sat down at the Angels Hotel bar and listened to a man named Ben Coon tell a yarn about a man, a frog, and a wager. That November the story ran in a New York paper. Mark Twain was born.</p>
-        <p>The same hotel bar is still there, on the same block, on the same Main Street. The frog is still mythic. And every May, on the third weekend, the Calaveras County Fair &amp; Jumping Frog Jubilee — running since 1928 — fills the fairgrounds with hundreds of frogs and the families that hand-raise them.</p>
-        <p>Angels Camp is also the operating address of Legacy Properties. Sara lives a mile from the fairgrounds. Most of her closings happen within a thirty-minute radius of her front porch.</p>
-      </div>
+<!-- ============ THE STORY ============ -->
+<section class="lg-sec" id="story"><div class="lg-wrap">
+  <div class="lg-grid" style="grid-template-columns:.85fr 1.15fr;gap:48px;align-items:start">
+    <div>
+      <div class="lg-kicker lg-rv"><span>Field notes · § I</span></div>
+      <h2 class="lg-display lg-h2 lg-rv lg-d1" style="margin:14px 0 10px">What is Angels Camp, California <em>known for?</em></h2>
+      <p class="lg-rv lg-d2" style="font-family:var(--lg-serif);font-style:italic;font-size:19px;color:var(--lg-ink-mute);line-height:1.4">Angels Camp is the only incorporated city in Calaveras County, at 1,378 feet &mdash; home of the Calaveras County Fair &amp; Jumping Frog Jubilee made famous by Mark Twain.</p>
     </div>
-
-    <div class="fit-strip">
-      <div class="fit-h"><span class="label-cap">Who Angels Camp is for —</span></div>
-      <div class="fit-cards">
-        <article class="fit-card">
-          <div class="fit-num">01</div>
-          <h4>The value buyer</h4>
-          <p>Most-affordable town in the survey. A real porch, a real yard, a real garage — at a number that looks like a typo to Bay Area eyes.</p>
-        </article>
-        <article class="fit-card">
-          <div class="fit-num">02</div>
-          <h4>The first-time buyer</h4>
-          <p>An hour-and-change from Stockton, two from the Bay. Inventory exists. Move-in dates are real. Offer terms are reasonable.</p>
-        </article>
-        <article class="fit-card">
-          <div class="fit-num">03</div>
-          <h4>The history buyer</h4>
-          <p>A 1900 cottage with the original windows. Walk to the museum, the saloon, the spot where Twain heard the story.</p>
-        </article>
-        <article class="fit-card">
-          <div class="fit-num">04</div>
-          <h4>The full-timer</h4>
-          <p>Hospitals fifteen minutes away in Mark Twain Medical Center. Schools, parks, the lifeguard at the city pool who's been there since 1991.</p>
-        </article>
-      </div>
+    <div class="lg-prose lg-rv lg-d1">
+      <p class="lg-lead">In the winter of 1865 an unknown young writer named Samuel Clemens sat down at the Angels Hotel bar and listened to a man named Ben Coon tell a yarn about a man, a frog, and a wager. That November the story ran in a New York paper. Mark Twain was born.</p>
+      <p>The same hotel bar is still there, on the same block, on the same Main Street. The frog is still mythic. And every May, on the third weekend, the Calaveras County Fair &amp; Jumping Frog Jubilee — running since 1928 — fills the fairgrounds with hundreds of frogs and the families that hand-raise them.</p>
+      <p>Angels Camp is also the operating address of Legacy Properties. Sara lives a mile from the fairgrounds. Most of her closings happen within a thirty-minute radius of her front porch.</p>
     </div>
   </div>
-</section>
-
-<!-- TWAIN — signature feature -->
-<section class="section" id="twain" style="background:var(--ink); color:var(--shell);">
-  <div class="section-inner">
-    <div class="section-h" style="border-bottom-color: rgba(250,246,236,0.1);">
-      <div>
-        <span class="hairline-brass" style="background:var(--brass-bright);"></span>
-        <span class="eyebrow" style="color:var(--brass-bright);">Plate III · A short history of a tall tale</span>
-        <h2 class="h-section" style="color:var(--shell); margin-top:10px;">The frog that<br><em style="color:var(--brass-bright);">made the writer.</em></h2>
-      </div>
-      <p class="lede right" style="color:rgba(250,246,236,0.7);">A hundred and sixty years of one story, lived on six city blocks.</p>
-    </div>
-
-    <div class="twain-strip">
-      <article class="twain-tile">
-        <div class="twain-yr">1865</div>
-        <div class="twain-h">A bar, a yarn, a notebook</div>
-        <div class="twain-b">Samuel Clemens, broke and unknown, hears Ben Coon tell a frog story at the Angels Hotel. He writes it down on the back of a letter.</div>
-      </article>
-      <article class="twain-tile">
-        <div class="twain-yr">1865</div>
-        <div class="twain-h">Published in New York</div>
-        <div class="twain-b">"The Celebrated Jumping Frog of Calaveras County" runs in the New York Saturday Press. Reprinted everywhere within weeks. Twain is on the map.</div>
-      </article>
-      <article class="twain-tile">
-        <div class="twain-yr">1928</div>
-        <div class="twain-h">The Jubilee begins</div>
-        <div class="twain-b">Angels Camp celebrates the paving of Main Street with the first Jumping Frog Jubilee. It becomes an annual rite — paused only twice since, in 1933 and 2020.</div>
-      </article>
-      <article class="twain-tile">
-        <div class="twain-yr">1986</div>
-        <div class="twain-h">Brass plates on Main</div>
-        <div class="twain-b">The Hall of Fame Frogs project sets bronze frogs into the sidewalk, one per winning frog since 1928. Walk Main Street, count the names.</div>
-      </article>
-      <article class="twain-tile">
-        <div class="twain-yr">2025</div>
-        <div class="twain-h">Sara opens Legacy</div>
-        <div class="twain-b">After five years selling homes under other brokers, Sara opens Legacy Properties one block off Main — her own shingle at last.</div>
-      </article>
-    </div>
-
-    <div class="wine-foot-strip">
-      <div>
-        <span class="label-cap" style="color:var(--brass-bright);">Jubilee math —</span>
-        <span class="wf-stat">1928 <em>first jubilee · annual since</em></span>
-        <span class="wf-stat">21<em>'5"</em><em>longest jump on record</em></span>
-        <span class="wf-stat">3 <em>days, 35,000 visitors</em></span>
-        <span class="wf-stat">May<em>third weekend, every year</em></span>
-      </div>
-      <a href="#" class="btn btn-brass btn-sm">Plan a Jubilee weekend</a>
-    </div>
+  <div class="lg-kicker lg-rv" style="margin-top:40px"><span>Who Angels Camp is for</span><span class="lg-rule"></span></div>
+  <div class="lg-grid lg-grid--4" style="margin-top:22px">
+    <div class="lg-point lg-rv" style="--lg-accent:var(--lg-a1)"><div class="lg-point__num">01</div><h4>The value buyer</h4><p>Most-affordable town in the survey. A real porch, a real yard, a real garage — at a number that looks like a typo to Bay Area eyes.</p></div>
+    <div class="lg-point lg-rv lg-d1" style="--lg-accent:var(--lg-a4)"><div class="lg-point__num">02</div><h4>The first-time buyer</h4><p>An hour-and-change from Stockton, two from the Bay. Inventory exists. Move-in dates are real. Offer terms are reasonable.</p></div>
+    <div class="lg-point lg-rv lg-d2" style="--lg-accent:var(--lg-a3)"><div class="lg-point__num">03</div><h4>The history buyer</h4><p>A 1900 cottage with the original windows. Walk to the museum, the saloon, the spot where Twain heard the story.</p></div>
+    <div class="lg-point lg-rv lg-d3" style="--lg-accent:var(--lg-a5)"><div class="lg-point__num">04</div><h4>The full-timer</h4><p>Hospitals fifteen minutes away in Mark Twain Medical Center. Schools, parks, the lifeguard at the city pool who's been there since 1991.</p></div>
   </div>
-</section>
+</div></section>
 
-
-<!-- PICKS -->
-<section class="section town-picks" id="picks" style="background:var(--vellum);">
-  <div class="section-inner">
-    <div class="section-h">
-      <div>
-        <span class="hairline-brass"></span>
-        <span class="eyebrow">Plate V · The personal list</span>
-        <h2 class="h-section" style="margin-top:10px;">Sara's standing<br><em>recommendations.</em></h2>
-      </div>
-      <p class="lede right">This is Sara's hometown. The list is opinionated.</p>
-    </div>
-
-    <div class="picks-tabs">
-      <button class="pick-tab pick-tab-on" data-tab="eat">Eat <span class="ct">04</span></button>
-      <button class="pick-tab" data-tab="drink">Drink <span class="ct">02</span></button>
-      <button class="pick-tab" data-tab="stay">Stay <span class="ct">03</span></button>
-      <button class="pick-tab" data-tab="do">Do <span class="ct">04</span></button>
-    </div>
-
-    <div class="picks-board">
-      <div class="pick-pane pick-pane-on" data-pane="eat">
-        <article class="pick-row">
-          <span class="pick-num">01</span>
-          <div class="pick-body">
-            <h4>Crusco's</h4>
-            <p>Italian-American, white tablecloths, the dining room where my anniversaries happen. Order the veal piccata.</p>
-            <div class="pick-tags"><span>Date</span><span>$$$</span></div>
-          </div>
-          <div class="pick-cap"><span class="label-cap">When</span><span>Dinner Wed–Sun</span></div>
-        </article>
-        <article class="pick-row">
-          <span class="pick-num">02</span>
-          <div class="pick-body">
-            <h4>Pickled Porch</h4>
-            <p>Breakfast all day, the chilaquiles are house lore. Walk-in only. The local Sunday.</p>
-            <div class="pick-tags"><span>Breakfast</span><span>$</span></div>
-          </div>
-          <div class="pick-cap"><span class="label-cap">When</span><span>7–2 Wed–Sun</span></div>
-        </article>
-        <article class="pick-row">
-          <span class="pick-num">03</span>
-          <div class="pick-body">
-            <h4>Miner's Lounge</h4>
-            <p>Exceptional bites — the Main Street kitchen that's quietly become the standby. Worth holding out for the corner table.</p>
-            <div class="pick-tags"><span>Bites</span><span>$$</span></div>
-          </div>
-          <div class="pick-cap"><span class="label-cap">When</span><span>11–9 daily</span></div>
-        </article>
-      </div>
-
-      <div class="pick-pane" data-pane="drink">
-        <article class="pick-row">
-          <span class="pick-num">01</span>
-          <div class="pick-body">
-            <h4>The Miner's Lounge</h4>
-            <p>The proper local. Burgers, pool table, the volunteer firefighters after a shift. The town's living room.</p>
-            <div class="pick-tags"><span>Local</span><span>$$</span></div>
-          </div>
-          <div class="pick-cap"><span class="label-cap">When</span><span>11 am – close</span></div>
-        </article>
-        <article class="pick-row">
-          <span class="pick-num">02</span>
-          <div class="pick-body">
-            <h4>Camps bar at sunset</h4>
-            <p>If you've got one drink in Angels Camp, drink it here, with the eighteenth hole in front of you and the foothills behind it.</p>
-            <div class="pick-tags"><span>View</span><span>$$</span></div>
-          </div>
-          <div class="pick-cap"><span class="label-cap">When</span><span>4 pm – close</span></div>
-        </article>
-      </div>
-
-      <div class="pick-pane" data-pane="stay">
-        <article class="pick-row">
-          <span class="pick-num">01</span>
-          <div class="pick-body">
-            <h4>Glashaus</h4>
-            <p>The glass dome James and I built on twenty private acres above New Melones Lake — 360° of water, foothills and stars through the glass, an outdoor clawfoot tub set right on the ancient rock. A guest-favorite Superhost stay, and where I send buyers who want to feel what living up here actually feels like. <a href="https://www.airbnb.com/rooms/919731657397440702" target="_blank" rel="noopener">Book it direct on Airbnb →</a></p>
-            <div class="pick-tags"><span>Glass dome</span><span>Lake view</span><span>Book direct</span></div>
-          </div>
-          <div class="pick-cap"><span class="label-cap">Rated</span><span><a href="https://www.airbnb.com/rooms/919731657397440702" target="_blank" rel="noopener">4.92 · Airbnb</a></span></div>
-        </article>
-        <article class="pick-row">
-          <span class="pick-num">02</span>
-          <div class="pick-body">
-            <h4>Cooper House Inn</h4>
-            <p>Six rooms, walk to Main. Wisteria porch, the back garden, the breakfast my mother-in-law still talks about.</p>
-            <div class="pick-tags"><span>B&B</span><span>$$$</span></div>
-          </div>
-          <div class="pick-cap"><span class="label-cap">From</span><span>$215 / nt</span></div>
-        </article>
-        <article class="pick-row">
-          <span class="pick-num">03</span>
-          <div class="pick-body">
-            <h4>Greenhorn Creek Resort</h4>
-            <p>Townhomes around the golf course, ten minutes south. The dependable group-trip option.</p>
-            <div class="pick-tags"><span>Resort</span><span>$$$</span></div>
-          </div>
-          <div class="pick-cap"><span class="label-cap">From</span><span>$285 / nt</span></div>
-        </article>
-      </div>
-
-      <div class="pick-pane" data-pane="do">
-        <article class="pick-row">
-          <span class="pick-num">01</span>
-          <div class="pick-body">
-            <h4>Calaveras Fair &amp; Frog Jubilee</h4>
-            <p>Third weekend in May. Bring kids, bring strangers, bring a folding chair. Sara hosts a porch party every year — ask.</p>
-            <div class="pick-tags"><span>Festival</span><span>May</span></div>
-          </div>
-          <div class="pick-cap"><span class="label-cap">When</span><span>May, 3rd wknd</span></div>
-        </article>
-        <article class="pick-row">
-          <span class="pick-num">02</span>
-          <div class="pick-body">
-            <h4>Angels Camp Museum</h4>
-            <p>Mining gear, period photos, and the original frog hall of fame. Free hour you didn't know you needed.</p>
-            <div class="pick-tags"><span>History</span><span>In town</span></div>
-          </div>
-          <div class="pick-cap"><span class="label-cap">When</span><span>10–4 daily</span></div>
-        </article>
-        <article class="pick-row">
-          <span class="pick-num">03</span>
-          <div class="pick-body">
-            <h4>New Melones Lake</h4>
-            <p>Eighteen minutes west. Wakeboarding, swimming, summer houseboats. A different California from up here.</p>
-            <div class="pick-tags"><span>Lake</span><span>18 min</span></div>
-          </div>
-          <div class="pick-cap"><span class="label-cap">When</span><span>May–Oct</span></div>
-        </article>
-        <article class="pick-row">
-          <span class="pick-num">04</span>
-          <div class="pick-body">
-            <h4>The frog trail on Main</h4>
-            <p>Walk Main from Finnegan to Bird's Way. Count the brass plates in the sidewalk — a champion frog for nearly every year since 1928. Promise.</p>
-            <div class="pick-tags"><span>Free</span><span>Anytime</span></div>
-          </div>
-          <div class="pick-cap"><span class="label-cap">When</span><span>Daylight</span></div>
-        </article>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- LISTINGS -->
-<section class="section" id="listings" style="background:var(--parchment);">
-  <div class="section-inner">
-    <div class="section-h">
-      <div>
-        <span class="hairline-brass"></span>
-        <span class="eyebrow">Plate VI · Currently in the field</span>
-        <h2 class="h-section" style="margin-top:10px;">Homes for sale<br><em>in Angels Camp.</em></h2>
-      </div>
-      <p class="lede right">Every home currently for sale in Angels Camp — live from the MLS.</p>
-    </div>
-
-    <!-- Full Angels Camp market — iHomeFinder saved-search gallery (id 3019721,
-         featured:false → pulls the whole MLS for the city, not office inventory). -->
-    <div class="idx-embed idx-feature-gallery">
-      <script>
-        document.currentScript.replaceWith(ihfKestrel.render({
-          "component": "gallerySliderWidget",
-          "rows": 2,
-          "navigation": true,
-          "nav": "top",
-          "auto": true,
-          "maxResults": 25,
-          "status": "active",
-          "sort": "ds",
-          "featured": false,
-          "effect": "slide",
-          "id": 3019721
-        }));
-      </script>
-    </div>
-
-  </div>
-</section>
-
-<!-- LETTER -->
-<section class="section town-letter" id="letter" style="background:var(--vellum);">
-  <div class="section-inner">
-    <article class="letter-card">
-      <div class="letter-head">
-        <span class="hairline-brass"></span>
-        <span class="eyebrow">A note from your agent · § VII</span>
-      </div>
-      <div class="letter-grid">
-        <div class="letter-photo">
-          <img src="art/sara-headshot.png" alt="Sara Cooper">
-          <div class="letter-stamp">
-            <span class="ls-cir">SC</span>
-            <span class="ls-lbl">Sara Cooper · Owner-Broker · Lives here</span>
-          </div>
-        </div>
-        <div class="letter-body">
-          <p class="letter-open">A few words on Angels Camp —</p>
-          <p>I live here. My mailbox is a mile from the fairgrounds, and I owner-built our home inside the city limits. I've been in this town since 1999.</p>
-          <p>Angels Camp is the most-affordable town in the survey — by a margin that surprises Bay Area buyers when they first see the numbers. The trade-off is honest: it's a working town, not a tasting-room town. Murphys is twelve minutes north when you want that. Sonora is twenty-two minutes south when you need a hospital. Both are close enough to count as amenities.</p>
-          <p>If you're looking for the best dollar-per-square-foot in three counties, with a real Main Street, a real fair, and a real history — Angels Camp is the conversation. Come see me when you're in town — I'm usually around before nine.</p>
-          <p class="letter-sign">— Sara</p>
-        </div>
-      </div>
-      <div class="letter-contact">
-        <a href="tel:2095594966"><span class="glyph">◇</span> (209) 559-4966</a>
-        <a href="mailto:SaraSellsCalifornia@gmail.com"><span class="glyph">◇</span> SaraSellsCalifornia@gmail.com</a>
-        <a href="find-my-match.html"><span class="glyph">◇</span> Coffee on Main</a>
-      </div>
+<!-- ============ TWAIN — signature feature ============ -->
+<section class="lg-sec lg-sec--ink" id="twain"><div class="lg-wrap">
+  <div class="lg-kicker lg-rv"><span>Plate III · A short history of a tall tale</span></div>
+  <h2 class="lg-display lg-h2 lg-rv lg-d1" style="margin:14px 0 10px">The frog that <em>made the writer.</em></h2>
+  <p class="lg-rv lg-d2" style="font-family:var(--lg-serif);font-style:italic;font-size:20px;color:rgba(255,253,248,.78);max-width:660px">A hundred and sixty years of one story, lived on six city blocks.</p>
+  <div class="twain-strip lg-rv lg-d2">
+    <article class="twain-tile">
+      <div class="twain-yr">1865</div>
+      <div class="twain-h">A bar, a yarn, a notebook</div>
+      <div class="twain-b">Samuel Clemens, broke and unknown, hears Ben Coon tell a frog story at the Angels Hotel. He writes it down on the back of a letter.</div>
+    </article>
+    <article class="twain-tile">
+      <div class="twain-yr">1865</div>
+      <div class="twain-h">Published in New York</div>
+      <div class="twain-b">"The Celebrated Jumping Frog of Calaveras County" runs in the New York Saturday Press. Reprinted everywhere within weeks. Twain is on the map.</div>
+    </article>
+    <article class="twain-tile">
+      <div class="twain-yr">1928</div>
+      <div class="twain-h">The Jubilee begins</div>
+      <div class="twain-b">Angels Camp celebrates the paving of Main Street with the first Jumping Frog Jubilee. It becomes an annual rite — paused only twice since, in 1933 and 2020.</div>
+    </article>
+    <article class="twain-tile">
+      <div class="twain-yr">1986</div>
+      <div class="twain-h">Brass plates on Main</div>
+      <div class="twain-b">The Hall of Fame Frogs project sets bronze frogs into the sidewalk, one per winning frog since 1928. Walk Main Street, count the names.</div>
+    </article>
+    <article class="twain-tile">
+      <div class="twain-yr">2025</div>
+      <div class="twain-h">Sara opens Legacy</div>
+      <div class="twain-b">After five years selling homes under other brokers, Sara opens Legacy Properties one block off Main — her own shingle at last.</div>
     </article>
   </div>
-</section>
+  <div class="wine-walk lg-rv">
+    <span class="label-cap" style="font-family:var(--lg-mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--lg-sun)">Jubilee math &mdash;</span>
+    <span class="wf-stat">1928 <em>first jubilee · annual since</em></span>
+    <span class="wf-stat">21'5" <em>longest jump on record</em></span>
+    <span class="wf-stat">3 <em>days, 35,000 visitors</em></span>
+    <span class="wf-stat">May <em>third weekend, every year</em></span>
+  </div>
+</div></section>
 
-<!-- NEARBY -->
-<section class="section" style="background:var(--parchment);">
-  <div class="section-inner">
-    <div class="section-h">
-      <div>
-        <span class="hairline-brass"></span>
-        <span class="eyebrow">Plate VIII · Adjacent</span>
-        <h2 class="h-section" style="margin-top:10px;">Towns nearby.</h2>
-      </div>
-      <p class="lede right">Five more characters in the same story.</p>
+<!-- ============ SARA'S PICKS (tabs preserved) ============ -->
+<section class="lg-sec lg-sec--tint" id="picks"><div class="lg-wrap">
+  <div class="lg-kicker lg-rv"><span>Plate V · The personal list</span><span class="lg-rule"></span></div>
+  <h2 class="lg-display lg-h2 lg-rv lg-d1" style="margin:14px 0 8px">Sara's standing <em>recommendations.</em></h2>
+  <div class="lg-note lg-rv lg-d2" style="max-width:680px">This is Sara's hometown. The list is opinionated.</div>
+
+  <div class="picks-tabs">
+    <button class="pick-tab pick-tab-on" data-tab="eat">Eat <span class="ct">04</span></button>
+    <button class="pick-tab" data-tab="drink">Drink <span class="ct">02</span></button>
+    <button class="pick-tab" data-tab="stay">Stay <span class="ct">03</span></button>
+    <button class="pick-tab" data-tab="do">Do <span class="ct">04</span></button>
+  </div>
+
+  <div class="picks-board">
+    <div class="pick-pane pick-pane-on" data-pane="eat">
+      <article class="pick-row">
+        <span class="pick-num">01</span>
+        <div class="pick-body">
+          <h4>Crusco's</h4>
+          <p>Italian-American, white tablecloths, the dining room where my anniversaries happen. Order the veal piccata.</p>
+          <div class="pick-tags"><span>Date</span><span>$$$</span></div>
+        </div>
+        <div class="pick-cap"><span class="label-cap">When</span><span>Dinner Wed–Sun</span></div>
+      </article>
+      <article class="pick-row">
+        <span class="pick-num">02</span>
+        <div class="pick-body">
+          <h4>Pickled Porch</h4>
+          <p>Breakfast all day, the chilaquiles are house lore. Walk-in only. The local Sunday.</p>
+          <div class="pick-tags"><span>Breakfast</span><span>$</span></div>
+        </div>
+        <div class="pick-cap"><span class="label-cap">When</span><span>7–2 Wed–Sun</span></div>
+      </article>
+      <article class="pick-row">
+        <span class="pick-num">03</span>
+        <div class="pick-body">
+          <h4>Miner's Lounge</h4>
+          <p>Exceptional bites — the Main Street kitchen that's quietly become the standby. Worth holding out for the corner table.</p>
+          <div class="pick-tags"><span>Bites</span><span>$$</span></div>
+        </div>
+        <div class="pick-cap"><span class="label-cap">When</span><span>11–9 daily</span></div>
+      </article>
     </div>
 
-    <div class="nearby-grid">
-      <a href="town-murphys.html" class="nearby-card">
-        <div class="nb-img" style="background-image:url('art/towns/murphys-mainst-summer.jpg');"></div>
-        <div class="nb-body"><span class="nb-dist">12 min north</span><h4>Murphys</h4><p>Wine country, Main Street.</p></div>
-      </a>
-      <a href="town-arnold.html" class="nearby-card">
-        <div class="nb-img" style="background-image:url('art/towns/arnold-aspens-fall.jpg');"></div>
-        <div class="nb-body"><span class="nb-dist">32 min northeast</span><h4>Arnold</h4><p>Pines &amp; cabins.</p></div>
-      </a>
-      <a href="town-copperopolis.html" class="nearby-card">
-        <div class="nb-img" style="background-image:url('art/towns/copperopolis-lake-tulloch.jpg');"></div>
-        <div class="nb-body"><span class="nb-dist">14 min southwest</span><h4>Copperopolis</h4><p>Lake estates, golf.</p></div>
-      </a>
-      <a href="river-mountain.html" class="nearby-card">
-        <div class="nb-img" style="background-image:url('art/towns/rm-mokelumne-rapids.jpg');"></div>
-        <div class="nb-body"><span class="nb-dist">22 min south</span><h4>Waterfront Lakes and Rivers</h4><p>Lakes, rivers &amp; waterfront.</p></div>
-      </a>
-      <a href="town-sutter-creek.html" class="nearby-card">
-        <div class="nb-img" style="background-image:url('art/towns/sutter-creek-mainst.jpg');"></div>
-        <div class="nb-body"><span class="nb-dist">28 min northwest</span><h4>Sutter Creek</h4><p>Antiques, Amador wine.</p></div>
-      </a>
+    <div class="pick-pane" data-pane="drink">
+      <article class="pick-row">
+        <span class="pick-num">01</span>
+        <div class="pick-body">
+          <h4>The Miner's Lounge</h4>
+          <p>The proper local. Burgers, pool table, the volunteer firefighters after a shift. The town's living room.</p>
+          <div class="pick-tags"><span>Local</span><span>$$</span></div>
+        </div>
+        <div class="pick-cap"><span class="label-cap">When</span><span>11 am – close</span></div>
+      </article>
+      <article class="pick-row">
+        <span class="pick-num">02</span>
+        <div class="pick-body">
+          <h4>Camps bar at sunset</h4>
+          <p>If you've got one drink in Angels Camp, drink it here, with the eighteenth hole in front of you and the foothills behind it.</p>
+          <div class="pick-tags"><span>View</span><span>$$</span></div>
+        </div>
+        <div class="pick-cap"><span class="label-cap">When</span><span>4 pm – close</span></div>
+      </article>
+    </div>
+
+    <div class="pick-pane" data-pane="stay">
+      <article class="pick-row">
+        <span class="pick-num">01</span>
+        <div class="pick-body">
+          <h4>Glashaus</h4>
+          <p>The glass dome James and I built on twenty private acres above New Melones Lake — 360° of water, foothills and stars through the glass, an outdoor clawfoot tub set right on the ancient rock. A guest-favorite Superhost stay, and where I send buyers who want to feel what living up here actually feels like. <a href="https://www.airbnb.com/rooms/919731657397440702" target="_blank" rel="noopener">Book it direct on Airbnb →</a></p>
+          <div class="pick-tags"><span>Glass dome</span><span>Lake view</span><span>Book direct</span></div>
+        </div>
+        <div class="pick-cap"><span class="label-cap">Rated</span><span><a href="https://www.airbnb.com/rooms/919731657397440702" target="_blank" rel="noopener">4.92 · Airbnb</a></span></div>
+      </article>
+      <article class="pick-row">
+        <span class="pick-num">02</span>
+        <div class="pick-body">
+          <h4>Cooper House Inn</h4>
+          <p>Six rooms, walk to Main. Wisteria porch, the back garden, the breakfast my mother-in-law still talks about.</p>
+          <div class="pick-tags"><span>B&B</span><span>$$$</span></div>
+        </div>
+        <div class="pick-cap"><span class="label-cap">From</span><span>$215 / nt</span></div>
+      </article>
+      <article class="pick-row">
+        <span class="pick-num">03</span>
+        <div class="pick-body">
+          <h4>Greenhorn Creek Resort</h4>
+          <p>Townhomes around the golf course, ten minutes south. The dependable group-trip option.</p>
+          <div class="pick-tags"><span>Resort</span><span>$$$</span></div>
+        </div>
+        <div class="pick-cap"><span class="label-cap">From</span><span>$285 / nt</span></div>
+      </article>
+    </div>
+
+    <div class="pick-pane" data-pane="do">
+      <article class="pick-row">
+        <span class="pick-num">01</span>
+        <div class="pick-body">
+          <h4>Calaveras Fair &amp; Frog Jubilee</h4>
+          <p>Third weekend in May. Bring kids, bring strangers, bring a folding chair. Sara hosts a porch party every year — ask.</p>
+          <div class="pick-tags"><span>Festival</span><span>May</span></div>
+        </div>
+        <div class="pick-cap"><span class="label-cap">When</span><span>May, 3rd wknd</span></div>
+      </article>
+      <article class="pick-row">
+        <span class="pick-num">02</span>
+        <div class="pick-body">
+          <h4>Angels Camp Museum</h4>
+          <p>Mining gear, period photos, and the original frog hall of fame. Free hour you didn't know you needed.</p>
+          <div class="pick-tags"><span>History</span><span>In town</span></div>
+        </div>
+        <div class="pick-cap"><span class="label-cap">When</span><span>10–4 daily</span></div>
+      </article>
+      <article class="pick-row">
+        <span class="pick-num">03</span>
+        <div class="pick-body">
+          <h4>New Melones Lake</h4>
+          <p>Eighteen minutes west. Wakeboarding, swimming, summer houseboats. A different California from up here.</p>
+          <div class="pick-tags"><span>Lake</span><span>18 min</span></div>
+        </div>
+        <div class="pick-cap"><span class="label-cap">When</span><span>May–Oct</span></div>
+      </article>
+      <article class="pick-row">
+        <span class="pick-num">04</span>
+        <div class="pick-body">
+          <h4>The frog trail on Main</h4>
+          <p>Walk Main from Finnegan to Bird's Way. Count the brass plates in the sidewalk — a champion frog for nearly every year since 1928. Promise.</p>
+          <div class="pick-tags"><span>Free</span><span>Anytime</span></div>
+        </div>
+        <div class="pick-cap"><span class="label-cap">When</span><span>Daylight</span></div>
+      </article>
     </div>
   </div>
-</section>
+</div></section>
 
-<!-- CTA -->
-<section class="cta">
-  <span class="hairline-brass" style="margin: 0 auto 20px; background: var(--brass-bright);"></span>
-  <span class="eyebrow" style="color: var(--brass-bright);">Begin your Angels Camp chapter</span>
-  <h2 class="cta-h">Coffee on Main<br><em>with Sara.</em></h2>
-  <p class="cta-sub">A walk through Frogtown. Honest counsel from someone who lives a mile from the fairgrounds.</p>
-  <div class="cta-ctas">
-    <a href="find-my-match.html" class="btn btn-ink">Find my Angels Camp match</a>
-    <a href="tel:2095594966" class="btn btn-ghost">Call (209) 559-4966</a>
+<!-- ============ LISTINGS — live IDX gallery ============ -->
+<section class="lg-sec" id="listings"><div class="lg-wrap">
+  <div class="lg-kicker lg-rv"><span>Plate VI · Currently in the field</span><span class="lg-rule"></span></div>
+  <h2 class="lg-display lg-h2 lg-rv lg-d1" style="margin:14px 0 10px">Homes for sale <em>in Angels Camp.</em></h2>
+  <div class="lg-note lg-rv lg-d2" style="max-width:560px">Every home currently for sale in Angels Camp — live from the MLS.</div>
+  <!-- Full Angels Camp market — iHomeFinder saved-search gallery (id 3019721,
+       featured:false → pulls the whole MLS for the city, not office inventory). -->
+  <div class="idx-embed idx-feature-gallery" style="margin-top:26px">
+    <script>
+      document.currentScript.replaceWith(ihfKestrel.render({
+        "component": "gallerySliderWidget",
+        "rows": 2,
+        "navigation": true,
+        "nav": "top",
+        "auto": true,
+        "maxResults": 25,
+        "status": "active",
+        "sort": "ds",
+        "featured": false,
+        "effect": "slide",
+        "id": 3019721
+      }));
+    </script>
   </div>
-</section>
+</div></section>
 
-<!-- ============ MARKET REPORT (live MLS) ============ -->
-<section class="section" id="market" style="background:var(--vellum);">
-  <div class="section-inner">
-    <div class="town-marketreport">
-      <div class="tmr-head">
-        <span class="hairline-brass"></span>
-        <span class="eyebrow">Live from the MLS · updated continuously</span>
-        <h3 class="tmr-title">What are current home prices in Angels Camp, CA?</h3>
-        <p style="margin-top:10px; max-width:640px; color:var(--ink-soft);">Angels Camp, California home prices are best read live. The report below pulls the current median price, days on market and active inventory for Angels Camp straight from the MLS, so the numbers stay current instead of going stale on the page.</p>
+<!-- ============ LETTER FROM SARA ============ -->
+<section class="lg-sec lg-sec--tint" id="letter"><div class="lg-wrap">
+  <article class="letter-card lg-rv">
+    <div class="lg-kicker"><span>A note from your agent · § VII</span><span class="lg-rule"></span></div>
+    <div class="letter-grid">
+      <div class="letter-photo">
+        <img src="art/sara-headshot.png" alt="Sara Cooper">
+        <div class="letter-stamp"><span class="ls-cir">SC</span><span class="ls-lbl">Sara Cooper · Owner-Broker · Lives here</span></div>
       </div>
-      <div class="idx-embed idx-market-report">
+      <div class="letter-body">
+        <p class="letter-open">A few words on Angels Camp &mdash;</p>
+        <p>I live here. My mailbox is a mile from the fairgrounds, and I owner-built our home inside the city limits. I've been in this town since 1999.</p>
+        <p>Angels Camp is the most-affordable town in the survey — by a margin that surprises Bay Area buyers when they first see the numbers. The trade-off is honest: it's a working town, not a tasting-room town. Murphys is twelve minutes north when you want that. Sonora is twenty-two minutes south when you need a hospital. Both are close enough to count as amenities.</p>
+        <p>If you're looking for the best dollar-per-square-foot in three counties, with a real Main Street, a real fair, and a real history — Angels Camp is the conversation. Come see me when you're in town — I'm usually around before nine.</p>
+        <p class="letter-sign">&mdash; Sara</p>
+      </div>
+    </div>
+    <div class="letter-contact">
+      <a href="tel:2095594966">◇&nbsp; (209) 559-4966</a>
+      <a href="mailto:SaraSellsCalifornia@gmail.com">◇&nbsp; SaraSellsCalifornia@gmail.com</a>
+      <a href="find-my-match.html">◇&nbsp; Coffee on Main</a>
+    </div>
+  </article>
+</div></section>
+
+<!-- ============ NEIGHBORING TOWNS ============ -->
+<section class="lg-sec"><div class="lg-wrap">
+  <div class="lg-kicker lg-rv"><span>Plate VIII · Adjacent</span><span class="lg-rule"></span></div>
+  <h2 class="lg-display lg-h2 lg-rv lg-d1" style="margin:14px 0 8px">Towns nearby.</h2>
+  <div class="lg-note lg-rv lg-d2" style="max-width:620px">Five more characters in the same story.</div>
+  <div class="nearby-grid lg-rv lg-d2">
+    <a href="town-murphys.html" class="nearby-card"><div class="nb-img" style="background-image:url('art/towns/murphys-mainst-summer.jpg');"></div><div class="nb-body"><span class="nb-dist">12 min north</span><h4>Murphys</h4><p>Wine country, Main Street.</p></div></a>
+    <a href="town-arnold.html" class="nearby-card"><div class="nb-img" style="background-image:url('art/towns/arnold-aspens-fall.jpg');"></div><div class="nb-body"><span class="nb-dist">32 min northeast</span><h4>Arnold</h4><p>Pines &amp; cabins.</p></div></a>
+    <a href="town-copperopolis.html" class="nearby-card"><div class="nb-img" style="background-image:url('art/towns/copperopolis-lake-tulloch.jpg');"></div><div class="nb-body"><span class="nb-dist">14 min southwest</span><h4>Copperopolis</h4><p>Lake estates, golf.</p></div></a>
+    <a href="river-mountain.html" class="nearby-card"><div class="nb-img" style="background-image:url('art/towns/rm-mokelumne-rapids.jpg');"></div><div class="nb-body"><span class="nb-dist">22 min south</span><h4>Waterfront Lakes and Rivers</h4><p>Lakes, rivers &amp; waterfront.</p></div></a>
+    <a href="town-sutter-creek.html" class="nearby-card"><div class="nb-img" style="background-image:url('art/towns/sutter-creek-mainst.jpg');"></div><div class="nb-body"><span class="nb-dist">28 min northwest</span><h4>Sutter Creek</h4><p>Antiques, Amador wine.</p></div></a>
+  </div>
+</div></section>
+
+<!-- ============ CTA ============ -->
+<section class="lg-sec lg-sec--ink"><div class="lg-wrap" style="text-align:center">
+  <div class="lg-kicker lg-rv" style="justify-content:center"><span>Begin your Angels Camp chapter</span></div>
+  <h2 class="lg-display lg-rv lg-d1" style="margin:16px 0 14px;font-size:clamp(38px,6vw,74px);line-height:.98">Coffee on Main<br><em>with Sara.</em></h2>
+  <p class="lg-rv lg-d2" style="font-family:var(--lg-serif);font-style:italic;font-size:21px;color:rgba(255,253,248,.85);max-width:600px;margin:0 auto">A walk through Frogtown. Honest counsel from someone who lives a mile from the fairgrounds.</p>
+  <div class="lg-rv lg-d3" style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:28px">
+    <a href="find-my-match.html" class="lg-btn lg-btn--gold">Find my Angels Camp match</a>
+    <a href="tel:2095594966" class="lg-btn lg-btn--ghost">Call (209) 559-4966</a>
+  </div>
+</div></section>
+
+<!-- ============ MARKET REPORT — live IDX market report ============ -->
+<section class="lg-sec" id="market"><div class="lg-wrap">
+  <div class="lg-kicker lg-rv"><span>Live from the MLS · updated continuously</span><span class="lg-rule"></span></div>
+  <h2 class="lg-display lg-h2 lg-rv lg-d1" style="margin:14px 0 10px">What are current home prices in <em>Angels Camp, CA?</em></h2>
+  <div class="lg-note lg-rv lg-d2" style="max-width:660px">Angels Camp, California home prices are best read live. The report below pulls the current median price, days on market and active inventory for Angels Camp straight from the MLS, so the numbers stay current instead of going stale on the page.</div>
+  <div class="idx-embed idx-market-report" style="margin-top:26px">
 <script>
   document.currentScript.replaceWith(ihfKestrel.render({
     "component": "marketReportWidget",
@@ -735,72 +712,41 @@
     "marketReportTypeId": 3
   }));
 </script>
-      </div>
-    </div>
   </div>
-</section>
+</div></section>
 
 <!-- ============ AT A GLANCE (facts, AI-retrievable) ============ -->
-<section class="section" id="facts" style="background:var(--parchment);">
-  <div class="section-inner">
-    <div class="section-h">
-      <div>
-        <span class="hairline-brass"></span>
-        <span class="eyebrow">Angels Camp · at a glance</span>
-        <h2 class="h-section" style="margin-top:10px;">Angels Camp, California<br><em>by the numbers.</em></h2>
-      </div>
-      <p class="lede right">The durable facts buyers ask first. Current prices are pulled live from the MLS, not hand-kept here.</p>
-    </div>
-    <div style="max-width:820px; margin-top:24px;">
-<div style="display:flex; justify-content:space-between; align-items:baseline; gap:24px; padding:16px 0; border-top:1px solid var(--rule);"><span style="font-family:var(--mono); font-size:11px; letter-spacing:0.1em; text-transform:uppercase; color:var(--ink-mute); white-space:nowrap;">County</span><span style="font-family:var(--serif); font-size:22px; color:var(--ink); text-align:right; line-height:1.2;">Calaveras County</span></div>
-<div style="display:flex; justify-content:space-between; align-items:baseline; gap:24px; padding:16px 0; border-top:1px solid var(--rule);"><span style="font-family:var(--mono); font-size:11px; letter-spacing:0.1em; text-transform:uppercase; color:var(--ink-mute); white-space:nowrap;">Distinction</span><span style="font-family:var(--serif); font-size:22px; color:var(--ink); text-align:right; line-height:1.2;">Only incorporated city in Calaveras County</span></div>
-<div style="display:flex; justify-content:space-between; align-items:baseline; gap:24px; padding:16px 0; border-top:1px solid var(--rule);"><span style="font-family:var(--mono); font-size:11px; letter-spacing:0.1em; text-transform:uppercase; color:var(--ink-mute); white-space:nowrap;">Elevation</span><span style="font-family:var(--serif); font-size:22px; color:var(--ink); text-align:right; line-height:1.2;">1,378 ft</span></div>
-<div style="display:flex; justify-content:space-between; align-items:baseline; gap:24px; padding:16px 0; border-top:1px solid var(--rule);"><span style="font-family:var(--mono); font-size:11px; letter-spacing:0.1em; text-transform:uppercase; color:var(--ink-mute); white-space:nowrap;">Population</span><span style="font-family:var(--serif); font-size:22px; color:var(--ink); text-align:right; line-height:1.2;">3,667 <span style="color:var(--ink-faint);">(2020 Census)</span></span></div>
-<div style="display:flex; justify-content:space-between; align-items:baseline; gap:24px; padding:16px 0; border-top:1px solid var(--rule);"><span style="font-family:var(--mono); font-size:11px; letter-spacing:0.1em; text-transform:uppercase; color:var(--ink-mute); white-space:nowrap;">Water</span><span style="font-family:var(--serif); font-size:22px; color:var(--ink); text-align:right; line-height:1.2;">Calaveras County Water District</span></div>
-<div style="display:flex; justify-content:space-between; align-items:baseline; gap:24px; padding:16px 0; border-top:1px solid var(--rule);"><span style="font-family:var(--mono); font-size:11px; letter-spacing:0.1em; text-transform:uppercase; color:var(--ink-mute); white-space:nowrap;">Schools</span><span style="font-family:var(--serif); font-size:22px; color:var(--ink); text-align:right; line-height:1.2;">Mark Twain Union Elem. → Bret Harte Union High</span></div>
-<div style="display:flex; justify-content:space-between; align-items:baseline; gap:24px; padding:16px 0; border-top:1px solid var(--rule);"><span style="font-family:var(--mono); font-size:11px; letter-spacing:0.1em; text-transform:uppercase; color:var(--ink-mute); white-space:nowrap;">Stockton</span><span style="font-family:var(--serif); font-size:22px; color:var(--ink); text-align:right; line-height:1.2;">≈ 1 hr</span></div>
-<div style="display:flex; justify-content:space-between; align-items:baseline; gap:24px; padding:16px 0; border-top:1px solid var(--rule);"><span style="font-family:var(--mono); font-size:11px; letter-spacing:0.1em; text-transform:uppercase; color:var(--ink-mute); white-space:nowrap;">Sacramento</span><span style="font-family:var(--serif); font-size:22px; color:var(--ink); text-align:right; line-height:1.2;">≈ 1 hr 48 min</span></div>
-<div style="display:flex; justify-content:space-between; align-items:baseline; gap:24px; padding:16px 0; border-top:1px solid var(--rule); border-bottom:1px solid var(--rule);"><span style="font-family:var(--mono); font-size:11px; letter-spacing:0.1em; text-transform:uppercase; color:var(--ink-mute); white-space:nowrap;">Known for</span><span style="font-family:var(--serif); font-size:22px; color:var(--ink); text-align:right; line-height:1.2;">Jumping Frog Jubilee · Mark Twain</span></div>
-</div>
-<p style="margin-top:20px; font-family:var(--mono); font-size:11px; letter-spacing:0.1em; text-transform:uppercase; color:var(--ink-faint);">Last updated: July 2026</p>
+<section class="lg-sec lg-sec--tint" id="facts"><div class="lg-wrap">
+  <div class="lg-kicker lg-rv"><span>Angels Camp · at a glance</span><span class="lg-rule"></span></div>
+  <h2 class="lg-display lg-h2 lg-rv lg-d1" style="margin:14px 0 10px">Angels Camp, California <em>by the numbers.</em></h2>
+  <div class="lg-note lg-rv lg-d2" style="max-width:640px">The durable facts buyers ask first. Current prices are pulled live from the MLS, not hand-kept here.</div>
+  <div class="facts lg-rv lg-d2">
+    <div class="facts-row"><span class="k">County</span><span class="v">Calaveras County</span></div>
+    <div class="facts-row"><span class="k">Distinction</span><span class="v">Only incorporated city in Calaveras County</span></div>
+    <div class="facts-row"><span class="k">Elevation</span><span class="v">1,378 ft</span></div>
+    <div class="facts-row"><span class="k">Population</span><span class="v">3,667 <span class="sub">(2020 Census)</span></span></div>
+    <div class="facts-row"><span class="k">Water</span><span class="v">Calaveras County Water District</span></div>
+    <div class="facts-row"><span class="k">Schools</span><span class="v">Mark Twain Union Elem. → Bret Harte Union High</span></div>
+    <div class="facts-row"><span class="k">Stockton</span><span class="v">≈ 1 hr</span></div>
+    <div class="facts-row"><span class="k">Sacramento</span><span class="v">≈ 1 hr 48 min</span></div>
+    <div class="facts-row"><span class="k">Known for</span><span class="v">Jumping Frog Jubilee · Mark Twain</span></div>
   </div>
-</section>
+  <p style="margin-top:18px;font-family:var(--lg-mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--lg-ink-faint)">Last updated: July 2026</p>
+</div></section>
 
-<!-- ============ FAQ + ENTITY + SOURCES (AI-retrievable) ============ -->
-<section class="section" id="faq" style="background:var(--vellum);">
-  <div class="section-inner">
-    <div class="section-h">
-      <div>
-        <span class="hairline-brass"></span>
-        <span class="eyebrow">Angels Camp · common questions</span>
-        <h2 class="h-section" style="margin-top:10px;">Buying in Angels Camp,<br><em>answered.</em></h2>
-      </div>
-    </div>
-    <div style="margin-top:24px; display:flex; flex-direction:column; gap:26px; max-width:820px;">
-      <div>
-        <h3 style="font-family:var(--serif); font-size:22px; color:var(--ink); margin-bottom:8px;">What does it mean that Angels Camp is the only incorporated city in Calaveras County?</h3>
-        <p style="color:var(--ink-soft); line-height:1.6;">Angels Camp is the sole incorporated city in Calaveras County, which means Angels Camp has its own city government and municipal services, while the rest of Calaveras County is unincorporated and governed by the county.</p>
-      </div>
-      <div>
-        <h3 style="font-family:var(--serif); font-size:22px; color:var(--ink); margin-bottom:8px;">What is Angels Camp, California known for?</h3>
-        <p style="color:var(--ink-soft); line-height:1.6;">Angels Camp, California is known as Frogtown, home of the Calaveras County Fair & Jumping Frog Jubilee inspired by Mark Twain's story, at 1,378 feet in the Sierra foothills.</p>
-      </div>
-      <div>
-        <h3 style="font-family:var(--serif); font-size:22px; color:var(--ink); margin-bottom:8px;">What school district serves Angels Camp?</h3>
-        <p style="color:var(--ink-soft); line-height:1.6;">Angels Camp is served by the Mark Twain Union Elementary School District, with high-school students attending Bret Harte Union High School, which is located in Angels Camp.</p>
-      </div>
-      <div>
-        <h3 style="font-family:var(--serif); font-size:22px; color:var(--ink); margin-bottom:8px;">How far is Angels Camp from the Central Valley?</h3>
-        <p style="color:var(--ink-soft); line-height:1.6;">Angels Camp is about 1 hour from Stockton and roughly 1 hour 48 minutes from Sacramento — the shortest Central Valley commute among the Calaveras foothill towns.</p>
-      </div>
-      <div>
-        <h3 style="font-family:var(--serif); font-size:22px; color:var(--ink); margin-bottom:8px;">Where can I see current Angels Camp home prices?</h3>
-        <p style="color:var(--ink-soft); line-height:1.6;">Current Angels Camp median price, days on market and inventory change constantly, so Legacy Properties keeps them in a live, MLS-fed market report and search rather than as a hand-kept number here. Call Sara Cooper at (209) 559-4966 for a current read on Angels Camp.</p>
-      </div>
-    </div>
-    <p style="margin-top:34px; padding-top:22px; border-top:1px solid var(--rule); color:var(--ink-soft); line-height:1.6; max-width:820px;">Sara Cooper, Broker at Legacy Properties (CA DRE #02141987), works across the Sierra foothills of Calaveras, Amador and Tuolumne counties, including Angels Camp, with 23 closings in the trailing twelve months. Reach Sara at <a href="tel:2095594966" style="color:var(--brass);">(209) 559-4966</a>.</p>
-    <p style="margin-top:16px; font-family:var(--mono); font-size:11px; letter-spacing:0.06em; color:var(--ink-faint); max-width:820px;">Sources: <a href="https://www.car.org/marketdata" target="_blank" rel="noopener" style="color:var(--ink-mute);">California Association of REALTORS®</a> · <a href="https://osfm.fire.ca.gov/what-we-do/community-wildfire-preparedness-and-mitigation/fire-hazard-severity-zones" target="_blank" rel="noopener" style="color:var(--ink-mute);">CAL FIRE Fire Hazard Severity Zones</a> · <a href="https://www.ccwd.org/" target="_blank" rel="noopener" style="color:var(--ink-mute);">Calaveras County Water District</a> · <a href="https://en.wikipedia.org/wiki/Angels_Camp,_California" target="_blank" rel="noopener" style="color:var(--ink-mute);">U.S. Census / Angels Camp, California</a>.</p>
+<!-- ============ FAQ (AI-retrievable) ============ -->
+<section class="lg-sec lg-sec--tint" id="faq"><div class="lg-wrap">
+  <div class="lg-kicker lg-rv"><span>Angels Camp · common questions</span><span class="lg-rule"></span></div>
+  <h2 class="lg-display lg-h2 lg-rv lg-d1" style="margin:14px 0 24px">Buying in Angels Camp, <em>answered.</em></h2>
+  <div style="display:flex;flex-direction:column;gap:24px;max-width:840px">
+    <div class="faq-q lg-rv"><h3>What does it mean that Angels Camp is the only incorporated city in Calaveras County?</h3><p>Angels Camp is the sole incorporated city in Calaveras County, which means Angels Camp has its own city government and municipal services, while the rest of Calaveras County is unincorporated and governed by the county.</p></div>
+    <div class="faq-q lg-rv"><h3>What is Angels Camp, California known for?</h3><p>Angels Camp, California is known as Frogtown, home of the Calaveras County Fair & Jumping Frog Jubilee inspired by Mark Twain's story, at 1,378 feet in the Sierra foothills.</p></div>
+    <div class="faq-q lg-rv"><h3>What school district serves Angels Camp?</h3><p>Angels Camp is served by the Mark Twain Union Elementary School District, with high-school students attending Bret Harte Union High School, which is located in Angels Camp.</p></div>
+    <div class="faq-q lg-rv"><h3>How far is Angels Camp from the Central Valley?</h3><p>Angels Camp is about 1 hour from Stockton and roughly 1 hour 48 minutes from Sacramento — the shortest Central Valley commute among the Calaveras foothill towns.</p></div>
+    <div class="faq-q lg-rv"><h3>Where can I see current Angels Camp home prices?</h3><p>Current Angels Camp median price, days on market and inventory change constantly, so Legacy Properties keeps them in a live, MLS-fed market report and search rather than as a hand-kept number here. Call Sara Cooper at (209) 559-4966 for a current read on Angels Camp.</p></div>
   </div>
+  <p style="margin-top:32px;padding-top:22px;border-top:1px solid rgba(23,20,15,.12);color:var(--lg-ink-soft);line-height:1.6;max-width:840px;font-size:14.5px">Sara Cooper, Broker at Legacy Properties (CA DRE #02141987), works across the Sierra foothills of Calaveras, Amador and Tuolumne counties, including Angels Camp, with 23 closings in the trailing twelve months. Reach Sara at <a href="tel:2095594966" style="color:var(--lg-a1)">(209) 559-4966</a>.</p>
+  <p style="margin-top:14px;font-family:var(--lg-mono);font-size:10.5px;letter-spacing:.05em;color:var(--lg-ink-faint);max-width:840px">Sources: <a href="https://www.car.org/marketdata" target="_blank" rel="noopener" style="color:var(--lg-ink-mute)">California Association of REALTORS®</a> · <a href="https://osfm.fire.ca.gov/what-we-do/community-wildfire-preparedness-and-mitigation/fire-hazard-severity-zones" target="_blank" rel="noopener" style="color:var(--lg-ink-mute)">CAL FIRE Fire Hazard Severity Zones</a> · <a href="https://www.ccwd.org/" target="_blank" rel="noopener" style="color:var(--lg-ink-mute)">Calaveras County Water District</a> · <a href="https://en.wikipedia.org/wiki/Angels_Camp,_California" target="_blank" rel="noopener" style="color:var(--lg-ink-mute)">U.S. Census / Angels Camp, California</a>.</p>
   <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -850,48 +796,43 @@
   ]
 }
   </script>
-</section>
+</div></section>
 
-<footer class="footer">
-  <div class="footer-inner">
-    <div class="footer-top">
-      <div>
-        <a href="index.html" class="wordmark" style="align-items: flex-start;">
-          <span class="wordmark-word">Legacy</span>
-          <span class="wordmark-sub">Properties · Angels Camp CA</span>
-        </a>
-        <p class="footer-tagline">Every home has a story. We help you find yours — or tell the one you've already lived.</p>
-      </div>
-      <div>
-        <h4>Communities</h4>
-        <a href="town-murphys.html">Murphys</a>
-        <a href="town-arnold.html">Arnold</a>
-        <a href="town-sutter-creek.html">Sutter Creek</a>
-        <a href="town-shenandoah-valley.html">Shenandoah Valley</a>
-        <a href="river-mountain.html">Waterfront Lakes and Rivers</a>
-        <a href="town-angels-camp.html">Angels Camp</a>
-        <a href="town-copperopolis.html">Copperopolis</a>
-      </div>
-      <div>
-        <h4>Buy &amp; sell</h4>
-        <a href="property-search.html">Search all listings</a>
-        <a href="valuation.html">What's my home worth?</a>
-        <a href="find-my-match.html">Request a tour</a>
-      </div>
-      <div>
-        <h4>Connect</h4>
-        <a href="tel:2095594966">(209) 559-4966</a>
-        <a href="mailto:SaraSellsCalifornia@gmail.com">SaraSellsCalifornia@gmail.com</a>
-        <a href="ledger.html">The Ledger</a>
-      </div>
+<!-- ============ FOOTER ============ -->
+<footer class="lg-footer"><div class="lg-wrap">
+  <div class="lg-footer__cols">
+    <div>
+      <a href="index.html" class="lg-mark"><span class="lg-mark__badge"><span>L</span></span><span class="lg-mark__txt"><b>Legacy</b><i>Properties · Angels Camp</i></span></a>
+      <p style="font-family:var(--lg-serif);font-style:italic;font-size:16px;color:var(--lg-ink-soft);line-height:1.5;margin-top:16px;max-width:260px">Every home has a story. We help you find yours &mdash; or tell the one you've already lived.</p>
     </div>
-    <div class="footer-bottom">
-      <div>© 2026 Legacy Properties · All rights reserved</div>
-      <div>Sara Cooper, Broker · DRE #02141987 · Equal Housing Opportunity</div>
+    <div><h5>Communities</h5>
+      <a href="town-murphys.html">Murphys</a>
+      <a href="town-arnold.html">Arnold</a>
+      <a href="town-sutter-creek.html">Sutter Creek</a>
+      <a href="town-shenandoah-valley.html">Shenandoah Valley</a>
+      <a href="river-mountain.html">Waterfront Lakes and Rivers</a>
+      <a href="town-angels-camp.html">Angels Camp</a>
+      <a href="town-copperopolis.html">Copperopolis</a>
+    </div>
+    <div><h5>Buy &amp; sell</h5>
+      <a href="property-search.html">Search all listings</a>
+      <a href="valuation.html">What's my home worth?</a>
+      <a href="find-my-match.html">Request a tour</a>
+    </div>
+    <div><h5>Connect</h5>
+      <a href="tel:2095594966">(209) 559-4966</a>
+      <a href="mailto:SaraSellsCalifornia@gmail.com">Email Sara</a>
+      <a href="ledger.html">The Ledger</a>
     </div>
   </div>
-</footer>
+  <div class="lg-footer__bot">
+    <span>&copy; 2026 Legacy Properties &middot; All rights reserved</span>
+    <span>Sara Cooper, Broker &middot; DRE #02141987 &middot; Equal Housing Opportunity</span>
+  </div>
+</div></footer>
 
+
+<script src="legacy-ui.js" defer></script>
 <script src="town.js"></script>
 </body>
 </html>
