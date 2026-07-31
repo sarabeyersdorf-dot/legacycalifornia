@@ -20,7 +20,7 @@ and whether `source_key` is NULL:
 |---|---|---|---|---|
 | **A · deals.json tasks** | `briefing` | **NULL** | Cowork writes `deals.json` `tasks[]` → `sync-deals` | Wiped + rebuilt **every hour**; check-offs preserved |
 | **B · keyed briefing tasks** | `briefing` | `brief:<id>` | Cowork POSTs `crm/tasks` (`bulkSync`) | Insert-only; pruned only on an opt-in snapshot |
-| **C · checklist** | `checklist` | rule key | `sync-deals` from `checklist_task_definitions.json` | Reconciled (insert + prune) each sync |
+| **C · checklist** | `checklist` | rule key | `sync-deals` from `checklist_task_definitions.json` | Reconciled each sync; a stale row an agent replied to / flagged is kept (marked done), only untouched rows are hard-deleted |
 | **D · auto** | `auto` | `auto:*` | `crm/tasks` self-heal | Self-completes when its condition resolves |
 
 You (Cowork) write **Pool A** (via `deals.json`) and **Pool B** (via the
