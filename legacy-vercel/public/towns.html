@@ -179,6 +179,7 @@
 <!-- seo:head:end -->
 <link rel="stylesheet" href="legacy.css">
 <link rel="stylesheet" href="town.css">
+<link rel="stylesheet" href="legacy-ui.css">
 <style>
 .hub-hero {
   background: var(--parchment);
@@ -349,352 +350,214 @@
 }
 </style>
 </head>
-<body class="paper" data-screen-label="Towns hub">
+<body class="paper lg-page" data-screen-label="Towns hub">
+<div class="lg-progress"></div>
 
-<header class="topnav">
-  <div class="topnav-bar1">
-    <span>Boutique luxury real estate · Calaveras · Amador · Tuolumne</span>
-    <span><a href="tel:2095594966">(209) 559-4966</a> · <a href="mailto:SaraSellsCalifornia@gmail.com">SaraSellsCalifornia@gmail.com</a></span>
-  </div>
-  <nav class="topnav-bar2">
-    <div class="topnav-links">
-      <a href="property-search.html">Listings</a>
-      <a href="towns.html" class="active">Communities</a>
-      <a href="relocate.html">Relocate</a>
-      <a href="valuation.html">Sellers</a>
-      <a href="market-report.html">Markets</a>
-    </div>
-    <a href="index.html" class="wordmark">
-      <span class="wordmark-word">Legacy Properties</span>
-      <span class="wordmark-sub">Every Home Has A Story</span>
-    </a>
-    <div class="topnav-links right">
-      <a href="ledger.html">The Ledger</a>
-      <a href="dashboard.html">Sign In</a>
-      <a href="find-my-match.html" class="btn btn-ink btn-sm" style="padding:10px 18px;">Find My Match</a>
-    </div>
+<!-- ============ TOP STRIP + HEADER ============ -->
+<div style="background:var(--lg-ink);color:rgba(255,253,248,.72);font-family:var(--lg-mono);font-size:10.5px;letter-spacing:.13em;text-transform:uppercase;display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;padding:9px var(--lg-gut)">
+  <span>Boutique real estate &middot; Calaveras &middot; Amador &middot; Tuolumne</span>
+  <span style="display:flex;gap:14px">
+    <a href="tel:2095594966" style="color:inherit;text-decoration:none">(209) 559-4966</a>
+    <a href="mailto:SaraSellsCalifornia@gmail.com" style="color:var(--lg-c2);text-decoration:none">SaraSellsCalifornia@gmail.com</a>
+  </span>
+</div>
+<header class="lg-header"><div class="lg-header__in">
+  <a class="lg-mark" href="index.html">
+    <span class="lg-mark__badge"><span>L</span></span>
+    <span class="lg-mark__txt"><b>Legacy</b><i>Properties · Angels Camp</i></span>
+  </a>
+  <nav class="lg-nav" id="siteNav">
+    <a href="property-search.html">Listings</a>
+    <a href="towns.html" aria-current="page">Communities</a>
+    <a href="relocate.html">Relocate</a>
+    <a href="valuation.html">Sellers</a>
+    <a href="market-report.html">Markets</a>
+    <a href="ledger.html">The Ledger</a>
+    <a href="dashboard.html">Sign In</a>
+    <a href="find-my-match.html" class="lg-btn" style="padding:11px 22px">Find My Match</a>
   </nav>
-</header>
+  <button class="lg-navtoggle" data-lg-nav="#siteNav" aria-expanded="false">Menu</button>
+</div></header>
 
-<!-- ============ HERO ============ -->
-<section class="hub-hero">
-  <div class="hub-hero-inner">
-    <span class="hairline-brass" style="margin-bottom:16px;"></span>
-    <span class="eyebrow">Volume XXII · A Gold Country Survey</span>
-    <h1>Seven communities,<br>one <em>Gold Country.</em></h1>
-    <p class="lede">From wine-country Murphys to pine-shaded Arnold, from the lake estates of Copperopolis to the antique-shop blocks of Sutter Creek and the old-vine Zinfandel of Amador’s Shenandoah Valley — seven neighbors across two counties, one stretch of California most of the country has never been to.</p>
+<style>
+  .town-stats{display:flex;flex-wrap:wrap;gap:10px 20px;margin-top:6px;font-family:var(--lg-mono);font-size:11px;letter-spacing:.06em;color:var(--lg-ink-mute)}
+  .town-stats strong{color:var(--lg-ink);font-family:var(--lg-serif);font-style:italic;font-weight:600;font-size:16px;letter-spacing:0;margin-left:4px}
+  .cmp{width:100%;border-collapse:collapse;font-size:14px;overflow:hidden;border-radius:var(--lg-r);box-shadow:var(--lg-sh-sm);background:var(--lg-white)}
+  .cmp thead th{font-family:var(--lg-mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--lg-ink-mute);text-align:left;padding:16px 18px;background:var(--lg-sand);border-bottom:2px solid var(--lg-c2)}
+  .cmp td{padding:15px 18px;border-bottom:1px solid rgba(23,20,15,.07);color:var(--lg-ink-soft)}
+  .cmp tr:last-child td{border-bottom:none}
+  .cmp tr:hover td{background:var(--lg-cream)}
+  .cmp td.town a{font-family:var(--lg-serif);font-style:italic;font-size:19px;color:var(--lg-ink);text-decoration:none}
+  .cmp td.price{font-family:var(--lg-serif);font-style:italic;font-size:17px;color:var(--lg-ink)}
+  .cmp .up{color:var(--lg-a3);font-weight:700;font-family:var(--lg-mono);font-size:12px}
+  .cmp-wrap{overflow-x:auto}
+  @media(max-width:700px){.cmp{font-size:13px}.cmp td,.cmp thead th{padding:12px 12px}}
+</style>
 
-    <div class="hub-meta-strip">
-      <div>
-        <span class="lab">Counties</span>
-        <span class="num">2</span>
-      </div>
-      <div>
-        <span class="lab">Towns covered</span>
-        <span class="num">7</span>
-      </div>
-      <div>
-        <span class="lab">Median (region)</span>
-        <span class="num">$542K</span>
-      </div>
-      <div>
-        <span class="lab">Listed by Sara</span>
-        <span class="num">21</span>
-      </div>
-    </div>
+<!-- HERO (illustrated · Variant A) -->
+<section class="lg-hero lg-hero--short">
+  <div class="lg-hero__art" aria-hidden="true">
+    <svg viewBox="0 0 1440 720" preserveAspectRatio="xMidYMid slice" role="presentation">
+      <defs>
+        <linearGradient id="lgSky" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="var(--lg-sky-a)"/><stop offset="58%" stop-color="var(--lg-sky-b)"/><stop offset="100%" stop-color="var(--lg-sky-c)"/></linearGradient>
+        <radialGradient id="lgSunGlow"><stop offset="0%" stop-color="var(--lg-sun)"/><stop offset="100%" stop-color="var(--lg-sun)" stop-opacity="0"/></radialGradient>
+        <linearGradient id="lgH1" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="var(--lg-hill-4)"/><stop offset="100%" stop-color="var(--lg-hill-3)"/></linearGradient>
+        <linearGradient id="lgH2" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="var(--lg-hill-3)"/><stop offset="100%" stop-color="var(--lg-hill-2)"/></linearGradient>
+        <linearGradient id="lgH3" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="var(--lg-hill-2)"/><stop offset="100%" stop-color="var(--lg-hill-1)"/></linearGradient>
+      </defs>
+      <rect width="1440" height="720" fill="url(#lgSky)"/>
+      <g transform="translate(0,70)">
+        <g class="lg-sun"><circle cx="1108" cy="196" r="185" fill="url(#lgSunGlow)" opacity=".6"/>
+          <g class="lg-rays" opacity=".28"><g stroke="var(--lg-sun)" stroke-width="2.5" stroke-linecap="round">
+            <line x1="1108" y1="70" x2="1108" y2="30"/><line x1="1108" y1="322" x2="1108" y2="362"/><line x1="982" y1="196" x2="942" y2="196"/><line x1="1234" y1="196" x2="1274" y2="196"/><line x1="1018" y1="106" x2="990" y2="78"/><line x1="1198" y1="286" x2="1226" y2="314"/><line x1="1198" y1="106" x2="1226" y2="78"/><line x1="1018" y1="286" x2="990" y2="314"/>
+          </g></g><circle cx="1108" cy="196" r="74" fill="var(--lg-sun)"/></g>
+        <g fill="#FFFDF8" opacity=".42">
+          <g class="lg-cloud" style="animation-duration:66s"><ellipse cx="220" cy="120" rx="86" ry="27"/><ellipse cx="278" cy="108" rx="58" ry="24"/><ellipse cx="168" cy="110" rx="46" ry="20"/></g>
+          <g class="lg-cloud" style="animation-duration:92s;animation-delay:-30s" opacity=".7"><ellipse cx="600" cy="188" rx="104" ry="24"/><ellipse cx="666" cy="176" rx="62" ry="21"/></g>
+        </g>
+        <g class="lg-bird" style="animation-delay:-4s"><g class="lg-flap" fill="none" stroke="var(--lg-hill-1)" stroke-width="2.6" stroke-linecap="round" opacity=".7"><path d="M300 250 q10 -9 20 0"/><path d="M320 250 q10 -9 20 0"/></g></g>
+        <g class="lg-bird" style="animation-delay:-13s"><g class="lg-flap" style="animation-delay:-.4s" fill="none" stroke="var(--lg-hill-1)" stroke-width="2.2" stroke-linecap="round" opacity=".55"><path d="M300 300 q8 -7 16 0"/><path d="M316 300 q8 -7 16 0"/></g></g>
+      </g>
+      <path class="lg-ridge" data-depth="0.10" fill="url(#lgH1)" opacity=".62" d="M0 452 L110 418 L206 442 L318 392 L430 430 L548 386 L664 424 L788 380 L900 420 L1020 384 L1140 424 L1266 392 L1380 428 L1440 410 L1440 720 L0 720 Z"/>
+      <path class="lg-ridge" data-depth="0.18" fill="url(#lgH2)" opacity=".82" d="M0 512 L128 470 L248 504 L372 452 L500 494 L628 448 L760 490 L890 446 L1020 488 L1150 450 L1290 492 L1440 456 L1440 720 L0 720 Z"/>
+      <g class="lg-ridge" data-depth="0.28"><path fill="url(#lgH3)" d="M0 574 L150 534 L290 570 L430 522 L578 566 L720 520 L868 562 L1010 518 L1160 560 L1300 522 L1440 562 L1440 720 L0 720 Z"/>
+        <g fill="var(--lg-hill-1)" opacity=".9"><path d="M214 566 q-4 -22 8 -30 q-14 -14 4 -22 q-2 -16 16 -14 q10 -14 22 -2 q18 -6 18 10 q16 4 8 18 q12 10 -2 20 q4 18 -14 20 z"/><rect x="248" y="562" width="7" height="20" rx="2"/><path d="M652 556 q-3 -18 7 -24 q-11 -12 3 -18 q-2 -13 13 -11 q8 -11 18 -2 q14 -5 14 8 q13 3 6 14 q10 8 -1 17 q3 14 -12 16 z"/><rect x="678" y="552" width="6" height="17" rx="2"/></g>
+      </g>
+      <path class="lg-ridge" data-depth="0.40" fill="var(--lg-hill-1)" d="M0 646 L180 618 L360 648 L540 612 L740 650 L940 614 L1130 650 L1310 618 L1440 646 L1440 720 L0 720 Z"/>
+    </svg>
+  </div>
+  <div class="lg-hero__scrim"></div>
+  <div class="lg-hero__in">
+    <div class="lg-hero__tag"><span class="lg-dot"></span><span>A Gold Country survey</span></div>
+    <h1 class="lg-display lg-h1">Seven communities,<br>one <em>Gold Country.</em></h1>
+    <p class="lg-hero__strap">From wine-country Murphys to pine-shaded Arnold, from the lake estates of Copperopolis to the antique blocks of Sutter Creek and the old-vine Zinfandel of Amador's Shenandoah Valley &mdash; seven neighbors across two counties.</p>
   </div>
 </section>
 
-<!-- ============ INDEX ============ -->
-<section class="hub-section">
-  <div class="hub-inner">
-    <div class="section-h" style="margin-bottom: 36px;">
-      <div>
-        <span class="hairline-brass"></span>
-        <span class="eyebrow">The index</span>
-        <h2 class="h-section" style="margin-top:10px;">Pick a <em>character.</em></h2>
-      </div>
-      <p class="lede right">Each town is its own room. Walk in, look around, decide.</p>
-    </div>
+<!-- INDEX -->
+<section class="lg-sec"><div class="lg-wrap">
+  <div class="lg-kicker lg-rv"><span>The index</span><span class="lg-rule"></span></div>
+  <h2 class="lg-display lg-h2 lg-rv lg-d1" style="margin:14px 0 10px">Pick a <em>character.</em></h2>
+  <div class="lg-note lg-rv lg-d2">Each town is its own room. Walk in, look around, decide.</div>
 
-    <div class="hub-index">
-      <!-- Murphys — feature -->
-      <a href="town-murphys.html" class="town-tile tt-feature"
-         style="--bg: url('art/towns/murphys-mainst-summer.jpg');">
-        <div class="tt-inner">
-          <div>
-            <span class="tt-num">I · Calaveras</span>
-            <div style="margin-top: 12px;"><span class="tt-tag">Legacy HQ</span></div>
-          </div>
-          <div class="tt-foot">
-            <div class="tt-name">Murphys, <span class="city">California</span></div>
-            <div class="tt-meta">
-              <div>Median<strong>$685K</strong></div>
-              <div>Pop.<strong>2,213</strong></div>
-              <div>Tasting rooms<strong>22</strong></div>
-              <div>YoY<strong>+4.2%</strong></div>
-            </div>
-            <div class="tt-arrow">Read the field notes →</div>
-          </div>
-        </div>
-      </a>
-
-      <!-- Arnold -->
-      <a href="town-arnold.html" class="town-tile tt-half"
-         style="--bg: url('art/towns/arnold-aspens-fall.jpg');">
-        <div class="tt-inner">
-          <div><span class="tt-num">II · Calaveras</span></div>
-          <div class="tt-foot">
-            <div class="tt-name">Arnold</div>
-            <div class="tt-meta">
-              <div>Median<strong>$520K</strong></div>
-              <div>Elev.<strong>3,999 ft</strong></div>
-              <div>Ski-in<strong>40 min</strong></div>
-            </div>
-            <div class="tt-arrow">Pines & cabins →</div>
-          </div>
-        </div>
-      </a>
-
-      <!-- Sutter Creek -->
-      <a href="town-sutter-creek.html" class="town-tile tt-third"
-         style="--bg: url('art/towns/sutter-creek-mainst.jpg');">
-        <div class="tt-inner">
-          <div><span class="tt-num">III · Amador</span></div>
-          <div class="tt-foot">
-            <div class="tt-name">Sutter <span class="city">Creek</span></div>
-            <div class="tt-meta">
-              <div>Median<strong>$598K</strong></div>
-              <div>Antiques<strong>16</strong></div>
-            </div>
-            <div class="tt-arrow">Gold Rush →</div>
-          </div>
-        </div>
-      </a>
-
-      <!-- Angels Camp -->
-      <a href="town-angels-camp.html" class="town-tile tt-third"
-         style="--bg: url('art/towns/angels-camp-mainst-fall.jpg');">
-        <div class="tt-inner">
-          <div><span class="tt-num">IV · Calaveras</span></div>
-          <div class="tt-foot">
-            <div class="tt-name">Angels <span class="city">Camp</span></div>
-            <div class="tt-meta">
-              <div>Median<strong>$415K</strong></div>
-              <div>Frog jubilee<strong>est. 1928</strong></div>
-            </div>
-            <div class="tt-arrow">Twain country →</div>
-          </div>
-        </div>
-      </a>
-
-      <!-- Waterfront Lakes and Rivers -->
-      <a href="river-mountain.html" class="town-tile tt-third"
-         style="--bg: url('art/towns/rm-mokelumne-pool.jpg');">
-        <div class="tt-inner">
-          <div><span class="tt-num">V · Lifestyle category</span></div>
-          <div class="tt-foot">
-            <div class="tt-name">Waterfront Lakes and <span class="city">Rivers</span></div>
-            <div class="tt-meta">
-              <div>Parcels<strong>5–40 ac</strong></div>
-              <div>Range<strong>$295K–2.4M</strong></div>
-            </div>
-            <div class="tt-arrow">Wilseyville, Mtn Ranch, West Point →</div>
-          </div>
-        </div>
-      </a>
-
-      <!-- Copperopolis -->
-      <a href="town-copperopolis.html" class="town-tile tt-half"
-         style="--bg: url('art/towns/copperopolis-town-square.jpg');">
-        <div class="tt-inner">
-          <div><span class="tt-num">VI · Calaveras</span></div>
-          <div class="tt-foot">
-            <div class="tt-name">Copperopolis</div>
-            <div class="tt-meta">
-              <div>Median<strong>$562K</strong></div>
-              <div>Lake Tulloch<strong>3 mi</strong></div>
-              <div>Golf<strong>2 courses</strong></div>
-            </div>
-            <div class="tt-arrow">Lake estates →</div>
-          </div>
-        </div>
-      </a>
-
-      <!-- Shenandoah Valley -->
-      <a href="town-shenandoah-valley.html" class="town-tile tt-half"
-         style="--bg: url('art/towns/shenandoah-valley-aerial.jpg');">
-        <div class="tt-inner">
-          <div><span class="tt-num">VII · Amador</span></div>
-          <div class="tt-foot">
-            <div class="tt-name">Shenandoah <span class="city">Valley</span></div>
-            <div class="tt-meta">
-              <div>Median<strong>$629K</strong></div>
-              <div>Wineries<strong>40+</strong></div>
-              <div>Oldest vines<strong>1869</strong></div>
-            </div>
-            <div class="tt-arrow">Old-vine Zinfandel →</div>
-          </div>
-        </div>
-      </a>
-
-      <!-- Murphys partner tile (right of feature) -->
-      <a href="town-murphys.html#vitals" class="town-tile tt-half"
-         style="--bg: url('art/towns/murphys-vineyard-fall.jpg');">
-        <div class="tt-inner">
-          <div><span class="tt-num">I.b · Continued</span></div>
-          <div class="tt-foot">
-            <div class="tt-name">A year in <span class="city">Murphys</span></div>
-            <div class="tt-meta">
-              <div>Snow days<strong>7</strong></div>
-              <div>To SF<strong>2 hr 30</strong></div>
-              <div>To Tahoe<strong>2 hr 10</strong></div>
-            </div>
-            <div class="tt-arrow">Spring → Winter →</div>
-          </div>
-        </div>
-      </a>
-    </div>
+  <div class="lg-grid lg-grid--3" style="margin-top:34px">
+    <a href="town-murphys.html" class="lg-card lg-rv">
+      <div class="lg-card__media"><img src="art/towns/murphys-mainst-summer.jpg" alt="Murphys, California"></div>
+      <div class="lg-card__body"><div class="lg-card__meta">I &middot; Calaveras &middot; Legacy HQ</div><div class="lg-card__title">Murphys</div>
+        <div class="town-stats"><span>Median<strong>$685K</strong></span><span>Pop.<strong>2,213</strong></span><span>Tasting rooms<strong>22</strong></span></div>
+        <div class="lg-card__more">Read the field notes <span class="lg-arrow">&rarr;</span></div></div>
+    </a>
+    <a href="town-arnold.html" class="lg-card lg-rv lg-d1">
+      <div class="lg-card__media"><img src="art/towns/arnold-aspens-fall.jpg" alt="Arnold, California"></div>
+      <div class="lg-card__body"><div class="lg-card__meta">II &middot; Calaveras</div><div class="lg-card__title">Arnold</div>
+        <div class="town-stats"><span>Median<strong>$520K</strong></span><span>Elev.<strong>3,999 ft</strong></span><span>Ski-in<strong>40 min</strong></span></div>
+        <div class="lg-card__more">Pines &amp; cabins <span class="lg-arrow">&rarr;</span></div></div>
+    </a>
+    <a href="town-sutter-creek.html" class="lg-card lg-rv lg-d2">
+      <div class="lg-card__media"><img src="art/towns/sutter-creek-mainst.jpg" alt="Sutter Creek, California"></div>
+      <div class="lg-card__body"><div class="lg-card__meta">III &middot; Amador</div><div class="lg-card__title">Sutter Creek</div>
+        <div class="town-stats"><span>Median<strong>$598K</strong></span><span>Antiques<strong>16</strong></span></div>
+        <div class="lg-card__more">Gold Rush <span class="lg-arrow">&rarr;</span></div></div>
+    </a>
+    <a href="town-angels-camp.html" class="lg-card lg-rv">
+      <div class="lg-card__media"><img src="art/towns/angels-camp-mainst-fall.jpg" alt="Angels Camp, California"></div>
+      <div class="lg-card__body"><div class="lg-card__meta">IV &middot; Calaveras</div><div class="lg-card__title">Angels Camp</div>
+        <div class="town-stats"><span>Median<strong>$415K</strong></span><span>Frog jubilee<strong>est. 1928</strong></span></div>
+        <div class="lg-card__more">Twain country <span class="lg-arrow">&rarr;</span></div></div>
+    </a>
+    <a href="river-mountain.html" class="lg-card lg-rv lg-d1">
+      <div class="lg-card__media"><img src="art/towns/rm-mokelumne-pool.jpg" alt="Waterfront lakes and rivers"></div>
+      <div class="lg-card__body"><div class="lg-card__meta">V &middot; Lifestyle category</div><div class="lg-card__title">Waterfront Lakes &amp; Rivers</div>
+        <div class="town-stats"><span>Parcels<strong>5&ndash;40 ac</strong></span><span>Range<strong>$295K&ndash;2.4M</strong></span></div>
+        <div class="lg-card__more">Wilseyville, Mtn Ranch, West Point <span class="lg-arrow">&rarr;</span></div></div>
+    </a>
+    <a href="town-copperopolis.html" class="lg-card lg-rv lg-d2">
+      <div class="lg-card__media"><img src="art/towns/copperopolis-town-square.jpg" alt="Copperopolis, California"></div>
+      <div class="lg-card__body"><div class="lg-card__meta">VI &middot; Calaveras</div><div class="lg-card__title">Copperopolis</div>
+        <div class="town-stats"><span>Median<strong>$562K</strong></span><span>Lake Tulloch<strong>3 mi</strong></span><span>Golf<strong>2 courses</strong></span></div>
+        <div class="lg-card__more">Lake estates <span class="lg-arrow">&rarr;</span></div></div>
+    </a>
+    <a href="town-shenandoah-valley.html" class="lg-card lg-rv">
+      <div class="lg-card__media"><img src="art/towns/shenandoah-valley-aerial.jpg" alt="Shenandoah Valley, California"></div>
+      <div class="lg-card__body"><div class="lg-card__meta">VII &middot; Amador</div><div class="lg-card__title">Shenandoah Valley</div>
+        <div class="town-stats"><span>Median<strong>$629K</strong></span><span>Wineries<strong>40+</strong></span><span>Oldest vines<strong>1869</strong></span></div>
+        <div class="lg-card__more">Old-vine Zinfandel <span class="lg-arrow">&rarr;</span></div></div>
+    </a>
+    <a href="town-murphys.html#vitals" class="lg-card lg-rv lg-d1">
+      <div class="lg-card__media"><img src="art/towns/murphys-vineyard-fall.jpg" alt="Murphys through the seasons"></div>
+      <div class="lg-card__body"><div class="lg-card__meta">I.b &middot; Continued</div><div class="lg-card__title">A year in Murphys</div>
+        <div class="town-stats"><span>Snow days<strong>7</strong></span><span>To SF<strong>2 hr 30</strong></span><span>To Tahoe<strong>2 hr 10</strong></span></div>
+        <div class="lg-card__more">Spring &rarr; Winter <span class="lg-arrow">&rarr;</span></div></div>
+    </a>
   </div>
-</section>
+</div></section>
 
-<!-- ============ COMPARE TABLE ============ -->
-<section class="hub-compare">
-  <div class="hub-inner">
-    <div class="section-h" style="margin-bottom: 32px;">
-      <div>
-        <span class="hairline-brass"></span>
-        <span class="eyebrow">Side by side</span>
-        <h2 class="h-section" style="margin-top:10px;">The whole region<br><em>at a glance.</em></h2>
-      </div>
-      <p class="lede right">Median sale price, days on market, character — seven rows, seven rooms.</p>
-    </div>
-
-    <table>
-      <thead>
-        <tr>
-          <th>Town</th>
-          <th>County</th>
-          <th>Median</th>
-          <th>YoY</th>
-          <th>Days on market</th>
-          <th>Known for</th>
-        </tr>
-      </thead>
+<!-- COMPARE TABLE -->
+<section class="lg-sec lg-sec--tint"><div class="lg-wrap">
+  <div class="lg-kicker lg-rv"><span>Side by side</span><span class="lg-rule"></span></div>
+  <h2 class="lg-display lg-h2 lg-rv lg-d1" style="margin:14px 0 10px">The whole region <em>at a glance.</em></h2>
+  <div class="lg-note lg-rv lg-d2">Median sale price, days on market, character &mdash; seven rows, seven rooms.</div>
+  <div class="cmp-wrap lg-rv lg-d2" style="margin-top:28px">
+    <table class="cmp">
+      <thead><tr><th>Town</th><th>County</th><th>Median</th><th>YoY</th><th>Days on market</th><th>Known for</th></tr></thead>
       <tbody>
-        <tr>
-          <td class="town"><a href="town-murphys.html" style="text-decoration:none; color:inherit;">Murphys</a></td>
-          <td>Calaveras</td>
-          <td class="price">$685,000</td>
-          <td><span class="chg up">+4.2%</span></td>
-          <td>18 d</td>
-          <td>Wine, Main Street, history</td>
-        </tr>
-        <tr>
-          <td class="town"><a href="town-arnold.html" style="text-decoration:none; color:inherit;">Arnold</a></td>
-          <td>Calaveras</td>
-          <td class="price">$520,000</td>
-          <td><span class="chg up">+2.8%</span></td>
-          <td>26 d</td>
-          <td>Mountain cabins, Bear Valley</td>
-        </tr>
-        <tr>
-          <td class="town"><a href="town-sutter-creek.html" style="text-decoration:none; color:inherit;">Sutter Creek</a></td>
-          <td>Amador</td>
-          <td class="price">$598,000</td>
-          <td><span class="chg up">+5.1%</span></td>
-          <td>21 d</td>
-          <td>Antiques, Amador wine</td>
-        </tr>
-        <tr>
-          <td class="town"><a href="town-shenandoah-valley.html" style="text-decoration:none; color:inherit;">Shenandoah Valley</a></td>
-          <td>Amador</td>
-          <td class="price">$629,000</td>
-          <td><span class="chg up">+5.6%</span></td>
-          <td>34 d</td>
-          <td>Old-vine Zinfandel, vineyard land</td>
-        </tr>
-        <tr>
-          <td class="town"><a href="river-mountain.html" style="text-decoration:none; color:inherit;">Waterfront Lakes and Rivers</a></td>
-          <td>Calaveras / Amador</td>
-          <td class="price">$295K–2.4M</td>
-          <td><span class="chg up">—</span></td>
-          <td>varies</td>
-          <td>Rural parcels, creek frontage, lifestyle</td>
-        </tr>
-        <tr>
-          <td class="town"><a href="town-angels-camp.html" style="text-decoration:none; color:inherit;">Angels Camp</a></td>
-          <td>Calaveras</td>
-          <td class="price">$415,000</td>
-          <td><span class="chg up">+3.7%</span></td>
-          <td>24 d</td>
-          <td>Frog Jubilee, Twain history</td>
-        </tr>
-        <tr>
-          <td class="town"><a href="town-copperopolis.html" style="text-decoration:none; color:inherit;">Copperopolis</a></td>
-          <td>Calaveras</td>
-          <td class="price">$562,000</td>
-          <td><span class="chg up">+6.3%</span></td>
-          <td>22 d</td>
-          <td>Lake Tulloch, golf, big sky</td>
-        </tr>
+        <tr><td class="town"><a href="town-murphys.html">Murphys</a></td><td>Calaveras</td><td class="price">$685,000</td><td><span class="up">+4.2%</span></td><td>18 d</td><td>Wine, Main Street, history</td></tr>
+        <tr><td class="town"><a href="town-arnold.html">Arnold</a></td><td>Calaveras</td><td class="price">$520,000</td><td><span class="up">+2.8%</span></td><td>26 d</td><td>Mountain cabins, Bear Valley</td></tr>
+        <tr><td class="town"><a href="town-sutter-creek.html">Sutter Creek</a></td><td>Amador</td><td class="price">$598,000</td><td><span class="up">+5.1%</span></td><td>21 d</td><td>Antiques, Amador wine</td></tr>
+        <tr><td class="town"><a href="town-shenandoah-valley.html">Shenandoah Valley</a></td><td>Amador</td><td class="price">$629,000</td><td><span class="up">+5.6%</span></td><td>34 d</td><td>Old-vine Zinfandel, vineyard land</td></tr>
+        <tr><td class="town"><a href="river-mountain.html">Waterfront Lakes &amp; Rivers</a></td><td>Calaveras / Amador</td><td class="price">$295K&ndash;2.4M</td><td><span class="up">&mdash;</span></td><td>varies</td><td>Rural parcels, creek frontage, lifestyle</td></tr>
+        <tr><td class="town"><a href="town-angels-camp.html">Angels Camp</a></td><td>Calaveras</td><td class="price">$415,000</td><td><span class="up">+3.7%</span></td><td>24 d</td><td>Frog Jubilee, Twain history</td></tr>
+        <tr><td class="town"><a href="town-copperopolis.html">Copperopolis</a></td><td>Calaveras</td><td class="price">$562,000</td><td><span class="up">+6.3%</span></td><td>22 d</td><td>Lake Tulloch, golf, big sky</td></tr>
       </tbody>
     </table>
   </div>
-</section>
+</div></section>
 
-<!-- ============ CTA ============ -->
-<section class="cta">
-  <span class="hairline-brass" style="margin: 0 auto 20px; background: var(--brass-bright);"></span>
-  <span class="eyebrow" style="color: var(--brass-bright);">Not sure yet?</span>
-  <h2 class="cta-h">Tell us how<br>you want to <em>live.</em></h2>
-  <p class="cta-sub">Five questions. We'll suggest the town — and three homes.</p>
-  <div class="cta-ctas">
-    <a href="find-my-match.html" class="btn btn-ink">Find my match</a>
-    <a href="tel:2095594966" class="btn btn-ghost">Call (209) 559-4966</a>
+<!-- CTA -->
+<section class="lg-sec lg-sec--ink"><div class="lg-wrap" style="text-align:center">
+  <div class="lg-kicker lg-rv" style="justify-content:center"><span>Not sure yet?</span></div>
+  <h2 class="lg-display lg-rv lg-d1" style="margin:16px 0 14px;font-size:clamp(38px,6vw,74px);line-height:.98">Tell us how<br>you want to <em>live.</em></h2>
+  <p class="lg-rv lg-d2" style="font-family:var(--lg-serif);font-style:italic;font-size:21px;color:rgba(255,253,248,.85);max-width:600px;margin:0 auto">Five questions. We'll suggest the town &mdash; and three homes.</p>
+  <div class="lg-rv lg-d3" style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:28px">
+    <a href="find-my-match.html" class="lg-btn lg-btn--gold">Find my match</a>
+    <a href="tel:2095594966" class="lg-btn lg-btn--ghost">Call (209) 559-4966</a>
   </div>
-</section>
+</div></section>
 
-<!-- ============ FOOTER ============ -->
-<footer class="footer">
-  <div class="footer-inner">
-    <div class="footer-top">
-      <div>
-        <a href="index.html" class="wordmark" style="align-items: flex-start;">
-          <span class="wordmark-word">Legacy Properties</span>
-          <span class="wordmark-sub">Every Home Has A Story</span>
-        </a>
-        <p class="footer-tagline">Every home has a story. We help you find yours — or tell the one you've already lived.</p>
-      </div>
-      <div>
-        <h4>Communities</h4>
-        <a href="town-murphys.html">Murphys</a>
-        <a href="town-arnold.html">Arnold</a>
-        <a href="town-sutter-creek.html">Sutter Creek</a>
-        <a href="town-shenandoah-valley.html">Shenandoah Valley</a>
-        <a href="river-mountain.html">Waterfront Lakes and Rivers</a>
-        <a href="town-angels-camp.html">Angels Camp</a>
-        <a href="town-copperopolis.html">Copperopolis</a>
-      </div>
-      <div>
-        <h4>Buy &amp; sell</h4>
-        <a href="property-search.html">Search all listings</a>
-        <a href="valuation.html">What's my home worth?</a>
-        <a href="find-my-match.html">Request a tour</a>
-      </div>
-      <div>
-        <h4>Connect</h4>
-        <a href="tel:2095594966">(209) 559-4966</a>
-        <a href="mailto:SaraSellsCalifornia@gmail.com">SaraSellsCalifornia@gmail.com</a>
-        <a href="ledger.html">The Ledger</a>
-      </div>
+<!-- FOOTER -->
+<footer class="lg-footer"><div class="lg-wrap">
+  <div class="lg-footer__cols">
+    <div>
+      <a href="index.html" class="lg-mark"><span class="lg-mark__badge"><span>L</span></span><span class="lg-mark__txt"><b>Legacy</b><i>Properties · Angels Camp</i></span></a>
+      <p style="font-family:var(--lg-serif);font-style:italic;font-size:16px;color:var(--lg-ink-soft);line-height:1.5;margin-top:16px;max-width:260px">Every home has a story. We help you find yours &mdash; or tell the one you've already lived.</p>
     </div>
-    <div class="footer-bottom">
-      <div>© 2026 Legacy Properties · All rights reserved</div>
-      <div>Sara Cooper, Broker · DRE #02141987 · Equal Housing Opportunity</div>
+    <div><h5>Communities</h5>
+      <a href="town-murphys.html">Murphys</a>
+      <a href="town-arnold.html">Arnold</a>
+      <a href="town-sutter-creek.html">Sutter Creek</a>
+      <a href="town-shenandoah-valley.html">Shenandoah Valley</a>
+      <a href="river-mountain.html">Waterfront Lakes &amp; Rivers</a>
+      <a href="town-angels-camp.html">Angels Camp</a>
+      <a href="town-copperopolis.html">Copperopolis</a>
+    </div>
+    <div><h5>Buy &amp; sell</h5>
+      <a href="property-search.html">Search all listings</a>
+      <a href="valuation.html">What's my home worth?</a>
+      <a href="find-my-match.html">Request a tour</a>
+    </div>
+    <div><h5>Connect</h5>
+      <a href="tel:2095594966">(209) 559-4966</a>
+      <a href="mailto:SaraSellsCalifornia@gmail.com">Email Sara</a>
+      <a href="ledger.html">The Ledger</a>
     </div>
   </div>
-</footer>
+  <div class="lg-footer__bot">
+    <span>&copy; 2026 Legacy Properties &middot; All rights reserved</span>
+    <span>Sara Cooper, Broker &middot; DRE #02141987 &middot; Equal Housing Opportunity</span>
+  </div>
+</div></footer>
 
+
+<script src="legacy-ui.js" defer></script>
 </body>
 </html>
