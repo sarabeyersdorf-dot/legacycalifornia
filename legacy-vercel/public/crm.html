@@ -7,10 +7,26 @@
 <link rel="stylesheet" href="legacy.css">
 <link rel="stylesheet" href="crm.css">
 <link rel="stylesheet" href="legacy-app.css">
+<link rel="stylesheet" href="legacy-ui.css">
+<style>
+/* Legacy UI re-theme — re-point the CRM's own --lp-* design tokens at the lg
+   palette so the desk shares the public site's brand: terracotta accent, warm
+   cream/ink surfaces, Manrope body (self-hosted via legacy-ui.css). Tokens
+   only — no markup, no data hooks, no logic touched. Headings intentionally
+   stay Montserrat per the crm.css 2026-07 "clean desk" decision. */
+body.lp-restyle {
+  --lp-paper:      var(--lg-cream);   /* cool #F5F2EA -> warm lg cream */
+  --lp-ink:        var(--lg-ink);     /* green-dark  -> warm lg ink */
+  --lp-ink-soft:   var(--lg-ink-soft);
+  --lp-terracotta: var(--lg-c1);      /* align to lg sunset terracotta */
+  --lp-gold:       var(--lg-a1);      /* primary accent -> terracotta (was gold) */
+  --lp-sans:       var(--lg-sans);    /* DM Sans -> Manrope */
+}
+</style>
 <!-- Installable home-screen app (PWA). Android/Chrome reads the manifest +
      service worker; iOS/Safari reads the apple-* tags + apple-touch-icon. -->
 <link rel="manifest" href="/manifest.webmanifest">
-<meta name="theme-color" content="#FAF6EC">
+<meta name="theme-color" content="#FFFAF0">
 <link rel="icon" type="image/png" href="/art/legacy-icon-192.png">
 <link rel="apple-touch-icon" href="/art/legacy-icon-180.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
