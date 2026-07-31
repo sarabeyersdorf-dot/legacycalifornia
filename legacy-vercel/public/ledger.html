@@ -3,19 +3,20 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>The Legacy Ledger — Sierra Foothills Real Estate Notes</title>
+<title>The Ledger · Legacy Properties · Gold Country Market Letter</title>
+<meta name="description" content="A monthly letter from Sara Cooper on the Calaveras and Amador real estate market — what's on in the foothills, what the numbers actually say, and one seasonal recipe.">
+<meta property="og:title" content="The Ledger — Legacy Properties">
+<meta property="og:description" content="Market intelligence for California's Gold Country. Second Tuesday, every month.">
+<meta property="og:type" content="website">
 <!-- seo:head:start -->
 <link rel="canonical" href="https://legacycalifornia.com/ledger.html" />
-<meta property="og:type" content="website" />
+<meta property="og:url" content="https://legacycalifornia.com/ledger.html" />
 <meta property="og:site_name" content="Legacy Properties" />
 <meta property="og:locale" content="en_US" />
-<meta property="og:url" content="https://legacycalifornia.com/ledger.html" />
-<meta property="og:title" content="The Legacy Ledger — Sierra Foothills Real Estate Notes" />
-<meta property="og:description" content="A monthly letter from Sara Cooper on the Gold Country property market — what's moving, what's stalling, and what it means for you." />
 <meta property="og:image" content="https://legacycalifornia.com/art/towns/murphys-mainst-summer.jpg" />
 <meta name="twitter:card" content="summary_large_image" />
-<meta name="twitter:title" content="The Legacy Ledger — Sierra Foothills Real Estate Notes" />
-<meta name="twitter:description" content="A monthly letter from Sara Cooper on the Gold Country property market — what's moving, what's stalling, and what it means for you." />
+<meta name="twitter:title" content="The Ledger — Legacy Properties" />
+<meta name="twitter:description" content="Market intelligence for California's Gold Country. Second Tuesday, every month." />
 <meta name="twitter:image" content="https://legacycalifornia.com/art/towns/murphys-mainst-summer.jpg" />
 <script type="application/ld+json">
 {
@@ -175,638 +176,1244 @@
   ]
 }
 </script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Blog",
+  "@id": "https://legacycalifornia.com/ledger.html#ledger",
+  "name": "The Ledger",
+  "headline": "The Ledger — Gold Country Market Letter",
+  "description": "A monthly letter from Sara Cooper on the Calaveras and Amador real estate market — what's on in the foothills, what the numbers actually say, and one seasonal recipe.",
+  "url": "https://legacycalifornia.com/ledger.html",
+  "inLanguage": "en-US",
+  "publisher": {
+    "@id": "https://legacycalifornia.com/#brokerage"
+  },
+  "author": {
+    "@id": "https://legacycalifornia.com/#sara"
+  }
+}
+</script>
 <!-- seo:head:end -->
-<meta name="description" content="A monthly letter from Sara Cooper on the Gold Country property market — what's moving, what's stalling, and what it means for you.">
-<link rel="stylesheet" href="legacy.css">
 <style>
-  /* ── Page-specific ───────────────────────────────────── */
-  .ledger-mast {
-    background: var(--parchment);
-    padding: 56px var(--gutter) 32px;
-    border-bottom: 1px solid var(--rule);
-  }
-  .ledger-mast-inner {
-    max-width: var(--max); margin: 0 auto;
-    display: grid; grid-template-columns: 1fr auto 1fr;
-    align-items: center; gap: 32px;
-  }
-  .ledger-mast-side {
-    font-family: var(--mono); font-size: 10px; letter-spacing: 0.18em;
-    text-transform: uppercase; color: var(--ink-mute);
-  }
-  .ledger-mast-side.r { text-align: right; }
-  .ledger-mast-title {
-    font-family: var(--serif); font-style: italic; font-weight: 300;
-    font-size: clamp(56px, 7vw, 92px); line-height: 0.95;
-    letter-spacing: -0.01em; text-align: center; color: var(--ink);
-  }
-  .ledger-mast-title em { color: var(--brass); }
-  .ledger-mast-sub {
-    text-align: center; margin-top: 18px;
-    font-family: var(--serif); font-style: italic; font-weight: 300;
-    font-size: 20px; color: var(--ink-soft); max-width: 640px;
-    margin-left: auto; margin-right: auto;
-  }
-  .ledger-mast-rule {
-    max-width: var(--max); margin: 36px auto 0;
-    height: 4px;
-    background:
-      linear-gradient(to bottom, var(--ink) 0 1px, transparent 1px 3px, var(--ink) 3px 4px);
-  }
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600&family=Manrope:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap');
 
-  /* ── Featured issue ──────────────────────────────────── */
-  .led-feat {
-    padding: 80px var(--gutter);
-  }
-  .led-feat-inner {
-    max-width: var(--max); margin: 0 auto;
-    display: grid; grid-template-columns: 1.1fr 1fr; gap: 72px;
-    align-items: stretch;
-  }
-  .led-feat-cover {
-    background: var(--vellum);
-    border: 1px solid var(--rule);
-    aspect-ratio: 4/5;
-    position: relative;
-    overflow: hidden;
-    display: flex; flex-direction: column;
-    padding: 36px 36px 32px;
-  }
-  .led-feat-cover::before {
-    content: ''; position: absolute; inset: 0;
-    background:
-      repeating-linear-gradient(135deg, var(--vellum) 0 22px, var(--linen) 22px 44px);
-    opacity: 0.55;
-  }
-  .led-feat-cover > * { position: relative; z-index: 1; }
-  .led-feat-cover-top {
-    display: flex; justify-content: space-between;
-    font-family: var(--mono); font-size: 10px; letter-spacing: 0.18em;
-    color: var(--ink-mute); text-transform: uppercase;
-    padding-bottom: 18px; border-bottom: 1px solid var(--rule-strong);
-  }
-  .led-feat-cover-vol {
-    margin-top: auto;
-    font-family: var(--serif); font-style: italic; font-weight: 300;
-    font-size: 96px; line-height: 0.9; color: var(--brass);
-    letter-spacing: -0.02em;
-  }
-  .led-feat-cover-title {
-    font-family: var(--serif); font-style: italic; font-weight: 300;
-    font-size: 36px; line-height: 1.05; color: var(--ink);
-    margin-top: 10px;
-  }
-  .led-feat-cover-foot {
-    margin-top: 32px; padding-top: 18px;
-    border-top: 1px solid var(--rule-strong);
-    display: flex; justify-content: space-between;
-    font-family: var(--mono); font-size: 10px; letter-spacing: 0.18em;
-    color: var(--ink-soft); text-transform: uppercase;
-  }
-  .led-feat-body { display: flex; flex-direction: column; justify-content: center; }
-  .led-feat-body .h-section { margin-top: 12px; }
-  .led-feat-lede {
-    font-family: var(--serif); font-style: italic; font-weight: 300;
-    font-size: 22px; line-height: 1.45; color: var(--ink-soft);
-    margin-top: 24px;
-  }
-  .led-feat-meta {
-    display: flex; gap: 28px; align-items: center;
-    margin-top: 28px; padding-top: 22px; border-top: 1px solid var(--rule);
-    font-family: var(--mono); font-size: 10px; letter-spacing: 0.16em;
-    color: var(--ink-mute); text-transform: uppercase;
-  }
-  .led-feat-meta strong { color: var(--ink); font-weight: 500; }
-  .led-feat-ctas { display: flex; gap: 14px; margin-top: 32px; flex-wrap: wrap; }
+/* ===================================================================
+   THE LEDGER — vibrant edition
+   Six seasonal palettes. Every issue month picks one automatically, so
+   the letter looks like the time of year it was written in.
+=================================================================== */
+:root{
+  --cream:#FFFAF0; --paper:#FFF4E2; --sand:#F6E7CE;
+  --ink:#17140F; --ink-2:#2B2419; --ink-soft:#4E4335; --ink-mute:#7C6E5A; --ink-faint:#A79684;
+  --white:#FFFDF8;
+  --serif:'Cormorant Garamond',Georgia,serif;
+  --sans:'Manrope',system-ui,-apple-system,sans-serif;
+  --mono:'JetBrains Mono',ui-monospace,monospace;
+  --max:1240px;
+  --shadow-sm:0 2px 10px rgba(23,20,15,.06);
+  --shadow:0 14px 40px -12px rgba(23,20,15,.22);
+  --shadow-lg:0 30px 70px -20px rgba(23,20,15,.30);
+  --ease:cubic-bezier(.22,.8,.28,1);
 
-  /* ── Subscribe band ──────────────────────────────────── */
-  .led-sub {
-    background: var(--ink); color: var(--shell);
-    padding: 80px var(--gutter);
-  }
-  .led-sub-inner {
-    max-width: 940px; margin: 0 auto;
-    display: grid; grid-template-columns: 1.1fr 1fr; gap: 60px; align-items: center;
-  }
-  .led-sub h3 {
-    font-family: var(--serif); font-style: italic; font-weight: 300;
-    font-size: 44px; line-height: 1.05; color: var(--shell);
-  }
-  .led-sub h3 em { color: var(--brass-bright); }
-  .led-sub p {
-    margin-top: 16px; font-family: var(--serif); font-style: italic;
-    font-weight: 300; font-size: 18px; line-height: 1.5;
-    color: rgba(250,246,236,0.7);
-  }
-  .led-sub-form {
-    display: flex; flex-direction: column; gap: 12px;
-  }
-  .led-sub-form .field-label {
-    color: var(--brass-bright);
-  }
-  .led-sub-form input {
-    background: transparent; color: var(--shell);
-    border: 1px solid rgba(250,246,236,0.20);
-    padding: 14px 16px; font-family: var(--sans); font-size: 14px;
-    outline: none; transition: border-color .15s;
-  }
-  .led-sub-form input::placeholder { color: rgba(250,246,236,0.40); }
-  .led-sub-form input:focus { border-color: var(--brass-bright); }
-  .led-sub-form button {
-    border: none; background: var(--brass-bright); color: var(--ink);
-    padding: 14px 28px; font-family: var(--sans); font-size: 11px;
-    font-weight: 600; letter-spacing: 0.16em; text-transform: uppercase;
-    transition: background .15s;
-  }
-  .led-sub-form button:hover { background: var(--shell); }
-  .led-sub-foot {
-    margin-top: 14px; font-family: var(--mono); font-size: 10px;
-    letter-spacing: 0.14em; color: rgba(250,246,236,0.40);
-    text-transform: uppercase;
-  }
+  /* default (summer) — overridden by [data-season] */
+  --c1:#C4562E;   /* primary: sunset terracotta */
+  --c2:#E3A13A;   /* gold      */
+  --c3:#1F4A3B;   /* deep pine */
+  --c4:#3F87AC;   /* sky       */
+  --c5:#8E3E62;   /* plum      */
+  --tint:#FFF1DC; /* section wash */
+  --sky-a:#FFD9A0; --sky-b:#F5A25C; --sky-c:#D96B4A;
+  --hill-1:#2E6350; --hill-2:#3C7A5E; --hill-3:#6E9B62; --hill-4:#A8B872;
+  --sun:#FFE08A;
+}
+body[data-season="summer"]{
+  --c1:#C4562E; --c2:#E3A13A; --c3:#1F4A3B; --c4:#3F87AC; --c5:#8E3E62;
+  --tint:#FFF1DC;
+  --sky-a:#FFE0AE; --sky-b:#F7A863; --sky-c:#DE6F49;
+  --hill-1:#2C6350; --hill-2:#3E7E60; --hill-3:#719E63; --hill-4:#AEBB74; --sun:#FFE597;
+}
+body[data-season="autumn"]{
+  --c1:#B0431F; --c2:#D98518; --c3:#5C4123; --c4:#8A6A2E; --c5:#7A2F3A;
+  --tint:#FDECD6;
+  --sky-a:#FFD59A; --sky-b:#EE9450; --sky-c:#C4522C;
+  --hill-1:#5A3A22; --hill-2:#7A4E26; --hill-3:#A8712C; --hill-4:#C99A45; --sun:#FFD782;
+}
+body[data-season="winter"]{
+  --c1:#2F6383; --c2:#6E92A8; --c3:#24333D; --c4:#3E7C6E; --c5:#6B4A6E;
+  --tint:#EAF1F5;
+  --sky-a:#D7E6EE; --sky-b:#A6C2D3; --sky-c:#6E8FA6;
+  --hill-1:#2A3A44; --hill-2:#3C5260; --hill-3:#5A7684; --hill-4:#8FA7B2; --sun:#F2F7FA;
+}
+body[data-season="spring"]{
+  --c1:#3E7A3C; --c2:#C9A227; --c3:#1F4A3B; --c4:#4C90A8; --c5:#A2506E;
+  --tint:#EEF7E4;
+  --sky-a:#E4F2CF; --sky-b:#A8D08A; --sky-c:#6FAE6A;
+  --hill-1:#28503A; --hill-2:#37704A; --hill-3:#5C9A55; --hill-4:#9CC262; --sun:#FFF3A8;
+}
 
-  /* ── Archive ─────────────────────────────────────────── */
-  .led-arch { padding: 100px var(--gutter); }
-  .led-arch-inner { max-width: var(--max); margin: 0 auto; }
-  .led-filter {
-    display: flex; gap: 4px; flex-wrap: wrap;
-    margin-bottom: 48px; padding-bottom: 18px;
-    border-bottom: 1px solid var(--rule);
-  }
-  .led-filter button {
-    background: none; border: 1px solid transparent;
-    padding: 8px 16px;
-    font-family: var(--mono); font-size: 10px; letter-spacing: 0.16em;
-    text-transform: uppercase; color: var(--ink-mute);
-    cursor: pointer; transition: all .15s;
-  }
-  .led-filter button:hover { color: var(--ink); }
-  .led-filter button.on {
-    background: var(--ink); color: var(--shell); border-color: var(--ink);
-  }
-  .led-grid {
-    display: grid; grid-template-columns: repeat(3, 1fr);
-    gap: 1px; background: var(--rule); border: 1px solid var(--rule);
-  }
-  .led-issue {
-    background: var(--shell);
-    padding: 36px 32px 32px;
-    display: flex; flex-direction: column;
-    text-decoration: none; color: inherit;
-    transition: background .2s;
-    min-height: 380px;
-  }
-  .led-issue:hover { background: var(--linen); }
-  .led-issue-top {
-    display: flex; justify-content: space-between; align-items: baseline;
-    padding-bottom: 18px; border-bottom: 1px solid var(--rule);
-    font-family: var(--mono); font-size: 10px; letter-spacing: 0.16em;
-    color: var(--ink-mute); text-transform: uppercase;
-  }
-  .led-issue-vol {
-    font-family: var(--serif); font-style: italic; font-weight: 300;
-    font-size: 44px; line-height: 0.9; color: var(--brass);
-    margin: 28px 0 8px;
-  }
-  .led-issue-title {
-    font-family: var(--serif); font-style: italic; font-weight: 400;
-    font-size: 24px; line-height: 1.15; color: var(--ink);
-    margin-bottom: 14px;
-  }
-  .led-issue-lede {
-    font-size: 13.5px; line-height: 1.55; color: var(--ink-soft);
-    margin-bottom: 22px;
-  }
-  .led-issue-foot {
-    margin-top: auto; padding-top: 18px;
-    border-top: 1px solid var(--rule);
-    display: flex; justify-content: space-between; align-items: center;
-    font-family: var(--mono); font-size: 10px; letter-spacing: 0.14em;
-    color: var(--ink-mute); text-transform: uppercase;
-  }
-  .led-issue-foot .tag {
-    color: var(--brass);
-  }
-  .led-issue-foot .read {
-    color: var(--ink); transition: color .15s;
-  }
-  .led-issue:hover .read { color: var(--brass); }
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+body{background:var(--cream);color:var(--ink);font-family:var(--sans);font-size:16.5px;line-height:1.68;
+  -webkit-font-smoothing:antialiased;overflow-x:hidden;}
+img{display:block;max-width:100%;}
+a{color:inherit;text-decoration:none;}
+button{font-family:inherit;cursor:pointer;}
+svg{display:block;}
+.wrap{max-width:var(--max);margin:0 auto;padding:0 30px;}
+.narrow{max-width:760px;margin:0 auto;}
 
-  /* ── Editor cards (recurring sections) ───────────────── */
-  .led-sections {
-    background: var(--vellum);
-    padding: 100px var(--gutter);
-    border-top: 1px solid var(--rule);
-    border-bottom: 1px solid var(--rule);
-  }
-  .led-sections-inner { max-width: var(--max); margin: 0 auto; }
-  .led-sections-grid {
-    display: grid; grid-template-columns: repeat(4, 1fr);
-    gap: 36px; margin-top: 56px;
-  }
-  .led-section {
-    border-top: 1px solid var(--ink); padding-top: 22px;
-  }
-  .led-section-num {
-    font-family: var(--serif); font-style: italic; font-weight: 300;
-    font-size: 14px; color: var(--brass); margin-bottom: 8px;
-  }
-  .led-section-title {
-    font-family: var(--serif); font-style: italic; font-weight: 400;
-    font-size: 22px; line-height: 1.2; margin-bottom: 12px;
-  }
-  .led-section-body {
-    font-size: 13.5px; line-height: 1.6; color: var(--ink-soft);
-  }
+/* ---------- reading progress ---------- */
+#prog{position:fixed;top:0;left:0;height:3px;width:0;z-index:200;
+  background:linear-gradient(90deg,var(--c2),var(--c1),var(--c5));transition:width .1s linear;}
 
-  @media (max-width: 1000px) {
-    .led-feat-inner { grid-template-columns: 1fr; gap: 48px; }
-    .led-feat-cover { max-width: 480px; }
-    .led-sub-inner { grid-template-columns: 1fr; gap: 36px; }
-    .led-grid { grid-template-columns: repeat(2, 1fr); }
-    .led-sections-grid { grid-template-columns: repeat(2, 1fr); }
-    .ledger-mast-inner { grid-template-columns: 1fr; text-align: center; }
-    .ledger-mast-side.r { text-align: center; }
-  }
-  @media (max-width: 640px) {
-    .led-grid { grid-template-columns: 1fr; }
-    .led-sections-grid { grid-template-columns: 1fr; }
-  }
+/* ---------- reveal on scroll ---------- */
+.rv{opacity:0;transform:translateY(26px);transition:opacity .7s var(--ease),transform .7s var(--ease);}
+.rv.in{opacity:1;transform:none;}
+.rv-d1{transition-delay:.07s}.rv-d2{transition-delay:.14s}.rv-d3{transition-delay:.21s}
+.rv-d4{transition-delay:.28s}.rv-d5{transition-delay:.35s}.rv-d6{transition-delay:.42s}
+
+/* ---------- shared ---------- */
+.eyebrow{font-family:var(--mono);font-size:10.5px;letter-spacing:.24em;text-transform:uppercase;font-weight:600;}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:10px;font-size:11.5px;font-weight:800;
+  letter-spacing:.15em;text-transform:uppercase;padding:16px 32px;border:0;border-radius:100px;
+  transition:transform .25s var(--ease),box-shadow .25s var(--ease),background .25s;}
+.btn:hover{transform:translateY(-2px);box-shadow:var(--shadow);}
+.btn-c1{background:var(--c1);color:var(--white);}
+.chip{display:inline-flex;align-items:center;gap:7px;font-family:var(--mono);font-size:10px;letter-spacing:.13em;
+  text-transform:uppercase;padding:7px 14px;border-radius:100px;font-weight:600;
+  background:var(--tint);color:var(--c1);border:1px solid color-mix(in srgb,var(--c1) 22%,transparent);
+  transition:all .22s var(--ease);cursor:pointer;}
+.chip:hover{background:var(--c1);color:var(--white);transform:translateY(-2px);}
+.chip.on{background:var(--ink);color:var(--cream);border-color:var(--ink);}
+
+/* ---------- header ---------- */
+header.site{position:sticky;top:0;z-index:100;background:color-mix(in srgb,var(--cream) 88%,transparent);
+  backdrop-filter:blur(14px) saturate(1.3);border-bottom:1px solid rgba(23,20,15,.08);}
+.site-in{display:flex;align-items:center;justify-content:space-between;gap:22px;padding:15px 30px;
+  max-width:var(--max);margin:0 auto;}
+.wordmark{display:flex;align-items:center;gap:11px;}
+.wm-badge{width:34px;height:34px;border-radius:50%;flex-shrink:0;
+  background:conic-gradient(from 200deg,var(--c2),var(--c1),var(--c5),var(--c3),var(--c2));
+  display:flex;align-items:center;justify-content:center;color:#fff;font-family:var(--serif);
+  font-style:italic;font-size:17px;font-weight:600;animation:spinslow 18s linear infinite;}
+@keyframes spinslow{to{transform:rotate(360deg)}}
+.wm-badge span{animation:spinslow 18s linear infinite reverse;}
+.wm-txt b{display:block;font-family:var(--serif);font-style:italic;font-weight:600;font-size:22px;line-height:1;}
+.wm-txt i{display:block;font-family:var(--mono);font-style:normal;font-size:7.5px;letter-spacing:.34em;
+  text-transform:uppercase;color:var(--ink-mute);margin-top:4px;}
+nav.site-nav{display:flex;align-items:center;gap:24px;}
+nav.site-nav a{position:relative;font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--ink-soft);padding:4px 0;transition:color .2s;}
+nav.site-nav a::after{content:'';position:absolute;left:0;right:100%;bottom:0;height:2px;border-radius:2px;
+  background:var(--c1);transition:right .3s var(--ease);}
+nav.site-nav a:hover{color:var(--c1);} nav.site-nav a:hover::after{right:0;}
+nav.site-nav a[aria-current]{color:var(--c1);} nav.site-nav a[aria-current]::after{right:0;}
+.nav-toggle{display:none;background:var(--tint);border:0;border-radius:100px;padding:10px 16px;
+  font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;font-weight:600;color:var(--c1);}
+
+/* ===================================================================
+   HERO — original animated SVG landscape, no stock photography
+=================================================================== */
+/* Height tracks viewport WIDTH, not height. With 62vh the hero became 3.4:1 on a
+   1748px monitor and sliced the entire sky — sun, clouds and birds — off the top. */
+.hero{position:relative;min-height:clamp(440px,38vw,660px);display:flex;align-items:flex-end;
+  overflow:hidden;background:linear-gradient(180deg,var(--sky-a),var(--sky-b) 55%,var(--sky-c));}
+.hero-art{position:absolute;inset:0;width:100%;height:100%;}
+.hero-art svg{width:100%;height:100%;}
+#sunGrp{transform-origin:center;animation:pulse 7s ease-in-out infinite;}
+@keyframes pulse{0%,100%{opacity:.95;transform:scale(1)}50%{opacity:1;transform:scale(1.045)}}
+#rays{transform-box:fill-box;transform-origin:center;animation:spinslow 70s linear infinite;}
+.cloud{animation:drift linear infinite;}
+@keyframes drift{from{transform:translateX(-16vw)}to{transform:translateX(116vw)}}
+.bird{animation:fly 26s linear infinite;}
+@keyframes fly{
+  0%{transform:translate(-8vw,10px) scale(.8);opacity:0}
+  12%{opacity:.75}
+  88%{opacity:.75}
+  100%{transform:translate(105vw,-70px) scale(1.05);opacity:0}}
+.flap{animation:flap 1.1s ease-in-out infinite;transform-box:fill-box;transform-origin:center;}
+@keyframes flap{0%,100%{transform:scaleY(1)}50%{transform:scaleY(.35)}}
+.ridge{will-change:transform;}
+.hero-scrim{position:absolute;inset:0;background:linear-gradient(180deg,transparent 40%,rgba(23,20,15,.55));}
+.hero-in{position:relative;z-index:3;padding:0 30px 46px;max-width:var(--max);margin:0 auto;width:100%;color:var(--white);}
+.hero-eyebrow{display:inline-flex;align-items:center;gap:10px;background:rgba(255,253,248,.16);
+  backdrop-filter:blur(6px);border:1px solid rgba(255,253,248,.3);border-radius:100px;padding:8px 18px;
+  font-family:var(--mono);font-size:10.5px;letter-spacing:.22em;text-transform:uppercase;font-weight:600;}
+.hero-eyebrow .dot{width:7px;height:7px;border-radius:50%;background:var(--c2);
+  box-shadow:0 0 0 0 var(--c2);animation:ping 2.4s ease-out infinite;}
+@keyframes ping{0%{box-shadow:0 0 0 0 color-mix(in srgb,var(--c2) 70%,transparent)}
+  70%{box-shadow:0 0 0 12px transparent}100%{box-shadow:0 0 0 0 transparent}}
+.hero h1{font-family:var(--serif);font-style:italic;font-weight:500;
+  font-size:clamp(46px,8.4vw,112px);line-height:.94;letter-spacing:-.015em;margin:20px 0 0;
+  text-shadow:0 4px 30px rgba(23,20,15,.35);}
+.hero h1 em{font-style:italic;color:var(--sun);}
+.hero .strap{font-family:var(--serif);font-style:italic;font-size:clamp(18px,2.2vw,25px);
+  color:rgba(255,253,248,.92);max-width:46ch;margin-top:16px;}
+
+/* ticker */
+.ticker{background:var(--ink);color:var(--cream);overflow:hidden;padding:13px 0;position:relative;}
+.ticker::before,.ticker::after{content:'';position:absolute;top:0;bottom:0;width:90px;z-index:2;pointer-events:none;}
+.ticker::before{left:0;background:linear-gradient(90deg,var(--ink),transparent);}
+.ticker::after{right:0;background:linear-gradient(270deg,var(--ink),transparent);}
+.ticker-track{display:flex;gap:0;width:max-content;animation:slide 46s linear infinite;}
+.ticker:hover .ticker-track{animation-play-state:paused;}
+@keyframes slide{to{transform:translateX(-50%)}}
+.tick{display:inline-flex;align-items:center;gap:12px;padding:0 26px;font-family:var(--mono);font-size:11px;
+  letter-spacing:.13em;text-transform:uppercase;white-space:nowrap;color:rgba(255,250,240,.62);}
+.tick b{color:var(--c2);font-weight:600;}
+.tick::after{content:'◆';color:rgba(255,250,240,.24);font-size:7px;margin-left:14px;}
+
+/* ===================================================================
+   ISSUE HEAD
+=================================================================== */
+.ihead{padding:62px 0 54px;background:var(--cream);position:relative;}
+.ihead::before{content:'';position:absolute;top:-1px;left:0;right:0;height:1px;background:rgba(23,20,15,.07);}
+.ihead-grid{display:grid;grid-template-columns:1fr 350px;gap:56px;align-items:start;}
+.kicker-line{display:flex;align-items:center;gap:14px;}
+.kicker-line span{font-family:var(--mono);font-size:11px;letter-spacing:.22em;text-transform:uppercase;
+  font-weight:600;color:var(--c1);}
+.kicker-line .bar{flex:1;height:2px;border-radius:2px;background:linear-gradient(90deg,var(--c1),transparent);}
+h2.ihead-title{font-family:var(--serif);font-style:italic;font-weight:500;
+  font-size:clamp(34px,4.8vw,62px);line-height:1.04;letter-spacing:-.01em;margin:16px 0 20px;}
+.ihead-dek{font-size:19.5px;line-height:1.62;color:var(--ink-soft);max-width:58ch;}
+.ihead-tags{display:flex;gap:9px;flex-wrap:wrap;margin-top:24px;}
+.byline{display:flex;align-items:center;gap:15px;margin-top:30px;padding-top:24px;
+  border-top:1px solid rgba(23,20,15,.09);}
+.av{width:52px;height:52px;border-radius:50%;flex-shrink:0;position:relative;
+  background:linear-gradient(140deg,var(--c2),var(--c1));display:flex;align-items:center;justify-content:center;
+  color:var(--white);font-family:var(--serif);font-style:italic;font-size:23px;font-weight:600;overflow:hidden;
+  box-shadow:0 0 0 3px var(--cream),0 0 0 5px color-mix(in srgb,var(--c1) 30%,transparent);}
+.av img{width:100%;height:100%;object-fit:cover;}
+.byline b{display:block;font-size:15px;font-weight:700;}
+.byline i{display:block;font-family:var(--mono);font-style:normal;font-size:10.5px;letter-spacing:.13em;
+  text-transform:uppercase;color:var(--ink-mute);margin-top:3px;}
+
+/* subscribe */
+.sub{position:relative;border-radius:22px;overflow:hidden;padding:34px 30px;color:var(--white);
+  background:linear-gradient(150deg,var(--c3),var(--ink) 55%,var(--c5));box-shadow:var(--shadow-lg);}
+.sub::before{content:'';position:absolute;inset:-40%;
+  background:conic-gradient(from 0deg,transparent,color-mix(in srgb,var(--c2) 55%,transparent),transparent 40%);
+  animation:spinslow 14s linear infinite;opacity:.5;}
+.sub-in{position:relative;z-index:2;}
+.sub .eyebrow{color:var(--c2);}
+.sub h3{font-family:var(--serif);font-style:italic;font-weight:500;font-size:31px;line-height:1.08;margin:12px 0 12px;}
+.sub p{font-size:14.5px;color:rgba(255,253,248,.78);line-height:1.62;}
+.sub-form{display:flex;flex-direction:column;gap:10px;margin-top:22px;}
+.sub-form input,.sub-form select{width:100%;background:rgba(255,253,248,.10);border:1px solid rgba(255,253,248,.24);
+  border-radius:12px;color:var(--white);padding:14px 16px;font-family:var(--sans);font-size:14.5px;outline:none;
+  transition:border-color .2s,background .2s;}
+.sub-form input::placeholder{color:rgba(255,253,248,.5);}
+.sub-form input:focus,.sub-form select:focus{border-color:var(--c2);background:rgba(255,253,248,.16);}
+.sub-form select option{background:var(--ink);color:var(--white);}
+.sub-form button{margin-top:6px;background:var(--c2);color:var(--ink);border-radius:100px;}
+.sub-form button:hover{background:var(--white);}
+.sub-fine{font-family:var(--mono);font-size:10px;letter-spacing:.06em;color:rgba(255,253,248,.5);
+  margin-top:15px;line-height:1.75;}
+.sub-ok{display:none;margin-top:15px;padding:13px 16px;border-radius:12px;
+  background:color-mix(in srgb,var(--c2) 22%,transparent);border:1px solid var(--c2);font-size:13.5px;color:var(--c2);}
+
+/* ===================================================================
+   SECTIONS
+=================================================================== */
+.sec{padding:76px 0;position:relative;}
+.sec-tint{background:var(--tint);}
+.sec-ink{background:var(--ink);color:var(--cream);}
+.divider{height:56px;width:100%;}
+.divider svg{width:100%;height:100%;}
+.sec-head{margin-bottom:40px;}
+.sec-badge{display:inline-flex;align-items:center;gap:12px;padding:9px 18px 9px 12px;border-radius:100px;
+  background:var(--white);box-shadow:var(--shadow-sm);border:1px solid rgba(23,20,15,.07);}
+.sec-badge .ic{width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.sec-badge span{font-family:var(--mono);font-size:10.5px;letter-spacing:.2em;text-transform:uppercase;font-weight:600;}
+.sec h3.sec-title{font-family:var(--serif);font-style:italic;font-weight:500;
+  font-size:clamp(30px,4vw,50px);line-height:1.06;margin-top:20px;max-width:26ch;}
+.sec-note{border-radius:16px;padding:22px 26px;font-size:15.5px;line-height:1.72;color:var(--ink-soft);
+  background:var(--white);box-shadow:var(--shadow-sm);border-left:5px solid var(--c2);margin-bottom:34px;}
+.sec-note strong{color:var(--ink);}
+
+/* the letter */
+.letter p{font-size:19px;line-height:1.78;margin-bottom:1.1em;color:var(--ink-2);}
+.letter p.lead{font-size:22px;color:var(--ink);}
+.letter p.lead::first-letter{font-family:var(--serif);font-style:italic;font-weight:600;float:left;
+  font-size:92px;line-height:.74;padding:8px 14px 0 0;
+  background:linear-gradient(150deg,var(--c1),var(--c5));-webkit-background-clip:text;background-clip:text;
+  -webkit-text-fill-color:transparent;}
+.letter h4{font-family:var(--serif);font-style:italic;font-weight:600;font-size:33px;margin:2.1em 0 .6em;
+  color:var(--ink);display:flex;align-items:center;gap:16px;}
+.letter h4::before{content:'';width:34px;height:3px;border-radius:3px;flex-shrink:0;
+  background:linear-gradient(90deg,var(--c1),var(--c2));}
+.letter strong{font-weight:700;color:var(--ink);
+  background:linear-gradient(180deg,transparent 62%,color-mix(in srgb,var(--c2) 40%,transparent) 62%);}
+.letter em{font-style:italic;}
+.letter .sig{font-family:var(--serif);font-style:italic;font-size:30px;color:var(--c1);margin-top:1.4em;}
+
+/* by the numbers */
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:18px;}
+.stat{position:relative;border-radius:20px;padding:28px 26px 24px;overflow:hidden;background:var(--white);
+  box-shadow:var(--shadow-sm);transition:transform .3s var(--ease),box-shadow .3s var(--ease);
+  display:flex;flex-direction:column;gap:8px;}
+.stat:hover{transform:translateY(-5px);box-shadow:var(--shadow);}
+.stat::before{content:'';position:absolute;top:0;left:0;right:0;height:5px;background:var(--sc);}
+.stat::after{content:'';position:absolute;right:-30px;bottom:-30px;width:120px;height:120px;border-radius:50%;
+  background:var(--sc);opacity:.07;}
+.stat .l{font-family:var(--mono);font-size:10px;letter-spacing:.16em;text-transform:uppercase;
+  color:var(--ink-mute);font-weight:600;min-height:2.7em;position:relative;}
+.stat .v{font-family:var(--serif);font-style:italic;font-weight:600;font-size:52px;line-height:1;
+  color:var(--sc);position:relative;padding-bottom:11px;
+  clip-path:inset(0 0 100% 0);transform:translateY(12px);
+  transition:clip-path .75s var(--ease),transform .75s var(--ease);}
+.stat .v.shown{clip-path:inset(0 0 0 0);transform:none;}
+.stat .v::after{content:'';position:absolute;left:0;bottom:0;width:0;height:4px;border-radius:4px;
+  background:var(--sc);opacity:.55;transition:width .9s var(--ease) .25s;}
+.stat .v.shown::after{width:46px;}
+.stat .c{display:inline-flex;align-items:center;gap:6px;font-family:var(--mono);font-size:11px;font-weight:600;
+  color:var(--ink-soft);position:relative;}
+.stat .c .arw{font-size:13px;line-height:1;}
+.stat .c.up .arw{color:#3E7A3C;} .stat .c.down .arw{color:var(--c1);}
+.stat .f{font-size:13px;line-height:1.62;color:var(--ink-mute);padding-top:13px;margin-top:6px;
+  border-top:1px solid rgba(23,20,15,.09);position:relative;}
+.stat .f strong{color:var(--ink);}
+.spread{margin-top:26px;border-radius:22px;padding:40px;color:var(--cream);position:relative;overflow:hidden;
+  background:linear-gradient(140deg,var(--c3),var(--ink));}
+.spread::after{content:'';position:absolute;right:-60px;top:-60px;width:280px;height:280px;border-radius:50%;
+  background:radial-gradient(circle,color-mix(in srgb,var(--c2) 40%,transparent),transparent 70%);}
+.spread h4{font-family:var(--serif);font-style:italic;font-weight:500;font-size:32px;color:var(--c2);
+  margin-bottom:15px;position:relative;}
+.spread p{font-size:17.5px;line-height:1.72;color:rgba(255,250,240,.88);max-width:72ch;position:relative;}
+
+/* what's on */
+.egroup{margin-bottom:44px;}
+.egroup-h{display:flex;align-items:center;gap:14px;margin-bottom:4px;padding-bottom:14px;
+  border-bottom:2px solid var(--gc);}
+.egroup-h .n{width:30px;height:30px;border-radius:50%;background:var(--gc);color:var(--white);flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:11px;font-weight:600;}
+.egroup-h h4{font-family:var(--serif);font-style:italic;font-weight:600;font-size:29px;color:var(--ink);}
+.evt{display:grid;grid-template-columns:152px 1fr auto;gap:24px;padding:19px 0;align-items:baseline;
+  border-bottom:1px solid rgba(23,20,15,.08);transition:padding-left .25s var(--ease);}
+.evt:last-child{border-bottom:0;}
+.evt:hover{padding-left:10px;}
+.evt-when{display:flex;flex-direction:column;gap:3px;}
+.evt-when b{font-family:var(--serif);font-style:italic;font-weight:600;font-size:22px;color:var(--gc);line-height:1.12;text-wrap:balance;}
+.evt-when i{font-family:var(--mono);font-style:normal;font-size:9.5px;letter-spacing:.17em;text-transform:uppercase;
+  color:var(--ink-faint);font-weight:600;}
+.evt-what .n{font-size:17.5px;font-weight:700;color:var(--ink);line-height:1.35;}
+.evt-what .n em{font-style:italic;font-weight:600;}
+.evt-what .w{font-size:14.5px;color:var(--ink-soft);margin-top:4px;}
+.evt-what .note{font-size:14px;color:var(--ink-mute);margin-top:8px;line-height:1.65;}
+.evt-what .note strong{color:var(--ink);}
+.evt-cost{font-family:var(--mono);font-size:10.5px;font-weight:600;letter-spacing:.05em;white-space:nowrap;
+  padding:6px 13px;border-radius:100px;background:color-mix(in srgb,var(--gc) 13%,transparent);color:var(--gc);}
+.mkt{margin-top:20px;border-radius:22px;overflow:hidden;background:var(--white);box-shadow:var(--shadow-sm);}
+.mkt-h{display:flex;align-items:center;gap:14px;padding:26px 30px 20px;border-bottom:1px solid rgba(23,20,15,.08);}
+.mkt-h h4{font-family:var(--serif);font-style:italic;font-weight:600;font-size:28px;}
+.mkt-row{display:grid;grid-template-columns:130px 1fr 210px;gap:20px;padding:15px 30px;align-items:baseline;
+  border-bottom:1px solid rgba(23,20,15,.05);transition:background .2s;}
+.mkt-row:last-child{border-bottom:0;}
+.mkt-row:hover{background:var(--tint);}
+.mkt-row .d{font-family:var(--mono);font-size:10.5px;letter-spacing:.15em;text-transform:uppercase;
+  font-weight:700;color:var(--c3);}
+.mkt-row .n{font-size:15px;font-weight:700;}
+.mkt-row .n small{display:block;font-weight:400;font-size:13.5px;color:var(--ink-mute);margin-top:2px;}
+.mkt-row .h{font-family:var(--mono);font-size:11px;color:var(--ink-mute);text-align:right;}
+.fnotes{margin-top:32px;display:grid;gap:14px;}
+.fnote{display:grid;grid-template-columns:26px 1fr;gap:14px;font-size:15px;color:var(--ink-soft);line-height:1.68;
+  background:var(--white);border-radius:14px;padding:16px 20px;box-shadow:var(--shadow-sm);}
+.fnote .m{width:26px;height:26px;border-radius:50%;background:var(--c2);color:var(--ink);flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;}
+.fnote strong{color:var(--ink);}
+
+/* recipe */
+.rec{display:grid;grid-template-columns:1fr 1.3fr;border-radius:26px;overflow:hidden;background:var(--white);
+  box-shadow:var(--shadow-lg);}
+.rec-left{padding:0;display:flex;flex-direction:column;}
+.rec-art{position:relative;aspect-ratio:16/11;overflow:hidden;
+  background:linear-gradient(160deg,var(--sky-a),var(--sky-b));}
+.rec-art svg,.rec-art img{width:100%;height:100%;object-fit:cover;}
+.rec-art .plate{position:absolute;inset:0;}
+.rec-body{padding:32px 32px 36px;}
+.rec-body h4{font-family:var(--serif);font-style:italic;font-weight:600;font-size:37px;line-height:1.05;margin-bottom:16px;}
+.rec-serves{display:inline-flex;gap:9px;flex-wrap:wrap;margin-bottom:20px;}
+.rec-serves em{font-family:var(--mono);font-style:normal;font-size:10px;letter-spacing:.13em;text-transform:uppercase;
+  font-weight:600;padding:6px 13px;border-radius:100px;background:var(--tint);color:var(--c1);}
+.rec-intro{font-size:16.5px;line-height:1.72;color:var(--ink-soft);}
+.rec-right{padding:36px 34px;background:var(--tint);}
+.rec-lbl{display:flex;align-items:center;gap:11px;font-family:var(--mono);font-size:10px;letter-spacing:.22em;
+  text-transform:uppercase;color:var(--ink-mute);font-weight:700;margin-bottom:16px;}
+.rec-lbl::after{content:'';flex:1;height:1px;background:rgba(23,20,15,.12);}
+.rec-ing{list-style:none;margin-bottom:30px;}
+.rec-ing li{font-size:15.5px;padding:9px 0 9px 26px;position:relative;color:var(--ink-2);
+  border-bottom:1px dashed rgba(23,20,15,.1);}
+.rec-ing li:last-child{border-bottom:0;}
+.rec-ing li::before{content:'';position:absolute;left:4px;top:18px;width:8px;height:8px;border-radius:50%;
+  background:var(--c1);}
+.rec-steps{counter-reset:s;list-style:none;}
+.rec-steps li{counter-increment:s;display:grid;grid-template-columns:42px 1fr;gap:18px;padding:15px 0;}
+.rec-steps li::before{content:counter(s);width:38px;height:38px;border-radius:50%;
+  background:linear-gradient(145deg,var(--c2),var(--c1));color:var(--white);display:flex;align-items:center;
+  justify-content:center;font-family:var(--serif);font-style:italic;font-weight:600;font-size:20px;flex-shrink:0;}
+.rec-steps li p{font-size:16px;line-height:1.72;color:var(--ink-2);}
+.rec-notes{margin-top:26px;padding-top:24px;border-top:1px solid rgba(23,20,15,.12);display:grid;gap:13px;}
+.rec-notes div{font-size:14.5px;line-height:1.68;color:var(--ink-soft);}
+.rec-notes strong{color:var(--ink);}
+
+/* worth knowing */
+.wk{display:grid;grid-template-columns:repeat(auto-fit,minmax(290px,1fr));gap:22px;}
+.wk-card{position:relative;border-radius:20px;padding:30px 28px;background:var(--white);box-shadow:var(--shadow-sm);
+  overflow:hidden;transition:transform .3s var(--ease),box-shadow .3s var(--ease);}
+.wk-card:hover{transform:translateY(-6px);box-shadow:var(--shadow);}
+.wk-card .num{position:absolute;right:16px;top:6px;font-family:var(--serif);font-style:italic;font-weight:700;
+  font-size:78px;line-height:1;color:var(--wc);opacity:.14;}
+.wk-card h4{font-family:var(--serif);font-style:italic;font-weight:600;font-size:26px;line-height:1.14;
+  margin-bottom:13px;position:relative;padding-top:6px;}
+.wk-card p{font-size:15.5px;line-height:1.7;color:var(--ink-soft);position:relative;}
+.wk-card strong{color:var(--ink);font-weight:700;}
+.wk-card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:5px;background:var(--wc);}
+
+/* a note */
+.anote{display:grid;grid-template-columns:auto 1fr;gap:30px;align-items:start;max-width:900px;margin:0 auto;}
+.anote .av{width:74px;height:74px;font-size:32px;box-shadow:0 0 0 4px var(--ink),0 0 0 6px color-mix(in srgb,var(--c2) 45%,transparent);}
+.anote .k{font-family:var(--mono);font-size:10.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--c2);
+  font-weight:600;margin-bottom:16px;}
+.anote p{font-family:var(--serif);font-style:italic;font-size:clamp(21px,2.4vw,27px);line-height:1.56;
+  color:rgba(255,250,240,.94);}
+.anote .sg{font-family:var(--serif);font-style:italic;font-size:26px;color:var(--c2);margin-top:24px;}
+
+/* sources */
+.srcs{border-radius:18px;overflow:hidden;background:var(--white);box-shadow:var(--shadow-sm);}
+.srcs summary{cursor:pointer;list-style:none;padding:22px 28px;display:flex;justify-content:space-between;
+  align-items:center;gap:16px;font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase;
+  font-weight:600;color:var(--ink-soft);transition:color .2s;}
+.srcs summary::-webkit-details-marker{display:none;}
+.srcs summary:hover{color:var(--c1);}
+.srcs summary .pm{width:28px;height:28px;border-radius:50%;background:var(--tint);color:var(--c1);flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;transition:transform .3s var(--ease);}
+.srcs[open] summary .pm{transform:rotate(45deg);}
+.src{display:grid;grid-template-columns:1fr 1fr;gap:22px;padding:16px 28px;font-size:13.5px;
+  border-top:1px solid rgba(23,20,15,.06);}
+.src .cl{color:var(--ink-2);} .src .sr{color:var(--ink-mute);}
+.src .sr a{color:var(--c1);font-weight:600;border-bottom:1px solid color-mix(in srgb,var(--c1) 35%,transparent);
+  word-break:break-word;}
+
+/* archive */
+.arch{padding:76px 0;background:linear-gradient(180deg,var(--tint),var(--sand));}
+.arch-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:24px;margin-top:32px;}
+.arch-card{position:relative;border-radius:20px;overflow:hidden;background:var(--white);box-shadow:var(--shadow-sm);
+  display:flex;flex-direction:column;transition:transform .3s var(--ease),box-shadow .3s var(--ease);}
+.arch-card:hover{transform:translateY(-6px);box-shadow:var(--shadow);}
+.arch-top{height:88px;position:relative;overflow:hidden;}
+.arch-top svg{width:100%;height:100%;}
+.arch-body{padding:22px 24px 24px;display:flex;flex-direction:column;gap:10px;flex:1;}
+.arch-card .m{font-family:var(--mono);font-size:10px;letter-spacing:.17em;text-transform:uppercase;
+  font-weight:700;color:var(--c1);}
+.arch-card h4{font-family:var(--serif);font-style:italic;font-weight:600;font-size:25px;line-height:1.14;}
+.arch-card p{font-size:14.5px;color:var(--ink-soft);line-height:1.6;
+  display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;}
+.arch-card .r{margin-top:auto;padding-top:14px;font-family:var(--mono);font-size:10.5px;letter-spacing:.13em;
+  text-transform:uppercase;font-weight:600;color:var(--ink-faint);display:flex;align-items:center;gap:8px;}
+.arch-card:hover .r{color:var(--c1);}
+.arch-card .r .ar{transition:transform .25s var(--ease);}
+.arch-card:hover .r .ar{transform:translateX(5px);}
+.filters{display:flex;gap:9px;flex-wrap:wrap;margin-top:24px;}
+
+/* footer */
+footer.site{background:var(--ink);color:rgba(255,250,240,.68);padding:60px 0 36px;font-size:14.5px;}
+footer.site .cols{display:grid;grid-template-columns:1.7fr 1fr 1fr 1fr;gap:38px;padding-bottom:34px;
+  border-bottom:1px solid rgba(255,250,240,.14);}
+footer.site h5{font-family:var(--mono);font-size:10px;letter-spacing:.22em;text-transform:uppercase;
+  color:var(--c2);margin-bottom:16px;font-weight:600;}
+footer.site a{display:block;padding:6px 0;color:rgba(255,250,240,.68);transition:color .2s,transform .2s;}
+footer.site a:hover{color:var(--c2);transform:translateX(3px);}
+footer .wm-txt b{color:var(--cream);} footer .wm-txt i{color:rgba(255,250,240,.45);}
+footer .fdesc{margin-top:18px;max-width:40ch;line-height:1.72;}
+footer .bot{display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap;padding-top:26px;
+  font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:rgba(255,250,240,.42);}
+
+/* states */
+.state{padding:110px 30px;text-align:center;}
+.state p{font-family:var(--serif);font-style:italic;font-size:26px;color:var(--ink-mute);}
+.spinner{width:38px;height:38px;margin:0 auto 22px;border-radius:50%;
+  border:3px solid color-mix(in srgb,var(--c1) 22%,transparent);border-top-color:var(--c1);
+  animation:spin .9s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* responsive */
+@media (max-width:1000px){
+  .ihead-grid{grid-template-columns:1fr;gap:40px;}
+  .rec{grid-template-columns:1fr;}
+  footer.site .cols{grid-template-columns:1fr 1fr;}
+  .src{grid-template-columns:1fr;gap:6px;}
+}
+@media (max-width:720px){
+  body{font-size:16px;}
+  .wrap,.site-in{padding-left:22px;padding-right:22px;}
+  nav.site-nav{display:none;}
+  nav.site-nav.open{display:flex;position:absolute;top:100%;left:0;right:0;background:var(--white);
+    flex-direction:column;gap:0;padding:10px 22px 20px;box-shadow:var(--shadow);}
+  nav.site-nav.open a{padding:14px 0;border-bottom:1px solid rgba(23,20,15,.07);}
+  .nav-toggle{display:block;}
+  header.site{position:relative;}
+  .hero{min-height:400px;} .hero-in{padding-bottom:34px;}
+  .sec{padding:54px 0;}
+  .letter p{font-size:17.5px;} .letter p.lead{font-size:19px;}
+  .letter p.lead::first-letter{font-size:70px;}
+  .letter h4{font-size:27px;}
+  .evt{grid-template-columns:1fr;gap:7px;}
+  .evt-when{flex-direction:row;align-items:baseline;gap:9px;}
+  .evt-cost{justify-self:start;}
+  .mkt-row{grid-template-columns:1fr;gap:5px;} .mkt-row .h{text-align:left;}
+  .anote{grid-template-columns:1fr;gap:20px;}
+  .spread{padding:28px 24px;} .spread p{font-size:16.5px;}
+  .rec-body,.rec-right{padding:26px 22px;}
+  .stat .v{font-size:44px;}
+}
+
+/* motion off */
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation:none!important;transition:none!important;}
+  .rv{opacity:1!important;transform:none!important;}
+  /* clip-path must be reset explicitly. Killing the transition alone leaves
+     the value stuck at inset(0 0 100% 0) — i.e. an invisible median for every
+     reader who has reduced motion switched on. */
+  .stat .v{clip-path:none!important;transform:none!important;}
+  .stat .v::after{width:46px!important;}
+  html{scroll-behavior:auto;}
+}
+/* Same reasoning for no-JS: never let a script failure hide a number. */
+html:not(.js) .stat .v{clip-path:none;transform:none;}
+html:not(.js) .stat .v::after{width:46px;}
 </style>
 </head>
+<body data-season="summer">
 
-<template id="__bundler_thumbnail" data-bg-color="#1c1a17">
-  <svg viewBox="0 0 1200 800" xmlns="http://www.w3.org/2000/svg">
-    <rect x="200" y="170" width="800" height="120" fill="none" stroke="#c9a24b" stroke-width="6"/>
-    <text x="600" y="258" font-family="Georgia, serif" font-style="italic" font-size="86" fill="#faf6ec" text-anchor="middle">Ledger</text>
-    <rect x="200" y="330" width="800" height="3" fill="#faf6ec"/>
-    <rect x="200" y="342" width="800" height="3" fill="#faf6ec"/>
-    <rect x="200" y="400" width="240" height="230" fill="none" stroke="#c9a24b" stroke-width="5"/>
-    <rect x="480" y="400" width="240" height="230" fill="none" stroke="#6b665d" stroke-width="3"/>
-    <rect x="760" y="400" width="240" height="230" fill="none" stroke="#6b665d" stroke-width="3"/>
-    <text x="320" y="540" font-family="Georgia, serif" font-style="italic" font-size="64" fill="#c9a24b" text-anchor="middle">04</text>
-  </svg>
-</template>
+<div id="prog"></div>
 
-<body class="paper" data-screen-label="The Ledger Index">
-
-<!-- ============ TOP NAV ============ -->
-<header class="topnav">
-  <div class="topnav-bar1">
-    <span>Boutique luxury real estate · Calaveras · Amador · Tuolumne</span>
-    <span>
-      <a href="tel:2095594966">(209) 559-4966</a>
-      &nbsp;·&nbsp;
-      <a href="mailto:SaraSellsCalifornia@gmail.com">SaraSellsCalifornia@gmail.com</a>
-    </span>
-  </div>
-  <nav class="topnav-bar2">
-    <div class="topnav-links">
-      <a href="property-search.html">Listings</a>
-      <a href="towns.html">Communities</a>
-      <a href="relocate.html">Relocate</a>
-      <a href="valuation.html">Sellers</a>
-      <a href="market-report.html">Markets</a>
-    </div>
-    <a href="index.html" class="wordmark">
-      <span class="wordmark-word">Legacy Properties</span>
-      <span class="wordmark-sub">Every Home Has A Story</span>
+<header class="site">
+  <div class="site-in">
+    <a class="wordmark" href="/">
+      <span class="wm-badge"><span>L</span></span>
+      <span class="wm-txt"><b>Legacy</b><i>Properties</i></span>
     </a>
-    <div class="topnav-links right">
-      <a href="ledger.html" class="active">The Ledger</a>
-      <a href="dashboard.html">Sign In</a>
-      <a href="find-my-match.html" class="btn btn-ink btn-sm" style="padding:10px 18px;">Find My Match</a>
-    </div>
-  </nav>
+    <nav class="site-nav" id="nav">
+      <a href="/property-search.html">Listings</a>
+      <a href="/towns.html">Communities</a>
+      <a href="/relocate.html">Relocate</a>
+      <a href="/valuation.html">Sellers</a>
+      <a href="/market-report.html">Markets</a>
+      <a href="/ledger.html" aria-current="page">The Ledger</a>
+      <a href="/dashboard.html">Sign In</a>
+    </nav>
+    <button class="nav-toggle" onclick="document.getElementById('nav').classList.toggle('open')">Menu</button>
+  </div>
 </header>
 
-<!-- ============ MASTHEAD ============ -->
-<section class="ledger-mast">
-  <div class="ledger-mast-inner">
-    <div class="ledger-mast-side">Vol. XXII · No. 4</div>
-    <h1 class="ledger-mast-title">The Legacy <em>Ledger</em></h1>
-    <div class="ledger-mast-side r">Spring 2026 · Angels Camp</div>
+<!-- ============ HERO: original animated foothill landscape ============ -->
+<section class="hero">
+  <div class="hero-art" aria-hidden="true">
+    <svg viewBox="0 0 1440 720" preserveAspectRatio="xMidYMid slice">
+      <defs>
+        <linearGradient id="gSky" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%"  stop-color="var(--sky-a)"/>
+          <stop offset="58%" stop-color="var(--sky-b)"/>
+          <stop offset="100%" stop-color="var(--sky-c)"/>
+        </linearGradient>
+        <radialGradient id="gSun"><stop offset="0%" stop-color="var(--sun)"/>
+          <stop offset="100%" stop-color="var(--sun)" stop-opacity="0"/></radialGradient>
+        <linearGradient id="gH1" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="var(--hill-4)"/><stop offset="100%" stop-color="var(--hill-3)"/></linearGradient>
+        <linearGradient id="gH2" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="var(--hill-3)"/><stop offset="100%" stop-color="var(--hill-2)"/></linearGradient>
+        <linearGradient id="gH3" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="var(--hill-2)"/><stop offset="100%" stop-color="var(--hill-1)"/></linearGradient>
+      </defs>
+
+      <rect width="1440" height="720" fill="url(#gSky)"/>
+
+      <!-- Sky group: translated down so a wide-aspect crop keeps it on screen.
+
+           Everything above y~150 gets sliced on a 3.4:1 hero. -->
+
+      <g transform="translate(0,70)">
+
+      <!-- sun -->
+      <g id="sunGrp">
+        <circle cx="1108" cy="196" r="190" fill="url(#gSun)" opacity=".62"/>
+        <g id="rays" opacity=".30">
+          <g stroke="var(--sun)" stroke-width="2.5" stroke-linecap="round">
+            <line x1="1108" y1="66"  x2="1108" y2="24"/>
+            <line x1="1108" y1="326" x2="1108" y2="368"/>
+            <line x1="978"  y1="196" x2="936"  y2="196"/>
+            <line x1="1238" y1="196" x2="1280" y2="196"/>
+            <line x1="1016" y1="104" x2="986"  y2="74"/>
+            <line x1="1200" y1="288" x2="1230" y2="318"/>
+            <line x1="1200" y1="104" x2="1230" y2="74"/>
+            <line x1="1016" y1="288" x2="986"  y2="318"/>
+          </g>
+        </g>
+        <circle cx="1108" cy="196" r="76" fill="var(--sun)"/>
+      </g>
+
+      <!-- clouds -->
+      <g fill="#FFFDF8" opacity=".42">
+        <g class="cloud" style="animation-duration:64s">
+          <ellipse cx="180" cy="118" rx="86" ry="27"/><ellipse cx="238" cy="106" rx="58" ry="24"/>
+          <ellipse cx="128" cy="108" rx="46" ry="20"/>
+        </g>
+        <g class="cloud" style="animation-duration:92s;animation-delay:-30s" opacity=".7">
+          <ellipse cx="560" cy="196" rx="104" ry="24"/><ellipse cx="626" cy="184" rx="62" ry="21"/>
+        </g>
+        <g class="cloud" style="animation-duration:78s;animation-delay:-58s" opacity=".5">
+          <ellipse cx="900" cy="86" rx="70" ry="20"/><ellipse cx="948" cy="78" rx="44" ry="16"/>
+        </g>
+      </g>
+
+      <!-- birds -->
+      <g class="bird" style="animation-delay:-4s">
+        <g class="flap" fill="none" stroke="var(--hill-1)" stroke-width="2.6" stroke-linecap="round" opacity=".7">
+          <path d="M300 250 q10 -9 20 0"/><path d="M320 250 q10 -9 20 0"/>
+        </g>
+      </g>
+      <g class="bird" style="animation-delay:-13s">
+        <g class="flap" style="animation-delay:-.4s" fill="none" stroke="var(--hill-1)" stroke-width="2.2"
+           stroke-linecap="round" opacity=".55">
+          <path d="M300 300 q8 -7 16 0"/><path d="M316 300 q8 -7 16 0"/>
+        </g>
+      </g>
+
+      </g>
+
+      <!-- ridge 4 (farthest) -->
+      <path class="ridge" data-depth="0.10" fill="url(#gH1)" opacity=".62"
+        d="M0 452 L110 418 L206 442 L318 392 L430 430 L548 386 L664 424 L788 380 L900 420 L1020 384 L1140 424 L1266 392 L1380 428 L1440 410 L1440 720 L0 720 Z"/>
+      <!-- ridge 3 -->
+      <path class="ridge" data-depth="0.18" fill="url(#gH2)" opacity=".82"
+        d="M0 512 L128 470 L248 504 L372 452 L500 494 L628 448 L760 490 L890 446 L1020 488 L1150 450 L1290 492 L1440 456 L1440 720 L0 720 Z"/>
+      <!-- ridge 2 with oaks -->
+      <g class="ridge" data-depth="0.28">
+        <path fill="url(#gH3)"
+          d="M0 574 L150 534 L290 570 L430 522 L578 566 L720 520 L868 562 L1010 518 L1160 560 L1300 522 L1440 562 L1440 720 L0 720 Z"/>
+        <g fill="var(--hill-1)" opacity=".9">
+          <path d="M214 566 q-4 -22 8 -30 q-14 -14 4 -22 q-2 -16 16 -14 q10 -14 22 -2 q18 -6 18 10 q16 4 8 18 q12 10 -2 20 q4 18 -14 20 z"/>
+          <rect x="248" y="562" width="7" height="20" rx="2"/>
+          <path d="M1058 560 q-5 -26 9 -35 q-16 -17 5 -26 q-2 -19 18 -16 q12 -17 26 -3 q21 -7 21 12 q19 5 9 21 q14 12 -2 24 q5 21 -17 23 z"/>
+          <rect x="1098" y="556" width="8" height="24" rx="2"/>
+          <path d="M652 556 q-3 -18 7 -24 q-11 -12 3 -18 q-2 -13 13 -11 q8 -11 18 -2 q14 -5 14 8 q13 3 6 14 q10 8 -1 17 q3 14 -12 16 z"/>
+          <rect x="678" y="552" width="6" height="17" rx="2"/>
+        </g>
+      </g>
+      <!-- foreground -->
+      <path class="ridge" data-depth="0.40" fill="var(--hill-1)"
+        d="M0 646 L180 618 L360 648 L540 612 L740 650 L940 614 L1130 650 L1310 618 L1440 646 L1440 720 L0 720 Z"/>
+      <g fill="var(--hill-1)" opacity=".55">
+        <ellipse cx="120" cy="700" rx="150" ry="34"/><ellipse cx="820" cy="710" rx="200" ry="30"/>
+        <ellipse cx="1340" cy="702" rx="160" ry="32"/>
+      </g>
+    </svg>
   </div>
-  <p class="ledger-mast-sub">A monthly letter from Sara — what's moving in the Gold Country market, what's stalling, and what it means for the version of life you're picturing here.</p>
-  <div class="ledger-mast-rule"></div>
+  <div class="hero-scrim"></div>
+  <div class="hero-in">
+    <div class="hero-eyebrow"><span class="dot"></span><span id="heroMeta">Gold Country Market Letter</span></div>
+    <h1>The <em>Ledger</em></h1>
+    <p class="strap">What the numbers actually say, what's on in the foothills, and one thing
+      worth cooking — from two agents who live here.</p>
+  </div>
 </section>
 
-<!-- ============ FEATURED ISSUE ============ -->
-<section class="led-feat">
-  <div class="led-feat-inner">
-    <a href="ledger-issue.html" class="led-feat-cover">
-      <div class="led-feat-cover-top">
-        <span>The Legacy Ledger</span>
-        <span>April 2026</span>
-      </div>
-      <div class="led-feat-cover-vol">XXII<span style="font-size:36px; color: var(--ink);">·04</span></div>
-      <div class="led-feat-cover-title">When the river<br>buyers come<br><em style="color: var(--brass);">looking for the mountain.</em></div>
-      <div class="led-feat-cover-foot">
-        <span>Issue · 1,840 words</span>
-        <span>By Sara Cooper</span>
-      </div>
-    </a>
-    <div class="led-feat-body">
-      <span class="hairline-brass" style="margin-bottom: 18px;"></span>
-      <span class="eyebrow">This month's letter</span>
-      <h2 class="h-section">When river buyers<br>come looking<br><em>for the mountain.</em></h2>
-      <p class="led-feat-lede">Three closings in the last six weeks went the opposite direction of the inquiry. People who wrote in asking about Copperopolis ended up in Arnold. That's not a coincidence — it's the market telling us something about elevation, snow, and how 2026 buyers are actually thinking about resilience.</p>
-      <div class="led-feat-meta">
-        <span><strong>9 min read</strong></span>
-        <span>·</span>
-        <span>Filed under <strong style="color: var(--brass);">Market</strong></span>
-        <span>·</span>
-        <span>April 14, 2026</span>
-      </div>
-      <div class="led-feat-ctas">
-        <a href="ledger-issue.html" class="btn btn-ink">Read the issue</a>
-        <a href="#subscribe" class="btn btn-ghost">Get it monthly</a>
-      </div>
-    </div>
-  </div>
-</section>
+<!-- ============ TICKER ============ -->
+<div class="ticker" id="ticker" aria-hidden="true"><div class="ticker-track" id="tickerTrack"></div></div>
 
-<!-- ============ SUBSCRIBE ============ -->
-<section class="led-sub" id="subscribe">
-  <div class="led-sub-inner">
-    <div>
-      <span class="hairline-brass" style="background: var(--brass-bright); margin-bottom: 16px;"></span>
-      <span class="eyebrow" style="color: var(--brass-bright);">Free · One letter per month · No promotions</span>
-      <h3 style="margin-top: 12px;">A useful letter,<br><em>once a month.</em></h3>
-      <p>Sara sends the Ledger on the second Tuesday of every month. Two thousand words on the foothills market, a handful of listings worth knowing about, the occasional piece of unsolicited advice. Unsubscribe with one click — Sara won't be offended.</p>
-    </div>
-    <form class="led-sub-form" onsubmit="event.preventDefault(); this.querySelector('button').textContent='Sent · thank you';">
-      <div class="field">
-        <span class="field-label">Your name</span>
-        <input type="text" placeholder="First and last" required>
-      </div>
-      <div class="field">
-        <span class="field-label">Email address</span>
-        <input type="email" placeholder="you@example.com" required>
-      </div>
-      <div class="field">
-        <span class="field-label">I'm most interested in</span>
-        <select style="background: transparent; color: var(--shell); border: 1px solid rgba(250,246,236,0.20); padding: 14px 16px; font-family: var(--sans); font-size: 14px; outline: none; appearance: none;">
-          <option style="color:var(--ink);">Buying in the next 12 months</option>
-          <option style="color:var(--ink);">Selling in the next 12 months</option>
-          <option style="color:var(--ink);">Both — we're trading up here</option>
-          <option style="color:var(--ink);">Just following the region</option>
-        </select>
-      </div>
-      <button type="submit">Subscribe to the Ledger →</button>
-      <div class="led-sub-foot">2,847 subscribers · 4.8 ★ avg rating · Read by 6 brokers</div>
-    </form>
-  </div>
-</section>
-
-<!-- ============ STANDING SECTIONS ============ -->
-<section class="led-sections">
-  <div class="led-sections-inner">
-    <div class="section-h" style="border-color: var(--rule-strong);">
+<!-- ============ ISSUE HEAD ============ -->
+<section class="ihead">
+  <div class="wrap">
+    <div class="ihead-grid">
       <div>
-        <span class="hairline-brass" style="margin-bottom: 16px;"></span>
-        <span class="eyebrow">In every issue</span>
-        <h2 class="h-section" style="margin-top: 10px;">Four standing<br><em>sections.</em></h2>
+        <div class="kicker-line rv"><span id="ihKicker">Current issue</span><span class="bar"></span></div>
+        <h2 class="ihead-title rv rv-d1" id="ihTitle">&nbsp;</h2>
+        <p class="ihead-dek rv rv-d2" id="ihDek"></p>
+        <div class="ihead-tags rv rv-d3" id="ihTags"></div>
+        <div class="byline rv rv-d4">
+          <div class="av" aria-hidden="true">S</div>
+          <div><b>Sara Cooper</b><i id="ihRead">Legacy Properties · Murphys, CA</i></div>
+        </div>
       </div>
-      <p class="lede right">Every Ledger follows the same architecture. The names of things change; the shape doesn't. You'll know where to look.</p>
-    </div>
 
-    <div class="led-sections-grid">
-      <div class="led-section">
-        <div class="led-section-num">§ I</div>
-        <h3 class="led-section-title">The Letter</h3>
-        <p class="led-section-body">One topic, 1,200–1,800 words. The thing on Sara's mind — usually a pattern she's noticed across showings, a policy change, an outlier sale. Conversational, never breathless.</p>
-      </div>
-      <div class="led-section">
-        <div class="led-section-num">§ II</div>
-        <h3 class="led-section-title">By the Numbers</h3>
-        <p class="led-section-body">Five charts — median, inventory, days on market, ratio sold-to-listed, and one rotating cut. Walked from MLS personally. No "experts say" filler.</p>
-      </div>
-      <div class="led-section">
-        <div class="led-section-num">§ III</div>
-        <h3 class="led-section-title">Worth Knowing</h3>
-        <p class="led-section-body">Three properties — typically one new listing, one quietly off-market, one price reduction worth a second look. Not pushed; just shown.</p>
-      </div>
-      <div class="led-section">
-        <div class="led-section-num">§ IV</div>
-        <h3 class="led-section-title">A Note</h3>
-        <p class="led-section-body">A single paragraph — a piece of foothills life that has nothing to do with selling houses. The Calaveras Big Trees in winter, the best pie in Murphys, a thing James fixed on the porch.</p>
-      </div>
+      <aside class="sub rv rv-d2">
+        <div class="sub-in">
+          <div class="eyebrow">Free · No spam</div>
+          <h3>Get The Ledger in your inbox</h3>
+          <p>One letter, second Tuesday of the month. Market numbers with their sources attached,
+             every event worth leaving the house for, and a recipe.</p>
+          <form class="sub-form" id="subForm" novalidate>
+            <input type="text"  id="subName"  placeholder="Your name" autocomplete="name" required>
+            <input type="email" id="subEmail" placeholder="you@email.com" autocomplete="email" required>
+            <select id="subInterest">
+              <option value="">I'm mostly interested in…</option>
+              <option>Buying in the foothills</option>
+              <option>Selling my place</option>
+              <option>Both</option>
+              <option>Just following the region</option>
+            </select>
+            <button type="submit" class="btn">Subscribe</button>
+          </form>
+          <div class="sub-ok" id="subOk">Thank you — your email app should be opening. Send that message and you're on the list.</div>
+          <p class="sub-fine">We send once a month and never share your address. Reply to any issue and Sara reads it.</p>
+        </div>
+      </aside>
     </div>
   </div>
 </section>
+
+<main id="issueBody">
+  <div class="state"><div class="spinner"></div><p>Loading this month's issue…</p></div>
+</main>
 
 <!-- ============ ARCHIVE ============ -->
-<section class="led-arch">
-  <div class="led-arch-inner">
-    <div class="section-h">
-      <div>
-        <span class="hairline-brass" style="margin-bottom: 16px;"></span>
-        <span class="eyebrow">The archive · Vol. XX onward</span>
-        <h2 class="h-section" style="margin-top: 10px;">Every issue,<br><em>kept.</em></h2>
-      </div>
-      <p class="lede right">Twenty-four months of letters, charts, and unsolicited opinions. Filter by what you're looking for, or read straight through — they hold up.</p>
-    </div>
-
-    <div class="led-filter">
-      <button class="on" data-tag="all">All issues</button>
-      <button data-tag="market">Market</button>
-      <button data-tag="letter">Letters</button>
-      <button data-tag="murphys">Murphys</button>
-      <button data-tag="arnold">Arnold</button>
-      <button data-tag="sutter">Sutter Creek</button>
-      <button data-tag="offmarket">Off-market</button>
-      <button data-tag="policy">Policy</button>
-    </div>
-
-    <div class="led-grid" id="ledGrid">
-      <a href="ledger-issue.html" class="led-issue" data-tags="market letter">
-        <div class="led-issue-top">
-          <span>Vol. XXII · No. 4</span>
-          <span>April 2026</span>
-        </div>
-        <div class="led-issue-vol">04</div>
-        <h3 class="led-issue-title">When river buyers come looking for the mountain.</h3>
-        <p class="led-issue-lede">Three closings in six weeks went the opposite direction of the inquiry. Why elevation and snow are quietly the 2026 story.</p>
-        <div class="led-issue-foot">
-          <span class="tag">Market · 9 min</span>
-          <span class="read">Read →</span>
-        </div>
-      </a>
-
-      <a href="ledger-issue.html" class="led-issue" data-tags="market policy">
-        <div class="led-issue-top">
-          <span>Vol. XXII · No. 3</span>
-          <span>March 2026</span>
-        </div>
-        <div class="led-issue-vol">03</div>
-        <h3 class="led-issue-title">The FAIR Plan year, twelve months in.</h3>
-        <p class="led-issue-lede">What changed for foothills buyers when CA's insurer of last resort became most peoples' first call — and how it's shaping which homes actually trade.</p>
-        <div class="led-issue-foot">
-          <span class="tag">Policy · 11 min</span>
-          <span class="read">Read →</span>
-        </div>
-      </a>
-
-      <a href="ledger-issue.html" class="led-issue" data-tags="murphys offmarket">
-        <div class="led-issue-top">
-          <span>Vol. XXII · No. 2</span>
-          <span>February 2026</span>
-        </div>
-        <div class="led-issue-vol">02</div>
-        <h3 class="led-issue-title">A quiet quarter on Main Street.</h3>
-        <p class="led-issue-lede">Three Murphys vineyard estates traded off-market between October and January. Here's what the public MLS doesn't show.</p>
-        <div class="led-issue-foot">
-          <span class="tag">Murphys · 7 min</span>
-          <span class="read">Read →</span>
-        </div>
-      </a>
-
-      <a href="ledger-issue.html" class="led-issue" data-tags="market letter">
-        <div class="led-issue-top">
-          <span>Vol. XXII · No. 1</span>
-          <span>January 2026</span>
-        </div>
-        <div class="led-issue-vol">01</div>
-        <h3 class="led-issue-title">What I'm watching in 2026.</h3>
-        <p class="led-issue-lede">Five honest predictions for Calaveras, Amador and Tuolumne — and the two I got wrong from last year, in writing.</p>
-        <div class="led-issue-foot">
-          <span class="tag">Letter · 12 min</span>
-          <span class="read">Read →</span>
-        </div>
-      </a>
-
-      <a href="ledger-issue.html" class="led-issue" data-tags="arnold letter">
-        <div class="led-issue-top">
-          <span>Vol. XXI · No. 12</span>
-          <span>December 2025</span>
-        </div>
-        <div class="led-issue-vol">12</div>
-        <h3 class="led-issue-title">The Arnold cabin paradox.</h3>
-        <p class="led-issue-lede">Why second-home buyers under $700k are quietly the most active segment in the county — and what that means for primary-residence inventory.</p>
-        <div class="led-issue-foot">
-          <span class="tag">Arnold · 8 min</span>
-          <span class="read">Read →</span>
-        </div>
-      </a>
-
-      <a href="ledger-issue.html" class="led-issue" data-tags="sutter market">
-        <div class="led-issue-top">
-          <span>Vol. XXI · No. 11</span>
-          <span>November 2025</span>
-        </div>
-        <div class="led-issue-vol">11</div>
-        <h3 class="led-issue-title">Sutter Creek, slowly.</h3>
-        <p class="led-issue-lede">The market that doesn't make headlines is the one I'd watch most carefully. Six months of data, three sales, one outlier.</p>
-        <div class="led-issue-foot">
-          <span class="tag">Sutter Creek · 6 min</span>
-          <span class="read">Read →</span>
-        </div>
-      </a>
-
-      <a href="ledger-issue.html" class="led-issue" data-tags="policy market">
-        <div class="led-issue-top">
-          <span>Vol. XXI · No. 10</span>
-          <span>October 2025</span>
-        </div>
-        <div class="led-issue-vol">10</div>
-        <h3 class="led-issue-title">The rate cut nobody felt.</h3>
-        <p class="led-issue-lede">Foothills inventory moves on its own schedule. Why the Fed's September move didn't move us — and what would.</p>
-        <div class="led-issue-foot">
-          <span class="tag">Policy · 9 min</span>
-          <span class="read">Read →</span>
-        </div>
-      </a>
-
-      <a href="ledger-issue.html" class="led-issue" data-tags="letter">
-        <div class="led-issue-top">
-          <span>Vol. XXI · No. 9</span>
-          <span>September 2025</span>
-        </div>
-        <div class="led-issue-vol">09</div>
-        <h3 class="led-issue-title">A letter to the buyer<br>still on the fence.</h3>
-        <p class="led-issue-lede">Two years of inquiries from one family. What I told them in June, and what I'd tell them now. Reprinted with permission.</p>
-        <div class="led-issue-foot">
-          <span class="tag">Letter · 6 min</span>
-          <span class="read">Read →</span>
-        </div>
-      </a>
-
-      <a href="ledger-issue.html" class="led-issue" data-tags="murphys market">
-        <div class="led-issue-top">
-          <span>Vol. XXI · No. 8</span>
-          <span>August 2025</span>
-        </div>
-        <div class="led-issue-vol">08</div>
-        <h3 class="led-issue-title">The Murphys ceiling.</h3>
-        <p class="led-issue-lede">Why $1.6M is the number every Main-Street-adjacent listing seems to die at — and which sub-market doesn't have the same problem.</p>
-        <div class="led-issue-foot">
-          <span class="tag">Murphys · 8 min</span>
-          <span class="read">Read →</span>
-        </div>
-      </a>
-    </div>
+<section class="arch" id="archive">
+  <div class="wrap">
+    <div class="kicker-line rv"><span>The Archive</span><span class="bar"></span></div>
+    <h3 class="sec-title rv rv-d1" style="font-family:var(--serif);font-style:italic;font-weight:500;
+      font-size:clamp(30px,4vw,50px);margin-top:18px;">Back issues</h3>
+    <div class="filters rv rv-d2" id="archFilters"></div>
+    <div class="arch-grid" id="archGrid"></div>
   </div>
 </section>
 
-<!-- ============ FOOTER ============ -->
-<footer class="footer">
-  <div class="footer-inner">
-    <div class="footer-top">
+<footer class="site">
+  <div class="wrap">
+    <div class="cols">
       <div>
-        <a href="index.html" class="wordmark" style="align-items: flex-start;">
-          <span class="wordmark-word">Legacy Properties</span>
-          <span class="wordmark-sub">Every Home Has A Story</span>
+        <a class="wordmark" href="/">
+          <span class="wm-badge"><span>L</span></span>
+          <span class="wm-txt"><b>Legacy</b><i>Properties</i></span>
         </a>
-        <p class="footer-tagline">Every home has a story. We help you find yours — or tell the one you've already lived.</p>
+        <p class="fdesc">Boutique real estate in California's Gold Country — Calaveras, Amador and
+          Tuolumne counties. Every home has a story; we help you write yours.</p>
       </div>
-      <div>
-        <h4>Services</h4>
-        <a href="relocate.html">Bay → Foothills relocation</a>
-        <a href="towns.html">Communities</a>
-        <a href="valuation.html">Sellers</a>
-        <a href="property-search.html">Browse listings</a>
-        <a href="find-my-match.html">Request a tour</a>
-      </div>
-      <div>
-        <h4>The Ledger</h4>
-        <a href="ledger.html">Latest issue</a>
-        <a href="ledger.html#subscribe">Subscribe</a>
-        <a href="ledger.html">Archive</a>
-        <a href="about.html">About Sara &amp; James</a>
-        <a href="how-we-work.html">How we work</a>
-      </div>
-      <div>
-        <h4>Connect</h4>
-        <a href="tel:2095594966">(209) 559-4966</a>
-        <a href="mailto:SaraSellsCalifornia@gmail.com">SaraSellsCalifornia@gmail.com</a>
-        <a href="https://www.instagram.com/legacypropertiesig/">Instagram</a>
-      </div>
+      <div><h5>Buy</h5>
+        <a href="/property-search.html">Search listings</a><a href="/property-search.html">Map search</a>
+        <a href="/open-home-listings.html">Open houses</a><a href="/market-report.html">Market reports</a></div>
+      <div><h5>Sell</h5>
+        <a href="/valuation.html">Home valuation</a><a href="/valuation.html">Listing process</a>
+        <a href="/about.html">About Sara &amp; James</a></div>
+      <div><h5>Connect</h5>
+        <a href="tel:+12095594966">(209) 559-4966</a>
+        <a href="mailto:SaraSellsCalifornia@gmail.com">Email Sara</a>
+        <a href="/ledger.html">The Ledger</a></div>
     </div>
-    <div class="footer-bottom">
-      <div>© 2026 Legacy Properties · All rights reserved · <a href="/privacy.html">Privacy Policy</a> · <a href="/sms-terms.html">SMS Terms</a></div>
-      <div>Sara Cooper, Broker · DRE #02141987 · Equal Housing Opportunity</div>
+    <div class="bot">
+      <span>© <span id="yr"></span> Legacy Properties · DRE Lic. #—</span>
+      <span>Calaveras · Amador · Tuolumne</span>
     </div>
   </div>
 </footer>
 
 <script>
-  // Filter pills
-  document.querySelectorAll('.led-filter button').forEach(b => {
-    b.addEventListener('click', () => {
-      document.querySelectorAll('.led-filter button').forEach(x => x.classList.remove('on'));
-      b.classList.add('on');
-      const tag = b.dataset.tag;
-      document.querySelectorAll('.led-issue').forEach(card => {
-        if (tag === 'all' || (card.dataset.tags || '').includes(tag)) {
-          card.style.display = '';
-        } else {
-          card.style.display = 'none';
+/* ==================================================================
+   The Ledger — hydrated from /api/ledger (Supabase-backed).
+   No framework, no build step, no browser storage.
+   Artwork is generated SVG, so there is nothing to license and
+   nothing to load. Real photos drop in wherever a URL is supplied:
+     issue.hero_image_url            → hero background
+     content.recipe.image            → recipe plate
+     content.happenings.image        → events banner
+   ================================================================== */
+(function () {
+  'use strict';
+
+  document.documentElement.classList.add('js');  /* enables the JS-only hidden states */
+  const $ = (id) => document.getElementById(id);
+  const REDUCED = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  $('yr').textContent = new Date().getFullYear();
+
+  const esc = (s) => String(s == null ? '' : s)
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+
+  /* inline markdown, applied AFTER escaping */
+  const md = (s) => esc(s)
+    .replace(/\*\*([^*]+)\*\*/g,'<strong>$1</strong>')
+    .replace(/(^|[\s(—])\*([^*]+)\*/g,'$1<em>$2</em>');
+
+  const MONTHS = ['January','February','March','April','May','June',
+                  'July','August','September','October','November','December'];
+  const monthLabel = (iso) => {
+    if (!iso) return '';
+    const [y,m] = String(iso).split('-').map(Number);
+    return `${MONTHS[(m||1)-1]} ${y}`;
+  };
+  const seasonFor = (iso) => {
+    const m = Number(String(iso||'').split('-')[1]) || 1;
+    return (m>=3&&m<=5) ? 'spring' : (m>=6&&m<=8) ? 'summer' : (m>=9&&m<=11) ? 'autumn' : 'winter';
+  };
+
+  /* section palette — each section gets its own hue from the seasonal set */
+  const HUES = ['var(--c1)','var(--c4)','var(--c3)','var(--c5)','var(--c2)','var(--c3)'];
+
+  /* ---------- generated artwork ---------- */
+
+  const ICONS = {
+    letter: '<path d="M3 6h14M3 10h14M3 14h9" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>',
+    numbers:'<rect x="3" y="11" width="3.4" height="6" rx="1.2" fill="currentColor"/>'
+           +'<rect x="8.3" y="7" width="3.4" height="10" rx="1.2" fill="currentColor"/>'
+           +'<rect x="13.6" y="3.5" width="3.4" height="13.5" rx="1.2" fill="currentColor"/>',
+    events: '<rect x="3" y="4.5" width="14" height="12.5" rx="2.5" stroke="currentColor" stroke-width="2" fill="none"/>'
+           +'<path d="M3 8.5h14M7 2.5v3M13 2.5v3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>',
+    recipe: '<path d="M10 3c3.6 0 6.4 2.9 6.4 6.5S13.6 17 10 17s-6.4-2.9-6.4-7.5S6.4 3 10 3z"'
+           +' stroke="currentColor" stroke-width="2" fill="none"/>'
+           +'<path d="M10 3c1.2-1.4 2.8-1.6 3.6-1.4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>',
+    know:   '<circle cx="7.5" cy="7.5" r="4" stroke="currentColor" stroke-width="2" fill="none"/>'
+           +'<path d="M10.4 10.4L17 17M14 14l-2 2M16 12l-2 2" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>',
+    note:   '<path d="M15.5 12.5A6.5 6.5 0 017.5 4.5a6.5 6.5 0 108 8z" stroke="currentColor" stroke-width="2" fill="none"/>'
+  };
+
+  const icon = (k, color) =>
+    `<span class="ic" style="background:color-mix(in srgb,${color} 15%,transparent);color:${color}">
+       <svg viewBox="0 0 20 20" width="15" height="15">${ICONS[k]||ICONS.letter}</svg></span>`;
+
+  /* an original peach-on-a-plate illustration for the recipe card */
+  const recipeArt = () => `
+    <svg class="plate" viewBox="0 0 400 275" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+      <defs>
+        <radialGradient id="pFlesh" cx="38%" cy="32%">
+          <stop offset="0%" stop-color="#FFD98A"/><stop offset="55%" stop-color="#F79A4B"/>
+          <stop offset="100%" stop-color="#D9552C"/></radialGradient>
+        <radialGradient id="pGlow" cx="50%" cy="50%">
+          <stop offset="0%" stop-color="#FFF3CE" stop-opacity=".9"/>
+          <stop offset="100%" stop-color="#FFF3CE" stop-opacity="0"/></radialGradient>
+        <linearGradient id="pPlate" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#FFFDF8"/><stop offset="100%" stop-color="#EFE0C6"/></linearGradient>
+      </defs>
+      <rect width="400" height="275" fill="url(#pGlow)"/>
+      <ellipse cx="200" cy="205" rx="152" ry="44" fill="url(#pPlate)"/>
+      <ellipse cx="200" cy="203" rx="128" ry="34" fill="#F7E9D0"/>
+      <!-- three halves, cut side up, char marks and a spoon of cream -->
+      <g>
+        <g transform="translate(118,178)">
+          <ellipse cx="0" cy="0" rx="50" ry="34" fill="url(#pFlesh)"/>
+          <ellipse cx="-4" cy="-3" rx="17" ry="12" fill="#B8431F" opacity=".55"/>
+          <ellipse cx="-4" cy="-4" rx="13" ry="9" fill="#FFF6E2" opacity=".95"/>
+          <g stroke="#8E3212" stroke-width="3.4" opacity=".45" stroke-linecap="round">
+            <path d="M-34 12 L-8 20"/><path d="M-18 -20 L10 -12"/><path d="M14 8 L38 14"/></g>
+          <path d="M-50 2 q50 26 100 0" fill="none" stroke="#B8431F" stroke-width="2" opacity=".3"/>
+        </g>
+        <g transform="translate(206,192)">
+          <ellipse cx="0" cy="0" rx="54" ry="36" fill="url(#pFlesh)"/>
+          <ellipse cx="2" cy="-3" rx="18" ry="13" fill="#B8431F" opacity=".55"/>
+          <ellipse cx="2" cy="-5" rx="14" ry="10" fill="#FFF6E2" opacity=".95"/>
+          <g stroke="#8E3212" stroke-width="3.6" opacity=".45" stroke-linecap="round">
+            <path d="M-36 14 L-8 22"/><path d="M-14 -22 L16 -14"/><path d="M20 10 L42 15"/></g>
+        </g>
+        <g transform="translate(288,176)">
+          <ellipse cx="0" cy="0" rx="46" ry="31" fill="url(#pFlesh)"/>
+          <ellipse cx="-2" cy="-2" rx="15" ry="11" fill="#B8431F" opacity=".55"/>
+          <ellipse cx="-2" cy="-4" rx="12" ry="8" fill="#FFF6E2" opacity=".95"/>
+          <g stroke="#8E3212" stroke-width="3.2" opacity=".42" stroke-linecap="round">
+            <path d="M-30 10 L-6 17"/><path d="M-10 -18 L14 -11"/></g>
+        </g>
+      </g>
+      <!-- rosemary sprig -->
+      <g transform="translate(96,128) rotate(-16)" stroke="#2C6350" stroke-linecap="round">
+        <path d="M0 0 L58 -12" stroke-width="3"/>
+        <g stroke-width="2.4">
+          <path d="M8 -2 l-6 -9"/><path d="M18 -4 l-6 -9"/><path d="M28 -6 l-6 -9"/>
+          <path d="M38 -8 l-6 -9"/><path d="M48 -10 l-6 -9"/>
+          <path d="M10 -1 l-4 9"/><path d="M20 -3 l-4 9"/><path d="M30 -5 l-4 9"/><path d="M40 -7 l-4 9"/>
+        </g>
+      </g>
+      <!-- honey drizzle -->
+      <path d="M244 132 q14 16 4 32 q-8 13 6 24" fill="none" stroke="#E8A63A" stroke-width="5"
+            stroke-linecap="round" opacity=".85"/>
+      <!-- almonds -->
+      <g fill="#C58F58"><ellipse cx="160" cy="222" rx="9" ry="5.5" transform="rotate(-18 160 222)"/>
+        <ellipse cx="252" cy="228" rx="8" ry="5" transform="rotate(24 252 228)"/>
+        <ellipse cx="318" cy="214" rx="8.5" ry="5" transform="rotate(-8 318 214)"/></g>
+    </svg>`;
+
+  /* small ridge motif for archive cards — hue rotates by index */
+  const archArt = (i) => {
+    const pals = [['#FFE0AE','#F7A863','#3E7E60'],['#FFD59A','#EE9450','#7A4E26'],
+                  ['#D7E6EE','#A6C2D3','#3C5260'],['#E4F2CF','#A8D08A','#37704A']];
+    const p = pals[i % pals.length];
+    return `<svg viewBox="0 0 400 88" preserveAspectRatio="none" aria-hidden="true">
+      <rect width="400" height="88" fill="${p[0]}"/>
+      <circle cx="322" cy="26" r="17" fill="#FFF3CE"/>
+      <path d="M0 62 L60 46 L120 62 L190 40 L260 60 L330 42 L400 60 L400 88 L0 88 Z" fill="${p[1]}"/>
+      <path d="M0 74 L80 62 L170 76 L260 60 L340 76 L400 66 L400 88 L0 88 Z" fill="${p[2]}"/>
+    </svg>`;
+  };
+
+  /* ---------- section renderers ---------- */
+
+  function secHead(kicker, headline, key, color) {
+    return `<div class="sec-head">
+      <div class="sec-badge rv">${icon(key,color)}<span style="color:${color}">${esc(kicker)}</span></div>
+      ${headline ? `<h3 class="sec-title rv rv-d1">${esc(headline)}</h3>` : ''}
+    </div>`;
+  }
+
+  function renderLetter(L, color) {
+    if (!L) return '';
+    let first = true;
+    const body = (L.body||[]).map((p) => {
+      const t = String(p||'').trim();
+      if (t.startsWith('## ')) return `<h4 class="rv">${md(t.slice(3))}</h4>`;
+      if (t.startsWith('# '))  return `<h4 class="rv">${md(t.slice(2))}</h4>`;
+      const cls = first ? 'lead rv' : 'rv'; first = false;
+      return `<p class="${cls}">${md(t)}</p>`;
+    }).join('');
+    return `<section class="sec" style="--sc:${color}"><div class="wrap">
+        ${secHead(L.kicker||'The Letter', L.headline, 'letter', color)}
+        <div class="letter narrow">${body}<div class="sig rv">— Sara</div></div>
+      </div></section>`;
+  }
+
+  function renderNumbers(N, color) {
+    if (!N) return '';
+    const hues = ['var(--c1)','var(--c4)','var(--c3)','var(--c5)','var(--c2)'];
+    const stats = (N.stats||[]).map((s,i) => {
+      const arw = s.direction==='up' ? '▲' : s.direction==='down' ? '▼' : '●';
+      return `<div class="stat rv rv-d${(i%5)+1}" style="--sc:${hues[i%hues.length]}">
+        <div class="l">${esc(s.label)}</div>
+        <div class="v">${esc(s.value)}</div>
+        <div class="c ${esc(s.direction||'')}"><span class="arw">${arw}</span>${esc(s.change||'')}</div>
+        ${s.footnote ? `<div class="f">${md(s.footnote)}</div>` : ''}
+      </div>`;
+    }).join('');
+    const spread = N.spread ? `<div class="spread rv">
+        <h4>${esc(N.spread.headline)}</h4><p>${md(N.spread.body)}</p></div>` : '';
+    return `<section class="sec sec-tint"><div class="wrap">
+        ${secHead(N.kicker||'By the Numbers', N.headline, 'numbers', color)}
+        ${N.note ? `<div class="sec-note rv">${md(N.note)}</div>` : ''}
+        <div class="stats">${stats}</div>${spread}
+      </div></section>`;
+  }
+
+  function renderHappenings(H, color) {
+    if (!H) return '';
+    const hues = ['var(--c1)','var(--c4)','var(--c5)','var(--c3)','var(--c2)','var(--c4)','var(--c1)'];
+    const groups = (H.groups||[]).map((g,gi) => {
+      const gc = hues[gi%hues.length];
+      const items = (g.items||[]).map((e) => `
+        <div class="evt rv">
+          <div class="evt-when"><b>${esc(e.date)}</b>${e.day?`<i>${esc(e.day)}</i>`:''}</div>
+          <div class="evt-what">
+            <div class="n">${md(e.name)}</div>
+            ${e.where?`<div class="w">${esc(e.where)}</div>`:''}
+            ${e.note?`<div class="note">${md(e.note)}</div>`:''}
+          </div>
+          ${e.cost?`<div class="evt-cost">${esc(e.cost)}</div>`:'<div></div>'}
+        </div>`).join('');
+      return `<div class="egroup" style="--gc:${gc}">
+          <div class="egroup-h rv"><span class="n">${String(gi+1).padStart(2,'0')}</span>
+            <h4>${esc(g.group)}</h4></div>${items}
+        </div>`;
+    }).join('');
+
+    const mkt = H.markets ? `<div class="mkt rv">
+        <div class="mkt-h">${icon('events','var(--c3)')}<h4>${esc(H.markets.headline)}</h4></div>
+        ${(H.markets.rows||[]).map((r)=>`<div class="mkt-row">
+            <div class="d">${esc(r.day)}</div>
+            <div class="n">${esc(r.name)}<small>${esc(r.where)}</small></div>
+            <div class="h">${esc(r.hours)}</div></div>`).join('')}
+      </div>` : '';
+
+    const fn = (H.footnotes||[]).length ? `<div class="fnotes">${
+      H.footnotes.map((f)=>`<div class="fnote rv"><span class="m">!</span><div>${md(f)}</div></div>`).join('')
+    }</div>` : '';
+
+    return `<section class="sec"><div class="wrap">
+        ${secHead(H.kicker||"What's On", H.headline, 'events', color)}
+        ${H.note ? `<div class="sec-note rv">${md(H.note)}</div>` : ''}
+        ${groups}${mkt}${fn}
+      </div></section>`;
+  }
+
+  function renderRecipe(R, color) {
+    if (!R) return '';
+    const art = R.image
+      ? `<img src="${esc(R.image)}" alt="${esc(R.headline)}" loading="lazy">`
+      : recipeArt();
+    return `<section class="sec sec-tint"><div class="wrap">
+        ${secHead(R.kicker||'From the Kitchen', '', 'recipe', color)}
+        <div class="rec rv">
+          <div class="rec-left">
+            <div class="rec-art">${art}</div>
+            <div class="rec-body">
+              <h4>${esc(R.headline)}</h4>
+              <div class="rec-serves">${String(R.serves||'').split('·').filter(Boolean)
+                .map((x)=>`<em>${esc(x.trim())}</em>`).join('')}</div>
+              <p class="rec-intro">${md(R.intro||'')}</p>
+            </div>
+          </div>
+          <div class="rec-right">
+            <div class="rec-lbl">What you need</div>
+            <ul class="rec-ing">${(R.ingredients||[]).map((i)=>`<li>${md(i)}</li>`).join('')}</ul>
+            <div class="rec-lbl">How</div>
+            <ol class="rec-steps">${(R.steps||[]).map((s)=>`<li><p>${md(s)}</p></li>`).join('')}</ol>
+            ${(R.notes||[]).length?`<div class="rec-notes">${
+              R.notes.map((x)=>`<div>${md(x)}</div>`).join('')}</div>`:''}
+          </div>
+        </div>
+      </div></section>`;
+  }
+
+  function renderWorthKnowing(W, color) {
+    if (!W) return '';
+    const hues = ['var(--c1)','var(--c4)','var(--c3)','var(--c5)'];
+    return `<section class="sec"><div class="wrap">
+        ${secHead(W.kicker||'Worth Knowing','Three things to file away','know',color)}
+        <div class="wk">${(W.items||[]).map((it,i)=>`
+          <div class="wk-card rv rv-d${i+1}" style="--wc:${hues[i%hues.length]}">
+            <div class="num">${i+1}</div>
+            <h4>${esc(it.title)}</h4><p>${md(it.body)}</p>
+          </div>`).join('')}</div>
+      </div></section>`;
+  }
+
+  function renderANote(A) {
+    if (!A) return '';
+    return `<section class="sec sec-ink"><div class="wrap">
+        <div class="anote rv">
+          <div class="av" aria-hidden="true">S</div>
+          <div><div class="k">${esc(A.kicker||'A Note')}</div>
+            <p>${md(A.body)}</p>
+            <div class="sg">${esc(A.signoff||'— Sara')}</div></div>
+        </div>
+      </div></section>`;
+  }
+
+  function renderSources(list) {
+    if (!list || !list.length) return '';
+    return `<section class="sec" style="padding-top:0"><div class="wrap">
+        <details class="srcs rv">
+          <summary><span>Sources &amp; methodology — ${list.length} references</span>
+            <span class="pm">+</span></summary>
+          ${list.map((s)=>`<div class="src">
+            <div class="cl">${esc(s.claim)}</div>
+            <div class="sr">${esc(s.source)}${s.url
+              ? ` · <a href="${esc(s.url)}" target="_blank" rel="noopener noreferrer">source</a>`:''}</div>
+          </div>`).join('')}
+        </details>
+      </div></section>`;
+  }
+
+  /* ---------- ticker ---------- */
+  function buildTicker(H) {
+    const items = [];
+    (H?.groups||[]).forEach((g)=>(g.items||[]).forEach((e)=>{
+      if (items.length < 22 && e.date && e.name) items.push({d:e.date, n:e.name});
+    }));
+    if (!items.length) { $('ticker').style.display='none'; return; }
+    const one = items.map((x)=>
+      `<span class="tick"><b>${esc(x.d)}</b>${esc(String(x.n).replace(/\*/g,''))}</span>`).join('');
+    $('tickerTrack').innerHTML = one + one;   // duplicated for a seamless loop
+  }
+
+  /* ---------- animations ---------- */
+  function observeReveals(root) {
+    const els = (root||document).querySelectorAll('.rv:not(.in)');
+    if (REDUCED || !('IntersectionObserver' in window)) {
+      els.forEach((el)=>el.classList.add('in')); return;
+    }
+    const io = new IntersectionObserver((entries)=>{
+      entries.forEach((en)=>{ if (en.isIntersecting){ en.target.classList.add('in'); io.unobserve(en.target); } });
+    }, { rootMargin:'0px 0px -8% 0px', threshold:0.08 });
+    els.forEach((el)=>io.observe(el));
+  }
+
+  /* Stat tiles animate, but the DIGITS NEVER DO.
+     A count-up looks nice and is wrong: mid-flight it renders a median that
+     is not the published figure. Someone glancing mid-scroll, screenshotting
+     to text a friend, or crawling the page for an AI answer can capture
+     "$482,590" when the real number is $500,000. These figures are cited and
+     indexed — so the tile wipes and rises into view with its final value
+     already correct, and the little bar under it grows. No fake numbers,
+     ever, at any frame.
+
+     AND: observe the TILE, never the value element.
+     The first version observed `.stat .v` directly and deadlocked. That
+     element starts at `clip-path: inset(0 0 100% 0)`, and Chrome folds an
+     element's own clip-path into its intersection rectangle — so a value
+     sitting in the middle of the viewport reported intersectionRatio 0 and
+     the callback never ran. It hid itself, which stopped it from ever being
+     unhidden: five blank medians under a heading that reads By the Numbers.
+     `.stat` is unclipped and has real area, so observe that instead. Any
+     future clip-based reveal has the same trap. */
+  function animateStats() {
+    const tiles = document.querySelectorAll('.stat');
+    const show = (t) => t.querySelectorAll('.v').forEach((v)=>v.classList.add('shown'));
+    if (REDUCED || !('IntersectionObserver' in window)) { tiles.forEach(show); return; }
+    const io = new IntersectionObserver((entries)=>{
+      entries.forEach((en)=>{
+        if (!en.isIntersecting) return;
+        show(en.target);
+        io.unobserve(en.target);
+      });
+    }, { threshold:0.25 });
+    tiles.forEach((t)=>io.observe(t));
+  }
+
+  /* hero parallax + reading progress, one rAF-throttled scroll handler */
+  function bindScroll() {
+    const ridges = REDUCED ? [] : [...document.querySelectorAll('.ridge')];
+    const prog = $('prog');
+    let queued = false;
+    const onScroll = () => {
+      if (queued) return; queued = true;
+      requestAnimationFrame(() => {
+        queued = false;
+        const y = window.scrollY || 0;
+        const h = document.documentElement.scrollHeight - window.innerHeight;
+        prog.style.width = (h > 0 ? Math.min(100, (y/h)*100) : 0) + '%';
+        if (y < window.innerHeight * 1.2) {
+          ridges.forEach((r)=>{
+            const d = parseFloat(r.dataset.depth||'0');
+            r.style.transform = `translate3d(0,${y*d*0.42}px,0)`;
+          });
         }
       });
-    });
-  });
-</script>
+    };
+    window.addEventListener('scroll', onScroll, { passive:true });
+    onScroll();
+  }
 
+  /* ---------- page assembly ---------- */
+
+  function renderIssue(issue) {
+    const c = issue.content || {};
+    document.body.dataset.season = seasonFor(issue.issue_month);
+
+    const vol = [
+      issue.volume ? `Vol. ${issue.volume}` : null,
+      issue.issue_no ? `No. ${issue.issue_no}` : null,
+      monthLabel(issue.issue_month),
+    ].filter(Boolean).join(' · ');
+
+    $('heroMeta').textContent = vol + ' · Second Tuesday, monthly';
+    $('ihKicker').textContent = vol;
+    $('ihTitle').textContent = issue.title || '';
+    $('ihDek').textContent = issue.dek || '';
+    $('ihRead').textContent = 'Legacy Properties · '
+      + (issue.reading_time ? `${issue.reading_time} min read` : 'Murphys, CA');
+    document.title = `${issue.title} · The Ledger · Legacy Properties`;
+
+    /* optional real photograph behind the hero */
+    if (issue.hero_image_url) {
+      const art = document.querySelector('.hero-art');
+      art.innerHTML = `<img src="${esc(issue.hero_image_url)}" alt=""
+        style="width:100%;height:100%;object-fit:cover">`;
+    }
+
+    $('ihTags').innerHTML = (issue.tags||[])
+      .map((t)=>`<a class="chip" href="#archive" data-tag="${esc(t)}">${esc(t)}</a>`).join('');
+
+    buildTicker(c.happenings);
+
+    $('issueBody').innerHTML =
+        renderLetter(c.letter, HUES[0])
+      + renderNumbers(c.numbers, HUES[1])
+      + renderHappenings(c.happenings, HUES[2])
+      + renderRecipe(c.recipe, HUES[3])
+      + renderWorthKnowing(c.worth_knowing, HUES[4])
+      + renderANote(c.a_note)
+      + renderSources(issue.sources);
+
+    observeReveals($('issueBody'));
+    animateStats();
+  }
+
+  function renderArchive(issues, activeTag) {
+    const tags = [...new Set(issues.flatMap((x)=>x.tags||[]))].sort();
+    $('archFilters').innerHTML =
+      `<a class="chip ${activeTag?'':'on'}" href="#archive" data-tag="">All</a>` +
+      tags.map((t)=>`<a class="chip ${t===activeTag?'on':''}" href="#archive" data-tag="${esc(t)}">${esc(t)}</a>`).join('');
+
+    const shown = activeTag ? issues.filter((x)=>(x.tags||[]).includes(activeTag)) : issues;
+    $('archGrid').innerHTML = shown.length
+      ? shown.map((x,i)=>`
+          <a class="arch-card rv rv-d${(i%4)+1}" href="/ledger.html?issue=${encodeURIComponent(x.slug)}">
+            <div class="arch-top">${archArt(i)}</div>
+            <div class="arch-body">
+              <div class="m">${esc(monthLabel(x.issue_month))}${x.issue_no?` · No. ${x.issue_no}`:''}</div>
+              <h4>${esc(x.title)}</h4>
+              <p>${esc(x.dek||'')}</p>
+              <div class="r">${x.reading_time?`${x.reading_time} min`:'Read'} <span class="ar">→</span></div>
+            </div>
+          </a>`).join('')
+      : `<p style="color:var(--ink-mute);font-style:italic">No issues tagged “${esc(activeTag)}” yet.</p>`;
+    observeReveals($('archGrid'));
+  }
+
+  /* ---------- boot ---------- */
+  let ARCHIVE = [];
+
+  async function boot() {
+    const slug = new URLSearchParams(location.search).get('issue');
+    const url = slug ? `/api/ledger?slug=${encodeURIComponent(slug)}` : '/api/ledger';
+    try {
+      const res = await fetch(url, { headers:{ Accept:'application/json' } });
+      if (!res.ok) throw new Error('api ' + res.status);
+      const data = await res.json();
+
+      const issue = data.issue || data.current;
+      ARCHIVE = data.issues || [];
+
+      if (!issue) {
+        $('ihTitle').textContent = 'The next issue is on its way';
+        $('ihDek').textContent = 'Second Tuesday of the month, as always. Subscribe and it lands in your inbox.';
+        $('issueBody').innerHTML =
+          `<div class="state"><p>The next issue is being written.</p></div>`;
+        $('ticker').style.display = 'none';
+      } else {
+        renderIssue(issue);
+      }
+      renderArchive(ARCHIVE, null);
+    } catch (err) {
+      console.error('[ledger]', err);
+      $('ihTitle').textContent = 'The Ledger';
+      $('ihDek').textContent = "We couldn't load this month's issue just now. Please refresh, or email Sara and she'll send it over.";
+      $('issueBody').innerHTML = `<div class="state"><p>Issue unavailable —
+        <a href="mailto:SaraSellsCalifornia@gmail.com" style="color:var(--c1);font-style:normal;font-weight:600">email Sara</a>
+        for a copy.</p></div>`;
+      $('ticker').style.display = 'none';
+    }
+    observeReveals();
+  }
+
+  /* tag filtering, delegated */
+  document.addEventListener('click', (e) => {
+    const t = e.target.closest('[data-tag]');
+    if (!t) return;
+    e.preventDefault();
+    renderArchive(ARCHIVE, t.dataset.tag || null);
+    $('archive').scrollIntoView({ behavior: REDUCED ? 'auto' : 'smooth' });
+  });
+
+  /* Subscribe.
+     NOTE FOR THE NEXT DEV: this composes a pre-filled email so the form works
+     with zero backend. To make it a real list, replace the handler body with a
+     POST to MailerLite (or /api/ledger-subscribe writing to a
+     ledger_subscribers table). Do not ship a form that silently does nothing. */
+  $('subForm').addEventListener('submit', (e) => {
+    e.preventDefault();
+    const name = $('subName').value.trim();
+    const email = $('subEmail').value.trim();
+    const want = $('subInterest').value;
+    if (!name || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      $('subEmail').focus(); $('subEmail').style.borderColor = 'var(--c2)'; return;
+    }
+    const body = `Please add me to The Ledger.\n\nName: ${name}\nEmail: ${email}\n`
+      + (want ? `Interested in: ${want}\n` : '');
+    window.location.href = 'mailto:SaraSellsCalifornia@gmail.com'
+      + '?subject=' + encodeURIComponent('Subscribe me to The Ledger')
+      + '&body=' + encodeURIComponent(body);
+    $('subOk').style.display = 'block';
+    $('subForm').reset();
+  });
+
+  bindScroll();
+  boot();
+})();
+</script>
 </body>
 </html>
