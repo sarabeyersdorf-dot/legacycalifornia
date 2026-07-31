@@ -5,7 +5,19 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Your Legacy · Dashboard</title>
 <link rel="stylesheet" href="legacy.css">
+<link rel="stylesheet" href="legacy-ui.css">
 <style>
+/* Legacy UI typographic re-theme — the app-shell + every data hook is
+   unchanged; this only points the app's type + accent tokens at the lg
+   system so the dashboard matches the converted public site. Self-hosted
+   Cormorant Garamond / Manrope arrive via legacy-ui.css's @font-face. */
+body {
+  --serif:        var(--lg-serif);   /* Playfair -> Cormorant Garamond */
+  --sans:         var(--lg-sans);    /* Inter    -> Manrope */
+  --mono:         var(--lg-mono);    /* JetBrains Mono (self-hosted) */
+  --brass:        var(--lg-a2);      /* gold, safe on light — lg token */
+  --brass-bright: var(--lg-c2);      /* brighter gold for on-dark accents */
+}
 /* Consumer dashboard */
 /* Wire-fraud warning — high-contrast, unmissable, never dismissible. */
 .wire-warn {
