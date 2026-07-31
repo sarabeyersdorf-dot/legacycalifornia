@@ -498,10 +498,12 @@
 
 /* callout — a bordered aside for caveats, methodology, "read this carefully" */
 .lg-note {
-  border-radius: 16px; padding: 22px 26px; font-size: 15.5px; line-height: 1.72;
-  color: var(--lg-ink-soft); background: var(--lg-white);
-  box-shadow: var(--lg-sh-sm); border-left: 5px solid var(--lg-c2);
+  display: inline-block;              /* hug the text so each reads as a bubble */
+  border-radius: 16px; padding: 20px 28px; font-size: 18px; line-height: 1.6;
+  color: var(--lg-ink-2); background: var(--lg-sand);
+  box-shadow: var(--lg-sh-sm); border-left: 5px solid var(--lg-c1);
 }
+.lg-note strong { color: var(--lg-a1); }
 .lg-note strong { color: var(--lg-ink); }
 
 /* --------------------------------------------------------------------------
