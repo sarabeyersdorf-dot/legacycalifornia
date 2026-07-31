@@ -1,24 +1,24 @@
 {
-  "version": "3.9",
-  "lastUpdated": "2026-07-30",
-  "updatedBy": "Claude",
+  "version": 4.0,
+  "lastUpdated": "2026-07-31",
+  "updatedBy": "briefing-agent",
   "tasks": [
     {
       "agent": "sara",
       "client": "433",
-      "title": "Review assignment of rents deed — Yvonne Heryford sent scanned doc (7/30 AM); prepare final version for Herfords to sign before COE 8/10",
+      "title": "Review assignment of rents deed \u2014 Yvonne Heryford sent scanned doc (7/30 AM); prepare final version for Herfords to sign before COE 8/10",
       "done": false
     },
     {
       "agent": "sara",
       "client": "433",
-      "title": "Confirm pest credit dollar amount with Elizabeth — path agreed (pest + shed row; contractor work post-close); get credit amount in writing before 8/5 walkthrough",
+      "title": "Confirm pest credit dollar amount with Elizabeth \u2014 path agreed (pest + shed row; contractor work post-close); get credit amount in writing before 8/5 walkthrough",
       "done": false
     },
     {
       "agent": "james",
       "client": "Baldwin",
-      "title": "🔴 COE 8/3 = 4 days — call Kim Hesser today for loan/appraisal status; confirm contractor bid; CR2 needed before closing",
+      "title": "\ud83d\udd34 COE 8/3 = 4 days \u2014 call Kim Hesser today for loan/appraisal status; confirm contractor bid; CR2 needed before closing",
       "done": false
     },
     {
@@ -30,7 +30,7 @@
     {
       "agent": "sara",
       "client": "Skyline",
-      "title": "Kerstin Breidenthal showing Sat 8/1 1PM — confirm appointment; get Scott Greiner (7/26) feedback if not yet received",
+      "title": "Kerstin Breidenthal showing Sat 8/1 1PM \u2014 confirm appointment; get Scott Greiner (7/26) feedback if not yet received",
       "done": false
     },
     {
@@ -599,29 +599,199 @@
       "title": "CRITICAL RISK flagged 2026-07-24: COE 8/3 at real risk. No loan confirmation from Kim Hesser. No contractor bid back (outreach to COASTCOUNTRYCONST@gmail.com 7/23, no reply). No appraisal requested. Extension may be overdue. No BIW on remaining inspections. Resolve today: call Kim, follow up contractor, confirm appraisal ordered.",
       "done": false
     },
-    {"agent": "sara", "client": "Skyline/Lead", "title": "HOT LEAD: Call Kerstin Breidenthal NOW — (408) 612-5906", "note": "Ylopo alert 7/25: back browsing after 16 days silent; said she'd return ~7/23 to see Skyline. Added 2026-07-27.", "done": false},
-    {"agent": "sara", "client": "Skyline", "title": "Skyline: Follow up with Scott Greiner — 7/26 1 PM showing happened; get buyer feedback", "note": "Showing was Sunday 7/26 1 PM. Outcome unknown. Added 2026-07-27.", "done": false},
-    {"agent": "james", "client": "695 Feather", "title": "695 Feather: Buyer Ashley signed MH Addendum 7/25 (Authentisign) — confirm = item #12, get Dee Bradley (seller) to sign", "note": "Authentisign complete 7/25 8:59 PM. File in EX as 'MH Add from escrow buyer signed.pdf'. Return to Tanya Salgado tanyas@octitle.com, escrow #2473532-TS. Added 2026-07-27.", "done": false},
-    {"agent": "james", "client": "695 Feather", "title": "695 Feather: Get Ashley Robinson Proof of Funds — Bert Andrews removed by ADM2, his POF is now invalid", "note": "ADM2 executed 7/24 removes Bert. Ashley must provide own POF to Tanya Salgado. Added 2026-07-27.", "done": false},
-    {"agent": "sara", "client": "Latigo", "title": "Latigo: Review and file corrected BA AVID from James (7/24 email) in Latigo EX folder", "note": "James forwarded corrected Latigo BA AVID (Kylie Windley et al.) 7/24. Confirm correct final version then file. Added 2026-07-27.", "done": false},
-    {"agent": "james", "client": "Wendell", "title": "Wendell: Verify signed AVID is physically in EX folder — Audry Burton said 7/22 it still needed to be written up", "note": "deals.json shows received but Audry's 7/22 email says still writing it up. Day 3 of court clock. Added 2026-07-27.", "done": false},
-    {"agent": "james", "client": "Baldwin", "title": "Baldwin: Schedule final walkthrough with Shomari Turner for Tuesday 7/29 (2 days)", "note": "COE 8/3 = 7 days. Final walkthrough must happen ~7/29. Coordinate with listing agent. Added 2026-07-27.", "done": false},
-    {"agent": "james", "client": "Admin", "title": "Fix CRM email signature — James's CRM outgoing emails display Sara Cooper's name, not James's", "note": "James flagged in 7/24 email. Update in CRM settings. Added 2026-07-27.", "done": false},
-    {"agent": "sara", "client": "Lead", "title": "Roger & Kim Quillen — 7/22 second showing outcome unknown; check FUB or ShowingTime", "note": "Roger re-engaged 7/19, second showing scheduled 7/22. No Gmail follow-up visible. Added 2026-07-27.", "done": false},
-    {"agent": "james", "client": "695 Feather", "title": "695 Feather: File fully executed MH Addendum — both Ashley Robinson AND Dee Bradley signed via Authentisign 7/25 8:59 PM; James forwarded completion notification 7/27; download and file in 695 Feather Ex folder", "note": "Authentisign completion 7/25 8:59 PM. Both buyer (Ashley Robinson) and seller (Dee Bradley) signed. This is prelim item #12 (OC Title escrow #2473532-TS). File PDF in EX. Added 2026-07-27.", "dateAdded": "2026-07-27", "done": false},
-    {"agent": "sara", "client": "433 Hwy 4", "title": "433: Coordinate tenant Dana ↔ buyer Elizabeth Dawson meeting — Dana avail Mon 7/28 after 2pm / Thu 7/31 before 10am / Fri 8/1 all day; Elizabeth expected late August; contact Neriah Davis to schedule", "note": "Dana (yoga studio tenant) must meet Elizabeth Dawson (buyer) per access protocol. Neriah Davis (neriahd@gmail.com) coordinating. Added 2026-07-27.", "dateAdded": "2026-07-27", "done": false},
-    {"agent": "sara", "client": "433 Hwy 4", "title": "433: Confirm Jim Heryford signed ADD3 ($1.2M price reduction) + SFA ($100K 2nd DOT seller carry) — Yvonne signed 7/24 via Authentisign; Jim status unconfirmed. SFA requires 2nd DOT to record simultaneously with 1st at closing (Placer Title underwriting requirement).", "note": "Check with Neriah Davis (neriahd@gmail.com). Ashley Cuslidge at Placer Title confirmed simultaneous 2nd DOT recording required — lender's original 30-day post-close plan rejected by underwriting. Added 2026-07-27.", "dateAdded": "2026-07-27", "done": false},
-    {"agent": "sara", "client": "433 Hwy 4", "title": "433: Download + file Sara's Glide listing-agent AVID (Glide cert e47c5a62, completed ~7/19) in 433 Ex folder", "note": "Glide certificate e47c5a62. Sara's LA AVID completed ~7/19. Separate from the AVID already in Homeligh. File original in 433 EX. Added 2026-07-27.", "dateAdded": "2026-07-27", "done": false},
-    {"agent": "sara", "client": "Latigo", "title": "LATIGO COE 7/28 — URGENT: Send BRBC to Ashley Cuslidge (acuslidge@placertitle.com / 209-736-9553). Ashley requested 3:05 PM 7/28. Buyers signing at Placer Title today.", "note": "COE day 7/28. Buyers at Placer 11am. Send BRBC immediately. Added 2026-07-28.", "dateAdded": "2026-07-28", "done": false},
-    {"agent": "sara", "client": "Latigo", "title": "Latigo: COE TODAY 7/28 — monitor for fund & record confirmation. Kim Hesser (Prime Residential) expects same-day. ETA1 buffer through 7/29. Post-COE: update deal stage to closed in CRM.", "note": "Closing statement + wiring instructions sent to Castles 3:09 PM 7/28 with Kim CC'd. Added 2026-07-28.", "dateAdded": "2026-07-28", "done": false},
-    {"agent": "sara", "client": "433 Hwy 4", "title": "433: Promissory note vesting BLANK — Herfords carrying $100K note for Elizabeth Dawson. Yvonne sent unsigned note 7/28 4:24 AM; title-vesting section is BLANK. Contact Neriah Davis (neriahd@gmail.com) to get Dawson's vesting info (how she holds title). Dawson signs note at COE 8/10.", "note": "DONE 7/28 — Ashley Cuslidge confirmed: Elizabeth Tara Dawson, an unmarried woman. Fill this into the promissory note before COE 8/10.", "dateAdded": "2026-07-28", "done": true},
-    {"agent": "sara", "client": "433 Hwy 4", "title": "433: File Add3 + ETA3 in Ex folder — Authentisign 'Add3, ETA3' completion 7/27 9:20 PM. James R Heryford accepted 9:19 PM. Download from Authentisign and file in 433 E Hwy 4 Ex. Separate from ETA No. 3 executed 7/24 via Glide.", "note": "New Authentisign signing completed 7/27. Different from Glide ETA3. Added 2026-07-28.", "dateAdded": "2026-07-28", "done": false},
-    {"agent": "both", "client": "CRM", "title": "CRM: 7 pending timeline approvals need manual decision — Latigo: cont_loan; 433: nhd/cont_inspection/cont_title/cont_insurance; Baldwin: cont_appraisal/cont_insurance/cont_loan. CRM → Timeline tab → Approvals. Reconcile engine did not auto-apply any (conservative).", "note": "Timeline reconcile run 7/28: auto_applied=[]. All 7 proposals require Sara/James decision. Added 2026-07-28.", "dateAdded": "2026-07-28", "done": false},
-    {"agent": "sara", "client": "Latigo", "title": "Latigo POST-COE: Request BA AVID from Kylie Windley (KylieWindley@gmail.com) — buyer-agent AVID never filed. Ex has two copies of the listing-agent AVID but no buyer-agent AVID. Post-close broker-file remediation.", "note": "Identified 7/28 during Ex-folder compliance scan. Added 2026-07-28.", "dateAdded": "2026-07-28", "done": false},
-    {"agent": "james", "client": "695 Feather", "title": "695 Feather: Download and file fully executed MH Addendum — Authentisign completion notice forwarded by James 7/27. Currently only buyer-signed version in Ex. Download full certificate and file in 695 Feather Ex.", "note": "James forwarded 'Fwd: Signing complete: MH Addendum' to Sara 7/27. Added 2026-07-28.", "dateAdded": "2026-07-28", "done": false},
-    {"agent": "sara", "client": "695 Feather", "title": "695 Feather: File ADM2 (removes Bert Andrews) in Ex + get Ashley Robinson's Proof of Funds — Bert's POF in Ex is invalid (Bert removed by ADM2). Ashley Robinson needs to provide new POF.", "note": "Bert Andrews POF in Ex: 'Proof of funds Bert Andrews.pdf' — invalid post-ADM2. Added 2026-07-28.", "dateAdded": "2026-07-28", "done": false},
-    {"agent": "james", "client": "Baldwin", "title": "Baldwin: Chase listing agent for their LA AVID (seller-side Agent Visual Inspection Disclosure) — missing from Ex. James's Buyer AVID is now filed. Need listing agent counterpart.", "note": "Baldwin Ex now has 'Buyer AVID.pdf' (James). LA AVID from listing agent still missing. Added 2026-07-28.", "dateAdded": "2026-07-28", "done": false},
-    {"agent": "sara", "client": "Wendell", "title": "Wendell: Confirm Day 0 date with James/Audry — clockStart in CRM is null. Order to Sell is in Ex (confirmed). If written notice was delivered to buyer on 7/24, set clockStart to 2026-07-24. This starts all contingency clocks.", "note": "Order to Sell doc confirmed in Wendell Ex. clockStart still null in deals.json. Must confirm official delivery date before updating. Added 2026-07-28.", "dateAdded": "2026-07-28", "done": false}
+    {
+      "agent": "sara",
+      "client": "Skyline/Lead",
+      "title": "HOT LEAD: Call Kerstin Breidenthal NOW \u2014 (408) 612-5906",
+      "note": "Ylopo alert 7/25: back browsing after 16 days silent; said she'd return ~7/23 to see Skyline. Added 2026-07-27.",
+      "done": false
+    },
+    {
+      "agent": "sara",
+      "client": "Skyline",
+      "title": "Skyline: Follow up with Scott Greiner \u2014 7/26 1 PM showing happened; get buyer feedback",
+      "note": "Showing was Sunday 7/26 1 PM. Outcome unknown. Added 2026-07-27.",
+      "done": false
+    },
+    {
+      "agent": "james",
+      "client": "695 Feather",
+      "title": "695 Feather: Buyer Ashley signed MH Addendum 7/25 (Authentisign) \u2014 confirm = item #12, get Dee Bradley (seller) to sign",
+      "note": "Authentisign complete 7/25 8:59 PM. File in EX as 'MH Add from escrow buyer signed.pdf'. Return to Tanya Salgado tanyas@octitle.com, escrow #2473532-TS. Added 2026-07-27.",
+      "done": false
+    },
+    {
+      "agent": "james",
+      "client": "695 Feather",
+      "title": "695 Feather: Get Ashley Robinson Proof of Funds \u2014 Bert Andrews removed by ADM2, his POF is now invalid",
+      "note": "ADM2 executed 7/24 removes Bert. Ashley must provide own POF to Tanya Salgado. Added 2026-07-27.",
+      "done": false
+    },
+    {
+      "agent": "sara",
+      "client": "Latigo",
+      "title": "Latigo: Review and file corrected BA AVID from James (7/24 email) in Latigo EX folder",
+      "note": "James forwarded corrected Latigo BA AVID (Kylie Windley et al.) 7/24. Confirm correct final version then file. Added 2026-07-27.",
+      "done": false
+    },
+    {
+      "agent": "james",
+      "client": "Wendell",
+      "title": "Wendell: Verify signed AVID is physically in EX folder \u2014 Audry Burton said 7/22 it still needed to be written up",
+      "note": "deals.json shows received but Audry's 7/22 email says still writing it up. Day 3 of court clock. Added 2026-07-27.",
+      "done": false
+    },
+    {
+      "agent": "james",
+      "client": "Baldwin",
+      "title": "Baldwin: Schedule final walkthrough with Shomari Turner for Tuesday 7/29 (2 days)",
+      "note": "COE 8/3 = 7 days. Final walkthrough must happen ~7/29. Coordinate with listing agent. Added 2026-07-27.",
+      "done": false
+    },
+    {
+      "agent": "james",
+      "client": "Admin",
+      "title": "Fix CRM email signature \u2014 James's CRM outgoing emails display Sara Cooper's name, not James's",
+      "note": "James flagged in 7/24 email. Update in CRM settings. Added 2026-07-27.",
+      "done": false
+    },
+    {
+      "agent": "sara",
+      "client": "Lead",
+      "title": "Roger & Kim Quillen \u2014 7/22 second showing outcome unknown; check FUB or ShowingTime",
+      "note": "Roger re-engaged 7/19, second showing scheduled 7/22. No Gmail follow-up visible. Added 2026-07-27.",
+      "done": false
+    },
+    {
+      "agent": "james",
+      "client": "695 Feather",
+      "title": "695 Feather: File fully executed MH Addendum \u2014 both Ashley Robinson AND Dee Bradley signed via Authentisign 7/25 8:59 PM; James forwarded completion notification 7/27; download and file in 695 Feather Ex folder",
+      "note": "Authentisign completion 7/25 8:59 PM. Both buyer (Ashley Robinson) and seller (Dee Bradley) signed. This is prelim item #12 (OC Title escrow #2473532-TS). File PDF in EX. Added 2026-07-27.",
+      "dateAdded": "2026-07-27",
+      "done": false
+    },
+    {
+      "agent": "sara",
+      "client": "433 Hwy 4",
+      "title": "433: Coordinate tenant Dana \u2194 buyer Elizabeth Dawson meeting \u2014 Dana avail Mon 7/28 after 2pm / Thu 7/31 before 10am / Fri 8/1 all day; Elizabeth expected late August; contact Neriah Davis to schedule",
+      "note": "Dana (yoga studio tenant) must meet Elizabeth Dawson (buyer) per access protocol. Neriah Davis (neriahd@gmail.com) coordinating. Added 2026-07-27.",
+      "dateAdded": "2026-07-27",
+      "done": false
+    },
+    {
+      "agent": "sara",
+      "client": "433 Hwy 4",
+      "title": "433: Confirm Jim Heryford signed ADD3 ($1.2M price reduction) + SFA ($100K 2nd DOT seller carry) \u2014 Yvonne signed 7/24 via Authentisign; Jim status unconfirmed. SFA requires 2nd DOT to record simultaneously with 1st at closing (Placer Title underwriting requirement).",
+      "note": "Check with Neriah Davis (neriahd@gmail.com). Ashley Cuslidge at Placer Title confirmed simultaneous 2nd DOT recording required \u2014 lender's original 30-day post-close plan rejected by underwriting. Added 2026-07-27.",
+      "dateAdded": "2026-07-27",
+      "done": false
+    },
+    {
+      "agent": "sara",
+      "client": "433 Hwy 4",
+      "title": "433: Download + file Sara's Glide listing-agent AVID (Glide cert e47c5a62, completed ~7/19) in 433 Ex folder",
+      "note": "Glide certificate e47c5a62. Sara's LA AVID completed ~7/19. Separate from the AVID already in Homeligh. File original in 433 EX. Added 2026-07-27.",
+      "dateAdded": "2026-07-27",
+      "done": false
+    },
+    {
+      "agent": "sara",
+      "client": "Latigo",
+      "title": "LATIGO COE 7/28 \u2014 URGENT: Send BRBC to Ashley Cuslidge (acuslidge@placertitle.com / 209-736-9553). Ashley requested 3:05 PM 7/28. Buyers signing at Placer Title today.",
+      "note": "COE day 7/28. Buyers at Placer 11am. Send BRBC immediately. Added 2026-07-28.",
+      "dateAdded": "2026-07-28",
+      "done": false
+    },
+    {
+      "agent": "sara",
+      "client": "Latigo",
+      "title": "Latigo: COE TODAY 7/28 \u2014 monitor for fund & record confirmation. Kim Hesser (Prime Residential) expects same-day. ETA1 buffer through 7/29. Post-COE: update deal stage to closed in CRM.",
+      "note": "Closing statement + wiring instructions sent to Castles 3:09 PM 7/28 with Kim CC'd. Added 2026-07-28.",
+      "dateAdded": "2026-07-28",
+      "done": false
+    },
+    {
+      "agent": "sara",
+      "client": "433 Hwy 4",
+      "title": "433: Promissory note vesting BLANK \u2014 Herfords carrying $100K note for Elizabeth Dawson. Yvonne sent unsigned note 7/28 4:24 AM; title-vesting section is BLANK. Contact Neriah Davis (neriahd@gmail.com) to get Dawson's vesting info (how she holds title). Dawson signs note at COE 8/10.",
+      "note": "DONE 7/28 \u2014 Ashley Cuslidge confirmed: Elizabeth Tara Dawson, an unmarried woman. Fill this into the promissory note before COE 8/10.",
+      "dateAdded": "2026-07-28",
+      "done": true
+    },
+    {
+      "agent": "sara",
+      "client": "433 Hwy 4",
+      "title": "433: File Add3 + ETA3 in Ex folder \u2014 Authentisign 'Add3, ETA3' completion 7/27 9:20 PM. James R Heryford accepted 9:19 PM. Download from Authentisign and file in 433 E Hwy 4 Ex. Separate from ETA No. 3 executed 7/24 via Glide.",
+      "note": "New Authentisign signing completed 7/27. Different from Glide ETA3. Added 2026-07-28.",
+      "dateAdded": "2026-07-28",
+      "done": false
+    },
+    {
+      "agent": "both",
+      "client": "CRM",
+      "title": "CRM: 7 pending timeline approvals need manual decision \u2014 Latigo: cont_loan; 433: nhd/cont_inspection/cont_title/cont_insurance; Baldwin: cont_appraisal/cont_insurance/cont_loan. CRM \u2192 Timeline tab \u2192 Approvals. Reconcile engine did not auto-apply any (conservative).",
+      "note": "Timeline reconcile run 7/28: auto_applied=[]. All 7 proposals require Sara/James decision. Added 2026-07-28.",
+      "dateAdded": "2026-07-28",
+      "done": false
+    },
+    {
+      "agent": "sara",
+      "client": "Latigo",
+      "title": "Latigo POST-COE: Request BA AVID from Kylie Windley (KylieWindley@gmail.com) \u2014 buyer-agent AVID never filed. Ex has two copies of the listing-agent AVID but no buyer-agent AVID. Post-close broker-file remediation.",
+      "note": "Identified 7/28 during Ex-folder compliance scan. Added 2026-07-28.",
+      "dateAdded": "2026-07-28",
+      "done": false
+    },
+    {
+      "agent": "james",
+      "client": "695 Feather",
+      "title": "695 Feather: Download and file fully executed MH Addendum \u2014 Authentisign completion notice forwarded by James 7/27. Currently only buyer-signed version in Ex. Download full certificate and file in 695 Feather Ex.",
+      "note": "James forwarded 'Fwd: Signing complete: MH Addendum' to Sara 7/27. Added 2026-07-28.",
+      "dateAdded": "2026-07-28",
+      "done": false
+    },
+    {
+      "agent": "sara",
+      "client": "695 Feather",
+      "title": "695 Feather: File ADM2 (removes Bert Andrews) in Ex + get Ashley Robinson's Proof of Funds \u2014 Bert's POF in Ex is invalid (Bert removed by ADM2). Ashley Robinson needs to provide new POF.",
+      "note": "Bert Andrews POF in Ex: 'Proof of funds Bert Andrews.pdf' \u2014 invalid post-ADM2. Added 2026-07-28.",
+      "dateAdded": "2026-07-28",
+      "done": false
+    },
+    {
+      "agent": "james",
+      "client": "Baldwin",
+      "title": "Baldwin: Chase listing agent for their LA AVID (seller-side Agent Visual Inspection Disclosure) \u2014 missing from Ex. James's Buyer AVID is now filed. Need listing agent counterpart.",
+      "note": "Baldwin Ex now has 'Buyer AVID.pdf' (James). LA AVID from listing agent still missing. Added 2026-07-28.",
+      "dateAdded": "2026-07-28",
+      "done": false
+    },
+    {
+      "agent": "sara",
+      "client": "Wendell",
+      "title": "Wendell: Confirm Day 0 date with James/Audry \u2014 clockStart in CRM is null. Order to Sell is in Ex (confirmed). If written notice was delivered to buyer on 7/24, set clockStart to 2026-07-24. This starts all contingency clocks.",
+      "note": "Order to Sell doc confirmed in Wendell Ex. clockStart still null in deals.json. Must confirm official delivery date before updating. Added 2026-07-28.",
+      "dateAdded": "2026-07-28",
+      "done": false
+    },
+    {
+      "agent": "sara",
+      "client": "433",
+      "title": "Reply to Neriah Davis re: pest credit documentation method \u2014 Neriah asked 7/29 how to proceed; Elizabeth agreed to credit for cosmetic/cutting/painting (own contractor post-close); propose ADM or escrow holdback instruction",
+      "done": false
+    },
+    {
+      "agent": "james",
+      "client": "Wendell",
+      "title": "CLOSING TONIGHT \u2014 after mobile notary signing: text Amanda Boitano (aboitano@placertitle.com) to confirm deed recording; update CRM closingDate + stage to closed once recorded",
+      "done": false
+    },
+    {
+      "agent": "sara",
+      "client": "Admin",
+      "title": "Sheep Ranch escrow P-698773 \u2014 call/text Sean Moffat for seller signature on cancellation; buyer signed 7/7, Sean said he'd sign but no response since 7/10",
+      "done": false
+    }
   ],
   "deals": [
     {
@@ -904,7 +1074,7 @@
         "note": "Bankruptcy court sale (ADM1) \u2014 all contingency + COE periods start only on seller's written notice of court approval"
       },
       "contacts": {
-        "coAgent": "Audrey Burton (audreybusybeerealty@gmail.com) / Brandi Jenkins (Bjenkins.RE@outlook.com) — Busy Bee Realty, listing/seller side",
+        "coAgent": "Audrey Burton (audreybusybeerealty@gmail.com) / Brandi Jenkins (Bjenkins.RE@outlook.com) \u2014 Busy Bee Realty, listing/seller side",
         "escrow": "Amanda Boitano (Placer Title, Angels Camp) - Escrow #P-704376 (asst Hope Lopez)",
         "lender": "Kimberly (Kim) Hesser, Prime Residential (khesser@primeres.com, 209-768-8277)",
         "title": "Placer Title"
@@ -1307,14 +1477,14 @@
           "status": "done",
           "col": "closing",
           "badge": "Done",
-          "desc": "Recorded July 28, 2026. Buyers signed loan docs at Placer Title at 11am, lender funded, and the county recorded the deed the same day. Congratulations — you are homeowners!"
+          "desc": "Recorded July 28, 2026. Buyers signed loan docs at Placer Title at 11am, lender funded, and the county recorded the deed the same day. Congratulations \u2014 you are homeowners!"
         }
       ],
       "agentNote": {
         "author": "sara",
         "status": "sent",
         "updated": "2026-07-28",
-        "body": "Guy and Adrianna, it is OFFICIAL — your home has recorded and you are homeowners! Congratulations! The keys are yours. It has been such a pleasure working with you both and I am so excited for you. Welcome home!"
+        "body": "Guy and Adrianna, it is OFFICIAL \u2014 your home has recorded and you are homeowners! Congratulations! The keys are yours. It has been such a pleasure working with you both and I am so excited for you. Welcome home!"
       },
       "clientTasks": [
         {
@@ -1350,7 +1520,7 @@
       "side": "buyer",
       "agent": "sara",
       "listing": {
-        "commission": "2.5% from seller — BRBC buyer-side 0.5% waived by Sara 7/28 at buyers' request; that 0.5% applied to Echo listing (1143 Echo St) commission instead"
+        "commission": "2.5% from seller \u2014 BRBC buyer-side 0.5% waived by Sara 7/28 at buyers' request; that 0.5% applied to Echo listing (1143 Echo St) commission instead"
       },
       "listPrice": null,
       "salePrice": 615000,
@@ -1720,7 +1890,7 @@
           "status": "upcoming",
           "col": "contingencies",
           "badge": "Key date",
-          "desc": "Extended to 8/5 via ETA No. 3 (all parties signed 7/24). The last major hurdle — once the buyer removes her loan contingency, the sale is substantially de-risked."
+          "desc": "Extended to 8/5 via ETA No. 3 (all parties signed 7/24). The last major hurdle \u2014 once the buyer removes her loan contingency, the sale is substantially de-risked."
         },
         {
           "date": "2026-08-05",
@@ -1805,7 +1975,7 @@
         "extensions": {
           "loan": "2026-08-05",
           "appraisal": "2026-07-17",
-          "source": "ETA No. 1 executed 2026-07-10: loan extended to 7/23, appraisal to 7/16 (overrides 34/27 days). UPDATED 7/17: appraisal extended one more day to 7/17 via second ETA. UPDATED 7/24: ETA No. 3 fully executed (all parties signed per Glide 7/24 12:34 AM) — loan contingency extended to 2026-08-05 (override updated to 47 days from acceptance 6/19). COE unchanged 8/10."
+          "source": "ETA No. 1 executed 2026-07-10: loan extended to 7/23, appraisal to 7/16 (overrides 34/27 days). UPDATED 7/17: appraisal extended one more day to 7/17 via second ETA. UPDATED 7/24: ETA No. 3 fully executed (all parties signed per Glide 7/24 12:34 AM) \u2014 loan contingency extended to 2026-08-05 (override updated to 47 days from acceptance 6/19). COE unchanged 8/10."
         }
       },
       "listPrice": null,
