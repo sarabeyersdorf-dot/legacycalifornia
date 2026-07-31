@@ -178,7 +178,7 @@
 </script>
 <!-- seo:head:end -->
 <link rel="stylesheet" href="legacy.css">
-<link rel="stylesheet" href="listings.css">
+<link rel="stylesheet" href="legacy-ui.css">
 <link rel="stylesheet" href="idx-theme.css">
 <script src="https://kestrel.idxhome.com/ihf-kestrel.js"></script>
 <script>
@@ -189,89 +189,169 @@
   };
 </script>
 </head>
-<body class="paper" data-screen-label="IDX Valuation">
+<body class="paper lg-page" data-screen-label="IDX Valuation">
+<div class="lg-progress"></div>
 
-<header class="topnav">
-  <div class="topnav-bar1">
-    <span>Boutique luxury real estate · Calaveras · Amador · Tuolumne</span>
-    <span><a href="tel:2095594966">(209) 559-4966</a> · <a href="mailto:SaraSellsCalifornia@gmail.com">SaraSellsCalifornia@gmail.com</a></span>
-  </div>
-  <nav class="topnav-bar2">
-    <div class="topnav-links">
-      <a href="property-search.html">Listings</a>
-      <a href="towns.html">Communities</a>
-      <a href="relocate.html">Relocate</a>
-      <a href="valuation.html" class="active">Sellers</a>
-      <a href="market-report.html">Markets</a>
-    </div>
-    <a href="index.html" class="wordmark">
-      <span class="wordmark-word">Legacy Properties</span>
-      <span class="wordmark-sub">Every Home Has A Story</span>
-    </a>
-    <div class="topnav-links right">
-      <a href="ledger.html">The Ledger</a>
-      <a href="dashboard.html">Sign In</a>
-      <a href="find-my-match.html" class="btn btn-ink btn-sm" style="padding:10px 18px;">Find My Match</a>
-    </div>
+<!-- ============ TOP STRIP + HEADER ============ -->
+<div style="background:var(--lg-ink);color:rgba(255,253,248,.72);font-family:var(--lg-mono);font-size:10.5px;letter-spacing:.13em;text-transform:uppercase;display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;padding:9px var(--lg-gut)">
+  <span>Boutique real estate &middot; Calaveras &middot; Amador &middot; Tuolumne</span>
+  <span style="display:flex;gap:14px">
+    <a href="tel:2095594966" style="color:inherit;text-decoration:none">(209) 559-4966</a>
+    <a href="mailto:SaraSellsCalifornia@gmail.com" style="color:var(--lg-c2);text-decoration:none">SaraSellsCalifornia@gmail.com</a>
+  </span>
+</div>
+<header class="lg-header"><div class="lg-header__in">
+  <a class="lg-mark" href="index.html">
+    <span class="lg-mark__badge"><span>L</span></span>
+    <span class="lg-mark__txt"><b>Legacy</b><i>Properties · Angels Camp</i></span>
+  </a>
+  <nav class="lg-nav" id="siteNav">
+    <a href="property-search.html">Listings</a>
+    <a href="towns.html">Communities</a>
+    <a href="relocate.html">Relocate</a>
+    <a href="valuation.html" aria-current="page">Sellers</a>
+    <a href="market-report.html">Markets</a>
+    <a href="ledger.html">The Ledger</a>
+    <a href="dashboard.html">Sign In</a>
+    <a href="find-my-match.html" class="lg-btn" style="padding:11px 22px">Find My Match</a>
   </nav>
-</header>
+  <button class="lg-navtoggle" data-lg-nav="#siteNav" aria-expanded="false">Menu</button>
+</div></header>
 
-<div class="idx-embed">
+<!-- Page-scoped lg styling for the kept IDX home-valuation widget. The
+     idx-embed + ihfKestrel.render script is preserved verbatim; only the
+     surrounding card chrome is restyled to the lg system. -->
+<style>
+  .val-panel{background:var(--lg-white);border-radius:var(--lg-r);box-shadow:var(--lg-sh-sm);padding:26px 28px;display:flex;flex-direction:column;gap:16px;min-width:0;border-top:4px solid var(--lg-c1)}
+  .val-panel-h{display:flex;align-items:baseline;justify-content:space-between;gap:12px;padding-bottom:14px;border-bottom:1px solid rgba(23,20,15,.1)}
+  .val-panel-h .val-name{font-family:var(--lg-serif);font-style:italic;font-weight:600;font-size:27px;color:var(--lg-ink);line-height:1}
+  .val-panel-h .val-area{font-family:var(--lg-mono);font-size:10px;letter-spacing:.13em;text-transform:uppercase;color:var(--lg-ink-mute);white-space:nowrap}
+  .val-panel .idx-embed{min-height:60px;min-width:0;overflow-x:auto}
+</style>
+
+<!-- HERO -->
+<section class="lg-hero lg-hero--short">
+  <div class="lg-hero__art" aria-hidden="true">
+    <svg viewBox="0 0 1440 720" preserveAspectRatio="xMidYMid slice" role="presentation">
+      <defs>
+        <linearGradient id="lgSky" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="var(--lg-sky-a)"/><stop offset="58%" stop-color="var(--lg-sky-b)"/><stop offset="100%" stop-color="var(--lg-sky-c)"/>
+        </linearGradient>
+        <radialGradient id="lgSunGlow"><stop offset="0%" stop-color="var(--lg-sun)"/><stop offset="100%" stop-color="var(--lg-sun)" stop-opacity="0"/></radialGradient>
+        <linearGradient id="lgH1" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="var(--lg-hill-4)"/><stop offset="100%" stop-color="var(--lg-hill-3)"/></linearGradient>
+        <linearGradient id="lgH2" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="var(--lg-hill-3)"/><stop offset="100%" stop-color="var(--lg-hill-2)"/></linearGradient>
+        <linearGradient id="lgH3" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="var(--lg-hill-2)"/><stop offset="100%" stop-color="var(--lg-hill-1)"/></linearGradient>
+      </defs>
+      <rect width="1440" height="720" fill="url(#lgSky)"/>
+      <g transform="translate(0,70)">
+        <g class="lg-sun">
+          <circle cx="360" cy="188" r="180" fill="url(#lgSunGlow)" opacity=".6"/>
+          <g class="lg-rays" opacity=".28"><g stroke="var(--lg-sun)" stroke-width="2.5" stroke-linecap="round">
+            <line x1="360" y1="70" x2="360" y2="30"/><line x1="360" y1="306" x2="360" y2="346"/>
+            <line x1="242" y1="188" x2="202" y2="188"/><line x1="478" y1="188" x2="518" y2="188"/>
+            <line x1="276" y1="104" x2="248" y2="76"/><line x1="444" y1="272" x2="472" y2="300"/>
+            <line x1="444" y1="104" x2="472" y2="76"/><line x1="276" y1="272" x2="248" y2="300"/>
+          </g></g>
+          <circle cx="360" cy="188" r="72" fill="var(--lg-sun)"/>
+        </g>
+        <g fill="#FFFDF8" opacity=".42">
+          <g class="lg-cloud" style="animation-duration:70s"><ellipse cx="900" cy="118" rx="86" ry="27"/><ellipse cx="958" cy="106" rx="58" ry="24"/><ellipse cx="848" cy="108" rx="46" ry="20"/></g>
+          <g class="lg-cloud" style="animation-duration:94s;animation-delay:-30s" opacity=".7"><ellipse cx="1180" cy="196" rx="104" ry="24"/><ellipse cx="1246" cy="184" rx="62" ry="21"/></g>
+        </g>
+        <g class="lg-bird" style="animation-delay:-4s"><g class="lg-flap" fill="none" stroke="var(--lg-hill-1)" stroke-width="2.6" stroke-linecap="round" opacity=".7"><path d="M300 250 q10 -9 20 0"/><path d="M320 250 q10 -9 20 0"/></g></g>
+        <g class="lg-bird" style="animation-delay:-13s"><g class="lg-flap" style="animation-delay:-.4s" fill="none" stroke="var(--lg-hill-1)" stroke-width="2.2" stroke-linecap="round" opacity=".55"><path d="M300 300 q8 -7 16 0"/><path d="M316 300 q8 -7 16 0"/></g></g>
+      </g>
+      <path class="lg-ridge" data-depth="0.10" fill="url(#lgH1)" opacity=".62" d="M0 452 L110 418 L206 442 L318 392 L430 430 L548 386 L664 424 L788 380 L900 420 L1020 384 L1140 424 L1266 392 L1380 428 L1440 410 L1440 720 L0 720 Z"/>
+      <path class="lg-ridge" data-depth="0.18" fill="url(#lgH2)" opacity=".82" d="M0 512 L128 470 L248 504 L372 452 L500 494 L628 448 L760 490 L890 446 L1020 488 L1150 450 L1290 492 L1440 456 L1440 720 L0 720 Z"/>
+      <g class="lg-ridge" data-depth="0.28"><path fill="url(#lgH3)" d="M0 574 L150 534 L290 570 L430 522 L578 566 L720 520 L868 562 L1010 518 L1160 560 L1300 522 L1440 562 L1440 720 L0 720 Z"/>
+        <g fill="var(--lg-hill-1)" opacity=".9"><path d="M214 566 q-4 -22 8 -30 q-14 -14 4 -22 q-2 -16 16 -14 q10 -14 22 -2 q18 -6 18 10 q16 4 8 18 q12 10 -2 20 q4 18 -14 20 z"/><rect x="248" y="562" width="7" height="20" rx="2"/><path d="M1058 560 q-5 -26 9 -35 q-16 -17 5 -26 q-2 -19 18 -16 q12 -17 26 -3 q21 -7 21 12 q19 5 9 21 q14 12 -2 24 q5 21 -17 23 z"/><rect x="1098" y="556" width="8" height="24" rx="2"/></g>
+      </g>
+      <path class="lg-ridge" data-depth="0.40" fill="var(--lg-hill-1)" d="M0 646 L180 618 L360 648 L540 612 L740 650 L940 614 L1130 650 L1310 618 L1440 646 L1440 720 L0 720 Z"/>
+    </svg>
+  </div>
+  <div class="lg-hero__scrim"></div>
+  <div class="lg-hero__in">
+    <div class="lg-hero__tag"><span class="lg-dot"></span><span>For sellers &middot; Calaveras &middot; Amador &middot; Tuolumne</span></div>
+    <h1 class="lg-display lg-h1">What's your home <em>worth?</em></h1>
+    <p class="lg-hero__strap">Start with an instant estimate below, then let Sara refine it into a real broker's valuation &mdash; grounded in what's actually selling on your street, not an algorithm guessing from a zip code.</p>
+    <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:24px">
+      <a href="#estimate" class="lg-btn lg-btn--gold">Get my estimate</a>
+      <a href="find-my-match.html" class="lg-btn lg-btn--ghost">Talk to Sara</a>
+    </div>
+  </div>
+</section>
+
+<!-- HOME VALUATION WIDGET — live IDX -->
+<section class="lg-sec lg-sec--tint" id="estimate"><div class="lg-wrap">
+  <div class="lg-kicker lg-rv"><span>Instant home estimate</span><span class="lg-rule"></span></div>
+  <h2 class="lg-display lg-h2 lg-rv lg-d1" style="margin:14px 0 10px">Start with the <em>number.</em></h2>
+  <div class="lg-note lg-rv lg-d2" style="max-width:660px">Enter your address for an automated valuation pulled from current market data. It's a starting point &mdash; a real listing price comes from a walk-through and the comps only a local broker knows to weigh.</div>
+
+  <article class="val-panel lg-rv lg-d1" style="margin-top:26px">
+    <div class="val-panel-h"><span class="val-name">Your home's estimate</span><span class="val-area">Calaveras &middot; Amador &middot; Tuolumne</span></div>
+    <div class="idx-embed">
 <script>
   document.currentScript.replaceWith(ihfKestrel.render());
 </script>
-</div>
-
-<footer class="footer">
-  <div class="footer-inner">
-    <div class="footer-top">
-      <div>
-        <a href="index.html" class="wordmark" style="align-items: flex-start;">
-          <span class="wordmark-word">Legacy Properties</span>
-          <span class="wordmark-sub">Every Home Has A Story</span>
-        </a>
-        <p class="footer-tagline">Every home has a story. We help you find yours — or tell the one you've already lived.</p>
-      </div>
-      <div>
-        <h4>Services</h4>
-        <a href="relocate.html">Bay → Foothills relocation</a>
-        <a href="towns.html">Communities</a>
-        <a href="valuation.html">Sellers</a>
-        <a href="property-search.html">Browse listings</a>
-        <a href="find-my-match.html">Request a tour</a>
-      </div>
-      <div>
-        <h4>Buy</h4>
-        <a href="property-search.html">Search all listings</a>
-        <a href="open-home-listings.html">Open houses</a>
-        <a href="featured-listings.html">Featured listings</a>
-        <a href="fire-zone.html">Fire-zone &amp; insurance tool</a>
-        <a href="commute.html">Commute calculator</a>
-        <a href="find-my-match.html">Request a tour</a>
-      </div>
-      <div>
-        <h4>Sell</h4>
-        <a href="valuation.html">What's my home worth?</a>
-        <a href="how-we-work.html">Listing process</a>
-        <a href="about.html">About Sara &amp; James</a>
-        <a href="valuation.html">Request a CMA</a>
-      </div>
-      <div>
-        <h4>Connect</h4>
-        <a href="tel:2095594966">(209) 559-4966</a>
-        <a href="mailto:SaraSellsCalifornia@gmail.com">SaraSellsCalifornia@gmail.com</a>
-        <a href="https://www.instagram.com/legacypropertiesig/">Instagram</a>
-        <a href="https://www.facebook.com/legacypropertiesfb/">Facebook</a>
-        <a href="https://www.youtube.com/LegacyPropertiesTV">YouTube</a>
-        <a href="ledger.html">The Ledger</a>
-      </div>
     </div>
-    <div class="footer-bottom">
-      <div>© 2026 Legacy Properties · All rights reserved · <a href="/privacy.html">Privacy Policy</a> · <a href="/sms-terms.html">SMS Terms</a></div>
-      <div>Sara Cooper, Broker · DRE #02141987 · Equal Housing Opportunity</div>
+  </article>
+</div></section>
+
+<!-- WHY A BROKER VALUATION -->
+<section class="lg-sec"><div class="lg-wrap">
+  <div class="lg-kicker lg-rv"><span>Beyond the algorithm</span><span class="lg-rule"></span></div>
+  <h2 class="lg-display lg-h2 lg-rv lg-d1" style="margin:14px 0 30px">An estimate is a start. A <em>valuation</em> is the work.</h2>
+  <div style="display:grid;gap:16px">
+    <div class="lg-point lg-rv" style="--lg-accent:var(--lg-a1)"><div class="lg-point__num">1</div><h4>Comps a model can't see.</h4><p>Automated estimates average a neighborhood. Sara weighs the details that move price in the foothills &mdash; acreage and usable land, well and septic condition, fire-zone status, views, outbuildings, and the recent sale three doors down that never made a clean comp.</p></div>
+    <div class="lg-point lg-rv lg-d1" style="--lg-accent:var(--lg-a4)"><div class="lg-point__num">2</div><h4>A written plan, not a guess.</h4><p>You get a comparative market analysis in writing: a defensible list price, the range above and below it, and the improvements that earn their cost back before you list &mdash; and the ones that don't.</p></div>
+    <div class="lg-point lg-rv lg-d2" style="--lg-accent:var(--lg-a3)"><div class="lg-point__num">3</div><h4>Marketing built for your buyer.</h4><p>Pricing right takes a strategy tuned to who's actually buying in your town this season &mdash; a Bay Area weekender, a retiree downsizing, a family chasing land. Sara reads that market week to week and runs the listing herself, start to finish.</p></div>
+  </div>
+</div></section>
+
+<!-- CTA -->
+<section class="lg-sec lg-sec--ink"><div class="lg-wrap">
+  <div class="lg-kicker lg-rv" style="color:var(--lg-sun)"><span>Ready when you are</span><span class="lg-rule" style="background:rgba(255,253,248,.3)"></span></div>
+  <h2 class="lg-display lg-h2 lg-rv lg-d1" style="margin:14px 0 12px;color:#fff">Let's talk about <em style="color:var(--lg-sun)">your number.</em></h2>
+  <div class="lg-note lg-rv lg-d2" style="background:rgba(255,253,248,.1);color:rgba(255,253,248,.9);border-left-color:var(--lg-sun);max-width:660px">Request a full comparative market analysis &mdash; no obligation, no pressure. Sara will walk your home, weigh the comps, and give you a real number in writing.</div>
+  <div class="lg-rv lg-d2" style="display:flex;gap:12px;flex-wrap:wrap;margin-top:24px">
+    <a href="find-my-match.html" class="lg-btn lg-btn--gold">Request a CMA</a>
+    <a href="tel:2095594966" class="lg-btn lg-btn--ghost">(209) 559-4966</a>
+  </div>
+</div></section>
+
+<!-- ============ FOOTER ============ -->
+<footer class="lg-footer"><div class="lg-wrap">
+  <div class="lg-footer__cols">
+    <div>
+      <a href="index.html" class="lg-mark"><span class="lg-mark__badge"><span>L</span></span><span class="lg-mark__txt"><b>Legacy</b><i>Properties · Angels Camp</i></span></a>
+      <p style="font-family:var(--lg-serif);font-style:italic;font-size:16px;color:var(--lg-ink-soft);line-height:1.5;margin-top:16px;max-width:260px">Every home has a story. We help you find yours &mdash; or tell the one you've already lived.</p>
+    </div>
+    <div><h5>Communities</h5>
+      <a href="town-murphys.html">Murphys</a>
+      <a href="town-arnold.html">Arnold</a>
+      <a href="town-sutter-creek.html">Sutter Creek</a>
+      <a href="town-shenandoah-valley.html">Shenandoah Valley</a>
+      <a href="river-mountain.html">Waterfront Lakes &amp; Rivers</a>
+      <a href="town-angels-camp.html">Angels Camp</a>
+      <a href="town-copperopolis.html">Copperopolis</a>
+    </div>
+    <div><h5>Buy &amp; sell</h5>
+      <a href="property-search.html">Search all listings</a>
+      <a href="valuation.html">What's my home worth?</a>
+      <a href="find-my-match.html">Request a tour</a>
+    </div>
+    <div><h5>Connect</h5>
+      <a href="tel:2095594966">(209) 559-4966</a>
+      <a href="mailto:SaraSellsCalifornia@gmail.com">Email Sara</a>
+      <a href="ledger.html">The Ledger</a>
     </div>
   </div>
-</footer>
+  <div class="lg-footer__bot">
+    <span>&copy; 2026 Legacy Properties &middot; All rights reserved &middot; <a href="/privacy.html">Privacy Policy</a> &middot; <a href="/sms-terms.html">SMS Terms</a></span>
+    <span>Sara Cooper, Broker &middot; DRE #02141987 &middot; Equal Housing Opportunity</span>
+  </div>
+</div></footer>
 
+<script src="legacy-ui.js" defer></script>
 </body>
 </html>
