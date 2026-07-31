@@ -178,54 +178,63 @@
 <!-- seo:head:end -->
 <meta name="description" content="Look up a Sierra foothills address — see Cal Fire severity zone, likely insurance situation, defensible-space requirements, and what it actually means for buying.">
 <link rel="stylesheet" href="legacy.css">
+<link rel="stylesheet" href="legacy-ui.css">
 <link rel="stylesheet" href="tools.css">
 </head>
-<body class="paper" data-screen-label="Fire Zone Tool">
+<body class="paper lg-page" data-screen-label="Fire Zone Tool">
+<div class="lg-progress"></div>
 
-<!-- ============ TOP NAV ============ -->
-<header class="topnav">
-  <div class="topnav-bar1">
-    <span>Boutique luxury real estate · Calaveras · Amador · Tuolumne</span>
-    <span>
-      <a href="tel:2095594966">(209) 559-4966</a>
-      &nbsp;·&nbsp;
-      <a href="mailto:SaraSellsCalifornia@gmail.com">SaraSellsCalifornia@gmail.com</a>
-    </span>
-  </div>
-  <nav class="topnav-bar2">
-    <div class="topnav-links">
-      <a href="property-search.html">Listings</a>
-      <a href="towns.html">Communities</a>
-      <a href="relocate.html">Relocate</a>
-      <a href="valuation.html">Sellers</a>
-      <a href="market-report.html">Markets</a>
-    </div>
-    <a href="index.html" class="wordmark">
-      <span class="wordmark-word">Legacy Properties</span>
-      <span class="wordmark-sub">Every Home Has A Story</span>
-    </a>
-    <div class="topnav-links right">
-      <a href="ledger.html">The Ledger</a>
-      <a href="dashboard.html">Sign In</a>
-      <a href="find-my-match.html" class="btn btn-ink btn-sm" style="padding:10px 18px;">Find My Match</a>
-    </div>
+<!-- ============ TOP STRIP + HEADER ============ -->
+<div style="background:var(--lg-ink);color:rgba(255,253,248,.72);font-family:var(--lg-mono);font-size:10.5px;letter-spacing:.13em;text-transform:uppercase;display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;padding:9px var(--lg-gut)">
+  <span>Boutique real estate &middot; Calaveras &middot; Amador &middot; Tuolumne</span>
+  <span style="display:flex;gap:14px">
+    <a href="tel:2095594966" style="color:inherit;text-decoration:none">(209) 559-4966</a>
+    <a href="mailto:SaraSellsCalifornia@gmail.com" style="color:var(--lg-c2);text-decoration:none">SaraSellsCalifornia@gmail.com</a>
+  </span>
+</div>
+<header class="lg-header"><div class="lg-header__in">
+  <a class="lg-mark" href="index.html">
+    <span class="lg-mark__badge"><span>L</span></span>
+    <span class="lg-mark__txt"><b>Legacy</b><i>Properties · Angels Camp</i></span>
+  </a>
+  <nav class="lg-nav" id="siteNav">
+    <a href="property-search.html">Listings</a>
+    <a href="towns.html">Communities</a>
+    <a href="relocate.html">Relocate</a>
+    <a href="valuation.html">Sellers</a>
+    <a href="market-report.html">Markets</a>
+    <a href="ledger.html">The Ledger</a>
+    <a href="dashboard.html">Sign In</a>
+    <a href="find-my-match.html" class="lg-btn" style="padding:11px 22px">Find My Match</a>
   </nav>
-</header>
+  <button class="lg-navtoggle" data-lg-nav="#siteNav" aria-expanded="false">Menu</button>
+</div></header>
 
-<!-- ============ TOOL HERO ============ -->
-<section class="tool-hero">
-  <div class="tool-hero-inner">
-    <div class="tool-hero-left">
-      <span class="hairline-brass" style="margin-bottom: 18px;"></span>
-      <span class="eyebrow">A Legacy tool · Free · No sign-up</span>
-      <h1 class="tool-h1">Fire-zone<br><em>&amp; insurance</em><br>reality check.</h1>
-      <p class="tool-dek">Paste any Calaveras, Amador or Tuolumne address. We pull the Cal Fire severity zone, the FAIR Plan likelihood, the defensible-space requirement, and what comparable homes are actually paying for coverage — so the most important number in your buying decision isn't a surprise.</p>
-      <div class="tool-hero-meta">
-        <div><span class="n">3</span><span class="l">CA counties covered</span></div>
-        <div><span class="n">8k+</span><span class="l">Parcels indexed</span></div>
-        <div><span class="n">~24mo</span><span class="l">Premium quote freshness</span></div>
-      </div>
-    </div>
+<!-- Page-scoped breadcrumb styling (chrome only; the calculator's tool-*/fz-*
+     classes are a separate namespace and are untouched). -->
+<style>
+  .t-crumb{font-family:var(--lg-mono);font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--lg-ink-mute);display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:16px var(--lg-gut) 0;max-width:var(--lg-max);margin:0 auto}
+  .t-crumb a{color:var(--lg-a1);text-decoration:none}.t-crumb .sp{flex:1}
+</style>
+
+<!-- Breadcrumb -->
+<nav class="t-crumb" aria-label="Breadcrumb">
+  <a href="index.html">Legacy</a><span>&rarr;</span>
+  <span>Fire-Zone &amp; Insurance Tool</span>
+  <span class="sp"></span>
+  <span>A Legacy Tool</span>
+</nav>
+
+<!-- ============ TOOL HERO (intro reskinned; calculator kept intact) ============ -->
+<section class="lg-sec"><div class="lg-wrap">
+  <div class="lg-kicker lg-rv"><span>A Legacy tool &middot; Free &middot; No sign-up</span><span class="lg-rule"></span></div>
+  <h1 class="lg-display lg-h2 lg-rv lg-d1" style="margin:14px 0 12px">Fire-zone <em>&amp; insurance</em> reality check.</h1>
+  <div class="lg-note lg-rv lg-d2" style="max-width:760px">Paste any Calaveras, Amador or Tuolumne address. We pull the Cal Fire severity zone, the FAIR Plan likelihood, the defensible-space requirement, and what comparable homes are actually paying for coverage — so the most important number in your buying decision isn't a surprise.</div>
+  <div class="lg-rv lg-d2" style="display:flex;gap:34px;flex-wrap:wrap;margin:22px 0 4px">
+    <div><span style="font-family:var(--lg-serif);font-style:italic;font-size:30px;color:var(--lg-a1);line-height:1">3</span><span style="display:block;font-family:var(--lg-mono);font-size:10px;letter-spacing:.13em;text-transform:uppercase;color:var(--lg-ink-mute);margin-top:4px">CA counties covered</span></div>
+    <div><span style="font-family:var(--lg-serif);font-style:italic;font-size:30px;color:var(--lg-a1);line-height:1">8k+</span><span style="display:block;font-family:var(--lg-mono);font-size:10px;letter-spacing:.13em;text-transform:uppercase;color:var(--lg-ink-mute);margin-top:4px">Parcels indexed</span></div>
+    <div><span style="font-family:var(--lg-serif);font-style:italic;font-size:30px;color:var(--lg-a1);line-height:1">~24mo</span><span style="display:block;font-family:var(--lg-mono);font-size:10px;letter-spacing:.13em;text-transform:uppercase;color:var(--lg-ink-mute);margin-top:4px">Premium quote freshness</span></div>
+  </div>
 
     <!-- LOOKUP FORM -->
     <form class="tool-lookup" id="fzForm" onsubmit="event.preventDefault(); fzLookup();">
@@ -264,8 +273,7 @@
         <button type="button" class="chip" onclick="fzPreset('19 Spanish St, Sutter Creek, CA 95685', 'sutter')">Sutter Creek</button>
       </div>
     </form>
-  </div>
-</section>
+</div></section>
 
 <!-- ============ RESULT ============ -->
 <section class="tool-result" id="fzResult">
@@ -598,110 +606,89 @@
 </section>
 
 <!-- ============ METHOD ============ -->
-<section class="tool-method">
-  <div class="tool-method-inner">
-    <div class="section-h">
-      <div>
-        <span class="hairline-brass" style="margin-bottom: 16px;"></span>
-        <span class="eyebrow">How this tool works</span>
-        <h2 class="h-section" style="margin-top: 10px;">Plain about<br><em>where the data comes from.</em></h2>
-      </div>
-      <p class="lede right">No proprietary scoring. No marketing magic. Everything here is sourced, dated, and updated on a known cadence — so you can decide how much weight to give it.</p>
+<section class="lg-sec lg-sec--tint"><div class="lg-wrap">
+  <div class="lg-grid" style="grid-template-columns:.85fr 1.15fr;gap:48px;align-items:start">
+    <div>
+      <div class="lg-kicker lg-rv"><span>How this tool works</span></div>
+      <h2 class="lg-display lg-h2 lg-rv lg-d1" style="margin:14px 0 10px">Plain about <em>where the data comes from.</em></h2>
     </div>
+    <p class="lg-rv lg-d2" style="font-family:var(--lg-serif);font-style:italic;font-size:19px;color:var(--lg-ink-mute);line-height:1.4">No proprietary scoring. No marketing magic. Everything here is sourced, dated, and updated on a known cadence — so you can decide how much weight to give it.</p>
+  </div>
 
-    <div class="tool-method-grid">
-      <div class="tool-method-cell">
-        <div class="tool-method-n">01</div>
-        <h4>Cal Fire FHSZ</h4>
-        <p>The Fire Hazard Severity Zone classification comes straight from the 2024 update of the California State Responsibility Area maps. Updated whenever Cal Fire updates them — typically every 5 years.</p>
-        <div class="tool-method-source">Source · osfm.fire.ca.gov</div>
-      </div>
-      <div class="tool-method-cell">
-        <div class="tool-method-n">02</div>
-        <h4>Premium estimates</h4>
-        <p>Sourced from anonymized policies tied to recent comparable sales in our book and three partner brokerages. We update the median every quarter. Your actual quote will vary based on credit, claims history, and bundling.</p>
-        <div class="tool-method-source">Source · Legacy + partner book</div>
-      </div>
-      <div class="tool-method-cell">
-        <div class="tool-method-n">03</div>
-        <h4>Mitigation checklist</h4>
-        <p>Pulled from the current PRC 4291 / SB 38 statutory requirements plus the Safer From Wildfires regulator framework. Items flagged from a high-altitude review of the parcel — a real inspection may surface more.</p>
-        <div class="tool-method-source">Source · CalFire + CDI</div>
-      </div>
-      <div class="tool-method-cell">
-        <div class="tool-method-n">04</div>
-        <h4>The disclaimer</h4>
-        <p>This is decision-support, not a binder. Get a real underwriting quote before you close. Sara can introduce you to two independent brokers who actually write foothills risk — she has no financial relationship with either.</p>
-        <div class="tool-method-source">Updated · April 14, 2026</div>
-      </div>
+  <div class="lg-grid lg-grid--4" style="margin-top:32px">
+    <div class="lg-point lg-rv" style="--lg-accent:var(--lg-a1)">
+      <div class="lg-point__num">01</div>
+      <h4>Cal Fire FHSZ</h4>
+      <p>The Fire Hazard Severity Zone classification comes straight from the 2024 update of the California State Responsibility Area maps. Updated whenever Cal Fire updates them — typically every 5 years.</p>
+      <p style="font-family:var(--lg-mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--lg-ink-mute);margin-top:8px">Source · osfm.fire.ca.gov</p>
+    </div>
+    <div class="lg-point lg-rv lg-d1" style="--lg-accent:var(--lg-a4)">
+      <div class="lg-point__num">02</div>
+      <h4>Premium estimates</h4>
+      <p>Sourced from anonymized policies tied to recent comparable sales in our book and three partner brokerages. We update the median every quarter. Your actual quote will vary based on credit, claims history, and bundling.</p>
+      <p style="font-family:var(--lg-mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--lg-ink-mute);margin-top:8px">Source · Legacy + partner book</p>
+    </div>
+    <div class="lg-point lg-rv lg-d2" style="--lg-accent:var(--lg-a3)">
+      <div class="lg-point__num">03</div>
+      <h4>Mitigation checklist</h4>
+      <p>Pulled from the current PRC 4291 / SB 38 statutory requirements plus the Safer From Wildfires regulator framework. Items flagged from a high-altitude review of the parcel — a real inspection may surface more.</p>
+      <p style="font-family:var(--lg-mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--lg-ink-mute);margin-top:8px">Source · CalFire + CDI</p>
+    </div>
+    <div class="lg-point lg-rv lg-d3" style="--lg-accent:var(--lg-a5)">
+      <div class="lg-point__num">04</div>
+      <h4>The disclaimer</h4>
+      <p>This is decision-support, not a binder. Get a real underwriting quote before you close. Sara can introduce you to two independent brokers who actually write foothills risk — she has no financial relationship with either.</p>
+      <p style="font-family:var(--lg-mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--lg-ink-mute);margin-top:8px">Updated · April 14, 2026</p>
     </div>
   </div>
-</section>
+</div></section>
 
 <!-- ============ NEXT STEPS ============ -->
-<section class="tool-next">
-  <div class="tool-next-inner">
-    <div class="tool-next-col">
-      <span class="eyebrow" style="color: var(--brass-bright);">Next, if you're buying</span>
-      <h3>Want this analysis on every<br><em>house you tour?</em></h3>
-      <p>Save the report to your Legacy dashboard and we'll automatically run a fire-zone &amp; insurance check on any listing you favorite — pinned to the property card before you ever schedule a showing.</p>
-      <div class="tool-next-ctas">
-        <a href="dashboard.html" class="btn btn-brass">Open dashboard</a>
-        <a href="find-my-match.html" class="btn" style="border: 1px solid var(--brass-bright); color: var(--brass-bright);">Talk to Sara</a>
+<section class="lg-sec"><div class="lg-wrap">
+  <div class="lg-grid lg-grid--2" style="gap:28px;align-items:start">
+    <div>
+      <div class="lg-kicker lg-rv"><span>Next, if you're buying</span></div>
+      <h3 class="lg-display lg-h2 lg-rv lg-d1" style="margin:14px 0 12px">Want this analysis on every <em>house you tour?</em></h3>
+      <div class="lg-note lg-rv lg-d2">Save the report to your Legacy dashboard and we'll automatically run a fire-zone &amp; insurance check on any listing you favorite — pinned to the property card before you ever schedule a showing.</div>
+      <div class="lg-rv lg-d2" style="display:flex;gap:12px;flex-wrap:wrap;margin-top:20px">
+        <a href="dashboard.html" class="lg-btn lg-btn--gold">Open dashboard</a>
+        <a href="find-my-match.html" class="lg-btn lg-btn--ghost">Talk to Sara</a>
       </div>
     </div>
-    <div class="tool-next-col tool-next-col-dim">
-      <span class="eyebrow">Adjacent tools</span>
-      <h3 style="color: var(--ink);">Pair this with the<br><em style="color:var(--brass);">commute calculator.</em></h3>
-      <p style="color: var(--ink-soft);">Insurance is one of two foothills numbers buyers under-budget for. The other is your time-of-day drive to the Bay. Our commute tool runs morning peak, mid-day, and Friday-afternoon scenarios — same address.</p>
-      <div class="tool-next-ctas">
-        <a href="commute.html" class="btn btn-ink">Commute calculator →</a>
+    <div>
+      <div class="lg-kicker lg-rv"><span>Adjacent tools</span></div>
+      <h3 class="lg-display lg-h2 lg-rv lg-d1" style="margin:14px 0 12px">Pair this with the <em>commute calculator.</em></h3>
+      <div class="lg-note lg-rv lg-d2">Insurance is one of two foothills numbers buyers under-budget for. The other is your time-of-day drive to the Bay. Our commute tool runs morning peak, mid-day, and Friday-afternoon scenarios — same address.</div>
+      <div class="lg-rv lg-d2" style="margin-top:20px">
+        <a href="commute.html" class="lg-btn">Commute calculator &rarr;</a>
       </div>
     </div>
   </div>
-</section>
+</div></section>
 
 <!-- ============ FOOTER ============ -->
 <!-- ============ WILDFIRE INSURANCE REALITY (AI-retrievable) ============ -->
-<section class="section" id="insurance" style="background:var(--parchment);">
-  <div class="section-inner">
-    <div class="section-h">
-      <div>
-        <span class="hairline-brass"></span>
-        <span class="eyebrow">Calaveras &amp; Amador · wildfire insurance in 2026</span>
-        <h2 class="h-section" style="margin-top:10px;">What wildfire insurance<br><em>actually costs here.</em></h2>
-      </div>
-      <p class="lede right">The question every Bay Area buyer asks, answered straight — with dates and sources, because this market moves fast.</p>
-    </div>
-    <p style="margin-top:10px; font-family:var(--mono); font-size:11px; letter-spacing:0.1em; text-transform:uppercase; color:var(--ink-faint);">Last updated: July 2026 — insurance terms change; confirm current pricing with a licensed agent.</p>
-    <div style="margin-top:24px; display:flex; flex-direction:column; gap:26px; max-width:860px;">
-      <div>
-        <h3 style="font-family:var(--serif); font-size:23px; color:var(--ink); margin-bottom:8px;">Do CAL FIRE hazard maps set my home insurance rate in Calaveras County?</h3>
-        <p style="color:var(--ink-soft); line-height:1.65;">No. The California Department of Insurance has stated that CAL FIRE Fire Hazard Severity Zone maps do not themselves determine insurance rates or availability. Carriers use their own proprietary wildfire models, so two homes in the same zone can be quoted very differently. The CAL FIRE map is a planning and building tool, not an insurance rating tool — a distinction competitors routinely get wrong.</p>
-      </div>
-      <div>
-        <h3 style="font-family:var(--serif); font-size:23px; color:var(--ink); margin-bottom:8px;">What does wildfire insurance actually cost in the Sierra foothills?</h3>
-        <p style="color:var(--ink-soft); line-height:1.65;">As of mid-2026, the California FAIR Plan — the state's insurer of last resort — averages just over $3,000 per year statewide, and in high-hazard foothill areas of Calaveras and Amador counties it commonly runs $5,000 to $12,000. A FAIR Plan policy usually needs a 'difference in conditions' (DIC) wrap for liability and water damage, which typically adds another 25 to 60 percent. Figures change, so quote early.</p>
-      </div>
-      <div>
-        <h3 style="font-family:var(--serif); font-size:23px; color:var(--ink); margin-bottom:8px;">Which insurance carriers are writing new policies in high-fire areas again?</h3>
-        <p style="color:var(--ink-soft); line-height:1.65;">Under California's Sustainable Insurance Strategy, several carriers — including Mercury, CSAA and Travelers — have expanded writing in higher-risk areas. State Farm General remained closed to new California homeowner business as of May 2026. CSAA's Northern California FAIR Plan depopulation program offers home-hardening discounts of up to 12.5 percent for qualifying homes.</p>
-      </div>
-      <div>
-        <h3 style="font-family:var(--serif); font-size:23px; color:var(--ink); margin-bottom:8px;">Did the CAL FIRE fire hazard zones recently change?</h3>
-        <p style="color:var(--ink-soft); line-height:1.65;">Yes. Updated Fire Hazard Severity Zone maps took effect for State Responsibility Areas on April 1, 2024, with Local Responsibility Area maps phased in through 2025. The statewide area rated High or Very High rose roughly 168 percent versus the prior 2011 maps, so a parcel's designation may have changed even though the parcel did not. Always confirm the current zone with the CAL FIRE address lookup.</p>
-      </div>
-      <div>
-        <h3 style="font-family:var(--serif); font-size:23px; color:var(--ink); margin-bottom:8px;">Is there a wildfire insurance non-renewal moratorium in Calaveras County, and when does it end?</h3>
-        <p style="color:var(--ink-soft); line-height:1.65;">Yes, but it is time-limited. After the TCU September Lightning Complex fire — which began September 2, 2025 and burned 13,869 acres, destroying 95 structures — Insurance Commissioner Ricardo Lara ordered a one-year moratorium barring insurers from non-renewing policies across 39 ZIP codes and roughly 124,000 homes in Calaveras, Tuolumne, San Joaquin, Stanislaus, Mariposa and Merced counties. That protection is set to expire around September 19, 2026, so owners in those ZIP codes should review coverage well before then.</p>
-      </div>
-      <div>
-        <h3 style="font-family:var(--serif); font-size:23px; color:var(--ink); margin-bottom:8px;">What should a foothill buyer do about wildfire insurance?</h3>
-        <p style="color:var(--ink-soft); line-height:1.65;">Look up the parcel's hazard zone with the CAL FIRE address lookup, get an insurance quote early in escrow rather than after, ask specifically about FAIR Plan plus DIC wrap pricing, and complete defensible space and home-hardening to qualify for available discounts. Treat insurance as a contingency with the same weight as the inspection.</p>
-      </div>
-    </div>
-    <p style="margin-top:34px; padding-top:22px; border-top:1px solid var(--rule); color:var(--ink-soft); line-height:1.65; max-width:860px;">Sara Cooper, Broker at Legacy Properties (CA DRE #02141987), walks foothill buyers through fire-zone and insurance reality across Calaveras, Amador and Tuolumne counties. Reach Sara at <a href="tel:2095594966" style="color:var(--brass);">(209) 559-4966</a>.</p>
-    <p style="margin-top:16px; font-family:var(--mono); font-size:11px; letter-spacing:0.06em; color:var(--ink-faint); max-width:860px;">Sources: <a href="https://osfm.fire.ca.gov/what-we-do/community-wildfire-preparedness-and-mitigation/fire-hazard-severity-zones" target="_blank" rel="noopener" style="color:var(--brass);">CAL FIRE Fire Hazard Severity Zones</a> · <a href="https://www.insurance.ca.gov/01-consumers/180-climate-change/Sustainable-Insurance-Strategy.cfm" target="_blank" rel="noopener" style="color:var(--brass);">CDI Sustainable Insurance Strategy</a> · <a href="https://www.insurance.ca.gov/0400-news/0100-press-releases/2025/" target="_blank" rel="noopener" style="color:var(--brass);">CDI moratorium (Sept 2025)</a> · <a href="https://www.insurancejournal.com/news/west/" target="_blank" rel="noopener" style="color:var(--brass);">Insurance Journal — FAIR Plan</a>.</p>
+<section class="lg-sec" id="insurance"><div class="lg-wrap">
+  <div class="lg-kicker lg-rv"><span>Calaveras &amp; Amador · wildfire insurance in 2026</span><span class="lg-rule"></span></div>
+  <h2 class="lg-display lg-h2 lg-rv lg-d1" style="margin:14px 0 10px">What wildfire insurance <em>actually costs here.</em></h2>
+  <div class="lg-note lg-rv lg-d2" style="max-width:720px">The question every Bay Area buyer asks, answered straight — with dates and sources, because this market moves fast.</div>
+  <p class="lg-rv lg-d2" style="margin-top:14px; font-family:var(--lg-mono); font-size:11px; letter-spacing:0.1em; text-transform:uppercase; color:var(--lg-ink-mute);">Last updated: July 2026 — insurance terms change; confirm current pricing with a licensed agent.</p>
+  <div class="lg-prose lg-rv lg-d1" style="max-width:860px; margin-top:8px;">
+    <h3>Do CAL FIRE hazard maps set my home insurance rate in Calaveras County?</h3>
+    <p>No. The California Department of Insurance has stated that CAL FIRE Fire Hazard Severity Zone maps do not themselves determine insurance rates or availability. Carriers use their own proprietary wildfire models, so two homes in the same zone can be quoted very differently. The CAL FIRE map is a planning and building tool, not an insurance rating tool — a distinction competitors routinely get wrong.</p>
+    <h3>What does wildfire insurance actually cost in the Sierra foothills?</h3>
+    <p>As of mid-2026, the California FAIR Plan — the state's insurer of last resort — averages just over $3,000 per year statewide, and in high-hazard foothill areas of Calaveras and Amador counties it commonly runs $5,000 to $12,000. A FAIR Plan policy usually needs a 'difference in conditions' (DIC) wrap for liability and water damage, which typically adds another 25 to 60 percent. Figures change, so quote early.</p>
+    <h3>Which insurance carriers are writing new policies in high-fire areas again?</h3>
+    <p>Under California's Sustainable Insurance Strategy, several carriers — including Mercury, CSAA and Travelers — have expanded writing in higher-risk areas. State Farm General remained closed to new California homeowner business as of May 2026. CSAA's Northern California FAIR Plan depopulation program offers home-hardening discounts of up to 12.5 percent for qualifying homes.</p>
+    <h3>Did the CAL FIRE fire hazard zones recently change?</h3>
+    <p>Yes. Updated Fire Hazard Severity Zone maps took effect for State Responsibility Areas on April 1, 2024, with Local Responsibility Area maps phased in through 2025. The statewide area rated High or Very High rose roughly 168 percent versus the prior 2011 maps, so a parcel's designation may have changed even though the parcel did not. Always confirm the current zone with the CAL FIRE address lookup.</p>
+    <h3>Is there a wildfire insurance non-renewal moratorium in Calaveras County, and when does it end?</h3>
+    <p>Yes, but it is time-limited. After the TCU September Lightning Complex fire — which began September 2, 2025 and burned 13,869 acres, destroying 95 structures — Insurance Commissioner Ricardo Lara ordered a one-year moratorium barring insurers from non-renewing policies across 39 ZIP codes and roughly 124,000 homes in Calaveras, Tuolumne, San Joaquin, Stanislaus, Mariposa and Merced counties. That protection is set to expire around September 19, 2026, so owners in those ZIP codes should review coverage well before then.</p>
+    <h3>What should a foothill buyer do about wildfire insurance?</h3>
+    <p>Look up the parcel's hazard zone with the CAL FIRE address lookup, get an insurance quote early in escrow rather than after, ask specifically about FAIR Plan plus DIC wrap pricing, and complete defensible space and home-hardening to qualify for available discounts. Treat insurance as a contingency with the same weight as the inspection.</p>
+  </div>
+  <p class="lg-rv" style="margin-top:34px; padding-top:22px; border-top:1px solid var(--lg-sand); color:var(--lg-ink-soft); line-height:1.65; max-width:860px;">Sara Cooper, Broker at Legacy Properties (CA DRE #02141987), walks foothill buyers through fire-zone and insurance reality across Calaveras, Amador and Tuolumne counties. Reach Sara at <a href="tel:2095594966" style="color:var(--lg-a1);">(209) 559-4966</a>.</p>
+  <p class="lg-rv" style="margin-top:16px; font-family:var(--lg-mono); font-size:11px; letter-spacing:0.06em; color:var(--lg-ink-mute); max-width:860px;">Sources: <a href="https://osfm.fire.ca.gov/what-we-do/community-wildfire-preparedness-and-mitigation/fire-hazard-severity-zones" target="_blank" rel="noopener" style="color:var(--lg-a1);">CAL FIRE Fire Hazard Severity Zones</a> · <a href="https://www.insurance.ca.gov/01-consumers/180-climate-change/Sustainable-Insurance-Strategy.cfm" target="_blank" rel="noopener" style="color:var(--lg-a1);">CDI Sustainable Insurance Strategy</a> · <a href="https://www.insurance.ca.gov/0400-news/0100-press-releases/2025/" target="_blank" rel="noopener" style="color:var(--lg-a1);">CDI moratorium (Sept 2025)</a> · <a href="https://www.insurancejournal.com/news/west/" target="_blank" rel="noopener" style="color:var(--lg-a1);">Insurance Journal — FAIR Plan</a>.</p>
   </div>
   <script type="application/ld+json">
 {
@@ -762,44 +749,37 @@
   </script>
 </section>
 
-<footer class="footer">
-  <div class="footer-inner">
-    <div class="footer-top">
-      <div>
-        <a href="index.html" class="wordmark" style="align-items: flex-start;">
-          <span class="wordmark-word">Legacy Properties</span>
-          <span class="wordmark-sub">Every Home Has A Story</span>
-        </a>
-        <p class="footer-tagline">Every home has a story. We help you find yours — or tell the one you've already lived.</p>
-      </div>
-      <div>
-        <h4>Tools</h4>
-        <a href="fire-zone.html">Fire-zone &amp; insurance</a>
-        <a href="commute.html">Commute calculator</a>
-        <a href="relocate.html">Bay → Foothills relocation</a>
-        <a href="valuation.html">What's my home worth?</a>
-      </div>
-      <div>
-        <h4>The Ledger</h4>
-        <a href="ledger.html">Latest issue</a>
-        <a href="ledger.html#subscribe">Subscribe</a>
-        <a href="about.html">About Sara &amp; James</a>
-        <a href="how-we-work.html">How we work</a>
-      </div>
-      <div>
-        <h4>Connect</h4>
-        <a href="tel:2095594966">(209) 559-4966</a>
-        <a href="mailto:SaraSellsCalifornia@gmail.com">SaraSellsCalifornia@gmail.com</a>
-        <a href="https://www.instagram.com/legacypropertiesig/">Instagram</a>
-      </div>
+<footer class="lg-footer"><div class="lg-wrap">
+  <div class="lg-footer__cols">
+    <div>
+      <a href="index.html" class="lg-mark"><span class="lg-mark__badge"><span>L</span></span><span class="lg-mark__txt"><b>Legacy</b><i>Properties · Angels Camp</i></span></a>
+      <p style="font-family:var(--lg-serif);font-style:italic;font-size:16px;color:var(--lg-ink-soft);line-height:1.5;margin-top:16px;max-width:260px">Every home has a story. We help you find yours &mdash; or tell the one you've already lived.</p>
     </div>
-    <div class="footer-bottom">
-      <div>© 2026 Legacy Properties · All rights reserved · <a href="/privacy.html">Privacy Policy</a> · <a href="/sms-terms.html">SMS Terms</a></div>
-      <div>Sara Cooper, Broker · DRE #02141987 · Equal Housing Opportunity</div>
+    <div><h5>Tools</h5>
+      <a href="fire-zone.html">Fire-zone &amp; insurance</a>
+      <a href="commute.html">Commute calculator</a>
+      <a href="relocate.html">Bay &rarr; Foothills relocation</a>
+      <a href="valuation.html">What's my home worth?</a>
+    </div>
+    <div><h5>The Ledger</h5>
+      <a href="ledger.html">Latest issue</a>
+      <a href="ledger.html#subscribe">Subscribe</a>
+      <a href="about.html">About Sara &amp; James</a>
+      <a href="how-we-work.html">How we work</a>
+    </div>
+    <div><h5>Connect</h5>
+      <a href="tel:2095594966">(209) 559-4966</a>
+      <a href="mailto:SaraSellsCalifornia@gmail.com">SaraSellsCalifornia@gmail.com</a>
+      <a href="https://www.instagram.com/legacypropertiesig/">Instagram</a>
     </div>
   </div>
-</footer>
+  <div class="lg-footer__bot">
+    <span>&copy; 2026 Legacy Properties &middot; All rights reserved &middot; <a href="/privacy.html">Privacy Policy</a> &middot; <a href="/sms-terms.html">SMS Terms</a></span>
+    <span>Sara Cooper, Broker &middot; DRE #02141987 &middot; Equal Housing Opportunity</span>
+  </div>
+</div></footer>
 
+<script src="legacy-ui.js" defer></script>
 <script>
   // Demo lookup states
   const FZ_PRESETS = {
