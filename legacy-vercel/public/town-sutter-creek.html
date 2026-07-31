@@ -577,159 +577,50 @@
 
 <!-- ============ HISTORIC BLOCKS — map ============ -->
 <section class="lg-sec lg-sec--tint" id="mainst"><div class="lg-wrap">
-  <div class="lg-kicker lg-rv"><span>Plate III · A walking diagram</span><span class="lg-rule"></span></div>
-  <h2 class="lg-display lg-h2 lg-rv lg-d1" style="margin:14px 0 10px">Six blocks, <em>National Register.</em></h2>
-  <div class="lg-note lg-rv lg-d2" style="max-width:640px">Hover any building. The whole town is a working museum of pre-1900 commercial architecture — and the antique store inside it.</div>
+  <style>
+    .sc-dir{display:flex;flex-direction:column;gap:20px}
+    .sc-grp h4{font-family:var(--lg-mono);font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--lg-a1);margin:0 0 10px;padding-bottom:8px;border-bottom:1px solid rgba(23,20,15,.12)}
+    .sc-shop{display:flex;flex-direction:column;gap:1px;text-decoration:none;padding:9px 12px;margin:0 -12px;border-radius:10px;transition:background var(--lg-fast)}
+    .sc-shop:hover{background:var(--lg-white)}
+    .sc-shop b{font-family:var(--lg-serif);font-style:italic;font-size:19px;color:var(--lg-ink);font-weight:600;line-height:1.15}
+    .sc-shop span{font-family:var(--lg-mono);font-size:11px;letter-spacing:.03em;color:var(--lg-ink-mute)}
+    .sc-shop .arw{color:var(--lg-a1);opacity:0;transition:opacity var(--lg-fast)}
+    .sc-shop:hover .arw{opacity:1}
+    @media(max-width:860px){.sc-maprow{grid-template-columns:1fr !important}}
+  </style>
+  <div class="lg-kicker lg-rv"><span>Main Street · the historic blocks</span><span class="lg-rule"></span></div>
+  <h2 class="lg-display lg-h2 lg-rv lg-d1" style="margin:14px 0 10px">The shops of <em>Main Street.</em></h2>
+  <div class="lg-note lg-rv lg-d2" style="max-width:700px">Six walkable blocks on the National Register &mdash; antique rooms, galleries, and boutiques, most in pre-1900 storefronts. Every address is on Main Street (Hwy 49); tap any shop to open it on the map.</div>
 
-    <div class="mainst-filters">
-      <button class="ms-filter ms-on" data-cat="all">All <span class="ct">18</span></button>
-      <button class="ms-filter" data-cat="wine">Antiques <span class="ct">6</span></button>
-      <button class="ms-filter" data-cat="eat">Eat <span class="ct">5</span></button>
-      <button class="ms-filter" data-cat="stay">Stay <span class="ct">3</span></button>
-      <button class="ms-filter" data-cat="shop">Galleries <span class="ct">2</span></button>
-      <button class="ms-filter" data-cat="do">Landmarks <span class="ct">2</span></button>
+  <div class="lg-grid sc-maprow lg-rv lg-d2" style="grid-template-columns:1.05fr .95fr;gap:26px;margin-top:26px;align-items:start">
+    <div class="town-map" style="height:clamp(440px,54vw,600px)">
+      <iframe title="Map of Main Street, Sutter Creek, California" src="https://www.google.com/maps?q=Main+Street,+Sutter+Creek,+CA+95685&amp;z=16&amp;output=embed" style="width:100%;height:100%;border:0;display:block" loading="lazy" referrerpolicy="no-referrer-when-downgrade" allowfullscreen></iframe>
     </div>
-
-    <div class="mainst-board">
-      <div class="mainst-map" id="mainstMap">
-        <svg viewBox="0 0 1000 600" preserveAspectRatio="xMidYMid meet">
-          <defs>
-            <pattern id="grainSc" x="0" y="0" width="2" height="2" patternUnits="userSpaceOnUse">
-              <rect width="2" height="2" fill="#EFE7D6"/>
-              <rect width="1" height="1" fill="#E8DFCC" opacity="0.5"/>
-            </pattern>
-          </defs>
-          <rect width="1000" height="600" fill="url(#grainSc)"/>
-
-          <!-- Sutter Creek (the actual creek) -->
-          <path d="M-20,540 Q200,510 460,530 T1020,500" fill="none" stroke="#9DB5C2" stroke-width="9" opacity="0.55"/>
-          <path d="M-20,540 Q200,510 460,530 T1020,500" fill="none" stroke="#7E9AAA" stroke-width="1" opacity="0.6" stroke-dasharray="3 4"/>
-          <text x="780" y="518" font-family="Cormorant Garamond" font-style="italic" font-size="14" fill="#5E7886">Sutter Creek</text>
-
-          <!-- Main Street (Hwy 49) -->
-          <rect x="0" y="240" width="1000" height="56" fill="#E0D5BB"/>
-          <line x1="0" y1="268" x2="1000" y2="268" stroke="#1B1813" stroke-opacity="0.35" stroke-dasharray="14 8"/>
-          <text x="500" y="284" text-anchor="middle" font-family="JetBrains Mono" font-size="11" letter-spacing="6" fill="rgba(27,24,19,0.55)" font-weight="500">— MAIN STREET · HWY 49 —</text>
-
-          <!-- Cross streets -->
-          <rect x="140" y="0"   width="22" height="240" fill="#E0D5BB"/>
-          <rect x="140" y="296" width="22" height="304" fill="#E0D5BB"/>
-          <rect x="370" y="0"   width="22" height="240" fill="#E0D5BB"/>
-          <rect x="370" y="296" width="22" height="304" fill="#E0D5BB"/>
-          <rect x="600" y="0"   width="22" height="240" fill="#E0D5BB"/>
-          <rect x="600" y="296" width="22" height="304" fill="#E0D5BB"/>
-          <rect x="830" y="0"   width="22" height="240" fill="#E0D5BB"/>
-          <rect x="830" y="296" width="22" height="304" fill="#E0D5BB"/>
-
-          <text x="151" y="14" text-anchor="middle" font-family="JetBrains Mono" font-size="8" fill="rgba(27,24,19,0.45)" letter-spacing="1">RANDOLPH</text>
-          <text x="381" y="14" text-anchor="middle" font-family="JetBrains Mono" font-size="8" fill="rgba(27,24,19,0.45)" letter-spacing="1">EUREKA</text>
-          <text x="611" y="14" text-anchor="middle" font-family="JetBrains Mono" font-size="8" fill="rgba(27,24,19,0.45)" letter-spacing="1">SPANISH ST</text>
-          <text x="841" y="14" text-anchor="middle" font-family="JetBrains Mono" font-size="8" fill="rgba(27,24,19,0.45)" letter-spacing="1">CHURCH</text>
-
-          <!-- Block labels -->
-          <text x="270" y="170" text-anchor="middle" font-family="Cormorant Garamond" font-style="italic" font-size="22" fill="rgba(27,24,19,0.35)">Upper Main</text>
-          <text x="500" y="170" text-anchor="middle" font-family="Cormorant Garamond" font-style="italic" font-size="22" fill="rgba(27,24,19,0.35)">Antique Row</text>
-          <text x="720" y="170" text-anchor="middle" font-family="Cormorant Garamond" font-style="italic" font-size="22" fill="rgba(27,24,19,0.35)">Lower Main</text>
-
-          <!-- Knight Foundry callout -->
-          <rect x="650" y="380" width="170" height="80" fill="none" stroke="rgba(58,74,56,0.35)" stroke-dasharray="4 3"/>
-          <text x="735" y="425" text-anchor="middle" font-family="Cormorant Garamond" font-style="italic" font-size="16" fill="rgba(58,74,56,0.6)">Knight Foundry</text>
-          <text x="735" y="442" text-anchor="middle" font-family="JetBrains Mono" font-size="8" letter-spacing="2" fill="rgba(58,74,56,0.5)">— est. 1873 —</text>
-
-          <!-- Compass -->
-          <g transform="translate(940,80)" font-family="JetBrains Mono" font-size="9" fill="rgba(27,24,19,0.55)">
-            <circle r="22" fill="none" stroke="rgba(27,24,19,0.25)"/>
-            <path d="M0,-20 L4,0 L0,4 L-4,0 Z" fill="#8C6E3D"/>
-            <text y="-26" text-anchor="middle">N</text>
-          </g>
-          <!-- Scale -->
-          <g transform="translate(40,560)" font-family="JetBrains Mono" font-size="8" fill="rgba(27,24,19,0.55)">
-            <line x1="0" y1="0" x2="100" y2="0" stroke="rgba(27,24,19,0.55)" stroke-width="1.5"/>
-            <line x1="0" y1="-4" x2="0" y2="4" stroke="rgba(27,24,19,0.55)"/>
-            <line x1="50" y1="-4" x2="50" y2="4" stroke="rgba(27,24,19,0.55)"/>
-            <line x1="100" y1="-4" x2="100" y2="4" stroke="rgba(27,24,19,0.55)"/>
-            <text x="0" y="18">0</text><text x="50" y="18">250 ft</text><text x="100" y="18">500 ft</text>
-          </g>
-        </svg>
-
-        <!-- Antiques -->
-        <button class="ms-pin" data-cat="wine" style="left:12%; top:36%;" data-name="Water Street Antiques" data-desc="Three floors of estate furniture. Bring a measuring tape.">
-          <span class="ms-pin-dot">A</span><span class="ms-pin-tip">Water St. Antiques</span>
-        </button>
-        <button class="ms-pin" data-cat="wine" style="left:24%; top:48%;" data-name="Fox &amp; Goose" data-desc="Curated mid-century, Victorian glass, the occasional brass bed.">
-          <span class="ms-pin-dot">A</span><span class="ms-pin-tip">Fox &amp; Goose</span>
-        </button>
-        <button class="ms-pin" data-cat="wine" style="left:42%; top:36%;" data-name="Sutter Creek Antiques" data-desc="Twelve dealers under one roof. Anchor of Antique Row.">
-          <span class="ms-pin-dot">A</span><span class="ms-pin-tip">Sutter Creek</span>
-        </button>
-        <button class="ms-pin" data-cat="wine" style="left:50%; top:48%;" data-name="The Pickle Barrel" data-desc="Quirky general store + collectibles. Sara's grandmother shopped here.">
-          <span class="ms-pin-dot">A</span><span class="ms-pin-tip">Pickle Barrel</span>
-        </button>
-        <button class="ms-pin" data-cat="wine" style="left:60%; top:36%;" data-name="Heirloom &amp; Co." data-desc="Estate jewelry, silver, watches. Locked cases for a reason.">
-          <span class="ms-pin-dot">A</span><span class="ms-pin-tip">Heirloom</span>
-        </button>
-        <button class="ms-pin" data-cat="wine" style="left:74%; top:48%;" data-name="Spanish St. Mercantile" data-desc="Architectural salvage. Doors, mantels, hardware.">
-          <span class="ms-pin-dot">A</span><span class="ms-pin-tip">Mercantile</span>
-        </button>
-
-        <!-- Eat -->
-        <button class="ms-pin" data-cat="eat" style="left:18%; top:64%;" data-name="Element" data-desc="Seasonal California small plates. Reserve.">
-          <span class="ms-pin-dot">E</span><span class="ms-pin-tip">Element</span>
-        </button>
-        <button class="ms-pin" data-cat="eat" style="left:32%; top:78%;" data-name="Sutter Creek Coffee Roasting" data-desc="House-roasted beans. The slow morning anchor.">
-          <span class="ms-pin-dot">E</span><span class="ms-pin-tip">Coffee Roasting</span>
-        </button>
-        <button class="ms-pin" data-cat="eat" style="left:46%; top:64%;" data-name="Susan's Place" data-desc="Wine bar + small plates on a creekside patio.">
-          <span class="ms-pin-dot">E</span><span class="ms-pin-tip">Susan's Place</span>
-        </button>
-        <button class="ms-pin" data-cat="eat" style="left:58%; top:80%;" data-name="Pizza Plus" data-desc="The local pizza joint. Order the meatlovers, two ranches.">
-          <span class="ms-pin-dot">E</span><span class="ms-pin-tip">Pizza Plus</span>
-        </button>
-        <button class="ms-pin" data-cat="eat" style="left:72%; top:64%;" data-name="Hotel Sutter" data-desc="The 1858 American Exchange, restored. New American in the dining room, whiskey in the saloon.">
-          <span class="ms-pin-dot">E</span><span class="ms-pin-tip">Hotel Sutter</span>
-        </button>
-
-        <!-- Stay -->
-        <button class="ms-pin" data-cat="stay" style="left:22%; top:14%;" data-name="The Foxes Inn" data-desc="Seven-room Victorian B&B. The four-poster suite is the one.">
-          <span class="ms-pin-dot">S</span><span class="ms-pin-tip">The Foxes Inn</span>
-        </button>
-        <button class="ms-pin" data-cat="stay" style="left:48%; top:14%;" data-name="Hanford House" data-desc="Mid-century-modern annex on a Victorian footprint. The rooftop.">
-          <span class="ms-pin-dot">S</span><span class="ms-pin-tip">Hanford House</span>
-        </button>
-        <button class="ms-pin" data-cat="stay" style="left:78%; top:14%;" data-name="Sutter Creek Inn" data-desc="California's first B&B, opened 1966. Seventeen rooms and rambling gardens.">
-          <span class="ms-pin-dot">S</span><span class="ms-pin-tip">Sutter Creek Inn</span>
-        </button>
-
-        <!-- Galleries -->
-        <button class="ms-pin" data-cat="shop" style="left:38%; top:22%;" data-name="Sutter Creek Gallery" data-desc="Local landscape painters. Always one painting of the creek.">
-          <span class="ms-pin-dot">G</span><span class="ms-pin-tip">SC Gallery</span>
-        </button>
-        <button class="ms-pin" data-cat="shop" style="left:66%; top:22%;" data-name="Theatre Gallery" data-desc="Tied to the 1919 theatre. Posters, prints, programs.">
-          <span class="ms-pin-dot">G</span><span class="ms-pin-tip">Theatre Gallery</span>
-        </button>
-
-        <!-- Landmarks -->
-        <button class="ms-pin" data-cat="do" style="left:30%; top:90%;" data-name="Sutter Creek Theatre" data-desc="1919 cinema, restored. Indie films, live music, Friday nights.">
-          <span class="ms-pin-dot">L</span><span class="ms-pin-tip">SC Theatre</span>
-        </button>
-        <button class="ms-pin" data-cat="do" style="left:73%; top:80%;" data-name="Knight Foundry" data-desc="The last water-powered foundry in America. Tours, working days.">
-          <span class="ms-pin-dot">L</span><span class="ms-pin-tip">Knight Foundry</span>
-        </button>
+    <div class="sc-dir">
+      <div class="sc-grp">
+        <h4>Antiques</h4>
+        <a class="sc-shop" href="https://www.google.com/maps/search/?api=1&amp;query=Sutter+Creek+Antiques+28+Main+St+Sutter+Creek+CA+95685" target="_blank" rel="noopener"><b>Sutter Creek Antiques</b><span>28 Main St &middot; (209) 267-5574 <span class="arw">&rarr;</span></span></a>
+        <a class="sc-shop" href="https://www.google.com/maps/search/?api=1&amp;query=Water+Street+Antiques+and+Interiors+33+Main+St+Sutter+Creek+CA+95685" target="_blank" rel="noopener"><b>Water Street Antiques &amp; Interiors</b><span>33 Main St &middot; (209) 267-0585 <span class="arw">&rarr;</span></span></a>
+        <a class="sc-shop" href="https://www.google.com/maps/search/?api=1&amp;query=Tigby+Hill+Vintage+65+Main+St+Sutter+Creek+CA+95685" target="_blank" rel="noopener"><b>Tigby Hill Vintage</b><span>65 Main St &middot; (209) 267-8314 <span class="arw">&rarr;</span></span></a>
+        <a class="sc-shop" href="https://www.google.com/maps/search/?api=1&amp;query=Old+Hotel+Antiques+68+Main+St+Sutter+Creek+CA+95685" target="_blank" rel="noopener"><b>Old Hotel Antiques</b><span>68 Main St &middot; est. 1973 &middot; (209) 267-5901 <span class="arw">&rarr;</span></span></a>
+        <a class="sc-shop" href="https://www.google.com/maps/search/?api=1&amp;query=Cozy+Collectibles+69+Main+St+Sutter+Creek+CA+95685" target="_blank" rel="noopener"><b>Cozy Collectibles</b><span>69 Main St &middot; (209) 267-0957 <span class="arw">&rarr;</span></span></a>
+        <a class="sc-shop" href="https://www.google.com/maps/search/?api=1&amp;query=The+Antique+Gardener+80+Main+St+Sutter+Creek+CA+95685" target="_blank" rel="noopener"><b>The Antique Gardener</b><span>80 Main St &middot; (209) 267-5551 <span class="arw">&rarr;</span></span></a>
+        <a class="sc-shop" href="https://www.google.com/maps/search/?api=1&amp;query=Creekside+Shops+22+Main+St+Sutter+Creek+CA+95685" target="_blank" rel="noopener"><b>Creekside Shops</b><span>22 &amp; 26 Main St &middot; (209) 267-5520 <span class="arw">&rarr;</span></span></a>
       </div>
-
-      <aside class="mainst-rail">
-        <div class="ms-rail-head">
-          <span class="label-cap">Detail</span>
-          <span class="mono" id="msCount" style="font-size:10px;color:var(--ink-faint);">18 places</span>
-        </div>
-        <div class="ms-rail-card" id="msRailCard">
-          <span class="ms-rail-tag" id="msTag">Hover the map</span>
-          <h3 class="ms-rail-name" id="msName">Seventeen rooms<br>on six blocks.</h3>
-          <p class="ms-rail-desc" id="msDesc">Filter by category to plan the afternoon — antique morning, lunch on the creek patio, theatre at seven.</p>
-          <ul class="ms-rail-list" id="msList"></ul>
-        </div>
-      </aside>
+      <div class="sc-grp">
+        <h4>Galleries</h4>
+        <a class="sc-shop" href="https://www.google.com/maps/search/?api=1&amp;query=Patricia+Stikeleather+Art+and+Photography+26+Main+St+Sutter+Creek+CA+95685" target="_blank" rel="noopener"><b>Patricia Stikeleather Art &amp; Photography</b><span>26 Main St &middot; (209) 267-5520 <span class="arw">&rarr;</span></span></a>
+        <a class="sc-shop" href="https://www.google.com/maps/search/?api=1&amp;query=Artfully+Rooted+54+Main+St+Sutter+Creek+CA+95685" target="_blank" rel="noopener"><b>Artfully Rooted</b><span>54 Main St &middot; (209) 267-8086 <span class="arw">&rarr;</span></span></a>
+      </div>
+      <div class="sc-grp">
+        <h4>Boutiques</h4>
+        <a class="sc-shop" href="https://www.google.com/maps/search/?api=1&amp;query=Sourgrass+Clothing+30+Main+St+Sutter+Creek+CA+95685" target="_blank" rel="noopener"><b>Sourgrass Clothing</b><span>30 Main St &middot; (530) 204-7144 <span class="arw">&rarr;</span></span></a>
+        <a class="sc-shop" href="https://www.google.com/maps/search/?api=1&amp;query=Tomorrows+Heirlooms+49+Main+St+Sutter+Creek+CA+95685" target="_blank" rel="noopener"><b>Tomorrow's Heirlooms</b><span>49 Main St &middot; (209) 267-5505 <span class="arw">&rarr;</span></span></a>
+        <a class="sc-shop" href="https://www.google.com/maps/search/?api=1&amp;query=Blondies+Boutique+70+Main+St+Sutter+Creek+CA+95685" target="_blank" rel="noopener"><b>Blondies Boutique</b><span>70 Main St &middot; (209) 267-8004 <span class="arw">&rarr;</span></span></a>
+      </div>
+      <p style="font-family:var(--lg-mono);font-size:10px;letter-spacing:.04em;color:var(--lg-ink-faint);margin-top:4px">Shops &amp; addresses from the Sutter Creek visitor directory (suttercreek.org).</p>
     </div>
+  </div>
 </div></section>
 
 <!-- ============ WINE — Shenandoah ============ -->
