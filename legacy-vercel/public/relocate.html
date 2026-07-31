@@ -178,6 +178,7 @@
 </script>
 <!-- seo:head:end -->
 <link rel="stylesheet" href="legacy.css">
+<link rel="stylesheet" href="legacy-ui.css">
 <style>
 /* ============================================================
    RELOCATE PAGE — concierge dual-transaction service
@@ -784,439 +785,333 @@
 }
 </style>
 </head>
-<body class="paper" data-screen-label="Relocate · California → Foothills">
+<body class="paper lg-page" data-screen-label="Relocate · California → Foothills">
+<div class="lg-progress"></div>
 
-<header class="topnav">
-  <div class="topnav-bar1">
-    <span>Boutique luxury real estate · Calaveras · Amador · Tuolumne</span>
-    <span><a href="tel:2095594966">(209) 559-4966</a> · <a href="mailto:SaraSellsCalifornia@gmail.com">SaraSellsCalifornia@gmail.com</a></span>
-  </div>
-  <nav class="topnav-bar2">
-    <div class="topnav-links">
-      <a href="property-search.html">Listings</a>
-      <a href="towns.html">Communities</a>
-      <a href="relocate.html" class="active">Relocate</a>
-      <a href="valuation.html">Sellers</a>
-      <a href="market-report.html">Markets</a>
-    </div>
-    <a href="index.html" class="wordmark">
-      <span class="wordmark-word">Legacy Properties</span>
-      <span class="wordmark-sub">Every Home Has A Story</span>
-    </a>
-    <div class="topnav-links right">
-      <a href="ledger.html">The Ledger</a>
-      <a href="dashboard.html">Sign In</a>
-      <a href="find-my-match.html" class="btn btn-ink btn-sm" style="padding:10px 18px;">Find My Match</a>
-    </div>
+<!-- ============ TOP STRIP + HEADER ============ -->
+<div style="background:var(--lg-ink);color:rgba(255,253,248,.72);font-family:var(--lg-mono);font-size:10.5px;letter-spacing:.13em;text-transform:uppercase;display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;padding:9px var(--lg-gut)">
+  <span>Boutique real estate &middot; Calaveras &middot; Amador &middot; Tuolumne</span>
+  <span style="display:flex;gap:14px">
+    <a href="tel:2095594966" style="color:inherit;text-decoration:none">(209) 559-4966</a>
+    <a href="mailto:SaraSellsCalifornia@gmail.com" style="color:var(--lg-c2);text-decoration:none">SaraSellsCalifornia@gmail.com</a>
+  </span>
+</div>
+<header class="lg-header"><div class="lg-header__in">
+  <a class="lg-mark" href="index.html">
+    <span class="lg-mark__badge"><span>L</span></span>
+    <span class="lg-mark__txt"><b>Legacy</b><i>Properties · Angels Camp</i></span>
+  </a>
+  <nav class="lg-nav" id="siteNav">
+    <a href="property-search.html">Listings</a>
+    <a href="towns.html">Communities</a>
+    <a href="relocate.html" aria-current="page">Relocate</a>
+    <a href="valuation.html">Sellers</a>
+    <a href="market-report.html">Markets</a>
+    <a href="ledger.html">The Ledger</a>
+    <a href="dashboard.html">Sign In</a>
+    <a href="find-my-match.html" class="lg-btn" style="padding:11px 22px">Find My Match</a>
   </nav>
-</header>
+  <button class="lg-navtoggle" data-lg-nav="#siteNav" aria-expanded="false">Menu</button>
+</div></header>
+
+<!-- Page-scoped styling for the scenario toggle (keeps the scen-tab/scen-pane
+     interaction and its JS; restyles tabs, panes and cards to the lg system). -->
+<style>
+  .r-crumb{font-family:var(--lg-mono);font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--lg-ink-mute);max-width:var(--lg-max);margin:0 auto;padding:16px var(--lg-gut) 0;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+  .r-crumb a{color:var(--lg-a1);text-decoration:none}
+  .r-crumb .spacer{flex:1}
+  .r-tabs{display:flex;gap:10px;flex-wrap:wrap;margin:28px 0 22px}
+  .scen-tab{display:inline-flex;align-items:center;gap:9px;font-family:var(--lg-mono);font-size:11px;letter-spacing:.13em;text-transform:uppercase;font-weight:700;padding:12px 22px;border-radius:100px;border:2px solid var(--lg-sand);background:var(--lg-white);color:var(--lg-ink-soft);cursor:pointer;transition:all var(--lg-fast) var(--lg-ease)}
+  .scen-tab .num{font-family:var(--lg-serif);font-style:italic;font-size:15px}
+  .scen-tab:hover{border-color:var(--lg-c1)}
+  .scen-tab.on{background:var(--lg-c1-deep);border-color:var(--lg-c1-deep);color:#fff}
+  .scen-pane{display:none}
+  .scen-pane.on{display:block}
+  .scen-summary{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+  .ss-card{background:var(--lg-white);border-radius:var(--lg-r);box-shadow:var(--lg-sh-sm);border-left:4px solid var(--lg-c2);padding:22px 24px}
+  .ss-h{display:block;font-family:var(--lg-mono);font-size:10px;letter-spacing:.15em;text-transform:uppercase;color:var(--lg-ink-mute)}
+  .ss-v{display:block;font-family:var(--lg-serif);font-style:italic;font-size:22px;color:var(--lg-ink);margin:6px 0 8px;line-height:1.15}
+  .ss-d{font-size:14px;color:var(--lg-ink-soft);line-height:1.6}
+  @media(max-width:760px){.scen-summary{grid-template-columns:1fr}}
+</style>
 
 <!-- Breadcrumb -->
-<div class="r-crumb">
-  <div class="r-crumb-inner">
-    <a href="index.html">Legacy</a>
-    <span class="sep">→</span>
-    <span class="cur">Relocate · California to Foothills</span>
-    <span class="spacer"></span>
-    <span class="mono small">Vol. XXII · The Signature Service</span>
+<nav class="r-crumb" aria-label="Breadcrumb">
+  <a href="index.html">Legacy</a><span>&rarr;</span>
+  <span>Relocate &middot; California to Foothills</span>
+  <span class="spacer"></span>
+  <span>The Signature Service</span>
+</nav>
+
+<!-- HERO (illustrated · Variant A) -->
+<section class="lg-hero lg-hero--short">
+  <div class="lg-hero__art" aria-hidden="true">
+    <svg viewBox="0 0 1440 720" preserveAspectRatio="xMidYMid slice" role="presentation">
+      <defs>
+        <linearGradient id="lgSky" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="var(--lg-sky-a)"/><stop offset="58%" stop-color="var(--lg-sky-b)"/><stop offset="100%" stop-color="var(--lg-sky-c)"/>
+        </linearGradient>
+        <radialGradient id="lgSunGlow"><stop offset="0%" stop-color="var(--lg-sun)"/><stop offset="100%" stop-color="var(--lg-sun)" stop-opacity="0"/></radialGradient>
+        <linearGradient id="lgH1" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="var(--lg-hill-4)"/><stop offset="100%" stop-color="var(--lg-hill-3)"/></linearGradient>
+        <linearGradient id="lgH2" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="var(--lg-hill-3)"/><stop offset="100%" stop-color="var(--lg-hill-2)"/></linearGradient>
+        <linearGradient id="lgH3" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="var(--lg-hill-2)"/><stop offset="100%" stop-color="var(--lg-hill-1)"/></linearGradient>
+      </defs>
+      <rect width="1440" height="720" fill="url(#lgSky)"/>
+      <g transform="translate(0,70)">
+        <g class="lg-sun">
+          <circle cx="360" cy="188" r="180" fill="url(#lgSunGlow)" opacity=".6"/>
+          <g class="lg-rays" opacity=".28"><g stroke="var(--lg-sun)" stroke-width="2.5" stroke-linecap="round">
+            <line x1="360" y1="70" x2="360" y2="30"/><line x1="360" y1="306" x2="360" y2="346"/>
+            <line x1="242" y1="188" x2="202" y2="188"/><line x1="478" y1="188" x2="518" y2="188"/>
+            <line x1="276" y1="104" x2="248" y2="76"/><line x1="444" y1="272" x2="472" y2="300"/>
+            <line x1="444" y1="104" x2="472" y2="76"/><line x1="276" y1="272" x2="248" y2="300"/>
+          </g></g>
+          <circle cx="360" cy="188" r="72" fill="var(--lg-sun)"/>
+        </g>
+        <g fill="#FFFDF8" opacity=".42">
+          <g class="lg-cloud" style="animation-duration:70s"><ellipse cx="900" cy="118" rx="86" ry="27"/><ellipse cx="958" cy="106" rx="58" ry="24"/><ellipse cx="848" cy="108" rx="46" ry="20"/></g>
+          <g class="lg-cloud" style="animation-duration:94s;animation-delay:-30s" opacity=".7"><ellipse cx="1180" cy="196" rx="104" ry="24"/><ellipse cx="1246" cy="184" rx="62" ry="21"/></g>
+        </g>
+        <g class="lg-bird" style="animation-delay:-4s"><g class="lg-flap" fill="none" stroke="var(--lg-hill-1)" stroke-width="2.6" stroke-linecap="round" opacity=".7"><path d="M300 250 q10 -9 20 0"/><path d="M320 250 q10 -9 20 0"/></g></g>
+        <g class="lg-bird" style="animation-delay:-13s"><g class="lg-flap" style="animation-delay:-.4s" fill="none" stroke="var(--lg-hill-1)" stroke-width="2.2" stroke-linecap="round" opacity=".55"><path d="M300 300 q8 -7 16 0"/><path d="M316 300 q8 -7 16 0"/></g></g>
+      </g>
+      <path class="lg-ridge" data-depth="0.10" fill="url(#lgH1)" opacity=".62" d="M0 452 L110 418 L206 442 L318 392 L430 430 L548 386 L664 424 L788 380 L900 420 L1020 384 L1140 424 L1266 392 L1380 428 L1440 410 L1440 720 L0 720 Z"/>
+      <path class="lg-ridge" data-depth="0.18" fill="url(#lgH2)" opacity=".82" d="M0 512 L128 470 L248 504 L372 452 L500 494 L628 448 L760 490 L890 446 L1020 488 L1150 450 L1290 492 L1440 456 L1440 720 L0 720 Z"/>
+      <g class="lg-ridge" data-depth="0.28"><path fill="url(#lgH3)" d="M0 574 L150 534 L290 570 L430 522 L578 566 L720 520 L868 562 L1010 518 L1160 560 L1300 522 L1440 562 L1440 720 L0 720 Z"/>
+        <g fill="var(--lg-hill-1)" opacity=".9"><path d="M214 566 q-4 -22 8 -30 q-14 -14 4 -22 q-2 -16 16 -14 q10 -14 22 -2 q18 -6 18 10 q16 4 8 18 q12 10 -2 20 q4 18 -14 20 z"/><rect x="248" y="562" width="7" height="20" rx="2"/><path d="M1058 560 q-5 -26 9 -35 q-16 -17 5 -26 q-2 -19 18 -16 q12 -17 26 -3 q21 -7 21 12 q19 5 9 21 q14 12 -2 24 q5 21 -17 23 z"/><rect x="1098" y="556" width="8" height="24" rx="2"/></g>
+      </g>
+      <path class="lg-ridge" data-depth="0.40" fill="var(--lg-hill-1)" d="M0 646 L180 618 L360 648 L540 612 L740 650 L940 614 L1130 650 L1310 618 L1440 646 L1440 720 L0 720 Z"/>
+    </svg>
   </div>
-</div>
-
-<!-- HERO -->
-<section class="r-hero">
-  <div class="r-hero-inner">
-    <div>
-      <span class="hairline-brass"></span>
-      <span class="eyebrow" style="display:block; margin-top:14px;">California metros → Sierra Foothills · The signature service</span>
-      <h1>We <em>move you,</em><br>end to end.</h1>
-      <p class="lede">Sara and James specialize in the one transaction most agents won't take on — selling your California home <em>and</em> finding your foothills one, on a single coordinated calendar.</p>
-      <p class="r-note" style="margin-top:16px; max-width:580px; font-size:13px; line-height:1.62; color:var(--ink-mute);">Happy to talk through a move with any California seller — and we welcome out-of-state buyers. We're licensed in California, so we can't list a home outside the state, but we'll get you pointed the right way.</p>
-      <div class="r-hero-ctas">
-        <a href="find-my-match.html" class="btn btn-ink">Start the conversation</a>
-        <a href="#calendar" class="btn btn-ghost">See the calendar</a>
-      </div>
-    </div>
-
-    <div class="from-to">
-      <div class="ft-stamp">
-        <span>Sara &amp;<br>James</span>
-        <strong>↗</strong>
-        <span>Both<br>sides</span>
-      </div>
-
-      <div class="ft-row">
-        <span class="ft-label">From</span>
-        <span class="ft-place">Your metro</span>
-        <span class="ft-sub">We list and market your California home ourselves — San Jose and Silicon Valley, Sacramento, Modesto, San Francisco and the East Bay. No referral hand-off; Sara runs the listing start to finish. (Staging is available at an additional cost.)</span>
-      </div>
-      <div class="ft-arrow">
-        <span class="bar"></span><span>The bridge</span><span class="bar"></span>
-      </div>
-      <div class="ft-row">
-        <span class="ft-label">To</span>
-        <span class="ft-place">The Foothills</span>
-        <span class="ft-sub">We tour you, advise on schools and septic, write the offer, and hand you the keys — coordinated to your home’s close.</span>
-      </div>
+  <div class="lg-hero__scrim"></div>
+  <div class="lg-hero__in">
+    <div class="lg-hero__tag"><span class="lg-dot"></span><span>California metros &rarr; Sierra Foothills</span></div>
+    <h1 class="lg-display lg-h1">We <em>move you,</em><br>end to end.</h1>
+    <p class="lg-hero__strap">Sara and James specialize in the one transaction most agents won't take on &mdash; selling your California home <em>and</em> finding your foothills one, on a single coordinated calendar.</p>
+    <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:24px">
+      <a href="find-my-match.html" class="lg-btn lg-btn--gold">Start the conversation</a>
+      <a href="#calendar" class="lg-btn lg-btn--ghost">See the calendar</a>
     </div>
   </div>
 </section>
+
+<!-- FROM / TO panel -->
+<section class="lg-sec lg-sec--ink"><div class="lg-wrap">
+  <div class="lg-note lg-rv" style="background:rgba(255,253,248,.1);color:rgba(255,253,248,.9);border-left-color:var(--lg-sun);max-width:760px">Happy to talk through a move with any California seller &mdash; and we welcome out-of-state buyers. We're licensed in California, so we can't list a home outside the state, but we'll get you pointed the right way.</div>
+  <div class="lg-grid lg-grid--2 lg-rv lg-d1" style="margin-top:26px;gap:1px;background:rgba(255,253,248,.14);border:1px solid rgba(255,253,248,.14);border-radius:var(--lg-r);overflow:hidden">
+    <div style="background:var(--lg-ink);padding:28px">
+      <div style="font-family:var(--lg-mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:rgba(255,253,248,.5)">From &middot; Your metro</div>
+      <div style="font-family:var(--lg-serif);font-style:italic;font-size:30px;color:var(--lg-white);margin:8px 0 10px">We list it ourselves</div>
+      <p style="font-size:13.5px;color:rgba(255,253,248,.66);line-height:1.6">San Jose and Silicon Valley, Sacramento, Modesto, San Francisco and the East Bay. No referral hand-off &mdash; Sara runs the listing start to finish. (Staging available at additional cost.)</p>
+    </div>
+    <div style="background:var(--lg-ink);padding:28px">
+      <div style="font-family:var(--lg-mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--lg-sun)">To &middot; The Foothills</div>
+      <div style="font-family:var(--lg-serif);font-style:italic;font-size:30px;color:var(--lg-white);margin:8px 0 10px">We hand you the keys</div>
+      <p style="font-size:13.5px;color:rgba(255,253,248,.66);line-height:1.6">We tour you, advise on schools and septic, write the offer, and hand you the keys &mdash; coordinated to your home's close.</p>
+    </div>
+  </div>
+</div></section>
 
 <!-- PITCH -->
-<section class="r-pitch">
-  <div class="r-pitch-inner">
-    <div>
-      <span class="ed">Why this matters</span>
-      <h2>Most agents handle one side. We handle <em>both.</em></h2>
-    </div>
-    <div class="r-pitch-points">
-      <article class="r-pp">
-        <div class="r-pp-num">I</div>
-        <div>
-          <h4>One agent, one calendar.</h4>
-          <p>Two transactions, one timeline. No relay race between an out-of-area listing agent and an in-area buying agent who've never spoken. Every date moves together because one team owns both.</p>
-        </div>
-      </article>
-      <article class="r-pp">
-        <div class="r-pp-num">II</div>
-        <div>
-          <h4>Marketing built for metro buyers — not foothills sellers.</h4>
-          <p>Your metro home needs a different playbook than the cabin you're buying. Sara's years of PR work shows up here: pre-list strategy, photography that performs on Compass and Zillow, a deliberate sequence of open houses, and a written marketing plan with weekly numbers.</p>
-        </div>
-      </article>
-      <article class="r-pp">
-        <div class="r-pp-num">III</div>
-        <div>
-          <h4>Bridge math, before you need it.</h4>
-          <p>Three real ways to handle the gap between sale and purchase: concurrent close, bridge loan, or rent-back. We walk you through the math on each — what they cost, what they cover, what they break — before you have to choose.</p>
-        </div>
-      </article>
+<section class="lg-sec"><div class="lg-wrap">
+  <div class="lg-kicker lg-rv"><span>Why this matters</span><span class="lg-rule"></span></div>
+  <h2 class="lg-display lg-h2 lg-rv lg-d1" style="margin:14px 0 30px">Most agents handle one side. We handle <em>both.</em></h2>
+  <div style="display:grid;gap:16px">
+    <div class="lg-point lg-rv" style="--lg-accent:var(--lg-a1)"><div class="lg-point__num">1</div><h4>One agent, one calendar.</h4><p>Two transactions, one timeline. No relay race between an out-of-area listing agent and an in-area buying agent who've never spoken. Every date moves together because one team owns both.</p></div>
+    <div class="lg-point lg-rv lg-d1" style="--lg-accent:var(--lg-a4)"><div class="lg-point__num">2</div><h4>Marketing built for metro buyers &mdash; not foothills sellers.</h4><p>Your metro home needs a different playbook than the cabin you're buying. Sara's years of PR work show up here: pre-list strategy, photography that performs on Compass and Zillow, a deliberate sequence of open houses, and a written marketing plan with weekly numbers.</p></div>
+    <div class="lg-point lg-rv lg-d2" style="--lg-accent:var(--lg-a3)"><div class="lg-point__num">3</div><h4>Bridge math, before you need it.</h4><p>Three real ways to handle the gap between sale and purchase: concurrent close, bridge loan, or rent-back. We walk you through the math on each &mdash; what they cost, what they cover, what they break &mdash; before you have to choose.</p></div>
+  </div>
+</div></section>
+
+<!-- COORDINATION CALENDAR -->
+<section class="lg-sec lg-sec--tint" id="calendar"><div class="lg-wrap">
+  <div class="lg-kicker lg-rv"><span>Three ways to coordinate the move</span><span class="lg-rule"></span></div>
+  <h2 class="lg-display lg-h2 lg-rv lg-d1" style="margin:14px 0 12px">Two transactions, <em>one timeline.</em></h2>
+  <div class="lg-note lg-rv lg-d2" style="max-width:720px">Most relocations fail one of three ways &mdash; and most agents only know one of them. Toggle the scenarios to see how each one works.</div>
+
+  <div class="scen-tabs r-tabs lg-rv lg-d2" role="tablist">
+    <button class="scen-tab on" data-scen="concurrent"><span class="num">I</span> Concurrent close</button>
+    <button class="scen-tab" data-scen="bridge"><span class="num">II</span> Bridge loan</button>
+    <button class="scen-tab" data-scen="rentback"><span class="num">III</span> Rent-back</button>
+  </div>
+
+  <div class="scen-pane on" data-scen="concurrent">
+    <div class="scen-summary">
+      <article class="ss-card"><span class="ss-h">Cash flow</span><span class="ss-v">Tight but clean</span><p class="ss-d">No bridge financing. Home-sale proceeds wire directly into the foothills close on the same business day. Costs the least; works only when both contracts cooperate.</p></article>
+      <article class="ss-card"><span class="ss-h">Stress profile</span><span class="ss-v">High coordination</span><p class="ss-d">Every contingency is leveraged. Inspection days have to line up. Sellers have to agree to a same-day close. We've done this 14 times &mdash; it can be done; it requires hands on every clock.</p></article>
+      <article class="ss-card"><span class="ss-h">Best for</span><span class="ss-v">Sellers without bridge access</span><p class="ss-d">First-time sellers, sellers without significant cash reserves, sellers who can't carry two mortgages even for a week. The most common scenario we run.</p></article>
     </div>
   </div>
-</section>
-
-<!-- COORDINATION CALENDAR — centerpiece -->
-<section class="calendar" id="calendar">
-  <div class="cal-inner">
-    <div class="cal-h">
-      <div>
-        <span class="hairline-brass"></span>
-        <span class="eyebrow" style="display:block; margin-top:14px;">Plate II · Three ways to coordinate the move</span>
-        <h2>Two transactions,<br><em>one timeline.</em></h2>
-      </div>
-      <p class="right">Most relocations fail one of three ways — and most agents only know one of them. Toggle the scenarios below to see how each one works.</p>
-    </div>
-
-    <div class="scen-tabs" role="tablist">
-      <button class="scen-tab on" data-scen="concurrent"><span class="num">I</span> Concurrent close</button>
-      <button class="scen-tab" data-scen="bridge"><span class="num">II</span> Bridge loan</button>
-      <button class="scen-tab" data-scen="rentback"><span class="num">III</span> Rent-back</button>
-    </div>
-
-    <!-- CONCURRENT -->
-    <div class="scen-pane on" data-scen="concurrent">
-      <div class="scen-summary">
-        <article class="ss-card">
-          <span class="ss-h">Cash flow</span>
-          <span class="ss-v">Tight but clean</span>
-          <p class="ss-d">No bridge financing. Home-sale proceeds wire directly into the foothills close on the same business day. Costs the least; works only when both contracts cooperate.</p>
-        </article>
-        <article class="ss-card">
-          <span class="ss-h">Stress profile</span>
-          <span class="ss-v">High coordination</span>
-          <p class="ss-d">Every contingency is leveraged. Inspection days have to line up. Sellers have to agree to a same-day close. We've done this 14 times — it can be done; it requires hands on every clock.</p>
-        </article>
-        <article class="ss-card">
-          <span class="ss-h">Best for</span>
-          <span class="ss-v">Sellers without bridge access</span>
-          <p class="ss-d">First-time sellers, sellers without significant cash reserves, sellers who can't carry two mortgages even for a week. The most common scenario we run.</p>
-        </article>
-      </div>
-    </div>
-
-    <!-- BRIDGE -->
-    <div class="scen-pane" data-scen="bridge">
-      <div class="scen-summary">
-        <article class="ss-card">
-          <span class="ss-h">Cash flow</span>
-          <span class="ss-v">~$3–6K / mo carrying</span>
-          <p class="ss-d">Bridge loan typically 8.5–10% APR for 6 months. We work with three Calaveras-area lenders who price competitively for cross-county relocations.</p>
-        </article>
-        <article class="ss-card">
-          <span class="ss-h">Stress profile</span>
-          <span class="ss-v">Move once. Sell empty.</span>
-          <p class="ss-d">You're already up here when your home shows. An empty home photographs better, open houses are easier to schedule, and there's no choreography around your daily life.</p>
-        </article>
-        <article class="ss-card">
-          <span class="ss-h">Best for</span>
-          <span class="ss-v">Equity-rich sellers</span>
-          <p class="ss-d">Sellers with substantial home equity, retirees, anyone with strong reserves who would rather pay for breathing room than gain a few thousand on the sale price.</p>
-        </article>
-      </div>
-    </div>
-
-    <!-- RENT-BACK -->
-    <div class="scen-pane" data-scen="rentback">
-      <div class="scen-summary">
-        <article class="ss-card">
-          <span class="ss-h">Cash flow</span>
-          <span class="ss-v">Rent your old home</span>
-          <p class="ss-d">Buyer typically accepts a 30–60 day rent-back at market rate. You hold your equity in cash until the foothills purchase closes. Average net cost: $4–7K total.</p>
-        </article>
-        <article class="ss-card">
-          <span class="ss-h">Stress profile</span>
-          <span class="ss-v">Hardest negotiation</span>
-          <p class="ss-d">Your buyer must agree to the rent-back upfront — strongest in a competitive seller's market, hardest when inventory is loose. We script this into the listing strategy from Day 0.</p>
-        </article>
-        <article class="ss-card">
-          <span class="ss-h">Best for</span>
-          <span class="ss-v">The patient picker</span>
-          <p class="ss-d">Buyers who know they want the foothills but don't yet know which town or which house. The rent-back gives you 30–60 days of cash-funded calendar to walk it correctly.</p>
-        </article>
-      </div>
+  <div class="scen-pane" data-scen="bridge">
+    <div class="scen-summary">
+      <article class="ss-card"><span class="ss-h">Cash flow</span><span class="ss-v">~$3&ndash;6K / mo carrying</span><p class="ss-d">Bridge loan typically 8.5&ndash;10% APR for 6 months. We work with three Calaveras-area lenders who price competitively for cross-county relocations.</p></article>
+      <article class="ss-card"><span class="ss-h">Stress profile</span><span class="ss-v">Move once. Sell empty.</span><p class="ss-d">You're already up here when your home shows. An empty home photographs better, open houses are easier to schedule, and there's no choreography around your daily life.</p></article>
+      <article class="ss-card"><span class="ss-h">Best for</span><span class="ss-v">Equity-rich sellers</span><p class="ss-d">Sellers with substantial home equity, retirees, anyone with strong reserves who would rather pay for breathing room than gain a few thousand on the sale price.</p></article>
     </div>
   </div>
-</section>
+  <div class="scen-pane" data-scen="rentback">
+    <div class="scen-summary">
+      <article class="ss-card"><span class="ss-h">Cash flow</span><span class="ss-v">Rent your old home</span><p class="ss-d">Buyer typically accepts a 30&ndash;60 day rent-back at market rate. You hold your equity in cash until the foothills purchase closes. Average net cost: $4&ndash;7K total.</p></article>
+      <article class="ss-card"><span class="ss-h">Stress profile</span><span class="ss-v">Hardest negotiation</span><p class="ss-d">Your buyer must agree to the rent-back upfront &mdash; strongest in a competitive seller's market, hardest when inventory is loose. We script this into the listing strategy from Day 0.</p></article>
+      <article class="ss-card"><span class="ss-h">Best for</span><span class="ss-v">The patient picker</span><p class="ss-d">Buyers who know they want the foothills but don't yet know which town or which house. The rent-back gives you 30&ndash;60 days of cash-funded calendar to walk it correctly.</p></article>
+    </div>
+  </div>
+</div></section>
 
 <!-- THREE STEPS -->
-<section class="steps">
-  <div class="steps-inner">
-    <div class="steps-h">
-      <span class="hairline-brass"></span>
-      <span class="eyebrow">Plate III · How it actually runs</span>
-      <h2>Three steps,<br>one team,<br><em>one calendar.</em></h2>
-    </div>
-
-    <div class="steps-grid">
-      <article class="step">
-        <div class="step-num">I</div>
-        <h3>Sell</h3>
-        <div class="step-tag">Your current home · weeks 0–8</div>
-        <p class="step-body">A written marketing plan customized to your home, your block, and your market. Sara lists it herself — no referral hand-off, no out-of-area co-agent. She's your single point of contact on both sides.</p>
-        <ul class="step-list">
-          <li>Pre-list strategy: improvements that matter, those that don't</li>
-          <li>Professional photography; staging available at additional cost</li>
-          <li>Compass / Zillow / MLS narrative built for metro buyers</li>
-          <li>Two-week open-house cadence with weekly numbers</li>
-          <li>Negotiation, contingency strategy, close coordination</li>
-        </ul>
-      </article>
-
-      <article class="step">
-        <div class="step-num">II</div>
-        <h3>Choose</h3>
-        <div class="step-tag">Your foothills town · weeks 1–10</div>
-        <p class="step-body">Most buyers think they know which town. Most are wrong on their first guess. We start with discovery — three half-day visits, six towns, the questions that distinguish lifestyle fit from spreadsheet fit.</p>
-        <ul class="step-list">
-          <li>Discovery weekend: tour up to six towns in two days</li>
-          <li>Town-by-town profile with school, water, fire data</li>
-          <li>Pre-tours of MLS &amp; off-market matches</li>
-          <li>James's deep dive on land parcels, water rights, fire zones</li>
-          <li>Shortlist of 4–6 properties; full-day showing schedule</li>
-        </ul>
-      </article>
-
-      <article class="step">
-        <div class="step-num">III</div>
-        <h3>Land</h3>
-        <div class="step-tag">Coordinated close · weeks 8–14</div>
-        <p class="step-body">Two escrows, one calendar, one Sara. We pick the timing scenario that fits your equity and your stress tolerance, then we run both transactions in lockstep through to the keys.</p>
-        <ul class="step-list">
-          <li>Bridge / rent-back / concurrent math, on paper</li>
-          <li>Lender, title, and inspector network already in place</li>
-          <li>Movers, utilities, change-of-address — all on a checklist</li>
-          <li>Local-onboarding briefing: doctors, mechanics, contractors</li>
-          <li>First-month check-in. We don't disappear at the close.</li>
-        </ul>
-      </article>
-    </div>
+<section class="lg-sec"><div class="lg-wrap">
+  <div class="lg-kicker lg-rv"><span>How it actually runs</span><span class="lg-rule"></span></div>
+  <h2 class="lg-display lg-h2 lg-rv lg-d1" style="margin:14px 0 30px">Three steps, one team, <em>one calendar.</em></h2>
+  <div class="lg-grid lg-grid--3">
+    <article class="lg-card lg-rv" style="padding:26px 26px 28px">
+      <div style="font-family:var(--lg-serif);font-style:italic;font-size:40px;color:var(--lg-a1);line-height:1">I</div>
+      <h3 style="font-family:var(--lg-serif);font-style:italic;font-size:27px;color:var(--lg-ink);margin:4px 0 4px">Sell</h3>
+      <div style="font-family:var(--lg-mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--lg-ink-mute);margin-bottom:12px">Your current home &middot; weeks 0&ndash;8</div>
+      <p style="font-size:14.5px;color:var(--lg-ink-soft);line-height:1.6">A written marketing plan customized to your home, your block, and your market. Sara lists it herself &mdash; no referral hand-off, no out-of-area co-agent. She's your single point of contact on both sides.</p>
+      <ul style="list-style:none;margin:14px 0 0;padding:0;display:flex;flex-direction:column;gap:8px;font-size:13.5px;color:var(--lg-ink-soft)">
+        <li style="padding-left:16px;position:relative"><span style="position:absolute;left:0;color:var(--lg-c1)">&bull;</span>Pre-list strategy: improvements that matter, those that don't</li>
+        <li style="padding-left:16px;position:relative"><span style="position:absolute;left:0;color:var(--lg-c1)">&bull;</span>Professional photography; staging available at additional cost</li>
+        <li style="padding-left:16px;position:relative"><span style="position:absolute;left:0;color:var(--lg-c1)">&bull;</span>Compass / Zillow / MLS narrative built for metro buyers</li>
+        <li style="padding-left:16px;position:relative"><span style="position:absolute;left:0;color:var(--lg-c1)">&bull;</span>Two-week open-house cadence with weekly numbers</li>
+        <li style="padding-left:16px;position:relative"><span style="position:absolute;left:0;color:var(--lg-c1)">&bull;</span>Negotiation, contingency strategy, close coordination</li>
+      </ul>
+    </article>
+    <article class="lg-card lg-rv lg-d1" style="padding:26px 26px 28px">
+      <div style="font-family:var(--lg-serif);font-style:italic;font-size:40px;color:var(--lg-a4);line-height:1">II</div>
+      <h3 style="font-family:var(--lg-serif);font-style:italic;font-size:27px;color:var(--lg-ink);margin:4px 0 4px">Choose</h3>
+      <div style="font-family:var(--lg-mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--lg-ink-mute);margin-bottom:12px">Your foothills town &middot; weeks 1&ndash;10</div>
+      <p style="font-size:14.5px;color:var(--lg-ink-soft);line-height:1.6">Most buyers think they know which town. Most are wrong on their first guess. We start with discovery &mdash; three half-day visits, six towns, the questions that distinguish lifestyle fit from spreadsheet fit.</p>
+    </article>
+    <article class="lg-card lg-rv lg-d2" style="padding:26px 26px 28px">
+      <div style="font-family:var(--lg-serif);font-style:italic;font-size:40px;color:var(--lg-a3);line-height:1">III</div>
+      <h3 style="font-family:var(--lg-serif);font-style:italic;font-size:27px;color:var(--lg-ink);margin:4px 0 4px">Land</h3>
+      <div style="font-family:var(--lg-mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--lg-ink-mute);margin-bottom:12px">Your new home &middot; weeks 6&ndash;14</div>
+      <p style="font-size:14.5px;color:var(--lg-ink-soft);line-height:1.6">Concurrent close, bridge loan, or rent-back &mdash; whichever the math favored back in step one. We write the offer, manage inspections and appraisal, and choreograph the two closes so the keys line up.</p>
+    </article>
   </div>
-</section>
+</div></section>
 
-<!-- DUO -->
-<section class="duo">
-  <div class="duo-inner">
-    <div class="duo-h">
-      <span class="hairline-brass"></span>
-      <span class="eyebrow">Plate IV · The team</span>
-      <h2>Two agents,<br><em>one operating system.</em></h2>
-    </div>
-
-    <div class="duo-grid">
-      <article class="duo-card">
-        <div class="duo-photo">
-          <img src="art/sara-headshot.png" alt="Sara Cooper">
-        </div>
-        <div>
-          <div class="duo-name">Sara Cooper</div>
-          <div class="duo-title">Owner-Broker · Lead on every relocation</div>
-          <div class="duo-role">
-            <strong>Marketing &amp; the sale side.</strong>
-            Sara runs the listing herself, writes the marketing plan, and stays on point through both closes. Buyer-side, she's your tour agent in Murphys, Sutter Creek, Angels Camp, and Copperopolis.
-          </div>
-          <div class="duo-spec">
-            <span>Listing strategy</span><span>Buyer tours</span><span>Negotiation</span><span>PR background</span>
-          </div>
-        </div>
-      </article>
-
-      <article class="duo-card">
-        <div class="duo-photo">
-          <img src="art/james-headshot.png" alt="James Beyersdorf">
-        </div>
-        <div>
-          <div class="duo-name">James Beyersdorf</div>
-          <div class="duo-title">Associate Agent · DRE #02122175</div>
-          <div class="duo-role">
-            <strong>Land, water, and the rural deep-dive.</strong>
-            For anyone moving onto a parcel — five acres, ten, forty — James is the technical second opinion. Water rights, well capacity, septic age, fire-zone status, road maintenance agreements. The questions that derail closings if no one asks.
-          </div>
-          <div class="duo-spec">
-            <span>Land</span><span>Acreage</span><span>Water rights</span><span>Fire-zone analysis</span>
-          </div>
-        </div>
-      </article>
-    </div>
+<!-- THE TEAM -->
+<section class="lg-sec lg-sec--tint"><div class="lg-wrap">
+  <div class="lg-kicker lg-rv"><span>The team</span><span class="lg-rule"></span></div>
+  <h2 class="lg-display lg-h2 lg-rv lg-d1" style="margin:14px 0 30px">Two agents, <em>one operating system.</em></h2>
+  <div class="lg-grid lg-grid--2">
+    <article class="lg-rv" style="display:flex;gap:20px;background:var(--lg-white);border-radius:var(--lg-r);box-shadow:var(--lg-sh-sm);padding:26px">
+      <img src="art/sara-headshot.png" alt="Sara Cooper" style="width:88px;height:88px;border-radius:50%;object-fit:cover;flex-shrink:0">
+      <div>
+        <div style="font-family:var(--lg-serif);font-style:italic;font-size:24px;color:var(--lg-ink)">Sara Cooper</div>
+        <div style="font-family:var(--lg-mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--lg-ink-mute);margin-top:3px">Owner-Broker &middot; Lead on every relocation</div>
+        <p style="font-size:14px;color:var(--lg-ink-soft);line-height:1.6;margin-top:10px"><strong style="color:var(--lg-a1)">Marketing &amp; the sale side.</strong> Sara runs the listing herself, writes the marketing plan, and stays on point through both closes. Buyer-side, she's your tour agent in Murphys, Sutter Creek, Angels Camp, and Copperopolis.</p>
+        <div style="display:flex;gap:7px;flex-wrap:wrap;margin-top:12px"><span class="lg-chip">Listing strategy</span><span class="lg-chip">Buyer tours</span><span class="lg-chip">Negotiation</span></div>
+      </div>
+    </article>
+    <article class="lg-rv lg-d1" style="display:flex;gap:20px;background:var(--lg-white);border-radius:var(--lg-r);box-shadow:var(--lg-sh-sm);padding:26px">
+      <img src="art/james-headshot.png" alt="James Beyersdorf" style="width:88px;height:88px;border-radius:50%;object-fit:cover;flex-shrink:0">
+      <div>
+        <div style="font-family:var(--lg-serif);font-style:italic;font-size:24px;color:var(--lg-ink)">James Beyersdorf</div>
+        <div style="font-family:var(--lg-mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--lg-ink-mute);margin-top:3px">Associate Agent &middot; DRE #02122175</div>
+        <p style="font-size:14px;color:var(--lg-ink-soft);line-height:1.6;margin-top:10px"><strong style="color:var(--lg-a1)">Land, water, and the rural deep-dive.</strong> For anyone moving onto a parcel &mdash; five acres, ten, forty &mdash; James is the technical second opinion: water rights, well capacity, septic age, fire-zone status, road maintenance agreements. The questions that derail closings if no one asks.</p>
+        <div style="display:flex;gap:7px;flex-wrap:wrap;margin-top:12px"><span class="lg-chip">Land</span><span class="lg-chip">Acreage</span><span class="lg-chip">Water rights</span><span class="lg-chip">Fire-zone</span></div>
+      </div>
+    </article>
   </div>
-</section>
+</div></section>
 
-<!-- RECENT MOVES -->
-<section class="moves">
-  <div class="moves-inner">
-    <div class="moves-h">
-      <span class="hairline-brass"></span>
-      <span class="eyebrow">Plate V · Recent moves</span>
-      <h2>Four families,<br><em>four homecomings.</em></h2>
-    </div>
-    <p class="lede" style="margin-top: 14px; max-width: 720px;">Real people, real moves — California equity turned into the foothills life they'd been picturing all along. Every door here, Sara handed over herself.</p>
-
-    <div class="moves-grid">
-      <article class="move">
-        <span class="move-tag">A porch, promised young</span>
-        <h3 class="move-h">Walnut Creek <span class="arrow">→</span> Murphys</h3>
-        <div class="move-numbers">
-          <div class="mn-cell"><span class="mn-l">From</span><span class="mn-v">Walnut Creek</span></div>
-          <div class="mn-cell"><span class="mn-l">To</span><span class="mn-v">Murphys</span></div>
-          <div class="mn-cell"><span class="mn-l">Her one wish</span><span class="mn-v">The front porch</span></div>
-        </div>
-        <p class="move-q">Kathy had carried the same picture since she was a little girl — a front porch to call her own. Sara sold her Walnut Creek home and found the Murphys house that finally had it. She's a happy foothills resident now, coffee in hand, right where she always knew she'd end up.</p>
-        <p class="move-attr">— Kathy · home in Murphys</p>
-      </article>
-
-      <article class="move">
-        <span class="move-tag">Up to the river</span>
-        <h3 class="move-h">Sacramento <span class="arrow">→</span> Wilseyville</h3>
-        <div class="move-numbers">
-          <div class="mn-cell"><span class="mn-l">From</span><span class="mn-v">Sacramento</span></div>
-          <div class="mn-cell"><span class="mn-l">To</span><span class="mn-v">Wilseyville</span></div>
-          <div class="mn-cell"><span class="mn-l">The setting</span><span class="mn-v">River cabin</span></div>
-        </div>
-        <p class="move-q">Laura was ready to trade the Sacramento grid for moving water. Sara sold her city place and got her up to a cabin by the river in Wilseyville — the kind of quiet you can actually hear.</p>
-        <p class="move-attr">— Laura · riverside in Wilseyville</p>
-      </article>
-
-      <article class="move">
-        <span class="move-tag">Thirty years, then room to spread out</span>
-        <h3 class="move-h">San Jose <span class="arrow">→</span> Forest Meadows</h3>
-        <div class="move-numbers">
-          <div class="mn-cell"><span class="mn-l">From</span><span class="mn-v">San Jose</span></div>
-          <div class="mn-cell"><span class="mn-l">To</span><span class="mn-v">Forest Meadows</span></div>
-          <div class="mn-cell"><span class="mn-l">Traded up for</span><span class="mn-v">Room to host</span></div>
-        </div>
-        <p class="move-q">Cheri and Jim spent thirty years in the San Jose home they started married life in. Sara sold it and moved them up into Forest Meadows — the gated enclave above Murphys — into high ceilings, a kitchen worth cooking in, and a deck built for morning coffee and a life well lived.</p>
-        <p class="move-attr">— Cheri &amp; Jim · Forest Meadows, Murphys</p>
-      </article>
-
-      <article class="move">
-        <span class="move-tag">Three generations, one address</span>
-        <h3 class="move-h">Modesto <span class="arrow">→</span> Valley Springs</h3>
-        <div class="move-numbers">
-          <div class="mn-cell"><span class="mn-l">From</span><span class="mn-v">Modesto</span></div>
-          <div class="mn-cell"><span class="mn-l">To</span><span class="mn-v">Valley Springs</span></div>
-          <div class="mn-cell"><span class="mn-l">Now includes</span><span class="mn-v">ADU + workshop</span></div>
-        </div>
-        <p class="move-q">Robert wanted everyone he loved under one roofline. Sara sold his Modesto house and settled the whole family — his young daughter, his wife, and his mother-in-law — into a parklike stretch of Valley Springs, with an ADU for Mom and a detached garage workshop that's finally all his.</p>
-        <p class="move-attr">— Robert &amp; family · Valley Springs</p>
-      </article>
-    </div>
+<!-- RECENT MOVES (four real families, no prices) -->
+<section class="lg-sec"><div class="lg-wrap">
+  <div class="lg-kicker lg-rv"><span>Recent moves</span><span class="lg-rule"></span></div>
+  <h2 class="lg-display lg-h2 lg-rv lg-d1" style="margin:14px 0 10px">Four families, <em>four homecomings.</em></h2>
+  <div class="lg-note lg-rv lg-d2" style="max-width:720px">Real people, real moves &mdash; California equity turned into the foothills life they'd been picturing all along. Every door here, Sara handed over herself.</div>
+  <div class="lg-grid lg-grid--2" style="margin-top:32px">
+    <article class="lg-rv" style="background:var(--lg-white);border-radius:var(--lg-r);box-shadow:var(--lg-sh-sm);padding:28px">
+      <div class="lg-card__meta">A porch, promised young</div>
+      <h3 style="font-family:var(--lg-serif);font-style:italic;font-size:26px;color:var(--lg-ink);margin:8px 0 12px">Walnut Creek <span style="color:var(--lg-c1)">&rarr;</span> Murphys</h3>
+      <p style="font-size:15px;color:var(--lg-ink-soft);line-height:1.65">Kathy had carried the same picture since she was a little girl &mdash; a front porch to call her own. Sara sold her Walnut Creek home and found the Murphys house that finally had it. She's a happy foothills resident now, coffee in hand, right where she always knew she'd end up.</p>
+      <p style="font-family:var(--lg-mono);font-size:10.5px;letter-spacing:.1em;color:var(--lg-ink-mute);margin-top:14px">&mdash; Kathy &middot; home in Murphys</p>
+    </article>
+    <article class="lg-rv lg-d1" style="background:var(--lg-white);border-radius:var(--lg-r);box-shadow:var(--lg-sh-sm);padding:28px">
+      <div class="lg-card__meta">Up to the river</div>
+      <h3 style="font-family:var(--lg-serif);font-style:italic;font-size:26px;color:var(--lg-ink);margin:8px 0 12px">Sacramento <span style="color:var(--lg-c1)">&rarr;</span> Wilseyville</h3>
+      <p style="font-size:15px;color:var(--lg-ink-soft);line-height:1.65">Laura was ready to trade the Sacramento grid for moving water. Sara sold her city place and got her up to a cabin by the river in Wilseyville &mdash; the kind of quiet you can actually hear.</p>
+      <p style="font-family:var(--lg-mono);font-size:10.5px;letter-spacing:.1em;color:var(--lg-ink-mute);margin-top:14px">&mdash; Laura &middot; riverside in Wilseyville</p>
+    </article>
+    <article class="lg-rv" style="background:var(--lg-white);border-radius:var(--lg-r);box-shadow:var(--lg-sh-sm);padding:28px">
+      <div class="lg-card__meta">Thirty years, then room to spread out</div>
+      <h3 style="font-family:var(--lg-serif);font-style:italic;font-size:26px;color:var(--lg-ink);margin:8px 0 12px">San Jose <span style="color:var(--lg-c1)">&rarr;</span> Forest Meadows</h3>
+      <p style="font-size:15px;color:var(--lg-ink-soft);line-height:1.65">Cheri and Jim spent thirty years in the San Jose home they started married life in. Sara sold it and moved them up into Forest Meadows &mdash; the gated enclave above Murphys &mdash; into high ceilings, a kitchen worth cooking in, and a deck built for morning coffee and a life well lived.</p>
+      <p style="font-family:var(--lg-mono);font-size:10.5px;letter-spacing:.1em;color:var(--lg-ink-mute);margin-top:14px">&mdash; Cheri &amp; Jim &middot; Forest Meadows, Murphys</p>
+    </article>
+    <article class="lg-rv lg-d1" style="background:var(--lg-white);border-radius:var(--lg-r);box-shadow:var(--lg-sh-sm);padding:28px">
+      <div class="lg-card__meta">Three generations, one address</div>
+      <h3 style="font-family:var(--lg-serif);font-style:italic;font-size:26px;color:var(--lg-ink);margin:8px 0 12px">Modesto <span style="color:var(--lg-c1)">&rarr;</span> Valley Springs</h3>
+      <p style="font-size:15px;color:var(--lg-ink-soft);line-height:1.65">Robert wanted everyone he loved under one roofline. Sara sold his Modesto house and settled the whole family &mdash; his young daughter, his wife, and his mother-in-law &mdash; into a parklike stretch of Valley Springs, with an ADU for Mom and a detached garage workshop that's finally all his.</p>
+      <p style="font-family:var(--lg-mono);font-size:10.5px;letter-spacing:.1em;color:var(--lg-ink-mute);margin-top:14px">&mdash; Robert &amp; family &middot; Valley Springs</p>
+    </article>
   </div>
-</section>
+</div></section>
 
 <!-- DISCOVERY QUESTIONS -->
-<section class="disco">
-  <div class="disco-inner">
-    <div class="disco-h">
-      <span class="hairline-brass" style="background:var(--brass-bright);"></span>
-      <span class="ed" style="display:block; margin-top: 14px;">Plate VI · The first conversation</span>
-      <h2>Ten questions<br>before <em>any house.</em></h2>
-    </div>
-    <p class="lede" style="margin-top: 14px; max-width: 720px; color: rgba(250,246,236,0.7); font-family: var(--serif); font-style: italic; font-size: 22px; line-height: 1.45;">
-      A relocation conversation starts with these, not with listings. If you can answer most of them, we can model your timeline within a week.
-    </p>
-
-    <div class="q-grid">
-      <div class="q-cell"><div class="q-num">01</div><div><h4>What's your current home worth — honestly?</h4><p>Not Zillow. Sara pulls comps and walks the property in week one.</p></div></div>
-      <div class="q-cell"><div class="q-num">02</div><div><h4>Mortgage balance, second loans, HELOCs?</h4><p>This drives bridge eligibility and net-proceeds math.</p></div></div>
-      <div class="q-cell"><div class="q-num">03</div><div><h4>What's your cash floor after both transactions?</h4><p>Reserves matter more than purchase price. We model three scenarios.</p></div></div>
-      <div class="q-cell"><div class="q-num">04</div><div><h4>Hard move date — or flexible window?</h4><p>School year, lease end, retirement date — these shape the timeline.</p></div></div>
-      <div class="q-cell"><div class="q-num">05</div><div><h4>Remote-work fiber requirement?</h4><p>Most foothills towns now have it. A few addresses still don't.</p></div></div>
-      <div class="q-cell"><div class="q-num">06</div><div><h4>Primary, second home, or eventual primary?</h4><p>Tax, insurance, lender posture all shift on this answer.</p></div></div>
-      <div class="q-cell"><div class="q-num">07</div><div><h4>Land or in-town?</h4><p>If land, James starts; if in-town, Sara starts.</p></div></div>
-      <div class="q-cell"><div class="q-num">08</div><div><h4>Fire-zone tolerance?</h4><p>Insurance reality varies wildly. Some parcels can't be insured.</p></div></div>
-      <div class="q-cell"><div class="q-num">09</div><div><h4>Two cars or three? Boat? RV? Horses?</h4><p>Shapes lot size, garage spec, HOA fit.</p></div></div>
-      <div class="q-cell"><div class="q-num">10</div><div><h4>What does a perfect Saturday look like?</h4><p>This is the question that picks the town. Hardest to answer; most important.</p></div></div>
-    </div>
+<section class="lg-sec lg-sec--ink"><div class="lg-wrap">
+  <div class="lg-kicker lg-rv"><span>The first conversation</span></div>
+  <h2 class="lg-display lg-h2 lg-rv lg-d1" style="margin:14px 0 14px">Ten questions before <em>any house.</em></h2>
+  <p class="lg-rv lg-d2" style="font-family:var(--lg-serif);font-style:italic;font-size:22px;line-height:1.45;color:rgba(255,253,248,.8);max-width:720px">A relocation conversation starts with these, not with listings. If you can answer most of them, we can model your timeline within a week.</p>
+  <div class="lg-grid lg-grid--2 lg-rv lg-d2" style="margin-top:30px">
+    <div class="lg-point" style="--lg-accent:var(--lg-sun)"><div class="lg-point__num">01</div><h4>What's your current home worth &mdash; honestly?</h4><p>Not Zillow. Sara pulls comps and walks the property in week one.</p></div>
+    <div class="lg-point" style="--lg-accent:var(--lg-sun)"><div class="lg-point__num">02</div><h4>Mortgage balance, second loans, HELOCs?</h4><p>This drives bridge eligibility and net-proceeds math.</p></div>
+    <div class="lg-point" style="--lg-accent:var(--lg-sun)"><div class="lg-point__num">03</div><h4>What's your cash floor after both transactions?</h4><p>Reserves matter more than purchase price. We model three scenarios.</p></div>
+    <div class="lg-point" style="--lg-accent:var(--lg-sun)"><div class="lg-point__num">04</div><h4>Hard move date &mdash; or flexible window?</h4><p>School year, lease end, retirement date &mdash; these shape the timeline.</p></div>
+    <div class="lg-point" style="--lg-accent:var(--lg-sun)"><div class="lg-point__num">05</div><h4>Remote-work fiber requirement?</h4><p>Most foothills towns now have it. A few addresses still don't.</p></div>
+    <div class="lg-point" style="--lg-accent:var(--lg-sun)"><div class="lg-point__num">06</div><h4>Primary, second home, or eventual primary?</h4><p>Tax, insurance, lender posture all shift on this answer.</p></div>
+    <div class="lg-point" style="--lg-accent:var(--lg-sun)"><div class="lg-point__num">07</div><h4>Land or in-town?</h4><p>If land, James starts; if in-town, Sara starts.</p></div>
+    <div class="lg-point" style="--lg-accent:var(--lg-sun)"><div class="lg-point__num">08</div><h4>Fire-zone tolerance?</h4><p>Insurance reality varies wildly. Some parcels can't be insured.</p></div>
+    <div class="lg-point" style="--lg-accent:var(--lg-sun)"><div class="lg-point__num">09</div><h4>Two cars or three? Boat? RV? Horses?</h4><p>Shapes lot size, garage spec, HOA fit.</p></div>
+    <div class="lg-point" style="--lg-accent:var(--lg-sun)"><div class="lg-point__num">10</div><h4>What does a perfect Saturday look like?</h4><p>This is the question that picks the town. Hardest to answer; most important.</p></div>
   </div>
-</section>
+</div></section>
 
 <!-- CTA -->
-<section class="r-cta">
-  <span class="hairline-brass" style="margin: 0 auto 18px;"></span>
-  <span class="eyebrow">Begin the conversation</span>
-  <h2>Start with a call<br>before <em>a calendar.</em></h2>
-  <p>Twenty minutes, no pressure, no commitment. We'll tell you whether what you're picturing is a six-month conversation or a six-week one.</p>
-  <div class="r-cta-ctas">
-    <a href="find-my-match.html" class="btn btn-ink">Start the conversation</a>
-    <a href="tel:2095594966" class="btn btn-ghost">Call (209) 559-4966</a>
+<section class="lg-sec lg-sec--ink"><div class="lg-wrap" style="text-align:center">
+  <div class="lg-kicker lg-rv" style="justify-content:center"><span>Begin the conversation</span></div>
+  <h2 class="lg-display lg-rv lg-d1" style="margin:16px 0 14px;font-size:clamp(38px,6vw,74px);line-height:.98">Start with a call<br>before <em>a calendar.</em></h2>
+  <p class="lg-rv lg-d2" style="font-family:var(--lg-serif);font-style:italic;font-size:21px;color:rgba(255,253,248,.85);max-width:640px;margin:0 auto">Twenty minutes, no pressure, no commitment. We'll tell you whether what you're picturing is a six-month conversation or a six-week one.</p>
+  <div class="lg-rv lg-d3" style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:28px">
+    <a href="find-my-match.html" class="lg-btn lg-btn--gold">Start the conversation</a>
+    <a href="tel:2095594966" class="lg-btn lg-btn--ghost">Call (209) 559-4966</a>
   </div>
-</section>
+</div></section>
 
 <!-- FOOTER -->
-<footer class="footer">
-  <div class="footer-inner">
-    <div class="footer-top">
-      <div>
-        <a href="index.html" class="wordmark" style="align-items: flex-start;">
-          <span class="wordmark-word">Legacy Properties</span>
-          <span class="wordmark-sub">Every Home Has A Story</span>
-        </a>
-        <p class="footer-tagline">Every home has a story. We help you find yours — or tell the one you've already lived.</p>
-      </div>
-      <div>
-        <h4>Services</h4>
-        <a href="property-search.html">Browse listings</a>
-        <a href="towns.html">Communities</a>
-        <a href="relocate.html">California → Foothills</a>
-        <a href="valuation.html">Sellers</a>
-      </div>
-      <div>
-        <h4>Buy &amp; sell</h4>
-        <a href="property-search.html">Search all listings</a>
-        <a href="valuation.html">What's my home worth?</a>
-        <a href="find-my-match.html">Request a tour</a>
-      </div>
-      <div>
-        <h4>Connect</h4>
-        <a href="tel:2095594966">(209) 559-4966</a>
-        <a href="mailto:SaraSellsCalifornia@gmail.com">SaraSellsCalifornia@gmail.com</a>
-        <a href="ledger.html">The Ledger</a>
-      </div>
+<footer class="lg-footer"><div class="lg-wrap">
+  <div class="lg-footer__cols">
+    <div>
+      <a href="index.html" class="lg-mark"><span class="lg-mark__badge"><span>L</span></span><span class="lg-mark__txt"><b>Legacy</b><i>Properties · Angels Camp</i></span></a>
+      <p style="font-family:var(--lg-serif);font-style:italic;font-size:16px;color:var(--lg-ink-soft);line-height:1.5;margin-top:16px;max-width:260px">Every home has a story. We help you find yours &mdash; or tell the one you've already lived.</p>
     </div>
-    <div class="footer-bottom">
-      <div>© 2026 Legacy Properties · All rights reserved · <a href="/privacy.html">Privacy Policy</a> · <a href="/sms-terms.html">SMS Terms</a></div>
-      <div>Sara Cooper, Broker · DRE #02141987 · Equal Housing Opportunity</div>
+    <div><h5>Services</h5>
+      <a href="relocate.html">California &rarr; Foothills relocation</a>
+      <a href="towns.html">Communities</a>
+      <a href="valuation.html">Sellers</a>
+      <a href="property-search.html">Browse listings</a>
+      <a href="find-my-match.html">Request a tour</a>
+    </div>
+    <div><h5>Buy &amp; sell</h5>
+      <a href="property-search.html">Search all listings</a>
+      <a href="valuation.html">What's my home worth?</a>
+      <a href="market-report.html">Market reports</a>
+      <a href="find-my-match.html">Request a tour</a>
+    </div>
+    <div><h5>Connect</h5>
+      <a href="tel:2095594966">(209) 559-4966</a>
+      <a href="mailto:SaraSellsCalifornia@gmail.com">Email Sara</a>
+      <a href="ledger.html">The Ledger</a>
     </div>
   </div>
-</footer>
+  <div class="lg-footer__bot">
+    <span>&copy; 2026 Legacy Properties &middot; All rights reserved &middot; <a href="/privacy.html" style="color:inherit">Privacy Policy</a> &middot; <a href="/sms-terms.html" style="color:inherit">SMS Terms</a></span>
+    <span>Sara Cooper, Broker &middot; DRE #02141987 &middot; Equal Housing Opportunity</span>
+  </div>
+</div></footer>
+
 
 <script>
 (function () {
@@ -1255,5 +1150,6 @@
   });
 })();
 </script>
+<script src="legacy-ui.js" defer></script>
 </body>
 </html>
