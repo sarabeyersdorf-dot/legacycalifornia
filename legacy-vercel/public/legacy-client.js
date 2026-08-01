@@ -2756,8 +2756,15 @@
         // Actions no longer leave a to-do behind — each one takes you to the tool
         // that does the real thing (the artifact is what reaches the portal).
         if (id === 'create-curated-search') {
-          toast('Opening Curated to build the search.');
           if (typeof window.showView === 'function') window.showView(null, 'curate');
+          // Actually start the search: open the new-collection flow pre-attached
+          // to this contact, instead of just landing on the Curate tab.
+          const cl = { id: lead.id, name: fullName(lead) };
+          if (window.LegacyCurate && typeof window.LegacyCurate.newForClient === 'function') {
+            setTimeout(() => window.LegacyCurate.newForClient(cl), 90);
+          } else {
+            toast('Opening Curated to build the search.');
+          }
         } else if (group === 'schedule') {
           // Scheduling actions open the calendar to create the real event — that
           // event (not a task) is what shows on the client portal + your agenda.
