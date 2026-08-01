@@ -3477,7 +3477,12 @@ function selectLead(el) {
   // ---- open / render a collection -----------------------------------------
   // Let the morning-brief collection nudge deep-link straight to a client's
   // collection (it lives in a different script), instead of just switching tabs.
-  window.LegacyCurate = { open: function (id) { if (!id) return; ensureLoaded(); openCollection(id); } };
+  window.LegacyCurate = {
+    open: function (id) { if (!id) return; ensureLoaded(); openCollection(id); },
+    // Open the new-collection flow pre-attached to a contact (from the card's
+    // "create curated search" action). client = { id, name }.
+    newForClient: function (client) { ensureLoaded(); newCollectionModal(client && client.id ? client : null); }
+  };
   function openCollection(id) {
     api('collections?id=' + encodeURIComponent(id)).then(function (r) {
       if (!r.ok) { alert((r.j && r.j.error) || 'Could not open collection'); return; }
@@ -3805,15 +3810,17 @@ function selectLead(el) {
     return m;
   }
 
-  function newCollectionModal() {
+  function newCollectionModal(prefill) {
     ensureLoaded();
-    var picked = null;
+    var picked = (prefill && prefill.id) ? prefill : null;
     var m = modal('<h3>New collection.</h3><p class="sub">Name it and (optionally) attach a client — that personalizes the greeting and pre-fills who it goes to at push time.</p>' +
       '<label>Title</label><input id="ncTitle" placeholder="Five for Karen" autofocus>' +
       '<label>Client (optional)</label><div style="display:flex;align-items:center;gap:10px;"><button type="button" class="btn btn-ghost btn-sm" id="ncPick">Choose client…</button><span id="ncClient" style="font-size:13px;color:var(--ink-soft);"></span></div>' +
       '<div class="actions"><button class="btn btn-ink btn-sm" id="ncGo">Create</button><button class="btn-link" id="ncX" style="margin-left:auto;">Cancel</button></div>' +
       '<div class="cur-result" id="ncR"></div>');
     m.querySelector('#ncX').onclick = m._close;
+    // Pre-fill the attached client when opened from a contact's action menu.
+    if (picked && picked.name) m.querySelector('#ncClient').textContent = '✓ ' + picked.name;
     m.querySelector('#ncPick').onclick = function () {
       pickClient(function (c) { picked = c; m.querySelector('#ncClient').textContent = c ? ('✓ ' + c.name) : ''; });
     };
