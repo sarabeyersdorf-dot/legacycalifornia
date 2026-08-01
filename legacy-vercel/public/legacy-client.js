@@ -563,6 +563,16 @@
     return `<div style="grid-column:1/-1;padding:24px;text-align:left;opacity:.55;font-style:italic;font-size:14px;">${escapeHtml(msg)}</div>`;
   }
 
+  // ---- Local per-device dismissals — hide a stale nudge or feed item for good.
+  // Kept in localStorage (no server round-trip); a nudge re-appears only if its
+  // collection is re-pushed (the key includes pushed_at). Capped so it can't grow
+  // without bound.
+  function lgDismissedSet() { try { return new Set(JSON.parse(localStorage.getItem('lgDismissed') || '[]')); } catch (_) { return new Set(); } }
+  function lgIsDismissed(k) { return !!k && lgDismissedSet().has(k); }
+  function lgDismiss(k) { if (!k) return; try { const s = lgDismissedSet(); s.add(k); localStorage.setItem('lgDismissed', JSON.stringify(Array.from(s).slice(-500))); } catch (_) {} }
+  function nudgeKey(n) { return 'ndg:' + (n.collection_id || '') + ':' + (n.pushed_at || ''); }
+  function feedKey(i) { return 'sig:' + (i.ts || '') + '|' + String(i.body || '').slice(0, 64); }
+
   // ---- The decision queue: everything that needs Sara, one ranked list ----
   // Timeline approvals (maroon), collection nudges (green), then AI drafts.
   function paintNeedsQueue(brief, drafts) {
@@ -572,7 +582,7 @@
     const approvals = brief.timeline_approvals || [];
     // Follow-ups land per agent: yours show by default; the broker gets a toggle
     // to reveal the other agent's (each nudge is tagged mine:true/false).
-    const allNudges = brief.collection_nudges || [];
+    const allNudges = (brief.collection_nudges || []).filter((n) => !lgIsDismissed(nudgeKey(n)));
     const nudges = allNudges.filter((n) => n.mine !== false);
     const otherNudges = allNudges.filter((n) => n.mine === false);
     const total = approvals.length + nudges.length + drafts.length;
@@ -650,10 +660,13 @@
           <h3>${escapeHtml(n.client_name || 'Your client')} hasn't reacted to “${escapeHtml(n.title)}”</h3>
           <p>Pushed ${n.days_since_push} days ago${n.opens_since_push ? ` · opened ${n.opens_since_push}× since` : ' · not opened yet'}. Worth a nudge.</p>
           <div class="nc-foot"><div class="nc-foot-l"></div><div class="nc-foot-r">
+            <button class="btn btn-ghost btn-sm" data-nudge-dismiss>Dismiss</button>
             <button class="btn btn-ghost btn-sm" data-open-curate>Open collection →</button>
           </div></div>
         </div>`;
       if (beforeEl) needs.insertBefore(card, beforeEl); else needs.appendChild(card);
+      const dbtn = card.querySelector('[data-nudge-dismiss]');
+      if (dbtn) dbtn.addEventListener('click', () => { lgDismiss(nudgeKey(n)); card.remove(); });
       card.querySelector('[data-open-curate]').addEventListener('click', () => {
         if (typeof window.showView === 'function') window.showView(null, 'curate');
         // Open THIS client's collection, not just the Curate tab.
@@ -746,14 +759,23 @@
   function renderFeed() {
     const grid = document.querySelector('[data-signal-grid]');
     if (!grid) return;
-    const items = feedItems.filter((i) => feedFilter === 'all' || i.kind === feedFilter).slice(0, 9);
+    const items = feedItems.filter((i) => (feedFilter === 'all' || i.kind === feedFilter) && !lgIsDismissed(feedKey(i))).slice(0, 9);
     if (!items.length) { grid.innerHTML = emptyPanel('Quiet right now. Signals, texts, and portal activity land here as they happen.'); return; }
     grid.innerHTML = items.map((i) => `
-      <article class="signal">
+      <article class="signal" data-fk="${escapeHtml(feedKey(i))}" style="position:relative">
+        <button data-feed-dismiss title="Dismiss" aria-label="Dismiss" style="position:absolute;top:6px;right:8px;border:none;background:none;cursor:pointer;font-size:15px;line-height:1;color:var(--ink-faint);padding:2px 5px;">×</button>
         <span class="sig-time">${escapeHtml(i.time || '')}</span>
         <p>${escapeHtml(i.body)}</p>
         <span class="sig-tag">${escapeHtml(i.tag || 'Signal')}</span>
       </article>`).join('');
+    if (!grid._dismissWired) {
+      grid._dismissWired = true;
+      grid.addEventListener('click', (e) => {
+        const x = e.target.closest('[data-feed-dismiss]'); if (!x) return;
+        const art = x.closest('[data-fk]'); if (!art) return;
+        lgDismiss(art.getAttribute('data-fk')); renderFeed();
+      });
+    }
   }
 
   // ---- Pulse: the page stays alive without a reload ----
