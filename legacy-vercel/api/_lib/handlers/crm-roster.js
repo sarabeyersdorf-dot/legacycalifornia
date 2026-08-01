@@ -40,6 +40,7 @@ const shape = (l) => ({
   name: [l.first_name, l.last_name].filter(Boolean).join(' ') || l.email || '(no name)',
   email: l.email, phone: l.phone,
   temperature: l.temperature, score: l.score,
+  side: l.contact_type || '',   // buyer/seller/both/past_client/sphere/do_not_contact — for the inline roster side picker
   stage: l.pipeline_stage, journey: l.journey_stage, type: l.lead_type,
   last_contact_at: l.last_contact_at, source: l.source
 });
