@@ -238,7 +238,9 @@
 
 <!-- ============ MARKET REPORTS — live IDX widgets (2-up) ============ -->
 <section class="lg-sec lg-sec--tint" style="padding-top:0"><div class="lg-wrap">
-  <div class="lg-grid lg-grid--2" style="margin-top:26px;align-items:start">
+  <!-- Single-column stack: the market-report widgets are wide and overlap/mis-render
+       in a 2-up grid (see a3f528e). Each panel gets the full content width. -->
+  <div style="margin-top:26px;display:flex;flex-direction:column;gap:26px">
 
     <article class="mr-panel lg-rv">
       <div class="mr-panel-h"><span class="mr-name">Murphys</span><span class="mr-area">Calaveras</span></div>
