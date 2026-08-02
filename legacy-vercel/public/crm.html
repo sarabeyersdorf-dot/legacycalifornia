@@ -830,7 +830,7 @@ body.lp-restyle {
         portal: { label: 'Curated list', bg: '#f5ecd9', fg: '#7C6A4D' },
         email:  { label: 'Email',        bg: '#eceaf3', fg: '#5A4C7C' }
       };
-      var state = { rows: [], filter: 'all', loaded: false, error: false };
+      var state = { rows: [], filter: 'all', loaded: false, error: false, groups: {} };
       function esc(s){ return String(s==null?'':s).replace(/[&<>"]/g,function(c){return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]);}); }
       function ago(iso){
         var t = Date.parse(iso); if (isNaN(t)) return '';
@@ -848,18 +848,34 @@ body.lp-restyle {
       function setBadge(n){ var el = document.querySelector('[data-msg-unread]'); if (!el) return; if (n>0){ el.textContent = n>9?'9+':String(n); el.style.display=''; } else { el.style.display='none'; } }
 
       function agentName(a){ a=String(a||'').toLowerCase(); return a==='james'?'James':a==='both'?'Both':a==='sara'?'Sara':''; }
-      function rowHTML(r){
+      // Collapse individual messages into one row per contact (a conversation),
+      // newest first — so a client's five texts are ONE line, not five to delete.
+      function groupRows(rows){
+        var map = {}, order = [];
+        rows.forEach(function(r){
+          var gk = r.lead_id ? ('lead:'+r.lead_id) : ('anon:'+(r.name||r.key||''));
+          if (!map[gk]){ map[gk] = { gk:gk, lead_id:r.lead_id||'', name:r.name||'Unknown', newest:r, count:0, unread:false, needs_review:false, msgs:[] }; order.push(gk); }
+          var g = map[gk]; g.msgs.push(r); g.count++;
+          if (Date.parse(r.created_at) > Date.parse(g.newest.created_at)) g.newest = r;
+          if (isUnread(r)) g.unread = true;
+          if (r.needs_review) g.needs_review = true;
+        });
+        return order.map(function(k){ return map[k]; })
+          .sort(function(a,b){ return Date.parse(b.newest.created_at) - Date.parse(a.newest.created_at); });
+      }
+      function rowHTML(g){
+        var r = g.newest;
         var c = CHAN[r.channel] || CHAN.sms;
-        var unread = isUnread(r);
-        var triage = r.needs_review ? '<span class="msg-triage">Unknown #</span>' : '';
+        var triage = g.needs_review ? '<span class="msg-triage">Unknown #</span>' : '';
         var who = agentName(r.agent);
         var whoTag = who ? '<span class="msg-agent" title="This client is handled by '+esc(who)+'">for '+esc(who)+'</span>' : '';
-        return '<div class="msg-item'+(unread?' unread':'')+'" data-msg-key="'+esc(r.key||'')+'" data-msg-lead="'+esc(r.lead_id||'')+'" data-msg-source="'+esc(r.source||'')+'" data-msg-review="'+(r.needs_review?'1':'')+'">'
-          + (unread ? '<span class="msg-dot"></span>' : '<span style="width:7px;flex:none;"></span>')
+        var countBadge = g.count>1 ? '<span class="msg-count" title="'+g.count+' messages in this conversation" style="flex:none;font-family:var(--mono);font-size:10px;letter-spacing:.06em;color:var(--ink-mute);background:var(--linen);border-radius:10px;padding:2px 8px;margin-left:6px;">'+g.count+'</span>' : '';
+        return '<div class="msg-item'+(g.unread?' unread':'')+'" data-group-key="'+esc(g.gk)+'" data-msg-lead="'+esc(g.lead_id||'')+'" data-msg-review="'+(g.needs_review?'1':'')+'">'
+          + (g.unread ? '<span class="msg-dot"></span>' : '<span style="width:7px;flex:none;"></span>')
           + '<span class="msg-chan" style="background:'+c.bg+';color:'+c.fg+';">'+c.label+'</span>'
-          + '<div class="msg-body"><div class="msg-top"><span class="msg-name">'+esc(r.name||'Unknown')+triage+'</span>'+whoTag+'<span class="msg-time">'+ago(r.created_at)+'</span></div>'
+          + '<div class="msg-body"><div class="msg-top"><span class="msg-name">'+esc(g.name||'Unknown')+triage+'</span>'+whoTag+countBadge+'<span class="msg-time">'+ago(r.created_at)+'</span></div>'
           + '<div class="msg-preview">'+esc(r.preview||'(no text)')+'</div></div>'
-          + '<button class="msg-del" type="button" data-msg-del aria-label="Delete message" title="Delete this message" style="flex:none;align-self:center;margin-left:6px;background:transparent;border:none;color:#B8AE97;font-size:20px;line-height:1;cursor:pointer;padding:4px 8px;border-radius:4px;">&times;</button>'
+          + '<button class="msg-del" type="button" data-msg-del aria-label="Delete conversation" title="'+(g.count>1?'Delete this whole conversation':'Delete this message')+'" style="flex:none;align-self:center;margin-left:6px;background:transparent;border:none;color:#B8AE97;font-size:20px;line-height:1;cursor:pointer;padding:4px 8px;border-radius:4px;">&times;</button>'
           + '</div>';
       }
       function renderList(){
@@ -867,11 +883,13 @@ body.lp-restyle {
         if (!state.loaded){ list.innerHTML = '<div class="cur-empty">Loading messages…</div>'; return; }
         if (state.error){ list.innerHTML = '<div class="cur-empty">Couldn’t load messages. Refresh to retry.</div>'; return; }
         var rows = state.filter==='triage' ? state.rows.filter(function(r){return r.needs_review;}) : state.rows;
-        list.innerHTML = rows.length ? rows.map(rowHTML).join('')
+        var groups = groupRows(rows);
+        state.groups = {}; groups.forEach(function(g){ state.groups[g.gk] = g; });
+        list.innerHTML = groups.length ? groups.map(rowHTML).join('')
           : '<div class="cur-empty">'+(state.filter==='triage'?'No unknown numbers to triage.':'No inbound messages yet.')+'</div>';
         var a = document.querySelector('[data-msgf-c-all]'), t = document.querySelector('[data-msgf-c-triage]');
-        if (a) a.textContent = state.rows.length;
-        if (t) t.textContent = state.rows.filter(function(r){return r.needs_review;}).length;
+        if (a) a.textContent = groupRows(state.rows).length;
+        if (t) t.textContent = groupRows(state.rows.filter(function(r){return r.needs_review;})).length;
       }
       function markAllSeenAndClear(){ if (state.rows.length) markSeen(state.rows[0].created_at); setBadge(0); }
 
@@ -902,39 +920,42 @@ body.lp-restyle {
         var del = e.target.closest('[data-msg-del]');
         if (del){
           e.stopPropagation();
-          var host = del.closest('[data-msg-lead]');
-          var dkey = host ? host.getAttribute('data-msg-key') : '';
-          var dsrc = host ? host.getAttribute('data-msg-source') : '';
+          var host = del.closest('[data-group-key]');
+          var gk = host ? host.getAttribute('data-group-key') : '';
+          var g = state.groups && state.groups[gk];
+          if (!g) return;
+          var resetDel = function(){ if(!del) return; del.disabled=false; del.removeAttribute('data-armed'); del.innerHTML='&times;'; del.style.color='#B8AE97'; del.style.fontSize='20px'; del.style.fontWeight=''; };
           if (!del.getAttribute('data-armed')){
             del.setAttribute('data-armed','1');
-            del.innerHTML = 'Delete?';
+            del.innerHTML = g.count>1 ? 'Delete all?' : 'Delete?';
             del.style.color = '#8B3A3A'; del.style.fontSize = '12px'; del.style.fontWeight = '700';
             del.style.letterSpacing = '.04em';
-            del._t = setTimeout(function(){ if(!del) return; del.removeAttribute('data-armed'); del.innerHTML='&times;'; del.style.color='#B8AE97'; del.style.fontSize='20px'; del.style.fontWeight=''; }, 3500);
+            del._t = setTimeout(resetDel, 3500);
             return;
           }
           clearTimeout(del._t); del.disabled = true; del.innerHTML = '…';
-          fetch('/api/crm/message-delete', { method:'POST', credentials:'include', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ id: dkey, source: dsrc }) })
-            .then(function(r){ return r.ok ? r.json() : null; })
-            .then(function(j){
-              if (j && j.deleted){
-                state.rows = state.rows.filter(function(r){ return r.key !== dkey; });
-                renderList(); setBadge(unreadCount());
-              } else {
-                del.disabled=false; del.removeAttribute('data-armed'); del.innerHTML='&times;';
-                del.style.color='#B8AE97'; del.style.fontSize='20px'; del.style.fontWeight='';
-              }
-            })
-            .catch(function(){ del.disabled=false; del.removeAttribute('data-armed'); del.innerHTML='&times;'; del.style.color='#B8AE97'; del.style.fontSize='20px'; del.style.fontWeight=''; });
+          // Delete every message in the conversation, not just one line.
+          var targets = g.msgs.map(function(m){ return { id:m.key, source:m.source }; });
+          Promise.all(targets.map(function(k){
+            return fetch('/api/crm/message-delete', { method:'POST', credentials:'include', headers:{'Content-Type':'application/json'}, body: JSON.stringify(k) })
+              .then(function(r){ return r.ok ? r.json() : null; }).catch(function(){ return null; });
+          })).then(function(results){
+            var gone = {};
+            targets.forEach(function(k,i){ if (results[i] && results[i].deleted) gone[k.id] = true; });
+            if (Object.keys(gone).length){
+              state.rows = state.rows.filter(function(r){ return !gone[r.key]; });
+              renderList(); setBadge(unreadCount());
+            } else { resetDel(); }
+          }).catch(resetDel);
           return;
         }
-        var item = e.target.closest('[data-msg-lead]');
+        var item = e.target.closest('[data-group-key]');
         if (item){
           var lead = item.getAttribute('data-msg-lead');
           if (item.getAttribute('data-msg-review')==='1' || !lead){ if (window.openReviewQueue) window.openReviewQueue(); return; }
-          var key = item.getAttribute('data-msg-key');
-          var row = state.rows.filter(function(r){ return r.key===key; })[0];
-          openReply(row || { lead_id: lead });
+          var gk2 = item.getAttribute('data-group-key');
+          var grp = state.groups && state.groups[gk2];
+          openReply((grp && grp.newest) || { lead_id: lead });
           return;
         }
       });
