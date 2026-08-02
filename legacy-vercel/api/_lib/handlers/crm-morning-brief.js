@@ -342,6 +342,33 @@ export default async function handler(req, res) {
       }
     } catch (_) { /* price-gap nudge is a bonus, never blocks the brief */ }
 
+    // Cowork loop (db/030): agent party/escrow edits (deals.party_details) that
+    // Cowork hasn't folded back into deals.json yet — party_reconciled_at is
+    // null. Surface ONE nudge so edits don't sit forever in the CRM-only overlay
+    // while the SSOT drifts. Cowork reconciles from the sync response's
+    // party_edits. Pre-030 / transient errors degrade to empty. Fail-soft.
+    result.party_reconcile = [];
+    try {
+      let pq = supa.from('deals')
+        .select('source_key, address, city, agent, party_details')
+        .not('party_details', 'is', null)
+        .is('party_reconciled_at', null)
+        .limit(50);
+      if (profile.role === 'agent_james') pq = pq.eq('agent', 'james');
+      const { data: pend } = await pq;
+      const rows = (pend || []).filter((d) => d.party_details && Object.keys(d.party_details).length);
+      result.party_reconcile = rows.map((d) => ({ source_key: d.source_key, address: [d.address, d.city].filter(Boolean).join(', ') || d.source_key }));
+      if (rows.length) {
+        const names = rows.slice(0, 3).map((r) => r.address).join('; ');
+        result.signals.unshift({
+          id: 'party-reconcile', lead_id: null, time_iso: new Date().toISOString(), time: 'Now',
+          body: `${rows.length} deal${rows.length === 1 ? ' has' : 's have'} party/escrow edits not yet in deals.json (${names}${rows.length > 3 ? '…' : ''}). Cowork can fold them in from the sync response.`,
+          tag: 'Reconcile'
+        });
+        result.signals.sort((a, b) => String(b.time_iso || '').localeCompare(String(a.time_iso || '')));
+      }
+    } catch (_) { /* pre-030 or transient — the brief must still load */ }
+
     // Phase 2D follow-up — surface mailboxes whose Gmail connection needs to be
     // redone (testing-mode OAuth app => refresh tokens for test users expire
     // periodically). The Settings card shows this too, but the morning brief is
