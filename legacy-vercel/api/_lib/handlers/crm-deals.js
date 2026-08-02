@@ -32,6 +32,19 @@ function isoDate(v) {
   return m ? `${m[1]}-${m[2]}-${m[3]}` : null;
 }
 
+// Pacific wall-clock parts (matches crm-deals-motion.js) so a booked event reads
+// the way the agent scheduled it regardless of the server's clock.
+const TZ = 'America/Los_Angeles';
+function laParts(date) {
+  const f = new Intl.DateTimeFormat('en-US', { timeZone: TZ, year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', hour12: false });
+  const p = {}; for (const part of f.formatToParts(date)) p[part.type] = part.value;
+  if (p.hour === '24') p.hour = '00';
+  return { y: +p.year, m: +p.month, d: +p.day, hour: +p.hour, minute: +p.minute };
+}
+const pad2 = (n) => String(n).padStart(2, '0');
+const ymd = (p) => `${p.y}-${pad2(p.m)}-${pad2(p.d)}`;
+function timeLabel(hour, minute) { const h12 = ((hour + 11) % 12) + 1; return `${h12}:${pad2(minute)} ${hour < 12 ? 'AM' : 'PM'}`; }
+
 // Buyer-side purchases we represent are live transactions too — include them,
 // tagged by `side`. We exclude only non-transaction rows (prospects/leads).
 const SIDES = ['listing', 'seller', 'both', 'buyer'];
@@ -45,7 +58,7 @@ export default async function handler(req, res) {
 
   try {
     const supa = adminClient();
-    const BASE = 'source_key, address, city, stage, side, agent, list_price, sale_price, coe_date, photo_url, video_url, matterport_url, escrow_officer, title_company, co_agent, milestones';
+    const BASE = 'id, source_key, address, city, stage, side, agent, list_price, sale_price, coe_date, photo_url, video_url, matterport_url, escrow_officer, title_company, co_agent, milestones';
     const COLS_FULL = BASE + ', mls_number, listing_meta, stage_override, photo_override, party_details';
     const COLS_MLS  = BASE + ', mls_number, stage_override, photo_override';
     const COLS_MIN  = BASE;
@@ -61,6 +74,7 @@ export default async function handler(req, res) {
 
     const todayMid = new Date(new Date().toISOString().slice(0, 10) + 'T12:00:00Z');
     const buckets = { offers: [], active: [], pending: [], preparing: [], closed: [], archived: [] };
+    const rowByDealId = new Map();   // deal uuid → escrow row, for calendar enrichment
 
     for (const d of (r.data || [])) {
       if (wantAgent && d.agent !== wantAgent && d.agent !== 'both') continue;
@@ -105,6 +119,8 @@ export default async function handler(req, res) {
         stage:      stage,
         base_stage: d.stage,
         contingencies,
+        events:     null,   // filled below for escrow rows
+        next_event: null,
         parties,
         party_summary: partySummary(parties)
       };
@@ -112,10 +128,64 @@ export default async function handler(req, res) {
       if (stage === 'dead')           buckets.archived.push(row);
       else if (stage === 'offer')     buckets.offers.push(row);
       else if (stage === 'listing')   buckets.active.push(row);
-      else if (stage === 'pending')   buckets.pending.push(row);
+      else if (stage === 'pending')   { buckets.pending.push(row); rowByDealId.set(d.id, row); }
       else if (stage === 'closed')    buckets.closed.push(row);
       else if (stage === 'preparing') buckets.preparing.push(row);
     }
+
+    // Calendar events → escrow rows. Tours/appointments carry only a lead_id;
+    // resolve lead_id → deal_parties → deal (the same wiring as the deals-motion
+    // ledger) so an inspection/appraisal/walk-through booked on the calendar
+    // shows on its deal. Scoped to the in-escrow (pending) rows to keep it light.
+    // Fully fail-soft: a missing calendar table degrades to no events.
+    try {
+      const pendingIds = [...rowByDealId.keys()];
+      if (pendingIds.length) {
+        const nowMs = Date.now();
+        const startISO = new Date(nowMs - 14 * 86400000).toISOString();   // small look-back
+        const endISO   = new Date(nowMs + 120 * 86400000).toISOString();  // ~4 months forward
+        const [partiesRes, toursRes, apptRes0] = await Promise.all([
+          supa.from('deal_parties').select('deal_id, lead_id').in('deal_id', pendingIds).then((x) => x, () => ({ data: [] })),
+          supa.from('tours').select('lead_id, scheduled_at, tour_type, status, leads(first_name,last_name), properties(address)')
+            .gte('scheduled_at', startISO).lt('scheduled_at', endISO).neq('status', 'cancelled').then((x) => x, () => ({ data: [] })),
+          supa.from('appointments').select('lead_id, title, kind, sub_kind, starts_at, leads(first_name,last_name)')
+            .gte('starts_at', startISO).lt('starts_at', endISO).then((x) => x, () => ({ data: [] }))
+        ]);
+        // sub_kind may be pre-migration — retry appointments without it.
+        let appts = apptRes0?.data;
+        if (apptRes0?.error && /sub_kind/i.test(apptRes0.error.message || '')) {
+          const { data } = await supa.from('appointments').select('lead_id, title, kind, starts_at, leads(first_name,last_name)').gte('starts_at', startISO).lt('starts_at', endISO);
+          appts = data || [];
+        }
+        appts = appts || [];
+        const leadToDeal = new Map();
+        for (const p of (partiesRes?.data || [])) if (p.lead_id && !leadToDeal.has(p.lead_id)) leadToDeal.set(p.lead_id, p.deal_id);
+
+        const evByDeal = new Map();
+        const pushEv = (id, ev) => { if (!evByDeal.has(id)) evByDeal.set(id, []); evByDeal.get(id).push(ev); };
+        for (const t of (toursRes?.data || [])) {
+          const id = t.lead_id ? leadToDeal.get(t.lead_id) : null; if (!id) continue;
+          const start = new Date(t.scheduled_at), p = laParts(start), prop = t.properties || {}, lead = t.leads || {};
+          pushEv(id, { label: t.tour_type === 'video' ? 'Video tour' : 'Tour',
+            vendor: prop.address ? String(prop.address).split(',')[0] : ([lead.first_name, lead.last_name].filter(Boolean).join(' ') || 'Client'),
+            iso: ymd(p), time: timeLabel(p.hour, p.minute), state: t.status === 'completed' ? 'complete' : (t.status === 'requested' ? 'scheduled' : 'confirmed'), kind: 'tour', ts: start.getTime() });
+        }
+        for (const a of appts) {
+          const id = a.lead_id ? leadToDeal.get(a.lead_id) : null; if (!id) continue;
+          const start = new Date(a.starts_at), p = laParts(start);
+          const label = a.kind === 'inspection' ? (a.sub_kind ? `${a.sub_kind} inspection` : 'Inspection')
+            : (a.title || (a.kind ? a.kind.charAt(0).toUpperCase() + a.kind.slice(1).replace(/_/g, ' ') : 'Event'));
+          pushEv(id, { label, vendor: null, iso: ymd(p), time: timeLabel(p.hour, p.minute), state: 'confirmed', kind: a.kind || 'event', ts: start.getTime() });
+        }
+        for (const [id, evs] of evByDeal) {
+          const row = rowByDealId.get(id); if (!row) continue;
+          evs.sort((a, b) => a.ts - b.ts);
+          row.events = evs.map((e) => ({ label: e.label, vendor: e.vendor, iso: e.iso, time: e.time, state: e.state, kind: e.kind }));
+          const next = evs.find((e) => e.ts >= Date.now() - 2 * 3600000);
+          row.next_event = next ? { label: next.label, iso: next.iso, time: next.time } : null;
+        }
+      }
+    } catch (_) { /* calendar enrichment is a bonus — never break the deals list */ }
 
     // Flat list + a group index of source_keys, so the UI can tab without
     // re-filtering and still hold one array of deals.

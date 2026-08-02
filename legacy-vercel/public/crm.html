@@ -3046,6 +3046,7 @@ body.lp-restyle {
     .dall-addr { font-family:var(--sans); font-size:13.5px; color:var(--ink); margin-top:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
     .dall-right { text-align:right; white-space:nowrap; }
     .dall-coe { font-size:11.5px; color:var(--ink-mute); }
+    .dall-next { font-size:11px; color:var(--brass); margin-top:2px; }
     .dall-open { font-family:var(--mono); font-size:10px; letter-spacing:.1em; text-transform:uppercase; color:var(--brass); }
     .dall-tools { margin-top:12px; font-family:var(--mono); font-size:10px; letter-spacing:.1em; text-transform:uppercase; color:var(--brass); text-decoration:none; border:1px solid var(--brass); padding:8px 13px; white-space:nowrap; }
     .dall-tools:hover { background:var(--brass); color:var(--shell); }
@@ -3105,7 +3106,9 @@ body.lp-restyle {
           +   '<div class="dall-addr">'+esc(d.address||d.source_key)+(d.city?' · '+esc(d.city):'')+'</div>'
           +   parties
           + '</div>'
-          + '<div class="dall-right">'+(coe?'<div class="dall-coe">'+coe+'</div>':'')+'<span class="dall-open">Open →</span></div>'
+          + '<div class="dall-right">'+(coe?'<div class="dall-coe">'+coe+'</div>':'')
+          +   (d.next_event?'<div class="dall-next" title="Next calendar event on this deal">▸ '+esc(d.next_event.label)+' · '+esc(d.next_event.iso)+(d.next_event.time?' '+esc(d.next_event.time):'')+'</div>':'')
+          +   '<span class="dall-open">Open →</span></div>'
           + '</div>';
       }
       function render(){
