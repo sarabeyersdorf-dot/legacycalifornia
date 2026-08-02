@@ -61,6 +61,7 @@ import roster            from '../_lib/handlers/crm-roster.js';
 import agentUpdates      from '../_lib/handlers/crm-agent-updates.js';
 import discardDraft      from '../_lib/handlers/crm-discard-draft.js';
 import dealsLite         from '../_lib/handlers/crm-deals-lite.js';
+import dealsUnified       from '../_lib/handlers/crm-deals.js';
 import dealsMotion        from '../_lib/handlers/crm-deals-motion.js';
 import messages           from '../_lib/handlers/crm-messages.js';
 import messageDelete      from '../_lib/handlers/crm-message-delete.js';
@@ -107,6 +108,7 @@ const TABLE = {
   'deal-portal-notes': dealPortalNotes,
   'agent-updates':     agentUpdates,
   'discard-draft':     discardDraft,
+  'deals':             dealsUnified,
   'deals-lite':        dealsLite,
   'deals-motion':      dealsMotion,
   'messages':          messages,
