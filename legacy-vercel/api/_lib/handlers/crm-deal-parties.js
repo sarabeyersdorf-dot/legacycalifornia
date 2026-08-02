@@ -19,11 +19,20 @@ const VALID_ROLES = ['seller', 'co-seller', 'buyer', 'co-buyer'];
 const roleToSection = (role) => ({ buyer: 'buyer', 'co-buyer': 'buyer2', seller: 'seller', 'co-seller': 'seller2' }[role] || 'buyer');
 
 async function loadDeal(supa, sourceKey, dealId) {
-  let q = supa.from('deals').select(DEAL_COLS);
-  q = dealId ? q.eq('id', dealId) : q.eq('source_key', sourceKey);
-  const { data, error } = await q.maybeSingle();
+  const run = (cols) => {
+    let q = supa.from('deals').select(cols);
+    q = dealId ? q.eq('id', dealId) : q.eq('source_key', sourceKey);
+    return q.maybeSingle();
+  };
+  // Prefer the reconcile marker (db/030); degrade if it isn't migrated yet.
+  let { data, error } = await run(DEAL_COLS + ', party_reconciled_at');
+  if (error && /party_reconciled_at/i.test(error.message || '')) ({ data, error } = await run(DEAL_COLS));
   return { deal: data || null, error };
 }
+
+// An overlay with any values that hasn't been reconciled into deals.json.
+const hasOverlay = (d) => !!(d && d.party_details && typeof d.party_details === 'object' && Object.keys(d.party_details).length);
+const isPending  = (d) => hasOverlay(d) && !d.party_reconciled_at;
 
 // The deal's linked CRM contacts (live name/phone/email) via deal_parties.
 async function linkedParties(supa, dealId) {
@@ -58,7 +67,10 @@ export default async function handler(req, res) {
         parties: resolveParties(deal),
         overlay: deal.party_details || {},
         linked:  await linkedParties(supa, deal.id),
-        base:    { escrow_officer: deal.escrow_officer || null, title_company: deal.title_company || null, co_agent: deal.co_agent || null, client: deal.listing_meta?.client || null }
+        base:    { escrow_officer: deal.escrow_officer || null, title_company: deal.title_company || null, co_agent: deal.co_agent || null, client: deal.listing_meta?.client || null },
+        // Cowork loop: has the agent's overlay been folded into deals.json yet?
+        pending_reconcile: isPending(deal),
+        reconciled_at:     deal.party_reconciled_at || null
       });
     }
 
@@ -115,14 +127,25 @@ export default async function handler(req, res) {
         if (lid) await supa.from('deal_parties').upsert({ deal_id: deal.id, lead_id: lid, role }, { onConflict: 'deal_id,lead_id' }).then(() => {}, () => {});
       }
 
-      const { error: uErr } = await supa.from('deals').update({ party_details: overlay }).eq('id', deal.id);
+      // Cowork loop: a plain {reconcile:true} marks the overlay folded into
+      // deals.json (drops it off the brief nudge). Any actual party edit resets
+      // it to null — there's fresh work for Cowork to reconcile.
+      const patch = { party_details: overlay };
+      patch.party_reconciled_at = (b?.reconcile === true) ? new Date().toISOString() : null;
+      let { error: uErr } = await supa.from('deals').update(patch).eq('id', deal.id);
+      if (uErr && /party_reconciled_at/i.test(uErr.message || '')) {
+        // db/030 not run yet — persist the overlay without the reconcile marker.
+        ({ error: uErr } = await supa.from('deals').update({ party_details: overlay }).eq('id', deal.id));
+      }
       if (uErr) {
         if (/party_details|column|schema cache/i.test(uErr.message || '')) return fail(res, 409, 'party_details column missing — run db/029_deal_party_details.sql');
         return fail(res, 500, uErr.message);
       }
 
       const { deal: fresh } = await loadDeal(supa, null, deal.id);
-      return ok(res, { saved: true, parties: resolveParties(fresh || deal), overlay, linked: await linkedParties(supa, deal.id) });
+      return ok(res, { saved: true, parties: resolveParties(fresh || deal), overlay, linked: await linkedParties(supa, deal.id),
+        pending_reconcile: isPending(fresh || { ...deal, party_details: overlay, party_reconciled_at: patch.party_reconciled_at }),
+        reconciled_at: (fresh && fresh.party_reconciled_at) || patch.party_reconciled_at || null });
     }
 
     return fail(res, 405, 'method_not_allowed');

@@ -820,16 +820,49 @@ export default async function handler(req, res) {
       dealsInTable = { total: (after || []).length, by_side_stage: bd };
     } catch (_) { /* diagnostic only */ }
 
-    // Cowork reconcile: any party/escrow details agents edited in the CRM live
-    // in deals.party_details (db/029) — a sync-safe overlay this sync never
-    // writes. Surface every non-empty overlay here so Cowork can fold the
-    // agent's structured people/escrow edits back into deals.json on its own
-    // schedule. Empty until the migration runs; diagnostic-only, never fatal.
+    // Cowork loop auto-reconcile (db/030): once deals.json reflects an agent's
+    // party overlay (Cowork folded it in), clear the pending flag so it drops
+    // off the brief nudge — closing the loop with no extra Cowork call.
+    // Conservative: mark reconciled only when EVERY value in the overlay appears
+    // in that deal's deals.json text (loose, punctuation-insensitive match, so
+    // "209-768-8277" matches "2097688277"). Values Cowork never carries (e.g. a
+    // TC the SSOT doesn't track) keep it pending — the agent can mark it done
+    // via {reconcile:true}. Fail-soft; pre-030 degrades to a no-op.
+    let partyReconciled = 0;
+    try {
+      const { data: overlays } = await supa.from('deals')
+        .select('id, source_key, party_details')
+        .not('party_details', 'is', null)
+        .is('party_reconciled_at', null);
+      const jsonById = new Map((data.deals || []).map((d) => [d.id, d]));
+      const strip = (s) => String(s).toLowerCase().replace(/[^a-z0-9@]/g, '');
+      for (const row of (overlays || [])) {
+        const ov = row.party_details;
+        if (!ov || !Object.keys(ov).length) continue;
+        const src = jsonById.get(row.source_key);
+        if (!src) continue;                          // deal left the feed — leave as-is
+        const hay = strip(JSON.stringify(src));
+        const vals = [];
+        for (const sec of Object.values(ov)) {
+          if (sec && typeof sec === 'object') { for (const [k, v] of Object.entries(sec)) if (k !== 'lead_id' && v) vals.push(v); }
+          else if (typeof sec === 'string' && sec) vals.push(sec);   // coe
+        }
+        if (vals.length && vals.every((v) => hay.includes(strip(v)))) {
+          await supa.from('deals').update({ party_reconciled_at: new Date().toISOString() }).eq('id', row.id).then(() => {}, () => {});
+          partyReconciled++;
+        }
+      }
+    } catch (_) { /* pre-030 or transient — non-fatal */ }
+
+    // Cowork reconcile: party/escrow overlays STILL pending (not yet folded into
+    // deals.json). Surface them so Cowork can fold each into deals.json on its
+    // own schedule. Empty until db/029 runs; diagnostic-only, never fatal.
     let partyEdits = [];
     try {
-      const { data: pe } = await supa.from('deals')
-        .select('source_key, address, party_details')
-        .not('party_details', 'is', null);
+      let peq = supa.from('deals').select('source_key, address, party_details').not('party_details', 'is', null);
+      // Prefer only-pending (db/030); if that column is absent, list all overlays.
+      const pend = await peq.is('party_reconciled_at', null);
+      const pe = pend.error ? (await supa.from('deals').select('source_key, address, party_details').not('party_details', 'is', null)).data : pend.data;
       partyEdits = (pe || [])
         .filter((r) => r.party_details && Object.keys(r.party_details).length)
         .map((r) => ({ source_key: r.source_key, address: r.address, party_details: r.party_details }));
@@ -851,8 +884,10 @@ export default async function handler(req, res) {
       spouses_related: spousesRelated,
       deal_errors: errors,
       deals_in_table: dealsInTable,
-      // Agent party/escrow edits awaiting reconciliation into deals.json.
+      // Agent party/escrow edits still awaiting reconciliation into deals.json,
+      // and how many the sync auto-reconciled this run (deals.json now covers them).
       party_edits: partyEdits,
+      party_reconciled: partyReconciled,
       ran_at: new Date().toISOString()
     });
   } catch (e) {

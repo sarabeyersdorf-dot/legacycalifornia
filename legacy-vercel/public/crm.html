@@ -2084,6 +2084,7 @@ body.lp-restyle {
     .dp-search-res button { display:block; width:100%; text-align:left; border:0; border-bottom:1px solid var(--rule-soft,#eee5d8); background:transparent; padding:8px 10px; font:inherit; font-size:13px; cursor:pointer; }
     .dp-search-res button:hover { background:var(--linen); }
     .dp-foot { display:flex; align-items:center; gap:12px; padding:14px 20px; border-top:1px solid var(--rule); }
+    .dp-recon { font-size:11px; color:var(--ink-mute); cursor:help; }
     .dp-save { font-family:var(--mono); font-size:11px; letter-spacing:.1em; text-transform:uppercase; padding:9px 16px; border:1px solid var(--ink); background:var(--ink); color:var(--shell); cursor:pointer; }
     .dp-save:disabled { opacity:.5; cursor:default; }
     .dp-msg { font-size:12.5px; color:var(--ink-mute); }
@@ -2196,7 +2197,7 @@ body.lp-restyle {
         var ov = document.createElement('div'); ov.className='dp-ov';
         ov.innerHTML = '<div class="dp-card"><div class="dp-card-h"><h3>People &amp; escrow</h3><button class="dp-card-x" aria-label="Close">×</button></div>'
           + '<div class="dp-body"><div style="padding:24px;color:var(--ink-mute);">Loading…</div></div>'
-          + '<div class="dp-foot"><button class="dp-save" disabled>Save</button><span class="dp-msg"></span></div></div>';
+          + '<div class="dp-foot"><button class="dp-save" disabled>Save</button><span class="dp-recon" data-dp-recon></span><span class="dp-msg"></span></div></div>';
         document.body.appendChild(ov);
         function close(){ if(ov.parentNode) ov.parentNode.removeChild(ov); document.removeEventListener('keydown',onKey); }
         function onKey(e){ if(e.key==='Escape') close(); }
@@ -2227,6 +2228,13 @@ body.lp-restyle {
             + SCHEMA.map(function(s){ return sectionHtml(s, overlay, base); }).join('')
             + '<div class="dp-sec"><div class="dp-sec-h"><b>Close of escrow (COE)</b></div><div class="dp-grid"><input type="date" data-dp="coe" value="'+esc((r.j.parties&&r.j.parties.coe)||'')+'"></div></div>';
           saveBtn.disabled = false;
+          // Cowork-loop status: is this overlay reflected in deals.json yet?
+          var recon = ov.querySelector('[data-dp-recon]');
+          if(recon){
+            if(r.j.pending_reconcile) recon.innerHTML = '<span title="Saved and shown here now — Cowork folds it into deals.json (the source of truth) on its next pass.">⏳ Not in deals.json yet</span>';
+            else if(r.j.reconciled_at) recon.innerHTML = '<span title="deals.json reflects these edits.">✓ In deals.json</span>';
+            else recon.innerHTML = '';
+          }
           wireLinkPickers(body);
           // "Use this" — seed the section's inputs from the deals.json prose,
           // only filling fields the agent hasn't already typed into.
