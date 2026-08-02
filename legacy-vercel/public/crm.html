@@ -2075,6 +2075,9 @@ body.lp-restyle {
     .dp-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:8px; }
     .dp-grid input { font:inherit; font-size:13px; padding:8px 10px; border:1px solid var(--rule); background:#fff; width:100%; }
     .dp-hint { font-size:11px; color:var(--ink-mute); margin-top:5px; font-style:italic; }
+    .dp-useprose { font-family:var(--mono); font-style:normal; font-size:9px; letter-spacing:.06em; text-transform:uppercase; border:1px solid var(--brass); background:transparent; color:var(--brass); cursor:pointer; padding:2px 7px; margin-left:4px; vertical-align:middle; }
+    .dp-useprose:hover:not(:disabled) { background:var(--brass); color:var(--shell); }
+    .dp-useprose:disabled { border-color:#2E5C3D; color:#2E5C3D; cursor:default; }
     .dp-linked { font-size:11px; color:#2E5C3D; margin-top:4px; }
     .dp-search { position:relative; margin-top:6px; }
     .dp-search-res { position:absolute; left:0; right:0; top:100%; background:#fff; border:1px solid var(--rule); max-height:210px; overflow:auto; z-index:5; box-shadow:0 8px 20px rgba(30,22,14,.14); }
@@ -2100,6 +2103,28 @@ body.lp-restyle {
         { key:'lender',  label:'Lender',     fields:['name','company','phone','email'] }
       ];
       var FLABEL = { name:'Name', company:'Company', brokerage:'Brokerage', phone:'Phone', email:'Email', officer:'Officer', number:'Escrow #' };
+      // Best-effort parse of a deals.json prose string into structured fields,
+      // so "Use this" can seed the form. Fuzzy by design — the agent reviews.
+      function parseProse(key, base){
+        var text = key==='escrow' ? (base && base.escrow_officer || '') : (key==='co_agent' ? (base && base.co_agent || '') : '');
+        if(!text) return {};
+        var out = {};
+        var em = text.match(/[^\s@]+@[^\s@]+\.[^\s@]+/); if(em) out.email = em[0];
+        var ph = text.match(/(?:\+?1[-.\s]?)?\(?\d{3}\)?[-.\s]?\d{3}[-.\s]?\d{4}/); if(ph) out.phone = ph[0].trim();
+        var comp = text.match(/\(([^)]+)\)/);                       // first parenthetical
+        var company = comp ? comp[1].split(',')[0].trim() : '';
+        if(key==='escrow'){
+          var num = text.match(/(?:escrow\s*#|#)\s*([A-Za-z0-9][A-Za-z0-9\-]*)/i); if(num) out.number = num[1];
+          out.officer = text.split(/[\(\-]|#/)[0].replace(/\s+/g,' ').trim();
+          out.company = company || (base && base.title_company) || '';
+        } else {                                                     // co_agent
+          out.name = text.split(/[\(\/]|,| - /)[0].replace(/\s+/g,' ').trim();
+          out.company = company;
+        }
+        // Drop empties.
+        Object.keys(out).forEach(function(k){ if(!out[k]) delete out[k]; });
+        return out;
+      }
       function telHref(p){ return String(p||'').replace(/[^0-9+]/g,''); }
       function contactBits(p){ var o=[]; if(p&&p.phone) o.push('<a href="tel:'+esc(telHref(p.phone))+'">'+esc(p.phone)+'</a>'); if(p&&p.email) o.push('<a href="mailto:'+esc(p.email)+'">'+esc(p.email)+'</a>'); return o.join(' · '); }
       function nameOf(p){ return (p && (p.name || p.officer || p.company)) || ''; }
@@ -2158,8 +2183,9 @@ body.lp-restyle {
         var inputs = s.fields.map(function(f){ return fieldInput(s.key,f,d[f]); }).join('');
         // deals.json prose hint for escrow / co-agent when no structured value yet.
         var hint='';
-        if(s.key==='escrow' && base && base.escrow_officer && !d.officer) hint='<div class="dp-hint">From deals.json: '+esc(base.escrow_officer)+(base.title_company?' — '+esc(base.title_company):'')+'</div>';
-        if(s.key==='co_agent' && base && base.co_agent && !d.name) hint='<div class="dp-hint">From deals.json: '+esc(base.co_agent)+'</div>';
+        var useBtn='<button type="button" class="dp-useprose" data-dp-useprose="'+esc(s.key)+'">Use this</button>';
+        if(s.key==='escrow' && base && base.escrow_officer && !d.officer) hint='<div class="dp-hint">From deals.json: '+esc(base.escrow_officer)+(base.title_company?' — '+esc(base.title_company):'')+' '+useBtn+'</div>';
+        if(s.key==='co_agent' && base && base.co_agent && !d.name) hint='<div class="dp-hint">From deals.json: '+esc(base.co_agent)+' '+useBtn+'</div>';
         return '<div class="dp-sec" data-dp-sec="'+esc(s.key)+'"><div class="dp-sec-h"><b>'+esc(s.label)+'</b>'+linkBtn+'</div>'
           + '<div class="dp-grid">'+inputs+'</div>'+linkedNote
           + (s.link?'<div class="dp-search" data-dp-search="'+esc(s.key)+'" style="display:none;"></div>':'')
@@ -2202,6 +2228,22 @@ body.lp-restyle {
             + '<div class="dp-sec"><div class="dp-sec-h"><b>Close of escrow (COE)</b></div><div class="dp-grid"><input type="date" data-dp="coe" value="'+esc((r.j.parties&&r.j.parties.coe)||'')+'"></div></div>';
           saveBtn.disabled = false;
           wireLinkPickers(body);
+          // "Use this" — seed the section's inputs from the deals.json prose,
+          // only filling fields the agent hasn't already typed into.
+          body.addEventListener('click', function(e){
+            var ub = e.target.closest('[data-dp-useprose]'); if(!ub) return;
+            e.preventDefault();
+            var key = ub.getAttribute('data-dp-useprose');
+            var parsed = parseProse(key, base);
+            var sec = body.querySelector('[data-dp-sec="'+key+'"]');
+            var filled = 0;
+            Object.keys(parsed).forEach(function(f){
+              var el = sec && sec.querySelector('[data-dp="'+key+'.'+f+'"]');
+              if(el && !el.value.trim() && parsed[f]){ el.value = parsed[f]; filled++; }
+            });
+            ub.textContent = filled ? '✓ Filled — review it' : 'Nothing to fill';
+            ub.disabled = true;
+          });
         });
 
         // Inline CRM-contact search for the linkable sections.
