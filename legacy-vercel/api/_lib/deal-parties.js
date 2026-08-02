@@ -31,15 +31,20 @@ export function resolveParties(d) {
   // Co-agent: overlay first; else the deals.json prose name.
   const coAgentBase = (d && d.co_agent) ? party({ name: d.co_agent }) : null;
 
+  // Deal representation (side): the agent's overlay override wins over the
+  // deals.json column, exactly like `coe` — so a correction persists across the
+  // hourly sync (which writes the column but never party_details).
+  const effSide = (ov.side && String(ov.side).trim()) || (d ? (d.side || null) : null);
+
   return {
     agent:   d ? (d.agent || null) : null,
-    side:    d ? (d.side || null) : null,
+    side:    effSide,
     coe:     (ov.coe && String(ov.coe).trim()) || (d ? (d.coe_date || null) : null),
     // The seller-side "client" name deals.json already carries (listing_meta).
     client_name: meta.client || null,
     buyer:    party(ov.buyer),
     buyer2:   party(ov.buyer2),
-    seller:   party(ov.seller) || (meta.client && (d?.side === 'seller' || d?.side === 'listing' || d?.side === 'both') ? party({ name: meta.client }) : null),
+    seller:   party(ov.seller) || (meta.client && (effSide === 'seller' || effSide === 'listing' || effSide === 'both') ? party({ name: meta.client }) : null),
     seller2:  party(ov.seller2),
     co_agent: party(ov.co_agent) || coAgentBase,
     tc:       party(ov.tc),
@@ -72,6 +77,12 @@ export function sanitizeOverlay(input) {
   for (const section of ['buyer', 'buyer2', 'seller', 'seller2', 'co_agent', 'tc', 'escrow', 'lender']) {
     const p = party(input[section]);
     if (p) out[section] = p;
+  }
+  // Deal representation override — only a known value; anything else is dropped
+  // (an explicit null in the raw body still clears the override in the handler).
+  if (input.side != null && String(input.side).trim() !== '') {
+    const s = String(input.side).trim().toLowerCase();
+    if (['buyer', 'seller', 'both'].includes(s)) out.side = s;
   }
   if (input.coe != null && String(input.coe).trim() !== '') {
     // Accept a plain, REAL calendar date (YYYY-MM-DD) only — reject impossible

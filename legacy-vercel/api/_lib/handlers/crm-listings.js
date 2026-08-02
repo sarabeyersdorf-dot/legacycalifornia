@@ -206,10 +206,13 @@ export default async function handler(req, res) {
       const photo = d.photo_override || d.photo_url || idxPhotoFor(d) || youtubeThumb(d.video_url);
       if (photo) photosMatched++;
       // Effective stage. The agent's stage_override (set from the Deals view)
-      // only applies while deals.json still has the deal at 'offer' — so
-      // flipping an accepted offer to escrow sticks until Cowork advances the
-      // deal in deals.json, then self-heals. Any other time, `stage` wins.
-      const stage = (d.stage === 'offer' && d.stage_override) ? d.stage_override : d.stage;
+      // applies while deals.json still has the deal at 'offer' — flipping an
+      // accepted offer to escrow, or an offer that fell through — OR at
+      // 'preparing', where the agent decides a listing WON'T go to market. Either
+      // way it self-heals once Cowork advances the deal in deals.json; any other
+      // time, the real `stage` wins.
+      const canOverride = d.stage === 'offer' || d.stage === 'preparing';
+      const stage = (canOverride && d.stage_override) ? d.stage_override : d.stage;
       const row = {
         source_key: d.source_key,
         address:    d.address,
@@ -228,6 +231,10 @@ export default async function handler(req, res) {
         has_video:  !!d.video_url,
         has_tour:   !!d.matterport_url,
         stage:      stage,
+        // The underlying deals.json stage, before any override — lets the
+        // archived (Fell through) card tell a collapsed OFFER from a listing the
+        // agent marked WON'T LIST, and restore each to its right bucket.
+        base_stage: d.stage,
         // Compliance intake status for the deal-card chip. 'complete' once Cowork
         // has written the attributes block; 'needed' while it hasn't. Only
         // meaningful for in-escrow deals (where the checklist consumes it) — the
