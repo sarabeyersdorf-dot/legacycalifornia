@@ -3047,6 +3047,9 @@ body.lp-restyle {
     .dall-right { text-align:right; white-space:nowrap; }
     .dall-coe { font-size:11.5px; color:var(--ink-mute); }
     .dall-next { font-size:11px; color:var(--brass); margin-top:2px; }
+    .dall-cont { font-size:11px; margin-top:2px; color:var(--ink-mute); }
+    .dall-cont-atrisk { color:#8A2C3B; font-weight:600; }
+    .lst-badge.dall-warn { background:#F6E3E8; color:#8A2C3B; border-color:#e6c3cd; }
     .dall-open { font-family:var(--mono); font-size:10px; letter-spacing:.1em; text-transform:uppercase; color:var(--brass); }
     .dall-tools { margin-top:12px; font-family:var(--mono); font-size:10px; letter-spacing:.1em; text-transform:uppercase; color:var(--brass); text-decoration:none; border:1px solid var(--brass); padding:8px 13px; white-space:nowrap; }
     .dall-tools:hover { background:var(--brass); color:var(--shell); }
@@ -3098,15 +3101,19 @@ body.lp-restyle {
         var coe = d.coe_date ? ('COE '+esc(d.coe_date)+(d.coe_days!=null?' · '+d.coe_days+'d':'')) : '';
         var ph = '<div class="dall-ph">'+(d.photo_url?'<img src="'+esc(d.photo_url)+'" alt="">':'')+'</div>';
         var parties = window.LegacyDealParties ? window.LegacyDealParties.summaryHtml(d.party_summary, d.source_key) : '';
+        var docsBadge = d.docs_missing ? '<span class="lst-badge dall-warn" title="Open compliance-file gaps">'+d.docs_missing+' doc'+(d.docs_missing===1?'':'s')+' missing</span>' : '';
+        // Next open (uncleared) contingency, earliest first.
+        var nc = (d.contingencies||[]).filter(function(c){ return c.state!=='cleared'&&c.iso; }).sort(function(a,b){ return String(a.iso).localeCompare(String(b.iso)); })[0];
         return '<div class="dall-row" data-dall-open="'+esc(d.source_key)+'" role="link" tabindex="0">'
           + ph
           + '<div class="dall-main"><div class="dall-top"><span class="dall-price">'+esc(fmtUSD(d.price))+'</span>'
           +   '<span class="lst-badge '+esc(d.stage==='dead'?'archived':(d.stage==='listing'?'active':d.stage))+'">'+esc(badge)+'</span>'
-          +   '<span class="lst-badge">'+esc(side)+'</span><span class="lst-badge">'+esc(agent)+'</span></div>'
+          +   '<span class="lst-badge">'+esc(side)+'</span><span class="lst-badge">'+esc(agent)+'</span>'+docsBadge+'</div>'
           +   '<div class="dall-addr">'+esc(d.address||d.source_key)+(d.city?' · '+esc(d.city):'')+'</div>'
           +   parties
           + '</div>'
           + '<div class="dall-right">'+(coe?'<div class="dall-coe">'+coe+'</div>':'')
+          +   (nc?'<div class="dall-cont dall-cont-'+esc(nc.state)+'" title="Next open contingency">◷ '+esc(nc.label)+' · '+esc(nc.iso)+'</div>':'')
           +   (d.next_event?'<div class="dall-next" title="Next calendar event on this deal">▸ '+esc(d.next_event.label)+' · '+esc(d.next_event.iso)+(d.next_event.time?' '+esc(d.next_event.time):'')+'</div>':'')
           +   '<span class="dall-open">Open →</span></div>'
           + '</div>';
