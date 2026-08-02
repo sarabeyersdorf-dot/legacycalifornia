@@ -74,6 +74,7 @@ body.lp-restyle {
     <div class="app-side-section">Deals &amp; offers</div>
     <nav class="app-side-nav">
       <a href="#" onclick="showView(event,'listings')" data-lst-nav="offers" title="Your offers and in-escrow deals — tab across stages inside">Deals <span class="pill" data-roster-offers>—</span></a>
+      <a href="#" onclick="showView(event,'dealsall')" title="Every deal in one list — filter across all stages">All deals <span class="pill" data-dealsall-c>—</span></a>
     </nav>
 
     <div class="app-side-section">Listings</div>
@@ -3023,6 +3024,127 @@ body.lp-restyle {
     .set-signout:hover { background: #8B3A3A; color: var(--shell); }
     @media (max-width: 900px) { .set { padding: 18px; } }
     </style>
+    <!-- ============================================================
+         ALL DEALS — Phase 4 unified overview. Read-only single list of
+         every deal from GET /api/crm/deals, filterable by stage. Does not
+         touch the existing Deals & Offers / Deals-in-motion / Listings views.
+         ============================================================ -->
+    <style>
+    .dall { max-width: 1080px; }
+    .dall-chips { display:flex; gap:6px; flex-wrap:wrap; margin-bottom:16px; }
+    .dall-chip { font-family:var(--sans); font-size:13px; padding:7px 13px; border:1px solid var(--rule); background:transparent; color:var(--ink-soft); cursor:pointer; }
+    .dall-chip.on { background:var(--ink); color:var(--shell); border-color:var(--ink); }
+    .dall-chip .ct { font-family:var(--mono); font-size:10px; opacity:.7; margin-left:5px; }
+    .dall-list { display:flex; flex-direction:column; border:1px solid var(--rule); background:var(--shell); }
+    .dall-row { display:grid; grid-template-columns:64px 1fr auto; gap:14px; align-items:center; padding:12px 16px; border-bottom:1px solid var(--rule-soft,#eee5d8); cursor:pointer; }
+    .dall-row:last-child { border-bottom:none; }
+    .dall-row:hover { background:var(--linen); }
+    .dall-ph { width:64px; height:48px; background:var(--linen); overflow:hidden; display:flex; align-items:center; justify-content:center; }
+    .dall-ph img { width:100%; height:100%; object-fit:cover; }
+    .dall-main { min-width:0; }
+    .dall-top { display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+    .dall-price { font-family:var(--serif); font-size:16px; color:var(--ink); font-weight:600; }
+    .dall-addr { font-family:var(--sans); font-size:13.5px; color:var(--ink); margin-top:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .dall-right { text-align:right; white-space:nowrap; }
+    .dall-coe { font-size:11.5px; color:var(--ink-mute); }
+    .dall-open { font-family:var(--mono); font-size:10px; letter-spacing:.1em; text-transform:uppercase; color:var(--brass); }
+    @media (max-width:720px){ .dall-row{ grid-template-columns:48px 1fr; } .dall-ph{ width:48px; height:40px; } .dall-right{ grid-column:2; text-align:left; } }
+    </style>
+    <section class="crm-view" data-view="dealsall">
+      <div class="dall">
+        <div class="cur-head"><div>
+          <span class="label-cap" style="color:var(--brass);">Every deal, one place</span>
+          <h1 class="h-section" style="font-size:38px;margin-top:6px;">All deals.</h1>
+        </div></div>
+        <div class="dall-chips" data-dall-chips></div>
+        <div class="dall-list" data-dall-list><div class="cur-empty" style="padding:20px;">Loading deals…</div></div>
+      </div>
+    </section>
+    <script>
+    /* All deals — unified read-only overview over GET /api/crm/deals. Isolated
+       from the other deal views; reuses window.LegacyDealParties for the people
+       summary + ✎ edit, and window.openDealByKey to open a deal. */
+    (function(){
+      'use strict';
+      var root = document.querySelector('.crm-view[data-view="dealsall"]');
+      if(!root) return;
+      var esc = function(s){ return (s==null?'':String(s)).replace(/[&<>"]/g,function(c){return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]); }); };
+      function fmtUSD(n){ if(n==null) return '—'; var v=Math.abs(+n); if(v>=1e6) return '$'+(+n/1e6).toFixed(v>=1e7?0:2)+'M'; if(v>=1e3) return '$'+Math.round(+n/1e3)+'K'; return '$'+Math.round(+n); }
+      var GROUPS = [['all','All'],['offers','Offers'],['pending','In escrow'],['active','On market'],['preparing','Preparing'],['closed','Closed'],['archived','Archived']];
+      var STAGE_LABEL = { offer:'Offer', pending:'In escrow', listing:'On market', preparing:'Preparing', closed:'Closed', dead:'Archived' };
+      var state = { data:null, filter:'all', loading:false };
+      function byKey(){ var m={}; (state.data&&state.data.deals||[]).forEach(function(d){ m[d.source_key]=d; }); return m; }
+      function currentRows(){
+        if(!state.data) return [];
+        if(state.filter==='all') return state.data.deals||[];
+        var m=byKey(); return (state.data.groups&&state.data.groups[state.filter]||[]).map(function(k){ return m[k]; }).filter(Boolean);
+      }
+      function renderChips(){
+        var box=root.querySelector('[data-dall-chips]'); if(!box||!state.data) return;
+        var c=state.data.counts||{};
+        box.innerHTML = GROUPS.filter(function(g){ return g[0]==='all' || (c[g[0]]||0)>0; }).map(function(g){
+          var n = g[0]==='all' ? (state.data.deals||[]).length : (c[g[0]]||0);
+          return '<button class="dall-chip'+(state.filter===g[0]?' on':'')+'" data-dall-f="'+g[0]+'">'+esc(g[1])+'<span class="ct">'+n+'</span></button>';
+        }).join('');
+      }
+      function row(d){
+        var badge = STAGE_LABEL[d.stage]||d.stage;
+        var side = d.side==='buyer'?'Buying':(d.side==='both'?'Dual':'Selling');
+        var agent = d.agent==='james'?'James':(d.agent==='both'?'Sara & James':'Sara');
+        var coe = d.coe_date ? ('COE '+esc(d.coe_date)+(d.coe_days!=null?' · '+d.coe_days+'d':'')) : '';
+        var ph = '<div class="dall-ph">'+(d.photo_url?'<img src="'+esc(d.photo_url)+'" alt="">':'')+'</div>';
+        var parties = window.LegacyDealParties ? window.LegacyDealParties.summaryHtml(d.party_summary, d.source_key) : '';
+        return '<div class="dall-row" data-dall-open="'+esc(d.source_key)+'" role="link" tabindex="0">'
+          + ph
+          + '<div class="dall-main"><div class="dall-top"><span class="dall-price">'+esc(fmtUSD(d.price))+'</span>'
+          +   '<span class="lst-badge '+esc(d.stage==='dead'?'archived':(d.stage==='listing'?'active':d.stage))+'">'+esc(badge)+'</span>'
+          +   '<span class="lst-badge">'+esc(side)+'</span><span class="lst-badge">'+esc(agent)+'</span></div>'
+          +   '<div class="dall-addr">'+esc(d.address||d.source_key)+(d.city?' · '+esc(d.city):'')+'</div>'
+          +   parties
+          + '</div>'
+          + '<div class="dall-right">'+(coe?'<div class="dall-coe">'+coe+'</div>':'')+'<span class="dall-open">Open →</span></div>'
+          + '</div>';
+      }
+      function render(){
+        renderChips();
+        var list=root.querySelector('[data-dall-list]'); if(!list) return;
+        var rows=currentRows();
+        list.innerHTML = rows.length ? rows.map(row).join('') : '<div class="cur-empty" style="padding:20px;">No deals in this group.</div>';
+      }
+      function setPill(){ var p=document.querySelector('[data-dealsall-c]'); if(p&&state.data) p.textContent=String((state.data.deals||[]).length); }
+      function load(){
+        if(state.loading) return; state.loading=true;
+        fetch('/api/crm/deals',{credentials:'include'}).then(function(r){ return r.ok?r.json():null; }).then(function(j){
+          state.loading=false;
+          if(!j||!j.deals){ if(!state.data){ var l=root.querySelector('[data-dall-list]'); if(l) l.innerHTML='<div class="cur-empty" style="padding:20px;">Could not load deals — try again.</div>'; } return; }
+          state.data=j; setPill(); render();
+        }).catch(function(){ state.loading=false; if(!state.data){ var l=root.querySelector('[data-dall-list]'); if(l) l.innerHTML='<div class="cur-empty" style="padding:20px;">Could not load deals — try again.</div>'; } });
+      }
+      root.addEventListener('click', function(e){
+        var chip=e.target.closest('[data-dall-f]');
+        if(chip){ state.filter=chip.getAttribute('data-dall-f'); render(); return; }
+        var open=e.target.closest('[data-dall-open]');
+        if(open){ var k=open.getAttribute('data-dall-open'); if(k&&typeof window.openDealByKey==='function') window.openDealByKey(k); return; }
+      });
+      root.addEventListener('keydown', function(e){
+        if(e.key!=='Enter'&&e.key!==' ') return;
+        if(e.target.closest('[data-parties-edit]')) return;
+        var open=e.target.closest('[data-dall-open]');
+        if(open){ e.preventDefault(); var k=open.getAttribute('data-dall-open'); if(k&&typeof window.openDealByKey==='function') window.openDealByKey(k); }
+      });
+      // Keep a row's people summary current after an edit from anywhere.
+      document.addEventListener('deal-parties:saved', function(ev){
+        if(!ev.detail||!state.data) return;
+        var d=(state.data.deals||[]).filter(function(x){ return x.source_key===ev.detail.source_key; })[0];
+        if(!d) return; d.parties=ev.detail.parties;
+        if(window.LegacyDealParties) d.party_summary=window.LegacyDealParties.summarize(ev.detail.parties);
+        render();
+      });
+      document.addEventListener('crm:view', function(ev){ if(ev.detail&&ev.detail.name==='dealsall') load(); });
+      if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', load); else load();
+    })();
+    </script>
+
     <section class="crm-view" data-view="settings">
       <div class="set">
         <div class="cur-head"><div>
@@ -3108,7 +3230,7 @@ body.lp-restyle {
 </div>
 
 <script>
-var VIEW_LABELS = { today:'Today', tasks:'Tasks', updates:'Notes', inbox:'Inbox', messages:'Inbox', pipe:'Pipeline', cal:'Calendar', seq:'Sequences', curate:'Curated', rep:'Reports', broker:'Broker', listings:'Deals & offers', command:'Deal command center', people:'Roster' };
+var VIEW_LABELS = { today:'Today', tasks:'Tasks', updates:'Notes', inbox:'Inbox', messages:'Inbox', pipe:'Pipeline', cal:'Calendar', seq:'Sequences', curate:'Curated', rep:'Reports', broker:'Broker', listings:'Deals & offers', dealsall:'All deals', command:'Deal command center', people:'Roster' };
 window.__viewStack = window.__viewStack || [];
 function navBack() {
   var prev = window.__viewStack.pop();
