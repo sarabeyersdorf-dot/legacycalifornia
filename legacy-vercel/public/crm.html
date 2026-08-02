@@ -74,15 +74,12 @@ body.lp-restyle {
 
     <div class="app-side-section">Deals &amp; offers</div>
     <nav class="app-side-nav">
-      <a href="#" onclick="showView(event,'listings')" data-lst-nav="offers">Offers <span class="pill" data-roster-offers>—</span></a>
-      <a href="#" onclick="showView(event,'listings')" data-lst-nav="pending">In escrow <span class="pill" data-roster-pending>—</span></a>
-      <a href="#" onclick="showView(event,'listings')" data-portal-mode data-lst-nav="pending" title="Click any deal to open its client-facing portal">Seller portals</a>
+      <a href="#" onclick="showView(event,'listings')" data-lst-nav="offers" title="Your offers and in-escrow deals — tab across stages inside">Deals <span class="pill" data-roster-offers>—</span></a>
     </nav>
 
     <div class="app-side-section">Listings</div>
     <nav class="app-side-nav">
-      <a href="#" onclick="showView(event,'roster')" title="All brokerage listings, filterable by agent">All listings</a>
-      <a href="#" onclick="showView(event,'roster')" data-rost-nav="preparing" title="Future listings not yet on market">Preparing to list</a>
+      <a href="#" onclick="showView(event,'roster')" title="All brokerage listings, filterable by agent and stage">Listings</a>
     </nav>
 
     <div class="app-side-section">Import</div>
@@ -1691,6 +1688,7 @@ body.lp-restyle {
           <button class="chip" data-lst="preparing">Preparing <span class="c" data-lst-c-preparing>—</span></button>
           <button class="chip" data-lst="closed">Closed <span class="c" data-lst-c-closed>—</span></button>
           <button class="chip" data-lst="archived">Fell through <span class="c" data-lst-c-archived>—</span></button>
+          <button class="chip" data-portal-toggle style="margin-left:auto;" title="Toggle on, then click any deal to open its client-facing seller portal instead of the console">Seller portals</button>
         </div>
         <div class="lst-grid" data-lst-grid><div class="cur-empty">Loading your listings…</div></div>
       </div>
@@ -4974,6 +4972,14 @@ function selectLead(el) {
     if (dead) { e.stopPropagation(); closeMenus(); fellThrough(dead.getAttribute('data-dead'), dead); return; }
     var rest = e.target.closest('[data-restore]');
     if (rest) { e.stopPropagation(); restoreDeal(rest.getAttribute('data-restore'), rest); return; }
+    var pt = e.target.closest('[data-portal-toggle]');
+    if (pt) {
+      state.portalMode = !state.portalMode;
+      pt.classList.toggle('on', state.portalMode);
+      var ph = root.querySelector('[data-portal-hint]');
+      if (ph) ph.style.display = state.portalMode ? '' : 'none';
+      return;
+    }
     var cardEl = e.target.closest('.lst-card[data-source-key]');
     if (cardEl) { openCard(cardEl); return; }
     var t = e.target.closest('[data-lst]'); if (!t) return;
@@ -5001,6 +5007,8 @@ function selectLead(el) {
     state.portalMode = !!nav.hasAttribute && nav.hasAttribute('data-portal-mode');
     var hint = root.querySelector('[data-portal-hint]');
     if (hint) hint.style.display = state.portalMode ? '' : 'none';
+    var ptog = root.querySelector('[data-portal-toggle]');
+    if (ptog) ptog.classList.toggle('on', state.portalMode);
     var want = nav.getAttribute && nav.getAttribute('data-lst-nav');
     if (want) { state.tab = want; root.querySelectorAll('[data-lst]').forEach(function (b) { b.classList.toggle('on', b.getAttribute('data-lst') === want); }); setTimeout(render, 0); }
   });
