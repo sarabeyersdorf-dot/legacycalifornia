@@ -69,10 +69,7 @@ body.lp-restyle {
 
     <div class="app-side-section">Roster</div>
     <nav class="app-side-nav">
-      <a href="#" onclick="showView(event,'people')" data-people-bucket="leads">Leads <span class="pill" data-roster-leads>—</span></a>
-      <a href="#" onclick="showView(event,'people')" data-people-bucket="clients">Clients <span class="pill" data-roster-clients>—</span></a>
-      <a href="#" onclick="showView(event,'people')" data-people-bucket="past">Past clients <span class="pill" data-roster-past>—</span></a>
-      <a href="#" onclick="showView(event,'people')" data-people-bucket="sphere">Sphere <span class="pill" data-roster-sphere>—</span></a>
+      <a href="#" onclick="showView(event,'people')" data-people-bucket="leads">Contacts <span class="pill" data-roster-leads title="New leads">—</span></a>
     </nav>
 
     <div class="app-side-section">Deals &amp; offers</div>
@@ -1910,10 +1907,10 @@ body.lp-restyle {
           <input data-people-q placeholder="Search this list…" style="margin-left:auto;min-width:220px;font:inherit;font-size:14px;padding:9px 12px;border:1px solid var(--rule);background:var(--shell);">
         </div>
         <div style="display:flex;gap:8px;margin-bottom:14px;">
-          <button class="feed-chip" data-people-tab="leads">Leads</button>
-          <button class="feed-chip" data-people-tab="clients">Clients</button>
-          <button class="feed-chip" data-people-tab="past">Past clients</button>
-          <button class="feed-chip" data-people-tab="sphere">Sphere</button>
+          <button class="feed-chip" data-people-tab="leads">Leads <span data-roster-leads style="opacity:.6;">—</span></button>
+          <button class="feed-chip" data-people-tab="clients">Clients <span data-roster-clients style="opacity:.6;">—</span></button>
+          <button class="feed-chip" data-people-tab="past">Past clients <span data-roster-past style="opacity:.6;">—</span></button>
+          <button class="feed-chip" data-people-tab="sphere">Sphere <span data-roster-sphere style="opacity:.6;">—</span></button>
         </div>
         <div data-people-list style="background:var(--shell);border:1px solid var(--rule);"></div>
       </div>
