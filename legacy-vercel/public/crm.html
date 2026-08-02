@@ -59,8 +59,7 @@ body.lp-restyle {
     <nav class="app-side-nav">
       <a href="#" class="active" onclick="showView(event,'today')">Today <span class="pill" data-roster-today>—</span></a>
       <a href="#" onclick="showView(event,'cowork')">Cowork <span class="pill" data-roster-tasks>—</span></a>
-      <a href="#" onclick="showView(event,'inbox')">Inbox <span class="pill" data-roster-inbox>—</span></a>
-      <a href="#" onclick="showView(event,'messages')">Messages <span class="pill" data-msg-unread style="display:none;background:#8B3A3A;color:#fff;">0</span></a>
+      <a href="#" onclick="showView(event,'inbox')" data-inbound-nav title="Everyone who reached out — lead threads and the raw inbound stream in one place">Inbox <span class="pill" data-msg-unread style="display:none;background:#8B3A3A;color:#fff;">0</span></a>
       <a href="#" onclick="showView(event,'pipe')">Pipeline</a>
       <a href="#" onclick="showView(event,'cal')">Calendar <span class="pill" data-roster-calendar>—</span></a>
       <a href="#" onclick="showView(event,'seq')">Sequences</a>
@@ -740,7 +739,21 @@ body.lp-restyle {
     <!-- ============================================================
          INBOX VIEW
          ============================================================ -->
+    <!-- Shared inbound sub-tabs: Threads (lead conversations) + All inbound
+         (the raw who-reached-out stream). One sidebar "Inbox" item, two tabs —
+         so there's a single place to answer "who needs a reply." -->
+    <style>
+    .inbound-tabs { display:flex; gap:8px; align-items:center; padding:16px 36px 0; }
+    .inb-tab { font-family:var(--sans); font-size:14px; font-weight:600; letter-spacing:.01em; color:var(--ink-soft); background:transparent; border:none; border-bottom:2px solid transparent; padding:8px 2px; margin-right:14px; cursor:pointer; }
+    .inb-tab:hover { color:var(--ink); }
+    .inb-tab.on { color:var(--ink); border-bottom-color:var(--brass); }
+    @media (max-width:900px){ .inbound-tabs { padding:14px 18px 0; } }
+    </style>
     <section class="crm-view" data-view="inbox">
+      <div class="inbound-tabs" role="tablist" aria-label="Inbound">
+        <button class="inb-tab on" type="button" data-inb-tab="inbox" onclick="showView(event,'inbox')">Threads</button>
+        <button class="inb-tab" type="button" data-inb-tab="messages" onclick="showView(event,'messages')">All inbound</button>
+      </div>
       <div class="inbox-shell">
 
         <!-- LEAD LIST · search lives once in the fixed topbar -->
@@ -802,6 +815,10 @@ body.lp-restyle {
     @media (max-width: 900px) { .msgs { padding: 18px; } }
     </style>
     <section class="crm-view" data-view="messages">
+      <div class="inbound-tabs" role="tablist" aria-label="Inbound">
+        <button class="inb-tab" type="button" data-inb-tab="inbox" onclick="showView(event,'inbox')">Threads</button>
+        <button class="inb-tab on" type="button" data-inb-tab="messages" onclick="showView(event,'messages')">All inbound</button>
+      </div>
       <div class="msgs">
         <div class="cur-head"><div>
           <span class="label-cap" style="color:var(--brass);">Everyone who reached out</span>
@@ -3027,7 +3044,7 @@ body.lp-restyle {
 </div>
 
 <script>
-var VIEW_LABELS = { today:'Today', tasks:'Tasks', updates:'Notes', inbox:'Leads & inbox', messages:'Messages', pipe:'Pipeline', cal:'Calendar', seq:'Sequences', curate:'Curated', rep:'Reports', broker:'Broker', listings:'Deals & offers', command:'Deal command center', people:'Roster' };
+var VIEW_LABELS = { today:'Today', tasks:'Tasks', updates:'Notes', inbox:'Inbox', messages:'Inbox', pipe:'Pipeline', cal:'Calendar', seq:'Sequences', curate:'Curated', rep:'Reports', broker:'Broker', listings:'Deals & offers', command:'Deal command center', people:'Roster' };
 window.__viewStack = window.__viewStack || [];
 function navBack() {
   var prev = window.__viewStack.pop();
@@ -3072,6 +3089,16 @@ function showView(e, name, fromBack) {
   // modules used to sniff specific click targets and missed entry paths.
   try { document.dispatchEvent(new CustomEvent('crm:view', { detail: { name } })); } catch (_) {}
 }
+// Inbox = Threads (lead conversations) + All inbound (raw stream) under ONE
+// sidebar item. Whenever either underlying view opens — by sidebar click, tab
+// click, or programmatically — keep the "Inbox" nav lit and the right tab on.
+document.addEventListener('crm:view', function (ev) {
+  var n = ev && ev.detail && ev.detail.name;
+  if (n !== 'inbox' && n !== 'messages') return;
+  var nav = document.querySelector('[data-inbound-nav]');
+  if (nav) { document.querySelectorAll('.app-side-nav a').forEach(function (a) { a.classList.remove('active'); }); nav.classList.add('active'); }
+  document.querySelectorAll('[data-inb-tab]').forEach(function (b) { b.classList.toggle('on', b.getAttribute('data-inb-tab') === n); });
+});
 document.addEventListener('click', function (e) {
   if (e.target.closest('[data-nav-back]')) { e.preventDefault(); navBack(); }
 });
