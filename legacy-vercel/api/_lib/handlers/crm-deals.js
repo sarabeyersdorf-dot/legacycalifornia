@@ -44,6 +44,12 @@ function laParts(date) {
 const pad2 = (n) => String(n).padStart(2, '0');
 const ymd = (p) => `${p.y}-${pad2(p.m)}-${pad2(p.d)}`;
 function timeLabel(hour, minute) { const h12 = ((hour + 11) % 12) + 1; return `${h12}:${pad2(minute)} ${hour < 12 ? 'AM' : 'PM'}`; }
+// deal_timeline_items.status → contingency chip state (matches deals-motion).
+function contStateFrom(status) {
+  if (status === 'done' || status === 'waived' || status === 'na') return 'cleared';
+  if (status === 'action') return 'atrisk';
+  return 'ontrack';
+}
 
 // Buyer-side purchases we represent are live transactions too — include them,
 // tagged by `side`. We exclude only non-transaction rows (prospects/leads).
@@ -119,8 +125,9 @@ export default async function handler(req, res) {
         stage:      stage,
         base_stage: d.stage,
         contingencies,
-        events:     null,   // filled below for escrow rows
-        next_event: null,
+        events:       null,   // filled below for escrow rows
+        next_event:   null,
+        docs_missing: 0,      // open compliance-file gaps (escrow rows)
         parties,
         party_summary: partySummary(parties)
       };
@@ -144,12 +151,16 @@ export default async function handler(req, res) {
         const nowMs = Date.now();
         const startISO = new Date(nowMs - 14 * 86400000).toISOString();   // small look-back
         const endISO   = new Date(nowMs + 120 * 86400000).toISOString();  // ~4 months forward
-        const [partiesRes, toursRes, apptRes0] = await Promise.all([
+        const [partiesRes, toursRes, apptRes0, itemsRes, docsRes] = await Promise.all([
           supa.from('deal_parties').select('deal_id, lead_id').in('deal_id', pendingIds).then((x) => x, () => ({ data: [] })),
           supa.from('tours').select('lead_id, scheduled_at, tour_type, status, leads(first_name,last_name), properties(address)')
             .gte('scheduled_at', startISO).lt('scheduled_at', endISO).neq('status', 'cancelled').then((x) => x, () => ({ data: [] })),
           supa.from('appointments').select('lead_id, title, kind, sub_kind, starts_at, leads(first_name,last_name)')
-            .gte('starts_at', startISO).lt('starts_at', endISO).then((x) => x, () => ({ data: [] }))
+            .gte('starts_at', startISO).lt('starts_at', endISO).then((x) => x, () => ({ data: [] })),
+          // Richer contingencies (preferred over the milestones fallback) + the
+          // deal's open compliance-file gaps, same sources as the deals-motion ledger.
+          supa.from('deal_timeline_items').select('deal_id, title, due_date, status, kind').in('deal_id', pendingIds).eq('kind', 'contingency').then((x) => x, () => ({ data: [] })),
+          supa.from('deal_documents').select('deal_id').eq('status', 'missing').in('deal_id', pendingIds).then((x) => x, () => ({ data: [] }))
         ]);
         // sub_kind may be pre-migration — retry appointments without it.
         let appts = apptRes0?.data;
@@ -184,6 +195,19 @@ export default async function handler(req, res) {
           const next = evs.find((e) => e.ts >= Date.now() - 2 * 3600000);
           row.next_event = next ? { label: next.label, iso: next.iso, time: next.time } : null;
         }
+
+        // Contingencies from the curated timeline (preferred over the milestones
+        // fallback already on the row) + open compliance-file gaps per deal.
+        const contByDeal = new Map();
+        for (const it of (itemsRes?.data || [])) {
+          if (!contByDeal.has(it.deal_id)) contByDeal.set(it.deal_id, []);
+          contByDeal.get(it.deal_id).push({ label: it.title || 'Contingency', iso: isoDate(it.due_date), state: contStateFrom(it.status) });
+        }
+        for (const [id, conts] of contByDeal) { const row = rowByDealId.get(id); if (row && conts.length) row.contingencies = conts; }
+
+        const docsMissing = new Map();
+        for (const doc of (docsRes?.data || [])) docsMissing.set(doc.deal_id, (docsMissing.get(doc.deal_id) || 0) + 1);
+        for (const [id, row] of rowByDealId) row.docs_missing = docsMissing.get(id) || 0;
       }
     } catch (_) { /* calendar enrichment is a bonus — never break the deals list */ }
 
