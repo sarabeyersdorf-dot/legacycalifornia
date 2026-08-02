@@ -1,6 +1,6 @@
 {
-  "version": 4.2,
-  "lastUpdated": "2026-08-01",
+  "version": 4.3,
+  "lastUpdated": "2026-08-02",
   "updatedBy": "briefing-agent",
   "tasks": [
     {
@@ -573,19 +573,19 @@
       "agent": "sara",
       "client": "Skyline",
       "title": "ShowingTime showing request — 467 Skyline Dr, Sunday 7/26 1:00 PM; confirm or decline via ShowingTime app. Also: HomeLight property info packet viewed 7/25 (interest signal).",
-      "done": false
+      "done": true
     },
     {
       "agent": "both",
       "client": "Wendell",
       "title": "CRITICAL — Order to Sell (bankruptcy court approval) received 2026-07-24 7:57 PM from Audrey Burton / attorney Ken Fugate ('You are good to go'). James forwarded to Sara. THIS IS Day 0 — all contingency and COE clocks start 2026-07-24. Confirm Day 0 with Ken Fugate and escrow officer Amanda Boitano (Placer Title).",
-      "done": false
+      "done": true
     },
     {
       "agent": "both",
       "client": "Wendell",
       "title": "Closing documents and funds must route to Chapter 13 trustee Tracy Updike (P.O. Box 11550, South Bend IN 46634, case #25-31761 In re Marshall Guthrie) per attorney Ken Fugate — NOT to seller directly. Update escrow instructions with Amanda Boitano (Placer Title).",
-      "done": false
+      "done": true
     },
     {
       "agent": "sara",
@@ -700,15 +700,15 @@
       "title": "LATIGO COE 7/28 — URGENT: Send BRBC to Ashley Cuslidge (acuslidge@placertitle.com / 209-736-9553). Ashley requested 3:05 PM 7/28. Buyers signing at Placer Title today.",
       "note": "COE day 7/28. Buyers at Placer 11am. Send BRBC immediately. Added 2026-07-28.",
       "dateAdded": "2026-07-28",
-      "done": false
+      "done": true
     },
     {
       "agent": "sara",
       "client": "Latigo",
       "title": "Latigo: COE TODAY 7/28 — monitor for fund & record confirmation. Kim Hesser (Prime Residential) expects same-day. ETA1 buffer through 7/29. Post-COE: update deal stage to closed in CRM.",
-      "note": "Closing statement + wiring instructions sent to Castles 3:09 PM 7/28 with Kim CC'd. Added 2026-07-28.",
+      "note": "Closing statement + wiring instructions sent to Castles 3:09 PM 7/28 with Kim CC'd. Added 2026-07-28. CLOSED 7/28.",
       "dateAdded": "2026-07-28",
-      "done": false
+      "done": true
     },
     {
       "agent": "sara",
@@ -770,9 +770,9 @@
       "agent": "sara",
       "client": "Wendell",
       "title": "Wendell: Confirm Day 0 date with James/Audry — clockStart in CRM is null. Order to Sell is in Ex (confirmed). If written notice was delivered to buyer on 7/24, set clockStart to 2026-07-24. This starts all contingency clocks.",
-      "note": "Order to Sell doc confirmed in Wendell Ex. clockStart still null in deals.json. Must confirm official delivery date before updating. Added 2026-07-28.",
+      "note": "Order to Sell doc confirmed in Wendell Ex. clockStart still null in deals.json. Must confirm official delivery date before updating. Added 2026-07-28. CLOSED 7/31 — moot.",
       "dateAdded": "2026-07-28",
-      "done": false
+      "done": true
     },
     {
       "agent": "sara",
@@ -784,13 +784,41 @@
       "agent": "james",
       "client": "Wendell",
       "title": "CLOSING TONIGHT — after mobile notary signing: text Amanda Boitano (aboitano@placertitle.com) to confirm deed recording; update CRM closingDate + stage to closed once recorded",
-      "done": false
+      "done": true
     },
     {
       "agent": "sara",
       "client": "Admin",
       "title": "Sheep Ranch escrow P-698773 — call/text Sean Moffat for seller signature on cancellation; buyer signed 7/7, Sean said he'd sign but no response since 7/10",
       "done": false
+    },
+    {
+      "agent": "sara",
+      "client": "433",
+      "title": "🔴 Zoom TUE 8/4 10 AM: Neriah Davis + Clayton (lender) — Clayton says price reduction (ADD3 $1.3M→$1.2M) may no longer be needed. Come prepared: carry-back note current status, what happens to ADD3 if rescinded, assignment of rents notarization timing, loan approval update.",
+      "done": false,
+      "dateAdded": "2026-08-02"
+    },
+    {
+      "agent": "sara",
+      "client": "Wendell",
+      "title": "Review James's 'wendell commission' email re buyer-broker compensation discrepancy — James drafted message to David and Stacy about HUD shortfall; confirm approach and wording before James sends.",
+      "done": false,
+      "dateAdded": "2026-08-02"
+    },
+    {
+      "agent": "james",
+      "client": "Baldwin",
+      "title": "🔴 COE TOMORROW 8/3 — call Chicago Title NOW (FSST-5312600364, Veronica Barragan or Kim McCray) to confirm closing on track; FHA 203(k): confirm lender wire received + final docs in hand; also check with Kim Hesser (khesser@primeres.com, 209-768-8277).",
+      "done": false,
+      "dateAdded": "2026-08-02"
+    },
+    {
+      "agent": "james",
+      "client": "Wendell",
+      "title": "Wendell post-close: Get one buyer to sign SBSA — listing-side TC Audrey flagged outstanding buyer signature during file review 7/31. Chase for complete broker file.",
+      "done": false,
+      "dateAdded": "2026-08-02"
     }
   ],
   "deals": [
