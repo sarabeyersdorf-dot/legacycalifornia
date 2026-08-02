@@ -2185,7 +2185,20 @@ body.lp-restyle {
         api('deal-parties?deal='+encodeURIComponent(sourceKey)).then(function(r){
           if(!r.ok){ body.innerHTML='<div style="padding:24px;color:#8A2C3B;">'+esc((r.j&&r.j.error)||'Could not load.')+'</div>'; return; }
           var overlay = r.j.overlay||{}, base = r.j.base||{};
-          body.innerHTML = SCHEMA.map(function(s){ return sectionHtml(s, overlay, base); }).join('')
+          // Deal representation (which side this deal is): editable, saved into
+          // the sync-safe overlay so a correction sticks across the hourly sync.
+          var curSide = String((r.j.parties&&r.j.parties.side)||'').toLowerCase();
+          if (curSide==='listing') curSide='seller';
+          var sideOpt = function(v,l){ return '<option value="'+v+'"'+(curSide===v?' selected':'')+'>'+l+'</option>'; };
+          var sideSec = '<div class="dp-sec"><div class="dp-sec-h"><b>Deal representation</b></div>'
+            + '<div class="dp-grid"><select data-dp-side style="font:inherit;font-size:13px;padding:8px 10px;border:1px solid var(--rule);background:#fff;width:100%;">'
+            + '<option value="">— not set —</option>'
+            + sideOpt('buyer','Representing the buyer')
+            + sideOpt('seller','Representing the seller')
+            + sideOpt('both','Dual — representing both sides')
+            + '</select></div></div>';
+          body.innerHTML = sideSec
+            + SCHEMA.map(function(s){ return sectionHtml(s, overlay, base); }).join('')
             + '<div class="dp-sec"><div class="dp-sec-h"><b>Close of escrow (COE)</b></div><div class="dp-grid"><input type="date" data-dp="coe" value="'+esc((r.j.parties&&r.j.parties.coe)||'')+'"></div></div>';
           saveBtn.disabled = false;
           wireLinkPickers(body);
@@ -2233,6 +2246,7 @@ body.lp-restyle {
             details[s.key] = any?obj:null;   // null clears the section server-side
           });
           var coeEl = body.querySelector('[data-dp="coe"]'); details.coe = coeEl && coeEl.value ? coeEl.value : null;
+          var sideEl = body.querySelector('[data-dp-side]'); details.side = sideEl && sideEl.value ? sideEl.value : null; // '' clears the override
           saveBtn.disabled=true; msg.textContent='Saving…';
           api('deal-parties',{ method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({ deal:sourceKey, party_details:details }) }).then(function(r){
             if(r.ok && r.j && r.j.saved){ msg.textContent='Saved.'; if(typeof onSaved==='function') onSaved(r.j.parties); setTimeout(close,400); }
@@ -4786,9 +4800,22 @@ function selectLead(el) {
           '</div>' +
         '</div>' +
         '</div>';
+    } else if (state.tab === 'preparing') {
+      var kp = esc(d.source_key || '');
+      // A listing the agent decides WON'T go to market. Same sync-safe
+      // stage_override='dead' as a fell-through offer — reversible, and it drops
+      // off both the Deals→Preparing tab and the brokerage roster at once.
+      accept = '<div class="lst-actions">' +
+        '<div class="lst-drop">' +
+          '<button class="lst-drop-btn" type="button" data-menu="' + kp + '" aria-haspopup="true" aria-expanded="false" aria-label="More listing actions">⋯</button>' +
+          '<div class="lst-drop-menu" data-menu-for="' + kp + '" role="menu">' +
+            '<button class="lst-drop-item danger" type="button" role="menuitem" data-dead="' + kp + '">Won’t list — remove</button>' +
+          '</div>' +
+        '</div>' +
+        '</div>';
     } else if (state.tab === 'archived') {
       accept = '<div class="lst-actions">' +
-        '<button class="lst-restore" data-restore="' + esc(d.source_key || '') + '">Restore to offers</button>' +
+        '<button class="lst-restore" data-restore="' + esc(d.source_key || '') + '">Restore</button>' +
         '</div>';
     }
     var lc = (window.LegacyDealColors && window.LegacyDealColors.get(d.source_key)) || null;
@@ -4803,7 +4830,7 @@ function selectLead(el) {
     return '<div class="lst-card" data-source-key="' + esc(d.source_key || '') + '"' + (lc ? ' style="border-top:5px solid ' + lc.border + ';"' : '') + ' role="link" tabindex="0">' + ph + '<div class="bd">' +
       '<div class="pr">' + esc(fmtUSD(d.price)) + '</div>' +
       '<div class="ad">' + esc(d.address || '') + (d.city ? ' · ' + esc(d.city) : '') + '</div>' +
-      '<div class="mt"><span class="lst-badge ' + state.tab + '">' + badge(state.tab) + '</span>' + sideBadge +
+      '<div class="mt"><span class="lst-badge ' + state.tab + '">' + ((state.tab === 'archived' && d.base_stage === 'preparing') ? 'Won’t list' : badge(state.tab)) + '</span>' + sideBadge +
         '<span class="lst-badge">' + (d.agent === 'james' ? 'James' : 'Sara') + '</span>' + tour + intake + '</div>' +
       (d.coe_date ? '<div style="font-size:11px;color:var(--ink-mute);">COE ' + esc(d.coe_date) + '</div>' : '') +
       (window.LegacyDealParties ? window.LegacyDealParties.summaryHtml(d.party_summary, d.source_key) : '') +
@@ -4881,11 +4908,18 @@ function selectLead(el) {
     (state.data[toKey] = state.data[toKey] || []).unshift(moved);
     return moved;
   }
-  // Fell through → soft-archive the offer (stage_override='dead'). Reversible.
+  // Soft-archive via stage_override='dead' (reversible). Serves two cases that
+  // share the exact same mechanism: an OFFER that fell through, and a PREPARING
+  // listing the agent won't take to market ("Won't list").
   async function fellThrough(sourceKey, btn) {
     if (!sourceKey) return;
-    if (!window.confirm('Mark this offer as fallen through? It moves to “Fell through” and leaves the active pipeline. You can restore it later.')) return;
-    btn.disabled = true; btn.textContent = 'Archiving…';
+    var fromPreparing = state.tab === 'preparing';
+    var confirmMsg = fromPreparing
+      ? 'Remove this from “Preparing to list”? It moves to Fell through (archived) and drops off the roster too. You can restore it any time.'
+      : 'Mark this offer as fallen through? It moves to “Fell through” and leaves the active pipeline. You can restore it later.';
+    if (!window.confirm(confirmMsg)) return;
+    var restoreLabel = fromPreparing ? 'Won’t list — remove' : 'Fell through';
+    btn.disabled = true; btn.textContent = fromPreparing ? 'Removing…' : 'Archiving…';
     try {
       var res = await fetch('/api/crm/deal-stage', {
         method: 'POST', credentials: 'include',
@@ -4894,20 +4928,22 @@ function selectLead(el) {
       });
       var j = await res.json().catch(function () { return {}; });
       if (res.ok && j && j.updated) {
-        moveRow(sourceKey, 'offers', 'archived', 'dead');
+        moveRow(sourceKey, fromPreparing ? 'preparing' : 'offers', 'archived', 'dead');
         refreshCounts();
         render();
-        if (window.Legacy && window.Legacy.toast) window.Legacy.toast('Offer moved to Fell through.', true);
+        if (window.Legacy && window.Legacy.toast) window.Legacy.toast(fromPreparing ? 'Removed — now in Fell through.' : 'Offer moved to Fell through.', true);
       } else {
-        btn.disabled = false; btn.textContent = 'Fell through';
-        alert((j && j.error) || 'Could not archive the offer.');
+        btn.disabled = false; btn.textContent = restoreLabel;
+        alert((j && j.error) || 'Could not archive this deal.');
       }
     } catch (err) {
-      btn.disabled = false; btn.textContent = 'Fell through';
-      alert('Network error archiving the offer.');
+      btn.disabled = false; btn.textContent = restoreLabel;
+      alert('Network error archiving this deal.');
     }
   }
-  // Restore a fell-through offer back to Offers (clears the override).
+  // Restore an archived deal (clears the override). It goes back to whichever
+  // bucket it came from — a fell-through offer to Offers, a won't-list listing to
+  // Preparing — read from base_stage so do/undo are symmetric.
   async function restoreDeal(sourceKey, btn) {
     if (!sourceKey) return;
     btn.disabled = true; btn.textContent = 'Restoring…';
@@ -4919,16 +4955,18 @@ function selectLead(el) {
       });
       var j = await res.json().catch(function () { return {}; });
       if (res.ok && j && j.updated) {
-        moveRow(sourceKey, 'archived', 'offers', 'offer');
+        var d0 = dealByKey(sourceKey);
+        var toPreparing = d0 && d0.base_stage === 'preparing';
+        moveRow(sourceKey, 'archived', toPreparing ? 'preparing' : 'offers', toPreparing ? 'preparing' : 'offer');
         refreshCounts();
         render();
-        if (window.Legacy && window.Legacy.toast) window.Legacy.toast('Offer restored.', true);
+        if (window.Legacy && window.Legacy.toast) window.Legacy.toast(toPreparing ? 'Restored to Preparing.' : 'Offer restored.', true);
       } else {
-        btn.disabled = false; btn.textContent = 'Restore to offers';
-        alert((j && j.error) || 'Could not restore the offer.');
+        btn.disabled = false; btn.textContent = 'Restore';
+        alert((j && j.error) || 'Could not restore this deal.');
       }
     } catch (err) {
-      btn.disabled = false; btn.textContent = 'Restore to offers';
+      btn.disabled = false; btn.textContent = 'Restore';
       alert('Network error restoring the offer.');
     }
   }
@@ -4938,7 +4976,8 @@ function selectLead(el) {
     var rows = (state.data && state.data[state.tab]) || [];
     var emptyMsg = state.tab === 'offers' ? 'No open offers. Cowork adds properties as offers go out.'
                  : state.tab === 'pending' ? 'Nothing in escrow right now.'
-                 : state.tab === 'archived' ? 'No offers have fallen through. Ones you mark “Fell through” land here — restorable, docs stay in Zipforms.'
+                 : state.tab === 'archived' ? 'Nothing archived. Offers you mark “Fell through” and listings you mark “Won’t list” land here — restorable, docs stay in Zipforms.'
+                 : state.tab === 'preparing' ? 'Nothing preparing to list. Use a card’s ⋯ menu to remove one you won’t take to market.'
                  : 'No ' + state.tab + ' deals.';
     grid.innerHTML = rows.length ? rows.map(card).join('') : '<div class="cur-empty">' + emptyMsg + '</div>';
   }
