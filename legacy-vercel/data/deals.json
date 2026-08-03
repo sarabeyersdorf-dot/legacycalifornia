@@ -1,19 +1,37 @@
 {
-  "version": 4.3,
-  "lastUpdated": "2026-08-02",
+  "version": 4.4,
+  "lastUpdated": "2026-08-03",
   "updatedBy": "briefing-agent",
   "tasks": [
     {
       "agent": "sara",
       "client": "433",
+      "title": "🔴 433 ESCROW CANCELLED — Neriah Davis email 8/2 8PM: Elizabeth Dawson withdrawing (Montessori school cash-flow crisis). Steps: (1) call Herfords FIRST; (2) reply to Neriah (neriahd@gmail.com, 209-728-7136); (3) call Ashley Cuslidge/Placer Title to open cancellation; (4) cancel 8/5 walkthrough. Loan contingency open through 8/5 — buyer can walk with $12K EMD. Tomorrow's 10AM Zoom with Neriah + Clayton is now about the cancellation.",
+      "done": false,
+      "due": "2026-08-03",
+      "source_key": "433-buyer-cancellation-respond"
+    },
+    {
+      "agent": "james",
+      "client": "Baldwin",
+      "title": "🔴 Baldwin COE IS TODAY 8/3 — call Chicago Title (FSST-5312600364, Kim McCray/Veronica Barragan) and Kim Hesser (209-768-8277) to confirm closing is happening; CR2 (appraisal/loan/insurance) not yet filed; if COE cannot close today get extension drafted immediately",
+      "done": false,
+      "due": "2026-08-03",
+      "source_key": "baldwin-coe-today-status"
+    },
+    {
+      "agent": "sara",
+      "client": "433",
       "title": "Review assignment of rents deed — Yvonne Heryford sent scanned doc (7/30 AM); prepare final version for Herfords to sign before COE 8/10",
-      "done": false
+      "done": true,
+      "note": "Moot — escrow cancelled 8/2 per Neriah Davis email (buyer withdrawal)"
     },
     {
       "agent": "sara",
       "client": "433",
       "title": "Confirm pest credit dollar amount with Elizabeth — path agreed (pest + shed row; contractor work post-close); get credit amount in writing before 8/5 walkthrough",
-      "done": false
+      "done": true,
+      "note": "Moot — escrow cancelled 8/2 per Neriah Davis email"
     },
     {
       "agent": "james",
