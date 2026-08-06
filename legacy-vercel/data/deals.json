@@ -1,15 +1,16 @@
 {
-  "version": 4.4,
-  "lastUpdated": "2026-08-03",
+  "version": 4.5,
+  "lastUpdated": "2026-08-06",
   "updatedBy": "briefing-agent",
   "tasks": [
     {
       "agent": "sara",
       "client": "433",
       "title": "🔴 433 ESCROW CANCELLED — Neriah Davis email 8/2 8PM: Elizabeth Dawson withdrawing (Montessori school cash-flow crisis). Steps: (1) call Herfords FIRST; (2) reply to Neriah (neriahd@gmail.com, 209-728-7136); (3) call Ashley Cuslidge/Placer Title to open cancellation; (4) cancel 8/5 walkthrough. Loan contingency open through 8/5 — buyer can walk with $12K EMD. Tomorrow's 10AM Zoom with Neriah + Clayton is now about the cancellation.",
-      "done": false,
+      "done": true,
       "due": "2026-08-03",
-      "source_key": "433-buyer-cancellation-respond"
+      "source_key": "433-buyer-cancellation-respond",
+      "note": "Steps completed 8/3-8/4: called Heryfords, replied to Neriah, notified Ashley Cuslidge (escrow), cancelled walkthrough. Cancellation addendum out for Heryford signatures per Neriah 8/4 4:30PM. New task: 433-cancel-addendum-track."
     },
     {
       "agent": "james",
@@ -37,7 +38,8 @@
       "agent": "james",
       "client": "Baldwin",
       "title": "🔴 COE 8/3 = 4 days — call Kim Hesser today for loan/appraisal status; confirm contractor bid; CR2 needed before closing",
-      "done": false
+      "done": true,
+      "note": "Stale 8/6 — superseded; CR2 confirmed doc-backed 7/19 by reconcile API; COE 8/3 status unknown, new task: baldwin-coe-confirm"
     },
     {
       "agent": "james",
@@ -49,7 +51,8 @@
       "agent": "sara",
       "client": "Skyline",
       "title": "Kerstin Breidenthal showing Sat 8/1 1PM — confirm appointment; get Scott Greiner (7/26) feedback if not yet received",
-      "done": false
+      "done": true,
+      "note": "Showing date 8/1 has passed — marked done 8/6"
     },
     {
       "agent": "james",
@@ -281,7 +284,8 @@
       "agent": "james",
       "client": "Baldwin",
       "title": "CR#1 only removed the INSPECTION contingency — appraisal/loan/title/insurance still open; prepare the remaining Buyer Contingency Removal for Shomari to sign once the 203(k) loan clears",
-      "done": false
+      "done": true,
+      "note": "Stale 8/6 — CR2 confirmed doc-backed done 2026-07-19 by timeline reconcile API (appraisal + loan contingencies removed)"
     },
     {
       "agent": "james",
@@ -322,7 +326,8 @@
       "agent": "sara",
       "client": "Baldwin",
       "title": "CRM Timeline tab: REJECT the 3 auto-proposals for cont_appraisal, cont_insurance, cont_loan — James confirmed 7/19 that CR1 (7/13) removed inspection only; go to Baldwin deal in CRM > Timeline tab to reject these",
-      "done": false
+      "done": true,
+      "note": "Stale 8/6 — CR2 confirmed doc-backed done 7/19 by timeline reconcile; appraisal and loan contingency proposals auto-filed"
     },
     {
       "agent": "sara",
@@ -335,7 +340,8 @@
       "agent": "james",
       "client": "Baldwin",
       "title": "Baldwin needs CR2 from buyer covering appraisal, loan, and insurance contingencies before COE 8/3 — check RPA for deadlines and coordinate with buyer's agent on timing",
-      "done": false
+      "done": true,
+      "note": "Done — CR2 (appraisal + loan) confirmed doc-backed filed 2026-07-19 by timeline reconcile API"
     },
     {
       "agent": "sara",
@@ -501,8 +507,9 @@
       "agent": "sara",
       "client": "433 Hwy 4",
       "title": "Chase buyer signature on LA AVID in Homeligh — Sara added her AVID to the Homeligh disclosure package 7/24 and notified Neriah; Elizabeth Dawson (buyer) still needs to sign. Follow up with Neriah Davis (neriahd@gmail.com) to confirm buyer reviews and signs the AVID in Homeligh.",
-      "done": false,
-      "dateAdded": "2026-07-24"
+      "done": true,
+      "dateAdded": "2026-07-24",
+      "note": "Moot 8/6 — deal cancelling per Neriah Davis 8/4; buyer Elizabeth Dawson withdrawing via loan contingency"
     },
     {
       "agent": "sara",
@@ -585,7 +592,8 @@
       "agent": "james",
       "client": "695 Feather",
       "title": "URGENT: Escrow amendment re prelim item #12 (OC Title, Tanya Salgado, sent 7/24 9:18 PM) — needs buyer (Ashley Robinson) AND seller (Dee Bradley) signatures; James acknowledged 7/24 but not confirmed complete; get both sides signed and returned to Tanya ASAP",
-      "done": false
+      "done": true,
+      "note": "Done — MH Addendum (prelim item #12) fully executed via Authentisign 7/25 8:59 PM (Ashley Robinson + Dee Bradley both signed)"
     },
     {
       "agent": "sara",
@@ -609,13 +617,15 @@
       "agent": "sara",
       "client": "433 Hwy 4",
       "title": "ETA3 fully executed 2026-07-24 (all parties signed per Glide). SUPERSEDES private-note task. NEW: review SFA Neriah Davis sent 7/24 — verify it requires 2nd DOT to record simultaneously with 1st (Placer Title/Ashley Cuslidge requirement; prior private-note structure was rejected by underwriting). Then get Herfords to sign ADD3 (price $1.2M) + SFA.",
-      "done": false
+      "done": true,
+      "note": "Moot 8/6 — deal cancelling; buyer Elizabeth Dawson withdrawing via loan contingency per Neriah 8/2"
     },
     {
       "agent": "james",
       "client": "Baldwin",
       "title": "CRITICAL RISK flagged 2026-07-24: COE 8/3 at real risk. No loan confirmation from Kim Hesser. No contractor bid back (outreach to COASTCOUNTRYCONST@gmail.com 7/23, no reply). No appraisal requested. Extension may be overdue. No BIW on remaining inspections. Resolve today: call Kim, follow up contractor, confirm appraisal ordered.",
-      "done": false
+      "done": true,
+      "note": "Stale 8/6 — superseded; CR2 confirmed filed 7/19; COE status now tracked by baldwin-coe-confirm task"
     },
     {
       "agent": "sara",
@@ -692,17 +702,17 @@
       "agent": "sara",
       "client": "433 Hwy 4",
       "title": "433: Coordinate tenant Dana ↔ buyer Elizabeth Dawson meeting — Dana avail Mon 7/28 after 2pm / Thu 7/31 before 10am / Fri 8/1 all day; Elizabeth expected late August; contact Neriah Davis to schedule",
-      "note": "Dana (yoga studio tenant) must meet Elizabeth Dawson (buyer) per access protocol. Neriah Davis (neriahd@gmail.com) coordinating. Added 2026-07-27.",
+      "note": "Moot 8/6 — deal cancelling; buyer Elizabeth Dawson withdrawing via loan contingency per Neriah 8/2.",
       "dateAdded": "2026-07-27",
-      "done": false
+      "done": true
     },
     {
       "agent": "sara",
       "client": "433 Hwy 4",
       "title": "433: Confirm Jim Heryford signed ADD3 ($1.2M price reduction) + SFA ($100K 2nd DOT seller carry) — Yvonne signed 7/24 via Authentisign; Jim status unconfirmed. SFA requires 2nd DOT to record simultaneously with 1st at closing (Placer Title underwriting requirement).",
-      "note": "Check with Neriah Davis (neriahd@gmail.com). Ashley Cuslidge at Placer Title confirmed simultaneous 2nd DOT recording required — lender's original 30-day post-close plan rejected by underwriting. Added 2026-07-27.",
+      "note": "Moot 8/6 — deal cancelling; buyer Elizabeth Dawson withdrawing via loan contingency per Neriah 8/2.",
       "dateAdded": "2026-07-27",
-      "done": false
+      "done": true
     },
     {
       "agent": "sara",
@@ -748,9 +758,9 @@
       "agent": "both",
       "client": "CRM",
       "title": "CRM: 7 pending timeline approvals need manual decision — Latigo: cont_loan; 433: nhd/cont_inspection/cont_title/cont_insurance; Baldwin: cont_appraisal/cont_insurance/cont_loan. CRM → Timeline tab → Approvals. Reconcile engine did not auto-apply any (conservative).",
-      "note": "Timeline reconcile run 7/28: auto_applied=[]. All 7 proposals require Sara/James decision. Added 2026-07-28.",
+      "note": "Stale 8/6 — Latigo closed 7/28; Baldwin CR2 confirmed doc-backed 7/19; 433 deal cancelling. Reconcile 8/6 auto-filed Baldwin appraisal+loan proposals. Remaining 433 proposals (loan cont + walkthrough) should be REJECTED in CRM.",
       "dateAdded": "2026-07-28",
-      "done": false
+      "done": true
     },
     {
       "agent": "sara",
@@ -796,7 +806,8 @@
       "agent": "sara",
       "client": "433",
       "title": "Reply to Neriah Davis re: pest credit documentation method — Neriah asked 7/29 how to proceed; Elizabeth agreed to credit for cosmetic/cutting/painting (own contractor post-close); propose ADM or escrow holdback instruction",
-      "done": false
+      "done": true,
+      "note": "Moot 8/6 — deal cancelling per Neriah 8/2; buyer withdrawing"
     },
     {
       "agent": "james",
@@ -814,8 +825,9 @@
       "agent": "sara",
       "client": "433",
       "title": "🔴 Zoom TUE 8/4 10 AM: Neriah Davis + Clayton (lender) — Clayton says price reduction (ADD3 $1.3M→$1.2M) may no longer be needed. Come prepared: carry-back note current status, what happens to ADD3 if rescinded, assignment of rents notarization timing, loan approval update.",
-      "done": false,
-      "dateAdded": "2026-08-02"
+      "done": true,
+      "dateAdded": "2026-08-02",
+      "note": "Past — Zoom 8/4 10AM was about cancellation; deal now cancelling per buyer withdrawal"
     },
     {
       "agent": "sara",
@@ -828,8 +840,9 @@
       "agent": "james",
       "client": "Baldwin",
       "title": "🔴 COE TOMORROW 8/3 — call Chicago Title NOW (FSST-5312600364, Veronica Barragan or Kim McCray) to confirm closing on track; FHA 203(k): confirm lender wire received + final docs in hand; also check with Kim Hesser (khesser@primeres.com, 209-768-8277).",
-      "done": false,
-      "dateAdded": "2026-08-02"
+      "done": true,
+      "dateAdded": "2026-08-02",
+      "note": "Stale 8/6 — COE date 8/3 has passed; status unknown (no email confirmation); see baldwin-coe-confirm task"
     },
     {
       "agent": "james",
@@ -837,6 +850,51 @@
       "title": "Wendell post-close: Get one buyer to sign SBSA — listing-side TC Audrey flagged outstanding buyer signature during file review 7/31. Chase for complete broker file.",
       "done": false,
       "dateAdded": "2026-08-02"
+    },
+    {
+      "agent": "sara",
+      "client": "433",
+      "title": "🔴 433 CANCELLATION: Get signed cancellation addendum from Neriah/Ashley. Neriah confirmed 8/4 4:30PM it's out for Heryford signatures. Once signed: change stage to cancelled, notify MLS, re-list property.",
+      "done": false,
+      "due": "2026-08-06",
+      "source_key": "433-cancel-addendum-track",
+      "dateAdded": "2026-08-06"
+    },
+    {
+      "agent": "sara",
+      "client": "433",
+      "title": "433 pest work appt 8/11 1PM (Joel Lawson) — decide: keep (useful for re-listing) or cancel. Sara confirmed 'Perfect' 8/4 AM before cancellation notice was sent.",
+      "done": false,
+      "due": "2026-08-06",
+      "source_key": "433-pest-appt-decision",
+      "dateAdded": "2026-08-06"
+    },
+    {
+      "agent": "james",
+      "client": "Baldwin",
+      "title": "🔴 Baldwin COE was 8/3 (3 days ago) — CONFIRM: did it close? CR2 (appraisal/loan) doc-backed done 7/19, deal was legally clear. Call Chicago Title (FSST-5312600364) or Kim Hesser (209-768-8277).",
+      "done": false,
+      "due": "2026-08-06",
+      "source_key": "baldwin-coe-confirm",
+      "dateAdded": "2026-08-06"
+    },
+    {
+      "agent": "james",
+      "client": "695 Feather",
+      "title": "695 Feather: Contact Tanya Salgado (tanyas@octitle.com, OC Title #2473532-TS) for COE date. Also chase Dee Bradley (dee@caltel.com) for seller disclosures: TDS, SPQ, NHD, LA AVID.",
+      "done": false,
+      "due": "2026-08-07",
+      "source_key": "695-feather-coe-date",
+      "dateAdded": "2026-08-06"
+    },
+    {
+      "agent": "sara",
+      "client": "Skyline",
+      "title": "Confirm 8/14 12PM showing via ShowingTime — 467 Skyline Dr, Arnold CA, $89,500.",
+      "done": false,
+      "due": "2026-08-06",
+      "source_key": "skyline-showing-0814",
+      "dateAdded": "2026-08-06"
     }
   ],
   "deals": [
