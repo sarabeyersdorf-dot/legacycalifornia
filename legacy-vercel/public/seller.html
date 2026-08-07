@@ -6,7 +6,47 @@
 <title>Your Sale · Legacy Seller Portal</title>
 <link rel="stylesheet" href="legacy.css">
 <link rel="stylesheet" href="legacy-app.css">
+<!-- lg design tokens (--lg-*) + fonts, so the re-theme below resolves -->
+<link rel="stylesheet" href="legacy-ui.css">
 <style>
+/* --------------------------------------------------------------------------
+   lg re-theme — the seller portal shipped with its own pine-green / cool-paper
+   / DM Sans identity. Re-point its --lp-* source tokens (which legacy-app.css
+   uses directly) at the warm lg system so the portal matches the marketing
+   site + buyer dashboard: warm cream, terracotta + gold accents, Cormorant +
+   Manrope. Structure — rounded cards, pills, soft shadows — is already lg-like
+   and untouched; only the palette + fonts shift. Defined on :root AFTER
+   legacy-app.css so both the direct --lp-* uses and the generic aliases
+   (--shell, --ink, --brass … which derive from --lp-*) follow.
+-------------------------------------------------------------------------- */
+body.lp-restyle {
+  --lp-paper:       var(--lg-cream);
+  --lp-card:        var(--lg-white);
+  --lp-card-shared: var(--lg-tint);
+  --lp-line:        #E7DBC6;            /* warm hairline (was cool grey) */
+  --lp-line-soft:   #F1E8D7;
+  --lp-ink:         var(--lg-ink);
+  --lp-ink-soft:    var(--lg-ink-mute);
+  --lp-pine:        var(--lg-ink);      /* dark panels → warm ink */
+  --lp-pine-soft:   var(--lg-tint);     /* pale green tint → warm tint */
+  --lp-terracotta:  var(--lg-a1);       /* safe terracotta on light */
+  --lp-gold:        var(--lg-c2);       /* gold accent — reads on the dark panels */
+  --lp-green:       var(--lg-a1);       /* green links/ticks → terracotta */
+  --lp-black:       var(--lg-ink);
+  --lp-serif:       var(--lg-serif);
+  --lp-sans:        var(--lg-sans);     /* DM Sans → Manrope */
+  /* the portal's "formal document" fonts → the site's Cormorant + Manrope */
+  --serif-doc:      var(--lg-serif);    /* was Libre Caslon */
+  --sans-doc:       var(--lg-sans);     /* was Source Sans 3 */
+  /* generic literals in legacy-app.css that aren't derived from --lp-* */
+  --vellum:         var(--lg-sand);
+  --ink-2:          var(--lg-ink-2);
+  --ink-soft:       var(--lg-ink-soft);
+  --ink-faint:      var(--lg-ink-faint);
+  --brass-warm:     var(--lg-c2);
+  --rule-strong:    #D8CBB2;
+  --serif:          var(--lg-serif);    /* was Playfair (legacy.css) → Cormorant */
+}
 /* Wire-fraud warning — high-contrast, unmissable, never dismissible. */
 .wire-warn {
   margin: 18px 36px 0; padding: 14px 18px;
@@ -71,7 +111,7 @@
 .sell-team-role { font-family: var(--mono); font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-mute); }
 .sell-team-contact { display: flex; flex-wrap: wrap; gap: 8px 10px; margin-top: 8px; }
 .sell-team-link { display: inline-flex; align-items: center; gap: 6px; font-size: 13.5px; font-weight: 600; text-decoration: none; padding: 6px 12px; border: 1px solid var(--rule); border-radius: 20px; background: #fff; color: var(--ink); white-space: nowrap; }
-.sell-team-link.tel { color: #2F7A4D; }
+.sell-team-link.tel { color: var(--lg-a1); }
 .sell-team-link:hover { border-color: var(--brass); }
 .sell-team-link::before { font-family: var(--mono); font-size: 12px; opacity: 0.85; }
 .sell-team-link.tel::before { content: '\260E'; }
@@ -127,7 +167,7 @@
   padding: 3px 8px; border-radius: 100px; white-space: nowrap;
   background: var(--rule-soft); color: var(--ink-mute); border: 1px solid var(--rule);
 }
-.road-badge.done { background: rgba(76,124,90,0.14); color: #3F6B4E; border-color: rgba(76,124,90,0.3); }
+.road-badge.done { background: rgba(140,110,61,0.14); color: var(--lg-a2); border-color: rgba(140,110,61,0.30); }
 .road-badge.key  { background: var(--linen); color: var(--brass-bright); border-color: var(--brass); }
 .road-badge.next { background: var(--ink); color: var(--shell); border-color: var(--ink); }
 
@@ -162,7 +202,7 @@
 .doc-row .name .sub { display: block; font-family: var(--mono); font-size: 9.5px; letter-spacing: 0.12em; color: var(--ink-faint); margin-top: 2px; text-transform: uppercase; }
 .doc-row .d-status { font-family: var(--mono); font-size: 9.5px; letter-spacing: 0.12em; color: var(--ink-mute); text-transform: uppercase; white-space: nowrap; }
 .doc-actions { grid-column: 2 / -1; display: flex; gap: 18px; margin-top: 7px; }
-.doc-link { font-size: 12px; font-weight: 600; color: #2F7A4D; text-decoration: none; }
+.doc-link { font-size: 12px; font-weight: 600; color: var(--lg-a1); text-decoration: none; }
 .doc-link:hover { text-decoration: underline; }
 
 /* Tasks — what I need from you */
