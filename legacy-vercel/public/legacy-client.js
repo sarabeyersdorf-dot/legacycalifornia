@@ -390,19 +390,30 @@
   }
 
   // Consumer portals (dashboard/seller) get a discreet "who am I signed in as"
-  // strip with a one-click switch, so a lingering session — a shared device, a
-  // household, or the agent's own login — is always visible and never a trap.
+  // chip with a one-click switch, so a lingering session — a shared device, a
+  // household, or the agent's own login — is always recoverable and never a
+  // trap. Tucked: it collapses to a small badge (the initial) so it doesn't
+  // cover a card, and expands to the full line on hover / focus / tap.
   function renderAccountBar(session) {
     if (!/\/(dashboard|seller)\.html$/.test(location.pathname)) return;
     if (document.getElementById('leg-acct-bar')) return;
     const email = ((session && session.user && session.user.email) || '').replace(/[<>]/g, '');
     if (!email) return;
+    const initial = (email.trim()[0] || '?').toUpperCase();
     const bar = document.createElement('div');
     bar.id = 'leg-acct-bar';
     bar.className = 'lg-acct';
-    bar.innerHTML = '<span>Signed in as ' + email + '</span>'
-      + '<a href="#" id="leg-acct-switch">Not you?</a>';
+    bar.innerHTML =
+      '<button type="button" class="lg-acct__badge" id="leg-acct-badge" aria-label="Account" aria-expanded="false">' + initial + '</button>'
+      + '<span class="lg-acct__body"><span class="who">Signed in as ' + email + '</span>'
+      + '<a href="#" id="leg-acct-switch">Not you?</a></span>';
     document.body.appendChild(bar);
+    // Tap the badge to toggle open on touch (hover/focus handle desktop).
+    document.getElementById('leg-acct-badge').addEventListener('click', function (e) {
+      e.preventDefault();
+      const open = bar.classList.toggle('is-open');
+      this.setAttribute('aria-expanded', open ? 'true' : 'false');
+    });
     document.getElementById('leg-acct-switch').addEventListener('click', async (e) => {
       e.preventDefault();
       try { await api('/api/auth/session', { method: 'DELETE' }); } catch (_) {}
