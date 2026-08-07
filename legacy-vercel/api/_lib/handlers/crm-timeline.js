@@ -382,8 +382,19 @@ export async function reconcileFromDealsFile(supa) {
         const item = byKey[key];
         if (!item || ['done', 'waived', 'na'].includes(item.status)) { summary.skipped++; continue; }
         const reason = ('Executed document on file — ' + token + ': "' + String(raw).slice(0, 160) + '"').slice(0, 460);
-        const { data: pend } = await supa.from('deal_timeline_proposals')
-          .select('id').eq('item_id', item.id).eq('status', 'pending');
+        // Prior decisions on THIS item: a pending proposal (dedup below) or a
+        // rejected one. The old query only looked at pending, so a proposal Sara
+        // REJECTED left no pending row and the next cron re-filed the identical
+        // card — and would even auto-apply over her "no" (it re-filed the two
+        // Baldwin contingency cards every hour; Baldwin's loan contingency is
+        // genuinely still open through 8/12). Respect the rejection: if she
+        // already rejected this exact evidence for this item, skip it entirely.
+        // Different/new evidence (a different reason) still flows through.
+        const { data: priorProps } = await supa.from('deal_timeline_proposals')
+          .select('id, status, reason').eq('item_id', item.id).in('status', ['pending', 'rejected']);
+        const pend = (priorProps || []).filter((p) => p.status === 'pending');
+        const reasonRejected = (priorProps || []).some((p) => p.status === 'rejected' && p.reason === reason);
+        if (reasonRejected) { summary.skipped++; continue; }
         const change = { status: 'done' };
         if (done_at) change.done_at = done_at;
         const label = addr + ' — ' + (item.title || key) + (done_at ? ' (done ' + done_at.slice(0, 10) + ')' : '');
