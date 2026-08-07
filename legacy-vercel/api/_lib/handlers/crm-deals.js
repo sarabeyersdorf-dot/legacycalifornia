@@ -51,6 +51,24 @@ function contStateFrom(status) {
   return 'ontrack';
 }
 
+// A per-deal health rollup combining the two escrow risk signals: at-risk /
+// overdue contingencies and open compliance-file gaps. One of on_track (green),
+// watch (amber), at_risk (red), with the human reasons behind it.
+function dealHealth(docsMissing, contingencies, todayStr) {
+  const conts = Array.isArray(contingencies) ? contingencies : [];
+  const atrisk  = conts.filter((c) => c && c.state === 'atrisk').length;
+  const overdue = conts.filter((c) => c && c.state !== 'cleared' && c.iso && String(c.iso) < todayStr).length;
+  const reasons = [];
+  if (atrisk)  reasons.push(`${atrisk} at-risk contingenc${atrisk === 1 ? 'y' : 'ies'}`);
+  if (overdue) reasons.push(`${overdue} overdue contingenc${overdue === 1 ? 'y' : 'ies'}`);
+  if (docsMissing) reasons.push(`${docsMissing} doc${docsMissing === 1 ? '' : 's'} missing`);
+  let level = 'on_track';
+  if (atrisk || overdue) level = 'at_risk';
+  else if (docsMissing)  level = 'watch';
+  const label = level === 'at_risk' ? 'At risk' : (level === 'watch' ? 'Watch' : 'On track');
+  return { level, label, reasons };
+}
+
 // Buyer-side purchases we represent are live transactions too — include them,
 // tagged by `side`. We exclude only non-transaction rows (prospects/leads).
 const SIDES = ['listing', 'seller', 'both', 'buyer'];
@@ -128,6 +146,7 @@ export default async function handler(req, res) {
         events:       null,   // filled below for escrow rows
         next_event:   null,
         docs_missing: 0,      // open compliance-file gaps (escrow rows)
+        health:       null,   // {level,label,reasons} for escrow rows
         parties,
         party_summary: partySummary(parties)
       };
@@ -210,6 +229,14 @@ export default async function handler(req, res) {
         for (const [id, row] of rowByDealId) row.docs_missing = docsMissing.get(id) || 0;
       }
     } catch (_) { /* calendar enrichment is a bonus — never break the deals list */ }
+
+    // Per-deal health for the escrow rows — computed unconditionally (outside the
+    // enrichment try) so it still rolls up from whatever signals landed, even if
+    // a calendar/docs query failed. Uses the row's final contingencies + docs.
+    {
+      const todayStr = new Date().toISOString().slice(0, 10);
+      for (const row of buckets.pending) row.health = dealHealth(row.docs_missing || 0, row.contingencies, todayStr);
+    }
 
     // Flat list + a group index of source_keys, so the UI can tab without
     // re-filtering and still hold one array of deals.
