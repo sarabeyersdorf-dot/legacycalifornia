@@ -23,6 +23,17 @@ import { adminClient }       from '../supabase.js';
 import { scoreLead }         from './ai-score-lead.js';
 import { anthropicJSON }     from '../anthropic.js';
 import { handleOptions, readJson, ok, fail } from '../cors.js';
+import { alertAgents, deskUrl } from '../agent-alert.js';
+
+// Events worth pinging both agents about the instant they happen. Passive
+// property views are throttled to first-touch per window (see below).
+const HIGH_SIGNAL = new Set(['search_run', 'property_saved', 'form_submitted']);
+const ENGAGE_VERB = {
+  search_run:      'set up a saved search',
+  property_saved:  'saved a property',
+  property_viewed: 'viewed a property',
+  form_submitted:  'submitted a form'
+};
 
 // iHomefinder event names → our lead_events.event_type values
 const EVENT_MAP = {
@@ -212,12 +223,47 @@ Respond in JSON only: { "sms": "...", "reasoning": "one sentence" }`;
       }
     }
 
+    // 5. Alert BOTH agents (SMS + email) on the engagement. High-signal events
+    //    (saved search, saved property, form) always ping; a passive view pings
+    //    only on first-touch per 60-min window, so repeat browsing stays quiet
+    //    but its volume rolls into the next ping. Fail-soft.
+    let agent_alert = null;
+    try {
+      const isHigh = HIGH_SIGNAL.has(event_type);
+      const WINDOW_MS = 60 * 60 * 1000;
+      const lastMs = lead.last_alert_at ? new Date(lead.last_alert_at).getTime() : 0;
+      const inQuietWindow = (Date.now() - lastMs) < WINDOW_MS;
+      if (isHigh || !inQuietWindow) {
+        // Roll up how much has happened since the previous ping, for context.
+        const since = lead.last_alert_at || new Date(Date.now() - 24 * 3600 * 1000).toISOString();
+        let more = 0;
+        try {
+          const { count } = await supa.from('lead_events').select('id', { count: 'exact', head: true }).eq('lead_id', lead.id).gt('created_at', since);
+          more = Math.max(0, (count || 0) - 1);   // minus the current event
+        } catch (_) { /* count is a nicety */ }
+        const name  = [lead.first_name, lead.last_name].filter(Boolean).join(' ') || lead.email;
+        const where = property && (property.address || property.city) ? ' (' + [property.address, property.city].filter(Boolean).join(', ') + ')' : '';
+        const moreStr = more > 0 ? ` +${more} more activit${more === 1 ? 'y' : 'ies'} since last ping.` : '';
+        const desk = deskUrl();
+        const sms = `${name} ${ENGAGE_VERB[event_type] || 'engaged'}${where}. Score ${newScore}.${moreStr} Open CRM: ${desk}`;
+        const text = `${name} just ${ENGAGE_VERB[event_type] || 'engaged'} on legacycalifornia.com${where}.\n\n`
+          + `Email: ${lead.email}\nPhone: ${lead.phone || '(none)'}\nScore: ${oldScore} → ${newScore} (${temperature})\n`
+          + (more > 0 ? `Activity since last ping: ${more + 1}\n` : '')
+          + `\nOpen the CRM: ${desk}`;
+        agent_alert = await alertAgents(supa, { subject: `${name} — website activity`, sms, text });
+        await supa.from('leads').update({ last_alert_at: new Date().toISOString() }).eq('id', lead.id).then(() => {}, () => {});
+      } else {
+        agent_alert = { throttled: true };   // logged in the CRM; rolls into the next ping
+      }
+    } catch (e) { agent_alert = { error: e.message }; }
+
     return ok(res, {
       lead_id:       lead.id,
       event_type,
       score:         { old: oldScore, new: newScore, breakdown },
       temperature,
-      draft
+      draft,
+      agent_alert
     });
   } catch (e) {
     return fail(res, 500, e.message);
