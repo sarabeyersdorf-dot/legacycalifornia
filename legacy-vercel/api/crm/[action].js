@@ -47,6 +47,7 @@ import visibility    from '../_lib/handlers/crm-visibility.js';
 import briefingFeedback from '../_lib/handlers/crm-briefing-feedback.js';
 import briefingCalendar from '../_lib/handlers/crm-briefing-calendar.js';
 import driftCheck        from '../_lib/handlers/crm-drift-check.js';
+import briefingBundle    from '../_lib/handlers/crm-briefing-bundle.js';
 import dealStage        from '../_lib/handlers/crm-deal-stage.js';
 import reviewQueue      from '../_lib/handlers/crm-review-queue.js';
 import dealPhoto        from '../_lib/handlers/crm-deal-photo.js';
@@ -100,6 +101,7 @@ const TABLE = {
   'briefing-feedback': briefingFeedback,
   'briefing-calendar': briefingCalendar,
   'drift-check':       driftCheck,
+  'briefing-bundle':   briefingBundle,
   'deal-stage':        dealStage,
   'review-queue':      reviewQueue,
   'deal-photo':        dealPhoto,

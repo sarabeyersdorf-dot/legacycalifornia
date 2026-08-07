@@ -101,8 +101,24 @@ export default async function handler(req, res) {
       }
     } catch (_) { /* db/048 not run yet */ }
 
+    // Data-freshness signal (Bug 3 / SPEC Rule 3). The endpoint itself always
+    // regenerates (no-store above), but its CONTENT is only as fresh as the last
+    // sync that wrote the briefing tasks — if sync is broken the tasks silently
+    // age (on 8/7 this served a briefing whose newest row was ~15h old while
+    // presenting as live). Surface the age of the underlying data so the
+    // consumer can say so out loud instead of trusting it blindly.
+    const stamps = [];
+    for (const t of (data || [])) { if (t.created_at) stamps.push(t.created_at); if (t.agent_note_at) stamps.push(t.agent_note_at); }
+    for (const p of rejected_proposals) { if (p.rejected_at) stamps.push(p.rejected_at); }
+    const dataGeneratedAt = stamps.length ? stamps.reduce((a, b) => (a > b ? a : b)) : null;
+    const cacheAgeSeconds = dataGeneratedAt ? Math.max(0, Math.floor((Date.now() - new Date(dataGeneratedAt).getTime()) / 1000)) : null;
+    const stale = cacheAgeSeconds != null && cacheAgeSeconds > 3600;
+
     return ok(res, {
       generated_at: new Date().toISOString(),
+      data_generated_at: dataGeneratedAt,
+      cache_age_seconds: cacheAgeSeconds,
+      stale,
       counts: {
         total:      tasks.length,
         done:       tasks.filter((t) => t.done).length,

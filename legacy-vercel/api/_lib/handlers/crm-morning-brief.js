@@ -37,8 +37,19 @@ export default async function handler(req, res) {
   if (req.method !== 'GET') return fail(res, 405, 'method_not_allowed');
 
   try {
-    const { profile } = await getCallerProfile(req, res);
-    if (!isAgent(profile)) return fail(res, 401, 'agents only');
+    // Two callers: an agent session (the CRM Today board), OR a headless key
+    // pull (Cowork's briefing, via ?key=<SYNC_SECRET>). Without the key path
+    // this returned 401 to Cowork — the "morning-brief has no usable body"
+    // symptom (Bug 5) — so it never surfaced collection_nudges / timeline_
+    // approvals. A key pull gets the broker (full) scope and the documented shape.
+    const secret = process.env.SYNC_SECRET || process.env.BRIEFING_FEEDBACK_SECRET;
+    let profile;
+    if (secret && req.query?.key === secret) {
+      profile = { role: 'admin' };
+    } else {
+      ({ profile } = await getCallerProfile(req, res));
+      if (!isAgent(profile)) return fail(res, 401, 'agents only');
+    }
 
     const supa = adminClient();
     const now  = new Date();
