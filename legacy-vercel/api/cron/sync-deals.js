@@ -62,18 +62,36 @@ const DOC_SKIP = new Set([
   'sellerDocs', 'mediationFiled', 'commissionCase', 'escrowDocs', 'evidence',
   'transactionDocs', 'BRBC', 'correspondence'
 ]);
-const STATUS_MAP = [
-  ['executed', 'signed'], ['accepted', 'signed'], ['signed', 'signed'],
-  ['received', 'on_file'], ['sent', 'sent'], ['drafted', 'pending']
+// data/deals.json stores each doc's status as free-text PROSE ("received 7/2
+// (in seller disclosure package)", "WAIVED by buyers…", "OUTSTANDING as of…").
+// deal_documents.status is constrained to the enum below, and the seller portal
+// branches on with_seller/to_sign/pending to decide what a client is asked to
+// sign — so prose in that column would render as garbage AND violate the check.
+// Map the prose to the enum on the LOWERCASED, TRIMMED PREFIX, in this order,
+// and keep the original string in status_raw. Unknown prose defaults to
+// 'on_file' on purpose: a wrong guess there is inert, whereas defaulting to
+// 'pending' would make a portal ask someone to re-sign an executed document.
+//
+// (Mirrors the deal_documents_normalize_status DB trigger exactly, so the two
+// compose: the trigger sees a value already in the enum and passes it through.)
+const STATUS_RULES = [
+  ['signed',      ['signed']],
+  ['to_sign',     ['to sign', 'to_sign']],
+  ['with_seller', ['with seller', 'with_seller']],
+  ['sent',        ['sent']],
+  ['pending',     ['drafted', 'pending', 'outstanding', 'missing', 'waiting', 'needs', 'not ']],
+  ['on_file',     ['executed', 'fully executed', 'received', 'accepted', 'on file', 'filed', 'waived', 'partial', 'final', 'complete', 'offer ']]
 ];
+// Free text → the deal_documents.status enum. Returns null for an empty value
+// (the caller treats that as a not-on-file "missing" doc).
 function docStatus(val) {
   if (val == null) return null;
-  const l = String(val).toLowerCase();
-  if (l.includes('with seller') || l.includes('seller still') || l.includes('seller signature') || l.includes('seller needs')) return 'with_seller';
-  if (l.includes('to sign') || l.includes('owed') || l.includes('awaiting-buyer') || l.includes('awaiting buyer')) return 'to_sign';
-  if (l.includes('pending')) return 'pending';
-  for (const [k, s] of STATUS_MAP) if (l.includes(k)) return s;
-  return 'on_file';
+  const l = String(val).toLowerCase().trim();
+  if (!l) return null;
+  for (const [status, prefixes] of STATUS_RULES) {
+    if (prefixes.some((p) => l.startsWith(p))) return status;
+  }
+  return 'on_file';                                  // unknown prose → inert default
 }
 
 // Merge a deal's listing-sheet metadata with a top-level `client` name (from
@@ -175,7 +193,12 @@ function mapDocs(dealId, d) {
       doc_type: base.slice(0, 12),
       name: label[0],
       sub: label[1] || null,
-      status: status || 'missing',
+      // A not-on-file doc is 'pending' (a valid enum value; 'missing' is NOT in
+      // the constraint) and carries the 'missing' marker in status_raw so the
+      // CRM health rollup (crm-deals.js) can still find it. A real doc keeps its
+      // original prose in status_raw.
+      status: missing ? 'pending' : status,
+      status_raw: missing ? 'missing' : String(rawState),
       doc_url: url ? String(url) : null,         // link to the executed document, if provided
       client_safe: missing ? false : !hasFlat,   // missing docs never reach the portal
       updated_at: new Date().toISOString()
@@ -196,12 +219,34 @@ function mapDocs(dealId, d) {
       name: name || 'Document',
       sub: doc.sub || doc.note || null,
       status: doc.status ? docStatus(doc.status) : null,   // status is OPTIONAL here
+      status_raw: doc.status != null ? String(doc.status) : null,
       doc_url: url ? String(url) : null,
       client_safe: doc.client_safe === false ? false : true, // shareable by default
       updated_at: new Date().toISOString()
     });
   }
   return out;
+}
+
+// Rebuild one deal's documents, resiliently. Deletes then inserts (idempotent).
+// Tries the whole batch first (one round-trip when every row is clean); if a bad
+// row aborts the batch, falls back to per-row so the rest of the deal's docs
+// still land, collecting each failure into `stats` instead of throwing. A single
+// malformed doc must never wipe a deal's entire document set.
+async function writeDealDocs(supa, dealId, rows, stats) {
+  await supa.from('deal_documents').delete().eq('deal_id', dealId);
+  if (!rows.length) return;
+  const { error } = await supa.from('deal_documents').insert(rows);
+  if (!error) { stats.inserted += rows.length; return; }
+  for (const r of rows) {
+    const { error: e1 } = await supa.from('deal_documents').insert(r);
+    if (e1) {
+      stats.skipped++;
+      stats.errors.push({ deal_id: dealId, name: r.name || null, status: r.status || null, error: e1.message });
+    } else {
+      stats.inserted++;
+    }
+  }
 }
 
 // A short type tag from a filename / URL extension (PDF / DOC / IMG / …).
@@ -573,8 +618,11 @@ export default async function handler(req, res) {
     const supa = adminClient();
 
     const active = (data.deals || []).filter((d) => ['offer', 'pending', 'listing', 'closed', 'preparing'].includes(d.stage));
-    let dealsUpserted = 0, docsWritten = 0;
+    let dealsUpserted = 0;
     const errors = [];
+    // Per-row outcomes for the two write loops that used to abort the whole run.
+    const docStats  = { inserted: 0, skipped: 0, errors: [] };
+    const taskStats = { created: 0, skipped_duplicates: 0 };
 
     for (const d of active) {
       try {
@@ -636,14 +684,10 @@ export default async function handler(req, res) {
         if (wErr) throw new Error(`${ex ? 'update' : 'insert'}: ${wErr.message}`);
         dealsUpserted++;
 
-        // Rebuild this deal's documents (delete then insert = idempotent)
-        await supa.from('deal_documents').delete().eq('deal_id', dealId);
-        const docRows = mapDocs(dealId, d);
-        if (docRows.length) {
-          const { error: de } = await supa.from('deal_documents').insert(docRows);
-          if (de) throw new Error(`docs: ${de.message}`);
-          docsWritten += docRows.length;
-        }
+        // Rebuild this deal's documents (delete then insert = idempotent).
+        // Resilient: a bad doc row is collected in docStats, never thrown, so it
+        // can't drop the deal's other docs or abort the run.
+        await writeDealDocs(supa, dealId, mapDocs(dealId, d), docStats);
       } catch (e) {
         // Keep going — one malformed deal must never zero out every listing.
         errors.push({ deal: d.id, address: d.address || null, error: e.message || String(e) });
@@ -749,9 +793,35 @@ export default async function handler(req, res) {
         return row;
       }).filter((r) => r.title);
       if (rows.length) {
-        const { error: te } = await supa.from('agent_tasks').insert(rows);
-        if (te) throw new Error(`tasks: ${te.message}`);
-        tasksWritten = rows.length;
+        // A stable source_key that already exists is an INTENDED repeat
+        // (idempotency — see TASKFLOWCONTRACT.md), not an error. The old code
+        // re-inserted keyed rows with no ON CONFLICT clause, so the first
+        // collision aborted the whole request → HTTP 500, killing everything
+        // after this point (checklist derivation, lead promotion, the response).
+        // Pre-filter out keys already present (and in-batch dupes) so a repeat is
+        // a no-op. Pre-filtering rather than .upsert({onConflict:'source_key'})
+        // because the unique index is PARTIAL (WHERE source_key IS NOT NULL),
+        // which ON CONFLICT (source_key) can't use as an arbiter. Composes with
+        // the agent_tasks_skip_duplicate trigger; also stands alone without it.
+        let existingKeys = new Set();
+        {
+          const { data: ek } = await supa.from('agent_tasks').select('source_key').not('source_key', 'is', null);
+          existingKeys = new Set((ek || []).map((r) => r.source_key));
+        }
+        const seenKeys = new Set();
+        const toInsert = [];
+        for (const r of rows) {
+          if (r.source_key != null) {
+            if (existingKeys.has(r.source_key) || seenKeys.has(r.source_key)) { taskStats.skipped_duplicates++; continue; }
+            seenKeys.add(r.source_key);
+          }
+          toInsert.push(r);
+        }
+        if (toInsert.length) {
+          const { error: te } = await supa.from('agent_tasks').insert(toInsert);
+          if (te) errors.push({ deal: 'agent_tasks', error: te.message });
+          else { tasksWritten = toInsert.length; taskStats.created = toInsert.length; }
+        }
       }
     }
 
@@ -873,7 +943,10 @@ export default async function handler(req, res) {
       source_version: data.version || null,
       deals_upserted: dealsUpserted,
       deals_pruned: dealsPruned,
-      documents_written: docsWritten,
+      documents_written: docStats.inserted,
+      // Per-row outcomes for the two loops that used to 500 the whole endpoint.
+      deal_documents: docStats,
+      agent_tasks: taskStats,
       tasks_written: tasksWritten,
       checklist_written: checklistWritten,
       checklist_pruned: checklistPruned,

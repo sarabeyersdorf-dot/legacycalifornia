@@ -167,7 +167,16 @@ export default async function handler(req, res) {
     if (dealsRes.error) return fail(res, 500, `deals: ${dealsRes.error.message}`);
     const tsOf = (ds) => laToUTC(+ds.slice(0, 4), +ds.slice(5, 7), +ds.slice(8, 10), 0, 0).getTime();
 
+    // Only a deal with a LIVE escrow clock has running contingency/COE deadlines.
+    // Without this guard, closed and cancelled deals still emit them: a closed
+    // deal keeps its timeline (e.g. 9985 Wendell emitting five 8/10 contingency
+    // deadlines), and a deal whose escrow was cancelled reverts to 'listing' but
+    // keeps a stale coe_date (e.g. 433 E Highway 4 emitting a COE after its 8/5
+    // cancellation). Restrict to in-escrow stages; timelineEvents self-guards a
+    // paused/unaccepted clock, so an offer with no acceptance still emits nothing.
+    const DEADLINE_STAGES = new Set(['pending', 'offer']);
     for (const d of (dealsRes.data || [])) {
+      if (!DEADLINE_STAGES.has(String(d.stage || '').toLowerCase())) continue;
       for (const ev of timelineEvents(d, { todayStr, endStr })) push(ev, tsOf(ev.start));
     }
 
