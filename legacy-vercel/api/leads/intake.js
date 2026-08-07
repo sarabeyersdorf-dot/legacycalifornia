@@ -28,6 +28,7 @@ import { handleOptions, readJson, ok, fail } from '../_lib/cors.js';
 import { draftWelcome } from '../_lib/handlers/ai-welcome.js';
 import { scoreLead }    from '../_lib/handlers/ai-score-lead.js';
 import { syncLeadToFUB } from '../fub/sync.js';
+import { alertAgents, deskUrl } from '../_lib/agent-alert.js';
 
 const ALLOWED_SOURCE  = new Set(['website_form','open_house','referral','ihomefinder_idx','manual']);
 const ALLOWED_JOURNEY = new Set(['discovering','narrowing','touring','ready_to_offer']);
@@ -175,6 +176,31 @@ export default async function handler(req, res) {
 
     try { sideEffects.fub = await syncLeadToFUB(lead); }
     catch (e) { sideEffects.fub_error = e.message; }
+
+    // Alert BOTH agents (SMS + email) — a form submit / search setup / tour is
+    // always high-signal, so it pings immediately. Awaited (fail-soft) so the
+    // work isn't cut off after the response, but never blocks a real lead.
+    try {
+      const name = [lead.first_name, lead.last_name].filter(Boolean).join(' ') || fields.email;
+      const action = (body.tour && body.tour.scheduled_at) ? 'requested a tour'
+        : fields.notes ? 'sent a message'
+        : (fields.journey_stage === 'ready_to_offer') ? 'is ready to make an offer'
+        : 'submitted a form / set up a search';
+      const bits = [];
+      if (fields.lead_type) bits.push(fields.lead_type);
+      if (fields.areas && fields.areas.length) bits.push('areas: ' + fields.areas.join(', '));
+      if (fields.price_min || fields.price_max) bits.push('budget: ' + (fields.price_min ? '$' + fields.price_min : '?') + '–' + (fields.price_max ? '$' + fields.price_max : '?'));
+      if (fields.phone) bits.push(fields.phone);
+      const desk = deskUrl();
+      const sms = `New ${is_new ? '' : 'returning '}lead: ${name} ${action}${bits.length ? ' — ' + bits.join(' · ') : ''}. Open CRM: ${desk}`;
+      const text = `${name} ${action} on legacycalifornia.com.\n\n`
+        + `Email: ${fields.email}\nPhone: ${fields.phone || '(none)'}\n`
+        + `Type: ${fields.lead_type || '—'}\nJourney: ${fields.journey_stage || '—'}\n`
+        + `Areas: ${(fields.areas || []).join(', ') || '—'}\nBudget: ${fields.price_min || '?'}–${fields.price_max || '?'}\n`
+        + (fields.notes ? `Message: ${fields.notes}\n` : '')
+        + `\nOpen the CRM: ${desk}`;
+      sideEffects.agent_alert = await alertAgents(supa, { subject: `New website lead — ${name}`, sms, text });
+    } catch (e) { sideEffects.agent_alert_error = e.message; }
 
     return ok(res, { lead_id: lead.id, is_new, side_effects: sideEffects });
   } catch (e) {
