@@ -94,6 +94,12 @@ function docStatus(val) {
   return 'on_file';                                  // unknown prose → inert default
 }
 
+// Stages with a LIVE escrow clock. Only these carry a running contingency/COE
+// timeline; a deal that has left escrow (closed / listing after a cancellation /
+// preparing / etc.) must not keep a timeline generating phantom deadlines on a
+// client's portal (drift-check's orphan_calendar / orphan_timeline).
+const ESCROW_STAGES = new Set(['pending', 'offer']);
+
 // Merge a deal's listing-sheet metadata with a top-level `client` name (from
 // the executed docs) so buyer-side deals carry a client without a full listing.
 function mergeMeta(d) {
@@ -142,8 +148,11 @@ function mapDeal(d) {
     // so buyer-side deals get a client name without a full listing block.
     listing_meta:   mergeMeta(d),
     // CA RPA timeline (acceptance Day 0, overrides, removals, paused clock) for
-    // the briefing calendar's contingency/COE deadline math.
-    timeline:       d.timeline || null,
+    // the briefing calendar's contingency/COE deadline math. Only a deal with a
+    // LIVE escrow keeps it — a deal that has left escrow (listing after a
+    // cancellation, closed, preparing…) drops it so it can't generate phantom
+    // deadlines/COE. deals.json retains the history either way.
+    timeline:       ESCROW_STAGES.has(d.stage) ? (d.timeline || null) : null,
     // ONE SHARED TIMELINE: At-a-Glance milestones + the author-attributed client
     // note, written verbatim from deals.json and read by the Today board, seller
     // portal, and buyer dashboard so all three show the same thing. Milestones
@@ -623,6 +632,9 @@ export default async function handler(req, res) {
     // Per-row outcomes for the two write loops that used to abort the whole run.
     const docStats  = { inserted: 0, skipped: 0, errors: [] };
     const taskStats = { created: 0, skipped_duplicates: 0 };
+    // Deals that have LEFT escrow — their lingering timeline items get retired
+    // after the loop so a dead escrow can't keep phantom deadlines on a portal.
+    const nonEscrowDealIds = [];
 
     for (const d of active) {
       try {
@@ -683,6 +695,7 @@ export default async function handler(req, res) {
         }
         if (wErr) throw new Error(`${ex ? 'update' : 'insert'}: ${wErr.message}`);
         dealsUpserted++;
+        if (!ESCROW_STAGES.has(d.stage)) nonEscrowDealIds.push(dealId);
 
         // Rebuild this deal's documents (delete then insert = idempotent).
         // Resilient: a bad doc row is collected in docStats, never thrown, so it
@@ -693,6 +706,22 @@ export default async function handler(req, res) {
         errors.push({ deal: d.id, address: d.address || null, error: e.message || String(e) });
       }
     }
+
+    // Retire orphaned escrow artifacts. A deal that has LEFT escrow (now
+    // listing / closed / preparing…) keeps its deal_timeline_items, which still
+    // read 'upcoming' and generate deadlines/COE — e.g. 433 E Highway 4 showed a
+    // live close-of-escrow to its sellers after the 8/5 cancellation. Mark those
+    // open items 'na' (kept for history, no longer live). The timeline JSONB is
+    // already dropped for these in mapDeal.
+    let timelineItemsRetired = 0;
+    try {
+      if (nonEscrowDealIds.length) {
+        const { data: retired } = await supa.from('deal_timeline_items')
+          .update({ status: 'na', updated_at: new Date().toISOString() })
+          .in('deal_id', nonEscrowDealIds).in('status', ['upcoming', 'action']).select('id');
+        timelineItemsRetired = (retired || []).length;
+      }
+    } catch (e) { errors.push({ deal: 'retire-timeline-items', error: e.message || String(e) }); }
 
     // Reconcile: the deals table must MIRROR the active feed. A deal that
     // dropped out of deals.json — removed outright, or moved to a retired stage
@@ -943,6 +972,7 @@ export default async function handler(req, res) {
       source_version: data.version || null,
       deals_upserted: dealsUpserted,
       deals_pruned: dealsPruned,
+      timeline_items_retired: timelineItemsRetired,
       documents_written: docStats.inserted,
       // Per-row outcomes for the two loops that used to 500 the whole endpoint.
       deal_documents: docStats,
