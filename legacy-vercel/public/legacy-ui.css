@@ -315,6 +315,108 @@
 .lg-field option { background: var(--lg-ink); color: var(--lg-white); }
 
 /* --------------------------------------------------------------------------
+   6b. OVERLAYS — modal sheets, auth sign-in, toast, account bar
+   The consumer "prompts and interactions" layer (intake forms + the auth
+   gate) is injected by legacy-client.js. These are class hooks it toggles so
+   that layer matches the site: a dark "ink sheet" — the same surface as the
+   Find My Match wizard — with gold accents, cream type, and the dark-surface
+   .lg-field for inputs.
+-------------------------------------------------------------------------- */
+.lg-ov {
+  position: fixed; inset: 0; z-index: 99999;
+  display: flex; align-items: center; justify-content: center; padding: 24px;
+  background: rgba(23,20,15,.72);
+  -webkit-backdrop-filter: blur(3px); backdrop-filter: blur(3px);
+  animation: lg-ov-in var(--lg-fast) var(--lg-ease);
+}
+.lg-ov--solid { background: rgba(23,20,15,.95); backdrop-filter: none; -webkit-backdrop-filter: none; }
+.lg-ov__checking {
+  font-family: var(--lg-mono); font-size: 10.5px; letter-spacing: .22em;
+  text-transform: uppercase; color: rgba(255,253,248,.7);
+}
+@keyframes lg-ov-in { from { opacity: 0 } to { opacity: 1 } }
+
+.lg-sheet {
+  position: relative; width: 100%; max-width: 460px;
+  background: var(--lg-ink); color: var(--lg-cream);
+  border: 1px solid rgba(255,253,248,.12);
+  border-radius: var(--lg-r); box-shadow: var(--lg-sh-lg);
+  padding: 34px 32px 30px;
+  animation: lg-sheet-in var(--lg-med) var(--lg-ease);
+}
+@keyframes lg-sheet-in {
+  from { opacity: 0; transform: translateY(10px) scale(.985) }
+  to   { opacity: 1; transform: none }
+}
+.lg-sheet__x {
+  position: absolute; top: 12px; right: 15px; line-height: 1;
+  background: none; border: 0; cursor: pointer;
+  font-size: 24px; color: var(--lg-ink-faint);
+  transition: color var(--lg-fast);
+}
+.lg-sheet__x:hover { color: var(--lg-cream); }
+.lg-sheet__x:focus-visible { outline: 2px solid var(--lg-c2); outline-offset: 2px; }
+.lg-sheet__eyebrow {
+  font-family: var(--lg-mono); font-size: 10px; letter-spacing: .24em;
+  text-transform: uppercase; font-weight: 600; color: var(--lg-c2); margin-bottom: 12px;
+}
+.lg-sheet__title {
+  font-family: var(--lg-serif); font-style: italic; font-weight: 500;
+  font-size: 32px; line-height: 1.06; margin: 0 0 12px; color: var(--lg-white);
+}
+.lg-sheet__intro {
+  font-family: var(--lg-sans); font-size: 14.5px; line-height: 1.6;
+  color: rgba(255,253,248,.72); margin: 0 0 20px;
+}
+.lg-sheet__form { display: flex; flex-direction: column; gap: 12px; }
+.lg-sheet__label {
+  display: flex; flex-direction: column; gap: 5px;
+  font-family: var(--lg-mono); font-size: 9.5px; letter-spacing: .18em;
+  text-transform: uppercase; color: var(--lg-ink-faint);
+}
+.lg-sheet__check {
+  display: flex; gap: 10px; align-items: flex-start; cursor: pointer;
+  font-family: var(--lg-sans); font-size: 12px; line-height: 1.5;
+  letter-spacing: 0; text-transform: none; color: rgba(255,253,248,.66);
+}
+.lg-sheet__check input { margin-top: 3px; flex: none; accent-color: var(--lg-c2); }
+.lg-sheet__check a { color: var(--lg-c2); }
+.lg-sheet__err {
+  min-height: 18px; margin-top: 10px;
+  font-family: var(--lg-sans); font-size: 13px; color: #F2B39C;
+}
+.lg-sheet .lg-btn { width: 100%; margin-top: 6px; padding: 15px 28px; }
+
+/* toast — on-brand replacement for native alert() on consumer pages */
+.lg-toast-wrap {
+  position: fixed; left: 0; right: 0; bottom: 22px; z-index: 100000;
+  display: flex; flex-direction: column; align-items: center; gap: 8px;
+  pointer-events: none;
+}
+.lg-toast {
+  pointer-events: auto; max-width: min(92vw, 420px);
+  background: var(--lg-ink); color: var(--lg-cream);
+  border: 1px solid rgba(255,253,248,.14); border-left: 3px solid var(--lg-c2);
+  border-radius: var(--lg-r-sm); box-shadow: var(--lg-sh-lg);
+  padding: 13px 16px; font-family: var(--lg-sans); font-size: 13.5px; line-height: 1.45;
+  animation: lg-toast-in var(--lg-fast) var(--lg-ease);
+}
+.lg-toast--err { border-left-color: #D9663F; }
+@keyframes lg-toast-in { from { opacity: 0; transform: translateY(8px) } to { opacity: 1; transform: none } }
+
+/* account bar — "Signed in as … · Not you?" on the consumer portals */
+.lg-acct {
+  position: fixed; bottom: 14px; right: 14px; z-index: 90000; max-width: 92vw;
+  display: flex; align-items: center; gap: 8px;
+  padding: 8px 14px; border-radius: 100px;
+  background: var(--lg-ink); color: var(--lg-cream);
+  border: 1px solid rgba(255,253,248,.14); box-shadow: var(--lg-sh);
+  font-family: var(--lg-mono); font-size: 10px; letter-spacing: .1em; text-transform: uppercase;
+}
+.lg-acct span { opacity: .72; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.lg-acct a { color: var(--lg-c2); text-decoration: underline; white-space: nowrap; }
+
+/* --------------------------------------------------------------------------
    7. HEADER / NAV
 -------------------------------------------------------------------------- */
 .lg-header {
