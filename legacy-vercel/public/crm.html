@@ -149,6 +149,12 @@ body.lp-restyle {
             <span class="live-stamp" data-live-stamp><span class="live-dot"></span>live</span>
             <h1 class="tb-greet">Good morning.</h1>
             <p class="tb-line" data-bind-narrative></p>
+            <!-- IDX feed health: is iHomefinder actually sending us behavioral events yet? -->
+            <div class="tb-idx" data-idx-status title="Live status of the iHomefinder (IDX) behavioral feed"
+                 style="display:none;align-items:center;gap:7px;margin-top:12px;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:rgba(255,253,248,.62);">
+              <span class="tb-idx-dot" style="width:7px;height:7px;border-radius:50%;background:#8a8577;display:inline-block;flex:none;"></span>
+              <span data-idx-text>Checking IDX feed…</span>
+            </div>
           </div>
           <!-- Market snapshot + weather removed — they were hardcoded placeholders,
                not live data. The morning-brief assessment (below) carries the day. -->
@@ -156,6 +162,52 @@ body.lp-restyle {
             <div class="tb-assess" data-bind-assessment></div>
           </div>
         </div>
+
+        <!-- IDX feed health indicator — self-contained -->
+        <script>
+        (function () {
+          var wrap = document.querySelector('[data-idx-status]');
+          if (!wrap) return;
+          var dot = wrap.querySelector('.tb-idx-dot');
+          var txt = wrap.querySelector('[data-idx-text]');
+          function rel(iso) {
+            if (!iso) return '';
+            var m = (Date.now() - new Date(iso).getTime()) / 60000;
+            if (m < 1)    return 'just now';
+            if (m < 60)   return Math.round(m) + ' min ago';
+            if (m < 1440) return Math.round(m / 60) + 'h ago';
+            return Math.round(m / 1440) + 'd ago';
+          }
+          function paint(j) {
+            wrap.style.display = 'inline-flex';
+            if (!j || !j.received) {
+              dot.style.background = '#8a8577';
+              txt.textContent = 'IDX feed — waiting for iHomefinder';
+              return;
+            }
+            var iso = j.last_event && j.last_event.created_at;
+            var ageH = iso ? (Date.now() - new Date(iso).getTime()) / 3600000 : 999;
+            var who = (j.last_event && j.last_event.lead_name) ? ' · ' + j.last_event.lead_name : '';
+            var today = j.count_24h ? ' · ' + j.count_24h + ' in 24h' : '';
+            if (ageH <= 48) {
+              dot.style.background = '#4f9d69';
+              txt.textContent = 'IDX feed live · last event ' + rel(iso) + who + today;
+            } else {
+              dot.style.background = '#c8922e';
+              txt.textContent = 'IDX feed quiet · last event ' + rel(iso);
+            }
+          }
+          function load() {
+            fetch('/api/crm/idx-status', { credentials: 'include' })
+              .then(function (r) { return r.ok ? r.json() : null; })
+              .then(paint)
+              .catch(function () { /* leave hidden on error — never break Today */ });
+          }
+          load();
+          document.addEventListener('crm:view', function (ev) { if (ev.detail && ev.detail.name === 'today') load(); });
+          setInterval(load, 180000);
+        })();
+        </script>
 
         <!-- DEADLINE WATCH — next contingency/COE deadlines across all deals -->
         <section class="dw" data-deadline-watch style="display:none;">
