@@ -3050,6 +3050,10 @@ body.lp-restyle {
     .dall-cont { font-size:11px; margin-top:2px; color:var(--ink-mute); }
     .dall-cont-atrisk { color:#8A2C3B; font-weight:600; }
     .lst-badge.dall-warn { background:#F6E3E8; color:#8A2C3B; border-color:#e6c3cd; }
+    .dall-hdot { display:inline-block; width:9px; height:9px; border-radius:50%; flex:none; cursor:help; }
+    .dall-h-on_track { background:#2E7D46; }
+    .dall-h-watch { background:#C88A1E; }
+    .dall-h-at_risk { background:#B3261E; }
     .dall-open { font-family:var(--mono); font-size:10px; letter-spacing:.1em; text-transform:uppercase; color:var(--brass); }
     .dall-tools { margin-top:12px; font-family:var(--mono); font-size:10px; letter-spacing:.1em; text-transform:uppercase; color:var(--brass); text-decoration:none; border:1px solid var(--brass); padding:8px 13px; white-space:nowrap; }
     .dall-tools:hover { background:var(--brass); color:var(--shell); }
@@ -3102,13 +3106,16 @@ body.lp-restyle {
         var ph = '<div class="dall-ph">'+(d.photo_url?'<img src="'+esc(d.photo_url)+'" alt="">':'')+'</div>';
         var parties = window.LegacyDealParties ? window.LegacyDealParties.summaryHtml(d.party_summary, d.source_key) : '';
         var docsBadge = d.docs_missing ? '<span class="lst-badge dall-warn" title="Open compliance-file gaps">'+d.docs_missing+' doc'+(d.docs_missing===1?'':'s')+' missing</span>' : '';
+        // Health rollup dot (escrow rows): green on-track / amber watch / red at-risk.
+        var health = d.health ? '<span class="dall-hdot dall-h-'+esc(d.health.level)+'" title="'+esc(d.health.label+(d.health.reasons&&d.health.reasons.length?' — '+d.health.reasons.join(', '):''))+'"></span>' : '';
+        var healthTag = (d.health&&d.health.level==='at_risk') ? '<span class="lst-badge dall-warn">At risk</span>' : '';
         // Next open (uncleared) contingency, earliest first.
         var nc = (d.contingencies||[]).filter(function(c){ return c.state!=='cleared'&&c.iso; }).sort(function(a,b){ return String(a.iso).localeCompare(String(b.iso)); })[0];
         return '<div class="dall-row" data-dall-open="'+esc(d.source_key)+'" role="link" tabindex="0">'
           + ph
-          + '<div class="dall-main"><div class="dall-top"><span class="dall-price">'+esc(fmtUSD(d.price))+'</span>'
+          + '<div class="dall-main"><div class="dall-top">'+health+'<span class="dall-price">'+esc(fmtUSD(d.price))+'</span>'
           +   '<span class="lst-badge '+esc(d.stage==='dead'?'archived':(d.stage==='listing'?'active':d.stage))+'">'+esc(badge)+'</span>'
-          +   '<span class="lst-badge">'+esc(side)+'</span><span class="lst-badge">'+esc(agent)+'</span>'+docsBadge+'</div>'
+          +   '<span class="lst-badge">'+esc(side)+'</span><span class="lst-badge">'+esc(agent)+'</span>'+docsBadge+healthTag+'</div>'
           +   '<div class="dall-addr">'+esc(d.address||d.source_key)+(d.city?' · '+esc(d.city):'')+'</div>'
           +   parties
           + '</div>'
