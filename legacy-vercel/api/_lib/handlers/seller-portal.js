@@ -721,7 +721,13 @@ export default async function handler(req, res) {
         const { data } = await supa.from('deals').select('*').ilike('address', listing.address).limit(1);
         deal = (data && data[0]) || null;
       }
-      if (deal) {
+      // Only show the "road to closing" for a deal that's actually IN ESCROW.
+      // A deal whose escrow was cancelled reverts to 'listing' (or closes) but
+      // its deal_timeline_items linger, so without this guard the portal keeps
+      // showing a live close-of-escrow to the client on a dead escrow — e.g. Jim
+      // & Yvonne still saw a COE for 433 E Highway 4 after its 8/5 cancellation.
+      const ESCROW_STAGES = new Set(['pending', 'offer']);
+      if (deal && ESCROW_STAGES.has(String(deal.stage || '').toLowerCase())) {
         const tl = await timelineSections(supa, deal);
         if (tl.road.length) {
           portal.road  = tl.road;
