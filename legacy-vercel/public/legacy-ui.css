@@ -404,16 +404,35 @@
 .lg-toast--err { border-left-color: #D9663F; }
 @keyframes lg-toast-in { from { opacity: 0; transform: translateY(8px) } to { opacity: 1; transform: none } }
 
-/* account bar — "Signed in as … · Not you?" on the consumer portals */
+/* account chip — "Signed in as … · Not you?" on the consumer portals.
+   Tucked: collapses to a small circular badge (just the initial) so it never
+   sits on top of a card; expands to the full line on hover, keyboard focus, or
+   tap (the badge toggles .is-open for touch). */
 .lg-acct {
   position: fixed; bottom: 14px; right: 14px; z-index: 90000; max-width: 92vw;
-  display: flex; align-items: center; gap: 8px;
-  padding: 8px 14px; border-radius: 100px;
+  display: flex; align-items: center; gap: 8px; padding: 5px; border-radius: 100px;
   background: var(--lg-ink); color: var(--lg-cream);
   border: 1px solid rgba(255,253,248,.14); box-shadow: var(--lg-sh);
   font-family: var(--lg-mono); font-size: 10px; letter-spacing: .1em; text-transform: uppercase;
+  opacity: .6; transition: opacity var(--lg-fast) var(--lg-ease), padding var(--lg-fast) var(--lg-ease);
 }
-.lg-acct span { opacity: .72; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.lg-acct:hover, .lg-acct:focus-within, .lg-acct.is-open { opacity: 1; padding: 5px 12px 5px 5px; }
+.lg-acct__badge {
+  width: 26px; height: 26px; border-radius: 50%; flex: none; cursor: pointer; border: 0;
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(255,253,248,.10); color: var(--lg-c2);
+  font-family: var(--lg-mono); font-size: 11px; font-weight: 600;
+}
+.lg-acct__badge:focus-visible { outline: 2px solid var(--lg-c2); outline-offset: 2px; }
+.lg-acct__body {
+  display: flex; align-items: center; gap: 8px; white-space: nowrap;
+  max-width: 0; opacity: 0; overflow: hidden;
+  transition: max-width var(--lg-med) var(--lg-ease), opacity var(--lg-fast) var(--lg-ease);
+}
+.lg-acct:hover .lg-acct__body, .lg-acct:focus-within .lg-acct__body, .lg-acct.is-open .lg-acct__body {
+  max-width: 60vw; opacity: 1;
+}
+.lg-acct__body .who { opacity: .72; overflow: hidden; text-overflow: ellipsis; }
 .lg-acct a { color: var(--lg-c2); text-decoration: underline; white-space: nowrap; }
 
 /* --------------------------------------------------------------------------
