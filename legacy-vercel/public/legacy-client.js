@@ -43,57 +43,49 @@
   function openModal({ title, intro, fields, submitLabel = 'Send', onSubmit }) {
     return new Promise((resolve) => {
       const overlay = document.createElement('div');
+      overlay.className = 'lg-ov';
       overlay.setAttribute('data-legacy-modal', '');
-      Object.assign(overlay.style, {
-        position: 'fixed', inset: 0, background: 'rgba(20,18,15,0.72)',
-        zIndex: 99999, display: 'flex', alignItems: 'center', justifyContent: 'center',
-        padding: '24px', fontFamily: 'inherit'
-      });
 
       const box = document.createElement('div');
-      Object.assign(box.style, {
-        background: '#FAF6EC', color: '#1A1714', maxWidth: '460px', width: '100%',
-        padding: '32px 32px 28px', boxShadow: '0 30px 80px rgba(0,0,0,0.35)',
-        borderRadius: '2px', position: 'relative',
-        fontFamily: 'Manrope, system-ui, sans-serif'
-      });
-
+      box.className = 'lg-sheet';
       box.innerHTML = `
-        <button data-close style="position:absolute;top:14px;right:18px;background:none;border:none;font-size:22px;cursor:pointer;color:#1A1714;">×</button>
-        <div style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.22em;text-transform:uppercase;color:#7C6A4D;margin-bottom:10px;">Legacy Properties</div>
-        <h3 style="font-family:'Cormorant Garamond',serif;font-style:italic;font-weight:500;font-size:30px;line-height:1.1;margin:0 0 12px;">${title}</h3>
-        ${intro ? `<p style="font-size:14px;line-height:1.6;color:#3A332B;margin:0 0 18px;">${intro}</p>` : ''}
-        <form data-form style="display:flex;flex-direction:column;gap:10px;"></form>
-        <div data-error style="color:#9B2C2C;font-size:13px;margin-top:10px;min-height:18px;"></div>
+        <button type="button" class="lg-sheet__x" data-close aria-label="Close">&times;</button>
+        <div class="lg-sheet__eyebrow">Legacy Properties</div>
+        <h3 class="lg-sheet__title">${title}</h3>
+        ${intro ? `<p class="lg-sheet__intro">${intro}</p>` : ''}
+        <form class="lg-sheet__form" data-form novalidate></form>
+        <div class="lg-sheet__err" data-error></div>
       `;
 
       const form = $('[data-form]', box);
       for (const f of fields) {
-        const wrap = document.createElement('label');
-        wrap.style.cssText = 'display:flex;flex-direction:column;font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:#7C6A4D;gap:4px;';
-        wrap.innerHTML = `<span>${f.label}</span>`;
         if (f.type === 'checkbox') {
           // Consent-style checkbox: small-print label, never pre-checked.
-          wrap.style.cssText = 'display:flex;gap:9px;align-items:flex-start;font-size:12px;letter-spacing:0;text-transform:none;color:#3A332B;line-height:1.5;cursor:pointer;';
+          const wrap = document.createElement('label');
+          wrap.className = 'lg-sheet__check';
           const cb = document.createElement('input');
-          cb.type = 'checkbox'; cb.name = f.name; cb.style.cssText = 'margin-top:3px;flex:none;';
-          wrap.innerHTML = '';
+          cb.type = 'checkbox'; cb.name = f.name;
           wrap.appendChild(cb);
           const span = document.createElement('span');
-          span.innerHTML = f.label;
+          span.innerHTML = f.label;   // label carries the A2P consent markup + links
           wrap.appendChild(span);
           form.appendChild(wrap);
           continue;
         }
+        const wrap = document.createElement('label');
+        wrap.className = 'lg-sheet__label';
+        const span = document.createElement('span');
+        span.textContent = f.label;
+        wrap.appendChild(span);
         const el = f.type === 'textarea'
           ? document.createElement('textarea')
           : document.createElement('input');
+        el.className = 'lg-field';
         if (f.type !== 'textarea') el.type = f.type || 'text';
         if (f.placeholder) el.placeholder = f.placeholder;
         if (f.required)    el.required    = true;
         if (f.value)       el.value       = f.value;
         el.name = f.name;
-        el.style.cssText = 'font:inherit;font-size:15px;text-transform:none;letter-spacing:normal;color:#1A1714;background:#fff;border:1px solid #D9CFB7;padding:10px 12px;border-radius:0;outline:none;';
         if (f.type === 'textarea') el.rows = 3;
         wrap.appendChild(el);
         form.appendChild(wrap);
@@ -101,8 +93,8 @@
 
       const submit = document.createElement('button');
       submit.type = 'submit';
+      submit.className = 'lg-btn lg-btn--gold';
       submit.textContent = submitLabel;
-      submit.style.cssText = 'margin-top:8px;background:#1A1714;color:#FAF6EC;border:none;padding:14px 22px;font-family:"JetBrains Mono",monospace;font-size:11px;letter-spacing:.22em;text-transform:uppercase;cursor:pointer;';
       form.appendChild(submit);
 
       document.body.appendChild(overlay);
@@ -122,7 +114,6 @@
         try {
           const result = await onSubmit(data);
           submit.textContent = 'Done. Thank you.';
-          submit.style.background = '#7C6A4D';
           setTimeout(() => close(result), 1200);
         } catch (err) {
           $('[data-error]', box).textContent = err.message || 'Something went wrong.';
@@ -131,6 +122,27 @@
         }
       });
     });
+  }
+
+  // Styled toast — the on-brand replacement for native alert() on consumer
+  // pages. toast(msg, {error}) shows an ink pill bottom-center that fades after
+  // a few seconds. Exposed as window.Legacy.toast.
+  function toast(message, opts = {}) {
+    let wrap = document.querySelector('.lg-toast-wrap');
+    if (!wrap) {
+      wrap = document.createElement('div');
+      wrap.className = 'lg-toast-wrap';
+      document.body.appendChild(wrap);
+    }
+    const t = document.createElement('div');
+    t.className = 'lg-toast' + (opts.error ? ' lg-toast--err' : '');
+    t.textContent = message;
+    wrap.appendChild(t);
+    setTimeout(() => {
+      t.style.transition = 'opacity .3s';
+      t.style.opacity = '0';
+      setTimeout(() => t.remove(), 320);
+    }, opts.duration || 4200);
   }
 
   // ---------------------------------------------------------------------------
@@ -306,7 +318,7 @@
       const tourType = $('.tour-tab.on')?.textContent?.toLowerCase().includes('video') ? 'video' : 'in_person';
       const dayEl    = $('.tour-day.on');
       const slotEl   = $('.tour-slot.on');
-      if (!dayEl || !slotEl) { alert('Pick a day and time.'); return; }
+      if (!dayEl || !slotEl) { toast('Pick a day and time.', { error: true }); return; }
 
       // Build a scheduled_at ISO from day number + slot text (current year + month)
       const now = new Date();
@@ -348,7 +360,7 @@
         const ta    = sideForm.querySelector('textarea');
         const name  = sideForm.querySelectorAll('.field-input')[0];
         const email = sideForm.querySelectorAll('.field-input')[1];
-        if (!email?.value || !ta?.value) { alert('Add your email and a quick note.'); return; }
+        if (!email?.value || !ta?.value) { toast('Add your email and a quick note.', { error: true }); return; }
         btn.disabled = true; btn.textContent = 'Sending…';
         try {
           await submitLead({
@@ -360,7 +372,7 @@
           btn.textContent = 'Sent. Thank you.';
         } catch (err) {
           btn.disabled = false; btn.textContent = 'Send to Sara';
-          alert(err.message);
+          toast(err.message || 'Something went wrong.', { error: true });
         }
       });
     }
@@ -387,17 +399,9 @@
     if (!email) return;
     const bar = document.createElement('div');
     bar.id = 'leg-acct-bar';
-    bar.style.cssText = [
-      'position:fixed', 'bottom:14px', 'right:14px', 'z-index:90000',
-      'display:flex', 'align-items:center', 'gap:8px',
-      'padding:8px 12px', 'border-radius:999px',
-      'background:rgba(20,18,15,0.92)', 'color:#FAF6EC',
-      'box-shadow:0 8px 28px rgba(0,0,0,0.28)',
-      "font-family:'JetBrains Mono',monospace", 'font-size:10px',
-      'letter-spacing:.1em', 'text-transform:uppercase', 'max-width:92vw'
-    ].join(';');
-    bar.innerHTML = '<span style="opacity:.75;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">Signed in as ' + email + '</span>'
-      + '<a href="#" id="leg-acct-switch" style="color:#E7C86B;text-decoration:underline;white-space:nowrap;">Not you?</a>';
+    bar.className = 'lg-acct';
+    bar.innerHTML = '<span>Signed in as ' + email + '</span>'
+      + '<a href="#" id="leg-acct-switch">Not you?</a>';
     document.body.appendChild(bar);
     document.getElementById('leg-acct-switch').addEventListener('click', async (e) => {
       e.preventDefault();
@@ -416,15 +420,9 @@
     if (!overlay) {
       overlay = document.createElement('div');
       overlay.id = 'leg-auth-overlay';
-      overlay.style.cssText = [
-        'position:fixed', 'inset:0', 'z-index:99998',
-        'background:rgba(20,18,15,0.94)',
-        'display:flex', 'align-items:center', 'justify-content:center',
-        'padding:24px',
-        'font-family:Manrope,system-ui,sans-serif',
-        'color:#FAF6EC'
-      ].join(';');
-      overlay.innerHTML = '<div style="font-family:\'JetBrains Mono\',monospace;font-size:10.5px;letter-spacing:.22em;text-transform:uppercase;opacity:.7;">Checking session…</div>';
+      overlay.className = 'lg-ov lg-ov--solid';
+      overlay.style.zIndex = '99998';   // sit under an intake modal if both open
+      overlay.innerHTML = '<div class="lg-ov__checking">Checking session…</div>';
       (document.body || document.documentElement).appendChild(overlay);
     }
 
@@ -458,16 +456,16 @@
 
     overlay.innerHTML = '';
     const card = document.createElement('div');
-    card.style.cssText = 'max-width:460px;width:100%;background:#FAF6EC;color:#1A1714;padding:36px 32px;box-shadow:0 30px 80px rgba(0,0,0,0.5);';
+    card.className = 'lg-sheet';
     card.innerHTML = `
-      <div style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.22em;text-transform:uppercase;color:#7C6A4D;margin-bottom:10px;">Legacy Properties</div>
-      <h2 style="font-family:'Cormorant Garamond',serif;font-style:italic;font-weight:500;font-size:30px;margin:0 0 14px;line-height:1.1;">${isAgent ? 'Open the desk.' : 'See your dashboard.'}</h2>
-      ${isAgent ? '' : '<p style="font-size:14px;line-height:1.55;color:#3A332B;margin:0 0 18px;">Enter your email and we will send you a one-click link. No password to remember.</p>'}
-      <form id="leg-auth" style="display:flex;flex-direction:column;gap:10px;">
-        <input name="email" type="email" placeholder="Email" required value="${prefillEmail.replace(/"/g,'')}" style="font-size:15px;padding:10px 12px;border:1px solid #D9CFB7;background:#fff;">
-        ${isAgent ? '<input name="password" type="password" placeholder="Password" required style="font-size:15px;padding:10px 12px;border:1px solid #D9CFB7;background:#fff;">' : ''}
-        <button type="submit" style="background:#1A1714;color:#FAF6EC;border:none;padding:14px;font-family:JetBrains Mono,monospace;font-size:11px;letter-spacing:.22em;text-transform:uppercase;cursor:pointer;">${isAgent ? 'Sign in' : 'Email me the link'}</button>
-        <div id="leg-auth-msg" style="font-size:13px;min-height:18px;color:#7C6A4D;"></div>
+      <div class="lg-sheet__eyebrow">Legacy Properties</div>
+      <h2 class="lg-sheet__title">${isAgent ? 'Open the desk.' : 'See your dashboard.'}</h2>
+      ${isAgent ? '' : '<p class="lg-sheet__intro">Enter your email and we will send you a one-click link. No password to remember.</p>'}
+      <form id="leg-auth" class="lg-sheet__form">
+        <input name="email" type="email" class="lg-field" placeholder="Email" required value="${prefillEmail.replace(/"/g,'')}">
+        ${isAgent ? '<input name="password" type="password" class="lg-field" placeholder="Password" required>' : ''}
+        <button type="submit" class="lg-btn lg-btn--gold">${isAgent ? 'Sign in' : 'Email me the link'}</button>
+        <div id="leg-auth-msg" class="lg-sheet__err" style="color:rgba(255,253,248,.6);"></div>
       </form>`;
     overlay.appendChild(card);
 
@@ -488,9 +486,9 @@
         const r = await api('/api/auth/magic-link', { body: { email: data.email } });
         if (r.ok) {
           form.innerHTML = `
-            <div style="font-family:'Cormorant Garamond',serif;font-style:italic;font-size:22px;line-height:1.3;color:#1A1714;margin-bottom:10px;">Check your email.</div>
-            <p style="font-size:14px;line-height:1.55;color:#3A332B;margin:0 0 8px;">We just sent a one-click sign-in link to <strong>${data.email.replace(/</g,'')}</strong>.</p>
-            <p style="font-size:13px;line-height:1.5;color:#7C6A4D;margin:0;">It can take up to a minute. Look in spam if you do not see it.</p>`;
+            <div class="lg-sheet__title" style="font-size:24px;margin-bottom:10px;">Check your email.</div>
+            <p class="lg-sheet__intro" style="margin:0 0 8px;">We just sent a one-click sign-in link to <strong style="color:var(--lg-cream);">${data.email.replace(/</g,'')}</strong>.</p>
+            <p class="lg-sheet__intro" style="font-size:13px;margin:0;opacity:.75;">It can take up to a minute. Look in spam if you do not see it.</p>`;
         } else {
           msg.textContent = r.json?.error || 'Could not send link.';
         }
@@ -1586,7 +1584,7 @@
   // search that lands on whoever was last open). Works for any contact, incl.
   // archived/closed clients, because selectLeadId→loadLead fetches by id.
   window.Legacy = {
-    api, openModal, submitLead,
+    api, openModal, submitLead, toast,
     openLead: function (id) {
       if (!id) return;
       if (typeof window.showView === 'function') window.showView(null, 'inbox');
