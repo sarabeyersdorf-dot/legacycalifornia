@@ -244,12 +244,12 @@ Respond in JSON only: { "sms": "...", "reasoning": "one sentence" }`;
         const name  = [lead.first_name, lead.last_name].filter(Boolean).join(' ') || lead.email;
         const where = property && (property.address || property.city) ? ' (' + [property.address, property.city].filter(Boolean).join(', ') + ')' : '';
         const moreStr = more > 0 ? ` +${more} more activit${more === 1 ? 'y' : 'ies'} since last ping.` : '';
-        const desk = deskUrl();
-        const sms = `${name} ${ENGAGE_VERB[event_type] || 'engaged'}${where}. Score ${newScore}.${moreStr} Open CRM: ${desk}`;
+        const desk = deskUrl(lead.id);
+        const sms = `${name} ${ENGAGE_VERB[event_type] || 'engaged'}${where}. Score ${newScore}.${moreStr} Open lead: ${desk}`;
         const text = `${name} just ${ENGAGE_VERB[event_type] || 'engaged'} on legacycalifornia.com${where}.\n\n`
           + `Email: ${lead.email}\nPhone: ${lead.phone || '(none)'}\nScore: ${oldScore} → ${newScore} (${temperature})\n`
           + (more > 0 ? `Activity since last ping: ${more + 1}\n` : '')
-          + `\nOpen the CRM: ${desk}`;
+          + `\nOpen this lead in the CRM: ${desk}`;
         agent_alert = await alertAgents(supa, { subject: `${name} — website activity`, sms, text });
         await supa.from('leads').update({ last_alert_at: new Date().toISOString() }).eq('id', lead.id).then(() => {}, () => {});
       } else {
