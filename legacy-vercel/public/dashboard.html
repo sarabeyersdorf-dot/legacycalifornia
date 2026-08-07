@@ -253,6 +253,33 @@ body {
 .dash-state.dash-empty { font-family: var(--serif); font-style: italic; font-size: 16px; color: var(--ink-soft); }
 .dash-spinner { width: 12px; height: 12px; border: 2px solid var(--rule-strong); border-top-color: var(--brass); border-radius: 50%; animation: dashspin 0.7s linear infinite; flex: none; }
 @keyframes dashspin { to { transform: rotate(360deg); } }
+
+/* --------------------------------------------------------------------------
+   lg polish pass — the tokens above already put the dashboard on the brand's
+   palette + type; this rounds the corners, adds the warm soft shadow, and
+   pills the buttons so the app reads like the same family as the marketing
+   site (which uses rounded lg-cards + pill lg-btns). Markup + data hooks are
+   untouched — this is purely cosmetic.
+-------------------------------------------------------------------------- */
+.dash-card, .digest {
+  border-radius: var(--lg-r);
+  box-shadow: var(--lg-sh-sm);
+  border-color: var(--lg-sand);
+}
+.dash-summary { border-radius: var(--lg-r); overflow: hidden; box-shadow: var(--lg-sh-sm); }
+/* the digest's dark header needs the top corners rounded to match its card */
+.digest { overflow: hidden; }
+/* Rounded media + inset tiles */
+.saved-photo { border-radius: var(--lg-r-sm); }
+.saved-photo .badge { border-radius: 100px; }
+.tour-date { border-radius: var(--lg-r-sm); }
+.saved-note { border-radius: var(--lg-r-sm); }
+.tag-mini { border-radius: 100px; }
+.digest-mini a { border-radius: var(--lg-r-sm); }
+.pref-card { border-radius: var(--lg-r-sm); }
+/* Pill buttons — match the marketing site's lg-btn shape */
+.btn { border-radius: 100px; }
+.wire-warn { border-radius: var(--lg-r-sm); }
 </style>
 </head>
 <body data-screen-label="Consumer Dashboard">
