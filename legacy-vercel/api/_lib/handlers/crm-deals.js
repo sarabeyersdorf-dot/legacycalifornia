@@ -179,7 +179,9 @@ export default async function handler(req, res) {
           // Richer contingencies (preferred over the milestones fallback) + the
           // deal's open compliance-file gaps, same sources as the deals-motion ledger.
           supa.from('deal_timeline_items').select('deal_id, title, due_date, status, kind').in('deal_id', pendingIds).eq('kind', 'contingency').then((x) => x, () => ({ data: [] })),
-          supa.from('deal_documents').select('deal_id').eq('status', 'missing').in('deal_id', pendingIds).then((x) => x, () => ({ data: [] }))
+          // A not-on-file doc is stored as status='pending' (valid enum) with the
+          // 'missing' marker in status_raw — the enum has no 'missing' value.
+          supa.from('deal_documents').select('deal_id').eq('status_raw', 'missing').in('deal_id', pendingIds).then((x) => x, () => ({ data: [] }))
         ]);
         // sub_kind may be pre-migration — retry appointments without it.
         let appts = apptRes0?.data;
