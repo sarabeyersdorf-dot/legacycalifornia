@@ -19,10 +19,12 @@ import { agentIdentity } from './collection-render.js';
 const AGENT_KEYS = ['sara', 'james'];
 
 // The CRM desk URL, following PUBLIC_SITE_URL (flips to the custom domain via
-// one env var) with a safe default.
-export function deskUrl() {
+// one env var) with a safe default. Pass a leadId to deep-link straight to that
+// contact's detail — the CRM reads ?lead=<id> on boot and opens it (survives the
+// sign-in gate, which reloads the same URL). Without an id, links to the desk.
+export function deskUrl(leadId) {
   const base = (process.env.PUBLIC_SITE_URL || 'https://legacycalifornia.vercel.app').replace(/\/+$/, '');
-  return `${base}/crm.html`;
+  return leadId ? `${base}/crm.html?lead=${encodeURIComponent(leadId)}` : `${base}/crm.html`;
 }
 
 // alertAgents(supa, { subject, sms, text, html })

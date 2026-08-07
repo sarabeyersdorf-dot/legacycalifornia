@@ -153,19 +153,28 @@
     if (!saveLink) return;
     saveLink.addEventListener('click', async (e) => {
       e.preventDefault();
-      const active = $('.journey-step.active');
-      const stageLabel = (active?.textContent || 'Discovering').trim().toLowerCase();
+      // Which lane? (buyer / seller) — the chips carry '.is-on', not '.active'.
+      const sideEl = $('.journey-side.is-on');
+      const lead_type = (sideEl?.getAttribute('data-side') === 'seller') ? 'seller' : 'buyer';
+      const active = $('.journey-step.is-on');
+      const stageLabel = (active?.textContent || '').trim();
+      // Buyer stages map to the intake's allowed journey values; seller stages
+      // don't (the CRM tracks those as seller_stage), so we carry the seller's
+      // chosen stage in the message instead and leave journey_stage null.
       const stageMap = {
-        'discovering':     'discovering',
-        'narrowing':       'narrowing',
-        'touring':         'touring',
-        'ready to offer':  'ready_to_offer'
+        'Discovering':    'discovering',
+        'Narrowing':      'narrowing',
+        'Touring':        'touring',
+        'Ready to offer': 'ready_to_offer'
       };
-      const journey_stage = stageMap[stageLabel] || 'discovering';
+      const journey_stage = lead_type === 'buyer' ? (stageMap[stageLabel] || 'discovering') : null;
+      const message = `Homepage: ${lead_type === 'seller' ? 'Selling' : 'Buying'}${stageLabel ? ' — ' + stageLabel : ''}`;
 
       const result = await openModal({
-        title:  'Save your place.',
-        intro:  'We will reach out within the day. No autoresponders.',
+        title:  lead_type === 'seller' ? 'Save your place.' : 'Save your place.',
+        intro:  lead_type === 'seller'
+          ? 'Tell us where to reach you — Sara will follow up about your property within the day. No autoresponders.'
+          : 'We will reach out within the day. No autoresponders.',
         fields: [
           { name: 'first_name', label: 'First name', required: true },
           { name: 'last_name',  label: 'Last name' },
@@ -175,7 +184,7 @@
         ],
         submitLabel: 'Save my place',
         onSubmit: async (data) => {
-          const r = await submitLead({ ...data, journey_stage, lead_type: 'buyer' });
+          const r = await submitLead({ ...data, journey_stage, lead_type, message });
           return { ...r, email: data.email };
         }
       });
@@ -3849,7 +3858,13 @@
     paintLeadList();
     paintKanban(pipelineRes.json);
 
-    if (allLeads.length) selectLeadId(allLeads[0].id);
+    // Deep-link: an alert SMS/email links to /crm.html?lead=<id>. Open that
+    // exact contact (openLead fetches by id, so it works even if the lead isn't
+    // in the initial roster) instead of auto-selecting the most-recent one.
+    const wantLead = new URLSearchParams(location.search).get('lead');
+    if (wantLead && window.Legacy && typeof window.Legacy.openLead === 'function') {
+      window.Legacy.openLead(wantLead);
+    } else if (allLeads.length) selectLeadId(allLeads[0].id);
     else {
       const detailEl = document.querySelector('[data-lead-detail]');
       if (detailEl) detailEl.innerHTML = `<div style="padding:32px;opacity:.55;font-style:italic;">No active leads yet. Submit a lead via the homepage to populate the CRM.</div>`;

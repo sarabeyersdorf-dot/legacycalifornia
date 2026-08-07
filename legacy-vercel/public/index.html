@@ -836,15 +836,20 @@
 <!-- ============ JOURNEY ============ -->
 <section class="lg-sec lg-sec--tint"><div class="lg-wrap" style="text-align:center">
   <div class="lg-kicker lg-rv" style="justify-content:center"><span>A quiet question</span></div>
-  <h2 class="lg-display lg-h2 lg-rv lg-d1" style="margin:14px 0 26px">Where are you in the journey?</h2>
-  <div class="lg-rv lg-d2" style="display:flex;gap:12px;flex-wrap:wrap;justify-content:center">
-    <button class="lg-chip journey-step is-on" onclick="setJourney(this)">Discovering</button>
-    <button class="lg-chip journey-step" onclick="setJourney(this)">Narrowing</button>
-    <button class="lg-chip journey-step" onclick="setJourney(this)">Touring</button>
-    <button class="lg-chip journey-step" onclick="setJourney(this)">Ready to offer</button>
+  <h2 class="lg-display lg-h2 lg-rv lg-d1" id="journeyHead" style="margin:14px 0 20px">Are you buying or selling?</h2>
+  <!-- Two lanes: pick a side first, then the chips below re-word to that side. -->
+  <div class="lg-rv lg-d1" style="display:flex;gap:10px;justify-content:center;margin:0 0 22px" data-journey-side>
+    <button type="button" class="lg-chip journey-side is-on" data-side="buyer"  onclick="setSide(this)">I'm buying</button>
+    <button type="button" class="lg-chip journey-side"       data-side="seller" onclick="setSide(this)">I'm selling</button>
+  </div>
+  <div class="lg-rv lg-d2" style="display:flex;gap:12px;flex-wrap:wrap;justify-content:center" data-journey-steps>
+    <button type="button" class="lg-chip journey-step is-on" onclick="setJourney(this)">Discovering</button>
+    <button type="button" class="lg-chip journey-step" onclick="setJourney(this)">Narrowing</button>
+    <button type="button" class="lg-chip journey-step" onclick="setJourney(this)">Touring</button>
+    <button type="button" class="lg-chip journey-step" onclick="setJourney(this)">Ready to offer</button>
   </div>
   <div class="lg-rv lg-d3" style="margin-top:28px">
-    <a href="dashboard.html" class="lg-btn lg-btn--ghost">Save my place &rarr;</a>
+    <a href="dashboard.html" class="lg-btn lg-btn--ghost journey-link">Save my place &rarr;</a>
   </div>
 </div></section>
 
@@ -1208,6 +1213,27 @@
 function setJourney(el) {
   document.querySelectorAll('.journey-step').forEach(s => s.classList.remove('is-on'));
   el.classList.add('is-on');
+}
+
+// Buyer / seller lanes. Picking a side re-words the four journey chips to that
+// side's stages so a seller never gets buyer prompts. legacy-client.js reads
+// the active side + chip to set lead_type and the message on "Save my place".
+var JOURNEY_LANES = {
+  buyer:  ['Discovering', 'Narrowing', 'Touring', 'Ready to offer'],
+  seller: ['Just curious', 'Getting it ready', 'Ready to list', 'Already listed']
+};
+function setSide(el) {
+  document.querySelectorAll('.journey-side').forEach(s => s.classList.remove('is-on'));
+  el.classList.add('is-on');
+  var side   = el.getAttribute('data-side') || 'buyer';
+  var labels = JOURNEY_LANES[side] || JOURNEY_LANES.buyer;
+  document.querySelectorAll('.journey-step').forEach(function (chip, i) {
+    if (!labels[i]) return;
+    chip.textContent = labels[i];
+    chip.classList.toggle('is-on', i === 0);
+  });
+  var head = document.getElementById('journeyHead');
+  if (head) head.textContent = side === 'seller' ? 'Where are you with selling?' : 'Where are you in the journey?';
 }
 
 /* ── Hero video: discreet dual-buffer loop ──

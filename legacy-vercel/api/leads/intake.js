@@ -191,14 +191,14 @@ export default async function handler(req, res) {
       if (fields.areas && fields.areas.length) bits.push('areas: ' + fields.areas.join(', '));
       if (fields.price_min || fields.price_max) bits.push('budget: ' + (fields.price_min ? '$' + fields.price_min : '?') + '–' + (fields.price_max ? '$' + fields.price_max : '?'));
       if (fields.phone) bits.push(fields.phone);
-      const desk = deskUrl();
-      const sms = `New ${is_new ? '' : 'returning '}lead: ${name} ${action}${bits.length ? ' — ' + bits.join(' · ') : ''}. Open CRM: ${desk}`;
+      const desk = deskUrl(lead.id);
+      const sms = `New ${is_new ? '' : 'returning '}lead: ${name} ${action}${bits.length ? ' — ' + bits.join(' · ') : ''}. Open lead: ${desk}`;
       const text = `${name} ${action} on legacycalifornia.com.\n\n`
         + `Email: ${fields.email}\nPhone: ${fields.phone || '(none)'}\n`
         + `Type: ${fields.lead_type || '—'}\nJourney: ${fields.journey_stage || '—'}\n`
         + `Areas: ${(fields.areas || []).join(', ') || '—'}\nBudget: ${fields.price_min || '?'}–${fields.price_max || '?'}\n`
         + (fields.notes ? `Message: ${fields.notes}\n` : '')
-        + `\nOpen the CRM: ${desk}`;
+        + `\nOpen this lead in the CRM: ${desk}`;
       sideEffects.agent_alert = await alertAgents(supa, { subject: `New website lead — ${name}`, sms, text });
     } catch (e) { sideEffects.agent_alert_error = e.message; }
 
