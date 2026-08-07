@@ -455,6 +455,43 @@
   var current = 0;
   var answers = { intent: null, timeline: null, budget: null, areas: [], must_haves: '' };
 
+  // Side-aware copy. Steps 1–4 re-word for sellers so "Selling" doesn't get
+  // buyer questions. The option DATA (timeline journey values, budget min/max)
+  // is unchanged — only the visible wording swaps — so the payload stays valid.
+  var COPY = {
+    buyer: {
+      timeline: { q: "What's your timeline?", hint: "No wrong answer — it just tells us how to help.",
+        opts: [['As soon as the right one appears','Ready now'],['Within the next 3–6 months','Actively looking'],['Sometime this year','Narrowing things down'],['Just starting to think about it','Discovering']] },
+      budget:   { q: "What's your range?", hint: "A rough band is plenty. We'll never show you outside it.",
+        opts: [['Up to $500K','Entry & cabins'],['$500K – $750K','The foothills sweet spot'],['$750K – $1M','Move-up & acreage'],['$1M and up','Estate & vineyard']] },
+      areas:    { q: "Where are you looking?", hint: "Pick any that pull at you — or none, and we'll suggest the town." },
+      notes:    { q: "What matters most?", hint: "The things that would make you say yes — views, single-level, a shop, walk to town, no HOA…",
+        label: "Your must-haves & lovely-to-haves", ph: "Single-level, generator, oak canopy, room for a horse…" }
+    },
+    seller: {
+      timeline: { q: "When are you hoping to sell?", hint: "No wrong answer — it just tells us how to help.",
+        opts: [["I'm ready to list now",'Ready now'],['Within the next 3–6 months','Getting it ready'],['Sometime this year','Thinking it through'],["Just exploring what it's worth",'Early days']] },
+      budget:   { q: "What are you hoping to sell for?", hint: "A rough number is plenty — we'll refine it with a real valuation.",
+        opts: [['Under $500K',''],['$500K – $750K',''],['$750K – $1M',''],['$1M and up','']] },
+      areas:    { q: "Where's your property?", hint: "Pick the town it's in — or 'Rural & acreage' if that fits better." },
+      notes:    { q: "Tell us about the property", hint: "Beds & baths, acreage, condition, any recent updates, and why you're selling — whatever you'd want us to know.",
+        label: "About your property", ph: "3 bd / 2 ba, 1.5 acres, new roof in 2023, selling to be closer to family…" }
+    }
+  };
+  function sideOf(intent) { return intent === 'seller' ? 'seller' : 'buyer'; }
+  function applyCopy(intent) {
+    var c = COPY[sideOf(intent)];
+    var stepEls = document.querySelectorAll('.fmm-step');
+    var setQ = function (el, o) { if (!el) return; var q = el.querySelector('.fmm-q'), h = el.querySelector('.fmm-hint'); if (q) q.textContent = o.q; if (h) h.textContent = o.hint; };
+    var setOpts = function (el, opts) { if (!el || !opts) return; var b = el.querySelectorAll('.fmm-opt'); opts.forEach(function (o, i) { if (!b[i]) return; var t = b[i].querySelector('.t'), s = b[i].querySelector('.s'); if (t) t.textContent = o[0]; if (s) { s.textContent = o[1]; s.style.display = o[1] ? '' : 'none'; } }); };
+    setQ(stepEls[1], c.timeline); setOpts(stepEls[1], c.timeline.opts);
+    setQ(stepEls[2], c.budget);   setOpts(stepEls[2], c.budget.opts);
+    setQ(stepEls[3], c.areas);
+    setQ(stepEls[4], c.notes);
+    var lbl = stepEls[4] && stepEls[4].querySelector('label'); if (lbl) lbl.textContent = c.notes.label;
+    var ta  = stepEls[4] && stepEls[4].querySelector('textarea'); if (ta) ta.setAttribute('placeholder', c.notes.ph);
+  }
+
   var form      = document.getElementById('fmmForm');
   var steps     = Array.prototype.slice.call(document.querySelectorAll('.fmm-step'));
   var nextBtn   = document.getElementById('nextBtn');
@@ -481,7 +518,7 @@
       btn.addEventListener('click', function () {
         group.querySelectorAll('.fmm-opt').forEach(function (b) { b.classList.remove('sel'); });
         btn.classList.add('sel');
-        if (key === 'intent')   answers.intent = btn.getAttribute('data-value');
+        if (key === 'intent')   { answers.intent = btn.getAttribute('data-value'); applyCopy(answers.intent); }
         if (key === 'timeline') answers.timeline = btn.getAttribute('data-value');
         if (key === 'budget') {
           answers.budget = {
@@ -538,12 +575,13 @@
 
   function buildPayload() {
     var b = answers.budget || {};
+    var sell = sideOf(answers.intent) === 'seller';
     var summaryBits = [
       'Intent: ' + (answers.intent || '—'),
-      'Timeline: ' + (answers.timeline || '—'),
-      'Budget: ' + (b.label || '—'),
-      'Areas: ' + (answers.areas.length ? answers.areas.join(', ') : 'Open / suggest the town'),
-      answers.must_haves ? 'Must-haves: ' + answers.must_haves : null
+      (sell ? 'Selling timeline: ' : 'Timeline: ') + (answers.timeline || '—'),
+      (sell ? 'Price expectation: ' : 'Budget: ') + (b.label || '—'),
+      (sell ? 'Property location: ' : 'Areas: ') + (answers.areas.length ? answers.areas.join(', ') : (sell ? '—' : 'Open / suggest the town')),
+      answers.must_haves ? (sell ? 'About the property: ' : 'Must-haves: ') + answers.must_haves : null
     ].filter(Boolean);
 
     return {
