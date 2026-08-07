@@ -377,6 +377,36 @@
     return json;
   }
 
+  // Consumer portals (dashboard/seller) get a discreet "who am I signed in as"
+  // strip with a one-click switch, so a lingering session — a shared device, a
+  // household, or the agent's own login — is always visible and never a trap.
+  function renderAccountBar(session) {
+    if (!/\/(dashboard|seller)\.html$/.test(location.pathname)) return;
+    if (document.getElementById('leg-acct-bar')) return;
+    const email = ((session && session.user && session.user.email) || '').replace(/[<>]/g, '');
+    if (!email) return;
+    const bar = document.createElement('div');
+    bar.id = 'leg-acct-bar';
+    bar.style.cssText = [
+      'position:fixed', 'bottom:14px', 'right:14px', 'z-index:90000',
+      'display:flex', 'align-items:center', 'gap:8px',
+      'padding:8px 12px', 'border-radius:999px',
+      'background:rgba(20,18,15,0.92)', 'color:#FAF6EC',
+      'box-shadow:0 8px 28px rgba(0,0,0,0.28)',
+      "font-family:'JetBrains Mono',monospace", 'font-size:10px',
+      'letter-spacing:.1em', 'text-transform:uppercase', 'max-width:92vw'
+    ].join(';');
+    bar.innerHTML = '<span style="opacity:.75;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">Signed in as ' + email + '</span>'
+      + '<a href="#" id="leg-acct-switch" style="color:#E7C86B;text-decoration:underline;white-space:nowrap;">Not you?</a>';
+    document.body.appendChild(bar);
+    document.getElementById('leg-acct-switch').addEventListener('click', async (e) => {
+      e.preventDefault();
+      try { await api('/api/auth/session', { method: 'DELETE' }); } catch (_) {}
+      // Land on a clean sign-in card; drop any ?email so it doesn't re-loop.
+      location.href = location.pathname;
+    });
+  }
+
   async function gate(requiredRoles) {
     // Inject an immediate full-screen dimmer so the prototype mock can never
     // flash before we know who the visitor is. The overlay is created
@@ -398,10 +428,26 @@
       (document.body || document.documentElement).appendChild(overlay);
     }
 
+    // The email the visitor intends to sign in as, if they arrived with one
+    // (e.g. the post-registration redirect adds ?email=…). Used to stop a
+    // lingering session from routing a new person into the wrong account.
+    const wantEmail = (new URLSearchParams(location.search).get('email') || '').trim().toLowerCase();
+
     const session = await ensureSession(requiredRoles);
     if (session) {
-      overlay.remove();
-      return session;
+      const sessEmail = ((session.user && session.user.email) || '').trim().toLowerCase();
+      // If they explicitly came to sign in as a specific email that isn't the
+      // one already signed in on this device, do NOT silently hand them the
+      // other account — fall through to the sign-in card (prefilled with the
+      // email they intend). A returning user with no ?email, or a matching
+      // email, is accepted normally so we never force a needless re-login.
+      if (wantEmail && sessEmail && wantEmail !== sessEmail) {
+        // fall through to sign-in card
+      } else {
+        overlay.remove();
+        renderAccountBar(session);
+        return session;
+      }
     }
 
     // Not signed in (or wrong role) — turn the overlay into a sign-in card.
