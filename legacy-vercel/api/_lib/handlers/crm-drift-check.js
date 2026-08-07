@@ -88,6 +88,11 @@ export default async function handler(req, res) {
     let lastPublishAt = null;
     for (const d of crmDeals) if (d.updated_at && (!lastPublishAt || d.updated_at > lastPublishAt)) lastPublishAt = d.updated_at;
 
+    // Window for orphan_calendar: only FUTURE events are phantom deadlines. A
+    // closed deal's historical COE (a past date) is not drift.
+    const todayStr = new Date().toISOString().slice(0, 10);
+    const horizonStr = new Date(Date.now() + 365 * 86400000).toISOString().slice(0, 10);
+
     const findings = [];
     const add = (severity, check, deal, extra) => findings.push({
       severity, check, deal: deal || null,
@@ -183,9 +188,10 @@ export default async function handler(req, res) {
             detail: `Deal is ${m.stage} in master but has ${upcoming.length} timeline item(s) still 'upcoming' (${upcoming.map((i) => i.key).join(', ')}). A stage exit should retire them.`
           });
         }
-        // orphan_calendar (CRITICAL) — dead deal still generates calendar events
+        // orphan_calendar (CRITICAL) — dead deal still generates FUTURE calendar
+        // events (past dates on a closed deal are history, not drift).
         let ev = [];
-        try { ev = timelineEvents(c) || []; } catch (_) { ev = []; }
+        try { ev = timelineEvents(c, { todayStr, endStr: horizonStr }) || []; } catch (_) { ev = []; }
         if (ev.length) {
           add('critical', 'orphan_calendar', id, {
             master: m.stage, crm: `${ev.length} event(s)`, client_visible: true,
@@ -225,16 +231,9 @@ export default async function handler(req, res) {
         }
       }
 
-      // next_pointer (WARN) — a live deal should have exactly one next open milestone
-      if (mLive && Array.isArray(c.milestones)) {
-        const nextCount = c.milestones.filter((ms) => ms && (ms.next === true || ms.is_next === true)).length;
-        if (nextCount !== 1) {
-          add('warn', 'next_pointer', id, {
-            crm: `${nextCount}'next' milestones`,
-            detail: `Live deal has ${nextCount} milestone(s) flagged as the next open item (expected exactly 1).`
-          });
-        }
-      }
+      // (next_pointer omitted: the milestones model carries no 'next' flag, so
+      // the check can't be evaluated without inventing one — it would false-flag
+      // every live deal. Revisit if milestones gain an explicit next-open marker.)
 
       // INFO — missing_commission / missing_contact on live deals
       if (mLive) {
