@@ -69,6 +69,7 @@ import deadlines          from '../_lib/handlers/crm-deadlines.js';
 import emailOauthStart    from '../_lib/handlers/crm-email-oauth-start.js';
 import emailOauthCallback from '../_lib/handlers/crm-email-oauth-callback.js';
 import emailAccounts      from '../_lib/handlers/crm-email-accounts.js';
+import idxStatus          from '../_lib/handlers/crm-idx-status.js';
 
 const TABLE = {
   'lead-hygiene':    leadHygiene,
@@ -116,7 +117,8 @@ const TABLE = {
   'deadlines':         deadlines,
   'email-oauth-start':    emailOauthStart,
   'email-oauth-callback': emailOauthCallback,
-  'email-accounts':       emailAccounts
+  'email-accounts':       emailAccounts,
+  'idx-status':           idxStatus
 };
 
 export default async function handler(req, res) {
