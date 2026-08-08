@@ -649,13 +649,22 @@
     const allNudges = (brief.collection_nudges || []).filter((n) => !lgIsDismissed(nudgeKey(n)));
     const nudges = allNudges.filter((n) => n.mine !== false);
     const otherNudges = allNudges.filter((n) => n.mine === false);
-    const total = approvals.length + nudges.length + drafts.length;
+    // Gone-quiet leads + deal data-flags: morning-brief computes these, but they
+    // were only ever "called out" inside the AI prose — never as something you
+    // could act on. Surface them in the queue so nothing needs hunting for.
+    const silent  = brief.radio_silence || [];
+    const gaps    = brief.data_gaps || [];
+    const parties = brief.party_reconcile || [];
+    const flags   = gaps.length + parties.length;
+    const total = approvals.length + nudges.length + drafts.length + silent.length + flags;
 
     const eyebrow = needs.querySelector('.eyebrow');
     if (eyebrow) eyebrow.textContent = total
       ? ['Needs you', approvals.length ? `${approvals.length} approval${approvals.length === 1 ? '' : 's'}` : '',
          drafts.length ? `${drafts.length} draft${drafts.length === 1 ? '' : 's'}` : '',
-         nudges.length ? `${nudges.length} follow-up${nudges.length === 1 ? '' : 's'}` : ''].filter(Boolean).join(' · ')
+         nudges.length ? `${nudges.length} follow-up${nudges.length === 1 ? '' : 's'}` : '',
+         silent.length ? `${silent.length} gone quiet` : '',
+         flags ? `${flags} data flag${flags === 1 ? '' : 's'}` : ''].filter(Boolean).join(' · ')
       : 'Needs you · clear desk';
     const h2 = needs.querySelector('.h-section');
     if (h2) h2.textContent = total ? 'Your decision queue.' : 'Nothing pending.';
@@ -740,6 +749,58 @@
       });
     };
     nudges.forEach((n) => renderNudge(n));
+
+    // Gone quiet — the leads morning-brief flagged as 14+ days no contact, now
+    // shown BY NAME with a one-click jump to each so "who are they?" is answered
+    // and you can actually reach out. Reaching out logs contact → drops next brief.
+    if (silent.length) {
+      const daysSince = (iso) => { if (!iso) return null; const d = Math.floor((Date.now() - new Date(iso).getTime()) / 86400000); return isNaN(d) ? null : d; };
+      const card = document.createElement('article');
+      card.className = 'need-card q-cli';
+      const rows = silent.map((l) => {
+        const nm = [l.first_name, l.last_name].filter(Boolean).join(' ') || l.email || 'Lead';
+        const d = daysSince(l.last_contact_at);
+        const temp = l.temperature ? `<span style="text-transform:capitalize;color:var(--ink-mute);">${escapeHtml(l.temperature)}</span> · ` : '';
+        return `<div style="display:flex;align-items:baseline;justify-content:space-between;gap:12px;padding:9px 0;border-top:1px solid rgba(0,0,0,.06);">
+            <span style="font-size:14px;">${temp}<strong>${escapeHtml(nm)}</strong>${d != null ? ` · ${d} days quiet` : ''}</span>
+            <button class="btn btn-ink btn-sm" data-open-lead="${escapeHtml(l.id)}">Reach out →</button>
+          </div>`;
+      }).join('');
+      card.innerHTML = `
+        <div class="nc-rank">…</div>
+        <div class="nc-body">
+          <div class="nc-meta"><span class="nc-tag" style="color:#8a6e3d;">Follow-up · gone quiet 14+ days</span></div>
+          <h3>${silent.length} lead${silent.length === 1 ? '' : 's'} ${silent.length === 1 ? 'has' : 'have'} gone quiet</h3>
+          <p>No contact logged in over two weeks. Open one to text, call, or log a note.</p>
+          <div style="margin-top:8px;">${rows}</div>
+        </div>`;
+      needs.appendChild(card);
+      card.querySelectorAll('[data-open-lead]').forEach((b) => b.addEventListener('click', () => {
+        const id = b.getAttribute('data-open-lead');
+        if (window.Legacy && window.Legacy.openLead) window.Legacy.openLead(id);
+      }));
+    }
+
+    // Data flags — deal-level items morning-brief computed for Cowork to fix (a
+    // pending deal missing its price, a party edit awaiting reconcile). Shown so
+    // they're visible and not a surprise; tagged so it's clear Cowork handles them.
+    if (flags) {
+      const card = document.createElement('article');
+      card.className = 'need-card q-dec';
+      const rows = [
+        ...gaps.map((g) => `<li>${escapeHtml(g.address || g.source_key)} — <span style="color:var(--ink-mute);">missing price on a pending deal</span></li>`),
+        ...parties.map((p) => `<li>${escapeHtml(p.address || p.source_key)} — <span style="color:var(--ink-mute);">party edit awaiting reconcile</span></li>`)
+      ].join('');
+      card.innerHTML = `
+        <div class="nc-rank">i</div>
+        <div class="nc-body">
+          <div class="nc-meta"><span class="nc-tag" style="color:#8a8577;">Data · your briefing handles these</span></div>
+          <h3>${flags} deal${flags === 1 ? '' : 's'} flagged for a data fix</h3>
+          <p>Your morning briefing corrects these in the master file — listed here so nothing slips by silently.</p>
+          <ul style="margin:8px 0 0;padding-left:18px;font-size:13.5px;line-height:1.7;color:var(--ink-soft);">${rows}</ul>
+        </div>`;
+      needs.appendChild(card);
+    }
 
     // Broker toggle — reveal the other agent's follow-ups on demand.
     if (otherNudges.length) {
