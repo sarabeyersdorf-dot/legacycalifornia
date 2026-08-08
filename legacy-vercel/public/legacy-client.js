@@ -634,6 +634,14 @@
   function lgDismissedSet() { try { return new Set(JSON.parse(localStorage.getItem('lgDismissed') || '[]')); } catch (_) { return new Set(); } }
   function lgIsDismissed(k) { return !!k && lgDismissedSet().has(k); }
   function lgDismiss(k) { if (!k) return; try { const s = lgDismissedSet(); s.add(k); localStorage.setItem('lgDismissed', JSON.stringify(Array.from(s).slice(-500))); } catch (_) {} }
+  function lgUndismiss(k) { if (!k) return; try { const s = lgDismissedSet(); s.delete(k); localStorage.setItem('lgDismissed', JSON.stringify(Array.from(s).slice(-500))); } catch (_) {} }
+  // Per-DAY cross-off key for the (derived) day list, so a tick survives a refresh
+  // but the list is fresh again tomorrow. Old dated keys simply never re-match.
+  function dayOffKey(title) {
+    const d = new Date().toISOString().slice(0, 10);
+    const slug = String(title || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 60);
+    return `dayoff:${d}:${slug}`;
+  }
   function nudgeKey(n) { return 'ndg:' + (n.collection_id || '') + ':' + (n.pushed_at || ''); }
   function feedKey(i) { return 'sig:' + (i.ts || '') + '|' + String(i.body || '').slice(0, 64); }
 
@@ -759,11 +767,28 @@
       card.className = 'need-card q-cli';
       const rows = silent.map((l) => {
         const nm = [l.first_name, l.last_name].filter(Boolean).join(' ') || l.email || 'Lead';
+        const fn = l.first_name || nm;
         const d = daysSince(l.last_contact_at);
         const temp = l.temperature ? `<span style="text-transform:capitalize;color:var(--ink-mute);">${escapeHtml(l.temperature)}</span> · ` : '';
-        return `<div style="display:flex;align-items:baseline;justify-content:space-between;gap:12px;padding:9px 0;border-top:1px solid rgba(0,0,0,.06);">
-            <span style="font-size:14px;">${temp}<strong>${escapeHtml(nm)}</strong>${d != null ? ` · ${d} days quiet` : ''}</span>
-            <button class="btn btn-ink btn-sm" data-open-lead="${escapeHtml(l.id)}">Reach out →</button>
+        const tel = l.phone ? String(l.phone).replace(/[^0-9+]/g, '') : '';
+        const opener = `Hi ${fn}, it's ${agentFirst} — it's been a little while. Anything I can help you look at right now?`;
+        return `<div data-rs-row style="padding:9px 0;border-top:1px solid rgba(0,0,0,.06);">
+            <div style="display:flex;align-items:baseline;justify-content:space-between;gap:10px;flex-wrap:wrap;">
+              <span style="font-size:14px;">${temp}<strong>${escapeHtml(nm)}</strong>${d != null ? ` · ${d} days quiet` : ''}</span>
+              <span style="display:flex;gap:6px;flex-wrap:wrap;">
+                ${tel ? `<a class="btn btn-ghost btn-sm" href="tel:${escapeHtml(tel)}">Call</a>` : ''}
+                <button class="btn btn-ghost btn-sm" data-rs-text${tel ? '' : ' disabled title="No phone on file"'}>Text</button>
+                <button class="btn btn-ink btn-sm" data-open-lead="${escapeHtml(l.id)}">Open →</button>
+              </span>
+            </div>
+            <div data-rs-composer style="display:none;margin-top:8px;">
+              <textarea data-rs-body rows="2" style="width:100%;font:inherit;font-size:13px;line-height:1.5;padding:7px 9px;border:1px solid #D9CFB7;background:#fff;">${escapeHtml(opener)}</textarea>
+              <div style="display:flex;gap:6px;margin-top:5px;align-items:center;">
+                <button class="btn btn-ink btn-sm" data-rs-send="${escapeHtml(l.id)}">Send text</button>
+                <button class="btn btn-ghost btn-sm" data-rs-cancel>Cancel</button>
+                <span data-rs-status style="font-size:12px;"></span>
+              </div>
+            </div>
           </div>`;
       }).join('');
       card.innerHTML = `
@@ -771,13 +796,38 @@
         <div class="nc-body">
           <div class="nc-meta"><span class="nc-tag" style="color:#8a6e3d;">Follow-up · gone quiet 14+ days</span></div>
           <h3>${silent.length} lead${silent.length === 1 ? '' : 's'} ${silent.length === 1 ? 'has' : 'have'} gone quiet</h3>
-          <p>No contact logged in over two weeks. Open one to text, call, or log a note.</p>
+          <p>No contact logged in over two weeks. Call or text right here, or open the full lead.</p>
           <div style="margin-top:8px;">${rows}</div>
         </div>`;
       needs.appendChild(card);
       card.querySelectorAll('[data-open-lead]').forEach((b) => b.addEventListener('click', () => {
         const id = b.getAttribute('data-open-lead');
         if (window.Legacy && window.Legacy.openLead) window.Legacy.openLead(id);
+      }));
+      // Inline quick-text: sends through the CRM (Twilio, logged), no need to open the lead.
+      card.querySelectorAll('[data-rs-text]').forEach((b) => b.addEventListener('click', () => {
+        const comp = b.closest('[data-rs-row]').querySelector('[data-rs-composer]');
+        if (comp) { comp.style.display = 'block'; const ta = comp.querySelector('[data-rs-body]'); if (ta) ta.focus(); }
+      }));
+      card.querySelectorAll('[data-rs-cancel]').forEach((b) => b.addEventListener('click', () => {
+        const comp = b.closest('[data-rs-composer]'); if (comp) comp.style.display = 'none';
+      }));
+      card.querySelectorAll('[data-rs-send]').forEach((b) => b.addEventListener('click', async () => {
+        const row = b.closest('[data-rs-row]');
+        const ta = row.querySelector('[data-rs-body]');
+        const statusEl = row.querySelector('[data-rs-status]');
+        const text = (ta && ta.value || '').trim();
+        if (!text) { statusEl.style.color = '#9B2C2C'; statusEl.textContent = 'Write something first'; return; }
+        b.disabled = true; b.textContent = 'Sending…'; statusEl.style.color = ''; statusEl.textContent = '';
+        const r = await api('/api/crm/message', { body: { lead_id: b.getAttribute('data-rs-send'), channel: 'sms', body: text } });
+        if (r.ok && r.json && r.json.status === 'sent') {
+          const comp = row.querySelector('[data-rs-composer]'); if (comp) comp.style.display = 'none';
+          row.style.opacity = '.55';
+          statusEl.style.color = '#2E5C3D'; statusEl.textContent = '✓ Sent';
+        } else {
+          b.disabled = false; b.textContent = 'Send text';
+          statusEl.style.color = '#9B2C2C'; statusEl.textContent = (r.json && r.json.error) || 'Failed — open the lead to send.';
+        }
       }));
     }
 
@@ -1292,20 +1342,22 @@
   });
 
   // The day list is recomputed fresh from live signals on every load (drafts
-  // awaiting approval, dark leads, today's tours, new leads) — there's no
-  // stable per-item id to persist a "done" state against server-side. So
-  // checking one off just crosses it out for the current page session: a
-  // quick "I see this, ignore it for now" rather than a saved task. If the
-  // underlying signal is still true next time the page loads, it'll show up
-  // again — that's intentional, it mirrors reality.
+  // awaiting approval, dark leads, today's tours, new leads) — there's no stable
+  // server-side id, so a check-off is persisted LOCALLY for the day (dayOffKey):
+  // it stays crossed off across refreshes today, and the list is fresh tomorrow.
+  // If the underlying signal is still live tomorrow the item returns — that
+  // mirrors reality — but ticking it no longer "un-does" itself on refresh.
   function paintDayList(items, totalMin) {
     const ul = document.querySelector('[data-day-list]');
     if (!ul) return;
     if (!items.length) {
       ul.innerHTML = `<li style="opacity:.55;font-style:italic;padding:14px 0;">Quiet day list. No drafts, no radio silence, no new leads in the last 24 hours.</li>`;
     } else {
-      ul.innerHTML = items.map((t) => `
-        <li data-tk-min="${parseInt(t.time) || 0}"><input type="checkbox" class="tk-box" data-tk-check title="Cross off for today"><span class="tk-body"><strong>${escapeHtml(t.title)}</strong>${t.sub ? ' · ' + escapeHtml(t.sub) : ''}</span><span class="tk-time">${escapeHtml(t.time || '')}</span></li>`).join('');
+      ul.innerHTML = items.map((t) => {
+        const key = dayOffKey(t.title);
+        const off = lgIsDismissed(key);
+        return `<li data-tk-min="${parseInt(t.time) || 0}" data-tk-key="${escapeHtml(key)}"${off ? ' class="done"' : ''}><input type="checkbox" class="tk-box" data-tk-check title="Cross off for today"${off ? ' checked' : ''}><span class="tk-body"><strong>${escapeHtml(t.title)}</strong>${t.sub ? ' · ' + escapeHtml(t.sub) : ''}</span><span class="tk-time">${escapeHtml(t.time || '')}</span></li>`;
+      }).join('');
     }
     renderDayTotal();
   }
@@ -1327,7 +1379,12 @@
     const box = e.target.closest('[data-tk-check]');
     if (!box) return;
     const li = box.closest('li');
-    if (li) { li.classList.toggle('done', box.checked); renderDayTotal(); }
+    if (li) {
+      li.classList.toggle('done', box.checked);
+      const key = li.getAttribute('data-tk-key');
+      if (key) { box.checked ? lgDismiss(key) : lgUndismiss(key); }   // persist for the day
+      renderDayTotal();
+    }
   });
 
   function paintDayStats(y) {
