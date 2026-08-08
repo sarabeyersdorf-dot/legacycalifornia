@@ -189,10 +189,16 @@ export default async function handler(req, res) {
           dealOut.folders.push({ folder: sub, files: files.length, visibility: folderVis });
           for (const f of files) {
             try {
-              const slug = slugify(f.name);
-              if (seen.has(slug)) continue;         // a file already handled by an earlier (narrower) folder wins
+              const raw = String(f.name || '');
+              // Skip system / hidden files BEFORE anything else: dotfiles
+              // (.DS_Store, .dropbox, .dropbox.attr), macOS AppleDouble companions
+              // (._Foo.pdf — these DO carry a real extension, so the whitelist alone
+              // wouldn't catch them), and common OS cruft.
+              if (/^\./.test(raw) || /^(thumbs\.db|desktop\.ini|\$recycle|icon\r?)$/i.test(raw)) continue;
+              const slug = slugify(raw);
+              if (!slug || seen.has(slug)) continue; // a file already handled by an earlier (narrower) folder wins
               seen.add(slug);
-              const ext = extOf(f.name);
+              const ext = extOf(raw);
               if (!['pdf', 'jpg', 'jpeg', 'png', 'doc', 'docx'].includes(ext)) continue; // only real documents
               const repoPath = `${DOCS_DIR}/${dealId}/${slug}`;
               // Skip the download+commit when Dropbox says the bytes are unchanged
