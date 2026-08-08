@@ -157,29 +157,27 @@
   };
 
   function wireHomepage() {
-    // The four journey-step buttons already toggle via inline setJourney(this);
-    // we just need to read which is active when "Save my place" is clicked.
-    const saveLink = $('.journey-link');
-    if (!saveLink) return;
-    saveLink.addEventListener('click', async (e) => {
-      e.preventDefault();
-      // Which lane? (buyer / seller) — the chips carry '.is-on', not '.active'.
-      const sideEl = $('.journey-side.is-on');
-      const lead_type = (sideEl?.getAttribute('data-side') === 'seller') ? 'seller' : 'buyer';
-      const active = $('.journey-step.is-on');
-      const stageLabel = (active?.textContent || '').trim();
-      // Buyer stages map to the intake's allowed journey values; seller stages
-      // don't (the CRM tracks those as seller_stage), so we carry the seller's
-      // chosen stage in the message instead and leave journey_stage null.
-      const stageMap = {
-        'Discovering':    'discovering',
-        'Narrowing':      'narrowing',
-        'Touring':        'touring',
-        'Ready to offer': 'ready_to_offer'
-      };
+    const stepsWrap = $('[data-journey-steps]');
+    const saveLink  = $('.journey-link');
+    if (!stepsWrap && !saveLink) return;
+
+    // Buyer stages map to the intake's allowed journey values; seller stages
+    // don't (the CRM tracks those separately), so for sellers we carry the
+    // chosen stage in the message and leave journey_stage null.
+    const stageMap = {
+      'Discovering':    'discovering',
+      'Narrowing':      'narrowing',
+      'Touring':        'touring',
+      'Ready to offer': 'ready_to_offer'
+    };
+    const currentSide = () =>
+      ($('.journey-side.is-on')?.getAttribute('data-side') === 'seller') ? 'seller' : 'buyer';
+
+    // Open the intake modal prefilled with the chosen side + stage, then send it
+    // to /api/leads/intake and route the new lead to their dashboard.
+    async function openJourneyIntake(lead_type, stageLabel) {
       const journey_stage = lead_type === 'buyer' ? (stageMap[stageLabel] || 'discovering') : null;
       const message = `Homepage: ${lead_type === 'seller' ? 'Selling' : 'Buying'}${stageLabel ? ' — ' + stageLabel : ''}`;
-
       const result = await openModal({
         title:  'Save your place.',
         intro:  lead_type === 'seller'
@@ -200,6 +198,21 @@
       });
       if (result?.email) location.href = `dashboard.html?email=${encodeURIComponent(result.email)}`;
       else if (result)   location.href = 'dashboard.html';
+    }
+
+    // Picking a stage opens the wizard immediately. The inline setJourney(this)
+    // has already moved the .is-on highlight by the time this fires.
+    $$('.journey-step').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        openJourneyIntake(currentSide(), (btn.textContent || '').trim());
+      });
+    });
+
+    // The secondary "Save my place" link keeps working — it reads whichever
+    // stage is currently highlighted.
+    if (saveLink) saveLink.addEventListener('click', (e) => {
+      e.preventDefault();
+      openJourneyIntake(currentSide(), ($('.journey-step.is-on')?.textContent || '').trim());
     });
   }
 
