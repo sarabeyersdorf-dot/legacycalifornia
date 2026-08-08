@@ -158,6 +158,13 @@
     "api/cron/publish-from-dropbox.js": {
       "maxDuration": 60
     },
+    "api/cron/publish-docs-from-dropbox.js": {
+      "maxDuration": 60
+    },
+    "api/cron/sync-deals.js": {
+      "maxDuration": 60,
+      "includeFiles": "data/portal-docs/**"
+    },
     "api/cron/drift-check.js": {
       "maxDuration": 60
     }
@@ -190,6 +197,10 @@
     {
       "path": "/api/cron/publish-from-dropbox?key=thisisasecret1234",
 "schedule": "0 * * * *"    },
+    {
+      "path": "/api/cron/publish-docs-from-dropbox?key=thisisasecret1234",
+      "schedule": "40 6 * * *"
+    },
     {
       "path": "/api/cron/drift-check",
       "schedule": "20 * * * *"

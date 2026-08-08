@@ -417,6 +417,19 @@ what's shared by where a file lives in Dropbox; you read the folder and write th
 matching `visibility`.** You are not judging what a client should see — you're
 transcribing Sara's folder placement.
 
+### Two ways documents get published
+
+- **Automatic (preferred) — set `docFolder` on the deal.** Put the deal's Dropbox
+  folder path on the deal: `"docFolder": "/_LEGACY/…/433 E Highway 4"`. A daily job
+  (`publish-docs-from-dropbox`) then mirrors that folder's **share subfolders** into
+  the site and publishes each file with the right visibility — **you don't author
+  `clientDocuments` for that deal at all.** Sara organizes the folders; the job does
+  the rest. (Trigger it on demand for one deal:
+  `/api/cron/publish-docs-from-dropbox?key=<PUBLISH_SECRET>&deal=<id>`.)
+- **Manual (legacy) — author `clientDocuments`.** For a deal with no `docFolder`, you
+  still write `clientDocuments[]` entries by hand (name + url + `visibility`), as in §3.
+  Both sources coexist and are de-duplicated by document key.
+
 ### The one rule
 
 **A document is PRIVATE unless the folder it sits in says who may see it.** No share
