@@ -228,6 +228,45 @@ body.paper::before {
   display: block;
 }
 
+/* ── Diamond seal (logo C) ──────────────────────────────────────
+   Shared by every header/footer that shows the mark. Lives here in
+   the base sheet (loaded on every page) so it works even where the
+   Legacy-UI sheet isn't loaded; tokens fall back to the base palette.
+   It settles in once on load, and re-spins whenever you hover the
+   mark — so the motion is always discoverable, never an infinite loop. */
+.lg-seal { width: 34px; height: 34px; flex: none; position: relative; }
+.lg-seal__d1 { position: absolute; inset: 0; border: 1px solid var(--brass); transform: rotate(45deg); transition: border-color var(--lg-fast, .25s); }
+.lg-seal__d2 { position: absolute; inset: 5px; border: 1px solid var(--brass-warm); opacity: .45; transform: rotate(45deg); transition: opacity var(--lg-fast, .25s), border-color var(--lg-fast, .25s); }
+.lg-seal__mk {
+  position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+  font-family: var(--lg-serif, var(--serif)); font-style: italic; font-weight: 600;
+  font-size: 13px; letter-spacing: .02em; color: var(--brass);
+}
+:where(.lg-mark, .wordmark):hover .lg-seal__d1 { border-color: var(--brass-bright); }
+:where(.lg-mark, .wordmark):hover .lg-seal__d2 { opacity: .8; }
+
+@media (prefers-reduced-motion: no-preference) {
+  .lg-seal { animation: lg-seal-in .9s cubic-bezier(.16,1,.3,1) backwards; }
+  /* Hover re-spins the diamond borders a full turn (the monogram stays put).
+     Spinning the borders, not the container, avoids re-firing the load
+     entrance on mouse-out. */
+  :where(.lg-mark, .wordmark):hover .lg-seal__d1,
+  :where(.lg-mark, .wordmark):hover .lg-seal__d2 { animation: lg-diam-spin .85s cubic-bezier(.16,1,.3,1); }
+}
+@keyframes lg-seal-in { from { transform: rotate(-48deg) scale(.42); opacity: 0; } to { transform: rotate(0) scale(1); opacity: 1; } }
+@keyframes lg-diam-spin { from { transform: rotate(45deg); } to { transform: rotate(405deg); } }
+
+/* Topnav seal lockup (idx / listings / ledger-issue) — the centred
+   column wordmark goes horizontal with the seal at its left. */
+.wordmark--c { flex-direction: row; align-items: center; gap: 13px; }
+.wordmark--c .wordmark-txt { display: flex; flex-direction: column; align-items: flex-start; gap: 3px; }
+.topnav .wordmark--c { padding-bottom: 0; }
+.topnav .wordmark--c::after { left: 47px; transform: none; }
+@media (max-width: 640px) {
+  .wordmark--c .lg-seal { width: 30px; height: 30px; }
+  .wordmark--c .wordmark-word { font-size: 22px; }
+}
+
 /* ── Dynamic header wordmark (topnav only) ──────────────────────
    The Legacy mark settles in on page load; on hover/focus an
    antique-brass hairline sweeps out from the centre while a soft
