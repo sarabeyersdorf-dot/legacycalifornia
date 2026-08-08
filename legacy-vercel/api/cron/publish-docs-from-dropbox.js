@@ -199,7 +199,7 @@ export default async function handler(req, res) {
               if (!slug || seen.has(slug)) continue; // a file already handled by an earlier (narrower) folder wins
               seen.add(slug);
               const ext = extOf(raw);
-              if (!['pdf', 'jpg', 'jpeg', 'png', 'doc', 'docx'].includes(ext)) continue; // only real documents
+              if (!['pdf', 'jpg', 'jpeg', 'png', 'heic', 'heif', 'tif', 'tiff', 'doc', 'docx'].includes(ext)) continue; // only real documents
               const repoPath = `${DOCS_DIR}/${dealId}/${slug}`;
               // Skip the download+commit when Dropbox says the bytes are unchanged
               // (same rev as the prior manifest). Classification is still recomputed.
