@@ -54,6 +54,7 @@ import dealPhoto        from '../_lib/handlers/crm-deal-photo.js';
 import dealClient       from '../_lib/handlers/crm-deal-client.js';
 import dealParties      from '../_lib/handlers/crm-deal-parties.js';
 import dealVisibility    from '../_lib/handlers/crm-deal-visibility.js';
+import documentVisibility from '../_lib/handlers/crm-document-visibility.js';
 import dealNotes         from '../_lib/handlers/crm-deal-notes.js';
 import dealNotePublish   from '../_lib/handlers/crm-deal-note-publish.js';
 import dealPortalNotes   from '../_lib/handlers/crm-deal-portal-notes.js';
@@ -108,6 +109,7 @@ const TABLE = {
   'deal-client':       dealClient,
   'deal-parties':      dealParties,
   'deal-visibility':   dealVisibility,
+  'document-visibility': documentVisibility,
   'deal-notes':        dealNotes,
   'deal-note-publish': dealNotePublish,
   'deal-portal-notes': dealPortalNotes,

@@ -1,0 +1,53 @@
+name: DB migrations
+
+# Runs the SQL migrations in legacy-vercel/db/ against Supabase so nobody has to
+# paste SQL by hand. Two ways to trigger:
+#   • Manually: Actions tab → "DB migrations" → Run workflow  (or Claude runs it for you)
+#   • Automatically: when a PR that changes legacy-vercel/db/*.sql lands on main
+#
+# Requires ONE repository secret: SUPABASE_DB_URL  (Settings → Secrets and
+# variables → Actions → New repository secret). Its value is the Supabase
+# connection string:  Supabase → Project Settings → Database → Connection string
+# → URI (the postgres://... one). Until that secret exists this workflow just
+# prints a note and exits cleanly — it never fails the repo.
+#
+# Every migration is written to be idempotent (IF NOT EXISTS / CREATE OR REPLACE),
+# so re-running the whole set is safe. A file that errors is logged and skipped so
+# one bad file never blocks the rest; the job still surfaces which failed.
+
+on:
+  workflow_dispatch: {}
+  push:
+    branches: [main]
+    paths:
+      - 'legacy-vercel/db/*.sql'
+
+jobs:
+  migrate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Apply migrations
+        env:
+          SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+        run: |
+          if [ -z "$SUPABASE_DB_URL" ]; then
+            echo "::notice::SUPABASE_DB_URL secret is not set — add it in Settings → Secrets and variables → Actions, then re-run. Skipping for now."
+            exit 0
+          fi
+          sudo apt-get update -qq && sudo apt-get install -y -qq postgresql-client
+          failed=""
+          for f in $(ls legacy-vercel/db/[0-9]*.sql | sort); do
+            echo "=== applying $f ==="
+            if psql "$SUPABASE_DB_URL" -v ON_ERROR_STOP=1 -f "$f"; then
+              echo "    ok"
+            else
+              echo "::warning::migration failed: $f"
+              failed="$failed $f"
+            fi
+          done
+          if [ -n "$failed" ]; then
+            echo "::warning::These migrations reported errors (often harmless re-runs):$failed"
+          fi
+          echo "Done."

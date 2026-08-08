@@ -113,10 +113,37 @@ function mergeMeta(d) {
   return { ...(base || {}), ...(client ? { client } : {}), ...(commission != null ? { commission } : {}) };
 }
 
+// Slice 2 (SPEC_portal_document_model.md): a property may carry an escrows[]
+// history. At most one is active. When escrows[] is present, the ACTIVE escrow
+// drives the property row's live fields; with none active the property reverts to
+// its authored listing state ("back on market") — no phantom COE/price. Returns
+// null when there's no escrows[] so the flat deal fields are used exactly as
+// authored (fully backward-compatible).
+function activeEscrow(d) {
+  if (!Array.isArray(d.escrows) || !d.escrows.length) return null;
+  return d.escrows.find((e) => e && e.status === 'active') || null;
+}
+function deriveFromEscrows(d) {
+  if (!Array.isArray(d.escrows) || !d.escrows.length) return null;
+  const a = activeEscrow(d);
+  if (a) {
+    return {
+      stage: 'pending',
+      sale_price: a.salePrice ?? a.sale_price ?? d.salePrice ?? null,
+      coe_date: a.coe || a.coeDate || a.closingDate || null,
+      escrow_open_date: a.openEscrowDate || a.escrowOpenDate || a.acceptance || null,
+      timeline: a.timeline || d.timeline || null
+    };
+  }
+  // No active escrow → back on market (or closed, if the property was authored so).
+  const revert = (d.stage && d.stage !== 'pending' && d.stage !== 'offer') ? d.stage : 'listing';
+  return { stage: revert, sale_price: null, coe_date: null, escrow_open_date: null, timeline: null };
+}
+
 function mapDeal(d) {
   const agent = /james/i.test(d.agent || '') ? 'james' : 'sara';
   const c = d.contacts || {};
-  return {
+  const mapped = {
     source_key: d.id,
     address: d.address,
     city: d.city || null,
@@ -168,10 +195,80 @@ function mapDeal(d) {
     attributes:     (d.attributes && typeof d.attributes === 'object' && !Array.isArray(d.attributes)) ? d.attributes : null,
     updated_at: new Date().toISOString()
   };
+  // Escrow-history override (Slice 2). No-op when there's no escrows[].
+  const ov = deriveFromEscrows(d);
+  if (ov) Object.assign(mapped, ov);
+  return mapped;
 }
 
+// Upsert a property's escrow history (deals.json escrows[]) into deal_escrows,
+// keyed by (deal_id, escrow_key), pruning escrows no longer authored. Fail-soft
+// and self-contained: an error is recorded in stats, never thrown, and degrades
+// to a no-op before db/055. No escrows[] on the deal → nothing happens.
+async function writeDealEscrows(supa, dealId, d, stats) {
+  if (!Array.isArray(d.escrows) || !d.escrows.length) return;
+  try {
+    const rows = d.escrows.map((e, i) => ({
+      deal_id: dealId,
+      escrow_key: String((e && (e.key || e.escrow_key)) || `esc${i + 1}`),
+      status: ['active', 'cancelled', 'closed'].includes(e && e.status) ? e.status : 'active',
+      label: (e && e.label) || `Escrow #${i + 1}`,
+      buyer_name: (e && (e.buyer || e.buyerName || e.buyer_name)) || null,
+      sale_price: (e && (e.salePrice ?? e.sale_price)) ?? null,
+      acceptance_date: (e && (e.acceptance || e.acceptanceDate)) || null,
+      escrow_open_date: (e && (e.openEscrowDate || e.escrowOpenDate)) || null,
+      coe_date: (e && (e.coe || e.coeDate || e.closingDate)) || null,
+      escrow_number: (e && ((e.contacts && e.contacts.escrowNumber) || e.escrowNumber)) || null,
+      cancelled_at: (e && (e.cancelledAt || e.cancelled_at)) || null,
+      closed_at: (e && (e.closedAt || e.closed_at)) || null,
+      sort: (e && (e.sort ?? i)) || i,
+      updated_at: new Date().toISOString()
+    }));
+    const { error } = await supa.from('deal_escrows').upsert(rows, { onConflict: 'deal_id,escrow_key' });
+    if (error) { stats.errors.push({ deal_id: dealId, error: error.message }); return; }
+    stats.upserted += rows.length;
+    // Prune escrows the property no longer lists.
+    const want = new Set(rows.map((r) => r.escrow_key));
+    const { data: existing } = await supa.from('deal_escrows').select('id, escrow_key').eq('deal_id', dealId);
+    const stale = (existing || []).filter((r) => !want.has(r.escrow_key)).map((r) => r.id);
+    if (stale.length) { await supa.from('deal_escrows').delete().in('id', stale); stats.pruned = (stats.pruned || 0) + stale.length; }
+  } catch (e) {
+    stats.errors.push({ deal_id: dealId, error: e.message || String(e) });
+  }
+}
+
+// Normalize a name into a fingerprint for the key-reuse guard (must match the
+// read path's normName: lower-cased, trimmed).
+function docFingerprint(name) { return String(name || '').trim().toLowerCase(); }
+// A URL-safe slug for deriving a doc_key from a document name.
+function docSlug(s) {
+  return String(s || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 40);
+}
+// A visibility authored in deals.json is only honored if it's one of the four
+// enum values; anything else (or absent) leaves the doc ungoverned → agent_only.
+const VIS_ENUM = new Set(['agent_only', 'seller', 'buyer', 'both']);
+const SCOPE_ENUM = new Set(['property', 'transaction']);
+
+// Returns { rows, seeds }: rows for deal_documents (the hourly rebuild), and
+// seeds for deal_document_governance (insert-only — a deliberate initial grant
+// authored in deals.json as { "visibility": "both" } on a document). Seeds never
+// overwrite an agent's CRM grant; that's enforced at the insert step.
 function mapDocs(dealId, d) {
   const out = [];
+  const seeds = [];
+  const prefix = String(d.id || dealId);
+  const seenKeys = new Set();
+  // Guarantee a unique doc_key per row even if two docs slug to the same thing.
+  const uniqueKey = (base) => {
+    let k = base, n = 2;
+    while (seenKeys.has(k)) { k = `${base}-${n++}`; }
+    seenKeys.add(k);
+    return k;
+  };
+  const pushSeed = (doc_key, name, visRaw) => {
+    const vis = String(visRaw || '').toLowerCase();
+    if (VIS_ENUM.has(vis)) seeds.push({ deal_id: dealId, doc_key, visibility: vis, doc_fingerprint: docFingerprint(name) });
+  };
 
   // A curated flat list (clientDocuments) is the authoritative set of files the
   // CLIENT should see. When one exists, the compliance `docs` object is treated
@@ -185,7 +282,8 @@ function mapDocs(dealId, d) {
   for (const [token, val] of Object.entries(docs)) {
     if (DOC_SKIP.has(token)) continue;
     // A doc value may be a bare status string ("received") OR an object that
-    // also carries the link to the executed file: { status, url }.
+    // also carries the link to the executed file: { status, url, scope,
+    // visibility, key }.
     const isObj    = val && typeof val === 'object';
     const rawState = isObj ? (val.status ?? val.state ?? val.value) : val;
     const url      = isObj ? (val.url || val.link || val.href || val.file || null) : null;
@@ -197,10 +295,17 @@ function mapDocs(dealId, d) {
     // it is NOT on file yet → surface it as 'missing' (was silently dropped),
     // internal-only, so the CRM shows the same file-gap the briefing does.
     const missing = !status;
+    const name = label[0];
+    // Stable key: explicit `key` wins, else derived from the (stable) token.
+    const doc_key = uniqueKey(String((isObj && (val.key || val.doc_key)) || `${prefix}-${token.toLowerCase()}`));
+    // Scope: compliance disclosures are property-scoped by default (they follow
+    // the property to the next buyer); an explicit scope overrides.
+    const scope = SCOPE_ENUM.has(String(isObj && val.scope || '').toLowerCase())
+      ? String(val.scope).toLowerCase() : 'property';
     out.push({
       deal_id: dealId,
       doc_type: base.slice(0, 12),
-      name: label[0],
+      name,
       sub: label[1] || null,
       // A not-on-file doc is 'pending' (a valid enum value; 'missing' is NOT in
       // the constraint) and carries the 'missing' marker in status_raw so the
@@ -209,9 +314,12 @@ function mapDocs(dealId, d) {
       status: missing ? 'pending' : status,
       status_raw: missing ? 'missing' : String(rawState),
       doc_url: url ? String(url) : null,         // link to the executed document, if provided
-      client_safe: missing ? false : !hasFlat,   // missing docs never reach the portal
+      doc_key,
+      scope,
+      client_safe: missing ? false : !hasFlat,   // legacy flag; governance is the real gate
       updated_at: new Date().toISOString()
     });
+    if (!missing && isObj) pushSeed(doc_key, name, val.visibility);
   }
 
   // SIMPLE PATH — a flat list of files to drop straight into the client portal.
@@ -222,19 +330,28 @@ function mapDocs(dealId, d) {
     const name = String(doc.name || doc.title || doc.label || '').trim();
     const url  = doc.url || doc.link || doc.href || doc.file || null;
     if (!name && !url) continue;
+    const dispName = name || 'Document';
+    const doc_key = uniqueKey(String(doc.key || doc.doc_key || `${prefix}-${docSlug(dispName) || 'doc'}`));
+    // Flat client docs are transaction-scoped by default (they belong to a
+    // particular deal); an explicit scope overrides.
+    const scope = SCOPE_ENUM.has(String(doc.scope || '').toLowerCase())
+      ? String(doc.scope).toLowerCase() : 'transaction';
     out.push({
       deal_id: dealId,
       doc_type: extType(name || url),
-      name: name || 'Document',
+      name: dispName,
       sub: doc.sub || doc.note || null,
       status: doc.status ? docStatus(doc.status) : null,   // status is OPTIONAL here
       status_raw: doc.status != null ? String(doc.status) : null,
       doc_url: url ? String(url) : null,
-      client_safe: doc.client_safe === false ? false : true, // shareable by default
+      doc_key,
+      scope,
+      client_safe: doc.client_safe === false ? false : true, // legacy flag; governance is the real gate
       updated_at: new Date().toISOString()
     });
+    pushSeed(doc_key, dispName, doc.visibility);
   }
-  return out;
+  return { rows: out, seeds };
 }
 
 // Rebuild one deal's documents, resiliently. Deletes then inserts (idempotent).
@@ -245,10 +362,22 @@ function mapDocs(dealId, d) {
 async function writeDealDocs(supa, dealId, rows, stats) {
   await supa.from('deal_documents').delete().eq('deal_id', dealId);
   if (!rows.length) return;
-  const { error } = await supa.from('deal_documents').insert(rows);
+  // If the scope/doc_key columns (db/052) aren't there yet, strip them and retry
+  // rather than dropping the deal's docs — they're restored on the next sync
+  // once migrated. (Same guard the deal upsert uses for not-yet-migrated cols.)
+  const stripNew = (r) => { const { doc_key, scope, ...rest } = r; return rest; };
+  const insert = async (payload) => {
+    let { error } = await supa.from('deal_documents').insert(payload);
+    if (error && /(doc_key|scope)/i.test(error.message || '')) {
+      const stripped = Array.isArray(payload) ? payload.map(stripNew) : stripNew(payload);
+      ({ error } = await supa.from('deal_documents').insert(stripped));
+    }
+    return error;
+  };
+  const error = await insert(rows);
   if (!error) { stats.inserted += rows.length; return; }
   for (const r of rows) {
-    const { error: e1 } = await supa.from('deal_documents').insert(r);
+    const e1 = await insert(r);
     if (e1) {
       stats.skipped++;
       stats.errors.push({ deal_id: dealId, name: r.name || null, status: r.status || null, error: e1.message });
@@ -632,9 +761,13 @@ export default async function handler(req, res) {
     // Per-row outcomes for the two write loops that used to abort the whole run.
     const docStats  = { inserted: 0, skipped: 0, errors: [] };
     const taskStats = { created: 0, skipped_duplicates: 0 };
+    const escrowStats = { upserted: 0, pruned: 0, errors: [] };
     // Deals that have LEFT escrow — their lingering timeline items get retired
     // after the loop so a dead escrow can't keep phantom deadlines on a portal.
     const nonEscrowDealIds = [];
+    // Insert-only visibility grants authored in deals.json (a doc with an explicit
+    // "visibility"). Applied after the loop; never overwrite an agent's CRM grant.
+    const govSeeds = [];
 
     for (const d of active) {
       try {
@@ -695,12 +828,21 @@ export default async function handler(req, res) {
         }
         if (wErr) throw new Error(`${ex ? 'update' : 'insert'}: ${wErr.message}`);
         dealsUpserted++;
-        if (!ESCROW_STAGES.has(d.stage)) nonEscrowDealIds.push(dealId);
+        // "In escrow" = has an ACTIVE escrow when escrows[] is authored; else the
+        // raw stage. A property left at stage 'listing' while carrying an active
+        // escrow must NOT have its live timeline retired.
+        const inEscrow = (Array.isArray(d.escrows) && d.escrows.length) ? !!activeEscrow(d) : ESCROW_STAGES.has(d.stage);
+        if (!inEscrow) nonEscrowDealIds.push(dealId);
 
         // Rebuild this deal's documents (delete then insert = idempotent).
         // Resilient: a bad doc row is collected in docStats, never thrown, so it
         // can't drop the deal's other docs or abort the run.
-        await writeDealDocs(supa, dealId, mapDocs(dealId, d), docStats);
+        const { rows: docRows, seeds: docSeeds } = mapDocs(dealId, d);
+        await writeDealDocs(supa, dealId, docRows, docStats);
+        for (const s of docSeeds) govSeeds.push({ ...s, deal_id: dealId });
+
+        // Upsert this property's escrow history (Slice 2). No-op without escrows[].
+        await writeDealEscrows(supa, dealId, d, escrowStats);
       } catch (e) {
         // Keep going — one malformed deal must never zero out every listing.
         errors.push({ deal: d.id, address: d.address || null, error: e.message || String(e) });
@@ -722,6 +864,35 @@ export default async function handler(req, res) {
         timelineItemsRetired = (retired || []).length;
       }
     } catch (e) { errors.push({ deal: 'retire-timeline-items', error: e.message || String(e) }); }
+
+    // Seed visibility grants authored in deals.json (a document with an explicit
+    // "visibility"). INSERT-ONLY: a seed creates a governance row only when none
+    // exists for (deal_id, doc_key), so it can NEVER overwrite an agent's live CRM
+    // grant or widen a doc that was deliberately narrowed. set_by='seed' marks its
+    // origin. Fail-soft + degrades to a no-op before db/053. This is the ONLY way
+    // the file touches visibility, and only in the safe (create-if-absent) direction.
+    let govSeeded = 0;
+    try {
+      if (govSeeds.length) {
+        // Dedup by (deal_id, doc_key); last write wins within a run.
+        const byKey = new Map();
+        for (const s of govSeeds) byKey.set(`${s.deal_id}|${s.doc_key}`, s);
+        const wanted = [...byKey.values()];
+        const dealIds = [...new Set(wanted.map((s) => s.deal_id))];
+        const { data: existing, error: exErr } = await supa.from('deal_document_governance')
+          .select('deal_id, doc_key').in('deal_id', dealIds);
+        if (exErr) throw new Error(exErr.message);
+        const have = new Set((existing || []).map((r) => `${r.deal_id}|${r.doc_key}`));
+        const toInsert = wanted
+          .filter((s) => !have.has(`${s.deal_id}|${s.doc_key}`))
+          .map((s) => ({ deal_id: s.deal_id, doc_key: s.doc_key, visibility: s.visibility, doc_fingerprint: s.doc_fingerprint, set_by: 'seed' }));
+        if (toInsert.length) {
+          const { error: insErr } = await supa.from('deal_document_governance').insert(toInsert);
+          if (insErr) throw new Error(insErr.message);
+          govSeeded = toInsert.length;
+        }
+      }
+    } catch (e) { errors.push({ deal: 'governance-seed', error: e.message || String(e) }); }
 
     // Reconcile: the deals table must MIRROR the active feed. A deal that
     // dropped out of deals.json — removed outright, or moved to a retired stage
@@ -974,6 +1145,8 @@ export default async function handler(req, res) {
       deals_pruned: dealsPruned,
       timeline_items_retired: timelineItemsRetired,
       documents_written: docStats.inserted,
+      governance_seeded: govSeeded,
+      deal_escrows: escrowStats,
       // Per-row outcomes for the two loops that used to 500 the whole endpoint.
       deal_documents: docStats,
       agent_tasks: taskStats,
