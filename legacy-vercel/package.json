@@ -15,6 +15,9 @@
   "dependencies": {
     "@supabase/supabase-js": "^2.45.0"
   },
+  "optionalDependencies": {
+    "heic-convert": "^2.1.0"
+  },
   "devDependencies": {
     "ws": "^8.21.0"
   }

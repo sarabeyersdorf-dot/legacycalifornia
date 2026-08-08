@@ -163,6 +163,12 @@ export default async function handler(req, res) {
   const onlyDeal = typeof req.query.deal === 'string' ? req.query.deal.trim() : '';
   const result = { deals: [], files_committed: 0, files_unchanged: 0, errors: [] };
 
+  // HEIC→JPG converter (optional dependency). If it isn't installed, HEIC files are
+  // published as-is rather than failing — the site build never depends on it.
+  let heicConvert = null;
+  try { heicConvert = (await import('heic-convert')).default; }
+  catch (_) { heicConvert = null; result.heic_convert = 'unavailable (publishing HEIC as-is)'; }
+
   try {
     const token = await dropboxToken(env);
     const deals = (await ghGetJson(env, DEALS_PATH)).deals || [];
@@ -200,25 +206,32 @@ export default async function handler(req, res) {
               seen.add(slug);
               const ext = extOf(raw);
               if (!['pdf', 'jpg', 'jpeg', 'png', 'heic', 'heif', 'tif', 'tiff', 'doc', 'docx'].includes(ext)) continue; // only real documents
-              const repoPath = `${DOCS_DIR}/${dealId}/${slug}`;
+              // HEIC/HEIF can't render inline in a browser, so publish it as JPG when
+              // the converter is available (the published slug/url become .jpg).
+              const isHeic = ext === 'heic' || ext === 'heif';
+              let pubSlug = (isHeic && heicConvert) ? slug.replace(/\.(heic|heif)$/i, '.jpg') : slug;
               // Skip the download+commit when Dropbox says the bytes are unchanged
               // (same rev as the prior manifest). Classification is still recomputed.
-              const prior = prevBySlug.get(slug);
+              const prior = prevBySlug.get(pubSlug);
               if (prior && prior.rev && prior.rev === f.rev) {
                 dealOut.unchanged++; result.files_unchanged++;
               } else {
-                const buf = await dropboxDownload(token, f.path_lower || `${base}/${sub}/${f.name}`);
-                const outcome = await ghPutFile(env, repoPath, buf, `Publish ${dealId}/${slug} from Dropbox`);
+                let buf = await dropboxDownload(token, f.path_lower || `${base}/${sub}/${f.name}`);
+                if (isHeic && heicConvert) {
+                  try { buf = Buffer.from(await heicConvert({ buffer: buf, format: 'JPEG', quality: 0.9 })); }
+                  catch (e) { pubSlug = slug; result.errors.push({ deal: dealId, file: raw, error: `heic-convert: ${e.message}` }); } // fall back to original HEIC
+                }
+                const outcome = await ghPutFile(env, `${DOCS_DIR}/${dealId}/${pubSlug}`, buf, `Publish ${dealId}/${pubSlug} from Dropbox`);
                 if (outcome === 'unchanged') { dealOut.unchanged++; result.files_unchanged++; }
                 else { dealOut.published++; result.files_committed++; }
               }
               const visibility = narrowByType(f.name, folderVis);
               manifest.push({
                 name: prettyName(f.name),
-                url: `/docs/${dealId}/${slug}`,
+                url: `/docs/${dealId}/${pubSlug}`,
                 scope: scopeByType(f.name),
                 visibility,
-                key: `${dealId}-${slug.replace(/\.[a-z0-9]+$/, '')}`,
+                key: `${dealId}-${pubSlug.replace(/\.[a-z0-9]+$/, '')}`,
                 rev: f.rev || null
               });
             } catch (e) { result.errors.push({ deal: dealId, file: f.name, error: e.message }); }
