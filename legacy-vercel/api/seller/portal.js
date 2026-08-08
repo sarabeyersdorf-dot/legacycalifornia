@@ -214,6 +214,25 @@ export default async function handler(req, res) {
       }
     } catch (_) { /* stay soft */ }
 
+    // Escrow records for this property (Slice 2/3). Fetched once; used to scope
+    // documents by escrow, to suppress the escrow road when back on market, and to
+    // build the back-on-market banner + history below. Fail-soft (pre-055).
+    let escrowRows = [];
+    try {
+      const { data } = await supa.from('deal_escrows')
+        .select('*').eq('deal_id', deal.id).order('sort', { ascending: true });
+      escrowRows = data || [];
+    } catch (_) { escrowRows = []; }
+    const activeEscrow = escrowRows.find((e) => e.status === 'active') || null;
+    const noActiveEscrow = escrowRows.length > 0 && !activeEscrow;
+    const escrowStatusById = new Map(escrowRows.map((e) => [e.id, e.status]));
+    // A transaction document tied to a NON-active escrow is archived with that
+    // escrow: it's kept out of the live document list (and, for a buyer, hidden
+    // entirely — SPEC test 2: a new buyer never sees the prior escrow's RPA). It
+    // resurfaces only under that escrow's collapsed history for the seller.
+    const isArchivedEscrowDoc = (doc) =>
+      doc.scope === 'transaction' && doc.escrow_id && escrowStatusById.get(doc.escrow_id) !== 'active';
+
     // 2. Documents for this deal — governed, FAIL CLOSED --------------------
     // Visibility is NOT read from deal_documents.client_safe (which defaults true
     // and is rebuilt hourly — it fails open). It comes from the governance table
@@ -230,12 +249,12 @@ export default async function handler(req, res) {
     let allDocs = [];
     {
       let dr = await supa.from('deal_documents')
-        .select('doc_type, name, sub, status, party_owed, doc_url, doc_key, scope')
+        .select('doc_type, name, sub, status, party_owed, doc_url, doc_key, scope, escrow_id')
         .eq('deal_id', deal.id);
       if (dr.error) {
-        // pre-052 (no scope/doc_key columns): degrade to the minimal set. Without
-        // doc_key nothing can be governed, so the portal shows zero docs — the
-        // safe (fail-closed) degradation until the migration lands.
+        // pre-052/055 (no scope/doc_key/escrow_id columns): degrade to the minimal
+        // set. Without doc_key nothing can be governed, so the portal shows zero
+        // docs — the safe (fail-closed) degradation until the migration lands.
         dr = await supa.from('deal_documents')
           .select('doc_type, name, sub, status, party_owed, doc_url')
           .eq('deal_id', deal.id);
@@ -248,14 +267,17 @@ export default async function handler(req, res) {
         .select('doc_key, visibility, doc_fingerprint').eq('deal_id', deal.id);
       govByKey = new Map((gov || []).map((g) => [g.doc_key, g]));
     } catch (_) { /* pre-053: no grants → everything stays agent_only (fail closed) */ }
-    const docs = allDocs.filter((doc) => {
+    // Visibility + audience gate (shared by the live list and escrow history).
+    const maySee = (doc) => {
       if (!doc.doc_key) return false;                      // ungoverned → hidden
       const g = govByKey.get(doc.doc_key);
       if (!g) return false;                                // no grant → agent_only
       if (normName(g.doc_fingerprint) !== normName(doc.name)) return false; // key-reuse guard
       const v = g.visibility || 'agent_only';
       return v === 'both' || v === audience;               // audience-scoped
-    });
+    };
+    // Live list: visible docs that are NOT archived with a dead/other escrow.
+    const docs = allDocs.filter((doc) => maySee(doc) && !isArchivedEscrowDoc(doc));
 
     // Hero photo + tour media — driven from deals.json ("photo" / "video" /
     // "matterport"), with a property-photo and YouTube-thumbnail fallback so a
@@ -322,23 +344,6 @@ export default async function handler(req, res) {
           { label: 'Status',   value: stageLabel, change: '' },
           docsKpi
         ];
-
-    // Escrow records — fetched here (once) so the escrow ROAD below can be
-    // suppressed when the property has no active escrow. Reused by the
-    // back-on-market banner + history section further down.
-    let escrowRows = [];
-    try {
-      const { data } = await supa.from('deal_escrows')
-        .select('*').eq('deal_id', deal.id).order('sort', { ascending: true });
-      escrowRows = data || [];
-    } catch (_) { escrowRows = []; }
-    const activeEscrow = escrowRows.find((e) => e.status === 'active') || null;
-    // A property that carries escrow history but has NONE active is back on
-    // market: its escrow-era milestones / timeline must NOT render, or the
-    // portal shows a phantom close-of-escrow beneath the "Back on market"
-    // banner (the 433 bug). The banner + property documents show instead. A
-    // property with no escrow history at all (a fresh listing) is unaffected.
-    const noActiveEscrow = escrowRows.length > 0 && !activeEscrow;
 
     // Road to closing. Preferred source: the curated deal_timeline_items —
     // the plain-English contractual timeline the agent approves updates to
@@ -613,7 +618,17 @@ export default async function handler(req, res) {
         buyer: sanitize(e.buyer_name || ''),
         when: e.cancelled_at ? `Cancelled ${fmtDateY(asDate(e.cancelled_at))}`
             : e.closed_at    ? `Closed ${fmtDateY(asDate(e.closed_at))}`
-            : (e.status === 'cancelled' ? 'Cancelled' : e.status === 'closed' ? 'Closed' : '')
+            : (e.status === 'cancelled' ? 'Cancelled' : e.status === 'closed' ? 'Closed' : ''),
+        // The escrow's own transaction documents the viewer may see — kept out of
+        // the live list, surfaced here as the escrow's record (SPEC: prior escrows
+        // expandable to their documents). Buyers never reach this section.
+        documents: allDocs
+          .filter((doc) => doc.escrow_id === e.id && maySee(doc))
+          .map((doc) => ({
+            name: sanitize(doc.name || 'Document'),
+            view_url: doc.doc_url || '',
+            view_label: doc.doc_url ? 'View' : ''
+          }))
       }));
       if (!activeEsc && list.length && !isBuyerSide && (isListing || isPreparing)) {
         const lastCancel = list

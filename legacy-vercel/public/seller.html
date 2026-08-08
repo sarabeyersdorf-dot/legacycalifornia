@@ -177,12 +177,17 @@ body.lp-restyle {
 .bom-body { font-size: 14px; color: var(--ink-soft); margin-top: 8px; line-height: 1.6; }
 
 /* Escrow history (Slice 2) — collapsed record of prior escrows */
-.esc-item { display: flex; align-items: baseline; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--rule-soft); flex-wrap: wrap; }
+.esc-item { padding: 10px 0; border-bottom: 1px solid var(--rule-soft); }
 .esc-item:last-child { border-bottom: none; }
+.esc-head { display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; }
 .esc-label { font-family: var(--serif); font-style: italic; font-size: 16px; color: var(--ink); }
 .esc-status { font-family: var(--mono); font-size: 9px; letter-spacing: 0.1em; text-transform: uppercase; padding: 3px 8px; border-radius: 100px; background: var(--rule-soft); color: var(--ink-mute); border: 1px solid var(--rule); }
 .esc-status.cancelled { color: var(--lg-a2); border-color: rgba(140,110,61,0.30); }
 .esc-when { font-family: var(--mono); font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-mute); margin-left: auto; }
+.esc-docs { margin: 8px 0 2px; padding-left: 4px; }
+.esc-doc { display: flex; align-items: baseline; gap: 10px; padding: 3px 0; }
+.esc-doc-name { font-size: 13px; color: var(--ink-soft); }
+.esc-doc-view { font-family: var(--mono); font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--brass-bright); text-decoration: none; }
 
 /* Good to know (v1.5) */
 .gtk-item { padding: 12px 0; border-bottom: 1px solid var(--rule-soft); }
@@ -431,9 +436,17 @@ body.agent-preview .task-box:hover { border-color: var(--brass); box-shadow: 0 0
             <span class="meta">Previous escrows on this property</span>
           </div>
           <div class="esc-item" data-row>
-            <span class="esc-label" data-bind="label">Escrow</span>
-            <span class="esc-status" data-bind="status" data-add-class="status" data-optional>cancelled</span>
-            <span class="esc-when" data-bind="when" data-optional>—</span>
+            <div class="esc-head">
+              <span class="esc-label" data-bind="label">Escrow</span>
+              <span class="esc-status" data-bind="status" data-add-class="status" data-optional>cancelled</span>
+              <span class="esc-when" data-bind="when" data-optional>—</span>
+            </div>
+            <div class="esc-docs" data-list="documents" data-optional>
+              <div class="esc-doc" data-row>
+                <span class="esc-doc-name" data-bind="name">Document</span>
+                <a class="esc-doc-view" data-bind="view_label" data-bind-href="view_url" data-optional href="#" target="_blank" rel="noopener">View</a>
+              </div>
+            </div>
           </div>
         </section>
       </div>
