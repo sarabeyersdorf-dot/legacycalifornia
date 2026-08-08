@@ -125,7 +125,24 @@ export default async function handler(req, res) {
         continue;
       }
 
-      const mStage = normStage(m.stage);
+      // Mirror sync-deals' escrow derivation (deriveFromEscrows) so drift-check
+      // compares the CRM against what the sync INTENDED to write, not the raw
+      // top-level master fields. A property that carries an escrows[] history with
+      // NO active escrow reverts to listing with null price/COE in the CRM; the
+      // active escrow (if any) supplies the live price/COE. Without this, 433's
+      // cancelled-escrow salePrice reads as a (false) client-visible price drift.
+      const mEscrows = Array.isArray(m.escrows) ? m.escrows : [];
+      const mActive  = mEscrows.find((e) => e && e.status === 'active') || null;
+      const mHistoryNoActive = mEscrows.length > 0 && !mActive;
+      const expStage = mEscrows.length
+        ? (mActive ? 'pending' : ((m.stage && m.stage !== 'pending' && m.stage !== 'offer') ? m.stage : 'listing'))
+        : m.stage;
+      const expSalePrice = mActive ? (mActive.salePrice ?? m.salePrice)
+                         : mHistoryNoActive ? null : m.salePrice;
+      const expCoe = mActive ? (mActive.coe || mActive.coeDate || mActive.closingDate)
+                   : mHistoryNoActive ? null : m.closingDate;
+
+      const mStage = normStage(expStage);
       const cStage = normStage(c.stage_override || c.stage);   // effective stage the CRM surfaces
       const mLive = ESCROW.has(mStage);
 
@@ -133,22 +150,22 @@ export default async function handler(req, res) {
       if (mStage !== cStage) {
         const viaOverride = c.stage_override && normStage(c.stage_override) !== normStage(c.stage);
         add('critical', 'stage_mismatch', id, {
-          master: m.stage || null, crm: c.stage_override || c.stage || null, client_visible: true,
-          detail: `Master ${m.stage} ≠ CRM ${c.stage_override || c.stage}${viaOverride ? ` (stale stage_override='${c.stage_override}' over base '${c.stage}')` : ''}.`
+          master: expStage || null, crm: c.stage_override || c.stage || null, client_visible: true,
+          detail: `Master ${expStage} ≠ CRM ${c.stage_override || c.stage}${viaOverride ? ` (stale stage_override='${c.stage_override}' over base '${c.stage}')` : ''}.`
         });
       }
       // coe_mismatch (CRITICAL)
-      if (dateOnly(m.closingDate) !== dateOnly(c.coe_date)) {
+      if (dateOnly(expCoe) !== dateOnly(c.coe_date)) {
         add('critical', 'coe_mismatch', id, {
-          master: dateOnly(m.closingDate), crm: dateOnly(c.coe_date), client_visible: true,
-          detail: `Master closingDate ${dateOnly(m.closingDate) || 'null'} ≠ CRM coe_date ${dateOnly(c.coe_date) || 'null'}.`
+          master: dateOnly(expCoe), crm: dateOnly(c.coe_date), client_visible: true,
+          detail: `Master COE ${dateOnly(expCoe) || 'null'} ≠ CRM coe_date ${dateOnly(c.coe_date) || 'null'}.`
         });
       }
       // price_mismatch (CRITICAL)
-      if (money(m.salePrice) !== money(c.sale_price)) {
+      if (money(expSalePrice) !== money(c.sale_price)) {
         add('critical', 'price_mismatch', id, {
-          master: money(m.salePrice), crm: money(c.sale_price), client_visible: true,
-          detail: `Master salePrice ${money(m.salePrice)} ≠ CRM sale_price ${money(c.sale_price)}.`
+          master: money(expSalePrice), crm: money(c.sale_price), client_visible: true,
+          detail: `Master price ${money(expSalePrice)} ≠ CRM sale_price ${money(c.sale_price)}.`
         });
       }
 
