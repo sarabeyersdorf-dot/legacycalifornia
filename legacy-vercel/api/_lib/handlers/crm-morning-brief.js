@@ -81,7 +81,7 @@ export default async function handler(req, res) {
           .lte('scheduled_at', tomorrow)
           .order('scheduled_at'),
       supa.from('leads')
-          .select('id, first_name, last_name, email, temperature, score, last_contact_at')
+          .select('id, first_name, last_name, email, phone, temperature, score, last_contact_at')
           .eq('status', 'active')
           .lt('last_contact_at', twoWk)
           .order('last_contact_at')
