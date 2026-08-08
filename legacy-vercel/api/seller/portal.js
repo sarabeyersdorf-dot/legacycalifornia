@@ -214,18 +214,48 @@ export default async function handler(req, res) {
       }
     } catch (_) { /* stay soft */ }
 
-    // 2. Documents for this deal (client-safe only) ------------------------
-    // Prefer selecting doc_url (link to the executed file); fall back if the
-    // column isn't there yet (pre-016) so documents never disappear.
-    let docRes = await supa.from('deal_documents')
-      .select('doc_type, name, sub, status, party_owed, client_safe, doc_url')
-      .eq('deal_id', deal.id).eq('client_safe', true);
-    if (docRes.error) {
-      docRes = await supa.from('deal_documents')
-        .select('doc_type, name, sub, status, party_owed, client_safe')
-        .eq('deal_id', deal.id).eq('client_safe', true);
+    // 2. Documents for this deal — governed, FAIL CLOSED --------------------
+    // Visibility is NOT read from deal_documents.client_safe (which defaults true
+    // and is rebuilt hourly — it fails open). It comes from the governance table
+    // (db/053), which the hourly rebuild never touches. A document is shown only
+    // when a matching grant makes it visible to THIS viewer's audience; anything
+    // ungoverned, mismatched, or key-less stays hidden. See SPEC_portal_document_model.md.
+    //
+    //   audience  — a buyer-side deal shows buyer/both; otherwise seller/both, so
+    //               a seller never sees a buyer-only doc and vice-versa.
+    //   fail-open guard — the grant's fingerprint must still match the document's
+    //               name, so a reused doc_key can't inherit an old grant.
+    const audience = /buyer/.test(String(deal.side || '').toLowerCase()) ? 'buyer' : 'seller';
+    const normName = (s) => String(s || '').trim().toLowerCase();
+    let allDocs = [];
+    {
+      let dr = await supa.from('deal_documents')
+        .select('doc_type, name, sub, status, party_owed, doc_url, doc_key, scope')
+        .eq('deal_id', deal.id);
+      if (dr.error) {
+        // pre-052 (no scope/doc_key columns): degrade to the minimal set. Without
+        // doc_key nothing can be governed, so the portal shows zero docs — the
+        // safe (fail-closed) degradation until the migration lands.
+        dr = await supa.from('deal_documents')
+          .select('doc_type, name, sub, status, party_owed, doc_url')
+          .eq('deal_id', deal.id);
+      }
+      allDocs = dr.data || [];
     }
-    const docs = docRes.data || [];
+    let govByKey = new Map();
+    try {
+      const { data: gov } = await supa.from('deal_document_governance')
+        .select('doc_key, visibility, doc_fingerprint').eq('deal_id', deal.id);
+      govByKey = new Map((gov || []).map((g) => [g.doc_key, g]));
+    } catch (_) { /* pre-053: no grants → everything stays agent_only (fail closed) */ }
+    const docs = allDocs.filter((doc) => {
+      if (!doc.doc_key) return false;                      // ungoverned → hidden
+      const g = govByKey.get(doc.doc_key);
+      if (!g) return false;                                // no grant → agent_only
+      if (normName(g.doc_fingerprint) !== normName(doc.name)) return false; // key-reuse guard
+      const v = g.visibility || 'agent_only';
+      return v === 'both' || v === audience;               // audience-scoped
+    });
 
     // Hero photo + tour media — driven from deals.json ("photo" / "video" /
     // "matterport"), with a property-photo and YouTube-thumbnail fallback so a
@@ -348,6 +378,7 @@ export default async function handler(req, res) {
         .from('deal_timeline_items')
         .select('*')
         .eq('deal_id', deal.id).eq('client_visible', true)
+        .neq('status', 'na')   // retired escrow artifacts (sync-deals) never render
         .order('sort_order').order('due_date', { ascending: true, nullsFirst: false });
       if (tlItems && tlItems.length) {
         const OWNER_LABEL = { seller: 'your side', buyer: "the buyer's side", escrow: 'escrow', agent: 'Sara', both: 'everyone' };

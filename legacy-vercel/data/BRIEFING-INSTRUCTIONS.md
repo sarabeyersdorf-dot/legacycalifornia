@@ -375,14 +375,54 @@ A token you omit entirely is treated as "not tracked," not "missing" — so to
 flag a gap, null it explicitly. Once the document lands, change the value to its
 status (`"received"`, `"signed"`, …) and the gap clears automatically.
 
+## 3a-2. Every document needs a scope, a stable key, and (optionally) a seed visibility
+
+The portal now models documents by **property vs. transaction scope** and gates
+them through a **fail-closed visibility** layer. Add three fields to each document
+you write (both in `clientDocuments[]` and in the object form of a `docs` entry):
+
+```json
+"clientDocuments": [
+  { "name": "Seller Disclosures (TDS)", "url": "https://…/tds.pdf",
+    "key": "433-tds", "scope": "property", "visibility": "both" },
+  { "name": "Purchase Agreement", "url": "https://…/rpa.pdf",
+    "key": "433-rpa", "scope": "transaction", "visibility": "both" },
+  { "name": "Buyer Pre-Approval", "url": "https://…/preapproval.pdf",
+    "key": "433-preapproval", "scope": "transaction" }
+]
+```
+
+- **`key`** — a **stable** id, `<deal>-<slug>`, **never dated**, the same key every
+  day for the same document (exactly like task keys — see `TASKFLOW-CONTRACT.md`).
+  This is what lets an agent's visibility choice survive the hourly rebuild. **Never
+  reuse a retired key** for a different document — a burned key stays burned.
+- **`scope`** — `"property"` (RLA, MOT, TDS, SPQ, NHD, FIRPTA, reports — **survive a
+  failed escrow** and follow the property to the next buyer) or `"transaction"`
+  (RPA, counters, addenda, CR, commission demand — **archived with the escrow**).
+  Compliance-map (`docs`) entries default to `property`; flat `clientDocuments`
+  default to `transaction`. Set it explicitly when unsure.
+- **`visibility`** *(optional seed)* — `agent_only` (default) · `seller` · `buyer` ·
+  `both`. Writing it **seeds an initial grant, insert-only**: it creates the grant
+  only if the agent hasn't already set one in the CRM, and it can **never** widen or
+  override an agent's live choice. Omit it and the document starts `agent_only`
+  (hidden) until an agent shares it. **Never seed a buyer's proof-of-funds /
+  pre-approval / lender docs, prior offers, or the commission demand to `seller`/
+  `both`** — those stay `agent_only`.
+
 ## 3b. Portal visibility — what you own vs. the CRM's live toggles
 
 There are two ways things reach a client's portal, and they don't overlap —
 stay in your lane so nothing gets clobbered:
 
-- **You (Cowork) own DOCUMENTS.** `clientDocuments` (§3) and the `docs`
-  checklist are yours. Sara asks you to add/rename/remove files; you write them
-  to `deals.json`. The CRM does not touch documents.
+- **You (Cowork) own the document FILES and their SCOPE.** `clientDocuments` (§3)
+  and the `docs` checklist are yours — you add/rename/remove files and set each
+  one's `scope` and stable `key` in `deals.json`.
+- **The agent owns each document's VISIBILITY, live in the CRM.** Who may see a
+  document (`agent_only`/`seller`/`buyer`/`both`) is flipped in the Command Center
+  (backed by `/api/crm/document-visibility`, which refuses to share wire/payment
+  docs) and is **fail-closed** — a document nobody has shared stays agent-only. You
+  may *seed* an initial visibility per §3a-2, but the agent's live choice always
+  wins and the hourly sync never overwrites it.
 - **Sara owns per-item visibility, live in the CRM.** Inside a deal's Command
   Center she flips individual **appointments, showings, and tasks** between
   Private and Shared with a toggle (backed by `/api/crm/visibility`, which
