@@ -17,6 +17,37 @@ import { adminClient } from '../_lib/supabase.js';
 const require = createRequire(import.meta.url);
 import { handleOptions, ok, fail } from '../_lib/cors.js';
 
+// Read a JSON file FRESH from the repo (GitHub Contents API) so a just-published
+// deals.json / portal-docs manifest is picked up IMMEDIATELY, without waiting for
+// Vercel to rebuild the bundled copy. Every read falls back to the bundled copy on
+// any failure (no token, network error, bad JSON), so the sync never gets worse
+// than today's behavior.
+const GH_OWNER = 'sarabeyersdorf-dot', GH_REPO = 'legacycalifornia', GH_BRANCH = 'main';
+async function ghFetchJson(repoPath) {
+  const token = process.env.GITHUB_TOKEN;
+  if (!token) return null;
+  const url = `https://api.github.com/repos/${GH_OWNER}/${GH_REPO}/contents/${repoPath}?ref=${GH_BRANCH}`;
+  const r = await fetch(url, { headers: { Authorization: `Bearer ${token}`, Accept: 'application/vnd.github+json' } });
+  if (!r.ok || !r.headers) return null;
+  const g = await r.json();
+  if (!g || !g.content) return null;                       // >1MB files return no inline content
+  return JSON.parse(Buffer.from(g.content, 'base64').toString('utf-8'));
+}
+async function loadDeals() {
+  try {
+    const fresh = await ghFetchJson('legacy-vercel/data/deals.json');
+    if (fresh && Array.isArray(fresh.deals)) return { data: fresh, source: 'github' };
+  } catch (_) { /* fall through to the bundled copy */ }
+  return { data: require('../../data/deals.json'), source: 'bundle' };
+}
+async function loadManifest(id) {
+  try {
+    const fresh = await ghFetchJson(`legacy-vercel/data/portal-docs/${id}.json`);
+    if (Array.isArray(fresh)) return fresh;
+  } catch (_) { /* fall through */ }
+  try { return require(`../../data/portal-docs/${id}.json`); } catch (_) { return []; }
+}
+
 // --- document label + status maps (mirror the compliance checklist) --------
 const DOC_LABELS = {
   RPA: ['Purchase Agreement', 'Core contract'],
@@ -258,7 +289,7 @@ const SCOPE_ENUM = new Set(['property', 'transaction']);
 // seeds for deal_document_governance (insert-only — a deliberate initial grant
 // authored in deals.json as { "visibility": "both" } on a document). Seeds never
 // overwrite an agent's CRM grant; that's enforced at the insert step.
-function mapDocs(dealId, d, escrowIdByKey) {
+function mapDocs(dealId, d, escrowIdByKey, manifest) {
   const out = [];
   const seeds = [];
   const prefix = String(d.id || dealId);
@@ -367,9 +398,8 @@ function mapDocs(dealId, d, escrowIdByKey) {
   // FOLDER-PUBLISHED PATH — documents published from Dropbox share folders by
   // publish-docs-from-dropbox, listed in data/portal-docs/<id>.json. Each entry
   // already carries the scope + visibility derived from the folder it sat in, so
-  // this is just a transcription. Missing file → no-op (deal has no published docs).
-  let manifest = [];
-  try { manifest = require(`../../data/portal-docs/${prefix}.json`); } catch (_) { manifest = []; }
+  // this is just a transcription. Passed in (fetched fresh by the caller); a deal
+  // with no published docs gets an empty array.
   if (Array.isArray(manifest)) {
     for (const doc of manifest) {
       if (!doc || !doc.name) continue;
@@ -793,7 +823,7 @@ export default async function handler(req, res) {
   if (!okManual && !okCron) return fail(res, 401, 'bad key');
 
   try {
-    const data = require('../../data/deals.json');
+    const { data, source: dealsSource } = await loadDeals();
     const supa = adminClient();
 
     const active = (data.deals || []).filter((d) => ['offer', 'pending', 'listing', 'closed', 'preparing'].includes(d.stage));
@@ -883,7 +913,8 @@ export default async function handler(req, res) {
         // Rebuild this deal's documents (delete then insert = idempotent).
         // Resilient: a bad doc row is collected in docStats, never thrown, so it
         // can't drop the deal's other docs or abort the run.
-        const { rows: docRows, seeds: docSeeds } = mapDocs(dealId, d, escrowIdByKey);
+        const manifest = d.docFolder ? await loadManifest(d.id) : [];
+        const { rows: docRows, seeds: docSeeds } = mapDocs(dealId, d, escrowIdByKey, manifest);
         await writeDealDocs(supa, dealId, docRows, docStats);
         for (const s of docSeeds) govSeeds.push({ ...s, deal_id: dealId });
       } catch (e) {
@@ -1184,6 +1215,7 @@ export default async function handler(req, res) {
     return ok(res, {
       synced: true,
       source_version: data.version || null,
+      deals_source: dealsSource,   // 'github' = read fresh (no deploy wait) · 'bundle' = fell back to the deployed copy
       deals_upserted: dealsUpserted,
       deals_pruned: dealsPruned,
       timeline_items_retired: timelineItemsRetired,
