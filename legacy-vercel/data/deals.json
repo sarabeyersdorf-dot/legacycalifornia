@@ -1,7 +1,7 @@
 {
-  "version": 4.9,
-  "lastUpdated": "2026-08-07",
-  "updatedBy": "cowork-morning-briefing 2026-08-07 11:15 PT",
+  "version": 5.2,
+  "lastUpdated": "2026-08-08",
+  "updatedBy": "cowork 2026-08-08 — 433 docFolder (pipeline publishes Seller/)",
   "tasks": [
     {
       "agent": "sara",
@@ -9,8 +9,8 @@
       "title": "🔴 433 ESCROW CANCELLED — Neriah Davis email 8/2 8PM: Elizabeth Dawson withdrawing (Montessori school cash-flow crisis). Steps: (1) call Herfords FIRST; (2) reply to Neriah (neriahd@gmail.com, 209-728-7136); (3) call Ashley Cuslidge/Placer Title to open cancellation; (4) cancel 8/5 walkthrough. Loan contingency open through 8/5 — buyer can walk with $12K EMD. Tomorrow's 10AM Zoom with Neriah + Clayton is now about the cancellation.",
       "done": true,
       "due": "2026-08-03",
-      "source_key": "433-buyer-cancellation-respond",
-      "note": "Steps completed 8/3-8/4: called Heryfords, replied to Neriah, notified Ashley Cuslidge (escrow), cancelled walkthrough. Cancellation addendum out for Heryford signatures per Neriah 8/4 4:30PM. New task: 433-cancel-addendum-track."
+      "note": "Steps completed 8/3-8/4: called Heryfords, replied to Neriah, notified Ashley Cuslidge (escrow), cancelled walkthrough. Cancellation addendum out for Heryford signatures per Neriah 8/4 4:30PM. New task: 433-cancel-addendum-track.",
+      "key": "433-buyer-cancellation-respond"
     },
     {
       "agent": "james",
@@ -18,8 +18,8 @@
       "title": "🔴 Baldwin COE IS TODAY 8/3 — call Chicago Title (FSST-5312600364, Kim McCray/Veronica Barragan) and Kim Hesser (209-768-8277) to confirm closing is happening; CR2 (appraisal/loan/insurance) not yet filed; if COE cannot close today get extension drafted immediately",
       "done": true,
       "due": "2026-08-03",
-      "source_key": "baldwin-coe-today-status",
-      "note": "Stale 8/7 — COE date 8/3 has passed; status tracked by baldwin-coe-confirm task"
+      "note": "Stale 8/7 — COE date 8/3 has passed; status tracked by baldwin-coe-confirm task",
+      "key": "baldwin-coe-today-status"
     },
     {
       "agent": "sara",
@@ -46,7 +46,9 @@
       "agent": "james",
       "client": "Baldwin",
       "title": "Verify final walkthrough happened 7/29; get VPC signed by Shomari Turner and filed in EX",
-      "done": false
+      "done": false,
+      "key": "baldwin-vpc-walkthrough",
+      "due": "2026-08-14"
     },
     {
       "agent": "sara",
@@ -446,7 +448,9 @@
       "agent": "james",
       "client": "Baldwin",
       "title": "Watch for contractor repair bid from Kim Hesser — expected today 7/21; forward to lender and Shomari for 203(k) underwriting",
-      "done": false
+      "done": false,
+      "key": "baldwin-contractor-bid",
+      "due": "2026-08-12"
     },
     {
       "agent": "sara",
@@ -564,19 +568,25 @@
       "agent": "james",
       "client": "695 Feather",
       "title": "Download signed ADM #2 from Authentisign (completion email 7/24 1:28 AM — removes Bert Andrews, Ashley holds title alone) and file in 695 Feather Ex folder",
-      "done": false
+      "done": false,
+      "key": "feather-adm2-download",
+      "due": "2026-08-12"
     },
     {
       "agent": "james",
       "client": "695 Feather",
       "title": "Confirm ADM #1 execution — sent for signatures 7/24 12:30 AM; no Authentisign completion confirmation yet; also clarify 'ADM #21 from Dee' per OC Title Tanya Salgado email 7/23",
-      "done": false
+      "done": false,
+      "key": "feather-adm1-confirm",
+      "due": "2026-08-12"
     },
     {
       "agent": "james",
       "client": "695 Feather",
       "title": "CRITICAL FILE GAP: Chase Dee Bradley (dee@caltel.com) for seller disclosures — TDS, SPQ, NHD + sig page, and LA AVID all missing from 695 Feather Ex folder; also file James BA AVID; cash deal nearing close",
-      "done": false
+      "done": false,
+      "key": "feather-seller-disclosures",
+      "due": "2026-08-12"
     },
     {
       "agent": "sara",
@@ -591,7 +601,9 @@
       "client": "Latigo",
       "title": "COE DELAYED 7/24 — lender Kim (Prime Residential) waiting on rent appraisal on Castles' primary residence before funding; follow up with Kim for appraisal ETA and revised COE date; notify Ashley Cuslidge at Placer Title (209-736-9553) and Guy & Adrianna Castle",
       "done": false,
-      "dateAdded": "2026-07-24"
+      "dateAdded": "2026-07-24",
+      "key": "latigo-coe-followup",
+      "due": "2026-08-14"
     },
     {
       "agent": "james",
@@ -662,7 +674,9 @@
       "client": "695 Feather",
       "title": "695 Feather: Get Ashley Robinson Proof of Funds — Bert Andrews removed by ADM2, his POF is now invalid",
       "note": "ADM2 executed 7/24 removes Bert. Ashley must provide own POF to Tanya Salgado. Added 2026-07-27.",
-      "done": false
+      "done": false,
+      "key": "feather-robinson-pof",
+      "due": "2026-08-12"
     },
     {
       "agent": "sara",
@@ -678,36 +692,46 @@
       "client": "Wendell",
       "title": "Wendell: Verify signed AVID is physically in EX folder — Audry Burton said 7/22 it still needed to be written up",
       "note": "deals.json shows received but Audry's 7/22 email says still writing it up. Day 3 of court clock. Added 2026-07-27.",
-      "done": false
+      "done": false,
+      "key": "wendell-avid-verify",
+      "due": "2026-08-14"
     },
     {
       "agent": "james",
       "client": "Baldwin",
       "title": "Baldwin: Schedule final walkthrough with Shomari Turner for Tuesday 7/29 (2 days)",
       "note": "COE 8/3 = 7 days. Final walkthrough must happen ~7/29. Coordinate with listing agent. Added 2026-07-27.",
-      "done": false
+      "done": false,
+      "key": "baldwin-walkthrough-schedule",
+      "due": "2026-08-14"
     },
     {
       "agent": "james",
       "client": "Admin",
       "title": "Fix CRM email signature — James's CRM outgoing emails display Sara Cooper's name, not James's",
       "note": "James flagged in 7/24 email. Update in CRM settings. Added 2026-07-27.",
-      "done": false
+      "done": false,
+      "key": "admin-crm-signature",
+      "due": "2026-08-31"
     },
     {
       "agent": "sara",
       "client": "Lead",
       "title": "Roger & Kim Quillen — 7/22 second showing outcome unknown; check FUB or ShowingTime",
       "note": "Roger re-engaged 7/19, second showing scheduled 7/22. No Gmail follow-up visible. Added 2026-07-27.",
-      "done": false
+      "done": false,
+      "key": "quillen-showing-outcome",
+      "due": "2026-08-14"
     },
     {
       "agent": "james",
       "client": "695 Feather",
       "title": "695 Feather: File fully executed MH Addendum — both Ashley Robinson AND Dee Bradley signed via Authentisign 7/25 8:59 PM; James forwarded completion notification 7/27; download and file in 695 Feather Ex folder",
-      "note": "Authentisign completion 7/25 8:59 PM. Both buyer (Ashley Robinson) and seller (Dee Bradley) signed. This is prelim item #12 (OC Title escrow #2473532-TS). File PDF in EX. Added 2026-07-27.",
+      "note": "Authentisign completion 7/25 8:59 PM. Both buyer (Ashley Robinson) and seller (Dee Bradley) signed. This is prelim item #12 (OC Title escrow #2473532-TS). File PDF in EX. Added 2026-07-27. Merged with the 7/28 duplicate 2026-08-08: EX holds the buyer-signed copy only; download the full Authentisign certificate (both Ashley Robinson and Dee Bradley signed 7/25 8:59 PM).",
       "dateAdded": "2026-07-27",
-      "done": false
+      "done": false,
+      "key": "feather-mh-addendum-file",
+      "due": "2026-08-12"
     },
     {
       "agent": "sara",
@@ -731,7 +755,9 @@
       "title": "433: Download + file Sara's Glide listing-agent AVID (Glide cert e47c5a62, completed ~7/19) in 433 Ex folder",
       "note": "Glide certificate e47c5a62. Sara's LA AVID completed ~7/19. Separate from the AVID already in Homeligh. File original in 433 EX. Added 2026-07-27.",
       "dateAdded": "2026-07-27",
-      "done": false
+      "done": false,
+      "key": "433-glide-avid-file",
+      "due": "2026-08-14"
     },
     {
       "agent": "sara",
@@ -763,7 +789,9 @@
       "title": "433: File Add3 + ETA3 in Ex folder — Authentisign 'Add3, ETA3' completion 7/27 9:20 PM. James R Heryford accepted 9:19 PM. Download from Authentisign and file in 433 E Hwy 4 Ex. Separate from ETA No. 3 executed 7/24 via Glide.",
       "note": "New Authentisign signing completed 7/27. Different from Glide ETA3. Added 2026-07-28.",
       "dateAdded": "2026-07-28",
-      "done": false
+      "done": false,
+      "key": "433-add3-eta3-file",
+      "due": "2026-08-14"
     },
     {
       "agent": "both",
@@ -784,20 +812,14 @@
       "doneDate": "2026-08-07"
     },
     {
-      "agent": "james",
-      "client": "695 Feather",
-      "title": "695 Feather: Download and file fully executed MH Addendum — Authentisign completion notice forwarded by James 7/27. Currently only buyer-signed version in Ex. Download full certificate and file in 695 Feather Ex.",
-      "note": "James forwarded 'Fwd: Signing complete: MH Addendum' to Sara 7/27. Added 2026-07-28.",
-      "dateAdded": "2026-07-28",
-      "done": false
-    },
-    {
       "agent": "sara",
       "client": "695 Feather",
       "title": "695 Feather: File ADM2 (removes Bert Andrews) in Ex + get Ashley Robinson's Proof of Funds — Bert's POF in Ex is invalid (Bert removed by ADM2). Ashley Robinson needs to provide new POF.",
       "note": "Bert Andrews POF in Ex: 'Proof of funds Bert Andrews.pdf' — invalid post-ADM2. Added 2026-07-28.",
       "dateAdded": "2026-07-28",
-      "done": false
+      "done": false,
+      "key": "feather-adm2-not-on-disk",
+      "due": "2026-08-12"
     },
     {
       "agent": "james",
@@ -805,7 +827,9 @@
       "title": "Baldwin: Chase listing agent for their LA AVID (seller-side Agent Visual Inspection Disclosure) — missing from Ex. James's Buyer AVID is now filed. Need listing agent counterpart.",
       "note": "Baldwin Ex now has 'Buyer AVID.pdf' (James). LA AVID from listing agent still missing. Added 2026-07-28.",
       "dateAdded": "2026-07-28",
-      "done": false
+      "done": false,
+      "key": "baldwin-la-avid-verify",
+      "due": "2026-08-12"
     },
     {
       "agent": "sara",
@@ -834,10 +858,10 @@
       "title": "Sheep Ranch escrow P-698773 — call/text Sean Moffat for seller signature on cancellation; buyer signed 7/7, Sean said he'd sign but no response since 7/10",
       "done": true,
       "due": "2026-08-09",
-      "source_key": "sheep-ranch-cancel-chase-8-7",
       "dateAdded": "2026-08-07",
       "doneNote": "Sean signed cancellation ~a month ago; Placer issued deposit check to buyer; file fully resolved (per Sara 8/7)",
-      "doneDate": "2026-08-07"
+      "doneDate": "2026-08-07",
+      "key": "sheep-ranch-cancel-chase-8-7"
     },
     {
       "agent": "sara",
@@ -852,7 +876,9 @@
       "client": "Wendell",
       "title": "Review James's 'wendell commission' email re buyer-broker compensation discrepancy — James drafted message to David and Stacy about HUD shortfall; confirm approach and wording before James sends.",
       "done": false,
-      "dateAdded": "2026-08-02"
+      "dateAdded": "2026-08-02",
+      "key": "wendell-commission-review",
+      "due": "2026-08-11"
     },
     {
       "agent": "james",
@@ -867,7 +893,9 @@
       "client": "Wendell",
       "title": "Wendell post-close: Get one buyer to sign SBSA — listing-side TC Audrey flagged outstanding buyer signature during file review 7/31. Chase for complete broker file.",
       "done": false,
-      "dateAdded": "2026-08-02"
+      "dateAdded": "2026-08-02",
+      "key": "wendell-sbsa-buyer-sig",
+      "due": "2026-08-14"
     },
     {
       "agent": "sara",
@@ -876,8 +904,8 @@
       "done": true,
       "note": "DONE 8/5-8/6 — Cancellation of Contract fully executed and filed in Ex 8/5. Ashley Cuslidge (Placer Title) confirmed 8/6: deposit release back to buyer in process.",
       "due": "2026-08-06",
-      "source_key": "433-cancel-addendum-track",
-      "dateAdded": "2026-08-06"
+      "dateAdded": "2026-08-06",
+      "key": "433-cancel-addendum-track"
     },
     {
       "agent": "sara",
@@ -886,8 +914,8 @@
       "done": true,
       "note": "Moot — deal cancelled 8/5. Pest appt decision deferred to re-listing strategy.",
       "due": "2026-08-06",
-      "source_key": "433-pest-appt-decision",
-      "dateAdded": "2026-08-06"
+      "dateAdded": "2026-08-06",
+      "key": "433-pest-appt-decision"
     },
     {
       "agent": "james",
@@ -895,10 +923,10 @@
       "title": "🔴 Baldwin COE was 8/3 (3 days ago) — CONFIRM: did it close? CR2 (appraisal/loan) doc-backed done 7/19, deal was legally clear. Call Chicago Title (FSST-5312600364) or Kim Hesser (209-768-8277).",
       "done": true,
       "due": "2026-08-06",
-      "source_key": "baldwin-coe-confirm",
       "dateAdded": "2026-08-06",
       "doneNote": "COE confirmed 8/17 per ETA2 in Baldwin Ex folder; loan contingency due 8/12 (per Sara 8/7)",
-      "doneDate": "2026-08-07"
+      "doneDate": "2026-08-07",
+      "key": "baldwin-coe-confirm"
     },
     {
       "agent": "james",
@@ -906,10 +934,10 @@
       "title": "695 Feather: Contact Tanya Salgado (tanyas@octitle.com, OC Title #2473532-TS) for COE date. Also chase Dee Bradley (dee@caltel.com) for seller disclosures: TDS, SPQ, NHD, LA AVID.",
       "done": true,
       "due": "2026-08-07",
-      "source_key": "695-feather-coe-date",
       "dateAdded": "2026-08-06",
       "doneNote": "COE confirmed 8/14 per Sara 8/7",
-      "doneDate": "2026-08-07"
+      "doneDate": "2026-08-07",
+      "key": "695-feather-coe-date"
     },
     {
       "agent": "sara",
@@ -918,8 +946,8 @@
       "done": true,
       "note": "Confirmed — ShowingTime email 8/5 11:54 PM shows Friday 8/14 12:00 PM showing scheduled.",
       "due": "2026-08-06",
-      "source_key": "skyline-showing-0814",
-      "dateAdded": "2026-08-06"
+      "dateAdded": "2026-08-06",
+      "key": "skyline-showing-0814"
     },
     {
       "agent": "sara",
@@ -927,9 +955,9 @@
       "title": "🔴 433 MetroList: Listing was EXTENDED (not expired) — submit MOT #3 to Compliance (Ref 3558163) + update ML# 226033798 expiration to ~11/18/2026 by ~4PM today",
       "done": false,
       "due": "2026-08-07",
-      "source_key": "metrolist-433-expired-listing",
       "dateAdded": "2026-08-07",
-      "note": "MOT #3 (Modification of Terms, Listing Agreement #3) signed 8/5. New listing expiration ~11/18/2026. ACTION: (1) Reply to Compliance@MetroList.net (Ref 3558163) with signed MOT attached; (2) In MetroList, update expiration date on ML# 226033798 to ~11/18/2026. Phone: 916.922.7584 opt 4. Deadline: 8/7 ~4PM."
+      "note": "MOT #3 (Modification of Terms, Listing Agreement #3) signed 8/5. New listing expiration ~11/18/2026. ACTION: (1) Reply to Compliance@MetroList.net (Ref 3558163) with signed MOT attached; (2) In MetroList, update expiration date on ML# 226033798 to ~11/18/2026. Phone: 916.922.7584 opt 4. Deadline: 8/7 ~4PM.",
+      "key": "metrolist-433-expired-listing"
     },
     {
       "agent": "sara",
@@ -937,10 +965,10 @@
       "title": "Unread Authentisign in inbox: 'Modification of Terms, Listing Agreement #3 - 6/25' signed 8/5 at 11:18 PM — identify which listing this belongs to and file executed copy in the correct EX folder.",
       "done": true,
       "due": "2026-08-07",
-      "source_key": "authentisign-mot-8-5",
       "dateAdded": "2026-08-07",
       "doneNote": "MOT #3 = 3-month listing extension in 433 Listing Ex folder (signed 8/5); listing extended to ~11/18/2026 (per Sara 8/7)",
-      "doneDate": "2026-08-07"
+      "doneDate": "2026-08-07",
+      "key": "authentisign-mot-8-5"
     },
     {
       "agent": "james",
@@ -948,8 +976,8 @@
       "title": "695 Feather compliance 🔴: AAA (Additional Agent Acknowledgment) not in EX folder. Locate from Authentisign history or obtain new execution from buyers.",
       "done": false,
       "due": "2026-08-09",
-      "source_key": "695-feather-aaa-missing",
-      "dateAdded": "2026-08-07"
+      "dateAdded": "2026-08-07",
+      "key": "695-feather-aaa-missing"
     },
     {
       "agent": "james",
@@ -957,8 +985,8 @@
       "title": "695 Feather compliance 🔴: NHD (Natural Hazard Disclosure) + signature page not in EX folder. Request from listing agent Dee Bradley (dee@caltel.com).",
       "done": false,
       "due": "2026-08-09",
-      "source_key": "695-feather-nhd-missing",
-      "dateAdded": "2026-08-07"
+      "dateAdded": "2026-08-07",
+      "key": "695-feather-nhd-missing"
     },
     {
       "agent": "james",
@@ -966,8 +994,8 @@
       "title": "695 Feather compliance 🔴: Buyer Agent AVID not in EX folder. Complete buyer agent visual inspection disclosure and file in EX.",
       "done": false,
       "due": "2026-08-09",
-      "source_key": "695-feather-avid-missing",
-      "dateAdded": "2026-08-07"
+      "dateAdded": "2026-08-07",
+      "key": "695-feather-avid-missing"
     },
     {
       "agent": "sara",
@@ -975,10 +1003,10 @@
       "title": "Latigo insurance: reply to Taryn Dominick (taryn.dominick@mysafehaven.com, Safe Haven) — asked if buyers Adrianna & Guy Castle still need homeowner's insurance; deal closed 7/28; reply or forward to clients",
       "done": true,
       "due": "2026-08-07",
-      "source_key": "latigo-insurance-reply-8-7",
       "dateAdded": "2026-08-07",
       "doneNote": "Spam — no reply needed (per Sara 8/7)",
-      "doneDate": "2026-08-07"
+      "doneDate": "2026-08-07",
+      "key": "latigo-insurance-reply-8-7"
     },
     {
       "agent": "sara",
@@ -986,10 +1014,10 @@
       "title": "433 stage decision: cancellation is executed (8/5) and deposit release confirmed (8/6). Set CRM stage to 'listing' (re-list Heryford property) or 'cancelled' — confirm so deals.json can be updated",
       "done": true,
       "due": "2026-08-07",
-      "source_key": "433-stage-decision-8-7",
       "dateAdded": "2026-08-07",
       "doneNote": "Decision: re-list; listing extended 3 months via MOT #3 signed 8/5 (per Sara 8/7)",
-      "doneDate": "2026-08-07"
+      "doneDate": "2026-08-07",
+      "key": "433-stage-decision-8-7"
     },
     {
       "agent": "james",
@@ -998,7 +1026,7 @@
       "note": "Buyer Shomari Turner must remove loan contingency by 8/12. Coordinate with Kim Hesser (khesser@primeres.com, 209-768-8277) and Chicago Title escrow (FSST-5312600364). COE is 8/17.",
       "done": false,
       "due": "2026-08-12",
-      "source_key": "baldwin-loan-cont-8-12"
+      "key": "baldwin-loan-cont-8-12"
     },
     {
       "agent": "sara",
@@ -1007,7 +1035,7 @@
       "note": "Pest appointment with Joel Lawson at 433 E Hwy 4, 8/11 at 1PM is still on. Listing extended 3 months (MOT #3). Results inform re-listing strategy.",
       "done": false,
       "due": "2026-08-11",
-      "source_key": "433-pest-appt-8-11"
+      "key": "433-pest-appt-8-11"
     },
     {
       "agent": "james",
@@ -1024,6 +1052,42 @@
       "title": "New buyer client Denis Listengourt — BRBC executed via Authentisign 8/7 9:41 AM. Download + file the BRBC and open a buyer-prospect record in deals.json",
       "due": "Today 8/7",
       "done": false
+    },
+    {
+      "agent": "james",
+      "client": "Baldwin",
+      "key": "baldwin-cr2-needed",
+      "title": "Baldwin: file CR #2 removing appraisal, loan and insurance contingencies — CR #1 (7/13) removed inspection only",
+      "due": "2026-08-12",
+      "done": false,
+      "dateAdded": "2026-08-08"
+    },
+    {
+      "agent": "james",
+      "client": "695 Feather",
+      "key": "feather-spq-missing",
+      "title": "695 Feather: SPQ genuinely missing from the file — chase Dee Bradley (dee@caltel.com). EX/TDSpdf.pdf is a 3-page standalone TDS, not stacked",
+      "due": "2026-08-12",
+      "done": false,
+      "dateAdded": "2026-08-08"
+    },
+    {
+      "agent": "james",
+      "client": "695 Feather",
+      "key": "feather-nhd-la-avid-verify",
+      "title": "695 Feather: open the Authentisign 'NHD LA-AVID' envelope completed 8/7 18:38 UTC, confirm which form it actually is, and file in EX",
+      "due": "2026-08-11",
+      "done": false,
+      "dateAdded": "2026-08-08"
+    },
+    {
+      "agent": "sara",
+      "client": "Scot Greiner",
+      "key": "scot-greiner-nudge",
+      "title": "Scot Greiner — collection pushed 8/1, 6 days with zero opens. Call or re-push with different properties",
+      "due": "this week",
+      "done": false,
+      "dateAdded": "2026-08-08"
     }
   ],
   "deals": [
@@ -2138,13 +2202,13 @@
       "agentNote": {
         "author": "sara",
         "status": "draft",
-        "updated": "2026-07-18",
-        "body": "Jim and Yvonne, the buyer's appraisal report is in and her lender is finishing its review, with the loan contingency due July 23. Your repair items and the tenant extension are all handled in writing. I will keep you posted as we head toward the August 10 close."
+        "updated": "2026-08-08",
+        "body": "Jim and Yvonne — the sale to Elizabeth Dawson was cancelled on August 5 and Placer Title has released her deposit, so we are back on the market. Nothing about your disclosures or reports changes; they stay on file and go to the next buyer. Your listing is extended to roughly November 18. Joel Lawson is still coming Tuesday August 11 at 1:00 for the Section 1 pest work — worth having done before the next buyer comes through. I will let you know as soon as we have activity. — Sara, (209) 559-4966"
       },
       "clientTasks": [
         {
-          "label": "Complete the agreed repair items — the Section 1 pest work (up to $5,697) plus the signed repair-request items. Keep receipts for the file.",
-          "when": "In process",
+          "label": "Section 1 pest work with Joel Lawson — appointment Tuesday Aug 11 at 1:00 PM. Worth completing now so the report is in hand for the next buyer. Keep receipts for the file.",
+          "when": "Aug 11",
           "status": "open"
         },
         {
@@ -2155,26 +2219,17 @@
         {
           "label": "Sign the corrected fire-hardening disclosure if a signature is still outstanding",
           "when": "Sent to you",
-          "status": "open"
-        },
-        {
-          "label": "Keep your tenants in the loop on the August timeline — walk-through Aug 5, closing Aug 10, occupancy through end of August",
-          "when": "Ongoing",
-          "status": "open"
+          "status": "done"
         }
       ],
       "goodToKnow": [
         {
-          "title": "The appraisal report is in",
-          "body": "The buyer's lender received the report July 17 and is finalizing its review, with the loan contingency due July 23."
+          "title": "Back on the market",
+          "body": "The sale to Elizabeth Dawson was cancelled on August 5 and her deposit has been released back to her. Your disclosures and reports stay on file and will be provided to the next buyer — nothing needs redoing."
         },
         {
-          "title": "Inspection contingencies are behind you",
-          "body": "The buyer has signed contingency removals following the inspections and agreed repairs. The loan contingency is what remains."
-        },
-        {
-          "title": "Listing coverage",
-          "body": "Your listing agreement runs through August 18, fully covering the August 10 close."
+          "title": "Your listing is extended",
+          "body": "Modification of Terms #3 was signed August 5 and extends your listing roughly three months, to about November 18, 2026. The property is active on the market again."
         }
       ],
       "address": "433 E Highway 4",
@@ -2244,71 +2299,105 @@
       "clientDocuments": [
         {
           "name": "Purchase Agreement (RPA)",
-          "url": "https://legacycalifornia.com/docs/433-hwy4/purchase-agreement-rpa.pdf"
+          "url": "https://legacycalifornia.com/docs/433-hwy4/purchase-agreement-rpa.pdf",
+          "scope": "transaction",
+          "visibility": "agent_only"
         },
         {
           "name": "Seller Counter Offer 1",
-          "url": "https://legacycalifornia.com/docs/433-hwy4/seller-counter-offer-1.pdf"
+          "url": "https://legacycalifornia.com/docs/433-hwy4/seller-counter-offer-1.pdf",
+          "scope": "transaction",
+          "visibility": "agent_only"
         },
         {
           "name": "Addendum A",
-          "url": "https://legacycalifornia.com/docs/433-hwy4/addendum-a.pdf"
+          "url": "https://legacycalifornia.com/docs/433-hwy4/addendum-a.pdf",
+          "scope": "transaction",
+          "visibility": "agent_only"
         },
         {
           "name": "Additional Agent Acknowledgment",
-          "url": "https://legacycalifornia.com/docs/433-hwy4/additional-agent-acknowledgment.pdf"
+          "url": "https://legacycalifornia.com/docs/433-hwy4/additional-agent-acknowledgment.pdf",
+          "scope": "transaction",
+          "visibility": "agent_only"
         },
         {
           "name": "Septic, Well & Property Monument Addendum",
-          "url": "https://legacycalifornia.com/docs/433-hwy4/septic-well-monument-addendum.pdf"
+          "url": "https://legacycalifornia.com/docs/433-hwy4/septic-well-monument-addendum.pdf",
+          "scope": "transaction",
+          "visibility": "agent_only"
         },
         {
           "name": "Tenant Occupied Property Addendum — House",
-          "url": "https://legacycalifornia.com/docs/433-hwy4/tenant-addendum-house.pdf"
+          "url": "https://legacycalifornia.com/docs/433-hwy4/tenant-addendum-house.pdf",
+          "scope": "transaction",
+          "visibility": "agent_only"
         },
         {
           "name": "Tenant Occupied Property Addendum — Yoga Studio",
-          "url": "https://legacycalifornia.com/docs/433-hwy4/tenant-addendum-yoga-studio.pdf"
+          "url": "https://legacycalifornia.com/docs/433-hwy4/tenant-addendum-yoga-studio.pdf",
+          "scope": "transaction",
+          "visibility": "agent_only"
         },
         {
           "name": "Earnest Money Deposit Receipt",
-          "url": "https://legacycalifornia.com/docs/433-hwy4/emd-receipt.pdf"
+          "url": "https://legacycalifornia.com/docs/433-hwy4/emd-receipt.pdf",
+          "scope": "transaction",
+          "visibility": "agent_only"
         },
         {
           "name": "Earnest Money Deposit Check (Scanned)",
-          "url": "https://legacycalifornia.com/docs/433-hwy4/emd-check-scanned.pdf"
+          "url": "https://legacycalifornia.com/docs/433-hwy4/emd-check-scanned.pdf",
+          "scope": "transaction",
+          "visibility": "agent_only"
         },
         {
           "name": "Buyer Pre-Approval Letter",
-          "url": "https://legacycalifornia.com/docs/433-hwy4/buyer-pre-approval.pdf"
+          "url": "https://legacycalifornia.com/docs/433-hwy4/buyer-pre-approval.pdf",
+          "scope": "transaction",
+          "visibility": "agent_only"
         },
         {
           "name": "Roof Inspection Report",
-          "url": "https://legacycalifornia.com/docs/433-hwy4/roof-inspection-report.pdf"
+          "url": "https://legacycalifornia.com/docs/433-hwy4/roof-inspection-report.pdf",
+          "scope": "property",
+          "visibility": "agent_only"
         },
         {
           "name": "Well Production Report",
-          "url": "https://legacycalifornia.com/docs/433-hwy4/well-production-report.pdf"
+          "url": "https://legacycalifornia.com/docs/433-hwy4/well-production-report.pdf",
+          "scope": "property",
+          "visibility": "agent_only"
         },
         {
           "name": "Natural Hazard Disclosure Report — Main Parcel",
-          "url": "https://legacycalifornia.com/docs/433-hwy4/nhd-report-main-parcel.pdf"
+          "url": "https://legacycalifornia.com/docs/433-hwy4/nhd-report-main-parcel.pdf",
+          "scope": "property",
+          "visibility": "agent_only"
         },
         {
           "name": "Natural Hazard Disclosure Report — Second Parcel",
-          "url": "https://legacycalifornia.com/docs/433-hwy4/nhd-report-second-parcel.pdf"
+          "url": "https://legacycalifornia.com/docs/433-hwy4/nhd-report-second-parcel.pdf",
+          "scope": "property",
+          "visibility": "agent_only"
         },
         {
           "name": "NHD Signature Page — Main Parcel",
-          "url": "https://legacycalifornia.com/docs/433-hwy4/nhd-signature-main-parcel.pdf"
+          "url": "https://legacycalifornia.com/docs/433-hwy4/nhd-signature-main-parcel.pdf",
+          "scope": "property",
+          "visibility": "agent_only"
         },
         {
           "name": "NHD Signature Page — Second Parcel",
-          "url": "https://legacycalifornia.com/docs/433-hwy4/nhd-signature-second-parcel.pdf"
+          "url": "https://legacycalifornia.com/docs/433-hwy4/nhd-signature-second-parcel.pdf",
+          "scope": "property",
+          "visibility": "agent_only"
         },
         {
           "name": "Home Warranty Receipt",
-          "url": "https://legacycalifornia.com/docs/433-hwy4/home-warranty-receipt.pdf"
+          "url": "https://legacycalifornia.com/docs/433-hwy4/home-warranty-receipt.pdf",
+          "scope": "property",
+          "visibility": "agent_only"
         }
       ],
       "correspondence": [],
@@ -2327,7 +2416,20 @@
         "appraisal_waived": false,
         "loan_waived": false,
         "inspection_waived": false
-      }
+      },
+      "escrows": [
+        {
+          "key": "esc1",
+          "status": "cancelled",
+          "label": "Escrow #1",
+          "buyer": "Elizabeth Dawson",
+          "salePrice": 1300000,
+          "acceptance": "2026-06-19",
+          "coe": "2026-08-10",
+          "cancelledAt": "2026-08-05"
+        }
+      ],
+      "docFolder": "/_LEGACY/_Listings/433 E Highway 4"
     },
     {
       "id": "467-skyline",
