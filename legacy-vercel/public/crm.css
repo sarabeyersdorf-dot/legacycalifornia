@@ -1477,3 +1477,44 @@ body.lp-restyle .pipe-stats div .v {
   font-style: normal;
   letter-spacing: -0.01em;
 }
+
+/* ============================================================
+   DE-CURSIVE — the CRM reads as a working tool, not calligraphy.
+   No serif-italic display voice anywhere: greetings, card titles,
+   numerals and section heads go upright Inter; italic never
+   renders as cursive. (crm.css loads on the CRM only, so this is
+   inherently CRM-scoped; the self-contained Deals-in-motion .dl
+   widget keeps its own Poppins type system.)
+   ============================================================ */
+.crm-main :not(.dl):not(.dl *) { font-style: normal !important; }
+
+.crm-main :where(h1, h2, h3, h4, .h-section, .nc-body h3):not(.dl):not(.dl *) {
+  font-family: var(--sans);
+  letter-spacing: -0.01em;
+}
+.crm-main .tb-greet {
+  font-family: var(--sans);
+  font-weight: 700;
+  font-size: clamp(38px, 4.2vw, 60px);
+  letter-spacing: -0.022em;
+  line-height: 1.02;
+  margin-bottom: 14px;
+}
+.crm-main .tb-greet em { font-weight: 700; }
+.crm-main .tb-line {
+  font-family: var(--sans);
+  font-weight: 400;
+  font-size: 17px;
+  line-height: 1.5;
+  letter-spacing: -0.003em;
+}
+.crm-main .nc-rank {
+  font-family: var(--sans);
+  font-weight: 700;
+  font-size: 26px;
+  letter-spacing: -0.01em;
+  padding-top: 2px;
+}
+.crm-main .nc-body h3 { font-weight: 600; letter-spacing: -0.012em; }
+.crm-main .tb-pulse-row .v { font-family: var(--sans); font-weight: 600; }
+.crm-main .tb-pulse-row .v .chg { font-family: var(--mono); font-weight: 500; }
