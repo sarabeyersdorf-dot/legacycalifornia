@@ -1,7 +1,7 @@
 {
-  "version": 5.2,
+  "version": 5.3,
   "lastUpdated": "2026-08-08",
-  "updatedBy": "cowork 2026-08-08 — 433 docFolder (pipeline publishes Seller/)",
+  "updatedBy": "cowork 2026-08-08 — Taskflow Fix 1: backfilled stable keys on all tasks",
   "tasks": [
     {
       "agent": "sara",
@@ -26,21 +26,24 @@
       "client": "433",
       "title": "Review assignment of rents deed — Yvonne Heryford sent scanned doc (7/30 AM); prepare final version for Herfords to sign before COE 8/10",
       "done": true,
-      "note": "Moot — escrow cancelled 8/2 per Neriah Davis email (buyer withdrawal)"
+      "note": "Moot — escrow cancelled 8/2 per Neriah Davis email (buyer withdrawal)",
+      "key": "433-review-assignment-rents-deed"
     },
     {
       "agent": "sara",
       "client": "433",
       "title": "Confirm pest credit dollar amount with Elizabeth — path agreed (pest + shed row; contractor work post-close); get credit amount in writing before 8/5 walkthrough",
       "done": true,
-      "note": "Moot — escrow cancelled 8/2 per Neriah Davis email"
+      "note": "Moot — escrow cancelled 8/2 per Neriah Davis email",
+      "key": "433-confirm-pest-credit-dollar"
     },
     {
       "agent": "james",
       "client": "Baldwin",
       "title": "🔴 COE 8/3 = 4 days — call Kim Hesser today for loan/appraisal status; confirm contractor bid; CR2 needed before closing",
       "done": true,
-      "note": "Stale 8/6 — superseded; CR2 confirmed doc-backed 7/19 by reconcile API; COE 8/3 status unknown, new task: baldwin-coe-confirm"
+      "note": "Stale 8/6 — superseded; CR2 confirmed doc-backed 7/19 by reconcile API; COE 8/3 status unknown, new task: baldwin-coe-confirm",
+      "key": "baldwin-coe"
     },
     {
       "agent": "james",
@@ -55,394 +58,451 @@
       "client": "Skyline",
       "title": "Kerstin Breidenthal showing Sat 8/1 1PM — confirm appointment; get Scott Greiner (7/26) feedback if not yet received",
       "done": true,
-      "note": "Showing date 8/1 has passed — marked done 8/6"
+      "note": "Showing date 8/1 has passed — marked done 8/6",
+      "key": "skyline-kerstin-breidenthal-showing-sat"
     },
     {
       "agent": "james",
       "client": "Wendell",
       "title": "no BRBC in the EX folder (James owes); file a copy if signed",
       "note": "done — bbrc.pdf confirmed in EX folder 7/7",
-      "done": true
+      "done": true,
+      "key": "wendell-no-brbc-ex-folder"
     },
     {
       "agent": "james",
       "client": "Baldwin",
       "title": "no fire-hardening disclosure (FHDS/WFA) on file; chase from listing side (Allyson)",
       "note": "done 7/7 — FHDS filed in EX folder",
-      "done": true
+      "done": true,
+      "key": "baldwin-no-fire-hardening-disclosure"
     },
     {
       "agent": "sara",
       "client": "Esperson",
       "title": "Resend offer on 2936 E Hwy 4 with new expiration (Kristin signs Mon/Tue); keep 512 Gardiner Way CMA moving",
       "note": "done 7/6 — buyer is working on her lending",
-      "done": true
+      "done": true,
+      "key": "esperson-resend-offer-hwy-new"
     },
     {
       "agent": "james",
       "client": "Skyline",
       "title": "Follow up with Sharon Hedges — Homes.com lead for 467 Skyline",
       "note": "done 7/6",
-      "done": true
+      "done": true,
+      "key": "skyline-follow-up-sharon-hedges"
     },
     {
       "agent": "sara",
       "client": "Latigo",
       "title": "Chase Mitzi for SELLER signatures: vehicle/trailer addendum + EMD Addendum #2 — both must reach Ashley/Placer",
       "note": "PARTIALLY resolved 7/13 -- vehicle/trailer addendum (Addendum 1) back FULLY signed from Kylie; EMD Addendum #2 still missing, Mitzi/Kylie never received it -- Sara re-sending",
-      "done": true
+      "done": true,
+      "key": "latigo-chase-mitzi-seller-signatures"
     },
     {
       "agent": "sara",
       "client": "Latigo",
       "title": "Complete buyer-agent AVID (only listing agent AVID on file)",
       "note": "Resolved 7/13 -- Kylie confirmed receipt of the AVID in the 'missing items Latigo' email thread",
-      "done": true
+      "done": true,
+      "key": "latigo-complete-buyer-agent-avid"
     },
     {
       "agent": "james",
       "client": "Wendell",
       "title": "Ping Audry/Brandi for the WRITTEN bankruptcy court-approval notice (21-day noticing ends ~7/9) — it starts every clock",
       "note": "noticing ended 7/9; pinged — now awaiting the JUDGE'S sign-off (per Sara 7/11); still no written notice, clocks stay paused",
-      "done": true
+      "done": true,
+      "key": "wendell-ping-audry-brandi-written"
     },
     {
       "agent": "sara",
       "client": "433 Hwy 4",
       "title": "Tenant IN POSSESSION — put the through-end-of-Aug extension in writing with Neriah (SIP/TIP addendum)",
       "note": "done 7/7 — Generic Addendum 2 fully signed by all parties (Glide), filed in Ex",
-      "done": true
+      "done": true,
+      "key": "433-tenant-possession"
     },
     {
       "agent": "sara",
       "client": "Latigo",
       "title": "No BRBC in Ex folder for the Castles — sign/file a copy",
       "note": "done 7/7 per Sara",
-      "done": true
+      "done": true,
+      "key": "latigo-no-brbc-ex-folder"
     },
     {
       "agent": "sara",
       "client": "433 Hwy 4",
       "title": "File buyer-signed disclosure set (DocuSign 7/1) in Ex; get sellers' NHD signature pages + MU-PA back to Melissa",
       "note": "received 7/6; MU-PA + NHD sig pages + FHDS signed via Authentisign 7/6 and sent to Melissa/SkySlope",
-      "done": true
+      "done": true,
+      "key": "433-file-buyer-signed-disclosure"
     },
     {
       "agent": "james",
       "client": "Sheep Ranch",
       "title": "Escrow P-698773 cancellation instructions — buyer signature pending (James sent 7/4); chase so Placer can close out",
       "note": "buyer signed 7/7; now awaiting SELLER signature (per Sara)",
-      "done": true
+      "done": true,
+      "key": "sheep-ranch-escrow-cancellation-instructions"
     },
     {
       "agent": "james",
       "client": "Sheep Ranch",
       "title": "Escrow P-698773 cancellation — chase the SELLER signature so Placer can close out",
       "note": "chased 7/10 — Sean said he would sign, has not come through yet; keep following up",
-      "done": true
+      "done": true,
+      "key": "sheep-ranch-escrow-cancellation"
     },
     {
       "agent": "sara",
       "client": "Rathburn",
       "title": "Listing appointment — Lilia Rathburn, 11 AM",
       "note": "done 7/6 — preparing listing agreement for 999k",
-      "done": true
+      "done": true,
+      "key": "rathburn-listing-appointment"
     },
     {
       "agent": "james",
       "client": "Copperopolis",
       "title": "Showing — mobile home in Copperopolis, 9 AM",
       "note": "done 7/6",
-      "done": true
+      "done": true,
+      "key": "copperopolis-showing"
     },
     {
       "agent": "sara",
       "client": "Latigo",
       "title": "Appraisal due back Fri 7/10 (per Kim Hesser) — then remove remaining appraisal + loan contingencies and paper the HELOC/conventional financing change",
       "note": "Kim texted 7/6; Sara texted Mitzi 7/7; appraisal NOT back 7/10 — Sara reached out to Kim again 7/11",
-      "done": true
+      "done": true,
+      "key": "latigo-appraisal-back-fri"
     },
     {
       "agent": "sara",
       "client": "433 Hwy 4",
       "title": "RR follow-through — track buyer/seller agreement on the Request for Repair (received 7/7, reviewed with sellers)",
       "note": "done — sellers signed RR1 response (Jim 7/7, Yvonne 7/8), sent to Neriah 7/8 AM",
-      "done": true
+      "done": true,
+      "key": "433-rr-follow-through"
     },
     {
       "agent": "sara",
       "client": "433 Hwy 4",
       "title": "Watch for buyer's signed reply to the seller RR response + CR1 (sent to Neriah/Melissa 7/8) — file fully executed set in Ex when back",
       "note": "done 7/9 — executed Seller Response & Buyer Reply to RR1 received from Neriah and filed in Ex",
-      "done": true
+      "done": true,
+      "key": "433-watch-buyer-signed-reply"
     },
     {
       "agent": "sara",
       "client": "Rathburn",
       "title": "Chase Lilia's signature on the 14281 Cobb Ln listing agreement (sent 7/7 at 999k)",
       "note": "chased 7/10; 7/11 Sara answered Lilia's questions — she will sign soon; meeting Lilia in person today 7/13 to sign",
-      "done": true
+      "done": true,
+      "key": "rathburn-chase-lilia-signature-cobb"
     },
     {
       "agent": "sara",
       "client": "433 Hwy 4",
       "title": "Reply to Melissa re: tenant estoppel — TEC box UNCHECKED on both TOPAs (not a contract deliverable); check the signed MU-PA text first, then decide courtesy TEC if lender requires (in writing)",
-      "done": true
+      "done": true,
+      "key": "433-reply-melissa"
     },
     {
       "agent": "sara",
       "client": "433 Hwy 4",
       "title": "FHDS signed 7/6 has UNCHECKED boxes (per Melissa) — issue corrected FHDS for signatures",
       "done": true,
-      "note": "Corrected FHDS reissued and sent for signatures 7/13 per Sara"
+      "note": "Corrected FHDS reissued and sent for signatures 7/13 per Sara",
+      "key": "433-fhds-signed-unchecked-boxes"
     },
     {
       "agent": "james",
       "client": "Duarte",
       "title": "6240 Michel Rd — SCO1 at 434000 (sellers signed 7/8) expires ~Sat 7/11 — review with Brian and respond (accept/counter/walk)",
       "note": "SCO1 expired 7/11 unaccepted; listing agent never acknowledged — seller won't go below 434000 (James 7/11); DEAL DEAD per Sara 7/12",
-      "done": true
+      "done": true,
+      "key": "duarte-michel-rd"
     },
     {
       "agent": "james",
       "client": "Robinson",
       "title": "Write the offer on 992 Iroquois Cir for Ashley Robinson (BRBC signed 7/5)",
       "note": "done — offer written at 125000; seller countered 134500; James countering back at 130000 (buyer's highest & best)",
-      "done": true
+      "done": true,
+      "key": "robinson-write-offer-iroquois-cir"
     },
     {
       "agent": "sara",
       "client": "433 Hwy 4",
       "title": "Watch for Jim's signed ETA — he signs Fri 7/10 before leaving for Idaho; file in Ex when back",
       "note": "done 7/10 — ETA No. 1 fully signed 7:43 AM, forwarded to Neriah/Melissa, filed in Ex; extends loan→7/23, appraisal→7/16",
-      "done": true
+      "done": true,
+      "key": "433-watch-jim-signed-eta"
     },
     {
       "agent": "james",
       "client": "Robinson",
       "title": "992 Iroquois — BCO at 130000 (buyer's highest & best) countering seller's 134500 — watch for seller response",
       "note": "seller will not accept the counter (James 7/11); OFFER DEAD per Sara 7/12 — pivoted to 695 Feather Dr showing 7/12",
-      "done": true
+      "done": true,
+      "key": "robinson-iroquois"
     },
     {
       "agent": "james",
       "client": "Sheep Ranch",
       "title": "Escrow P-698773 cancellation — Sean's (seller) signature STILL pending; said he'd sign (chased 7/10) — follow up until Placer can close out",
       "note": "done — cancellation FULLY SIGNED 7/10 6:27 PM (Authentisign); Sara forwarded to Ashley/Amanda at Placer that evening",
-      "done": true
+      "done": true,
+      "key": "sheep-ranch-escrow-cancellation-2"
     },
     {
       "agent": "sara",
       "client": "433 Hwy 4",
       "title": "Track appraisal status with Neriah/lender — appraisal contingency Thu 7/16 per ETA1",
       "note": "Neriah reached out to the lender again 7/11; followed up, ticked done by Sara 7/12 (contingency 7/16 stands)",
-      "done": true
+      "done": true,
+      "key": "433-track-appraisal-status-neriah"
     },
     {
       "agent": "sara",
       "client": "Esperson",
       "title": "Pursue 512 Gardiner Way LISTING (reduced-commission, Kristin has her own buyer) — home in ACTIVE FORECLOSURE so timing matters; buyer side dead (lending declined)",
       "note": "7/12 per Sara — Kristin meeting her buyer Monday 7/13, will advise after",
-      "done": true
+      "done": true,
+      "key": "esperson-pursue-gardiner-way-listing"
     },
     {
       "agent": "sara",
       "client": "Furr",
       "title": "Ben Furr (new buyer, BRBC signed 7/12) — file the signed BRBC and follow up after the 7/12 Skyline meeting",
-      "done": true
+      "done": true,
+      "key": "furr-ben-furr"
     },
     {
       "agent": "sara",
       "client": "Latigo",
       "title": "Resend EMD Addendum #2 to Mitzi/Kylie for seller signature",
       "note": "buyer signed 6/29 but listing side never received it -- resend along with AVID copy",
-      "done": true
+      "done": true,
+      "key": "latigo-resend-emd-addendum-mitzi"
     },
     {
       "agent": "sara",
       "client": "Latigo",
       "title": "Download seller-signed vehicle/trailer addendum from Kylie's 7/13 email attachment and file in Ex",
       "done": true,
-      "note": "Not needed — Sara confirmed 7/13 that Addendum 1 is already in the Ex folder"
+      "note": "Not needed — Sara confirmed 7/13 that Addendum 1 is already in the Ex folder",
+      "key": "latigo-download-seller-signed-vehicle"
     },
     {
       "agent": "sara",
       "client": "Latigo",
       "title": "Send buyer-initialed Preliminary Title Report to Kylie",
-      "done": true
+      "done": true,
+      "key": "latigo-send-buyer-initialed-preliminary"
     },
     {
       "agent": "sara",
       "client": "1143 Echo",
       "title": "1143 Echo St listing agreement executed 7/12 -- confirm list price and publish to portal",
-      "done": true
+      "done": true,
+      "key": "echo-echo-st-listing-agreement"
     },
     {
       "agent": "james",
       "client": "695 Feather",
       "title": "Watch for seller response on 695 Feather Dr offer (Ashley Robinson)",
-      "done": true
+      "done": true,
+      "key": "feather-watch-seller-response-feather"
     },
     {
       "agent": "james",
       "client": "Baldwin",
       "title": "CR#1 only removed the INSPECTION contingency — appraisal/loan/title/insurance still open; prepare the remaining Buyer Contingency Removal for Shomari to sign once the 203(k) loan clears",
       "done": true,
-      "note": "Stale 8/6 — CR2 confirmed doc-backed done 2026-07-19 by timeline reconcile API (appraisal + loan contingencies removed)"
+      "note": "Stale 8/6 — CR2 confirmed doc-backed done 2026-07-19 by timeline reconcile API (appraisal + loan contingencies removed)",
+      "key": "baldwin-cr-only-removed-inspection"
     },
     {
       "agent": "james",
       "client": "Baldwin",
       "title": "CR#1 not showing in Allyson Overturf's (listing side) portal despite her 7/14 acknowledgment — resend/confirm it's actually filed on the seller side",
       "done": true,
-      "note": "[marked done via CRM feedback 2026-07-24]"
+      "note": "[marked done via CRM feedback 2026-07-24]",
+      "key": "baldwin-cr-showing-allyson-overturf"
     },
     {
       "agent": "sara",
       "client": "Latigo",
       "title": "Call David at Hometown Lenders for new COE date — lender requested extension 7/19, original COE 7/20 is off, likely 7/22 or 7/24; update CRM calendar once confirmed",
       "done": true,
-      "note": "Done 7/20 — Kim confirmed COE is July 24. Update CRM Latigo calendar to 7/24."
+      "note": "Done 7/20 — Kim confirmed COE is July 24. Update CRM Latigo calendar to 7/24.",
+      "key": "latigo-call-david-hometown-lenders"
     },
     {
       "agent": "sara",
       "client": "Wendell",
       "title": "Read James's forwarded court email (thread 19f7b805f96b1b38, 1:50 PM 7/19) — could be court approval notice that starts all clocks; open manually in Gmail, too large to auto-extract",
       "done": true,
-      "note": "Read 7/20 — NOT a court approval notice. Court has NOT signed off yet. Case status only (CASE # 25-31761). All contingency clocks still frozen."
+      "note": "Read 7/20 — NOT a court approval notice. Court has NOT signed off yet. Case status only (CASE # 25-31761). All contingency clocks still frozen.",
+      "key": "wendell-read-james-forwarded-court"
     },
     {
       "agent": "sara",
       "client": "Wendell",
       "title": "Fix Audry's bounced email — audrybusybeerealty@gmail.com returned 550 error 7/17; find correct address (call escrow, MLS, or Audry direct) and resend FHA Amendatory Clause; also confirm Tiphani at Prime Residential has a copy",
       "done": true,
-      "note": "Done 7/20 — correct email found, FHA Amendatory Clause resent."
+      "note": "Done 7/20 — correct email found, FHA Amendatory Clause resent.",
+      "key": "wendell-fix-audry-bounced-email"
     },
     {
       "agent": "sara",
       "client": "433 Hwy 4",
       "title": "Loan contingency deadline is 7/23 (4 days) — call Neriah Davis to confirm Elizabeth Dawson's lender is on track; if any delay risk, plan a loan contingency extension now",
       "done": true,
-      "note": "Emailed Neriah 7/21 — no written loan removal or extension confirmation in hand yet. 7/23 deadline is TOMORROW. Must receive written removal or extension in writing by EOD 7/23."
+      "note": "Emailed Neriah 7/21 — no written loan removal or extension confirmation in hand yet. 7/23 deadline is TOMORROW. Must receive written removal or extension in writing by EOD 7/23.",
+      "key": "433-loan-contingency-deadline"
     },
     {
       "agent": "sara",
       "client": "Baldwin",
       "title": "CRM Timeline tab: REJECT the 3 auto-proposals for cont_appraisal, cont_insurance, cont_loan — James confirmed 7/19 that CR1 (7/13) removed inspection only; go to Baldwin deal in CRM > Timeline tab to reject these",
       "done": true,
-      "note": "Stale 8/6 — CR2 confirmed doc-backed done 7/19 by timeline reconcile; appraisal and loan contingency proposals auto-filed"
+      "note": "Stale 8/6 — CR2 confirmed doc-backed done 7/19 by timeline reconcile; appraisal and loan contingency proposals auto-filed",
+      "key": "baldwin-crm-timeline-tab"
     },
     {
       "agent": "sara",
       "client": "Latigo",
       "title": "Buyer-agent AVID still missing from Ex folder — only listing-agent AVID (LA Avid.pdf) is on file; chase buyer AVID before COE",
       "done": true,
-      "note": "Done 7/21 — Kylie Windley's buyer-agent AVID confirmed in Ex."
+      "note": "Done 7/21 — Kylie Windley's buyer-agent AVID confirmed in Ex.",
+      "key": "latigo-buyer-agent-avid-missing"
     },
     {
       "agent": "james",
       "client": "Baldwin",
       "title": "Baldwin needs CR2 from buyer covering appraisal, loan, and insurance contingencies before COE 8/3 — check RPA for deadlines and coordinate with buyer's agent on timing",
       "done": true,
-      "note": "Done — CR2 (appraisal + loan) confirmed doc-backed filed 2026-07-19 by timeline reconcile API"
+      "note": "Done — CR2 (appraisal + loan) confirmed doc-backed filed 2026-07-19 by timeline reconcile API",
+      "key": "baldwin-baldwin-cr-buyer-covering"
     },
     {
       "agent": "sara",
       "client": "433 Hwy 4",
       "title": "Disclosure package missing from Ex: TDS, SPQ, NHD, AVID, FHDS — Sara is listing agent (represents Herfords); get these signed and filed before loan contingency 7/23",
       "done": true,
-      "note": "Moot 8/7 — deal cancelled 8/5; disclosure obligation ends with cancellation"
+      "note": "Moot 8/7 — deal cancelled 8/5; disclosure obligation ends with cancellation",
+      "key": "433-disclosure-package-missing-ex"
     },
     {
       "agent": "sara",
       "client": "695 Feather",
       "title": "TDS/SPQ/NHD/AVID/FHDS not yet on file (new deal 7/15) — request from escrow/seller's agent if not received by 7/22",
       "done": true,
-      "note": "Done per Sara's 7/22 briefing note — disclosures confirmed in Ex now."
+      "note": "Done per Sara's 7/22 briefing note — disclosures confirmed in Ex now.",
+      "key": "feather-tds-spq-nhd-avid"
     },
     {
       "agent": "james",
       "client": "Baldwin",
       "title": "NHD not found as standalone in EX folder — check if it's inside the FVACHID bundle; add standalone NHD if not present before COE 8/3",
       "done": true,
-      "note": "Done 7/21 — NHD_Signature_page_-_fully_executed_ts55458.pdf confirmed in Baldwin EX folder during 7/21 morning compliance scan"
+      "note": "Done 7/21 — NHD_Signature_page_-_fully_executed_ts55458.pdf confirmed in Baldwin EX folder during 7/21 morning compliance scan",
+      "key": "baldwin-nhd-found-as-standalone"
     },
     {
       "agent": "sara",
       "client": "Latigo",
       "title": "EMD receipt and Escrow Holder Ack not found in Ex folder during 7/19 scan — confirm they're actually filed in Ex (may be elsewhere or pre-dates Ex structure)",
       "done": true,
-      "note": "Done 7/21 — Escrow Holder Ack confirmed in Ex/EMD folder."
+      "note": "Done 7/21 — Escrow Holder Ack confirmed in Ex/EMD folder.",
+      "key": "latigo-emd-receipt-escrow-holder"
     },
     {
       "agent": "james",
       "client": "695 Feather",
       "title": "Update Commission Demand for 695 Feather — file still says 'needs escrow info'; escrow is now known: Orange Coast Title, Escrow #2473532-TS, Tanya Salgado (tanyas@octitle.com)",
       "done": true,
-      "note": "[marked done via CRM feedback 2026-07-24]"
+      "note": "[marked done via CRM feedback 2026-07-24]",
+      "key": "feather-update-commission-demand-feather"
     },
     {
       "agent": "james",
       "client": "695 Feather",
       "title": "Check what listing agent Dee Bradley (dee@caltel.com) committed to do 'Monday' 7/20 per her 7/17 email— content unclear from snippet; follow up with Dee to confirm",
       "done": true,
-      "note": "Stale 8/7 — 7/20 has long passed; Dee follow-up absorbed into 695-feather-coe-date task"
+      "note": "Stale 8/7 — 7/20 has long passed; Dee follow-up absorbed into 695-feather-coe-date task",
+      "key": "feather-check-what-listing-agent"
     },
     {
       "agent": "sara",
       "client": "433 Hwy 4",
       "title": "Download and file signed AVID from Glide — Glide notification 7/19 9:11 PM confirms all parties signed '[AVID] Agent Visual Inspection Disclosure – 1.pdf'; open Glide email (thread 19f7c38328ed5339) in Sara's Gmail and save PDF to 433 Ex folder",
       "done": true,
-      "note": "Done 7/24 — added to Homeligh disclosure package; T and Neriah notified it is there. Still needs buyer (Elizabeth Dawson) signature to complete"
+      "note": "Done 7/24 — added to Homeligh disclosure package; T and Neriah notified it is there. Still needs buyer (Elizabeth Dawson) signature to complete",
+      "key": "433-download-file-signed-avid"
     },
     {
       "agent": "james",
       "client": "Baldwin",
       "title": "No AVID found in Baldwin EX folder — James as buyer's agent needs to create and file buyer-agent AVID before COE 8/3",
       "done": true,
-      "note": "Done 7/21 — Buyer AVID.pdf confirmed in Baldwin EX folder; Allyson Overturf (listing agent) sent it 7/20 10:49 PM, James acknowledged 7/21 4:35 PM."
+      "note": "Done 7/21 — Buyer AVID.pdf confirmed in Baldwin EX folder; Allyson Overturf (listing agent) sent it 7/20 10:49 PM, James acknowledged 7/21 4:35 PM.",
+      "key": "baldwin-no-avid-found-baldwin"
     },
     {
       "agent": "james",
       "client": "Wendell",
       "title": "🚨 URGENT — Judge signed Wendell court approval (7/21): Call David & Stacy Hopkins immediately with the good news. Tell them all contingency clocks start the day after Audry delivers written notice to Placer — that is imminent. Confirm lender Kim Hesser (khesser@primeres.com, 209-768-8277) is ready to move fast and ask for estimated days to close.",
       "done": true,
-      "note": "[marked done via CRM feedback 2026-07-24]"
+      "note": "[marked done via CRM feedback 2026-07-24]",
+      "key": "wendell-task"
     },
     {
       "agent": "james",
       "client": "Wendell",
       "title": "🚨 URGENT — Wendell court approval imminent: Call Amanda Boitano at Placer Title (Escrow #P-704376) to confirm she is preparing for closing and get an estimated COE date once written notice arrives from Audry. Attorney needs a signed settlement statement before recording.",
       "done": true,
-      "note": "[marked done via CRM feedback 2026-07-24]"
+      "note": "[marked done via CRM feedback 2026-07-24]",
+      "key": "wendell-task-2"
     },
     {
       "agent": "james",
       "client": "Wendell",
       "title": "Watch for Audry's forwarded court approval document to Amanda — the day it is delivered to buyer (written notice) starts ALL contingency clocks. Note the exact delivery date immediately; it is Day 0 for every remaining deadline.",
       "done": true,
-      "note": "[marked done via CRM feedback 2026-07-24]"
+      "note": "[marked done via CRM feedback 2026-07-24]",
+      "key": "wendell-watch-audry-forwarded-court"
     },
     {
       "agent": "sara",
       "client": "433 Hwy 4",
       "title": "Download & file 7/20 DocuSign package (NHD sig pages + MU-PA + ADM2) — all parties signed via Authentisign; search Sara's Gmail for Authentisign completion notification",
       "done": true,
-      "note": "Done 7/21 — package filed in 433 Ex folder."
+      "note": "Done 7/21 — package filed in 433 Ex folder.",
+      "key": "433-download-file-docusign-package"
     },
     {
       "agent": "sara",
       "client": "433 Hwy 4",
       "title": "Download & file Neriah's buyer-agent AVID from Melissa Frey email 7/20 — search Gmail for '[AVID] Agent Visual Inspection' from Melissa",
       "done": true,
-      "note": "Done 7/21 — received 7/20 from Melissa Frey (melissa.frey@norcalgold.com); sent to sellers Jim & Yvonne Heryford for signature acknowledgment. Awaiting return."
+      "note": "Done 7/21 — received 7/20 from Melissa Frey (melissa.frey@norcalgold.com); sent to sellers Jim & Yvonne Heryford for signature acknowledgment. Awaiting return.",
+      "key": "433-download-file-neriah-buyer"
     },
     {
       "agent": "sara",
       "client": "Skyline",
       "title": "Reply to Lisa Clark HOA vacation rental inquiry — email 7/21 2:31 PM UNREAD; answer whether vacation rentals are allowed at 467 Skyline",
       "done": true,
-      "note": "Done 7/21 — Sara replied to Lisa Clark (lisaclarkmurphys@gmail.com)."
+      "note": "Done 7/21 — Sara replied to Lisa Clark (lisaclarkmurphys@gmail.com).",
+      "key": "skyline-reply-lisa-clark-hoa"
     },
     {
       "agent": "james",
@@ -457,42 +517,48 @@
       "client": "Hovey",
       "title": "Hovey hearing FRIDAY 7/25 at 1:30 PM — Caroline Selfridge wants pre-hearing meeting; coordinate with Mike Fluetsch on what to bring and say",
       "done": true,
-      "note": "Removed 7/22 — Sara confirmed this hearing is NOT related to the Hovey/Emco file. Caroline Selfridge item is a separate matter."
+      "note": "Removed 7/22 — Sara confirmed this hearing is NOT related to the Hovey/Emco file. Caroline Selfridge item is a separate matter.",
+      "key": "hov-hovey-hearing-friday"
     },
     {
       "agent": "sara",
       "client": "433 Hwy 4",
       "title": "Chase sellers Jim & Yvonne Heryford for signed acknowledgment on Neriah's buyer-agent AVID — sent to Herfords 7/21; signed copy must come back and be filed in Ex before COE 8/10.",
       "done": true,
-      "note": "[marked done via CRM feedback 2026-07-24]"
+      "note": "[marked done via CRM feedback 2026-07-24]",
+      "key": "433-chase-sellers-jim-yvonne"
     },
     {
       "agent": "sara",
       "client": "Latigo",
       "title": "COE THURSDAY 7/24 — watch for signing instructions from Chase International (Mitzi: mwindley@chaseinternational.com). Call Mitzi if nothing in inbox by noon today 7/22.",
       "done": true,
-      "note": "[marked done via CRM feedback 2026-07-24]"
+      "note": "[marked done via CRM feedback 2026-07-24]",
+      "key": "latigo-coe-thursday"
     },
     {
       "agent": "sara",
       "client": "695 Feather",
       "title": "Sign OC Title escrow DocuSign — Commission Instructions (broker sig required) + NHD signature pages. From Tanya Salgado (tanyas@octitle.com), escrow #2473532-TS. Received 7/21. Do today — COE timeline active.",
       "done": true,
-      "note": "Done 7/21 — Sara signed."
+      "note": "Done 7/21 — Sara signed.",
+      "key": "feather-sign-oc-title-escrow"
     },
     {
       "agent": "james",
       "client": "Baldwin",
       "title": "Update deals.json contacts.lender — confirmed Kimberly Hesser, Prime Residential (khesser@primeres.com, 209-768-8277); same lender as Wendell per Kim's 7/20 email to Allyson.",
       "done": true,
-      "note": "[marked done via CRM feedback 2026-07-24]"
+      "note": "[marked done via CRM feedback 2026-07-24]",
+      "key": "baldwin-update-deals-json-contacts"
     },
     {
       "agent": "james",
       "client": "Wendell",
       "title": "Update deals.json BEO alert — Buyer Early Occupancy Addendum is now fully executed via Authentisign (7/20, Brandi Jenkins forwarding). Change language from 'arranged' to 'executed'.",
       "done": true,
-      "note": " | CLOSED 2026-07-25: BEO fully executed confirmed in EX folder ('Buyer Early Occupancy Addendum fully executed - 625pdf.pdf'); no action needed."
+      "note": " | CLOSED 2026-07-25: BEO fully executed confirmed in EX folder ('Buyer Early Occupancy Addendum fully executed - 625pdf.pdf'); no action needed.",
+      "key": "wendell-update-deals-json-beo"
     },
     {
       "agent": "sara",
@@ -500,7 +566,8 @@
       "title": "🔥 LOAN CONTINGENCY DUE TODAY 7/23: Sara replied 1:30 AM agreeing to $100K seller-carry note (6% IO, 5yr/30yr amort, no prepay penalty). A CR3 or signed written extension must still be executed TODAY — email agreement ≠ formal contingency removal. Confirm with Neriah Davis and Randall LeBlanc (Atlas Mortgage) that a formal removal or extension is forthcoming. Escalate by 3 PM if nothing received.",
       "done": true,
       "dateAdded": "2026-07-23",
-      "note": "[marked done via CRM feedback 2026-07-24]"
+      "note": "[marked done via CRM feedback 2026-07-24]",
+      "key": "433-loan-contingency"
     },
     {
       "agent": "sara",
@@ -508,7 +575,8 @@
       "title": "433 seller-carry REVISED 7/24: Herfords want PRIVATE $100K note — not through escrow. ADD3 (price reduction to $1.2M) + loan cont extension to Aug 5 out for Herford signatures. Note is private promissory note between buyer and sellers outside escrow; no SFA, no 2nd DOT through escrow. File both docs in Ex when signed; update CRM sale price to $1.2M.",
       "done": true,
       "dateAdded": "2026-07-23",
-      "note": "ADD3 terms confirmed by Sara 7/24. Both ADD3 and ETA3 (loan cont ext to Aug 5) now out for Herford (seller) signatures via Neriah. | SUPERSEDED 2026-07-25: Private note outside escrow rejected by Placer Title underwriting (2nd DOT must record simultaneously with 1st). ETA3 fully executed 7/24 (all parties signed per Glide). New task added: review SFA + get Herfords to sign ADD3+SFA."
+      "note": "ADD3 terms confirmed by Sara 7/24. Both ADD3 and ETA3 (loan cont ext to Aug 5) now out for Herford (seller) signatures via Neriah. | SUPERSEDED 2026-07-25: Private note outside escrow rejected by Placer Title underwriting (2nd DOT must record simultaneously with 1st). ETA3 fully executed 7/24 (all parties signed per Glide). New task added: review SFA + get Herfords to sign ADD3+SFA.",
+      "key": "433-seller-carry-revised"
     },
     {
       "agent": "sara",
@@ -516,7 +584,8 @@
       "title": "Chase buyer signature on LA AVID in Homeligh — Sara added her AVID to the Homeligh disclosure package 7/24 and notified Neriah; Elizabeth Dawson (buyer) still needs to sign. Follow up with Neriah Davis (neriahd@gmail.com) to confirm buyer reviews and signs the AVID in Homeligh.",
       "done": true,
       "dateAdded": "2026-07-24",
-      "note": "Moot 8/6 — deal cancelling per Neriah Davis 8/4; buyer Elizabeth Dawson withdrawing via loan contingency"
+      "note": "Moot 8/6 — deal cancelling per Neriah Davis 8/4; buyer Elizabeth Dawson withdrawing via loan contingency",
+      "key": "433-chase-buyer-signature-la"
     },
     {
       "agent": "sara",
@@ -524,7 +593,8 @@
       "title": "Cancellation instructions STILL NOT RECEIVED by Placer Title (Ashley Cuslidge confirmed 7/23 10:13 AM — 'Good morning, I haven’t yet'). Sara resent the signed cancellation this morning. Call Ashley directly: 209-736-9553. Deposit release blocked until escrow closes out.",
       "done": true,
       "dateAdded": "2026-07-23",
-      "note": "[marked done via CRM feedback 2026-07-24]"
+      "note": "[marked done via CRM feedback 2026-07-24]",
+      "key": "sheep-ranch-cancellation-instructions-received-placer"
     },
     {
       "agent": "sara",
@@ -532,7 +602,8 @@
       "title": "RE-FLAG 7/23: Buyer-agent AVID from Kylie Windley NOT in EX folder — bash scan this morning found only LA Avid.pdf x2 (Sara’s listing-agent AVID), no BA AVID present. Prior task was marked done 7/21 but file does not appear on disk. COE TOMORROW 7/24 — contact Kylie immediately: kyliewindley@gmail.com / 209-304-7971.",
       "done": true,
       "dateAdded": "2026-07-23",
-      "note": "[marked done via CRM feedback 2026-07-24]"
+      "note": "[marked done via CRM feedback 2026-07-24]",
+      "key": "latigo-flag"
     },
     {
       "agent": "sara",
@@ -540,7 +611,8 @@
       "title": "Follow up with Kerstin Breidenthal — was traveling ~2 weeks from ~7/8, wanted showing on return (~7/23 today). No contact in 48 hrs. Reach out proactively. Also: Lisa Clark (lisaclarkmurphys@gmail.com) confirmed HOA allows vacation rentals 7/21 — follow up to schedule a showing.",
       "done": true,
       "dateAdded": "2026-07-23",
-      "note": "Followed up 7/24"
+      "note": "Followed up 7/24",
+      "key": "skyline-follow-up-kerstin-breidenthal"
     },
     {
       "agent": "james",
@@ -548,21 +620,24 @@
       "title": "695 Feather DocuSign escrow pkg #2473532-TS COMPLETED by all parties 7/22 (buyers Ashley Robinson & Bert Andrews were camping; signed on return per DocuSign completion email from OC Title). Download the completed package from DocuSign and file in 695 Feather Ex folder.",
       "done": true,
       "dateAdded": "2026-07-23",
-      "note": "[marked done via CRM feedback 2026-07-24]"
+      "note": "[marked done via CRM feedback 2026-07-24]",
+      "key": "feather-feather-docusign-escrow-pkg"
     },
     {
       "agent": "sara",
       "client": "433 Hwy 4",
       "title": "Download and file ETA No. 3 from Glide — all parties signed 7/24 12:34 AM per Glide notification; open Glide email and save [ETA] Extension of Time Amendment No. 3.pdf to 433 Ex folder",
       "done": true,
-      "note": "Downloaded and filed in 433 Ex 7/24. Note: ETA No. 3 still out for Herford (seller) signatures to be fully counter-executed — loan cont extension to Aug 5; covered by ADD3 Herfords watch item"
+      "note": "Downloaded and filed in 433 Ex 7/24. Note: ETA No. 3 still out for Herford (seller) signatures to be fully counter-executed — loan cont extension to Aug 5; covered by ADD3 Herfords watch item",
+      "key": "433-download-file-eta-no"
     },
     {
       "agent": "sara",
       "client": "433 Hwy 4",
       "title": "Review UNREAD SFA + Price Reduction Addendum from Neriah (email 7/24 12:58 AM, UNREAD) — confirm interest-only terms ($1.2M price, $100K at 6% interest-only/5yr/30yr/no prepay/2nd DOT records with 1st), then forward to Jim & Yvonne Heryford for seller signatures",
       "done": true,
-      "note": "SUPERSEDED 7/24 — Herfords want private $100K note not through escrow; SFA approach replaced by ADD3 (price reduction to $1.2M) + loan cont extension to Aug 5, both out for Herford signatures"
+      "note": "SUPERSEDED 7/24 — Herfords want private $100K note not through escrow; SFA approach replaced by ADD3 (price reduction to $1.2M) + loan cont extension to Aug 5, both out for Herford signatures",
+      "key": "433-review-unread-sfa-price"
     },
     {
       "agent": "james",
@@ -594,7 +669,8 @@
       "title": "Post-COE file remediation: BA AVID from Kylie Windley still not in Ex — Kylie mis-named her LA AVID as BA AVID; after COE confirmed, request true BA AVID from Kylie (kyliewindley@gmail.com / 209-304-7971) and file in Latigo Ex",
       "done": true,
       "doneNote": "BA AVID confirmed in Latigo Ex folder (per Sara 8/7)",
-      "doneDate": "2026-08-07"
+      "doneDate": "2026-08-07",
+      "key": "latigo-post-coe-file-remediation"
     },
     {
       "agent": "sara",
@@ -610,39 +686,45 @@
       "client": "695 Feather",
       "title": "URGENT: Escrow amendment re prelim item #12 (OC Title, Tanya Salgado, sent 7/24 9:18 PM) — needs buyer (Ashley Robinson) AND seller (Dee Bradley) signatures; James acknowledged 7/24 but not confirmed complete; get both sides signed and returned to Tanya ASAP",
       "done": true,
-      "note": "Done — MH Addendum (prelim item #12) fully executed via Authentisign 7/25 8:59 PM (Ashley Robinson + Dee Bradley both signed)"
+      "note": "Done — MH Addendum (prelim item #12) fully executed via Authentisign 7/25 8:59 PM (Ashley Robinson + Dee Bradley both signed)",
+      "key": "feather-task"
     },
     {
       "agent": "sara",
       "client": "Skyline",
       "title": "ShowingTime showing request — 467 Skyline Dr, Sunday 7/26 1:00 PM; confirm or decline via ShowingTime app. Also: HomeLight property info packet viewed 7/25 (interest signal).",
-      "done": true
+      "done": true,
+      "key": "skyline-showingtime-showing-request"
     },
     {
       "agent": "both",
       "client": "Wendell",
       "title": "CRITICAL — Order to Sell (bankruptcy court approval) received 2026-07-24 7:57 PM from Audrey Burton / attorney Ken Fugate ('You are good to go'). James forwarded to Sara. THIS IS Day 0 — all contingency and COE clocks start 2026-07-24. Confirm Day 0 with Ken Fugate and escrow officer Amanda Boitano (Placer Title).",
-      "done": true
+      "done": true,
+      "key": "wendell-critical"
     },
     {
       "agent": "both",
       "client": "Wendell",
       "title": "Closing documents and funds must route to Chapter 13 trustee Tracy Updike (P.O. Box 11550, South Bend IN 46634, case #25-31761 In re Marshall Guthrie) per attorney Ken Fugate — NOT to seller directly. Update escrow instructions with Amanda Boitano (Placer Title).",
-      "done": true
+      "done": true,
+      "key": "wendell-closing-documents-funds-must"
     },
     {
       "agent": "sara",
       "client": "433 Hwy 4",
       "title": "ETA3 fully executed 2026-07-24 (all parties signed per Glide). SUPERSEDES private-note task. NEW: review SFA Neriah Davis sent 7/24 — verify it requires 2nd DOT to record simultaneously with 1st (Placer Title/Ashley Cuslidge requirement; prior private-note structure was rejected by underwriting). Then get Herfords to sign ADD3 (price $1.2M) + SFA.",
       "done": true,
-      "note": "Moot 8/6 — deal cancelling; buyer Elizabeth Dawson withdrawing via loan contingency per Neriah 8/2"
+      "note": "Moot 8/6 — deal cancelling; buyer Elizabeth Dawson withdrawing via loan contingency per Neriah 8/2",
+      "key": "433-eta-fully-executed-supersedes"
     },
     {
       "agent": "james",
       "client": "Baldwin",
       "title": "CRITICAL RISK flagged 2026-07-24: COE 8/3 at real risk. No loan confirmation from Kim Hesser. No contractor bid back (outreach to COASTCOUNTRYCONST@gmail.com 7/23, no reply). No appraisal requested. Extension may be overdue. No BIW on remaining inspections. Resolve today: call Kim, follow up contractor, confirm appraisal ordered.",
       "done": true,
-      "note": "Stale 8/6 — superseded; CR2 confirmed filed 7/19; COE status now tracked by baldwin-coe-confirm task"
+      "note": "Stale 8/6 — superseded; CR2 confirmed filed 7/19; COE status now tracked by baldwin-coe-confirm task",
+      "key": "baldwin-critical-risk-flagged"
     },
     {
       "agent": "sara",
@@ -651,7 +733,8 @@
       "note": "Ylopo alert 7/25: back browsing after 16 days silent; said she'd return ~7/23 to see Skyline. Added 2026-07-27.",
       "done": true,
       "doneNote": "Sara: remove from checklist 8/7; Skyline Kerstin/Scott follow-ups no longer needed",
-      "doneDate": "2026-08-07"
+      "doneDate": "2026-08-07",
+      "key": "skyline-hot-lead"
     },
     {
       "agent": "sara",
@@ -660,14 +743,16 @@
       "note": "Showing was Sunday 7/26 1 PM. Outcome unknown. Added 2026-07-27.",
       "done": true,
       "doneNote": "Sara: remove from checklist 8/7",
-      "doneDate": "2026-08-07"
+      "doneDate": "2026-08-07",
+      "key": "skyline-skyline"
     },
     {
       "agent": "james",
       "client": "695 Feather",
       "title": "695 Feather: Buyer Ashley signed MH Addendum 7/25 (Authentisign) — confirm = item #12, get Dee Bradley (seller) to sign",
       "note": "Done 8/7 — both Ashley Robinson AND Dee Bradley signed via Authentisign 7/25 8:59 PM (fully executed). File in EX covered by later task.",
-      "done": true
+      "done": true,
+      "key": "feather-feather"
     },
     {
       "agent": "james",
@@ -685,7 +770,8 @@
       "note": "James forwarded corrected Latigo BA AVID (Kylie Windley et al.) 7/24. Confirm correct final version then file. Added 2026-07-27.",
       "done": true,
       "doneNote": "BA AVID confirmed in Latigo Ex folder (per Sara 8/7)",
-      "doneDate": "2026-08-07"
+      "doneDate": "2026-08-07",
+      "key": "latigo-latigo"
     },
     {
       "agent": "james",
@@ -739,7 +825,8 @@
       "title": "433: Coordinate tenant Dana ↔ buyer Elizabeth Dawson meeting — Dana avail Mon 7/28 after 2pm / Thu 7/31 before 10am / Fri 8/1 all day; Elizabeth expected late August; contact Neriah Davis to schedule",
       "note": "Moot 8/6 — deal cancelling; buyer Elizabeth Dawson withdrawing via loan contingency per Neriah 8/2.",
       "dateAdded": "2026-07-27",
-      "done": true
+      "done": true,
+      "key": "433-task"
     },
     {
       "agent": "sara",
@@ -747,7 +834,8 @@
       "title": "433: Confirm Jim Heryford signed ADD3 ($1.2M price reduction) + SFA ($100K 2nd DOT seller carry) — Yvonne signed 7/24 via Authentisign; Jim status unconfirmed. SFA requires 2nd DOT to record simultaneously with 1st at closing (Placer Title underwriting requirement).",
       "note": "Moot 8/6 — deal cancelling; buyer Elizabeth Dawson withdrawing via loan contingency per Neriah 8/2.",
       "dateAdded": "2026-07-27",
-      "done": true
+      "done": true,
+      "key": "433-task-2"
     },
     {
       "agent": "sara",
@@ -765,7 +853,8 @@
       "title": "LATIGO COE 7/28 — URGENT: Send BRBC to Ashley Cuslidge (acuslidge@placertitle.com / 209-736-9553). Ashley requested 3:05 PM 7/28. Buyers signing at Placer Title today.",
       "note": "COE day 7/28. Buyers at Placer 11am. Send BRBC immediately. Added 2026-07-28.",
       "dateAdded": "2026-07-28",
-      "done": true
+      "done": true,
+      "key": "latigo-latigo-coe"
     },
     {
       "agent": "sara",
@@ -773,7 +862,8 @@
       "title": "Latigo: COE TODAY 7/28 — monitor for fund & record confirmation. Kim Hesser (Prime Residential) expects same-day. ETA1 buffer through 7/29. Post-COE: update deal stage to closed in CRM.",
       "note": "Closing statement + wiring instructions sent to Castles 3:09 PM 7/28 with Kim CC'd. Added 2026-07-28. CLOSED 7/28.",
       "dateAdded": "2026-07-28",
-      "done": true
+      "done": true,
+      "key": "latigo-latigo-2"
     },
     {
       "agent": "sara",
@@ -781,7 +871,8 @@
       "title": "433: Promissory note vesting BLANK — Herfords carrying $100K note for Elizabeth Dawson. Yvonne sent unsigned note 7/28 4:24 AM; title-vesting section is BLANK. Contact Neriah Davis (neriahd@gmail.com) to get Dawson's vesting info (how she holds title). Dawson signs note at COE 8/10.",
       "note": "DONE 7/28 — Ashley Cuslidge confirmed: Elizabeth Tara Dawson, an unmarried woman. Fill this into the promissory note before COE 8/10.",
       "dateAdded": "2026-07-28",
-      "done": true
+      "done": true,
+      "key": "433-task-3"
     },
     {
       "agent": "sara",
@@ -799,7 +890,8 @@
       "title": "CRM: 7 pending timeline approvals need manual decision — Latigo: cont_loan; 433: nhd/cont_inspection/cont_title/cont_insurance; Baldwin: cont_appraisal/cont_insurance/cont_loan. CRM → Timeline tab → Approvals. Reconcile engine did not auto-apply any (conservative).",
       "note": "Stale 8/6 — Latigo closed 7/28; Baldwin CR2 confirmed doc-backed 7/19; 433 deal cancelling. Reconcile 8/6 auto-filed Baldwin appraisal+loan proposals. Remaining 433 proposals (loan cont + walkthrough) should be REJECTED in CRM.",
       "dateAdded": "2026-07-28",
-      "done": true
+      "done": true,
+      "key": "crm-crm"
     },
     {
       "agent": "sara",
@@ -809,7 +901,8 @@
       "dateAdded": "2026-07-28",
       "done": true,
       "doneNote": "BA AVID confirmed in Latigo Ex folder (per Sara 8/7)",
-      "doneDate": "2026-08-07"
+      "doneDate": "2026-08-07",
+      "key": "latigo-latigo-post-coe"
     },
     {
       "agent": "sara",
@@ -837,20 +930,23 @@
       "title": "Wendell: Confirm Day 0 date with James/Audry — clockStart in CRM is null. Order to Sell is in Ex (confirmed). If written notice was delivered to buyer on 7/24, set clockStart to 2026-07-24. This starts all contingency clocks.",
       "note": "Order to Sell doc confirmed in Wendell Ex. clockStart still null in deals.json. Must confirm official delivery date before updating. Added 2026-07-28. CLOSED 7/31 — moot.",
       "dateAdded": "2026-07-28",
-      "done": true
+      "done": true,
+      "key": "wendell-wendell"
     },
     {
       "agent": "sara",
       "client": "433",
       "title": "Reply to Neriah Davis re: pest credit documentation method — Neriah asked 7/29 how to proceed; Elizabeth agreed to credit for cosmetic/cutting/painting (own contractor post-close); propose ADM or escrow holdback instruction",
       "done": true,
-      "note": "Moot 8/6 — deal cancelling per Neriah 8/2; buyer withdrawing"
+      "note": "Moot 8/6 — deal cancelling per Neriah 8/2; buyer withdrawing",
+      "key": "433-reply-neriah-davis"
     },
     {
       "agent": "james",
       "client": "Wendell",
       "title": "CLOSING TONIGHT — after mobile notary signing: text Amanda Boitano (aboitano@placertitle.com) to confirm deed recording; update CRM closingDate + stage to closed once recorded",
-      "done": true
+      "done": true,
+      "key": "wendell-closing-tonight"
     },
     {
       "agent": "sara",
@@ -869,7 +965,8 @@
       "title": "🔴 Zoom TUE 8/4 10 AM: Neriah Davis + Clayton (lender) — Clayton says price reduction (ADD3 $1.3M→$1.2M) may no longer be needed. Come prepared: carry-back note current status, what happens to ADD3 if rescinded, assignment of rents notarization timing, loan approval update.",
       "done": true,
       "dateAdded": "2026-08-02",
-      "note": "Past — Zoom 8/4 10AM was about cancellation; deal now cancelling per buyer withdrawal"
+      "note": "Past — Zoom 8/4 10AM was about cancellation; deal now cancelling per buyer withdrawal",
+      "key": "433-zoom-tue"
     },
     {
       "agent": "sara",
@@ -886,7 +983,8 @@
       "title": "🔴 COE TOMORROW 8/3 — call Chicago Title NOW (FSST-5312600364, Veronica Barragan or Kim McCray) to confirm closing on track; FHA 203(k): confirm lender wire received + final docs in hand; also check with Kim Hesser (khesser@primeres.com, 209-768-8277).",
       "done": true,
       "dateAdded": "2026-08-02",
-      "note": "Stale 8/6 — COE date 8/3 has passed; status unknown (no email confirmation); see baldwin-coe-confirm task"
+      "note": "Stale 8/6 — COE date 8/3 has passed; status unknown (no email confirmation); see baldwin-coe-confirm task",
+      "key": "baldwin-coe-2"
     },
     {
       "agent": "james",
