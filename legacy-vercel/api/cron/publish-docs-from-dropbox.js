@@ -121,9 +121,15 @@ async function listFolder(token, path) {
   return out;
 }
 
+// Dropbox-API-Arg is an HTTP header, so it must be ASCII. Escape any non-ASCII
+// (e.g. an en-dash in a filename) as \uXXXX — Dropbox unescapes it. Without this,
+// a filename like "…(FIRPTA) – 1.pdf" throws a ByteString conversion error.
+function dbxArg(obj) {
+  return JSON.stringify(obj).replace(/[\u007F-\uFFFF]/g, (c) => '\\u' + c.charCodeAt(0).toString(16).padStart(4, '0'));
+}
 async function dropboxDownload(token, path) {
   const r = await fetch('https://content.dropboxapi.com/2/files/download', {
-    method: 'POST', headers: { Authorization: `Bearer ${token}`, 'Dropbox-API-Arg': JSON.stringify({ path }) }
+    method: 'POST', headers: { Authorization: `Bearer ${token}`, 'Dropbox-API-Arg': dbxArg({ path }) }
   });
   if (!r.ok) throw new Error(`download ${path}: ${r.status} ${await r.text()}`);
   return Buffer.from(await r.arrayBuffer());
