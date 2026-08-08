@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64" role="img" aria-label="Legacy Properties">
+  <rect width="64" height="64" rx="13" fill="#201B14"/>
+  <g transform="rotate(45 32 32)">
+    <rect x="17.5" y="17.5" width="29" height="29" rx="1.5" fill="none" stroke="#BE9A5E" stroke-width="2"/>
+    <rect x="23" y="23" width="18" height="18" fill="none" stroke="#8C6E3D" stroke-width="1" opacity="0.55"/>
+  </g>
+  <text x="32" y="34.5" text-anchor="middle" font-family="'Cormorant Garamond','Iowan Old Style',Georgia,'Times New Roman',serif" font-style="italic" font-weight="600" font-size="22" fill="#D7B072">LP</text>
+</svg>
