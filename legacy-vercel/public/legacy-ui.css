@@ -492,7 +492,7 @@
 
 /* Footer carries the same mark on a dark ground — lighten the text and warm
    the seal so it reads against the ink. */
-.lg-footer .lg-lock__word { color: var(--lg-cream); }
+.lg-footer .lg-lock__word { color: var(--lg-cream); --wm-base: var(--lg-cream); }
 .lg-footer .lg-lock__sub  { color: rgba(255,250,240,.55); }
 .lg-footer .lg-seal__d1   { border-color: var(--brass-warm); }
 .lg-footer .lg-seal__d2   { border-color: var(--brass); }
