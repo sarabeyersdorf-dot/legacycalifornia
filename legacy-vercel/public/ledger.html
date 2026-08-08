@@ -1392,12 +1392,10 @@ html:not(.js) .stat .v::after{width:46px;}
     $('archive').scrollIntoView({ behavior: REDUCED ? 'auto' : 'smooth' });
   });
 
-  /* Subscribe.
-     NOTE FOR THE NEXT DEV: this composes a pre-filled email so the form works
-     with zero backend. To make it a real list, replace the handler body with a
-     POST to MailerLite (or /api/ledger-subscribe writing to a
-     ledger_subscribers table). Do not ship a form that silently does nothing. */
-  $('subForm').addEventListener('submit', (e) => {
+  /* Subscribe — real list. POSTs to /api/ledger-subscribe, which saves the
+     person into the CRM contacts (tagged 'ledger'), sends a welcome with the
+     latest issue, and enrolls them in the automatic monthly send. */
+  $('subForm').addEventListener('submit', async (e) => {
     e.preventDefault();
     const name = $('subName').value.trim();
     const email = $('subEmail').value.trim();
@@ -1405,13 +1403,27 @@ html:not(.js) .stat .v::after{width:46px;}
     if (!name || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
       $('subEmail').focus(); $('subEmail').style.borderColor = 'var(--c2)'; return;
     }
-    const body = `Please add me to The Ledger.\n\nName: ${name}\nEmail: ${email}\n`
-      + (want ? `Interested in: ${want}\n` : '');
-    window.location.href = 'mailto:SaraSellsCalifornia@gmail.com'
-      + '?subject=' + encodeURIComponent('Subscribe me to The Ledger')
-      + '&body=' + encodeURIComponent(body);
-    $('subOk').style.display = 'block';
-    $('subForm').reset();
+    const btn = $('subForm').querySelector('button[type=submit]');
+    const label = btn ? btn.textContent : '';
+    if (btn) { btn.disabled = true; btn.textContent = 'Subscribing…'; }
+    try {
+      const r = await fetch('/api/ledger-subscribe', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, email, interest: want })
+      });
+      const j = await r.json().catch(() => null);
+      if (!r.ok || !j || !j.success) throw new Error((j && j.error) || 'Something went wrong.');
+      $('subOk').textContent = "You're on the list — check your inbox for a welcome and the latest issue.";
+      $('subOk').style.display = 'block';
+      $('subForm').reset();
+    } catch (err) {
+      $('subOk').textContent = 'Sorry — that didn’t go through. Please try again in a moment.';
+      $('subOk').style.color = '#9B2C2C';
+      $('subOk').style.display = 'block';
+    } finally {
+      if (btn) { btn.disabled = false; btn.textContent = label; }
+    }
   });
 
   bindScroll();

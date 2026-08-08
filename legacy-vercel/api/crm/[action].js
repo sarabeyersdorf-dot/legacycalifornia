@@ -29,6 +29,7 @@ import pipeline      from '../_lib/handlers/crm-pipeline.js';
 import leadDetail    from '../_lib/handlers/crm-lead-detail.js';
 import approve       from '../_lib/handlers/crm-approve.js';
 import messageSend   from '../_lib/handlers/crm-message-send.js';
+import bulkSend      from '../_lib/handlers/crm-bulk-send.js';
 import noteCreate    from '../_lib/handlers/crm-note-create.js';
 import importLeads   from '../_lib/handlers/crm-import-leads.js';
 import metrics       from '../_lib/handlers/crm-metrics.js';
@@ -84,6 +85,7 @@ const TABLE = {
   'lead':            leadDetail,
   'approve':         approve,
   'message':         messageSend,
+  'bulk-send':       bulkSend,
   'note':            noteCreate,
   'import-leads':    importLeads,
   'metrics':         metrics,

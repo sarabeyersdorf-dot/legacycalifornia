@@ -204,6 +204,10 @@
     {
       "path": "/api/cron/drift-check",
       "schedule": "20 * * * *"
+    },
+    {
+      "path": "/api/cron/ledger-send?key=thisisasecret1234",
+      "schedule": "10 * * * *"
     }
   ]
 }

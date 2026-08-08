@@ -70,6 +70,7 @@ body.lp-restyle {
     <div class="app-side-section">Roster</div>
     <nav class="app-side-nav">
       <a href="#" onclick="showView(event,'people')" data-people-bucket="leads">Contacts <span class="pill" data-roster-leads title="New leads">—</span></a>
+      <a href="#" onclick="showView(event,'broadcast')" title="Email a whole segment at once — newsletters, updates, The Ledger">Bulk email</a>
     </nav>
 
     <div class="app-side-section">Deals &amp; offers</div>
@@ -1949,6 +1950,157 @@ body.lp-restyle {
     .cc-doc-h.miss { color: #9B2C2C; }
     .cc-empty { font-family: var(--sans); font-size: 13px; color: var(--ink-mute); padding: 6px 0; }
     </style>
+    <!-- ============================================================
+         BULK EMAIL / BROADCAST — newsletters, updates, The Ledger, to a
+         whole segment at once. Resolves the contactable recipients for a
+         segment, then streams them to /api/crm/bulk-send in batches.
+         ============================================================ -->
+    <style>
+    .bc { padding: 26px 36px 60px; max-width: 760px; }
+    .bc h1 { font-family: var(--serif); font-size: 34px; margin: 6px 0 4px; }
+    .bc .bc-sub { font-size: 14px; color: var(--ink-soft); line-height: 1.5; margin-bottom: 22px; max-width: 620px; }
+    .bc-field { margin-bottom: 16px; }
+    .bc-field label { display: block; font-family: var(--mono); font-size: 10px; letter-spacing: .12em; text-transform: uppercase; color: var(--ink-mute); margin-bottom: 6px; }
+    .bc-field select, .bc-field input, .bc-field textarea { width: 100%; font: inherit; font-size: 14px; color: var(--ink); background: #fff; border: 1px solid var(--rule-strong); border-radius: 4px; padding: 10px 12px; }
+    .bc-field textarea { min-height: 200px; resize: vertical; line-height: 1.6; }
+    .bc-count { font-size: 13px; color: var(--ink-soft); margin: 2px 0 0; }
+    .bc-count b { color: #2E5C3D; font-size: 15px; }
+    .bc-row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-top: 8px; }
+    .bc-note { font-size: 12px; color: var(--ink-mute); line-height: 1.5; margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--rule-soft); }
+    .bc-prog { margin-top: 16px; font-size: 13.5px; color: var(--ink); display: none; }
+    .bc-bar { height: 7px; background: var(--vellum); border-radius: 4px; overflow: hidden; margin-top: 8px; }
+    .bc-bar > span { display: block; height: 100%; width: 0; background: #2E5C3D; transition: width .3s; }
+    </style>
+    <section class="crm-view" data-view="broadcast">
+      <div class="bc">
+        <span class="label-cap" style="color:var(--brass);">Reach out · one send, many people</span>
+        <h1>Bulk email.</h1>
+        <p class="bc-sub">Send a newsletter, an update, or the latest Ledger to a whole segment. Anyone who's unsubscribed or marked do-not-contact is skipped automatically, and every message carries a one-click unsubscribe link.</p>
+
+        <div class="bc-field">
+          <label>Send to</label>
+          <select data-bc-segment>
+            <option value="ledger">The Ledger subscribers</option>
+            <option value="everyone">Everyone (all contactable)</option>
+            <option value="buyers">Buyers</option>
+            <option value="sellers">Sellers</option>
+            <option value="sphere">Sphere</option>
+            <option value="past">Past clients</option>
+          </select>
+          <p class="bc-count" data-bc-count>Counting…</p>
+        </div>
+
+        <div class="bc-field">
+          <label>Subject</label>
+          <input type="text" data-bc-subject placeholder="e.g. The Ledger — August in the foothills" maxlength="200">
+        </div>
+
+        <div class="bc-field">
+          <label>Message</label>
+          <textarea data-bc-body placeholder="Write your update. Plain text — it's wrapped in the Legacy Properties letterhead automatically. A blank line starts a new paragraph."></textarea>
+        </div>
+
+        <div class="bc-row">
+          <button class="btn btn-ghost btn-sm" data-bc-loadledger>Load the latest Ledger →</button>
+          <span style="flex:1;"></span>
+          <button class="btn btn-ink" data-bc-send>Send</button>
+        </div>
+
+        <div class="bc-prog" data-bc-prog>
+          <span data-bc-prog-text>Sending…</span>
+          <div class="bc-bar"><span data-bc-prog-bar></span></div>
+        </div>
+
+        <p class="bc-note">Emails send from your verified Legacy Properties address in batches. Large lists take a minute — keep this tab open until it finishes. Every send is logged to the contact's thread.</p>
+      </div>
+
+      <script>
+      (function () {
+        var view = document.querySelector('.crm-view[data-view="broadcast"]');
+        if (!view) return;
+        var segSel  = view.querySelector('[data-bc-segment]');
+        var countEl = view.querySelector('[data-bc-count]');
+        var subjEl  = view.querySelector('[data-bc-subject]');
+        var bodyEl  = view.querySelector('[data-bc-body]');
+        var sendBtn = view.querySelector('[data-bc-send]');
+        var ledgerBtn = view.querySelector('[data-bc-loadledger]');
+        var prog    = view.querySelector('[data-bc-prog]');
+        var progText= view.querySelector('[data-bc-prog-text]');
+        var progBar = view.querySelector('[data-bc-prog-bar]');
+        var currentIds = [];
+
+        function post(body) {
+          return fetch('/api/crm/bulk-send', {
+            method: 'POST', credentials: 'include',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(body)
+          }).then(function (r) { return r.json().catch(function () { return null; }); });
+        }
+
+        function resolve() {
+          countEl.textContent = 'Counting…';
+          currentIds = [];
+          post({ mode: 'resolve', segment: segSel.value }).then(function (j) {
+            if (!j || !j.success) { countEl.textContent = 'Could not load recipients.'; return; }
+            currentIds = j.ids || [];
+            if (!currentIds.length) { countEl.innerHTML = 'No contactable recipients in this segment yet.'; return; }
+            var names = (j.sample || []).join(', ');
+            countEl.innerHTML = '<b>' + currentIds.length + '</b> contact' + (currentIds.length === 1 ? '' : 's')
+              + (names ? ' · e.g. ' + names + (currentIds.length > (j.sample || []).length ? '…' : '') : '');
+          });
+        }
+
+        segSel.addEventListener('change', resolve);
+        document.addEventListener('crm:view', function (ev) { if (ev.detail && ev.detail.name === 'broadcast') resolve(); });
+
+        ledgerBtn.addEventListener('click', function () {
+          ledgerBtn.disabled = true; var t = ledgerBtn.textContent; ledgerBtn.textContent = 'Loading…';
+          fetch('/api/ledger', { credentials: 'include' }).then(function (r) { return r.json(); }).then(function (j) {
+            var issue = (j && (j.current || (j.issues && j.issues[0]))) || null;
+            if (!issue) { ledgerBtn.textContent = 'No published issue'; return; }
+            var link = 'https://legacycalifornia.com/ledger.html?slug=' + encodeURIComponent(issue.slug || '');
+            subjEl.value = 'The Ledger — ' + (issue.title || '');
+            bodyEl.value = 'Hi {first_name},\n\nThe latest Ledger is out'
+              + (issue.title ? ' — "' + issue.title + '."' : '.') + '\n\n'
+              + (issue.dek ? issue.dek + '\n\n' : '')
+              + 'Read it here:\n' + link + '\n\n— Sara';
+            ledgerBtn.textContent = t; ledgerBtn.disabled = false;
+          }).catch(function () { ledgerBtn.textContent = t; ledgerBtn.disabled = false; });
+        });
+
+        sendBtn.addEventListener('click', async function () {
+          var subject = (subjEl.value || '').trim();
+          var body = (bodyEl.value || '').trim();
+          if (!subject) { subjEl.focus(); return; }
+          if (!body) { bodyEl.focus(); return; }
+          if (!currentIds.length) { resolve(); return; }
+          if (!window.confirm('Send this to ' + currentIds.length + ' contact' + (currentIds.length === 1 ? '' : 's') + '?')) return;
+
+          sendBtn.disabled = true; ledgerBtn.disabled = true; segSel.disabled = true;
+          prog.style.display = 'block';
+          var ids = currentIds.slice();
+          var total = ids.length, done = 0, sent = 0, failed = 0, skipped = 0;
+          // Note: {first_name} isn't personalized server-side yet — strip the token
+          // so it doesn't ship literally. (Kept in the box as a future nicety.)
+          var sendBody = body.replace(/\{first_name\}/g, 'there');
+          for (var i = 0; i < ids.length; i += 40) {
+            var batch = ids.slice(i, i + 40);
+            var j = await post({ mode: 'send', lead_ids: batch, subject: subject, body: sendBody });
+            if (j && j.success) { sent += j.sent || 0; failed += j.failed || 0; skipped += (j.skipped || []).length; }
+            else { failed += batch.length; }
+            done += batch.length;
+            progBar.style.width = Math.round(done / total * 100) + '%';
+            progText.textContent = 'Sent ' + sent + ' of ' + total + (skipped ? ' · ' + skipped + ' skipped' : '') + (failed ? ' · ' + failed + ' failed' : '');
+          }
+          progText.textContent = '✓ Done — ' + sent + ' sent'
+            + (skipped ? ', ' + skipped + ' skipped (unsubscribed / no email)' : '')
+            + (failed ? ', ' + failed + ' failed' : '') + '.';
+          sendBtn.disabled = false; ledgerBtn.disabled = false; segSel.disabled = false;
+        });
+      })();
+      </script>
+    </section>
+
     <!-- PEOPLE / ROSTER VIEW — browsable lists behind Leads/Clients/Past/Sphere -->
     <section class="crm-view" data-view="people">
       <div style="max-width:1100px;">
@@ -3286,7 +3438,7 @@ body.lp-restyle {
 </div>
 
 <script>
-var VIEW_LABELS = { today:'Today', tasks:'Tasks', updates:'Notes', inbox:'Inbox', messages:'Inbox', pipe:'Pipeline', cal:'Calendar', seq:'Sequences', curate:'Curated', rep:'Reports', broker:'Broker', listings:'Deals & offers', dealsall:'All deals', command:'Deal command center', people:'Roster' };
+var VIEW_LABELS = { today:'Today', tasks:'Tasks', updates:'Notes', inbox:'Inbox', messages:'Inbox', pipe:'Pipeline', cal:'Calendar', seq:'Sequences', curate:'Curated', rep:'Reports', broker:'Broker', listings:'Deals & offers', dealsall:'All deals', command:'Deal command center', people:'Roster', broadcast:'Bulk email' };
 window.__viewStack = window.__viewStack || [];
 function navBack() {
   var prev = window.__viewStack.pop();
