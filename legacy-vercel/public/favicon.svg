@@ -1,8 +1,8 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64" role="img" aria-label="Legacy Properties">
-  <rect width="64" height="64" rx="13" fill="#201B14"/>
-  <g transform="rotate(45 32 32)">
-    <rect x="17.5" y="17.5" width="29" height="29" rx="1.5" fill="none" stroke="#BE9A5E" stroke-width="2"/>
-    <rect x="23" y="23" width="18" height="18" fill="none" stroke="#8C6E3D" stroke-width="1" opacity="0.55"/>
+  <rect width="64" height="64" rx="12" fill="#F4EDDE"/>
+  <g transform="rotate(45 32 32)" fill="none">
+    <rect x="14.5" y="14.5" width="35" height="35" rx="1.5" stroke="#8C6E3D" stroke-width="2"/>
+    <rect x="20" y="20" width="24" height="24" stroke="#A6824A" stroke-width="1.2" opacity="0.5"/>
   </g>
-  <text x="32" y="34.5" text-anchor="middle" font-family="'Cormorant Garamond','Iowan Old Style',Georgia,'Times New Roman',serif" font-style="italic" font-weight="600" font-size="22" fill="#D7B072">LP</text>
+  <text x="32" y="32.5" text-anchor="middle" dominant-baseline="central" font-family="'Cormorant Garamond','Playfair Display',Georgia,serif" font-style="italic" font-weight="600" font-size="17" letter-spacing="0.5" fill="#8C6E3D">LP</text>
 </svg>
