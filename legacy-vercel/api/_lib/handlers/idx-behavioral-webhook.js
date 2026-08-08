@@ -92,6 +92,41 @@ function pickProperty(p) {
   };
 }
 
+// Mirror an iHomefinder favorite into saved_properties so it shows in the lead's
+// portal "Saved homes". Fail-soft — never blocks the webhook. Resolves the
+// property by mls_number (or address); if we haven't synced that listing yet it
+// inserts a minimal row, which the 4-hour IDX sync later enriches (by mls_number)
+// with photos/beds/etc. Idempotent per (lead, property).
+async function recordSavedProperty(supa, leadId, property) {
+  if (!property) return null;
+  const mls     = property.mls_number ? String(property.mls_number) : null;
+  const address = property.address ? String(property.address) : null;
+  if (!mls && !address) return { skipped: 'no mls_number or address' };
+  const toInt = (v) => { const n = parseInt(String(v ?? '').replace(/[^0-9]/g, ''), 10); return Number.isFinite(n) ? n : null; };
+  try {
+    let propId = null;
+    // Prefer an existing row so we never overwrite richer synced data.
+    let q = supa.from('properties').select('id');
+    q = mls ? q.eq('mls_number', mls) : q.ilike('address', address);
+    const { data: existing } = await q.limit(1);
+    if (existing && existing[0]) propId = existing[0].id;
+    if (!propId) {
+      const { data: ins, error } = await supa.from('properties').insert({
+        mls_number: mls, address, city: property.city || null,
+        price: toInt(property.price), sq_ft: toInt(property.sq_ft),
+        status: 'active', features: { idx: true, from_favorite: true }
+      }).select('id').single();
+      if (error) return { error: `property insert: ${error.message}` };
+      propId = ins.id;
+    }
+    const { error: sErr } = await supa.from('saved_properties')
+      .upsert({ lead_id: leadId, property_id: propId, tag: 'favorite', last_viewed_at: new Date().toISOString() },
+              { onConflict: 'lead_id,property_id' });
+    if (sErr) return { error: `saved_properties: ${sErr.message}` };
+    return { property_id: propId, saved: true };
+  } catch (e) { return { error: e.message }; }
+}
+
 export default async function handler(req, res) {
   if (handleOptions(req, res)) return;
   if (req.method !== 'POST') return fail(res, 405, 'method_not_allowed');
@@ -169,6 +204,12 @@ export default async function handler(req, res) {
       event_data: eventData,
       source:     'ihomefinder_idx'
     });
+
+    // 2b. Mirror a favorite into the lead's portal Saved Homes. Fail-soft.
+    let saved_property = null;
+    if (event_type === 'property_saved') {
+      saved_property = await recordSavedProperty(supa, lead.id, property);
+    }
 
     // 3. Re-score
     const { score: newScore, temperature, breakdown } = await scoreLead(lead.id);
@@ -262,6 +303,7 @@ Respond in JSON only: { "sms": "...", "reasoning": "one sentence" }`;
       event_type,
       score:         { old: oldScore, new: newScore, breakdown },
       temperature,
+      saved_property,
       draft,
       agent_alert
     });
