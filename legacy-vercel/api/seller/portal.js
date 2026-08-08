@@ -323,6 +323,23 @@ export default async function handler(req, res) {
           docsKpi
         ];
 
+    // Escrow records — fetched here (once) so the escrow ROAD below can be
+    // suppressed when the property has no active escrow. Reused by the
+    // back-on-market banner + history section further down.
+    let escrowRows = [];
+    try {
+      const { data } = await supa.from('deal_escrows')
+        .select('*').eq('deal_id', deal.id).order('sort', { ascending: true });
+      escrowRows = data || [];
+    } catch (_) { escrowRows = []; }
+    const activeEscrow = escrowRows.find((e) => e.status === 'active') || null;
+    // A property that carries escrow history but has NONE active is back on
+    // market: its escrow-era milestones / timeline must NOT render, or the
+    // portal shows a phantom close-of-escrow beneath the "Back on market"
+    // banner (the 433 bug). The banner + property documents show instead. A
+    // property with no escrow history at all (a fresh listing) is unaffected.
+    const noActiveEscrow = escrowRows.length > 0 && !activeEscrow;
+
     // Road to closing. Preferred source: the curated deal_timeline_items —
     // the plain-English contractual timeline the agent approves updates to
     // (seeded from the CA RPA template, dates per contract). Falls back to
@@ -333,7 +350,8 @@ export default async function handler(req, res) {
     // Preferred source: the deals.json milestones (v1.5 — each carries a full
     // `desc` paragraph, a `badge` chip, a status dot and an At-a-Glance `col`).
     // This is Cowork's maintained source of truth and matches the Today board.
-    if (Array.isArray(deal.milestones) && deal.milestones.length) {
+    // Suppressed when back on market (no active escrow) — see noActiveEscrow.
+    if (!noActiveEscrow && Array.isArray(deal.milestones) && deal.milestones.length) {
       const msLabel = (d) => {
         const s = /^(\d{4}-\d{2}-\d{2})/.exec(String(d || ''));
         return s ? new Date(s[1] + 'T12:00:00Z').toLocaleDateString('en-US', { month: 'short', day: 'numeric', timeZone: 'UTC' }) : '';
@@ -372,8 +390,8 @@ export default async function handler(req, res) {
     }
 
     // Next: the curated deal_timeline_items (rich contractual timeline) for a deal
-    // that isn't on the milestones model yet.
-    if (!road.length) try {
+    // that isn't on the milestones model yet. Also suppressed when back on market.
+    if (!road.length && !noActiveEscrow) try {
       const { data: tlItems } = await supa
         .from('deal_timeline_items')
         .select('*')
@@ -587,10 +605,8 @@ export default async function handler(req, res) {
     let escrowHistory = [];
     let backOnMarket = null;
     try {
-      const { data: escrows } = await supa.from('deal_escrows')
-        .select('*').eq('deal_id', deal.id).order('sort', { ascending: true });
-      const list = escrows || [];
-      const activeEsc = list.find((e) => e.status === 'active') || null;
+      const list = escrowRows;   // fetched once above (reused, not refetched)
+      const activeEsc = activeEscrow;
       escrowHistory = list.filter((e) => e.status !== 'active').map((e) => ({
         label: sanitize(e.label || 'Escrow'),
         status: e.status,
