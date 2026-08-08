@@ -579,9 +579,46 @@ export default async function handler(req, res) {
         : ''
     };
 
+    // 4b. Escrow history (Slice 2) -----------------------------------------
+    // A property can carry cancelled/closed escrows plus (maybe) an active one.
+    // With NO active escrow, a seller listing says "back on market" plainly
+    // instead of showing silence or a stale timeline. Prior escrows are exposed
+    // as collapsed history. Fail-soft: pre-055 (no table) → no history/banner.
+    let escrowHistory = [];
+    let backOnMarket = null;
+    try {
+      const { data: escrows } = await supa.from('deal_escrows')
+        .select('*').eq('deal_id', deal.id).order('sort', { ascending: true });
+      const list = escrows || [];
+      const activeEsc = list.find((e) => e.status === 'active') || null;
+      escrowHistory = list.filter((e) => e.status !== 'active').map((e) => ({
+        label: sanitize(e.label || 'Escrow'),
+        status: e.status,
+        buyer: sanitize(e.buyer_name || ''),
+        when: e.cancelled_at ? `Cancelled ${fmtDateY(asDate(e.cancelled_at))}`
+            : e.closed_at    ? `Closed ${fmtDateY(asDate(e.closed_at))}`
+            : (e.status === 'cancelled' ? 'Cancelled' : e.status === 'closed' ? 'Closed' : '')
+      }));
+      if (!activeEsc && list.length && !isBuyerSide && (isListing || isPreparing)) {
+        const lastCancel = list
+          .filter((e) => e.status === 'cancelled')
+          .sort((a, b) => String(b.cancelled_at || '').localeCompare(String(a.cancelled_at || '')))[0];
+        const when = lastCancel && lastCancel.cancelled_at ? fmtDateY(asDate(lastCancel.cancelled_at)) : null;
+        backOnMarket = {
+          headline: 'Back on market',
+          body: when
+            ? `Escrow with the previous buyer was cancelled ${when}. Your disclosures remain on file and will be provided to the next buyer.`
+            : 'This listing is back on the market. Your disclosures remain on file and will be provided to the next buyer.'
+        };
+      }
+    } catch (_) { /* pre-055 — no escrow records → no history/banner (safe) */ }
+
     // 5. Assemble -----------------------------------------------------------
     const portal = {
       security,
+      // 0-or-1 array so the front-end data-list hides the whole section when absent.
+      back_on_market: backOnMarket ? [backOnMarket] : [],
+      escrow_history: escrowHistory,
       seller: { first_name: firstName || '', who: sanitize(deal.address) },
       status: {
         label: stageLabel,

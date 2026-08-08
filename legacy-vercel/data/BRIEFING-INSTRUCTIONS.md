@@ -99,6 +99,40 @@ Find the deal by `"address"` (or `"id"`) and update:
 | `"notes"` | free-text context about the deal (shows on the deal / seller portal) |
 | `"alerts"` | array of short strings — time-sensitive deal alerts |
 
+## 1a-2. Escrows on a property (`"escrows"`) — a property can outlive an escrow
+
+When a listing goes into escrow, falls out, and is expected to take another buyer
+(e.g. **433 E Hwy 4** — Dawson escrow cancelled 8/5, back on market), model the
+escrows as a **child array on the property**, so the property's disclosures survive
+and a dead escrow can't leave a phantom close-of-escrow on the seller's portal.
+
+```json
+"escrows": [
+  { "key": "esc1", "status": "cancelled", "label": "Escrow #1",
+    "buyer": "Elizabeth Dawson", "salePrice": 1300000,
+    "acceptance": "2026-06-19", "coe": "2026-08-10", "cancelledAt": "2026-08-05" },
+  { "key": "esc2", "status": "active", "label": "Escrow #2",
+    "buyer": "…", "salePrice": 1295000, "acceptance": "2026-08-20", "coe": "2026-09-25",
+    "timeline": { "acceptance": "2026-08-20", "coe": "2026-09-25" } }
+]
+```
+
+- **`key`** — stable per-property escrow id (`esc1`, `esc2`), never reused.
+- **`status`** — `active` · `cancelled` · `closed`. **At most one `active`** per
+  property. With **no active escrow**, the portal shows a plainly-worded *"Back on
+  market"* state (built from the most recent `cancelledAt`) and the prior escrows as
+  collapsed history — never a stale timeline.
+- The **active** escrow drives the property's live escrow fields (stage → in-escrow,
+  its `salePrice`/`coe`/`timeline`). Put the RPA `timeline` (§1b) **inside** the
+  active escrow. You may leave the property `"stage"` as `"listing"`; the active
+  escrow makes it in-escrow. When escrow is cancelled, flip that escrow to
+  `"cancelled"` and set `cancelledAt` — the property reverts to listing on its own.
+- **Backward-compatible:** a deal with **no** `escrows[]` behaves exactly as today
+  (its top-level `stage`/`salePrice`/`closingDate`/`timeline` are used directly).
+  Only adopt `escrows[]` for a property that needs the multi-escrow arc.
+- **Documents follow scope, not the escrow array** (see §3a-2): a `property`-scope
+  doc survives every escrow; a `transaction`-scope doc belongs to its escrow.
+
 ## 1b. Deal timeline — RPA deadlines (`"timeline"`)
 
 For an **in-escrow** deal, add a `"timeline"` object so the briefing calendar

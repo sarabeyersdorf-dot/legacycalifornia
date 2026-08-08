@@ -171,6 +171,19 @@ body.lp-restyle {
 .road-badge.key  { background: var(--linen); color: var(--brass-bright); border-color: var(--brass); }
 .road-badge.next { background: var(--ink); color: var(--shell); border-color: var(--ink); }
 
+/* Back on market (Slice 2) — a plainly worded state when no active escrow */
+.back-on-market { border-left: 3px solid var(--brass); }
+.bom-head { font-family: var(--serif); font-style: italic; font-size: 22px; color: var(--ink); line-height: 1.15; }
+.bom-body { font-size: 14px; color: var(--ink-soft); margin-top: 8px; line-height: 1.6; }
+
+/* Escrow history (Slice 2) — collapsed record of prior escrows */
+.esc-item { display: flex; align-items: baseline; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--rule-soft); flex-wrap: wrap; }
+.esc-item:last-child { border-bottom: none; }
+.esc-label { font-family: var(--serif); font-style: italic; font-size: 16px; color: var(--ink); }
+.esc-status { font-family: var(--mono); font-size: 9px; letter-spacing: 0.1em; text-transform: uppercase; padding: 3px 8px; border-radius: 100px; background: var(--rule-soft); color: var(--ink-mute); border: 1px solid var(--rule); }
+.esc-status.cancelled { color: var(--lg-a2); border-color: rgba(140,110,61,0.30); }
+.esc-when { font-family: var(--mono); font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-mute); margin-left: auto; }
+
 /* Good to know (v1.5) */
 .gtk-item { padding: 12px 0; border-bottom: 1px solid var(--rule-soft); }
 .gtk-item:last-child { border-bottom: none; }
@@ -370,6 +383,15 @@ body.agent-preview .task-box:hover { border-color: var(--brass); box-shadow: 0 0
           </div>
         </div>
 
+        <!-- Back on market — shown only when there's no active escrow (Slice 2).
+             An explicit, plainly worded state instead of a stale/blank timeline. -->
+        <section class="s-card back-on-market" data-list="back_on_market" data-optional>
+          <div class="bom-item" data-row>
+            <h2 class="bom-head" data-bind="headline">Back on market</h2>
+            <p class="bom-body" data-bind="body" data-optional>—</p>
+          </div>
+        </section>
+
         <!-- Road to closing -->
         <section class="s-card" id="road" data-list="road">
           <div class="s-card-h">
@@ -398,6 +420,20 @@ body.agent-preview .task-box:hover { border-color: var(--brass); box-shadow: 0 0
           <div class="gtk-item" data-row>
             <div class="gtk-title" data-bind="title">—</div>
             <div class="gtk-body" data-bind="body" data-optional>—</div>
+          </div>
+        </section>
+
+        <!-- Prior escrows — collapsed history (Slice 2). Sellers know the escrow
+             fell out; hiding it reads as evasion, and they may need the record. -->
+        <section class="s-card escrow-history" id="escrow-history" data-list="escrow_history" data-optional>
+          <div class="s-card-h">
+            <h2>Escrow history.</h2>
+            <span class="meta">Previous escrows on this property</span>
+          </div>
+          <div class="esc-item" data-row>
+            <span class="esc-label" data-bind="label">Escrow</span>
+            <span class="esc-status" data-bind="status" data-add-class="status" data-optional>cancelled</span>
+            <span class="esc-when" data-bind="when" data-optional>—</span>
           </div>
         </section>
       </div>

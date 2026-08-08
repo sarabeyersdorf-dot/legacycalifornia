@@ -113,10 +113,37 @@ function mergeMeta(d) {
   return { ...(base || {}), ...(client ? { client } : {}), ...(commission != null ? { commission } : {}) };
 }
 
+// Slice 2 (SPEC_portal_document_model.md): a property may carry an escrows[]
+// history. At most one is active. When escrows[] is present, the ACTIVE escrow
+// drives the property row's live fields; with none active the property reverts to
+// its authored listing state ("back on market") — no phantom COE/price. Returns
+// null when there's no escrows[] so the flat deal fields are used exactly as
+// authored (fully backward-compatible).
+function activeEscrow(d) {
+  if (!Array.isArray(d.escrows) || !d.escrows.length) return null;
+  return d.escrows.find((e) => e && e.status === 'active') || null;
+}
+function deriveFromEscrows(d) {
+  if (!Array.isArray(d.escrows) || !d.escrows.length) return null;
+  const a = activeEscrow(d);
+  if (a) {
+    return {
+      stage: 'pending',
+      sale_price: a.salePrice ?? a.sale_price ?? d.salePrice ?? null,
+      coe_date: a.coe || a.coeDate || a.closingDate || null,
+      escrow_open_date: a.openEscrowDate || a.escrowOpenDate || a.acceptance || null,
+      timeline: a.timeline || d.timeline || null
+    };
+  }
+  // No active escrow → back on market (or closed, if the property was authored so).
+  const revert = (d.stage && d.stage !== 'pending' && d.stage !== 'offer') ? d.stage : 'listing';
+  return { stage: revert, sale_price: null, coe_date: null, escrow_open_date: null, timeline: null };
+}
+
 function mapDeal(d) {
   const agent = /james/i.test(d.agent || '') ? 'james' : 'sara';
   const c = d.contacts || {};
-  return {
+  const mapped = {
     source_key: d.id,
     address: d.address,
     city: d.city || null,
@@ -168,6 +195,46 @@ function mapDeal(d) {
     attributes:     (d.attributes && typeof d.attributes === 'object' && !Array.isArray(d.attributes)) ? d.attributes : null,
     updated_at: new Date().toISOString()
   };
+  // Escrow-history override (Slice 2). No-op when there's no escrows[].
+  const ov = deriveFromEscrows(d);
+  if (ov) Object.assign(mapped, ov);
+  return mapped;
+}
+
+// Upsert a property's escrow history (deals.json escrows[]) into deal_escrows,
+// keyed by (deal_id, escrow_key), pruning escrows no longer authored. Fail-soft
+// and self-contained: an error is recorded in stats, never thrown, and degrades
+// to a no-op before db/055. No escrows[] on the deal → nothing happens.
+async function writeDealEscrows(supa, dealId, d, stats) {
+  if (!Array.isArray(d.escrows) || !d.escrows.length) return;
+  try {
+    const rows = d.escrows.map((e, i) => ({
+      deal_id: dealId,
+      escrow_key: String((e && (e.key || e.escrow_key)) || `esc${i + 1}`),
+      status: ['active', 'cancelled', 'closed'].includes(e && e.status) ? e.status : 'active',
+      label: (e && e.label) || `Escrow #${i + 1}`,
+      buyer_name: (e && (e.buyer || e.buyerName || e.buyer_name)) || null,
+      sale_price: (e && (e.salePrice ?? e.sale_price)) ?? null,
+      acceptance_date: (e && (e.acceptance || e.acceptanceDate)) || null,
+      escrow_open_date: (e && (e.openEscrowDate || e.escrowOpenDate)) || null,
+      coe_date: (e && (e.coe || e.coeDate || e.closingDate)) || null,
+      escrow_number: (e && ((e.contacts && e.contacts.escrowNumber) || e.escrowNumber)) || null,
+      cancelled_at: (e && (e.cancelledAt || e.cancelled_at)) || null,
+      closed_at: (e && (e.closedAt || e.closed_at)) || null,
+      sort: (e && (e.sort ?? i)) || i,
+      updated_at: new Date().toISOString()
+    }));
+    const { error } = await supa.from('deal_escrows').upsert(rows, { onConflict: 'deal_id,escrow_key' });
+    if (error) { stats.errors.push({ deal_id: dealId, error: error.message }); return; }
+    stats.upserted += rows.length;
+    // Prune escrows the property no longer lists.
+    const want = new Set(rows.map((r) => r.escrow_key));
+    const { data: existing } = await supa.from('deal_escrows').select('id, escrow_key').eq('deal_id', dealId);
+    const stale = (existing || []).filter((r) => !want.has(r.escrow_key)).map((r) => r.id);
+    if (stale.length) { await supa.from('deal_escrows').delete().in('id', stale); stats.pruned = (stats.pruned || 0) + stale.length; }
+  } catch (e) {
+    stats.errors.push({ deal_id: dealId, error: e.message || String(e) });
+  }
 }
 
 // Normalize a name into a fingerprint for the key-reuse guard (must match the
@@ -694,6 +761,7 @@ export default async function handler(req, res) {
     // Per-row outcomes for the two write loops that used to abort the whole run.
     const docStats  = { inserted: 0, skipped: 0, errors: [] };
     const taskStats = { created: 0, skipped_duplicates: 0 };
+    const escrowStats = { upserted: 0, pruned: 0, errors: [] };
     // Deals that have LEFT escrow — their lingering timeline items get retired
     // after the loop so a dead escrow can't keep phantom deadlines on a portal.
     const nonEscrowDealIds = [];
@@ -760,7 +828,11 @@ export default async function handler(req, res) {
         }
         if (wErr) throw new Error(`${ex ? 'update' : 'insert'}: ${wErr.message}`);
         dealsUpserted++;
-        if (!ESCROW_STAGES.has(d.stage)) nonEscrowDealIds.push(dealId);
+        // "In escrow" = has an ACTIVE escrow when escrows[] is authored; else the
+        // raw stage. A property left at stage 'listing' while carrying an active
+        // escrow must NOT have its live timeline retired.
+        const inEscrow = (Array.isArray(d.escrows) && d.escrows.length) ? !!activeEscrow(d) : ESCROW_STAGES.has(d.stage);
+        if (!inEscrow) nonEscrowDealIds.push(dealId);
 
         // Rebuild this deal's documents (delete then insert = idempotent).
         // Resilient: a bad doc row is collected in docStats, never thrown, so it
@@ -768,6 +840,9 @@ export default async function handler(req, res) {
         const { rows: docRows, seeds: docSeeds } = mapDocs(dealId, d);
         await writeDealDocs(supa, dealId, docRows, docStats);
         for (const s of docSeeds) govSeeds.push({ ...s, deal_id: dealId });
+
+        // Upsert this property's escrow history (Slice 2). No-op without escrows[].
+        await writeDealEscrows(supa, dealId, d, escrowStats);
       } catch (e) {
         // Keep going — one malformed deal must never zero out every listing.
         errors.push({ deal: d.id, address: d.address || null, error: e.message || String(e) });
@@ -1071,6 +1146,7 @@ export default async function handler(req, res) {
       timeline_items_retired: timelineItemsRetired,
       documents_written: docStats.inserted,
       governance_seeded: govSeeded,
+      deal_escrows: escrowStats,
       // Per-row outcomes for the two loops that used to 500 the whole endpoint.
       deal_documents: docStats,
       agent_tasks: taskStats,
