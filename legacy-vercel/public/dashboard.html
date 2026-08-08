@@ -280,7 +280,23 @@ body {
 /* Pill buttons — match the marketing site's lg-btn shape */
 .btn { border-radius: 100px; }
 .wire-warn { border-radius: var(--lg-r-sm); }
+/* In-portal IDX search (Phase 1) — the Kestrel widget renders into #browse. */
+#browse .idx-embed { min-height: 60vh; }
+#browse.dash-card { display: none; }              /* hidden until "Browse properties" is chosen */
+body.viewing-browse #browse.dash-card { display: block; }
+body.viewing-browse .dash-hero,
+body.viewing-browse .dash-grid { display: none; } /* Browse takes over the main area */
 </style>
+<!-- iHomefinder Kestrel IDX — same activation as property-search.html, so search
+     runs INSIDE the logged-in portal instead of a separate page. -->
+<script src="https://kestrel.idxhome.com/ihf-kestrel.js"></script>
+<script>
+  window.ihfKestrel = window.ihfKestrel || {};
+  ihfKestrel.config = {
+    platform: "custom",
+    activationToken: "d77ab7ae-7afe-403d-89cf-61bd60bbf806",
+  };
+</script>
 </head>
 <body data-screen-label="Consumer Dashboard">
 
@@ -296,16 +312,16 @@ body {
 
     <div class="app-side-section">Your search</div>
     <nav class="app-side-nav">
-      <a href="dashboard.html" class="active">Home <span class="pill" data-bind="nav.new_matches">3</span></a>
-      <a href="property-search.html">Browse properties</a>
-      <a href="#">Saved homes <span class="pill" data-bind="nav.saved">12</span></a>
-      <a href="#">Saved searches</a>
+      <a href="#" class="active" data-view="home">Home <span class="pill" data-bind="nav.new_matches">3</span></a>
+      <a href="#browse" data-view="browse">Browse properties</a>
+      <a href="#saved" data-view="home" data-scroll="saved">Saved homes <span class="pill" data-bind="nav.saved">12</span></a>
+      <a href="property-organizer.html">Saved searches</a>
       <a href="#">Notes &amp; tags</a>
     </nav>
 
     <div class="app-side-section">Activity</div>
     <nav class="app-side-nav">
-      <a href="#">Tours <span class="pill" data-bind="nav.tours">2</span></a>
+      <a href="#tours" data-view="home" data-scroll="tours">Tours <span class="pill" data-bind="nav.tours">2</span></a>
       <a href="#">Messages <span class="pill" data-bind="nav.messages">1</span></a>
       <a href="#">Documents</a>
       <a href="#">Offers</a>
@@ -358,6 +374,19 @@ body {
         <div class="dash-sum"><span class="v accent" data-bind="stats.new_matches">3</span><span class="l">New matches</span></div>
         <div class="dash-sum"><span class="v" data-bind="stats.tours_upcoming">2</span><span class="l">Tours upcoming</span></div>
         <div class="dash-sum"><span class="v"><span data-bind="stats.match_strength">87</span><span style="font-size:18px;">%</span></span><span class="l">Profile match strength</span></div>
+      </div>
+    </section>
+
+    <!-- BROWSE / IN-PORTAL IDX SEARCH (Phase 1) — the Kestrel search widget is
+         rendered lazily into #browse-idx the first time "Browse properties" is
+         chosen, so search happens inside the logged-in portal. -->
+    <section class="dash-card" id="browse">
+      <div class="dash-card-h">
+        <h2>Browse properties.</h2>
+        <span class="meta">Search every listing — right here in your portal</span>
+      </div>
+      <div class="idx-embed" id="browse-idx">
+        <p class="mono" style="font-size:11px;color:var(--ink-mute);padding:24px 0;">Loading search…</p>
       </div>
     </section>
 
@@ -455,7 +484,7 @@ body {
 
         <!-- Saved + tours row -->
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 28px; min-width: 0;">
-          <section class="dash-card" data-list="saved">
+          <section class="dash-card" id="saved" data-list="saved">
             <div class="dash-card-h">
               <h2>Saved.</h2>
               <span class="meta">12 properties</span>
@@ -497,7 +526,7 @@ body {
             </div>
           </section>
 
-          <section class="dash-card" data-list="tours">
+          <section class="dash-card" id="tours" data-list="tours">
             <div class="dash-card-h">
               <h2>Tours.</h2>
               <span class="meta">2 upcoming</span>
@@ -698,5 +727,53 @@ document.querySelectorAll('.toggle').forEach(t => {
 });
 </script>
 <script src="/legacy-client.js" defer></script>
+<script>
+/* In-portal Browse (Phase 1). Switches between the home view and the embedded
+   IDX search without leaving the page — the Kestrel widget is rendered lazily,
+   the first time Browse is opened, into a VISIBLE container so it measures its
+   width correctly. Nav links carry data-view ("home"|"browse") and, optionally,
+   data-scroll (a section id to scroll to within the home view). */
+(function () {
+  var rendered = false;
+  function renderBrowse() {
+    if (rendered) return;
+    var box = document.getElementById('browse-idx');
+    if (!box) return;
+    if (window.ihfKestrel && typeof ihfKestrel.render === 'function') {
+      try { box.innerHTML = ''; box.appendChild(ihfKestrel.render()); rendered = true; }
+      catch (e) { /* leave the "Loading search…" text; try again on next open */ }
+    }
+  }
+  function setActive(link) {
+    document.querySelectorAll('.app-side-nav a').forEach(function (a) { a.classList.remove('active'); });
+    if (link) link.classList.add('active');
+  }
+  function showBrowse() {
+    document.body.classList.add('viewing-browse');
+    renderBrowse();
+    // Kestrel may load a moment after the first click; retry briefly.
+    if (!rendered) { var n = 0, t = setInterval(function () { renderBrowse(); if (rendered || ++n > 20) clearInterval(t); }, 250); }
+    window.scrollTo(0, 0);
+  }
+  function showHome(scrollId) {
+    document.body.classList.remove('viewing-browse');
+    if (scrollId) {
+      var el = document.getElementById(scrollId);
+      if (el) setTimeout(function () { el.scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 30);
+    }
+  }
+  document.addEventListener('click', function (e) {
+    var a = e.target.closest('[data-view]');
+    if (!a) return;
+    e.preventDefault();
+    setActive(a);
+    if (a.getAttribute('data-view') === 'browse') showBrowse();
+    else showHome(a.getAttribute('data-scroll'));
+  });
+  // The topbar search box also jumps into Browse.
+  var topSearch = document.querySelector('.app-search input');
+  if (topSearch) topSearch.addEventListener('focus', showBrowse);
+})();
+</script>
 </body>
 </html>
