@@ -484,6 +484,29 @@ just listed. When a buyer goes into escrow and is entitled to them, the disclosu
 you record the escrow. On cancellation they go back to seller-only. One move per
 document, never a recurring task.
 
+### Multi-escrow properties (e.g. 433) — link transaction docs to their escrow
+
+On a property with an `escrows[]` history (§1a-2), tag each **transaction-scope**
+document with the escrow it belongs to, using that escrow's `key`:
+
+```json
+{ "name": "Purchase Agreement (RPA)", "url": "https://…", "escrow": "esc1" }
+```
+
+- A transaction doc tied to a **non-active** escrow (cancelled/closed) is
+  **automatically hidden from a future buyer** and kept out of the live document
+  list — it resurfaces only under that escrow's collapsed history on the seller's
+  portal. So escrow #1's RPA/addenda never reach buyer #2; you don't police it.
+- **Property**-scope docs (disclosures, reports) carry **no** `escrow` — they belong
+  to the property and survive every escrow, so the next buyer gets them without a
+  re-upload.
+- **Versioning a disclosure across buyers:** the seller-signed original and a buyer's
+  acknowledgment are **two separate document entries with different keys** — e.g.
+  `433-tds` (property, the seller's original) and `433-tds-ack-esc2` (transaction,
+  `"escrow": "esc2"`, the buyer's acknowledgment). Never overwrite one with the
+  other; both are kept, and buyer #1's acknowledgment (`…-esc1`) stays archived with
+  its escrow.
+
 ## 3b. Portal visibility — what you own vs. the CRM's live toggles
 
 There are two ways things reach a client's portal, and they don't overlap —
