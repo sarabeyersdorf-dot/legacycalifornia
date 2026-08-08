@@ -774,29 +774,37 @@
 .dw-date { flex: 0 0 auto; font-family: var(--mono); font-size: 10.5px; letter-spacing: .06em; color: var(--ink-faint); text-transform: uppercase; }
 .dw-more { grid-column: 1 / -1; font-size: 11.5px; color: var(--ink-faint); font-style: italic; padding: 2px 4px; }
 
-/* — Brief header — */
+/* — Brief header — a deep sierra-forest band so the morning greeting reads
+     like the top of a room, not a beige memo. Cream cards sit on it below. — */
 .today-brief {
   display: grid;
   grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.6fr);  /* Closing-soon gets the lion's share */
   gap: 40px;
-  align-items: end;
-  padding-bottom: 32px;
-  border-bottom: 1px solid var(--rule);
-  margin-bottom: 36px;
+  align-items: center;
+  background: linear-gradient(140deg, #2E3F30 0%, #223026 55%, #1B261E 100%);
+  border: 1px solid #38472F;
+  border-radius: 16px;
+  padding: 38px 44px;
+  margin-bottom: 40px;
+  box-shadow: 0 14px 34px -18px rgba(20, 30, 22, 0.7);
 }
-.tb-l .label-cap { display: block; margin-bottom: 14px; }
+.tb-l .label-cap { display: block; margin-bottom: 14px; color: #D9B166; }
 .tb-greet {
   font-family: var(--serif); font-style: italic; font-weight: 300;
   font-size: clamp(48px, 5vw, 76px); line-height: 0.96;
-  color: var(--ink); letter-spacing: -0.01em;
+  color: #F7F1E3; letter-spacing: -0.01em;
   margin-bottom: 18px;
 }
-.tb-greet em { color: var(--brass); font-style: italic; }
+.tb-greet em { color: #E4B968; font-style: italic; }
 .tb-line {
   font-family: var(--serif); font-style: italic; font-weight: 300;
-  font-size: 20px; line-height: 1.4; color: var(--ink-soft);
+  font-size: 20px; line-height: 1.4; color: rgba(247, 241, 227, 0.82);
   max-width: 540px;
 }
+/* Live pulse + IDX feed sit on the dark band now — lift them to legible tints. */
+.today-brief .live-stamp { color: #8FC79E; }
+.today-brief .live-dot { background: #8FC79E; }
+@media (max-width: 1100px) { .today-brief { padding: 30px 26px; } }
 .tb-r { display: flex; flex-direction: column; gap: 18px; align-items: stretch; }
 .tb-pulse {
   width: 100%;
@@ -849,22 +857,32 @@
 .needs-h { margin-bottom: 22px; }
 .needs-h .eyebrow { color: var(--brass); display: block; margin-top: 14px; }
 
+/* Color-coded board: every card carries a category color via --cat (spine,
+   rank, filled tag) over a bright card + a faint category wash. Beige-on-beige
+   becomes scannable at a glance. */
 .need-card {
-  background: var(--shell);
+  --cat: #8A8577;            /* neutral fallback */
+  --cat-wash: #F6F4EF;
+  background: linear-gradient(180deg, #FFFFFF 0%, var(--cat-wash) 100%);
   border: 1px solid var(--rule);
-  padding: 24px 28px;
+  border-left: 6px solid var(--cat);
+  border-radius: 8px;
+  padding: 22px 26px;
   display: grid;
   grid-template-columns: 56px 1fr;
   gap: 22px;
   margin-bottom: 14px;
   position: relative;
-  transition: background .15s, transform .15s;
+  box-shadow: 0 2px 6px -3px rgba(27, 24, 19, 0.18);
+  transition: box-shadow .15s, transform .15s;
 }
-.need-card:hover { background: var(--linen); }
-/* Decision-queue variants: maroon = approval, green = client, gold = deadline */
-.need-card.q-dec { border-left: 4px solid #5A0E24; }
-.need-card.q-cli { border-left: 4px solid #2E5C3D; }
-.need-card.q-dl  { border-left: 4px solid var(--brass); }
+.need-card:hover { box-shadow: 0 8px 20px -8px rgba(27, 24, 19, 0.28); transform: translateY(-1px); }
+/* Category colors: maroon = approval, forest = follow-up, amber = deadline,
+   slate = data/FYI. Driven by --cat so spine + rank + tag stay in lockstep. */
+.need-card.q-dec, .need-card.q-app { --cat: #8B2C42; --cat-wash: #FBF2F3; }
+.need-card.q-cli { --cat: #2E5C3D; --cat-wash: #F1F6F1; }
+.need-card.q-dl  { --cat: #B07C10; --cat-wash: #FBF4E4; }
+.need-card.q-info { --cat: #8A8577; --cat-wash: #F5F4F0; }
 .need-card .nc-body h3 { font-size: 19px; }
 .need-card .nc-body p { font-size: 15px; line-height: 1.6; color: var(--ink); }
 .live-stamp { font-family: var(--mono); font-size: 10px; letter-spacing: .14em; text-transform: uppercase; color: #2E5C3D; margin-left: 14px; display: inline-flex; align-items: center; gap: 6px; }
@@ -874,21 +892,23 @@
 .feed-chip { font-family: var(--mono); font-size: 10px; letter-spacing: .12em; text-transform: uppercase; padding: 6px 14px; border: 1px solid var(--rule); background: var(--shell); color: var(--ink-mute); cursor: pointer; }
 .feed-chip.on { background: var(--ink); color: var(--shell); border-color: var(--ink); }
 .need-card-hot {
-  border-left: 3px solid var(--brass);
+  box-shadow: 0 2px 6px -3px rgba(27, 24, 19, 0.18), 0 0 0 2px rgba(184, 90, 62, 0.35);
 }
 .nc-rank {
   font-family: var(--serif); font-style: italic; font-weight: 300;
-  font-size: 44px; color: var(--ink-faint); line-height: 1;
-  padding-top: 4px;
+  font-size: 44px; color: var(--cat); line-height: 1;
+  padding-top: 4px; opacity: 0.9;
 }
-.need-card-hot .nc-rank { color: var(--brass); }
 .nc-meta {
   display: flex; gap: 12px; align-items: center;
   margin-bottom: 8px; flex-wrap: wrap;
 }
 .nc-tag {
-  font-family: var(--mono); font-size: 9.5px; letter-spacing: 0.14em;
-  text-transform: uppercase; color: var(--ink-mute);
+  display: inline-block;
+  font-family: var(--mono); font-size: 9.5px; letter-spacing: 0.12em;
+  text-transform: uppercase; font-weight: 600;
+  color: #fff; background: var(--cat);
+  padding: 3px 9px; border-radius: 3px;
 }
 .nc-body h3 {
   font-family: var(--serif); font-style: italic; font-weight: 400;

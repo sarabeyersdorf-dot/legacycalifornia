@@ -690,7 +690,7 @@
       card.innerHTML = `
         <div class="nc-rank">✓</div>
         <div class="nc-body">
-          <div class="nc-meta"><span class="nc-tag" style="color:#5A0E24;">Timeline · ${escapeHtml(pr.address || 'deal')}</span></div>
+          <div class="nc-meta"><span class="nc-tag">Timeline · ${escapeHtml(pr.address || 'deal')}</span></div>
           <h3>${escapeHtml((pr.item_key || '').replace(/^custom:/, '').replace(/_/g, ' '))} — ${escapeHtml(changeLabel(pr.change))}</h3>
           <p>${escapeHtml(pr.reason || '')}</p>
           <div class="nc-foot"><div class="nc-foot-l"><span>Applies to the seller's page the moment you approve</span></div>
@@ -737,7 +737,7 @@
       card.innerHTML = `
         <div class="nc-rank">…</div>
         <div class="nc-body">
-          <div class="nc-meta"><span class="nc-tag" style="color:#2E5C3D;">Client · curated collection${ownerTag}</span></div>
+          <div class="nc-meta"><span class="nc-tag">Client · curated collection${ownerTag}</span></div>
           <h3>${escapeHtml(n.client_name || 'Your client')} hasn't reacted to “${escapeHtml(n.title)}”</h3>
           <p>Pushed ${n.days_since_push} days ago${n.opens_since_push ? ` · opened ${n.opens_since_push}× since` : ' · not opened yet'}. Worth a nudge.</p>
           <div class="nc-foot"><div class="nc-foot-l"></div><div class="nc-foot-r">
@@ -794,7 +794,7 @@
       card.innerHTML = `
         <div class="nc-rank">…</div>
         <div class="nc-body">
-          <div class="nc-meta"><span class="nc-tag" style="color:#8a6e3d;">Follow-up · gone quiet 14+ days</span></div>
+          <div class="nc-meta"><span class="nc-tag">Follow-up · gone quiet 14+ days</span></div>
           <h3>${silent.length} lead${silent.length === 1 ? '' : 's'} ${silent.length === 1 ? 'has' : 'have'} gone quiet</h3>
           <p>No contact logged in over two weeks. Call or text right here, or open the full lead.</p>
           <div style="margin-top:8px;">${rows}</div>
@@ -836,7 +836,7 @@
     // they're visible and not a surprise; tagged so it's clear Cowork handles them.
     if (flags) {
       const card = document.createElement('article');
-      card.className = 'need-card q-dec';
+      card.className = 'need-card q-info';
       const rows = [
         ...gaps.map((g) => `<li>${escapeHtml(g.address || g.source_key)} — <span style="color:var(--ink-mute);">missing price on a pending deal</span></li>`),
         ...parties.map((p) => `<li>${escapeHtml(p.address || p.source_key)} — <span style="color:var(--ink-mute);">party edit awaiting reconcile</span></li>`)
@@ -844,7 +844,7 @@
       card.innerHTML = `
         <div class="nc-rank">i</div>
         <div class="nc-body">
-          <div class="nc-meta"><span class="nc-tag" style="color:#8a8577;">Data · your briefing handles these</span></div>
+          <div class="nc-meta"><span class="nc-tag">Data · your briefing handles these</span></div>
           <h3>${flags} deal${flags === 1 ? '' : 's'} flagged for a data fix</h3>
           <p>Your morning briefing corrects these in the master file — listed here so nothing slips by silently.</p>
           <ul style="margin:8px 0 0;padding-left:18px;font-size:13.5px;line-height:1.7;color:var(--ink-soft);">${rows}</ul>
@@ -1603,7 +1603,7 @@
         : `<h3>${escapeHtml(fullName)} — ${m.channel === 'sms' ? 'SMS draft' : 'Email draft'}</h3>`;
 
       const card = document.createElement('article');
-      card.className = idx === 0 && lead.temperature === 'hot' ? 'need-card need-card-hot' : 'need-card';
+      card.className = idx === 0 && lead.temperature === 'hot' ? 'need-card q-app need-card-hot' : 'need-card q-app';
       card.setAttribute('data-message-id', m.id);
       card.innerHTML = `
         <div class="nc-rank">${rank}</div>
