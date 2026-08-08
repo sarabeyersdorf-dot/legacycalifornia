@@ -561,7 +561,8 @@
       paintReportsFunnel(briefRes.json.funnel || null);
     }
     paintNeedsQueue(briefRes.ok ? briefRes.json : {}, inboxRes.ok ? (inboxRes.json.messages || []) : []);
-    paintDeadlineWatch();
+    // Deadline-watch band retired — every contingency/COE now lives inline in the
+    // Deals-in-motion table below, so the cross-deal countdown was a third copy.
     loadLeadHygiene();
     startTodayPulse();
     if (pipelineRes.ok) paintPipelineStats(pipelineRes.json);
@@ -690,7 +691,7 @@
       card.innerHTML = `
         <div class="nc-rank">✓</div>
         <div class="nc-body">
-          <div class="nc-meta"><span class="nc-tag" style="color:#5A0E24;">Timeline · ${escapeHtml(pr.address || 'deal')}</span></div>
+          <div class="nc-meta"><span class="nc-tag">Timeline · ${escapeHtml(pr.address || 'deal')}</span></div>
           <h3>${escapeHtml((pr.item_key || '').replace(/^custom:/, '').replace(/_/g, ' '))} — ${escapeHtml(changeLabel(pr.change))}</h3>
           <p>${escapeHtml(pr.reason || '')}</p>
           <div class="nc-foot"><div class="nc-foot-l"><span>Applies to the seller's page the moment you approve</span></div>
@@ -737,7 +738,7 @@
       card.innerHTML = `
         <div class="nc-rank">…</div>
         <div class="nc-body">
-          <div class="nc-meta"><span class="nc-tag" style="color:#2E5C3D;">Client · curated collection${ownerTag}</span></div>
+          <div class="nc-meta"><span class="nc-tag">Client · curated collection${ownerTag}</span></div>
           <h3>${escapeHtml(n.client_name || 'Your client')} hasn't reacted to “${escapeHtml(n.title)}”</h3>
           <p>Pushed ${n.days_since_push} days ago${n.opens_since_push ? ` · opened ${n.opens_since_push}× since` : ' · not opened yet'}. Worth a nudge.</p>
           <div class="nc-foot"><div class="nc-foot-l"></div><div class="nc-foot-r">
@@ -794,7 +795,7 @@
       card.innerHTML = `
         <div class="nc-rank">…</div>
         <div class="nc-body">
-          <div class="nc-meta"><span class="nc-tag" style="color:#8a6e3d;">Follow-up · gone quiet 14+ days</span></div>
+          <div class="nc-meta"><span class="nc-tag">Follow-up · gone quiet 14+ days</span></div>
           <h3>${silent.length} lead${silent.length === 1 ? '' : 's'} ${silent.length === 1 ? 'has' : 'have'} gone quiet</h3>
           <p>No contact logged in over two weeks. Call or text right here, or open the full lead.</p>
           <div style="margin-top:8px;">${rows}</div>
@@ -836,7 +837,7 @@
     // they're visible and not a surprise; tagged so it's clear Cowork handles them.
     if (flags) {
       const card = document.createElement('article');
-      card.className = 'need-card q-dec';
+      card.className = 'need-card q-info';
       const rows = [
         ...gaps.map((g) => `<li>${escapeHtml(g.address || g.source_key)} — <span style="color:var(--ink-mute);">missing price on a pending deal</span></li>`),
         ...parties.map((p) => `<li>${escapeHtml(p.address || p.source_key)} — <span style="color:var(--ink-mute);">party edit awaiting reconcile</span></li>`)
@@ -844,7 +845,7 @@
       card.innerHTML = `
         <div class="nc-rank">i</div>
         <div class="nc-body">
-          <div class="nc-meta"><span class="nc-tag" style="color:#8a8577;">Data · your briefing handles these</span></div>
+          <div class="nc-meta"><span class="nc-tag">Data · your briefing handles these</span></div>
           <h3>${flags} deal${flags === 1 ? '' : 's'} flagged for a data fix</h3>
           <p>Your morning briefing corrects these in the master file — listed here so nothing slips by silently.</p>
           <ul style="margin:8px 0 0;padding-left:18px;font-size:13.5px;line-height:1.7;color:var(--ink-soft);">${rows}</ul>
@@ -1493,9 +1494,10 @@
     // widgets with live numbers from the brief. Only real counts, no fabrication.
     const assessEl = document.querySelector('[data-bind-assessment]');
     if (assessEl) {
-      // "Closing soon" — the money panel: every escrow deal with its color,
-      // COE date, days-to-close, and the commission it pays (internal), plus
-      // expected totals. Replaces the static at-a-glance counts.
+      // "Closing soon" is now a money summary only — the per-deal COE/countdown
+      // list moved to the Deals-in-motion table below (one home for deadlines).
+      // Here we keep what the table doesn't total: expected commission this month
+      // and over the next 60 days, plus the single next deal to close as a hook.
       const escrow = (data.active_deals || []).filter((d) => d.in_escrow).sort((a, b) => String(a.coe_date || '9999').localeCompare(String(b.coe_date || '9999')));
       const fmtCoe = (iso) => iso ? new Date(String(iso).slice(0, 10) + 'T12:00:00Z').toLocaleDateString('en-US', { month: 'short', day: 'numeric', timeZone: 'UTC' }) : 'TBD';
       const money = (n) => n == null ? '—' : '$' + Math.round(n).toLocaleString('en-US');
@@ -1507,31 +1509,26 @@
         if (coe < eom) totalMonth += d.commission_usd;
         if (coe.getTime() - now.getTime() < 60 * 86400000) total60 += d.commission_usd;
       });
-      const rows = escrow.map((d) => {
-        const c = window.LegacyDealColors ? window.LegacyDealColors.get(d.lead_id) : null;
-        const dtc = d.days_to_coe;
-        // Prominent days-to-close countdown per deal — green when there's runway,
-        // amber inside a week, red when past the COE date.
-        let countTxt, countCls;
-        if (dtc == null)      { countTxt = 'COE TBD';       countCls = 'tbd'; }
-        else if (dtc < 0)     { countTxt = Math.abs(dtc) + ' day' + (Math.abs(dtc) === 1 ? '' : 's') + ' late'; countCls = 'late'; }
-        else if (dtc === 0)   { countTxt = 'Closes today';  countCls = 'near'; }
-        else                  { countTxt = dtc + ' day' + (dtc === 1 ? '' : 's'); countCls = dtc <= 7 ? 'near' : 'ok'; }
-        const commission = d.commission_usd != null
-          ? money(d.commission_usd) + (d.agent ? ' · ' + (d.agent === 'james' ? 'James' : 'Sara') : '')
-          : 'commission n/a';
-        return `<div class="tb-pulse-row tb-esc" data-open-deal="${escapeHtml(d.lead_id || '')}" style="cursor:pointer;" title="Open this deal">
-          <span class="tb-esc-main"><span class="tb-esc-dot" style="background:${c ? c.border : 'var(--brass)'};"></span>
-            <span class="tb-esc-txt"><span class="tb-esc-addr">${escapeHtml((d.address || d.lead_id || '').split(',')[0])}</span><span class="tb-esc-sub">COE ${escapeHtml(fmtCoe(d.coe_date))} · ${escapeHtml(commission)}</span></span></span>
-          <span class="tb-esc-count ${countCls}">${escapeHtml(countTxt)}</span>
-        </div>`;
-      }).join('');
+      // The nearest close (escrow is already sorted by COE) — one line, not a list.
+      const next = escrow.find((d) => d.coe_date);
+      let nextRow = '';
+      if (next) {
+        const dtc = next.days_to_coe;
+        const when = dtc == null ? fmtCoe(next.coe_date)
+          : dtc < 0 ? `${Math.abs(dtc)}d late`
+          : dtc === 0 ? 'closes today'
+          : `${dtc} day${dtc === 1 ? '' : 's'}`;
+        nextRow = `<div class="tb-pulse-row tb-esc" data-open-deal="${escapeHtml(next.lead_id || '')}" style="cursor:pointer;" title="Open this deal">
+          <span>Next to close</span>
+          <span class="v">${escapeHtml((next.address || next.lead_id || '').split(',')[0])} · ${escapeHtml(when)}</span></div>`;
+      }
       assessEl.innerHTML = `
         <div class="tb-pulse">
           <span class="label-cap">Closing soon · ${escrow.length} in escrow</span>
-          ${rows || '<div class="tb-pulse-row"><span>Nothing in escrow right now.</span><span class="v"></span></div>'}
+          ${nextRow || '<div class="tb-pulse-row"><span>Nothing in escrow right now.</span><span class="v"></span></div>'}
           <div class="tb-pulse-row" style="border-top:1px solid var(--rule);margin-top:8px;padding-top:8px;font-weight:600;"><span>Expected this month</span><span class="v">${money(totalMonth)}</span></div>
           <div class="tb-pulse-row" style="font-weight:600;"><span>Next 60 days</span><span class="v">${money(total60)}</span></div>
+          <div class="tb-pulse-row" style="opacity:.6;font-size:11.5px;"><span>Every deadline &amp; contingency is in the deals table below ↓</span><span class="v"></span></div>
         </div>`;
     }
 
@@ -1603,7 +1600,7 @@
         : `<h3>${escapeHtml(fullName)} — ${m.channel === 'sms' ? 'SMS draft' : 'Email draft'}</h3>`;
 
       const card = document.createElement('article');
-      card.className = idx === 0 && lead.temperature === 'hot' ? 'need-card need-card-hot' : 'need-card';
+      card.className = idx === 0 && lead.temperature === 'hot' ? 'need-card q-app need-card-hot' : 'need-card q-app';
       card.setAttribute('data-message-id', m.id);
       card.innerHTML = `
         <div class="nc-rank">${rank}</div>

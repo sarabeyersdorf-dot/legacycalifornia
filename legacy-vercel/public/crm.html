@@ -145,7 +145,7 @@ body.lp-restyle {
         <!-- MORNING BRIEF HEADER -->
         <div class="today-brief">
           <div class="tb-l">
-            <span class="label-cap" style="color: var(--brass);" data-bind-brief-date>Loading brief…</span>
+            <span class="label-cap" data-bind-brief-date>Loading brief…</span>
             <span class="live-stamp" data-live-stamp><span class="live-dot"></span>live</span>
             <h1 class="tb-greet">Good morning.</h1>
             <p class="tb-line" data-bind-narrative></p>
@@ -209,15 +209,6 @@ body.lp-restyle {
         })();
         </script>
 
-        <!-- DEADLINE WATCH — next contingency/COE deadlines across all deals -->
-        <section class="dw" data-deadline-watch style="display:none;">
-          <div class="dw-head">
-            <span class="hairline-brass"></span>
-            <span class="eyebrow">Deadline watch · what's due next across every deal</span>
-          </div>
-          <div class="dw-list" data-dw-list></div>
-        </section>
-
         <!-- HERO 3-COL -->
         <div class="today-grid">
 
@@ -253,17 +244,6 @@ body.lp-restyle {
           </aside>
 
         </div>
-
-        <!-- QUIETLY ATTENTIVE BAND -->
-        <section class="signals">
-          <div class="signals-h">
-            <span class="hairline-brass"></span>
-            <span class="eyebrow">Quietly attentive · overnight signals</span>
-            <h2 class="h-section" style="font-size: 28px; margin-top: 8px;">What happened while you slept.</h2>
-          </div>
-          <div class="signal-grid" data-signal-grid>
-          </div>
-        </section>
 
         <!-- ===== BEGIN Deals in Motion (ledger + triage toggle) ===== -->
         <!-- Self-contained .dl-* widget. Its own type system (Poppins, 12px floor)
@@ -632,15 +612,18 @@ body.lp-restyle {
         </script>
         <!-- ===== END Deals in Motion ===== -->
 
-        <!-- RECENT COMMUNICATIONS (Twilio deal inbox) -->
-        <section class="deals" data-comms-section style="display:none;">
-          <div class="deals-h">
+        <!-- OVERNIGHT / LIVE FEED — merged signals + comms, rendered by
+             paintLiveFeed() into one filterable stream (all / clients / deals).
+             Sits below the deals table so the page leads with decisions, then
+             the work surface, then ambient activity. -->
+        <section class="signals">
+          <div class="signals-h">
             <span class="hairline-brass"></span>
-            <span class="eyebrow">Recent communications · texts, calls &amp; email, last 24h</span>
-            <h2 class="h-section" style="font-size: 28px; margin-top: 8px;">Who reached out.</h2>
-            <a href="#" class="hours-link" data-comms-review style="display:none;">0 unreviewed →</a>
+            <span class="eyebrow">While you were away · signals, texts &amp; calls</span>
+            <h2 class="h-section" style="font-size: 28px; margin-top: 8px;">What's happening.</h2>
           </div>
-          <div class="deal-grid" data-comms-grid></div>
+          <div class="signal-grid" data-signal-grid>
+          </div>
         </section>
 
         <!-- TASKS + STATS -->
