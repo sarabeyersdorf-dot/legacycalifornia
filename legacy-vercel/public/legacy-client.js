@@ -561,7 +561,8 @@
       paintReportsFunnel(briefRes.json.funnel || null);
     }
     paintNeedsQueue(briefRes.ok ? briefRes.json : {}, inboxRes.ok ? (inboxRes.json.messages || []) : []);
-    paintDeadlineWatch();
+    // Deadline-watch band retired — every contingency/COE now lives inline in the
+    // Deals-in-motion table below, so the cross-deal countdown was a third copy.
     loadLeadHygiene();
     startTodayPulse();
     if (pipelineRes.ok) paintPipelineStats(pipelineRes.json);
@@ -1493,9 +1494,10 @@
     // widgets with live numbers from the brief. Only real counts, no fabrication.
     const assessEl = document.querySelector('[data-bind-assessment]');
     if (assessEl) {
-      // "Closing soon" — the money panel: every escrow deal with its color,
-      // COE date, days-to-close, and the commission it pays (internal), plus
-      // expected totals. Replaces the static at-a-glance counts.
+      // "Closing soon" is now a money summary only — the per-deal COE/countdown
+      // list moved to the Deals-in-motion table below (one home for deadlines).
+      // Here we keep what the table doesn't total: expected commission this month
+      // and over the next 60 days, plus the single next deal to close as a hook.
       const escrow = (data.active_deals || []).filter((d) => d.in_escrow).sort((a, b) => String(a.coe_date || '9999').localeCompare(String(b.coe_date || '9999')));
       const fmtCoe = (iso) => iso ? new Date(String(iso).slice(0, 10) + 'T12:00:00Z').toLocaleDateString('en-US', { month: 'short', day: 'numeric', timeZone: 'UTC' }) : 'TBD';
       const money = (n) => n == null ? '—' : '$' + Math.round(n).toLocaleString('en-US');
@@ -1507,31 +1509,26 @@
         if (coe < eom) totalMonth += d.commission_usd;
         if (coe.getTime() - now.getTime() < 60 * 86400000) total60 += d.commission_usd;
       });
-      const rows = escrow.map((d) => {
-        const c = window.LegacyDealColors ? window.LegacyDealColors.get(d.lead_id) : null;
-        const dtc = d.days_to_coe;
-        // Prominent days-to-close countdown per deal — green when there's runway,
-        // amber inside a week, red when past the COE date.
-        let countTxt, countCls;
-        if (dtc == null)      { countTxt = 'COE TBD';       countCls = 'tbd'; }
-        else if (dtc < 0)     { countTxt = Math.abs(dtc) + ' day' + (Math.abs(dtc) === 1 ? '' : 's') + ' late'; countCls = 'late'; }
-        else if (dtc === 0)   { countTxt = 'Closes today';  countCls = 'near'; }
-        else                  { countTxt = dtc + ' day' + (dtc === 1 ? '' : 's'); countCls = dtc <= 7 ? 'near' : 'ok'; }
-        const commission = d.commission_usd != null
-          ? money(d.commission_usd) + (d.agent ? ' · ' + (d.agent === 'james' ? 'James' : 'Sara') : '')
-          : 'commission n/a';
-        return `<div class="tb-pulse-row tb-esc" data-open-deal="${escapeHtml(d.lead_id || '')}" style="cursor:pointer;" title="Open this deal">
-          <span class="tb-esc-main"><span class="tb-esc-dot" style="background:${c ? c.border : 'var(--brass)'};"></span>
-            <span class="tb-esc-txt"><span class="tb-esc-addr">${escapeHtml((d.address || d.lead_id || '').split(',')[0])}</span><span class="tb-esc-sub">COE ${escapeHtml(fmtCoe(d.coe_date))} · ${escapeHtml(commission)}</span></span></span>
-          <span class="tb-esc-count ${countCls}">${escapeHtml(countTxt)}</span>
-        </div>`;
-      }).join('');
+      // The nearest close (escrow is already sorted by COE) — one line, not a list.
+      const next = escrow.find((d) => d.coe_date);
+      let nextRow = '';
+      if (next) {
+        const dtc = next.days_to_coe;
+        const when = dtc == null ? fmtCoe(next.coe_date)
+          : dtc < 0 ? `${Math.abs(dtc)}d late`
+          : dtc === 0 ? 'closes today'
+          : `${dtc} day${dtc === 1 ? '' : 's'}`;
+        nextRow = `<div class="tb-pulse-row tb-esc" data-open-deal="${escapeHtml(next.lead_id || '')}" style="cursor:pointer;" title="Open this deal">
+          <span>Next to close</span>
+          <span class="v">${escapeHtml((next.address || next.lead_id || '').split(',')[0])} · ${escapeHtml(when)}</span></div>`;
+      }
       assessEl.innerHTML = `
         <div class="tb-pulse">
           <span class="label-cap">Closing soon · ${escrow.length} in escrow</span>
-          ${rows || '<div class="tb-pulse-row"><span>Nothing in escrow right now.</span><span class="v"></span></div>'}
+          ${nextRow || '<div class="tb-pulse-row"><span>Nothing in escrow right now.</span><span class="v"></span></div>'}
           <div class="tb-pulse-row" style="border-top:1px solid var(--rule);margin-top:8px;padding-top:8px;font-weight:600;"><span>Expected this month</span><span class="v">${money(totalMonth)}</span></div>
           <div class="tb-pulse-row" style="font-weight:600;"><span>Next 60 days</span><span class="v">${money(total60)}</span></div>
+          <div class="tb-pulse-row" style="opacity:.6;font-size:11.5px;"><span>Every deadline &amp; contingency is in the deals table below ↓</span><span class="v"></span></div>
         </div>`;
     }
 
