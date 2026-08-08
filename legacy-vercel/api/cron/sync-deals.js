@@ -1035,6 +1035,19 @@ export default async function handler(req, res) {
     // un-keyed tasks behave exactly as before.
     const keepBySig = new Map(prior.map((t) => [sig(t.agent, t.client, t.title), t]));
     const keepByKey = new Map(prior.filter((t) => t && t.brief_key).map((t) => [t.brief_key, t]));
+    // Safety-net for KEYLESS tasks whose title carries a live countdown/date:
+    // strip a trailing "— N days" / "(N days)" and a leading status emoji so a
+    // check-off survives "4 days → 3 days" wording changes even without a `key`.
+    // Conservative (keeps the dated core of the title), so it can't bleed a tick
+    // between two genuinely different tasks. The real fix is a stable `key`.
+    // Remove only the "N days" countdown token and normalize punctuation/emoji,
+    // keeping every other word (dates, names, the action) — so it collapses
+    // "4 days → 3 days" but never merges two tasks that differ in any real word.
+    const stripCd = (s) => String(s || '')
+      .replace(/\b\d+\s*days?\b/gi, ' ')       // the volatile countdown token
+      .replace(/[^\p{L}\p{N}]+/gu, ' ')        // emoji/symbols/punctuation → space
+      .replace(/\s+/g, ' ').trim().toLowerCase();
+    const keepByCd = new Map(prior.map((t) => [sig(t.agent, t.client, stripCd(t.title)), t]));
 
     await supa.from('agent_tasks').delete().eq('source', 'briefing').is('source_key', null);
     if (tasks.length) {
@@ -1045,7 +1058,8 @@ export default async function handler(req, res) {
         const s = sig(agent, client, title);
         const taskKey = t.key ? String(t.key).slice(0, 120) : null;
         // brief_key match first (stable across title countdowns), then signature.
-        const kept = (hasBriefKey && taskKey && keepByKey.get(taskKey)) || keepBySig.get(s);
+        const kept = (hasBriefKey && taskKey && keepByKey.get(taskKey)) || keepBySig.get(s)
+          || keepByCd.get(sig(agent, client, stripCd(title)));
         const row = {
           agent,
           client,
