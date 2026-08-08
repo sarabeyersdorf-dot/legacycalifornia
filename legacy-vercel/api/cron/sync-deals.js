@@ -363,6 +363,35 @@ function mapDocs(dealId, d, escrowIdByKey) {
     });
     pushSeed(doc_key, dispName, doc.visibility);
   }
+
+  // FOLDER-PUBLISHED PATH — documents published from Dropbox share folders by
+  // publish-docs-from-dropbox, listed in data/portal-docs/<id>.json. Each entry
+  // already carries the scope + visibility derived from the folder it sat in, so
+  // this is just a transcription. Missing file → no-op (deal has no published docs).
+  let manifest = [];
+  try { manifest = require(`../../data/portal-docs/${prefix}.json`); } catch (_) { manifest = []; }
+  if (Array.isArray(manifest)) {
+    for (const doc of manifest) {
+      if (!doc || !doc.name) continue;
+      const doc_key = uniqueKey(String(doc.key || `${prefix}-${docSlug(doc.name) || 'doc'}`));
+      const scope = SCOPE_ENUM.has(String(doc.scope || '').toLowerCase()) ? String(doc.scope).toLowerCase() : 'property';
+      out.push({
+        deal_id: dealId,
+        doc_type: extType(doc.name || doc.url),
+        name: String(doc.name),
+        sub: null,
+        status: null,
+        status_raw: null,
+        doc_url: doc.url ? String(doc.url) : null,
+        doc_key,
+        scope,
+        escrow_id: resolveEscrow(doc.escrow),
+        client_safe: true,
+        updated_at: new Date().toISOString()
+      });
+      pushSeed(doc_key, String(doc.name), doc.visibility);
+    }
+  }
   return { rows: out, seeds };
 }
 
