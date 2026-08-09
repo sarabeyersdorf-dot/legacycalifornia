@@ -808,8 +808,8 @@
          opacity 0) so the footage shows even before the script runs; the drawing
          underneath appears only if the video truly can't play (load failure,
          unsupported codec, or reduced motion). -->
-    <video id="heroVidA" class="hero-video" autoplay muted playsinline preload="auto" src="hero-video.mp4" aria-hidden="true" style="opacity:1;z-index:2"></video>
-    <video id="heroVidB" class="hero-video" muted playsinline preload="auto" src="hero-video.mp4" aria-hidden="true" style="opacity:0;z-index:1"></video>
+    <video id="heroVidA" class="hero-video" autoplay muted playsinline preload="auto" poster="/art/hero-poster.jpg" src="hero-video.mp4" aria-hidden="true" style="opacity:1;z-index:2"></video>
+    <video id="heroVidB" class="hero-video" muted playsinline preload="metadata" poster="/art/hero-poster.jpg" src="hero-video.mp4" aria-hidden="true" style="opacity:0;z-index:1"></video>
   </div>
 
   <!-- REQUIRED over video too — footage brightness varies shot to shot, and
