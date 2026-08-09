@@ -2550,6 +2550,10 @@ body.lp-restyle {
         if(s==='offer'){ var t = side==='buyer'?'Offer out':'Offer in'; return { chip:t, overlay:t }; }
         if(s==='preparing') return { chip:'Preparing', overlay:'Preparing to list' };
         if(s==='closed') return { chip:'Closed', overlay:'Closed' };
+        // A 'listing' with no MLS number and no list price isn't actually on the
+        // market yet — the listing agreement is signed but it isn't syndicated
+        // (e.g. 1143 Echo). Show it as preparing, not "On Market."
+        if(s==='listing' && !(deal.mls||deal.mls_number) && deal.list_price==null) return { chip:'Coming soon', overlay:'Preparing to list' };
         return { chip:'On Market', overlay:'On the market' };
       }
 
@@ -2557,7 +2561,8 @@ body.lp-restyle {
       function consoleHtml(deal){
         var meta=deal.meta||{};
         var steps=['Preparing','On market','Offer','In escrow','Closed'];
-        var idx={preparing:0,listing:1,offer:2,pending:3,closed:4}[deal.stage]; if(idx==null) idx=1;
+        var effStage = (deal.stage==='listing' && !(deal.mls||deal.mls_number) && deal.list_price==null) ? 'preparing' : deal.stage;
+        var idx={preparing:0,listing:1,offer:2,pending:3,closed:4}[effStage]; if(idx==null) idx=1;
         var track=steps.map(function(s,i){ var cls=i<idx?'done':(i===idx?'on':''); return '<div class="cc-step '+cls+'"><span class="dot"></span><span class="lb">'+esc(s)+'</span></div>'; }).join('');
         var who=meta.client?esc(meta.client):'the client';
         var portalUrl='/seller.html?deal='+encodeURIComponent(deal.source_key);
