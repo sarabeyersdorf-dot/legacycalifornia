@@ -511,19 +511,22 @@
   .lg-lock__sub { font-size: 7px; letter-spacing: .3em; }
 }
 .lg-nav { display: flex; align-items: center; gap: 24px; }
-.lg-nav a {
+/* :not(.lg-btn) so a pill button dropped into the nav (e.g. "Find My Match")
+   keeps its own white-on-terracotta styling — otherwise the link-hover color
+   below repaints its text the accent hue and it vanishes against the button. */
+.lg-nav a:not(.lg-btn) {
   position: relative; font-size: 12px; font-weight: 700; letter-spacing: .1em;
   text-transform: uppercase; color: var(--lg-ink-soft);
   padding: 4px 0; text-decoration: none; transition: color var(--lg-fast);
 }
 /* underline wipes in from the left rather than fading — reads as intentional */
-.lg-nav a::after {
+.lg-nav a:not(.lg-btn)::after {
   content: ''; position: absolute; left: 0; right: 100%; bottom: 0;
   height: 2px; border-radius: 2px; background: var(--lg-c1);
   transition: right var(--lg-med) var(--lg-ease);
 }
-.lg-nav a:hover, .lg-nav a[aria-current] { color: var(--lg-a1); }
-.lg-nav a:hover::after, .lg-nav a[aria-current]::after { right: 0; }
+.lg-nav a:not(.lg-btn):hover, .lg-nav a:not(.lg-btn)[aria-current] { color: var(--lg-a1); }
+.lg-nav a:not(.lg-btn):hover::after, .lg-nav a:not(.lg-btn)[aria-current]::after { right: 0; }
 .lg-nav a:focus-visible { outline: 3px solid var(--lg-c4); outline-offset: 4px; }
 .lg-navtoggle {
   display: none; background: var(--lg-tint); border: 0; border-radius: 100px;
