@@ -358,8 +358,14 @@ function mapDocs(dealId, d, escrowIdByKey, manifest) {
   // CLIENT should see. When one exists, the compliance `docs` object is treated
   // as INTERNAL only (client_safe:false) so the portal shows just the curated
   // uploads — not the old pre-curation compliance rows stacked alongside them.
-  const flat = [d.clientDocuments, d.portalDocs, d.documents, d.portalDocuments]
-    .find(Array.isArray) || [];
+  // BUT once a deal publishes real files from its Dropbox folder (a manifest),
+  // the folder is authoritative — the deals.json clientDocuments were only a
+  // stopgap and would now DUPLICATE the folder's files (324 Augusta showed its
+  // advisories twice). So a manifest suppresses the flat clientDocuments.
+  const hasManifest = Array.isArray(manifest) && manifest.length > 0;
+  const flat = hasManifest
+    ? []
+    : ([d.clientDocuments, d.portalDocs, d.documents, d.portalDocuments].find(Array.isArray) || []);
   const hasFlat = flat.length > 0;
 
   const docs = d.docs || {};
