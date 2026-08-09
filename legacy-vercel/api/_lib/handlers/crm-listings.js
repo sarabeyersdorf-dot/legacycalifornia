@@ -248,9 +248,15 @@ export default async function handler(req, res) {
       // It's soft-archived: out of every active bucket and count, but kept as a
       // thin row so it can be restored. Reachable only while deals.json still
       // has the deal at 'offer' — self-heals if Cowork re-advances it.
+      // A 'listing'-stage deal is only truly ON MARKET once it's actually
+      // syndicated — i.e. it has an MLS number (or at least a list price). A
+      // signed listing agreement with neither is still being PREPARED (e.g. 1143
+      // Echo showed "on market" with no MLS#). Route those to Preparing so they
+      // don't read as live.
+      const onMarket = !!(d.mls_number || d.list_price);
       if (stage === 'dead')           buckets.archived.push(row);
       else if (stage === 'offer')     buckets.offers.push(row);
-      else if (stage === 'listing')   buckets.active.push(row);
+      else if (stage === 'listing')   (onMarket ? buckets.active : buckets.preparing).push(row);
       else if (stage === 'pending')   buckets.pending.push(row);
       else if (stage === 'closed')    buckets.closed.push(row);
       else if (stage === 'preparing') buckets.preparing.push(row);
