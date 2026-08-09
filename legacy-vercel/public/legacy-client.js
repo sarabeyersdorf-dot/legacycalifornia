@@ -779,6 +779,7 @@
               <span style="display:flex;gap:6px;flex-wrap:wrap;">
                 ${tel ? `<a class="btn btn-ghost btn-sm" href="tel:${escapeHtml(tel)}">Call</a>` : ''}
                 <button class="btn btn-ghost btn-sm" data-rs-text${tel ? '' : ' disabled title="No phone on file"'}>Text</button>
+                <button class="btn btn-ghost btn-sm" data-rs-dismiss="${escapeHtml(l.id)}" title="Already reached out (e.g. by phone) — clears this and resets the 14-day clock">Dismiss</button>
                 <button class="btn btn-ink btn-sm" data-open-lead="${escapeHtml(l.id)}">Open →</button>
               </span>
             </div>
@@ -812,6 +813,26 @@
       }));
       card.querySelectorAll('[data-rs-cancel]').forEach((b) => b.addEventListener('click', () => {
         const comp = b.closest('[data-rs-composer]'); if (comp) comp.style.display = 'none';
+      }));
+      // Dismiss: "I already reached out (usually by phone)." Records contact so
+      // the lead drops off the next brief — the truest fix for a false nudge,
+      // and it never asks you to text a DNC contact. Updates the header count.
+      card.querySelectorAll('[data-rs-dismiss]').forEach((b) => b.addEventListener('click', async () => {
+        const row = b.closest('[data-rs-row]');
+        b.disabled = true; b.textContent = 'Dismissing…';
+        const r = await api('/api/crm/log-contact', { body: { lead_id: b.getAttribute('data-rs-dismiss'), note: 'Marked contacted from Today — reached out outside the CRM.' } });
+        if (r.ok && r.json && r.json.logged) {
+          if (row) { row.style.opacity = '.4'; row.querySelectorAll('button,a,textarea').forEach((el) => { el.disabled = true; }); }
+          const rank = card.querySelector('.nc-rank');
+          const remaining = card.querySelectorAll('[data-rs-row]').length
+            - card.querySelectorAll('[data-rs-row][data-rs-done]').length - 1;
+          if (row) row.setAttribute('data-rs-done', '1');
+          const h = card.querySelector('h3');
+          if (h && remaining >= 0) h.textContent = `${remaining} lead${remaining === 1 ? '' : 's'} ${remaining === 1 ? 'has' : 'have'} gone quiet`;
+          if (remaining <= 0 && rank) card.style.opacity = '.55';
+        } else {
+          b.disabled = false; b.textContent = 'Dismiss';
+        }
       }));
       card.querySelectorAll('[data-rs-send]').forEach((b) => b.addEventListener('click', async () => {
         const row = b.closest('[data-rs-row]');
@@ -3724,12 +3745,32 @@
       if (success) {
         statusEl.style.color = '#2E5C3D';
         statusEl.textContent = isNote
-          ? `Note saved · ${channel === 'internal' ? 'internal' : 'private to agents'}`
+          ? `Saved to this contact’s Notes ✓`
           : `Sent via ${(r.json.provider && r.json.provider.via) || channel}`;
+        const savedText = (isNote && r.json.note && r.json.note.body) || text;
         bodyEl.value = '';
         if (subjectEl) subjectEl.value = '';
         sendBtn.textContent = isNote ? 'Saved' : 'Sent';
-        setTimeout(() => { loadLead(lead.id); if (!isNote) refreshLeadListPreview(lead.id); }, 600);
+        if (isNote) {
+          // The full-card reload used to scroll the agent back to the top, so a
+          // saved note looked like it vanished ("I don't see where it saved").
+          // Instead echo it inline, right at the composer, and leave the scroll
+          // position alone. Persists until the next note or card reload.
+          const esc = (s) => String(s == null ? '' : s).replace(/[&<>]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]));
+          let echo = composer.querySelector('[data-note-echo]');
+          if (!echo) {
+            echo = document.createElement('div');
+            echo.setAttribute('data-note-echo', '1');
+            echo.style.cssText = 'margin-top:10px;border-left:3px solid var(--brass,#8C6E3D);background:rgba(140,110,61,.07);padding:9px 12px;border-radius:4px;';
+            composer.appendChild(echo);
+          }
+          echo.innerHTML = '<div style="font:600 11px/1.2 var(--sans,sans-serif);letter-spacing:.1em;text-transform:uppercase;color:var(--ink-mute,#7C6A4D);margin-bottom:4px;">Saved to Notes · just now</div>'
+            + '<div style="font:14px/1.55 var(--sans,sans-serif);white-space:pre-wrap;color:var(--ink,#1A1714);">' + esc(savedText.length > 500 ? savedText.slice(0, 500) + '…' : savedText) + '</div>';
+          try { echo.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); } catch (_) {}
+          if (typeof refreshLeadListPreview === 'function') refreshLeadListPreview(lead.id);
+        } else {
+          setTimeout(() => { loadLead(lead.id); refreshLeadListPreview(lead.id); }, 600);
+        }
         setTimeout(() => { sendBtn.textContent = isNote ? 'Save note' : 'Send'; sendBtn.disabled = false; }, 1800);
       } else {
         statusEl.style.color = '#9B2C2C';

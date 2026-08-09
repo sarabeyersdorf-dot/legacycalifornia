@@ -5804,7 +5804,9 @@ function selectLead(el) {
 /* Hybrid type refresh: upright body text, bigger labels, italics as garnish. */
 .tb-greet { font-style: normal; font-weight: 500; }
 .tb-greet em { font-style: italic; }
-.tb-line { font-family: var(--sans); font-style: normal; font-size: 16.5px; line-height: 1.6; color: var(--ink-soft); }
+/* The narrative sits on the dark forest hero band — keep it cream, not the dark
+   --ink-soft (which rendered invisible dark-on-dark). */
+.tb-line { font-family: var(--sans); font-style: normal; font-size: 16.5px; line-height: 1.6; color: rgba(247,241,227,.9); }
 .eyebrow, .label-cap { font-family: var(--sans); font-size: 11px; letter-spacing: .13em; font-weight: 600; }
 .sig-tag, .nc-tag { font-family: var(--sans); font-size: 10.5px; letter-spacing: .09em; font-weight: 600; }
 .sig-time { font-family: var(--sans); font-size: 11px; font-weight: 600; }
