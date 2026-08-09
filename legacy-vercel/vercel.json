@@ -214,6 +214,10 @@
     {
       "path": "/api/cron/ledger-send?key=thisisasecret1234",
       "schedule": "10 * * * *"
+    },
+    {
+      "path": "/api/cron/buyer-matches?key=thisisasecret1234",
+      "schedule": "12 15 * * *"
     }
   ]
 }
