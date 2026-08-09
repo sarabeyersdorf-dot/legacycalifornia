@@ -1,0 +1,8 @@
+{
+  "_comment": "Deal id → Dropbox listing folder, for the document publisher (publish-docs-from-dropbox) and the sync manifest read. This is a REPO-OWNED override that publish-from-dropbox never rewrites, so a deal's folder link survives every deals.json republish — unlike a `docFolder` field in deals.json, which Cowork must set and which gets wiped hourly. A deal's own deals.json `docFolder` still wins if present. Add a deal here (verified against Dropbox /_LEGACY/_Listings) to publish its Share-with-Seller / Share-with-Buyer / EX folders to the client portal.",
+  "preparing-324-augusta": "/_LEGACY/_Listings/324 Augusta",
+  "preparing-1143-echo": "/_LEGACY/_Listings/1143 Echo",
+  "467-skyline": "/_LEGACY/_Listings/467 Skyline",
+  "1111-dunbar": "/_LEGACY/_Listings/1111 Dunbar",
+  "fowler": "/_LEGACY/_Listings/Fowler"
+}
