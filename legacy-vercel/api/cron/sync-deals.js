@@ -330,6 +330,13 @@ function mapDocs(dealId, d, escrowIdByKey, manifest) {
   const seeds = [];
   const prefix = String(d.id || dealId);
   const seenKeys = new Set();
+  // Curated client docs (clientDocuments) are, by their name, the files the
+  // CLIENT is meant to see. Default them visible to the client side of THIS deal
+  // so they actually reach the portal — they used to default to agent_only, so a
+  // seller saw 0 documents even with the listing agreement + advisories on file
+  // (324 Augusta). An explicit per-doc visibility still wins, and the governance
+  // seed is insert-only, so an agent who later hides one keeps it hidden.
+  const defaultClientVis = (d.side === 'buyer') ? 'buyer' : (d.side === 'both' ? 'both' : 'seller');
   // Guarantee a unique doc_key per row even if two docs slug to the same thing.
   const uniqueKey = (base) => {
     let k = base, n = 2;
@@ -428,7 +435,7 @@ function mapDocs(dealId, d, escrowIdByKey, manifest) {
       client_safe: doc.client_safe === false ? false : true, // legacy flag; governance is the real gate
       updated_at: new Date().toISOString()
     });
-    pushSeed(doc_key, dispName, doc.visibility);
+    pushSeed(doc_key, dispName, doc.visibility || defaultClientVis);
   }
 
   // FOLDER-PUBLISHED PATH — documents published from Dropbox share folders by
