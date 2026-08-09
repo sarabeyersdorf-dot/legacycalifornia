@@ -22,13 +22,14 @@
 import { adminClient } from '../_lib/supabase.js';
 import { handleOptions, ok, fail } from '../_lib/cors.js';
 import { seedDeal } from '../_lib/handlers/crm-timeline.js';
-import { DOC_EVIDENCE } from '../_lib/timeline-template.js';
+import { DOC_EVIDENCE, expectedDueByKey } from '../_lib/timeline-template.js';
 import { createRequire } from 'module';
 const requireJson = createRequire(import.meta.url);
 
 const CONT = { cont_inspection: 'inspection', cont_appraisal: 'appraisal', cont_title: 'title', cont_insurance: 'insurance', cont_loan: 'loan' };
 const ISO = /^\d{4}-\d{2}-\d{2}/;
 const addDays = (iso, n) => new Date(new Date(iso.slice(0, 10) + 'T12:00:00Z').getTime() + n * 86400000).toISOString().slice(0, 10);
+const changeKey = (c) => { try { return JSON.stringify(c); } catch (_) { return String(c); } };
 
 export default async function handler(req, res) {
   if (handleOptions(req, res)) return;
@@ -70,35 +71,73 @@ export default async function handler(req, res) {
         return /^ETA|extension/i.test(k) && /executed|signed|filed/i.test(String(raw || ''));
       });
 
-      const effectiveDue = (item) => {
-        const c = CONT[item.key];
-        if (c) {
-          const ext = tl.extensions && tl.extensions[c];
-          if (typeof ext === 'string' && ISO.test(ext)) return ext.slice(0, 10);
-          const days = Number(tl.overrides && tl.overrides[c]);
-          const acc = tl.acceptance || tl.clockStart;
-          if (Number.isFinite(days) && days > 0 && typeof acc === 'string' && ISO.test(acc)) return addDays(acc, days);
-        }
-        if (item.key === 'coe' && typeof tl.coe === 'string' && ISO.test(tl.coe)) return tl.coe.slice(0, 10);
-        return item.due_date;
-      };
+      // Authoritative due date per item key, from deals.json timeline + deal
+      // columns (extensions, <c>Contingency dates, coe). One source of truth so
+      // a stale offset (Bug 3) or a null-seeded date (Bug 4) self-heals here.
+      const expected = expectedDueByKey({ ...deal, timeline: deal.timeline || src.timeline || null });
 
-      const [{ data: items }, { data: pend }, { data: docs }] = await Promise.all([
+      const [{ data: items }, { data: props }, { data: docs }] = await Promise.all([
         supa.from('deal_timeline_items').select('*').eq('deal_id', deal.id),
-        supa.from('deal_timeline_proposals').select('item_id').eq('deal_id', deal.id).eq('status', 'pending'),
+        supa.from('deal_timeline_proposals').select('item_id, item_key, change, status')
+          .eq('deal_id', deal.id).in('status', ['pending', 'rejected']),
         supa.from('deal_documents').select('name, doc_type, created_at').eq('deal_id', deal.id)
       ]);
-      const pending = new Set((pend || []).map((p) => p.item_id));
+      const pending = new Set((props || []).filter((p) => p.status === 'pending').map((p) => p.item_id));
+      // Rejected changes, keyed item_key → set of change payloads Sara already
+      // said no to. We never re-propose an equivalent change (Bug 1: the same
+      // walk-through "done" was re-created five mornings after four rejections).
+      const rejected = new Map();
+      for (const p of (props || [])) {
+        if (p.status !== 'rejected') continue;
+        const k = p.item_key || '';
+        if (!rejected.has(k)) rejected.set(k, new Set());
+        rejected.get(k).add(changeKey(p.change));
+      }
       const addr = [deal.address, deal.city].filter(Boolean).join(', ');
 
       const propose = async (item, change, reason) => {
         if (pending.has(item.id)) return;
+        // Suppress anything Sara has already rejected for this item+change.
+        const rej = rejected.get(item.key);
+        if (rej && rej.has(changeKey(change))) { out.suppressed_rejected = (out.suppressed_rejected || 0) + 1; return; }
         const { error: pErr } = await supa.from('deal_timeline_proposals').insert({
           deal_id: deal.id, item_id: item.id, item_key: item.key, address: addr,
           change, reason, source: 'cron'
         });
         if (!pErr) { pending.add(item.id); out.proposed += 1; }
       };
+
+      // Correct stale/missing due dates in place FIRST, for every live item —
+      // including ones seeded with a null date. This is an unambiguous,
+      // document/contract-backed change, so it is applied directly and logged to
+      // deal_activity — it does NOT go through the approval queue (Bug 2: writing
+      // an auto-approved proposal produced rows with decided_at < created_at).
+      for (const item of (items || [])) {
+        if (['done', 'waived', 'na'].includes(item.status)) continue;
+        if (paused) continue;
+        const eff = expected[item.key];
+        if (eff && ISO.test(String(eff)) && eff !== item.due_date) {
+          const nowIso = new Date().toISOString();
+          const { error: dErr } = await supa.from('deal_timeline_items')
+            .update({ due_date: eff, updated_at: nowIso }).eq('id', item.id);
+          if (!dErr) {
+            out.corrected_dates += 1;
+            await supa.from('deal_activity').insert({
+              deal_id: deal.id,
+              text: `Timeline: “${item.title}” due date ${item.due_date || '(unset)'} → ${eff} (recomputed from deals.json).`,
+              emphasis: 'normal'
+            }).then(() => {}, () => {});
+            item.due_date = eff;
+          }
+        }
+      }
+
+      // Bug 4b — an active deal whose close date can't be resolved is a data gap,
+      // not a silent blank. Surface it to the brief so the date gets recorded.
+      const coeItem = (items || []).find((i) => i.key === 'coe');
+      if (coeItem && !coeItem.due_date && !paused && !['done', 'na', 'waived'].includes(coeItem.status)) {
+        out.needs_info.push(`${deal.source_key}: close-of-escrow date is unknown — add timeline.coe (or closingDate) to deals.json`);
+      }
 
       for (const item of (items || [])) {
         if (['done', 'waived', 'na'].includes(item.status)) continue;
@@ -113,25 +152,6 @@ export default async function handler(req, res) {
         // No deadline chatter while the contract clock is stopped.
         if (paused) continue;
         if (!item.due_date) continue;
-
-        // Extension terms recompute the due date; correct stale item dates in
-        // place (audit-trailed) so the client page shows the post-ETA date.
-        const eff = effectiveDue(item);
-        if (eff && ISO.test(String(eff)) && eff !== item.due_date) {
-          const nowIso = new Date().toISOString();
-          const { error: dErr } = await supa.from('deal_timeline_items')
-            .update({ due_date: eff, updated_at: nowIso }).eq('id', item.id);
-          if (!dErr) {
-            out.corrected_dates += 1;
-            await supa.from('deal_timeline_proposals').insert({
-              deal_id: deal.id, item_id: item.id, item_key: item.key, address: addr,
-              change: { due_date: eff },
-              reason: `Due date recomputed from executed extension terms in deals.json (${item.due_date} → ${eff}) — auto-applied (document-backed).`,
-              source: 'cron', status: 'approved', decided_by: 'auto-doc', decided_at: nowIso
-            });
-            item.due_date = eff;
-          }
-        }
 
         // Date passed → confirm satisfied.
         if (item.due_date < today) {
