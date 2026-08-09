@@ -131,6 +131,36 @@ function docStatus(val) {
 // client's portal (drift-check's orphan_calendar / orphan_timeline).
 const ESCROW_STAGES = new Set(['pending', 'offer']);
 
+// Fallback timeline for a deal in escrow that has NO `timeline` block in
+// deals.json (Bug 4 — 695 Feather seeded every date null and never recovered).
+// Reconstruct Day 0 and the COE from the signals the deal DOES carry so the
+// client-facing timeline isn't blank: acceptance from the "offer accepted /
+// RPA executed" milestone, close from closingDate, and waived contingencies
+// (cash deals) dropped so we don't invent deadlines that don't apply.
+const _isoDate = (s) => (typeof s === 'string' && /^\d{4}-\d{2}-\d{2}/.test(s)) ? s.slice(0, 10) : null;
+function synthTimeline(d) {
+  const ms = Array.isArray(d.milestones) ? d.milestones : [];
+  const findMs = (re) => {
+    const hit = ms.find((m) => m && re.test(String(m.label || '')) && _isoDate(m.date));
+    return hit ? _isoDate(hit.date) : null;
+  };
+  const acceptance = findMs(/accept|executed|ratified|under contract/i);
+  const escrowOpen = d.openEscrowDate ? _isoDate(d.openEscrowDate) : findMs(/escrow open/i);
+  const coe = _isoDate(d.closingDate);
+  const a = d.attributes || {};
+  const removed = [];
+  if (a.appraisal_waived)  removed.push('appraisal');
+  if (a.loan_waived)       removed.push('loan');
+  if (a.inspection_waived) removed.push('inspection');
+  const tl = {};
+  if (acceptance) tl.acceptance = acceptance;
+  if (escrowOpen) tl.escrowOpen = escrowOpen;
+  if (coe)        tl.coe = coe;
+  if (removed.length) tl.removed = removed;
+  // Only worth storing if it anchors at least a Day 0 or a close date.
+  return (tl.acceptance || tl.escrowOpen || tl.coe) ? tl : null;
+}
+
 // Merge a deal's listing-sheet metadata with a top-level `client` name (from
 // the executed docs) so buyer-side deals carry a client without a full listing.
 function mergeMeta(d) {
@@ -210,7 +240,7 @@ function mapDeal(d) {
     // LIVE escrow keeps it — a deal that has left escrow (listing after a
     // cancellation, closed, preparing…) drops it so it can't generate phantom
     // deadlines/COE. deals.json retains the history either way.
-    timeline:       ESCROW_STAGES.has(d.stage) ? (d.timeline || null) : null,
+    timeline:       ESCROW_STAGES.has(d.stage) ? (d.timeline || synthTimeline(d)) : null,
     // ONE SHARED TIMELINE: At-a-Glance milestones + the author-attributed client
     // note, written verbatim from deals.json and read by the Today board, seller
     // portal, and buyer dashboard so all three show the same thing. Milestones
@@ -932,10 +962,20 @@ export default async function handler(req, res) {
     let timelineItemsRetired = 0;
     try {
       if (nonEscrowDealIds.length) {
+        // Retire to 'na' AND pull them off the client portal, and clear the dead
+        // due_date — a cancelled escrow was still rendering "Close of Escrow —
+        // 8/10" to sellers with no buyer (Bug 5). client_visible=false + null
+        // date means the row survives for agent history but shows nothing client-
+        // facing.
         const { data: retired } = await supa.from('deal_timeline_items')
-          .update({ status: 'na', updated_at: new Date().toISOString() })
+          .update({ status: 'na', client_visible: false, due_date: null, updated_at: new Date().toISOString() })
           .in('deal_id', nonEscrowDealIds).in('status', ['upcoming', 'action']).select('id');
         timelineItemsRetired = (retired || []).length;
+        // Also fix already-'na' rows from earlier runs that kept their dates/visibility.
+        await supa.from('deal_timeline_items')
+          .update({ client_visible: false, due_date: null, updated_at: new Date().toISOString() })
+          .in('deal_id', nonEscrowDealIds).eq('status', 'na').eq('client_visible', true)
+          .then(() => {}, () => {});
       }
     } catch (e) { errors.push({ deal: 'retire-timeline-items', error: e.message || String(e) }); }
 

@@ -97,6 +97,23 @@ export function buildTimelineItems(deal) {
   return rows;
 }
 
+// The authoritative due date for every timeline item key, computed from the
+// deal's current dates (deals.json timeline + deal columns). Used by the daily
+// scan to correct dates IN PLACE on already-seeded deals — so a deal seeded
+// before its `loanContingency` was known (Bug 3), or seeded with null dates
+// because it had no `timeline` block at all (Bug 4), self-heals on the next run
+// without a re-seed. Returns { key: 'YYYY-MM-DD' | null }.
+export function expectedDueByKey(deal) {
+  const T = computeTimeline(dealTimelineInput(deal));
+  const byKey = Object.fromEntries((T.contingencies || []).map((c) => [c.key, c.date]));
+  const out = {};
+  for (const t of TEMPLATE) {
+    if (t.cKey) out[t.key] = byKey[t.cKey] || null;      // null if that contingency isn't active
+    else out[t.key] = t.due ? (t.due(T, deal) || null) : null;
+  }
+  return out;
+}
+
 // Evidence keywords for matching deal_documents rows to disclosure items.
 export const DOC_EVIDENCE = {
   nhd: /natural hazard|nhd/i,

@@ -404,15 +404,20 @@ export async function reconcileFromDealsFile(supa) {
             .update({ ...change, updated_at: now() }).eq('id', item.id);
           if (uErr) { summary.skipped++; continue; }
           if (pend?.length) {
+            // A queued proposal is now satisfied by evidence — resolve it.
+            // (decided_at = now, always ≥ the row's earlier created_at.)
             await supa.from('deal_timeline_proposals')
               .update({ status: 'approved', decided_by: 'auto-doc', decided_at: now() })
               .in('id', pend.map((p) => p.id));
           } else {
-            await supa.from('deal_timeline_proposals').insert({
-              deal_id: deal.id, item_id: item.id, item_key: item.key, address: addr,
-              change, reason: reason + ' — auto-applied (document-backed)', source: 'cron',
-              status: 'approved', decided_by: 'auto-doc', decided_at: now()
-            });
+            // No queue item to resolve: an unambiguous auto-apply must NOT
+            // fabricate an already-decided proposal (Bug 2 — that wrote rows with
+            // decided_at milliseconds BEFORE created_at, and bypassed review). The
+            // item is already updated above; record it as deal activity instead.
+            await supa.from('deal_activity').insert({
+              deal_id: deal.id, emphasis: 'normal',
+              text: (item.title || key) + ' marked done — auto-applied from ' + token + ' on file' + (done_at ? ' (' + done_at.slice(0, 10) + ')' : '') + '.'
+            }).then(() => {}, () => {});
           }
           byKey[key].status = 'done'; // in-run memo: a 2nd doc token can't re-apply
           summary.auto_applied.push(label);

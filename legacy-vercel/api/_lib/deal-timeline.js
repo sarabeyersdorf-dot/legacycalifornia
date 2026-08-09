@@ -29,6 +29,33 @@ export const CONTINGENCY_LABEL = {
 };
 export const DEFAULT_CONTINGENCY_DAYS = 17;
 
+// deals.json expresses a per-contingency deadline three ways. In priority order:
+//   1. timeline.extensions.<c>       — an executed ETA's new ISO date
+//   2. timeline.<c>Contingency       — an explicit ISO date (e.g. loanContingency)
+//   3. timeline.overrides.<c>        — a day-count from Day 0
+// The first two are absolute dates and must WIN over the 17-day default; the
+// third is handled by computeTimeline's day-count path. This map + helper are
+// the single source of truth so the seeder, the scan-time corrector, and the
+// briefing calendar all read the same authoritative date.
+const CONT_DIRECT_KEY = {
+  inspection: 'inspectionContingency',
+  appraisal:  'appraisalContingency',
+  loan:       'loanContingency',
+  insurance:  'insuranceContingency',
+  title:      'titleContingency'
+};
+// Explicit (absolute-date) per-contingency overrides pulled from a timeline JSON.
+export function explicitContingencyDates(tl = {}) {
+  const out = {};
+  for (const c of STANDARD_CONTINGENCIES) {
+    const ext = tl.extensions && tl.extensions[c];
+    if (isDateStr(ext)) { out[c] = ext.slice(0, 10); continue; }
+    const direct = tl[CONT_DIRECT_KEY[c]];
+    if (isDateStr(direct)) { out[c] = direct.slice(0, 10); }
+  }
+  return out;
+}
+
 // --- date-only helpers (operate on 'YYYY-MM-DD' in the calendar sense) -------
 const pad2 = (n) => String(n).padStart(2, '0');
 const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
@@ -114,10 +141,29 @@ export function computeTimeline(input = {}) {
   if (clockPaused) {
     return { paused: true, day0: null, basis: 'clock not started', contingencies: [], coe: null };
   }
-  if (!day0) return { paused: false, day0: null, basis: null, contingencies: [], coe: null };
+
+  // COE — explicit contract date, else coeDays from Day 0. Rolls forward off a
+  // weekend/holiday (COE must land on a business day). An EXPLICIT contract COE
+  // needs no Day 0, so it is computed first: a deal with a close date but no
+  // recorded acceptance (e.g. an imported buy-side deal) still shows its COE and
+  // final walk-through instead of a blank timeline (Bug 4).
+  let coe = null;
+  const coeRaw = isDateStr(input.coe) ? input.coe
+              : (Number.isFinite(+input.coeDays) && day0 ? addDays(day0, +input.coeDays) : null);
+  if (coeRaw) {
+    const rolled = rollForwardBusinessDay(coeRaw);
+    coe = {
+      date: rolled, original: coeRaw, rolled: rolled !== coeRaw,
+      basis: isDateStr(input.coe) ? 'contract' : `${input.coeDays} days from ${basis}`
+    };
+  }
+
+  // No Day 0 → contingency offsets are unknowable, but an explicit COE stands.
+  if (!day0) return { paused: false, day0: null, basis: null, contingencies: [], coe };
 
   const baseDays = Number.isFinite(+input.contingencyDays) ? +input.contingencyDays : DEFAULT_CONTINGENCY_DAYS;
   const overrides = input.overrides || {};
+  const explicit  = input.contingencyDates || {};
 
   // Which contingencies still emit?
   let active;
@@ -126,28 +172,19 @@ export function computeTimeline(input = {}) {
   else active = STANDARD_CONTINGENCIES.slice();
 
   const contingencies = active.map((key) => {
+    // An absolute date from deals.json (extension or <c>Contingency) is
+    // authoritative and overrides the derived offset. Otherwise a day-count
+    // override, otherwise the 17-day default.
+    const hasExplicit = isDateStr(explicit[key]);
     const days = Number.isFinite(+overrides[key]) ? +overrides[key] : baseDays;
-    const date = addDays(day0, days);
+    const date = hasExplicit ? explicit[key] : addDays(day0, days);
     return {
       key, label: CONTINGENCY_LABEL[key] || key,
-      date, days,
+      date, days: hasExplicit ? null : days, explicit: hasExplicit,
       weekend: isWeekend(date), holiday: isFederalHoliday(date),
       flagged: isNonBusinessDay(date)
     };
   });
-
-  // COE — explicit date, else coeDays from Day 0. Rolls forward off a
-  // weekend/holiday (COE must land on a business day).
-  let coe = null;
-  const coeRaw = isDateStr(input.coe) ? input.coe
-              : (Number.isFinite(+input.coeDays) ? addDays(day0, +input.coeDays) : null);
-  if (coeRaw) {
-    const rolled = rollForwardBusinessDay(coeRaw);
-    coe = {
-      date: rolled, original: coeRaw, rolled: rolled !== coeRaw,
-      basis: isDateStr(input.coe) ? 'contract' : `${input.coeDays} days from ${basis}`
-    };
-  }
 
   return { paused: false, day0, basis, contingencies, coe };
 }
@@ -162,12 +199,17 @@ function cleanStr(v) { return v == null ? null : String(v).replace(/[<>]/g, '').
 export function dealTimelineInput(row) {
   const tl = row.timeline || {};
   const input = {
-    acceptance:      tl.acceptance || null,
+    // Day 0: explicit acceptance, else the deal's acceptance/escrow-open columns
+    // (a deal with no `timeline` block still anchors its dates — Bug 4).
+    acceptance:      tl.acceptance || row.acceptance_date || null,
     escrowOpen:      tl.escrowOpen || row.escrow_open_date || null,
     contingencyDays: tl.contingencyDays,
     overrides:       tl.overrides
                       || (Number.isFinite(+row.loan_contingency_days) && +row.loan_contingency_days !== DEFAULT_CONTINGENCY_DAYS
                           ? { loan: +row.loan_contingency_days } : undefined),
+    // Absolute per-contingency dates (extensions + <c>Contingency keys) win over
+    // the 17-day offset (Bug 3).
+    contingencyDates: explicitContingencyDates(tl),
     coe:             tl.coe || row.coe_date || null,
     coeDays:         tl.coeDays,
     remaining:       Array.isArray(tl.remaining) ? tl.remaining : null,
@@ -209,7 +251,7 @@ export function timelineEvents(row, { todayStr = null, endStr = null } = {}) {
       title: `${c.label}${addrShort ? ' — ' + addrShort : ''}${verify}`,
       start: c.date, end: null, all_day: true, weekend: !!c.flagged,
       agent, client, deal, type: 'deadline', location,
-      notes: `${c.days} days from ${T.basis} ${T.day0}.${warn}`
+      notes: `${c.explicit ? `Per contract / executed extension (${c.date})` : `${c.days} days from ${T.basis} ${T.day0}`}.${warn}`
     });
   }
 
