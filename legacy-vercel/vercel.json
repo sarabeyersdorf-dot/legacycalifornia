@@ -57,6 +57,12 @@
       "permanent": true
     },
     {
+      "source": "/:path*",
+      "has": [{ "type": "host", "value": "legacycalifornia.vercel.app" }],
+      "destination": "https://legacycalifornia.com/:path*",
+      "permanent": true
+    },
+    {
       "source": "/listings",
       "destination": "/property-search.html",
       "permanent": true
