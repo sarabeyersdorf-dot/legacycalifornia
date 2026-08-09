@@ -64,9 +64,28 @@ export default async function handler(req, res) {
   if (req.method !== 'POST') return fail(res, 405, 'method_not_allowed');
 
   const b = await readJson(req);
-  const listingId = String(b.listing_id || '').trim();
-  if (!listingId) return fail(res, 400, 'listing_id required');
   const unsave = !!b.unsave;
+
+  // Path 2: save an EXISTING property directly by id (dashboard match/saved
+  // cards, which are already rows in our properties table — no IDX lookup).
+  const propertyId = b.property_id ? String(b.property_id).trim() : '';
+  if (propertyId) {
+    const { data: exists } = await supa.from('properties').select('id').eq('id', propertyId).maybeSingle();
+    if (!exists) return fail(res, 404, 'property not found');
+    if (unsave) {
+      await supa.from('saved_properties').delete().eq('lead_id', lead.id).eq('property_id', propertyId);
+      return ok(res, { saved: false });
+    }
+    const { error } = await supa.from('saved_properties')
+      .upsert({ lead_id: lead.id, property_id: propertyId, tag: 'favorite', last_viewed_at: new Date().toISOString() },
+              { onConflict: 'lead_id,property_id' });
+    if (error) return fail(res, 500, error.message);
+    return ok(res, { saved: true });
+  }
+
+  // Path 1: save by iHomefinder listing id (IDX search/detail cards).
+  const listingId = String(b.listing_id || '').trim();
+  if (!listingId) return fail(res, 400, 'listing_id or property_id required');
   const priceInt = (b.price != null && !isNaN(parseInt(b.price, 10))) ? parseInt(b.price, 10) : null;
 
   // Find the property row (keyed by iHomefinder listing id); create on first save.

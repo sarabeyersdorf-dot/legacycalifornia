@@ -1784,6 +1784,16 @@
       const v = dget(item, el.getAttribute('data-bind-href'));
       if (v != null) el.setAttribute('href', v);
     });
+    // Generic attribute binding: data-bind-attr="attr:path[,attr2:path2]".
+    row.querySelectorAll('[data-bind-attr]').forEach((el) => {
+      if (el.closest('[data-list]')) return;
+      (el.getAttribute('data-bind-attr') || '').split(',').forEach((pair) => {
+        const i = pair.indexOf(':'); if (i < 0) return;
+        const attr = pair.slice(0, i).trim();
+        const v = dget(item, pair.slice(i + 1).trim());
+        if (attr && v != null) el.setAttribute(attr, v);
+      });
+    });
     row.querySelectorAll('[data-toggle]').forEach((el) => {
       if (el.closest('[data-list]')) return;
       el.classList.toggle('on', !!dget(item, el.getAttribute('data-toggle')));
@@ -2016,6 +2026,16 @@
       if (el.closest('[data-list]')) return;
       const v = dget(item, el.getAttribute('data-bind-href'));
       if (v != null) el.setAttribute('href', v);
+    });
+    // Generic attribute binding: data-bind-attr="attr:path[,attr2:path2]".
+    row.querySelectorAll('[data-bind-attr]').forEach((el) => {
+      if (el.closest('[data-list]')) return;
+      (el.getAttribute('data-bind-attr') || '').split(',').forEach((pair) => {
+        const i = pair.indexOf(':'); if (i < 0) return;
+        const attr = pair.slice(0, i).trim();
+        const v = dget(item, pair.slice(i + 1).trim());
+        if (attr && v != null) el.setAttribute(attr, v);
+      });
     });
     row.querySelectorAll('[data-toggle]').forEach((el) => {
       if (el.closest('[data-list]')) return;

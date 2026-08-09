@@ -439,7 +439,7 @@ body.viewing-browse .dash-grid { display: none; } /* Browse takes over the main 
             </div>
             <div class="saved-actions">
               <a href="listing.html" class="btn btn-ink btn-sm" data-bind-href="listing_url">View residence</a>
-              <button class="btn btn-ghost btn-sm">Book tour</button>
+              <button type="button" class="dash-heart" data-dash-save data-bind-attr="data-save-id:save_id" aria-pressed="false" title="Save this home">&#9825;</button>
             </div>
           </div>
 
@@ -494,15 +494,16 @@ body.viewing-browse .dash-grid { display: none; } /* Browse takes over the main 
             </div>
             <div class="dash-state dash-loading" data-state="loading" style="display:none;"><span class="dash-spinner"></span> Loading…</div>
             <div class="dash-state dash-empty" data-state="empty" style="display:none;">Nothing saved yet — tap the heart on any listing.</div>
-            <div class="saved-row" data-row style="grid-template-columns: 96px 1fr; gap: 14px; padding: 12px 0;">
+            <div class="saved-row" data-row style="grid-template-columns: 96px 1fr auto; gap: 14px; padding: 12px 0; align-items: start;">
               <div class="saved-photo" style="width: 96px; height: 72px;">
                 <img src="https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?w=300&q=85" alt="" data-bind="photo">
               </div>
               <div class="saved-info">
                 <span class="saved-price" style="font-size: 18px;" data-bind="price">$1,195,000</span>
-                <span class="saved-addr" style="font-size: 12px;" data-bind="address">8001 Vineyard Ridge · Sutter Creek</span>
+                <a class="saved-addr" style="font-size: 12px;text-decoration:none;color:inherit;" data-bind="address" data-bind-href="listing_url">8001 Vineyard Ridge · Sutter Creek</a>
                 <div class="saved-tags" data-list="tags" data-optional><span class="tag-mini" data-row data-bind="label">Favorite</span></div>
               </div>
+              <button type="button" class="dash-heart is-on" data-dash-save data-bind-attr="data-save-id:save_id" aria-pressed="true" title="Saved — remove">&#9829;</button>
             </div>
             <div class="saved-row" style="grid-template-columns: 96px 1fr; gap: 14px; padding: 12px 0;">
               <div class="saved-photo" style="width: 96px; height: 72px;">
@@ -776,6 +777,44 @@ document.querySelectorAll('.toggle').forEach(t => {
   // The topbar search box also jumps into Browse.
   var topSearch = document.querySelector('.app-search input');
   if (topSearch) topSearch.addEventListener('focus', showBrowse);
+})();
+</script>
+
+<style>
+  .dash-heart { background:transparent; border:1px solid rgba(27,24,19,.16); border-radius:50%; width:34px; height:34px; font-size:16px; line-height:1; cursor:pointer; color:#8C6E3D; display:inline-flex; align-items:center; justify-content:center; flex:none; transition:background .15s,color .15s,border-color .15s; }
+  .dash-heart:hover { background:rgba(140,110,61,.12); }
+  .dash-heart.is-on { background:#8C6E3D; color:#fff; border-color:#8C6E3D; }
+  .dash-heart[disabled] { opacity:.5; cursor:default; }
+</style>
+<script>
+// Save/unsave from the dashboard match + saved cards. Writes to our own DB via
+// /api/me/save-property (by property_id — these are already properties rows).
+(function () {
+  document.addEventListener('click', function (e) {
+    var b = e.target.closest('[data-dash-save]');
+    if (!b) return;
+    e.preventDefault();
+    var id = b.getAttribute('data-save-id');
+    if (!id) return;
+    var on = b.classList.contains('is-on');
+    b.disabled = true;
+    fetch('/api/me/save-property', {
+      method: 'POST', credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ property_id: id, unsave: on })
+    })
+      .then(function (r) { if (r.status === 401) { location.href = 'dashboard.html'; return null; } return r.ok ? r.json() : null; })
+      .then(function (j) {
+        if (j && typeof j.saved === 'boolean') {
+          b.classList.toggle('is-on', j.saved);
+          b.innerHTML = j.saved ? '&#9829;' : '&#9825;';
+          b.setAttribute('aria-pressed', j.saved ? 'true' : 'false');
+          b.title = j.saved ? 'Saved — remove' : 'Save this home';
+        }
+        b.disabled = false;
+      })
+      .catch(function () { b.disabled = false; });
+  });
 })();
 </script>
 </body>

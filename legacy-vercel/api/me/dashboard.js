@@ -223,7 +223,9 @@ export default async function handler(req, res) {
       address:      sanitize(`${p.address || ''}${p.city ? `, ${p.city}` : ''}`),
       note:         pct >= 85 ? 'Hits your brief on price, area, and size.' : undefined,
       tags:         (p.features?.tags || []).slice(0, 3).map((label) => ({ label })),
-      listing_url:  p.mls_number ? `/listing.html?mls=${encodeURIComponent(p.mls_number)}` : '/listing.html',
+      listing_url:  p.ihomefinder_idx_id ? `/listing.html?id=${encodeURIComponent(p.ihomefinder_idx_id)}`
+                  : p.mls_number ? `/listing.html?id=${encodeURIComponent(p.mls_number)}` : '/listing.html',
+      save_id:      p.id,
       _price:       p.price  // kept for digest.items lookup; painter ignores _-prefixed keys
     }));
 
@@ -240,6 +242,7 @@ export default async function handler(req, res) {
         price:       fmtUSD(p.price),
         address:     sanitize(`${p.address || ''}${p.city ? `, ${p.city}` : ''}`),
         tags:        tagPills,
+        save_id:     p.id,
         listing_url: p.ihomefinder_idx_id ? `/listing.html?id=${encodeURIComponent(p.ihomefinder_idx_id)}`
                    : p.mls_number ? `/listing.html?id=${encodeURIComponent(p.mls_number)}` : '/listing.html'
       };
