@@ -215,7 +215,15 @@
     for (var i = 0; i < vids.length; i++) {
       var v = vids[i];
 
+      // Reveal the still illustration (hidden by default) whenever the video
+      // won't be playing — reduced-motion here, or a load failure below.
+      var reveal = function (el) {
+        var host = el && el.parentNode;
+        if (host && host.classList) host.classList.add('show-fallback');
+      };
+
       if (REDUCED) {
+        reveal(v);
         try { v.pause(); v.removeAttribute('autoplay'); v.removeAttribute('src');
               while (v.firstChild) v.removeChild(v.firstChild); } catch (e) {}
         continue;
@@ -230,9 +238,10 @@
          its sources, and re-check shortly after in case the failure is still
          in flight. NETWORK_NO_SOURCE (3) is the state a video lands in when
          nothing playable was found. */
-      var drop = function (el) {
-        return function () { if (el.parentNode) el.parentNode.removeChild(el); };
-      }(v);
+      var drop = function (el, show) {
+        var host = el && el.parentNode;
+        return function () { show(el); if (host && host.contains(el)) host.removeChild(el); };
+      }(v, reveal);
 
       var failed = function (el) {
         return el.error !== null || el.networkState === 3;   /* NETWORK_NO_SOURCE */

@@ -546,6 +546,14 @@
   background: linear-gradient(180deg, var(--lg-sky-a), var(--lg-sky-b) 55%, var(--lg-sky-c));
 }
 .lg-hero--short { min-height: clamp(320px, 42vh, 440px); }   /* interior pages */
+/* The .lg-hero background is a peach "sky" meant to sit BEHIND the illustrated
+   .lg-hero__art landscape. The listing / IDX pages reuse .lg-hero but omit that
+   art layer, so the bare peach sky showed through. Give art-less heroes a deep,
+   on-brand ground instead — the hero text is already white/gold, so it stays
+   legible. Self-correcting: any hero without an art layer gets this. */
+.lg-hero:not(:has(.lg-hero__art)) {
+  background: linear-gradient(158deg, #3A322A 0%, #26201B 55%, #1C1712 100%);
+}
 .lg-hero__art { position: absolute; inset: 0; width: 100%; height: 100%; }
 .lg-hero__art svg,
 .lg-hero__art img,
@@ -557,15 +565,24 @@
    reduced motion (see below). Markup order is fallback first, video second.
    Never ship a video hero without that layer underneath — a black rectangle
    on a slow connection is worse than a drawing. */
-.lg-hero__art--video { display: grid; }
+.lg-hero__art--video { display: grid; background: #0F0C08; }
 .lg-hero__art--video > * { grid-area: 1 / 1; }        /* stack, no absolute soup */
 .lg-hero__art--video video { position: relative; z-index: 1; }
+/* During cold-load buffering the <video> has no frame yet and paints
+   transparent, so the illustration behind it used to flash through on first
+   visit (it only "worked" on refresh, once the footage was cached). Hide the
+   fallback by default over a dark brand ground, and reveal the drawing only
+   when the video genuinely fails (lg-ui.js adds .show-fallback) or for
+   reduced-motion — so first paint reads as video, never the cartoon. */
+.lg-hero__art--video > div[aria-hidden="true"] { opacity: 0; transition: opacity .5s ease; }
+.lg-hero__art--video.show-fallback > div[aria-hidden="true"] { opacity: 1; }
 
 /* Autoplaying video is motion the visitor did not ask for, so reduced-motion
    hides it and reveals the still illustration underneath. lg-ui.js also calls
    pause() so the browser stops spending bandwidth on it, not just hides it. */
 @media (prefers-reduced-motion: reduce) {
   .lg-hero__art--video video { display: none; }
+  .lg-hero__art--video > div[aria-hidden="true"] { opacity: 1; }   /* show the still illustration */
 }
 .lg-hero__scrim {
   position: absolute; inset: 0;

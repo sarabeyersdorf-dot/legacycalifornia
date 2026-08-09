@@ -25,8 +25,12 @@ export default async function handler(req, res) {
     const { email, redirect } = await readJson(req);
     if (!email) return fail(res, 400, 'email required');
 
-    const origin = `${req.headers['x-forwarded-proto'] || 'https'}://${req.headers['x-forwarded-host'] || req.headers.host}`;
-    const emailRedirectTo = redirect || `${origin}/api/auth/callback`;
+    // Always anchor the callback to the canonical production domain, NOT the
+    // request Host — otherwise a link requested from legacycalifornia.vercel.app
+    // emails a vercel.app callback, stranding the user on a domain where the
+    // (domain-locked) IDX / MLS widget renders nothing. PUBLIC_SITE_URL wins if set.
+    const site = (process.env.PUBLIC_SITE_URL || 'https://legacycalifornia.com').replace(/\/+$/, '');
+    const emailRedirectTo = redirect || `${site}/api/auth/callback`;
 
     // Path A — Resend is configured: mint the link admin-side, send via Resend.
     if (resendConfigured()) {
