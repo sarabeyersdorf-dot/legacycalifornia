@@ -25,12 +25,22 @@
 // Env (same secrets publish-from-dropbox already uses):
 //   PUBLISH_SECRET, GITHUB_TOKEN, DROPBOX_APP_KEY/SECRET/REFRESH_TOKEN, SYNC_SECRET
 
+import { createRequire } from 'module';
+
 const GITHUB_OWNER = 'sarabeyersdorf-dot';
 const GITHUB_REPO = 'legacycalifornia';
 const GITHUB_BRANCH = 'main';
 const DEALS_PATH = 'legacy-vercel/data/deals.json';
 const DOCS_DIR = 'legacy-vercel/public/docs';           // served at /docs/...
 const MANIFEST_DIR = 'legacy-vercel/data/portal-docs';  // read by the sync
+
+// Repo-owned deal→Dropbox-folder map. Lets a deal be published even when its
+// deals.json record has no `docFolder` (Cowork rarely sets it, and it's wiped on
+// every deals.json republish). A deal's own `docFolder` still wins.
+const _require = createRequire(import.meta.url);
+let DOC_FOLDER_OVERRIDES = {};
+try { DOC_FOLDER_OVERRIDES = _require('../../data/doc-folders.json') || {}; } catch (_) {}
+const docFolderFor = (d) => (d && (d.docFolder || DOC_FOLDER_OVERRIDES[d.id])) || '';
 
 // Folder name (case-insensitive, relative to a deal's docFolder) → visibility.
 const FOLDER_VISIBILITY = [
@@ -179,11 +189,11 @@ export default async function handler(req, res) {
   try {
     const token = await dropboxToken(env);
     const deals = (await ghGetJson(env, DEALS_PATH)).deals || [];
-    const targets = deals.filter((d) => d && d.docFolder && (!onlyDeal || d.id === onlyDeal));
+    const targets = deals.filter((d) => d && docFolderFor(d) && (!onlyDeal || d.id === onlyDeal));
 
     for (const d of targets) {
       const dealId = d.id;
-      const base = String(d.docFolder).replace(/\/+$/, '');
+      const base = String(docFolderFor(d)).replace(/\/+$/, '');
       const manifest = [];
       const seen = new Set();
       const dealOut = { deal: dealId, published: 0, unchanged: 0, folders: [] };

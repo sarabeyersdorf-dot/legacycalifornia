@@ -48,6 +48,12 @@ async function loadManifest(id) {
   try { return require(`../../data/portal-docs/${id}.json`); } catch (_) { return []; }
 }
 
+// Repo-owned deal→Dropbox-folder map (see publish-docs-from-dropbox). Mirrors the
+// publisher so the sync loads a deal's published doc manifest even when deals.json
+// has no `docFolder` field (Cowork rarely sets it and it's wiped on republish).
+let DOC_FOLDER_OVERRIDES = {};
+try { DOC_FOLDER_OVERRIDES = require('../../data/doc-folders.json') || {}; } catch (_) {}
+
 // --- document label + status maps (mirror the compliance checklist) --------
 const DOC_LABELS = {
   RPA: ['Purchase Agreement', 'Core contract'],
@@ -943,7 +949,7 @@ export default async function handler(req, res) {
         // Rebuild this deal's documents (delete then insert = idempotent).
         // Resilient: a bad doc row is collected in docStats, never thrown, so it
         // can't drop the deal's other docs or abort the run.
-        const manifest = d.docFolder ? await loadManifest(d.id) : [];
+        const manifest = (d.docFolder || DOC_FOLDER_OVERRIDES[d.id]) ? await loadManifest(d.id) : [];
         const { rows: docRows, seeds: docSeeds } = mapDocs(dealId, d, escrowIdByKey, manifest);
         await writeDealDocs(supa, dealId, docRows, docStats);
         for (const s of docSeeds) govSeeds.push({ ...s, deal_id: dealId });
