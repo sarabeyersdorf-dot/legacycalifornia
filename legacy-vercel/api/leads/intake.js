@@ -38,16 +38,22 @@ const ALLOWED_TYPE    = new Set(['buyer','seller','both','land','relocation']);
 // visually-offscreen input to each form; a filled value = a bot.
 const HONEYPOT_FIELDS = ['company','website','url','fax'];
 
-// The team's own addresses. When one of these submits a form we still record
-// the lead (so end-to-end form testing works), but we DON'T score it, draft it,
+// The team's ACTUAL working logins. When one of these submits a form we still
+// record the lead (so end-to-end testing works) but we DON'T score it, draft it,
 // enroll it in nurture, sync it to FUB, or alert the agents — otherwise the CRM
 // scores staff as buyers and queues outreach addressed to the team itself
-// (Bug 9: James's website test scored him at $500K and drafted an SMS to him).
+// (Bug 9: a staff address scored as a $500K buyer and drafted an SMS to itself).
+//
+// NOTE: this is the STAFF-MAILBOX list, not a "don't let us test" list. James
+// deliberately tests the buyer journey from james@jamesbeyersdorf.com — that is
+// a real test lead and must run the full pipeline, so his personal domain is NOT
+// suppressed here. Only the real agent mailboxes are. To deliberately test from
+// a staff address anyway, pass test_lead:true on the form submit (below).
 const INTERNAL_ADDRESSES = new Set([
   'sarasellscalifornia@gmail.com',
   'jamessellscalifornia@gmail.com'
 ]);
-const INTERNAL_DOMAINS = ['jamesbeyersdorf.com', 'legacycalifornia.com'];
+const INTERNAL_DOMAINS = ['legacycalifornia.com'];
 function isInternalAddress(email) {
   const e = String(email || '').toLowerCase().trim();
   if (!e) return false;
@@ -115,8 +121,10 @@ export default async function handler(req, res) {
       return fail(res, 400, 'valid email required');
     }
 
-    // Team address → tag it and hold back every downstream automation.
-    const internal = isInternalAddress(fields.email);
+    // Team address → tag it and hold back every downstream automation. An
+    // explicit test_lead:true on the submit overrides this so a staff address can
+    // be run through the FULL pipeline on purpose when we're testing.
+    const internal = isInternalAddress(fields.email) && body.test_lead !== true;
     if (internal) fields.source = 'internal_test';
 
     const supa = adminClient();
