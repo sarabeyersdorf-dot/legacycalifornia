@@ -222,9 +222,37 @@ async function applyConsent(supa, body) {
   if (!rows.length) return { kind: 'consent', error: 'no rows parsed' };
 
   const summary = { kind: 'consent', parsed: rows.length, applied: 0, dnc_promoted: 0, sphered: 0, not_found: 0, errors: [] };
+
+  // GUARD (2026-08-09): a mislabeled consent CSV once flagged a THIRD of the list
+  // (693 of 2,076 contacts) opt-out/DNC in one silent pass. Count how many rows
+  // this upload would suppress BEFORE touching anything, and refuse to apply an
+  // implausibly large sweep unless the caller explicitly opts in. A genuine bulk
+  // suppression is a deliberate act — it passes allow_mass_dnc:true and proceeds.
+  const SUPPRESS_CAP = Number.isFinite(+body.suppress_cap) ? +body.suppress_cap : 50;
+  const wouldSuppress = rows.filter((r) =>
+    truthy(r.no_call) || truthy(r.no_sms) || truthy(r.no_email) || truthy(r.not_interested)).length;
+  const wouldDnc = rows.filter((r) =>
+    (truthy(r.no_call) && truthy(r.no_sms) && truthy(r.no_email)) || truthy(r.not_interested)).length;
+  summary.would_suppress = wouldSuppress;
+  summary.would_dnc = wouldDnc;
+  summary.suppress_cap = SUPPRESS_CAP;
+
   if (body.dry_run) {
     summary.preview = rows.slice(0, 5);
+    summary.would_exceed_cap = wouldSuppress > SUPPRESS_CAP;
     return summary;
+  }
+
+  if (wouldSuppress > SUPPRESS_CAP && body.allow_mass_dnc !== true) {
+    return {
+      kind: 'consent', error: 'suppression_cap_exceeded',
+      parsed: rows.length, applied: 0, would_suppress: wouldSuppress, would_dnc: wouldDnc,
+      suppress_cap: SUPPRESS_CAP,
+      message: `This upload would flag ${wouldSuppress} contacts as opt-out/do-not-contact `
+        + `(${wouldDnc} promoted to full "do not contact"), above the ${SUPPRESS_CAP} safety cap. `
+        + `A mislabeled CSV once suppressed a third of the list this way — nothing was applied. `
+        + `If this really is a bulk suppression, re-run with allow_mass_dnc:true (or raise suppress_cap).`
+    };
   }
 
   for (const r of rows) {
