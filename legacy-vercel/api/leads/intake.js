@@ -38,6 +38,24 @@ const ALLOWED_TYPE    = new Set(['buyer','seller','both','land','relocation']);
 // visually-offscreen input to each form; a filled value = a bot.
 const HONEYPOT_FIELDS = ['company','website','url','fax'];
 
+// The team's own addresses. When one of these submits a form we still record
+// the lead (so end-to-end form testing works), but we DON'T score it, draft it,
+// enroll it in nurture, sync it to FUB, or alert the agents — otherwise the CRM
+// scores staff as buyers and queues outreach addressed to the team itself
+// (Bug 9: James's website test scored him at $500K and drafted an SMS to him).
+const INTERNAL_ADDRESSES = new Set([
+  'sarasellscalifornia@gmail.com',
+  'jamessellscalifornia@gmail.com'
+]);
+const INTERNAL_DOMAINS = ['jamesbeyersdorf.com', 'legacycalifornia.com'];
+function isInternalAddress(email) {
+  const e = String(email || '').toLowerCase().trim();
+  if (!e) return false;
+  if (INTERNAL_ADDRESSES.has(e)) return true;
+  const domain = e.split('@')[1] || '';
+  return INTERNAL_DOMAINS.some((d) => domain === d || domain.endsWith('.' + d));
+}
+
 // Per-IP / per-email velocity guard. Fail-OPEN: if the intake_hits table isn't
 // there yet or the DB hiccups, we never block a real lead.
 async function rateLimited(supa, ip, email) {
@@ -96,6 +114,10 @@ export default async function handler(req, res) {
     if (!fields.email || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(fields.email)) {
       return fail(res, 400, 'valid email required');
     }
+
+    // Team address → tag it and hold back every downstream automation.
+    const internal = isInternalAddress(fields.email);
+    if (internal) fields.source = 'internal_test';
 
     const supa = adminClient();
 
@@ -162,6 +184,13 @@ export default async function handler(req, res) {
         source:     'website',
         event_data: { scheduled_at: body.tour.scheduled_at, property_id: body.property_id || null }
       });
+    }
+
+    // Internal test submissions record the lead and its event (so the pipeline
+    // is verified end to end) but skip scoring, drafting, FUB sync, and the
+    // agent alert entirely.
+    if (internal) {
+      return ok(res, { lead_id: lead.id, is_new, internal_test: true, side_effects: { skipped: 'internal address' } });
     }
 
     // Fire-and-forget: AI welcome draft + score + FUB sync.
