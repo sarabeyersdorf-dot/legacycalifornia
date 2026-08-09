@@ -116,21 +116,28 @@ function buildICS({ uid, start, end, summary, description, location, attendeeEma
 export default async function handler(req, res) {
   if (handleOptions(req, res)) return;
 
-  const { user, profile } = await getCallerProfile(req, res);
-  if (!user)             return fail(res, 401, 'not authenticated');
-  if (!isAgent(profile)) return fail(res, 403, 'agents only');
-
-  const supa = adminClient();
-  const agent = profile.role === 'agent_james' ? 'james' : 'sara';
-
+  // One try/catch around EVERYTHING — including auth. A throw in
+  // getCallerProfile() (session refresh, network blip) used to escape the
+  // handler unhandled, which the platform/CDN could surface as a zero-length
+  // 200 that reads as "working but nothing to report" (Bug 6). Now every exit
+  // path returns a JSON body with a real status code.
   try {
+    const { user, profile } = await getCallerProfile(req, res);
+    if (!user)             return fail(res, 401, 'not authenticated');
+    if (!isAgent(profile)) return fail(res, 403, 'agents only');
+
+    const supa = adminClient();
+    const agent = profile.role === 'agent_james' ? 'james' : 'sara';
+
     if (req.method === 'GET')    return await listWeek(req, res, supa);
     if (req.method === 'POST')   return await createOrInvite(req, res, supa, agent);
     if (req.method === 'PATCH')  return await editEvent(req, res, supa);
     if (req.method === 'DELETE') return await deleteEvent(req, res, supa);
     return fail(res, 405, 'method_not_allowed');
   } catch (e) {
-    return fail(res, 500, e.message);
+    // Guard against a double-send if headers already went out mid-stream.
+    if (res.headersSent) { try { res.end(); } catch (_) {} return; }
+    return fail(res, 500, e && e.message ? e.message : 'calendar failed');
   }
 }
 

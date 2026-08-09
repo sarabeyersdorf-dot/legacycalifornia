@@ -43,6 +43,11 @@ export function handleOptions(req, res) {
 
 export function json(res, status, payload) {
   res.setHeader('Content-Type', 'application/json');
+  // Never let a CDN/proxy cache an API/cron response. A cron endpoint that
+  // replays yesterday's body reads as "healthy but stale" and silently poisons
+  // every diagnosis built on it (see Bug 8). All crm/cron/me handlers respond
+  // through here, so one header covers them.
+  res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0');
   res.status(status).send(JSON.stringify(payload));
 }
 

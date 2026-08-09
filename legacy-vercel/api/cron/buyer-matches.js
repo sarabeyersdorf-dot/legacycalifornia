@@ -76,6 +76,7 @@ function renderText(agent, first, homes) {
 }
 
 export default async function handler(req, res) {
+  res.setHeader('Cache-Control', 'no-store'); // never serve a stale cron replay (Bug 8)
   if (!process.env.PUBLISH_SECRET || req.query.key !== process.env.PUBLISH_SECRET) {
     return res.status(401).json({ success: false, error: 'unauthorized' });
   }

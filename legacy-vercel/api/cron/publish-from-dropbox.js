@@ -42,6 +42,7 @@ const GITHUB_BRANCH = "main";
 const GITHUB_FILE_PATH = "legacy-vercel/data/deals.json";
 
 export default async function handler(req, res) {
+  res.setHeader('Cache-Control', 'no-store'); // never serve a stale cron replay (Bug 8)
   const {
     PUBLISH_SECRET,
     GITHUB_TOKEN,
