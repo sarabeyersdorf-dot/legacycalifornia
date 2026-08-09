@@ -47,14 +47,82 @@
   <button class="lg-navtoggle" data-lg-nav="#siteNav" aria-expanded="false">Menu</button>
 </div></header>
 
+<style>
+  .idx-save { display:inline-flex; align-items:center; gap:9px; margin-top:18px; font-family:var(--sans,system-ui,sans-serif); font-size:13px; font-weight:600; letter-spacing:.02em; color:#fff; background:rgba(255,255,255,.12); border:1px solid rgba(255,255,255,.4); border-radius:40px; padding:11px 20px; cursor:pointer; -webkit-backdrop-filter:blur(4px); backdrop-filter:blur(4px); transition:background .2s,border-color .2s,transform .1s; }
+  .idx-save:hover { background:rgba(255,255,255,.22); }
+  .idx-save:active { transform:scale(.97); }
+  .idx-save.is-saved { background:#8C6E3D; border-color:#8C6E3D; }
+  .idx-save-heart { font-size:16px; line-height:1; }
+  .idx-save[disabled] { opacity:.6; cursor:default; }
+</style>
 <section class="lg-hero lg-hero--short">
   <div class="lg-hero__scrim"></div>
   <div class="lg-hero__in">
     <div class="lg-hero__tag"><span class="lg-dot"></span><span>The listing</span></div>
     <h1 class="lg-display lg-h1">This <em>home.</em></h1>
     <p class="lg-hero__strap">The full listing &mdash; photos, details, and the map. Questions on it? Text Sara at (209) 559-4966.</p>
+    <button class="idx-save" data-idx-save aria-pressed="false" hidden>
+      <span class="idx-save-heart">&#9825;</span><span data-idx-save-label>Save this home</span>
+    </button>
   </div>
 </section>
+
+<script>
+// Native "save this home" — writes to our own DB (no third-party), keyed by the
+// iHomefinder listing id in the ?id= param. Signed-in buyers only; others are
+// sent to sign in and returned here.
+(function () {
+  var btn = document.querySelector('[data-idx-save]');
+  if (!btn) return;
+  var label = btn.querySelector('[data-idx-save-label]');
+  var heart = btn.querySelector('.idx-save-heart');
+  var id = '';
+  try { id = new URL(location.href).searchParams.get('id') || ''; } catch (e) {}
+  if (!id) return;                    // not a single-listing view → no button
+  btn.hidden = false;
+
+  var saved = false;
+  function paint() {
+    heart.innerHTML = saved ? '&#9829;' : '&#9825;';
+    label.textContent = saved ? 'Saved' : 'Save this home';
+    btn.setAttribute('aria-pressed', saved ? 'true' : 'false');
+    btn.classList.toggle('is-saved', saved);
+  }
+  // iHomefinder sets document.title to the listing address on a detail page —
+  // grab it (and the social image) so the saved card shows something real.
+  function address() {
+    var t = (document.title || '').split('|')[0].split(' — ')[0].split(' - ')[0].trim();
+    if (!t || /^listing$/i.test(t) || /legacy properties/i.test(t)) return '';
+    return t;
+  }
+  function ogImage() { var m = document.querySelector('meta[property="og:image"]'); return (m && m.content) || ''; }
+  function call(method, body) {
+    return fetch('/api/me/save-property', {
+      method: method, credentials: 'include',
+      headers: body ? { 'Content-Type': 'application/json' } : undefined,
+      body: body ? JSON.stringify(body) : undefined
+    });
+  }
+  call('GET').then(function (r) { return r.ok ? r.json() : null; }).then(function (j) {
+    if (j && j.ids && j.ids.indexOf(id) !== -1) { saved = true; paint(); }
+  }).catch(function () {});
+
+  btn.addEventListener('click', function () {
+    btn.disabled = true;
+    var want = !saved;
+    var body = want
+      ? { listing_id: id, address: address() || undefined, image: ogImage() || undefined }
+      : { listing_id: id, unsave: true };
+    call('POST', body).then(function (r) {
+      if (r.status === 401) { location.href = 'dashboard.html?next=' + encodeURIComponent(location.pathname + location.search); return null; }
+      return r.ok ? r.json() : null;
+    }).then(function (j) {
+      if (j && typeof j.saved === 'boolean') { saved = j.saved; paint(); }
+      btn.disabled = false;
+    }).catch(function () { btn.disabled = false; });
+  });
+})();
+</script>
 
 <section class="lg-sec"><div class="lg-wrap">
 

@@ -240,7 +240,8 @@ export default async function handler(req, res) {
         price:       fmtUSD(p.price),
         address:     sanitize(`${p.address || ''}${p.city ? `, ${p.city}` : ''}`),
         tags:        tagPills,
-        listing_url: p.mls_number ? `/listing.html?mls=${encodeURIComponent(p.mls_number)}` : '/listing.html'
+        listing_url: p.ihomefinder_idx_id ? `/listing.html?id=${encodeURIComponent(p.ihomefinder_idx_id)}`
+                   : p.mls_number ? `/listing.html?id=${encodeURIComponent(p.mls_number)}` : '/listing.html'
       };
     });
 
