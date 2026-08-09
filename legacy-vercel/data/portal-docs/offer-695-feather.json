@@ -1,0 +1,170 @@
+[
+  {
+    "name": "100 2473532 11.PreliminaryReport.Merged",
+    "url": "/docs/offer-695-feather/100-2473532-11.preliminaryreport.merged.pdf",
+    "scope": "property",
+    "visibility": "both",
+    "key": "offer-695-feather-100-2473532-11.preliminaryreport.merged",
+    "rev": "016588f3827a1c7000000029e854303"
+  },
+  {
+    "name": "695 Feather BRBC executed",
+    "url": "/docs/offer-695-feather/695-feather-brbc-executed.pdf",
+    "scope": "transaction",
+    "visibility": "buyer",
+    "key": "offer-695-feather-695-feather-brbc-executed",
+    "rev": "016574e4cf32108000000029e854303"
+  },
+  {
+    "name": "695 feather dr AAA buyer signed",
+    "url": "/docs/offer-695-feather/695-feather-dr-aaa-buyer-signed.pdf",
+    "scope": "transaction",
+    "visibility": "buyer",
+    "key": "offer-695-feather-695-feather-dr-aaa-buyer-signed",
+    "rev": "016588f33c2e805000000029e854303"
+  },
+  {
+    "name": "695 Feather Dr MLS",
+    "url": "/docs/offer-695-feather/695-feather-dr-mls.pdf",
+    "scope": "transaction",
+    "visibility": "both",
+    "key": "offer-695-feather-695-feather-dr-mls",
+    "rev": "016574e4cf32105000000029e854303"
+  },
+  {
+    "name": "695 feather EMD receipt",
+    "url": "/docs/offer-695-feather/695-feather-emd-receipt.pdf",
+    "scope": "transaction",
+    "visibility": "both",
+    "key": "offer-695-feather-695-feather-emd-receipt",
+    "rev": "016574e4cf3210a000000029e854303"
+  },
+  {
+    "name": "695 feather escrow acknoledgement",
+    "url": "/docs/offer-695-feather/695-feather-escrow-acknoledgement.pdf",
+    "scope": "transaction",
+    "visibility": "both",
+    "key": "offer-695-feather-695-feather-escrow-acknoledgement",
+    "rev": "016574e4cf3210b000000029e854303"
+  },
+  {
+    "name": "695 Feather RPA executed",
+    "url": "/docs/offer-695-feather/695-feather-rpa-executed.pdf",
+    "scope": "transaction",
+    "visibility": "both",
+    "key": "offer-695-feather-695-feather-rpa-executed",
+    "rev": "016574e4cf32106000000029e854303"
+  },
+  {
+    "name": "695 Feather SCO1 executed",
+    "url": "/docs/offer-695-feather/695-feather-sco1-executed.pdf",
+    "scope": "transaction",
+    "visibility": "both",
+    "key": "offer-695-feather-695-feather-sco1-executed",
+    "rev": "016574e4cf32107000000029e854303"
+  },
+  {
+    "name": "ADM 1pdf",
+    "url": "/docs/offer-695-feather/adm-1pdf.pdf",
+    "scope": "transaction",
+    "visibility": "both",
+    "key": "offer-695-feather-adm-1pdf",
+    "rev": "016575ed92919e4000000029e854303"
+  },
+  {
+    "name": "Buyer Contingency Removal 1 624pdf",
+    "url": "/docs/offer-695-feather/buyer-contingency-removal-1-624pdf.pdf",
+    "scope": "transaction",
+    "visibility": "both",
+    "key": "offer-695-feather-buyer-contingency-removal-1-624pdf",
+    "rev": "016583fb37d3ab6000000029e854303"
+  },
+  {
+    "name": "Buyer Investigation Waiver 625pdf",
+    "url": "/docs/offer-695-feather/buyer-investigation-waiver-625pdf.pdf",
+    "scope": "transaction",
+    "visibility": "both",
+    "key": "offer-695-feather-buyer-investigation-waiver-625pdf",
+    "rev": "016583fb4397ecf000000029e854303"
+  },
+  {
+    "name": "Commission Instructions",
+    "url": "/docs/offer-695-feather/commission-instructions.pdf",
+    "scope": "transaction",
+    "visibility": "agent_only",
+    "key": "offer-695-feather-commission-instructions",
+    "rev": "016574e4d9b3d15000000029e854303"
+  },
+  {
+    "name": "Fire Hardening and Defensible Space Advisory, Disclosure, and Addendum 625pdfpdf",
+    "url": "/docs/offer-695-feather/fire-hardening-and-defensible-space-advisory-disclosure-and-addendum-625pdfpdf.pdf",
+    "scope": "transaction",
+    "visibility": "both",
+    "key": "offer-695-feather-fire-hardening-and-defensible-space-advisory-disclosure-and-addendum-625pdfpdf",
+    "rev": "016574e4cf3210d000000029e854303"
+  },
+  {
+    "name": "Lead Based Paint and Lead Based Paint Hazards Disclosure 2 (RLAS) 626pdfpdf",
+    "url": "/docs/offer-695-feather/lead-based-paint-and-lead-based-paint-hazards-disclosure-2-rlas-626pdfpdf.pdf",
+    "scope": "property",
+    "visibility": "both",
+    "key": "offer-695-feather-lead-based-paint-and-lead-based-paint-hazards-disclosure-2-rlas-626pdfpdf",
+    "rev": "016574e4cf3210e000000029e854303"
+  },
+  {
+    "name": "Market Conditions Advisory 624pdfpdf",
+    "url": "/docs/offer-695-feather/market-conditions-advisory-624pdfpdf.pdf",
+    "scope": "transaction",
+    "visibility": "both",
+    "key": "offer-695-feather-market-conditions-advisory-624pdfpdf",
+    "rev": "016574e4cf32111000000029e854303"
+  },
+  {
+    "name": "MH Add from escrow buyer signed",
+    "url": "/docs/offer-695-feather/mh-add-from-escrow-buyer-signed.pdf",
+    "scope": "transaction",
+    "visibility": "both",
+    "key": "offer-695-feather-mh-add-from-escrow-buyer-signed",
+    "rev": "0165799a5bc65b3000000029e854303"
+  },
+  {
+    "name": "Proof of funds Bert Andrews",
+    "url": "/docs/offer-695-feather/proof-of-funds-bert-andrews.pdf",
+    "scope": "property",
+    "visibility": "agent_only",
+    "key": "offer-695-feather-proof-of-funds-bert-andrews",
+    "rev": "016574e4cf32109000000029e854303"
+  },
+  {
+    "name": "Statewide Buyer and Seller Advisory 626pdfpdf",
+    "url": "/docs/offer-695-feather/statewide-buyer-and-seller-advisory-626pdfpdf.pdf",
+    "scope": "transaction",
+    "visibility": "both",
+    "key": "offer-695-feather-statewide-buyer-and-seller-advisory-626pdfpdf",
+    "rev": "016574e4cf3210f000000029e854303"
+  },
+  {
+    "name": "tds add1 acknowledgement for offer",
+    "url": "/docs/offer-695-feather/tds-add1-acknowledgement-for-offer.pdf",
+    "scope": "property",
+    "visibility": "both",
+    "key": "offer-695-feather-tds-add1-acknowledgement-for-offer",
+    "rev": "016574e4cf3210c000000029e854303"
+  },
+  {
+    "name": "TDSpdf",
+    "url": "/docs/offer-695-feather/tdspdf.pdf",
+    "scope": "property",
+    "visibility": "both",
+    "key": "offer-695-feather-tdspdf",
+    "rev": "016575ed92919e5000000029e854303"
+  },
+  {
+    "name": "Water Heater and Smoke Detector Statement of Compliance 1223pdfpdf",
+    "url": "/docs/offer-695-feather/water-heater-and-smoke-detector-statement-of-compliance-1223pdfpdf.pdf",
+    "scope": "property",
+    "visibility": "both",
+    "key": "offer-695-feather-water-heater-and-smoke-detector-statement-of-compliance-1223pdfpdf",
+    "rev": "016574e4cf32110000000029e854303"
+  }
+]
