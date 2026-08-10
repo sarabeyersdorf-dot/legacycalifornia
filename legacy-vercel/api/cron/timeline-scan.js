@@ -113,8 +113,14 @@ export default async function handler(req, res) {
       // deal_activity — it does NOT go through the approval queue (Bug 2: writing
       // an auto-approved proposal produced rows with decided_at < created_at).
       for (const item of (items || [])) {
-        if (['done', 'waived', 'na'].includes(item.status)) continue;
+        // Retired ('na') rows are intentionally date-less (Bug 5) — never refill.
+        if (item.status === 'na') continue;
         if (paused) continue;
+        // A done/waived milestone keeps a date it already has (historical), but a
+        // NULL one is still filled — otherwise a step marked done before the date
+        // was computed (e.g. a deal seeded with no timeline, then evidence-matched)
+        // shows "done" with no date forever (Bug 4 tail: Feather's acceptance/emd).
+        if ((item.status === 'done' || item.status === 'waived') && item.due_date) continue;
         const eff = expected[item.key];
         if (eff && ISO.test(String(eff)) && eff !== item.due_date) {
           const nowIso = new Date().toISOString();
