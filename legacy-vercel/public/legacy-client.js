@@ -1530,19 +1530,21 @@
         if (coe < eom) totalMonth += d.commission_usd;
         if (coe.getTime() - now.getTime() < 60 * 86400000) total60 += d.commission_usd;
       });
-      // The nearest close (escrow is already sorted by COE) — one line, not a list.
-      const next = escrow.find((d) => d.coe_date);
-      let nextRow = '';
-      if (next) {
-        const dtc = next.days_to_coe;
-        const when = dtc == null ? fmtCoe(next.coe_date)
+      // One row per deal in escrow (sorted by COE), each with its countdown, so
+      // every live transaction is named here — not just the nearest. Full
+      // deadlines/contingencies still live in the Deals-in-motion table below.
+      const whenFor = (d) => {
+        const dtc = d.days_to_coe;
+        return dtc == null ? fmtCoe(d.coe_date)
           : dtc < 0 ? `${Math.abs(dtc)}d late`
           : dtc === 0 ? 'closes today'
           : `${dtc} day${dtc === 1 ? '' : 's'}`;
-        nextRow = `<div class="tb-pulse-row tb-esc" data-open-deal="${escapeHtml(next.lead_id || '')}" style="cursor:pointer;" title="Open this deal">
-          <span>Next to close</span>
-          <span class="v">${escapeHtml((next.address || next.lead_id || '').split(',')[0])} · ${escapeHtml(when)}</span></div>`;
-      }
+      };
+      const withCoe = escrow.filter((d) => d.coe_date);
+      const nextRow = withCoe.slice(0, 6).map((d, i) => `
+        <div class="tb-pulse-row tb-esc" data-open-deal="${escapeHtml(d.lead_id || '')}" style="cursor:pointer;" title="Open this deal">
+          <span>${i === 0 ? 'Next to close' : ''}</span>
+          <span class="v">${escapeHtml((d.address || d.lead_id || '').split(',')[0])} · ${escapeHtml(whenFor(d))}</span></div>`).join('');
       assessEl.innerHTML = `
         <div class="tb-pulse">
           <span class="label-cap">Closing soon · ${escrow.length} in escrow</span>

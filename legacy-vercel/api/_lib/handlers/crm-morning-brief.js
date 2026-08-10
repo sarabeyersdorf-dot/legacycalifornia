@@ -631,7 +631,12 @@ function shapeDealsInMotion(deals) {
     let commPct = null, commUsd = null;
     if (commRaw != null && String(commRaw).trim() !== '') {
       const s = String(commRaw).trim();
-      const num = parseFloat(s.replace(/[^0-9.]/g, ''));
+      // Take the FIRST number in the string — NOT every digit concatenated. A
+      // descriptive commission like "3% — seller pays 1%, buyer pays 2%" was
+      // being flattened to "312", turning a 3% fee into 312% ($530K on a $170K
+      // home). Handles "$15,375", "2.5%", "3", "3% — …" alike.
+      const m = s.match(/\$?\s*([0-9][0-9,]*(?:\.[0-9]+)?)/);
+      const num = m ? parseFloat(m[1].replace(/,/g, '')) : NaN;
       if (Number.isFinite(num)) {
         if (/\$/.test(s) || (!/%/.test(s) && num > 100)) commUsd = Math.round(num);
         else { commPct = num; commUsd = price ? Math.round(price * num / 100) : null; }
