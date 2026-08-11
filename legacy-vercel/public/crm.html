@@ -188,6 +188,67 @@ body.lp-restyle {
          TODAY VIEW (default landing)
          ============================================================ -->
     <section class="crm-view on" data-view="today">
+      <!-- ===== 2026 Dashboard (screen 1A) — re-skin. The bespoke .today block
+           below is retained but hidden by body.ds-appshell; this is the live
+           landing. Populated by paintDashboardDS() from morning-brief + metrics
+           + the board's cached pipeline/deals. ===== -->
+      <div class="ds ds-dash">
+        <div class="ds-screen">
+          <div class="ds-corners"><i></i><i></i><i></i><i></i></div>
+
+          <div class="ds-title">
+            <div>
+              <div class="ds-kicker" data-bind-dash-date>Today</div>
+              <h1 class="ds-headline" data-bind-dash-headline>Today</h1>
+            </div>
+            <div class="ds-alert" data-bind-dash-alert style="display:none;"><span class="sq"></span><b data-bind-dash-alert-text></b></div>
+          </div>
+
+          <div class="ds-strip c5">
+            <div class="ds-cell inv"><div class="lab">Pipeline value</div><div class="fig" data-bind-dash-pipeval>—</div><div class="sub">deals in flight</div></div>
+            <div class="ds-cell"><div class="lab">Commission in escrow</div><div class="fig" data-bind-dash-comm>—</div><div class="sub">under contract</div></div>
+            <div class="ds-cell"><div class="lab">New leads</div><div class="fig" data-bind-dash-newleads>—</div><div class="sub">came in today</div></div>
+            <div class="ds-cell"><div class="lab">In escrow</div><div class="fig" data-bind-dash-escrow>—</div><div class="sub">deals under contract</div></div>
+            <div class="ds-cell"><div class="lab">Active clients</div><div class="fig" data-bind-dash-clients>—</div><div class="sub">on the books</div></div>
+          </div>
+
+          <div class="ds-legend">
+            <span class="ds-legend-lab">Stage</span>
+            <span class="ds-sw" data-stg="new"><i></i>New lead</span>
+            <span class="ds-sw" data-stg="nurture"><i></i>Nurturing</span>
+            <span class="ds-sw" data-stg="preparing"><i></i>Listing prep</span>
+            <span class="ds-sw" data-stg="on_market"><i></i>On market</span>
+            <span class="ds-sw" data-stg="reviewing_offers"><i></i>Offers</span>
+            <span class="ds-sw" data-stg="in_escrow"><i></i>In escrow</span>
+          </div>
+
+          <div class="ds-dash-body">
+            <div class="ds-dash-left">
+              <div class="ds-panel-h"><h3>Today</h3><span class="ds-panel-sub" data-bind-dash-todaycount>—</span></div>
+              <div data-dash-today><div class="ds-empty-line">Loading your day…</div></div>
+              <div class="ds-panel-h" style="margin-top:22px;"><h3>Going quiet</h3><span class="ds-panel-sub" data-bind-dash-quietcount></span></div>
+              <div data-dash-quiet></div>
+            </div>
+            <div class="ds-dash-right">
+              <div class="ds-panel-h"><h3>The pipeline</h3><span class="ds-panel-sub" data-bind-dash-pipesub></span></div>
+              <div class="ds-segbar" data-dash-segbar></div>
+              <div class="ds-seglabels" data-dash-seglabels></div>
+              <div data-dash-dealtable></div>
+              <div class="ds-dash-foot">
+                <div>
+                  <div class="ds-panel-h sm"><h4>Your funnel</h4></div>
+                  <div class="ds-funnel" data-dash-funnel></div>
+                </div>
+                <div>
+                  <div class="ds-panel-h sm"><h4>Latest activity</h4></div>
+                  <div data-dash-activity></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <div class="today">
 
         <!-- MORNING BRIEF HEADER -->

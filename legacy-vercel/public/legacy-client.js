@@ -4139,6 +4139,209 @@
     __boardNoteEl.__t = setTimeout(() => { __boardNoteEl.style.display = 'none'; }, 3400);
   }
 
+  // ========================= Dashboard 1A (Today) =========================
+  // Re-skin of the landing screen. Reuses the board's cached pipeline/deals
+  // (lastPipelineData / lastDealsData) plus a fresh morning-brief + metrics.
+  const DEAL_STAGE_META = {
+    preparing: { stg: 'preparing',        label: 'Listing prep' },
+    listing:   { stg: 'on_market',        label: 'On market' },
+    offer:     { stg: 'reviewing_offers', label: 'Offers' },
+    pending:   { stg: 'in_escrow',        label: 'In escrow' },
+    closed:    { stg: 'closed',           label: 'Closed' }
+  };
+  function dashClock(iso) {
+    if (!iso) return '';
+    const d = new Date(iso);
+    return d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+  }
+  function daysSince(iso) {
+    if (!iso) return null;
+    return Math.floor((Date.now() - new Date(iso).getTime()) / 86400000);
+  }
+  function sellerLeadStageCounts() {
+    const leads = (lastPipelineData && lastPipelineData.stages || []).flatMap((s) => s.leads || []);
+    const out = { new: 0, nurture: 0 };
+    for (const l of leads) {
+      if (!['seller', 'both'].includes(l.deal_side || '')) continue;
+      const k = l.seller_stage || PIPE_TO_SELLER[kanCoarseKey(l)] || null;
+      if (k === 'new') out.new++; else if (k === 'nurture') out.nurture++;
+    }
+    return out;
+  }
+
+  let __dashLoading = false;
+  async function paintDashboardDS() {
+    const root = document.querySelector('.ds-dash');
+    if (!root || !window.Legacy || !window.Legacy.api || __dashLoading) return;
+    __dashLoading = true;
+    const setT = (sel, txt) => { const e = root.querySelector(sel); if (e) e.textContent = txt; };
+    const setHTML = (sel, html) => { const e = root.querySelector(sel); if (e) e.innerHTML = html; };
+    try {
+      const [mbRes, mRes] = await Promise.all([
+        window.Legacy.api('/api/crm/morning-brief', { method: 'GET' }),
+        window.Legacy.api('/api/crm/metrics', { method: 'GET' })
+      ]);
+      const mb  = (mbRes && mbRes.ok && mbRes.json) || {};
+      const met = (mRes && mRes.ok && mRes.json) || {};
+      const deals  = (lastDealsData && lastDealsData.deals) || [];
+      const groups = (lastDealsData && lastDealsData.groups) || {};
+      const roster = mb.roster || {};
+
+      // ---- title ----
+      const today = new Date();
+      setT('[data-bind-dash-date]', today.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' }));
+      const drafts = mb.drafts || [], tours = mb.tours_today || [], quiet = mb.radio_silence || [];
+      const moveCount = drafts.length + tours.length;
+      setT('[data-bind-dash-headline]', moveCount ? `${moveCount} thing${moveCount === 1 ? '' : 's'} move today` : 'You’re clear today');
+
+      // deadlines inside 48h = pending deals closing within 2 days
+      const pending = (groups.pending || []).map((k) => deals.find((d) => d.source_key === k)).filter(Boolean);
+      const dueSoon = pending.filter((d) => d.coe_days != null && d.coe_days <= 2).length;
+      const alertEl = root.querySelector('[data-bind-dash-alert]');
+      if (alertEl) {
+        if (dueSoon > 0) { alertEl.style.display = ''; setT('[data-bind-dash-alert-text]', `${dueSoon} deadline${dueSoon === 1 ? '' : 's'} inside 48 hours`); }
+        else alertEl.style.display = 'none';
+      }
+
+      // ---- stat strip (deal-backed money only) ----
+      const dealCols = ['preparing', 'active', 'offers', 'pending'];
+      const boardDeals = dealCols.flatMap((g) => (groups[g] || []).map((k) => deals.find((d) => d.source_key === k)).filter(Boolean));
+      const pipeVal = boardDeals.reduce((s, d) => s + (d.price || 0), 0);
+      const comm = pending.reduce((s, d) => s + (parseCommissionUsd(d.meta, d.price) || 0), 0);
+      setT('[data-bind-dash-pipeval]', pipeVal ? fmtUSDshort(pipeVal) : '—');
+      setT('[data-bind-dash-comm]', comm ? fmtUSD(comm) : '—');
+      setT('[data-bind-dash-newleads]', String((mb.new_today || []).length));
+      setT('[data-bind-dash-escrow]', String(pending.length));
+      setT('[data-bind-dash-clients]', String(roster.clients != null ? roster.clients : '—'));
+
+      // ---- Today list ----
+      const items = []
+        .concat(drafts.map((d) => ({ kind: 'draft', lead_id: d.lead_id, name: fullName(d.leads || {}) || 'A lead', title: d.subject || 'Draft reply ready', ctx: `Draft ${d.channel || 'reply'} awaiting your approval`, due: 'Review', stg: 'nurture' })))
+        .concat(tours.map((t) => ({ kind: 'tour', lead_id: (t.leads && t.leads.id) || null, name: fullName(t.leads || {}) || 'Client', title: `${t.tour_type === 'video' ? 'Video tour' : 'Showing'} · ${fullName(t.leads || {}) || 'client'}`, ctx: (t.properties && [t.properties.address, t.properties.city].filter(Boolean).join(', ')) || 'Location TBD', due: dashClock(t.scheduled_at), stg: 'on_market' })));
+      const todayHost = root.querySelector('[data-dash-today]');
+      setT('[data-bind-dash-todaycount]', `${items.length} item${items.length === 1 ? '' : 's'}${drafts.length ? ` · ${drafts.length} to review` : ''}`);
+      if (todayHost) {
+        if (!items.length) {
+          todayHost.innerHTML = `<div class="ds-empty-line">Nothing queued — you’re clear.</div>`;
+        } else {
+          const hero = items[0];
+          const rest = items.slice(1);
+          const heroHtml = `
+            <div class="ds-hero">
+              <div class="lab">Needs you now</div>
+              <div class="tt">${escHtml(hero.title)}</div>
+              <div class="cx">${escHtml(hero.ctx)}</div>
+              <div class="acts">
+                <button class="ds-btn ds-btn--amber" data-dash-open="${escHtml(hero.lead_id || '')}">Open ${escHtml(hero.kind === 'draft' ? 'draft' : 'showing')}</button>
+                <button class="ds-btn" data-dash-cal>See calendar</button>
+              </div>
+            </div>`;
+          const rowsHtml = `<div class="ds-today-list">` + rest.map((it) => `
+            <div class="ds-today-row" data-stg="${escHtml(it.stg)}" data-dash-open="${escHtml(it.lead_id || '')}">
+              <span class="stripe"></span>
+              <div class="tr-b"><div class="tt">${escHtml(it.title)}</div><div class="cx">${escHtml(it.ctx)}</div></div>
+              <span class="due${it.kind === 'tour' ? '' : ''}">${escHtml(it.due)}</span>
+            </div>`).join('') + `</div>`;
+          todayHost.innerHTML = heroHtml + rowsHtml;
+        }
+      }
+
+      // ---- Going quiet ----
+      setT('[data-bind-dash-quietcount]', quiet.length ? `${quiet.length}` : '');
+      const quietHost = root.querySelector('[data-dash-quiet]');
+      if (quietHost) {
+        quietHost.innerHTML = quiet.length
+          ? `<div class="ds-quiet-list">` + quiet.slice(0, 5).map((q) => {
+              const dd = daysSince(q.last_contact_at);
+              return `<div class="ds-quiet-row" data-dash-open="${escHtml(q.id || '')}"><span class="nm">${escHtml(fullName(q) || 'A lead')}</span><span class="dy">${dd != null ? dd + 'd quiet' : 'no contact yet'}</span></div>`;
+            }).join('') + `</div>`
+          : `<div class="ds-empty-line">Everyone’s been touched recently.</div>`;
+      }
+
+      // ---- pipeline: segmented bar + labels ----
+      const sc = sellerLeadStageCounts();
+      const segs = [
+        { key: 'new',       name: 'New lead',     stg: 'new',              n: sc.new },
+        { key: 'nurture',   name: 'Nurturing',    stg: 'nurture',          n: sc.nurture },
+        { key: 'preparing', name: 'Listing prep', stg: 'preparing',        n: (groups.preparing || []).length },
+        { key: 'active',    name: 'On market',    stg: 'on_market',        n: (groups.active || []).length },
+        { key: 'offers',    name: 'Offers',       stg: 'reviewing_offers', n: (groups.offers || []).length },
+        { key: 'pending',   name: 'In escrow',    stg: 'in_escrow',        n: (groups.pending || []).length }
+      ];
+      const segTotal = segs.reduce((s, x) => s + x.n, 0) || 1;
+      setT('[data-bind-dash-pipesub]', `${segTotal} in motion`);
+      setHTML('[data-dash-segbar]', segs.map((s) => s.n ? `<div class="ds-seg" data-stg="${s.stg}" style="flex:${s.n}" title="${escHtml(s.name)}: ${s.n}"></div>` : '').join('') || `<div class="ds-seg" data-stg="new" style="flex:1"></div>`);
+      setHTML('[data-dash-seglabels]', segs.map((s) => `<div class="ds-seglabel" style="flex:${Math.max(s.n, 0.6)}" data-stg="${s.stg}"><div class="nm"><span class="dot"></span>${escHtml(s.name)}</div><div class="ct">${s.n}</div></div>`).join(''));
+
+      // ---- deal table (up to 6, most imminent first) ----
+      const tableDeals = boardDeals.slice().sort((a, b) => {
+        const av = a.coe_days == null ? 1e9 : a.coe_days, bv = b.coe_days == null ? 1e9 : b.coe_days;
+        return av - bv;
+      }).slice(0, 6);
+      const tblHost = root.querySelector('[data-dash-dealtable]');
+      if (tblHost) {
+        if (!tableDeals.length) {
+          tblHost.innerHTML = `<div class="ds-empty-line">No active deals on the board yet.</div>`;
+        } else {
+          const head = `<div class="ds-dt-h"><span>Property</span><span class="who-col">Who</span><span>Stage</span><span style="text-align:right">Value</span></div>`;
+          const rows = tableDeals.map((d) => {
+            const meta = DEAL_STAGE_META[d.stage] || { stg: 'new', label: d.stage || '—' };
+            const next = d.coe_days != null
+              ? (d.coe_days < 0 ? `COE ${Math.abs(d.coe_days)}d late` : d.coe_days === 0 ? 'Closes today' : `Closes in ${d.coe_days}d`)
+              : (d.next_event && d.next_event.label ? d.next_event.label : '');
+            return `<div class="ds-dt-r">
+              <span><span class="prop">${escHtml(String(d.address || 'Untitled').split(',')[0])}</span></span>
+              <span class="who">${escHtml(d.party_summary || d.city || '')}</span>
+              <span><span class="ds-stagepill" data-stg="${escHtml(meta.stg)}"><i></i>${escHtml(meta.label)}</span></span>
+              <span class="val">${d.price ? escHtml(fmtUSD(d.price)) : '—'}</span>
+            </div>`;
+          }).join('');
+          tblHost.innerHTML = `<div class="ds-dealtable">${head}${rows}</div>`;
+        }
+      }
+
+      // ---- funnel ----
+      const f = mb.funnel || {};
+      const funnelRows = [
+        { label: 'New leads', stg: 'new',              v: f.new_leads || 0 },
+        { label: 'Engaged',   stg: 'nurture',          v: f.engaged || 0 },
+        { label: 'Touring',   stg: 'on_market',        v: f.toured || 0 },
+        { label: 'Offers',    stg: 'reviewing_offers', v: f.offered || 0 },
+        { label: 'Closed',    stg: 'closed',           v: f.closed || 0 }
+      ];
+      const fMax = Math.max(1, ...funnelRows.map((r) => r.v));
+      setHTML('[data-dash-funnel]', funnelRows.map((r) => `
+        <div class="ds-funnel-row" data-stg="${r.stg}">
+          <span class="fl">${escHtml(r.label)}</span>
+          <span class="track"><span class="fill" style="width:${Math.round((r.v / fMax) * 100)}%"></span></span>
+          <span class="fv">${r.v}</span>
+        </div>`).join(''));
+
+      // ---- latest activity ----
+      const sig = (mb.signals || []).slice(0, 5);
+      setHTML('[data-dash-activity]', sig.length
+        ? `<div class="ds-activity">` + sig.map((s) => `<div class="ds-activity-row" data-stg="nurture"><span class="stripe"></span><div><div class="tt">${escHtml(s.body || s.tag || 'Activity')}</div><div class="tm">${escHtml(s.time || '')}${s.tag ? ' · ' + escHtml(s.tag) : ''}</div></div></div>`).join('') + `</div>`
+        : `<div class="ds-empty-line">Nothing overnight.</div>`);
+
+    } catch (e) {
+      /* dashboard is best-effort — never blank the app */
+    } finally {
+      __dashLoading = false;
+    }
+  }
+
+  // Dashboard interactions: open a lead detail from any row/button.
+  document.addEventListener('click', (e) => {
+    const open = e.target.closest('[data-dash-open]');
+    if (open) {
+      const id = open.getAttribute('data-dash-open');
+      if (id) { if (typeof window.showView === 'function') window.showView(null, 'inbox'); selectLeadId(id); }
+      return;
+    }
+    if (e.target.closest('[data-dash-cal]')) { if (typeof window.showView === 'function') window.showView(null, 'cal'); }
+  });
+  document.addEventListener('crm:view', (ev) => { if (ev.detail && ev.detail.name === 'today') paintDashboardDS(); });
+
   function midPrice(min, max) {
     if (min && max) return (min + max) / 2;
     return min || max || 0;
@@ -4295,6 +4498,9 @@
     paintLeadCounts();
     paintLeadList();
     paintKanban(pipelineRes.json, (dealsRes && dealsRes.ok) ? dealsRes.json : null);
+    // Default landing is Today — paint the 2026 dashboard now (crm:view won't
+    // fire for the already-"on" today view at boot). Uses the caches just set.
+    try { paintDashboardDS(); } catch (_) {}
 
     // Deep-link: an alert SMS/email links to /crm.html?lead=<id>. Open that
     // exact contact (openLead fetches by id, so it works even if the lead isn't
