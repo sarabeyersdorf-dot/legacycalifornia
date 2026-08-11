@@ -232,6 +232,7 @@ body.ds-appshell .crm-view[data-view="today"]{padding:22px;}
 body.ds-appshell .crm-view[data-view="people"]{padding:22px;}
 body.ds-appshell .crm-view[data-view="roster"]{padding:22px;}
 body.ds-appshell .crm-view[data-view="cal"]{padding:22px;}
+body.ds-appshell .crm-view[data-view="dealsall"]{padding:22px;}
 /* the bespoke Today body is superseded by the .ds-dash block above it */
 body.ds-appshell .crm-view[data-view="today"] > .today{display:none;}
 
