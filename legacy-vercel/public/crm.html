@@ -2237,7 +2237,7 @@ body.lp-restyle {
               <div class="ds-ctbl-h"><span>Name</span><span>Stage</span><span>Last touch</span><span class="ow-col">Source</span></div>
               <div class="ds-ctbl-scroll" data-people-list></div>
             </div>
-            <div class="ds-cdetail" data-people-detail><div class="cd-empty">Select a contact to see their details.</div></div>
+            <div class="ds-cdetail" data-people-detail><div class="cd-empty">Click a name to open their full profile.</div></div>
           </div>
         </div>
       </div>
@@ -2315,8 +2315,11 @@ body.lp-restyle {
         if(full && view.contains(full)){ var fid=full.getAttribute('data-ppl-full'); if(fid && window.Legacy && window.Legacy.openLead) window.Legacy.openLead(fid); return; }
         var row=e.target.closest('[data-ppl-open]');
         if(row && view.contains(row)){
+          // Clicking a name jumps straight to the full profile — no in-between
+          // preview card. (The old two-step "mini card → Open full profile" is gone.)
+          var pid=row.getAttribute('data-ppl-open');
           view.querySelectorAll('.ds-ctbl-r').forEach(function(r){ r.classList.toggle('on', r===row); });
-          paintDetail(st.byId[row.getAttribute('data-ppl-open')]);
+          if(pid && window.Legacy && window.Legacy.openLead){ window.Legacy.openLead(pid); }
           return;
         }
       });
@@ -3564,10 +3567,33 @@ body.lp-restyle {
 <script>
 var VIEW_LABELS = { today:'Today', tasks:'Tasks', updates:'Notes', inbox:'Inbox', messages:'Inbox', pipe:'Pipeline', cal:'Calendar', seq:'Sequences', curate:'Curated', rep:'Reports', broker:'Broker', listings:'Deals & offers', dealsall:'All deals', command:'Deal command center', people:'Roster', broadcast:'Bulk email' };
 window.__viewStack = window.__viewStack || [];
+window.__crmHistIdx = window.__crmHistIdx || 0;
 function navBack() {
-  var prev = window.__viewStack.pop();
-  if (prev) showView(null, prev, true);
+  // Route the in-app Back button through the browser's history so it and the
+  // device/browser Back button share one code path (the popstate handler).
+  if (window.__viewStack.length) { try { history.back(); } catch (_) {
+    var prev = window.__viewStack.pop(); if (prev) showView(null, prev, true);
+  } }
 }
+// Browser / hardware Back: without a history entry per view switch, the very
+// first Back left crm.html entirely and dumped the agent on the marketing
+// homepage. Each forward showView() now pushes a state (below); popstate walks
+// __viewStack in step. The idx on each state tells back from forward apart so
+// the Forward button re-enters a view instead of popping the stack again.
+window.addEventListener('popstate', function (ev) {
+  var toIdx = (ev.state && typeof ev.state.idx === 'number') ? ev.state.idx : 0;
+  if (toIdx < window.__crmHistIdx) {            // going back
+    window.__crmHistIdx = toIdx;
+    var prev = window.__viewStack.pop();
+    if (prev) showView(null, prev, true);
+  } else if (toIdx > window.__crmHistIdx && ev.state && ev.state.crmView) { // going forward
+    window.__crmHistIdx = toIdx;
+    var cur = document.querySelector('.crm-view.on');
+    var curName = cur && cur.getAttribute('data-view');
+    if (curName && curName !== ev.state.crmView) window.__viewStack.push(curName);
+    showView(null, ev.state.crmView, true);
+  }
+});
 function showView(e, name, fromBack) {
   if (e) e.preventDefault();
   // Any view switch leaves the focused-contact mode (openLead re-adds it right
@@ -3580,6 +3606,8 @@ function showView(e, name, fromBack) {
     if (!fromBack && curName && curName !== name) {
       window.__viewStack.push(curName);
       if (window.__viewStack.length > 25) window.__viewStack.shift();
+      // Push a browser history entry so Back steps here instead of leaving.
+      try { window.__crmHistIdx++; history.pushState({ crmView: name, idx: window.__crmHistIdx }, ''); } catch (_) {}
     }
     var bk = document.querySelector('[data-nav-back]');
     if (bk) bk.style.display = window.__viewStack.length ? '' : 'none';

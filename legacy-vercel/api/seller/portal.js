@@ -461,6 +461,31 @@ export default async function handler(req, res) {
       else road.push(...cleaned);
     }
 
+    // Colour each road dot by CATEGORY (marketing / paperwork / inspection /
+    // money / closing), not just by status. Preferred source is the milestone's
+    // At-a-Glance `col`; otherwise we infer it from the label/description text so
+    // timeline- and heuristic-sourced roads get colour too. `dotclass` bundles
+    // the status + the category so the seller-portal binding engine's
+    // data-add-class can drop both classes on the dot in one pass.
+    const roadCategory = (r) => {
+      const col = String((r && r.col) || '').toLowerCase();
+      if (['marketing', 'paperwork', 'inspection', 'money', 'closing'].includes(col)) return col;
+      if (['financing', 'finance', 'loan', 'lender'].includes(col)) return 'money';
+      if (['escrow', 'title', 'docs', 'contract'].includes(col)) return 'paperwork';
+      const t = `${(r && r.label) || ''} ${(r && r.description) || ''}`.toLowerCase();
+      if (/close of escrow|escrow clos|\bclosing\b|final walk|record(s|ed|ing)?\b|possession|hand.?over|\bkeys\b/.test(t)) return 'closing';
+      if (/loan|financ|lender|underwrit|apprais|fund(s|ing|ed)?\b|deposit|earnest|proceeds|payoff|\bwire\b|down ?payment/.test(t)) return 'money';
+      if (/inspection|walk-?through|contingenc|repair|pest|termite|roof|sewer/.test(t)) return 'inspection';
+      if (/photo|market|listing|\blist\b|showing|\bmls\b|open house|stag(e|ing)|yard sign/.test(t)) return 'marketing';
+      if (/disclosure|document|paperwork|signature|sign(ed|ing)?\b|escrow open|\btitle\b|contract|addend|amend|counter/.test(t)) return 'paperwork';
+      return 'milestone';
+    };
+    road = road.map((r) => {
+      const category = roadCategory(r);
+      const dotclass = `${r && r.status ? r.status + ' ' : ''}cat-${category}`;
+      return { ...r, category, dotclass };
+    });
+
     // What I need from you. Preferred: the deal's curated clientTasks[] (v1.5,
     // from deals.json) — the real to-do list, so a deal with genuine tasks no
     // longer shows the empty state just because no doc is owed. Fall back to the

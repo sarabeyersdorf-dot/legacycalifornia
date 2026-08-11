@@ -415,10 +415,18 @@ body.ds-appshell .crm-view[data-view="today"] > .today{display:none;}
 .ds-road-rail{display:flex;justify-content:center;position:relative;}
 .ds-road-rail::before{content:"";position:absolute;left:50%;transform:translateX(-50%);top:18px;bottom:-24px;width:1px;background:var(--rule);}
 .ds-road-item:last-child .ds-road-rail::before{display:none;}
-.ds-road-dot{width:14px;height:14px;border:2px solid var(--border);background:var(--panel);margin-top:3px;position:relative;z-index:1;flex:none;}
-.ds-road-dot.done{background:var(--s-prep,#3f7d7a);border-color:#3f7d7a;}
-.ds-road-dot.next{background:var(--amber);border-color:var(--amber);box-shadow:0 0 0 4px var(--amber-bg);}
-.ds-road-dot.key{background:var(--amber);border-color:var(--amber);}
+/* Road dots carry TWO signals: category (hue, via --cat) + status (fill/ring).
+   Upcoming steps are hollow rings in their category colour; done steps fill;
+   the current/next + closing steps fill and take an amber focus ring. */
+.ds-road-dot{--cat:#8a8f95;width:14px;height:14px;border:2px solid var(--cat);background:var(--panel);margin-top:3px;position:relative;z-index:1;flex:none;}
+.ds-road-dot.cat-marketing{--cat:#597ea3;}
+.ds-road-dot.cat-paperwork{--cat:#3f7d7a;}
+.ds-road-dot.cat-inspection{--cat:#6b5a86;}
+.ds-road-dot.cat-money{--cat:#b26a1f;}
+.ds-road-dot.cat-closing{--cat:#4a7a55;}
+.ds-road-dot.done{background:var(--cat);border-color:var(--cat);}
+.ds-road-dot.next{background:var(--cat);border-color:var(--cat);box-shadow:0 0 0 4px var(--amber-bg);}
+.ds-road-dot.key{background:var(--cat);border-color:var(--cat);box-shadow:0 0 0 4px var(--amber-bg);}
 .ds-road-date{font-family:var(--cond);font-weight:600;font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--faint);}
 .ds-road-labelrow{display:flex;align-items:baseline;gap:9px;flex-wrap:wrap;margin-top:2px;}
 .ds-road-label{font-family:var(--cond);font-weight:600;font-size:19px;color:var(--ink);line-height:1.15;}
