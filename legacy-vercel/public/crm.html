@@ -891,7 +891,7 @@ body.lp-restyle {
     .inb-tab.on { color:var(--ink); border-bottom-color:var(--brass); }
     @media (max-width:900px){ .inbound-tabs { padding:14px 18px 0; } }
     </style>
-    <section class="crm-view" data-view="inbox">
+    <section class="crm-view ds" data-view="inbox">
       <div class="inbound-tabs" role="tablist" aria-label="Inbound">
         <button class="inb-tab on" type="button" data-inb-tab="inbox" onclick="showView(event,'inbox')">Threads</button>
         <button class="inb-tab" type="button" data-inb-tab="messages" onclick="showView(event,'messages')">All inbound</button>
@@ -956,16 +956,13 @@ body.lp-restyle {
     .msg-dot { width: 7px; height: 7px; border-radius: 50%; background: #8B3A3A; flex: none; margin-top: 8px; }
     @media (max-width: 900px) { .msgs { padding: 18px; } }
     </style>
-    <section class="crm-view" data-view="messages">
+    <section class="crm-view ds" data-view="messages">
       <div class="inbound-tabs" role="tablist" aria-label="Inbound">
         <button class="inb-tab" type="button" data-inb-tab="inbox" onclick="showView(event,'inbox')">Threads</button>
         <button class="inb-tab on" type="button" data-inb-tab="messages" onclick="showView(event,'messages')">All inbound</button>
       </div>
       <div class="msgs">
-        <div class="cur-head"><div>
-          <span class="label-cap" style="color:var(--brass);">Everyone who reached out</span>
-          <h1 class="h-section" style="font-size:38px;margin-top:6px;">Messages.</h1>
-        </div></div>
+        <div class="ds-title" style="padding:8px 0 14px;border-bottom:none;"><div><div class="ds-kicker">Everyone who reached out</div><h1 class="ds-headline">Messages</h1></div></div>
         <p class="msgs-sub">Every inbound message in one place — texts to your Legacy number, questions from a curated list, and portal replies. Tap anyone to reply by text or email right here; unknown numbers can be triaged into a lead.</p>
         <div class="msgs-filter" data-msgs-filter>
           <button class="chip on" data-msgf="all">All <span class="ct" data-msgf-c-all>—</span></button>
