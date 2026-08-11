@@ -578,5 +578,44 @@ body.agent-preview .ds-action-box{cursor:pointer;}
 body.viewing-browse .ds-buyer-home{display:none;}
 #browse.ds .ds-headline{color:var(--ink);}
 
+/* ===================== SELLER CAMPAIGN 2A (collapsible) ================= */
+.ds-campaign{border:1px solid var(--rule);background:var(--panel);}
+.ds-campaign>summary{list-style:none;cursor:pointer;display:flex;align-items:baseline;gap:10px;padding:14px 16px;}
+.ds-campaign>summary::-webkit-details-marker{display:none;}
+.ds-campaign>summary h3{font-family:var(--cond);font-weight:600;font-size:22px;margin:0;color:var(--ink);}
+.ds-campaign>summary .meta{margin-left:auto;font-size:13px;color:var(--faint);}
+.ds-campaign>summary::after{content:"▾";color:var(--faint);margin-left:6px;font-size:12px;}
+.ds-campaign[open]>summary{border-bottom:1px solid var(--hair);}
+.ds-campaign:not([open])>summary::after{content:"▸";}
+.ds-campaign-in{padding:16px;}
+.ds-camp-hero{position:relative;aspect-ratio:16/9;border:1px solid var(--rule);overflow:hidden;
+  background-image:repeating-linear-gradient(135deg,#e2e5e8 0 16px,#dde1e5 16px 32px);display:flex;align-items:flex-end;}
+.ds-camp-hero .play{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none;}
+.ds-camp-hero .play span{width:56px;height:56px;border:2px solid #f2f2f3;background:rgba(29,45,61,.5);color:#f2f2f3;display:flex;align-items:center;justify-content:center;font-size:19px;}
+.ds-camp-cap{position:relative;padding:14px 16px;background:linear-gradient(transparent,rgba(29,45,61,.78));color:#f2f2f3;width:100%;display:flex;align-items:baseline;gap:10px 14px;flex-wrap:wrap;}
+.ds-camp-cap .t{font-family:var(--cond);font-weight:600;font-size:21px;}
+.ds-camp-cap .s{font-size:12.5px;opacity:.85;}
+.ds-camp-cap .share{margin-left:auto;font-size:13px;color:#f2f2f3;text-decoration:underline;white-space:nowrap;}
+.ds-camp-reel{display:grid;grid-template-columns:repeat(6,1fr);gap:8px;margin-top:10px;}
+.ds-camp-still{aspect-ratio:1/1;border:1px solid var(--rule);background-image:repeating-linear-gradient(135deg,#e2e5e8 0 10px,#dde1e5 10px 20px);}
+.ds-camp-reel-cap{font-size:12px;color:var(--faint);margin-top:8px;font-style:italic;}
+.ds-camp-cols{display:none;grid-template-columns:1fr 1fr;gap:24px;margin-top:22px;}
+.ds-camp-cols:has([data-painted]){display:grid;}
+@media(max-width:760px){.ds-camp-cols{grid-template-columns:1fr;}.ds-camp-reel{grid-template-columns:repeat(4,1fr);}}
+.ds-camp-h4{font-family:var(--cond);font-weight:600;font-size:17px;margin:0 0 12px;color:var(--ink);}
+.ds-chan{display:flex;flex-direction:column;gap:10px;}
+.ds-chan-row{display:grid;grid-template-columns:120px 1fr auto;gap:10px;align-items:center;font-size:13px;}
+.ds-chan-row .l{color:var(--muted);}
+.ds-chan-row .track{height:8px;background:var(--track);}
+.ds-chan-row .fill{height:8px;background:var(--_c,#597ea3);}
+.ds-chan-row .v{font-family:var(--cond);font-weight:600;font-size:15px;color:var(--ink);}
+.ds-ran{display:flex;flex-direction:column;gap:1px;background:var(--rule);border:1px solid var(--rule);}
+.ds-ran-row{background:var(--panel);display:flex;gap:11px;padding:9px 12px 9px 16px;position:relative;align-items:baseline;}
+.ds-ran-row::before{content:"";position:absolute;left:0;top:0;bottom:0;width:5px;background:var(--_c,#3f7d7a);}
+.ds-ran-row .b{flex:1;min-width:0;}
+.ds-ran-row .t{font-size:14px;font-weight:600;color:var(--ink);}
+.ds-ran-row .d{font-size:12.5px;color:var(--muted);margin-top:1px;}
+.ds-ran-row .w{font-size:12px;color:var(--faint);white-space:nowrap;}
+
 /* focus visibility */
 .ds :focus-visible{outline:2px solid #597ea3;outline-offset:2px;}
