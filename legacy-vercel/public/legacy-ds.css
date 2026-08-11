@@ -158,31 +158,34 @@
 .ds-col-body{padding:14px 18px;display:flex;flex-direction:column;gap:12px;flex:1;}
 .ds-col-empty{font-size:13px;color:var(--faint);font-style:italic;padding:2px;}
 
-/* deal card — hairline box, stage stripe, corner marks */
-.ds-card{position:relative;display:flex;background:var(--panel);border:1px solid var(--border);
+/* deal card (pipeline board) — hairline box, stage stripe, corner marks.
+   NOTE: named .ds-dcard (not .ds-card) — .ds-card is the portal/dashboard block
+   card; the two must not share a class or the board's display:flex leaks onto
+   every portal card and lays their contents out in a squished row. */
+.ds-dcard{position:relative;display:flex;background:var(--panel);border:1px solid var(--border);
   padding:0;cursor:pointer;}
-.ds-card:hover{background:#eeeef0;}
-.ds-card .stripe{width:5px;align-self:stretch;background:var(--stg);flex:none;}
-.ds-card .body{padding:12px 13px;min-width:0;flex:1;}
-.ds-card .nm{font-size:16px;font-weight:600;color:var(--ink);line-height:1.2;}
-.ds-card .ctx{font-size:13px;color:var(--faint);margin-top:2px;}
-.ds-card .val{margin-top:7px;display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;}
-.ds-card .val .num{font-family:var(--cond);font-weight:600;font-size:21px;color:var(--ink);}
-.ds-card .val .st{font-size:13px;color:var(--muted);}
-.ds-card .val .st.bad{color:var(--amber-ink);}
-.ds-card .val .st.good{color:var(--good);}
-.ds-card .next{font-size:14px;color:var(--muted);margin-top:6px;}
-.ds-card .marks i{position:absolute;width:7px;height:7px;}
-.ds-card .marks i::before{content:"";position:absolute;left:0;top:3px;width:7px;height:1px;background:var(--rule);}
-.ds-card .marks i::after{content:"";position:absolute;top:0;left:3px;width:1px;height:7px;background:var(--rule);}
-.ds-card .marks i:nth-child(1){left:2px;top:2px;}.ds-card .marks i:nth-child(2){right:2px;top:2px;}
-.ds-card .marks i:nth-child(3){left:2px;bottom:2px;}.ds-card .marks i:nth-child(4){right:2px;bottom:2px;}
+.ds-dcard:hover{background:#eeeef0;}
+.ds-dcard .stripe{width:5px;align-self:stretch;background:var(--stg);flex:none;}
+.ds-dcard .body{padding:12px 13px;min-width:0;flex:1;}
+.ds-dcard .nm{font-size:16px;font-weight:600;color:var(--ink);line-height:1.2;}
+.ds-dcard .ctx{font-size:13px;color:var(--faint);margin-top:2px;}
+.ds-dcard .val{margin-top:7px;display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;}
+.ds-dcard .val .num{font-family:var(--cond);font-weight:600;font-size:21px;color:var(--ink);}
+.ds-dcard .val .st{font-size:13px;color:var(--muted);}
+.ds-dcard .val .st.bad{color:var(--amber-ink);}
+.ds-dcard .val .st.good{color:var(--good);}
+.ds-dcard .next{font-size:14px;color:var(--muted);margin-top:6px;}
+.ds-dcard .marks i{position:absolute;width:7px;height:7px;}
+.ds-dcard .marks i::before{content:"";position:absolute;left:0;top:3px;width:7px;height:1px;background:var(--rule);}
+.ds-dcard .marks i::after{content:"";position:absolute;top:0;left:3px;width:1px;height:7px;background:var(--rule);}
+.ds-dcard .marks i:nth-child(1){left:2px;top:2px;}.ds-dcard .marks i:nth-child(2){right:2px;top:2px;}
+.ds-dcard .marks i:nth-child(3){left:2px;bottom:2px;}.ds-dcard .marks i:nth-child(4){right:2px;bottom:2px;}
 /* urgency: amber stripe = stale; full amber = a dated deadline */
-.ds-card.stale .stripe{background:var(--amber);}
-.ds-card.due{border-color:var(--amber-bd);background:var(--amber-bg);}
-.ds-card.due .stripe{background:var(--amber);}
-.ds-card.due:hover{background:#f2e6d3;}
-.ds-card.dragging{opacity:.5;}
+.ds-dcard.stale .stripe{background:var(--amber);}
+.ds-dcard.due{border-color:var(--amber-bd);background:var(--amber-bg);}
+.ds-dcard.due .stripe{background:var(--amber);}
+.ds-dcard.due:hover{background:#f2e6d3;}
+.ds-dcard.dragging{opacity:.5;}
 .ds-col.drop-target{outline:2px solid var(--stg);outline-offset:-2px;}
 
 .ds-more-count{font-size:14px;color:var(--faint);padding:4px 2px;}

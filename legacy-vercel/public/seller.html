@@ -224,36 +224,10 @@ body.lp-restyle {
 .doc-link { font-size: 12px; font-weight: 600; color: var(--lg-a1); text-decoration: none; }
 .doc-link:hover { text-decoration: underline; }
 
-/* Tasks — what I need from you */
-.task-row {
-  display: grid; grid-template-columns: 20px 1fr auto; gap: 14px;
-  padding: 12px 0; border-bottom: 1px solid var(--rule-soft); align-items: center;
-}
-.task-row:last-child { border-bottom: none; }
-.task-box { width: 17px; height: 17px; border: 1px solid var(--rule-strong); background: var(--shell); padding: 0; border-radius: 3px; cursor: default; }
-.task-row.done .task-box { background: var(--brass); border-color: var(--brass); }
-.task-row.done .task-box::after { content: '✓'; color: var(--shell); font-size: 12px; line-height: 15px; display: block; }
-.task-row.done .task-label { color: var(--ink-mute); text-decoration: line-through; }
-.task-label { font-size: 13.5px; color: var(--ink); }
-/* Agent preview: the boxes become tickable */
-body.agent-preview .task-box { cursor: pointer; }
-body.agent-preview .task-box:hover { border-color: var(--brass); box-shadow: 0 0 0 3px var(--linen); }
-/* Completed tasks (agent-only) — de-emphasized below the open list */
-.tasks-done { background: transparent; border-style: dashed; }
-.tasks-done h3 { color: var(--ink-mute); }
-.tasks-done .task-when { color: var(--ink-mute); }
-/* Note for the daily briefing (agent-only) */
-.cowork-note { border-left: 3px solid var(--brass); }
-.cowork-note-ta { width: 100%; box-sizing: border-box; min-height: 70px; resize: vertical; font: inherit; font-size: 13.5px; line-height: 1.5; color: var(--ink); background: var(--shell); border: 1px solid var(--rule); border-radius: 9px; padding: 10px 12px; margin-top: 4px; }
-.cowork-note-ta:focus { outline: none; border-color: var(--brass); }
-.cowork-note-foot { display: flex; align-items: center; gap: 12px; margin-top: 9px; }
-.cowork-note-status { font-size: 12px; color: var(--ink-mute); margin-right: auto; }
-.cowork-note-status.ok { color: #2E5C3D; }
-.cowork-note-status.warn { color: #A23B26; }
-.cowork-note-save { font-family: var(--mono); font-size: 10px; letter-spacing: .12em; text-transform: uppercase; padding: 9px 16px; border: 1px solid var(--ink); background: var(--ink); color: var(--shell); border-radius: 8px; cursor: pointer; }
-.cowork-note-save:hover { background: var(--brass); border-color: var(--brass); }
-.task-when { font-family: var(--mono); font-size: 10px; letter-spacing: 0.12em; color: var(--brass); text-transform: uppercase; white-space: nowrap; }
-.task-intro { font-size: 13px; color: var(--ink-soft); font-style: italic; line-height: 1.5; margin-bottom: 6px; }
+/* Tasks / Completed / Cowork-note — styling now lives in legacy-ds.css
+   (.ds-action / .ds-action-* / .ds-note-ta / .ds-note-foot). The old
+   .task-row grid + .cowork-note rules were removed: they collided with
+   the re-skinned markup that reuses .task-row/.cowork-note as JS hooks. */
 
 /* Team / who has access */
 .share-row {

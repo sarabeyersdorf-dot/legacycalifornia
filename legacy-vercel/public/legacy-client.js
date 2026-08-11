@@ -3954,7 +3954,7 @@
     const stale = d.stage_days != null && d.stage_days > 14;
     const due   = col.key === 'pending' && d.coe_days != null && d.coe_days <= 2;
     return `
-      <div class="ds-card${stale ? ' stale' : ''}${due ? ' due' : ''}" data-stg="${escHtml(col.stg)}" data-deal-key="${escHtml(d.source_key)}" data-bucket="${escHtml(col.key)}">
+      <div class="ds-dcard${stale ? ' stale' : ''}${due ? ' due' : ''}" data-stg="${escHtml(col.stg)}" data-deal-key="${escHtml(d.source_key)}" data-bucket="${escHtml(col.key)}">
         <span class="stripe"></span>
         <div class="body">
           <span class="marks"><i></i><i></i><i></i><i></i></span>
@@ -4367,7 +4367,7 @@
       : (temp === 'cold' ? '<span class="st">Cooling</span>' : '');
     const stale = isStaleLead(l);
     return `
-      <div class="ds-card${stale ? ' stale' : ''}" data-stg="${escHtml(stage)}" data-lead-id="${escHtml(l.id)}">
+      <div class="ds-dcard${stale ? ' stale' : ''}" data-stg="${escHtml(stage)}" data-lead-id="${escHtml(l.id)}">
         <span class="stripe"></span>
         <div class="body">
           <span class="marks"><i></i><i></i><i></i><i></i></span>
