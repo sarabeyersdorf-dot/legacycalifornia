@@ -1,5 +1,5 @@
 {
-  "version": 6.2,
+  "version": 6.4,
   "lastUpdated": "2026-08-11",
   "updatedBy": "cowork 2026-08-10 — canonical commission/timeline schema migration per Sara",
   "tasks": [
@@ -1274,6 +1274,70 @@
       "title": "🔴 324 Augusta: escrow OPENED 8/11 (Placer P-708410, COE 9/9, $460K) - record in deals.json: stage pending, salePrice 460000, closingDate 2026-09-09, buyer Denis Listengourt",
       "due": "Today 8/11",
       "done": false
+    },
+    {
+      "agent": "sara",
+      "client": "324 Augusta",
+      "key": "augusta-aaa-missing",
+      "title": "🔴 324 Augusta: AAA (Additional Agent Acknowledgment) not found in any of the four document trees - first compliance pass since escrow opened",
+      "due": "This week",
+      "done": false
+    },
+    {
+      "agent": "sara",
+      "client": "324 Augusta",
+      "key": "augusta-avid-missing",
+      "title": "🔴 324 Augusta: AVID missing for BOTH sides - not found in any of the four trees. Sara is on both sides, so both are hers to produce",
+      "due": "This week",
+      "done": false
+    },
+    {
+      "agent": "sara",
+      "client": "324 Augusta",
+      "key": "augusta-nhd-missing",
+      "title": "324 Augusta: NHD not found in any of the four trees. Placer's net sheet splits the NHD fee - confirm with Ashley Cuslidge it is ordered through escrow rather than chasing an agent",
+      "due": "This week",
+      "done": false
+    },
+    {
+      "agent": "sara",
+      "client": "324 Augusta",
+      "key": "augusta-address-typo",
+      "title": "324 Augusta: escrow-open email said '342 Augusta Ct'; Placer opened it correctly as 324 Augusta Court. Confirm the correction to Ashley so nothing downstream inherits the typo",
+      "due": "Today 8/11",
+      "done": false
+    },
+    {
+      "agent": "sara",
+      "client": "324 Augusta",
+      "key": "augusta-escrow-vacation-cover",
+      "title": "324 Augusta: Ashley Cuslidge out 8/26-9/4 and Placer closed 9/7 (Labor Day) against a 9/9 COE - name a backup escrow contact at Placer now",
+      "due": "This week",
+      "done": false
+    },
+    {
+      "agent": "james",
+      "client": "8235 Baldwin",
+      "key": "baldwin-walkthrough-date-fix",
+      "title": "Baldwin: Shomari's client page still says 'plan for the final walk-through around July 29' - CRM says 8/12. Update clientTasks so the client sees the real date",
+      "due": "This week",
+      "done": false
+    },
+    {
+      "agent": "james",
+      "client": "8235 Baldwin",
+      "key": "baldwin-agentnote-refresh",
+      "title": "Baldwin: agent note is still the 7/19 draft, written before ETA No. 2 existed. Six days from closing it should say where the loan stands - rewrite for Sara to publish",
+      "due": "This week",
+      "done": false
+    },
+    {
+      "agent": "sara",
+      "client": "Donald Rester",
+      "key": "fub-donald-rester",
+      "title": "Donald Rester (209) 482-5744 viewed 1330 Calaveritas 62, San Andreas SEVEN times (Ylopo alert 8/10, unread) - strongest buying signal this week. Call him",
+      "due": "Today 8/11",
+      "done": false
     }
   ],
   "deals": [
@@ -1724,9 +1788,17 @@
           "desc": "You signed Buyer Contingency Removal #1, and the listing side acknowledged it July 14 — but CR#1 only removed the INSPECTION contingency. Appraisal, loan, title, and insurance contingencies are still open (corrected 7/19 per James)."
         },
         {
+          "date": "2026-08-12",
+          "label": "Loan contingency deadline",
+          "status": "next",
+          "col": "contingencies",
+          "badge": "Key date",
+          "desc": "Your loan contingency runs to August 12 under Extension of Time Amendment No. 2, accepted August 3. Buyer Contingency Removal #2 (appraisal, loan, title, insurance) is the document that clears it."
+        },
+        {
           "date": "2026-08-17",
           "label": "Close of Escrow — 8/17",
-          "status": "next",
+          "status": "upcoming",
           "col": "closing",
           "badge": "Closing 8/17",
           "desc": "Close of escrow confirmed for August 17, 2026."
