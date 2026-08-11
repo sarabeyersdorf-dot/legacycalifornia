@@ -8,6 +8,7 @@
 <link rel="stylesheet" href="legacy-app.css">
 <!-- lg design tokens (--lg-*) + fonts, so the re-theme below resolves -->
 <link rel="stylesheet" href="legacy-ui.css">
+<link rel="stylesheet" href="legacy-ds.css">
 <style>
 /* --------------------------------------------------------------------------
    lg re-theme — the seller portal shipped with its own pine-green / cool-paper
@@ -281,229 +282,177 @@ body.agent-preview .task-box:hover { border-color: var(--brass); box-shadow: 0 0
 </head>
 <body data-screen-label="Seller Portal" class="lp-restyle">
 
-<div class="app">
-  <aside class="app-side">
-    <div class="app-side-brand">
-      <a href="index.html" class="wordmark">
-        <span class="wordmark-word">Legacy</span>
-        <span class="wordmark-sub">Seller Portal</span>
-      </a>
-    </div>
-
-    <div class="app-side-section" data-bind="status.headline">Your sale</div>
-    <nav class="app-side-nav">
-      <a href="seller.html" class="active">Overview</a>
-      <a href="#road">Road to closing</a>
-      <a href="#docs">Documents <span class="pill" data-bind="nav.documents">0</span></a>
-      <a href="#tasks">What I need <span class="pill" data-bind="nav.tasks">0</span></a>
-      <a href="#team">Your team</a>
-    </nav>
-
-    <div class="app-side-section">Resources</div>
-    <nav class="app-side-nav">
-      <a href="mortgage-calculator.html">Net proceeds</a>
-      <a href="market-report.html">Market reports</a>
-      <a href="how-we-work.html">How we work</a>
-    </nav>
-
-    <div class="app-side-foot">
-      <div class="avatar avatar-sm">L</div>
-      <div style="flex:1;min-width:0;">
-        <div style="font-size:13px;color:var(--ink);font-weight:500;" data-bind="status.address">Your listing</div>
-        <div class="mono" style="font-size:9px;letter-spacing:.16em;color:var(--ink-mute);" data-bind="status.city">SELLER PORTAL</div>
+<!-- ===== Seller Portal (screen 1A — spine) · 2026 re-skin =====
+     Markup rewritten to the design system; every data-bind / data-list /
+     data-row / data-add-class key and every referenced id (#sell-hero-photo,
+     #sell-tour, #sell-note-avatar, #sell-msg-btn, #cowork-note, .task-row /
+     [data-task-toggle]) is preserved so paintPortal() + the page scripts drive
+     it unchanged. Road dots are coloured by step status (done / current /
+     upcoming); a per-step CATEGORY colour would need a category field from the
+     deal payload — noted for a follow-up. -->
+<div class="ds">
+  <div class="ds-appbar-wrap">
+    <header class="ds-topbar ds-portal-top">
+      <a href="index.html" class="ds-wordmark">LEGACY</a>
+      <span class="ds-vr"></span>
+      <span class="ds-prod">Seller portal</span>
+      <div class="ds-right">
+        <span class="ds-portal-addr" data-bind="status.address">Your listing</span>
+        <button class="ds-btn ds-btn--primary" id="sell-msg-btn" type="button">Message Sara</button>
       </div>
-    </div>
-  </aside>
+    </header>
+  </div>
 
-  <main class="app-main">
-    <div class="app-topbar">
-      <div class="app-search">
-        <span style="font-family:var(--mono);font-size:11px;">⌕</span>
-        <input placeholder="Search documents, dates, your team…">
-      </div>
-      <div class="app-actions">
-        <button class="icon-btn" title="Notifications">✉<span class="dot"></span></button>
-        <button class="btn btn-ink btn-sm" id="sell-msg-btn">Message Sara</button>
-      </div>
-    </div>
+  <main class="ds-portal">
+    <div class="ds-screen">
+      <div class="ds-corners"><i></i><i></i><i></i><i></i></div>
 
-    <!-- WIRE-FRAUD WARNING · shown to every in-escrow client, never omitted -->
-    <div class="wire-warn" data-bind="security.banner" data-optional></div>
+      <div class="ds-wire" data-bind="security.banner" data-optional></div>
 
-    <!-- HERO -->
-    <section class="sell-hero">
-      <div class="sell-photo">
-        <img id="sell-hero-photo" src="" alt="" style="display:none;">
-        <span class="badge" data-bind="status.badge" data-optional>In escrow</span>
-      </div>
-      <div class="sell-h-info">
-        <span class="eyebrow" data-bind="status.since">In escrow · Closing soon</span>
-        <h1><span data-bind="status.address">Your home</span><br><em data-bind="status.tagline">On track to close.</em></h1>
-        <p class="addr"><span data-bind="status.city">—</span></p>
-        <div class="specs">
-          <span data-bind="status.type" data-optional>Residential</span>
-          <span data-bind="status.label" data-optional>In escrow</span>
+      <div class="ds-title ds-portal-hero">
+        <div>
+          <div class="ds-kicker" data-bind="status.since">In escrow</div>
+          <h1 class="ds-headline" data-bind="status.address">Your home</h1>
+          <div class="ds-portal-sub"><span data-bind="status.city">—</span> <span data-bind="status.tagline" data-optional>· On track to close</span></div>
         </div>
-        <div id="sell-tour" class="sell-tour"></div>
-
-        <!-- Your team — right up top so a client can reach anyone in one tap -->
-        <div class="sell-team" id="team" data-list="team">
-          <div class="sell-team-h">Your team</div>
-          <div class="sell-team-card" data-row>
-            <div class="sell-team-id">
-              <span class="sell-team-name" data-bind="name">—</span>
-              <span class="sell-team-role" data-bind="sub" data-optional>—</span>
-            </div>
-            <div class="sell-team-contact">
-              <a class="sell-team-link tel" data-bind="phone_label" data-bind-href="phone_href" data-optional href="#">Call</a>
-              <a class="sell-team-link mail" data-bind="email_label" data-bind-href="email_href" data-optional href="#">Email</a>
-            </div>
-          </div>
+        <div class="ds-portal-price">
+          <div class="lab" data-bind="status.price_label">List price</div>
+          <div class="fig" data-bind="status.price">—</div>
+          <div class="sub" data-bind="status.label" data-optional>In escrow</div>
         </div>
       </div>
-      <div class="sell-status">
-        <div class="l" data-bind="status.price_label">List price</div>
-        <div class="v" data-bind="status.price">—</div>
-        <div class="since" data-bind="status.since" data-optional>Closing soon</div>
-      </div>
-    </section>
+      <img id="sell-hero-photo" src="" alt="" style="display:none;width:100%;max-height:300px;object-fit:cover;border-bottom:1px solid var(--rule);">
+      <div id="sell-tour" class="ds-portal-tour" style="padding:0 24px;"></div>
 
-    <!-- KPI -->
-    <section class="sell-kpi" data-list="kpis">
-      <div class="cell" data-row>
-        <span class="l" data-bind="label">—</span>
-        <span class="v" data-bind="value">—</span>
-        <span class="ch" data-bind="change" data-optional>—</span>
-      </div>
-    </section>
-
-    <!-- GRID -->
-    <div class="sell-grid">
-      <!-- LEFT -->
-      <div>
-        <!-- Sara note (always visible) -->
-        <div class="sara-note">
-          <div class="avatar" id="sell-note-avatar"><img src="art/sara-headshot.png" alt=""></div>
-          <div>
-            <div class="sara-note-head" data-bind="note.head">A note from Sara</div>
-            <p class="sara-note-text" data-bind="note.body">Your sale is moving along on schedule. I will flag anything that needs you the moment it comes up.</p>
-            <div class="sara-note-sign" data-bind="note.sign">— Sara · (209) 559-4966</div>
-          </div>
+      <section class="ds-strip ds-strip--kpis" data-list="kpis">
+        <div class="ds-cell" data-row style="display:none;">
+          <div class="lab" data-bind="label">—</div>
+          <div class="fig" data-bind="value">—</div>
+          <div class="sub" data-bind="change" data-optional>—</div>
         </div>
+      </section>
 
-        <!-- Back on market — shown only when there's no active escrow (Slice 2).
-             An explicit, plainly worded state instead of a stale/blank timeline. -->
-        <section class="s-card back-on-market" data-list="back_on_market" data-optional>
-          <div class="bom-item" data-row>
-            <h2 class="bom-head" data-bind="headline">Back on market</h2>
-            <p class="bom-body" data-bind="body" data-optional>—</p>
-          </div>
-        </section>
-
-        <!-- Road to closing -->
-        <section class="s-card" id="road" data-list="road">
-          <div class="s-card-h">
-            <h2>The road to closing.</h2>
-            <span class="meta">Every step, as it happens</span>
-          </div>
-          <div class="road-item" data-row>
-            <div class="road-date" data-bind="date">—</div>
-            <div class="road-mark"><span class="road-dot" data-add-class="status"></span></div>
-            <div class="road-body">
-              <div class="road-label-row">
-                <span class="road-label" data-bind="label">Milestone</span>
-                <span class="road-badge" data-bind="badge" data-add-class="status" data-optional>Done</span>
-              </div>
-              <div class="road-desc" data-bind="description" data-optional>—</div>
+      <div class="ds-portal-body">
+        <!-- LEFT: note + road spine -->
+        <div class="ds-portal-left">
+          <div class="ds-note">
+            <span class="ds-note-av" id="sell-note-avatar"><img src="art/sara-headshot.png" alt=""></span>
+            <div>
+              <div class="ds-note-h" data-bind="note.head">A note from Sara</div>
+              <p class="ds-note-b" data-bind="note.body">Your sale is moving along on schedule. I’ll flag anything that needs you the moment it comes up.</p>
+              <div class="ds-note-s" data-bind="note.sign">— Sara · (209) 559-4966</div>
             </div>
           </div>
-        </section>
 
-        <!-- Good to know (v1.5) — collapses entirely when empty -->
-        <section class="s-card" id="good" data-list="good_to_know" data-optional>
-          <div class="s-card-h">
-            <h2>Good to know.</h2>
-            <span class="meta">Context on where things stand</span>
-          </div>
-          <div class="gtk-item" data-row>
-            <div class="gtk-title" data-bind="title">—</div>
-            <div class="gtk-body" data-bind="body" data-optional>—</div>
-          </div>
-        </section>
-
-        <!-- Prior escrows — collapsed history (Slice 2). Sellers know the escrow
-             fell out; hiding it reads as evasion, and they may need the record. -->
-        <section class="s-card escrow-history" id="escrow-history" data-list="escrow_history" data-optional>
-          <div class="s-card-h">
-            <h2>Escrow history.</h2>
-            <span class="meta">Previous escrows on this property</span>
-          </div>
-          <div class="esc-item" data-row>
-            <div class="esc-head">
-              <span class="esc-label" data-bind="label">Escrow</span>
-              <span class="esc-status" data-bind="status" data-add-class="status" data-optional>cancelled</span>
-              <span class="esc-when" data-bind="when" data-optional>—</span>
+          <section class="ds-card" data-list="back_on_market" data-optional>
+            <div class="ds-bom" data-row style="display:none;padding:14px 16px;">
+              <div class="ds-card-h" style="border:none;padding:0 0 6px;"><h3 data-bind="headline">Back on market</h3></div>
+              <p class="ds-card-p" style="padding:0;" data-bind="body" data-optional>—</p>
             </div>
-            <div class="esc-docs" data-list="documents" data-optional>
-              <div class="esc-doc" data-row>
-                <span class="esc-doc-name" data-bind="name">Document</span>
-                <a class="esc-doc-view" data-bind="view_label" data-bind-href="view_url" data-optional href="#" target="_blank" rel="noopener">View</a>
+          </section>
+
+          <section class="ds-card" id="road">
+            <div class="ds-card-h"><h3>The road to closing</h3><span class="ds-card-meta">every step, as it happens</span></div>
+            <div class="ds-road" data-list="road">
+              <div class="ds-road-item" data-row style="display:none;">
+                <div class="ds-road-rail"><span class="ds-road-dot" data-add-class="status"></span></div>
+                <div class="ds-road-body">
+                  <div class="ds-road-date" data-bind="date" data-optional>—</div>
+                  <div class="ds-road-labelrow">
+                    <span class="ds-road-label" data-bind="label">Milestone</span>
+                    <span class="ds-road-badge" data-bind="badge" data-add-class="status" data-optional>Done</span>
+                  </div>
+                  <div class="ds-road-desc" data-bind="description" data-optional>—</div>
+                </div>
               </div>
             </div>
-          </div>
-        </section>
-      </div>
+          </section>
 
-      <!-- RIGHT -->
-      <div>
-        <!-- What I need from you (tasks) -->
-        <section class="s-mini" id="tasks" data-list="tasks">
-          <h3>What I need from you</h3>
-          <p class="task-intro">I only reach out when something genuinely needs your signature. Those requests land right here — and I will text you too.</p>
-          <div class="task-row" data-row data-add-class="status">
-            <button type="button" class="task-box" data-task-toggle aria-label="Mark complete"></button>
-            <div class="task-label" data-bind="label">Task</div>
-            <span class="task-when" data-bind="when" data-optional>Open</span>
-          </div>
-        </section>
+          <section class="ds-card" id="good" data-list="good_to_know" data-optional>
+            <div class="ds-gtk" data-row style="display:none;">
+              <div class="ds-gtk-t" data-bind="title">—</div>
+              <div class="ds-gtk-b" data-bind="body" data-optional>—</div>
+            </div>
+          </section>
 
-        <!-- Completed tasks — AGENT ONLY (collapses when empty; client gets none).
-             Tick a row to un-complete it and send it back to the open list. -->
-        <section class="s-mini tasks-done" id="tasks-done" data-list="tasks_done" data-optional>
-          <h3>✓ Completed</h3>
-          <p class="task-intro">Done and off the client's list. Tick one to bring it back.</p>
-          <div class="task-row done" data-row data-add-class="status">
-            <button type="button" class="task-box" data-task-toggle aria-label="Un-complete"></button>
-            <div class="task-label" data-bind="label">Task</div>
-            <span class="task-when" data-bind="when" data-optional>Done</span>
-          </div>
-        </section>
+          <section class="ds-card" id="escrow-history" data-list="escrow_history" data-optional>
+            <div class="ds-esc" data-row style="display:none;">
+              <div class="ds-esc-h">
+                <span data-bind="label">Escrow</span>
+                <span class="ds-esc-st" data-bind="status" data-add-class="status" data-optional>cancelled</span>
+                <span class="ds-esc-when" data-bind="when" data-optional>—</span>
+              </div>
+              <div data-list="documents" data-optional>
+                <div class="ds-esc-doc" data-row style="display:none;">
+                  <span data-bind="name">Document</span>
+                  <a data-bind="view_label" data-bind-href="view_url" data-optional href="#" target="_blank" rel="noopener">View</a>
+                </div>
+              </div>
+            </div>
+          </section>
+        </div>
 
-        <!-- Note for the daily briefing — AGENT ONLY (revealed on agent preview) -->
-        <section class="s-mini cowork-note" id="cowork-note" data-agent-only hidden>
-          <h3>Note for your daily briefing</h3>
-          <p class="task-intro">Private — the client never sees this. Your morning briefing reads it and updates the deal (drops completed tasks, adjusts the list) accordingly.</p>
-          <textarea class="cowork-note-ta" data-cowork-note placeholder="e.g. Seller finished the pest repairs — clear that task. Add: confirm HOA docs by Friday."></textarea>
-          <div class="cowork-note-foot">
-            <span class="cowork-note-status" data-cowork-note-status></span>
-            <button class="cowork-note-save" type="button" data-cowork-note-save>Save for briefing</button>
-          </div>
-        </section>
+        <!-- RIGHT: tasks + documents + team -->
+        <div class="ds-portal-right">
+          <section class="ds-card ds-actionwrap" id="tasks">
+            <div class="ds-card-h"><h3>What I need from you</h3><span class="ds-card-meta" data-bind="nav.tasks" data-optional>0</span></div>
+            <p class="ds-card-p">I only reach out when something genuinely needs your signature. Those requests land right here — and I’ll text you too.</p>
+            <div class="ds-actions" data-list="tasks">
+              <div class="ds-action task-row" data-row data-add-class="status" style="display:none;">
+                <button type="button" class="ds-action-box task-box" data-task-toggle aria-label="Mark complete"></button>
+                <div class="ds-action-label task-label" data-bind="label">Task</div>
+                <span class="ds-action-when task-when" data-bind="when" data-optional>Open</span>
+              </div>
+            </div>
+          </section>
 
-        <!-- Documents -->
-        <section class="s-mini" id="docs" data-list="documents">
-          <h3>Documents</h3>
-          <div class="doc-row" data-row>
-            <span class="icn" data-bind="type">DOC</span>
-            <div class="name"><span data-bind="name">Document</span><span class="sub" data-bind="sub" data-optional>—</span></div>
-            <span class="d-status" data-bind="status" data-optional>On file</span>
-            <span class="doc-actions">
-              <a class="doc-link" data-bind="view_label" data-bind-href="view_url" data-optional href="#" target="_blank" rel="noopener">View</a>
-              <a class="doc-link doc-download" data-bind="download_label" data-bind-href="download_url" data-optional href="#" target="_blank" rel="noopener" download>Download ↓</a>
-            </span>
-          </div>
-        </section>
+          <section class="ds-card ds-tasks-done" id="tasks-done" data-list="tasks_done" data-optional>
+            <div class="ds-card-h"><h3>Completed</h3></div>
+            <div class="ds-action task-row done" data-row data-add-class="status" style="display:none;">
+              <button type="button" class="ds-action-box task-box" data-task-toggle aria-label="Un-complete"></button>
+              <div class="ds-action-label task-label" data-bind="label">Task</div>
+              <span class="ds-action-when task-when" data-bind="when" data-optional>Done</span>
+            </div>
+          </section>
 
+          <section class="ds-card cowork-note" id="cowork-note" data-agent-only hidden>
+            <div class="ds-card-h"><h3>Note for your daily briefing</h3></div>
+            <p class="ds-card-p">Private — the client never sees this. Your briefing reads it and updates the deal accordingly.</p>
+            <textarea class="ds-note-ta" data-cowork-note placeholder="e.g. Seller finished the pest repairs — clear that task. Add: confirm HOA docs by Friday."></textarea>
+            <div class="ds-note-foot"><span data-cowork-note-status></span><button class="ds-btn ds-btn--primary" type="button" data-cowork-note-save>Save for briefing</button></div>
+          </section>
+
+          <section class="ds-card" id="docs">
+            <div class="ds-card-h"><h3>Documents</h3><span class="ds-card-meta" data-bind="nav.documents" data-optional>0</span></div>
+            <div class="ds-docs" data-list="documents">
+              <div class="ds-doc" data-row style="display:none;">
+                <span class="ds-doc-ic" data-bind="type" data-optional>DOC</span>
+                <div class="ds-doc-nm"><span data-bind="name">Document</span><span class="ds-doc-sub" data-bind="sub" data-optional>—</span></div>
+                <span class="ds-doc-st" data-bind="status" data-optional>On file</span>
+                <span class="ds-doc-acts">
+                  <a class="ds-doc-link" data-bind="view_label" data-bind-href="view_url" data-optional href="#" target="_blank" rel="noopener">View</a>
+                  <a class="ds-doc-link" data-bind="download_label" data-bind-href="download_url" data-optional href="#" target="_blank" rel="noopener" download>Download ↓</a>
+                </span>
+              </div>
+            </div>
+          </section>
+
+          <section class="ds-card" id="team">
+            <div class="ds-card-h"><h3>Your team</h3></div>
+            <div class="ds-teams" data-list="team">
+              <div class="ds-team" data-row style="display:none;">
+                <span class="ds-team-av"></span>
+                <div class="ds-team-b">
+                  <div class="ds-team-id"><span class="ds-team-nm" data-bind="name">—</span><span class="ds-team-role" data-bind="sub" data-optional>—</span></div>
+                  <div class="ds-team-links">
+                    <a class="ds-team-link" data-bind="phone_label" data-bind-href="phone_href" data-optional href="#">Call</a>
+                    <a class="ds-team-link" data-bind="email_label" data-bind-href="email_href" data-optional href="#">Email</a>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+        </div>
       </div>
     </div>
   </main>

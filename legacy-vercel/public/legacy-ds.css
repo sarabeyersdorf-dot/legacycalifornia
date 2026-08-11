@@ -360,5 +360,116 @@ body.ds-appshell .crm-view[data-view="today"] > .today{display:none;}
 .cd-side select{font:inherit;font-size:14px;padding:8px 10px;border:1px solid var(--border);background:var(--panel);width:100%;color:var(--ink);}
 @media(max-width:900px){ .ds-cbody{grid-template-columns:1fr;} .ds-ctbl-h,.ds-ctbl-r{grid-template-columns:2fr 1.2fr 1fr;} .ds-ctbl-h .ow-col,.ds-ctbl-r .ow{display:none;} }
 
+/* ===================== SELLER / BUYER PORTAL (1A spine) ================= */
+.ds-portal{max-width:1120px;margin:0 auto;padding:22px;}
+.ds-portal-top{max-width:1120px;margin:0 auto;}
+.ds-portal-top .ds-right{gap:16px;}
+.ds-portal-addr{font-size:14px;color:var(--muted);}
+.ds-portal-hero{align-items:flex-end;}
+.ds-portal-sub{font-size:15px;color:var(--faint);margin-top:4px;}
+.ds-portal-price{margin-left:auto;text-align:right;}
+.ds-portal-price .lab{font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--faint);}
+.ds-portal-price .fig{font-family:var(--cond);font-weight:600;font-size:34px;color:var(--ink);line-height:1.05;}
+.ds-portal-price .sub{font-size:13px;color:var(--muted);}
+.ds-portal-tour{display:flex;gap:8px;flex-wrap:wrap;padding:0 0 0 0;}
+.ds-portal-tour a{display:inline-block;padding:8px 14px;border:1px solid var(--border);font-size:14px;color:var(--ink);text-decoration:none;margin:12px 0 0;}
+.ds-portal-tour a:hover{background:var(--band);}
+.ds-strip--kpis{grid-auto-flow:column;grid-auto-columns:minmax(0,1fr);}
+.ds-strip--kpis .ds-cell:first-child{background:var(--ink-dark);}
+.ds-strip--kpis .ds-cell:first-child .lab{color:var(--inv-label);}
+.ds-strip--kpis .ds-cell:first-child .fig{color:var(--panel);}
+.ds-strip--kpis .ds-cell:first-child .sub{color:var(--inv-sub);}
+.ds-wire{background:var(--amber-bg);border:1px solid var(--amber-bd);color:var(--amber-ink);
+  padding:12px 16px;font-size:14px;line-height:1.45;border-bottom:1px solid var(--amber-bd);}
+.ds-wire:empty{display:none;}
+
+.ds-portal-body{display:grid;grid-template-columns:1.35fr 1fr;gap:1px;background:var(--rule);border-top:1px solid var(--rule);}
+.ds-portal-left,.ds-portal-right{background:var(--panel);padding:22px 24px;min-width:0;display:flex;flex-direction:column;gap:20px;}
+
+.ds-note{display:flex;gap:13px;align-items:flex-start;border:1px solid var(--rule);background:var(--band);padding:15px 16px;}
+.ds-note-av{width:44px;height:44px;background:var(--avatar);flex:none;overflow:hidden;}
+.ds-note-av img{width:100%;height:100%;object-fit:cover;}
+.ds-note-h{font-family:var(--cond);font-weight:600;font-size:17px;color:var(--ink);}
+.ds-note-b{font-size:14.5px;color:var(--muted);line-height:1.55;margin:5px 0;}
+.ds-note-s{font-size:13px;color:var(--faint);}
+
+.ds-card{border:1px solid var(--rule);background:var(--panel);}
+.ds-card:empty{display:none;}
+.ds-card-h{display:flex;align-items:baseline;gap:10px;padding:14px 16px;border-bottom:1px solid var(--hair);}
+.ds-card-h h3{font-family:var(--cond);font-weight:600;font-size:22px;margin:0;color:var(--ink);}
+.ds-card-meta{margin-left:auto;font-size:13px;color:var(--faint);}
+.ds-card-p{font-size:14px;color:var(--muted);padding:12px 16px 0;line-height:1.5;margin:0;}
+
+/* road spine */
+.ds-road{padding:6px 16px 14px;}
+.ds-road-item{display:grid;grid-template-columns:22px 1fr;gap:14px;padding:12px 0;position:relative;}
+.ds-road-rail{display:flex;justify-content:center;position:relative;}
+.ds-road-rail::before{content:"";position:absolute;left:50%;transform:translateX(-50%);top:18px;bottom:-24px;width:1px;background:var(--rule);}
+.ds-road-item:last-child .ds-road-rail::before{display:none;}
+.ds-road-dot{width:14px;height:14px;border:2px solid var(--border);background:var(--panel);margin-top:3px;position:relative;z-index:1;flex:none;}
+.ds-road-dot.done{background:var(--s-prep,#3f7d7a);border-color:#3f7d7a;}
+.ds-road-dot.next{background:var(--amber);border-color:var(--amber);box-shadow:0 0 0 4px var(--amber-bg);}
+.ds-road-dot.key{background:var(--amber);border-color:var(--amber);}
+.ds-road-date{font-family:var(--cond);font-weight:600;font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--faint);}
+.ds-road-labelrow{display:flex;align-items:baseline;gap:9px;flex-wrap:wrap;margin-top:2px;}
+.ds-road-label{font-family:var(--cond);font-weight:600;font-size:19px;color:var(--ink);line-height:1.15;}
+.ds-road-badge{font-family:var(--cond);font-weight:600;font-size:11px;letter-spacing:.08em;text-transform:uppercase;padding:1px 7px;border:1px solid var(--rule);color:var(--muted);background:var(--band);}
+.ds-road-badge.done{background:#e4efe7;color:#2c4a33;border-color:#b3ccb9;}
+.ds-road-badge.next,.ds-road-badge.key{background:var(--amber-bg);color:var(--amber-ink);border-color:var(--amber-bd);}
+.ds-road-desc{font-size:14px;color:var(--muted);line-height:1.55;margin-top:5px;}
+
+/* action blocks (what I need from you) — amber = waiting on you */
+.ds-actionwrap .ds-action:first-of-type{margin-top:12px;}
+.ds-action{display:flex;align-items:flex-start;gap:11px;margin:10px 16px 0;padding:13px 14px;
+  border:1px solid var(--amber-bd);background:var(--amber-bg);}
+.ds-action:last-child{margin-bottom:16px;}
+.ds-action-box{width:19px;height:19px;border:1px solid var(--amber);background:var(--panel);flex:none;cursor:default;margin-top:1px;}
+body.agent-preview .ds-action-box{cursor:pointer;}
+.ds-action-label{flex:1;font-size:15px;color:var(--ink);}
+.ds-action-when{font-size:13px;color:var(--amber-ink);white-space:nowrap;}
+.task-row.done .ds-action,.ds-action.done{background:var(--panel);border-color:var(--rule);opacity:.62;}
+.task-row.done .ds-action-box{background:var(--s-closed);border-color:var(--s-closed);}
+.ds-tasks-done .ds-card-h h3{color:var(--faint);}
+.ds-note-ta{width:calc(100% - 32px);margin:12px 16px 0;min-height:80px;font:inherit;font-size:14px;padding:10px;border:1px solid var(--border);background:var(--panel);resize:vertical;}
+.ds-note-foot{display:flex;align-items:center;gap:12px;padding:10px 16px 16px;}
+.ds-note-foot span{font-size:13px;color:var(--faint);flex:1;}
+
+/* documents */
+.ds-doc{display:flex;align-items:center;gap:12px;padding:11px 16px;border-bottom:1px solid var(--hair);}
+.ds-doc:last-child{border-bottom:none;}
+.ds-doc-ic{font-family:var(--cond);font-weight:600;font-size:11px;letter-spacing:.06em;color:var(--muted);background:var(--band);border:1px solid var(--rule);padding:3px 6px;flex:none;}
+.ds-doc-nm{flex:1;min-width:0;}
+.ds-doc-nm>span:first-child{display:block;font-size:14.5px;color:var(--ink);font-weight:500;}
+.ds-doc-sub{font-size:12.5px;color:var(--faint);}
+.ds-doc-st{font-size:12px;color:var(--muted);white-space:nowrap;}
+.ds-doc-acts{display:flex;gap:8px;}
+.ds-doc-link{font-size:13px;color:#416180;text-decoration:none;white-space:nowrap;}
+
+/* team */
+.ds-team{display:flex;gap:12px;align-items:flex-start;padding:12px 16px;border-bottom:1px solid var(--hair);}
+.ds-team:last-child{border-bottom:none;}
+.ds-team-av{width:38px;height:38px;background:var(--avatar);flex:none;}
+.ds-team-b{flex:1;min-width:0;}
+.ds-team-id{display:flex;align-items:baseline;gap:9px;flex-wrap:wrap;}
+.ds-team-nm{font-family:var(--cond);font-weight:600;font-size:18px;color:var(--ink);}
+.ds-team-role{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--faint);}
+.ds-team-links{display:flex;gap:8px;margin-top:7px;flex-wrap:wrap;}
+.ds-team-link{font-size:13px;font-weight:600;text-decoration:none;padding:5px 11px;border:1px solid var(--border);color:var(--ink);white-space:nowrap;}
+.ds-team-link:hover{background:var(--band);}
+
+.ds-gtk{padding:11px 16px;border-bottom:1px solid var(--hair);}
+.ds-gtk:last-child{border-bottom:none;}
+.ds-gtk-t{font-weight:600;font-size:14.5px;color:var(--ink);}
+.ds-gtk-b{font-size:13.5px;color:var(--muted);margin-top:3px;line-height:1.5;}
+.ds-esc{padding:12px 16px;border-bottom:1px solid var(--hair);}
+.ds-esc:last-child{border-bottom:none;}
+.ds-esc-h{display:flex;align-items:baseline;gap:9px;flex-wrap:wrap;font-size:14px;}
+.ds-esc-st{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--alert);}
+.ds-esc-when{color:var(--faint);font-size:12.5px;}
+.ds-esc-doc{display:flex;justify-content:space-between;gap:10px;font-size:13px;padding:5px 0 0;}
+.ds-esc-doc a{color:#416180;text-decoration:none;}
+
+@media(max-width:860px){ .ds-portal-body{grid-template-columns:1fr;} .ds-strip--kpis{grid-auto-flow:row;grid-template-columns:1fr 1fr;} .ds-portal-price{margin-left:0;text-align:left;} }
+
 /* focus visibility */
 .ds :focus-visible{outline:2px solid #597ea3;outline-offset:2px;}
