@@ -1739,14 +1739,12 @@ body.lp-restyle {
     }
     </style>
     <section class="crm-view" data-view="curate">
-      <div class="cur">
-        <div class="cur-head">
-          <div>
-            <span class="label-cap" style="color:var(--brass);">Curated Search &amp; Story Push</span>
-            <h1 class="h-section" style="font-size:38px;margin-top:6px;">Collections.</h1>
-          </div>
-          <button class="btn btn-ink btn-sm" data-cur-new>+ New collection</button>
+      <div class="ds"><div class="ds-screen"><div class="ds-corners"><i></i><i></i><i></i><i></i></div>
+        <div class="ds-title" style="align-items:center;">
+          <div><div class="ds-kicker">Curated Search &amp; Story Push</div><h1 class="ds-headline">Collections</h1></div>
+          <button class="ds-btn ds-btn--primary" data-cur-new style="margin-left:auto;">+ New collection</button>
         </div>
+      <div class="cur">
         <div class="cur-grid">
           <aside class="cur-side">
             <div class="cur-side-h">Your collections</div>
@@ -1759,7 +1757,7 @@ body.lp-restyle {
             <div data-cur-editor style="display:none;"></div>
           </div>
         </div>
-      </div>
+      </div></div></div>
     </section>
 
     <!-- ============================================================
@@ -4436,7 +4434,7 @@ function selectLead(el) {
 
   // ---- modals --------------------------------------------------------------
   function modal(html) {
-    var m = document.createElement('div'); m.className = 'cur-modal';
+    var m = document.createElement('div'); m.className = 'cur-modal ds';
     m.innerHTML = '<div class="box">' + html + '</div>';
     document.body.appendChild(m);
     m.addEventListener('click', function (e) { if (e.target === m) document.body.removeChild(m); });

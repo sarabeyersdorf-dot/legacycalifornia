@@ -750,3 +750,47 @@ body.viewing-browse .ds-buyer-home{display:none;}
 .ds .bc-note{font-family:var(--body);color:var(--faint);}
 .ds .bc-bar{background:var(--track);}
 .ds .bc-bar span{background:var(--amber);}
+
+/* ---- Curated (Collections) ---- */
+.ds .cur{padding:20px 28px 40px;}
+.ds .cur-side-h{font-family:var(--cond);font-weight:600;letter-spacing:.14em;color:var(--faint);}
+.ds .cur-coll{background:var(--panel);border:1px solid var(--rule);}
+.ds .cur-coll:hover{border-color:var(--ink);}
+.ds .cur-coll.on{border-color:var(--amber);box-shadow:inset 0 0 0 1px var(--amber);}
+.ds .cur-coll .t{font-family:var(--cond);font-weight:600;font-style:normal;font-size:17px;color:var(--ink);}
+.ds .cur-coll .m{font-family:var(--cond);font-weight:600;letter-spacing:.08em;color:var(--faint);}
+.ds .cur-empty,.ds .cur-placeholder{font-family:var(--body);font-style:italic;color:var(--faint);}
+.ds .cur-saved button{border:1px solid var(--rule);color:var(--muted);font-family:var(--body);}
+.ds .cur-saved button:hover{border-color:var(--ink);color:var(--ink);}
+.ds .cur-saved button .c{font-family:var(--cond);font-weight:600;color:var(--amber-ink);}
+.ds .cur-ed-h{border-bottom:1px solid var(--rule);}
+.ds .cur-ed-meta input,.ds .cur-ed-meta textarea{border:1px solid var(--border);background:var(--panel);color:var(--ink);border-radius:0;font-family:var(--body);}
+.ds .cur-ed-meta .title-in{font-family:var(--cond);font-weight:600;font-style:normal;font-size:24px;}
+.ds .cur-status{font-family:var(--cond);font-weight:600;letter-spacing:.1em;border-radius:0;}
+.ds .cur-status.draft{background:var(--band);color:var(--muted);}
+.ds .cur-status.active{background:var(--good);color:var(--panel);}
+.ds .cur-subtab{font-family:var(--cond);font-weight:600;letter-spacing:.1em;border:1px solid var(--border);color:var(--muted);border-radius:0;}
+.ds .cur-subtab.on{background:var(--ink-dark);color:var(--panel);border-color:var(--ink-dark);}
+.ds .cur-filters{background:var(--panel);border:1px solid var(--rule);}
+.ds .cur-filters label{font-family:var(--cond);font-weight:600;letter-spacing:.1em;color:var(--faint);}
+.ds .cur-filters input,.ds .cur-filters select{border:1px solid var(--border);background:var(--panel);color:var(--ink);border-radius:0;font-family:var(--body);}
+.ds .cur-chip{font-family:var(--cond);font-weight:600;letter-spacing:.08em;border:1px solid var(--border);color:var(--muted);border-radius:0;}
+.ds .cur-chip.on{background:var(--amber);color:var(--panel);border-color:var(--amber);}
+.ds .cur-card,.ds .cur-row{background:var(--panel);border:1px solid var(--rule);}
+.ds .cur-card .pr,.ds .cur-row .pr{font-family:var(--cond);font-weight:600;font-style:normal;color:var(--ink);}
+.ds .cur-card .ad,.ds .cur-row .ad{color:var(--muted);}
+.ds .cur-card .sp,.ds .cur-row .sp{font-family:var(--cond);font-weight:600;letter-spacing:.08em;color:var(--faint);}
+.ds .cur-client{background:var(--panel);border:1px solid var(--rule);}
+.ds .cur-client .cc-av{background:var(--avatar);color:var(--panel);border-radius:0;font-family:var(--cond);font-weight:600;}
+.ds .cur-client .cc-name{font-family:var(--cond);font-weight:600;font-style:normal;color:var(--ink);}
+.ds .cur-suggest{border:1px dashed var(--amber-bd);background:var(--amber-bg);}
+.ds .cur-suggest-h{font-family:var(--cond);font-weight:600;letter-spacing:.12em;color:var(--amber-ink);}
+.ds .cur-eng{font-family:var(--cond);font-weight:600;color:var(--amber-ink);}
+/* the collection / message-preview modal is appended to <body> with a `ds`
+   class of its own (not inside the screen's .ds), so target it directly. */
+.cur-modal.ds .box{background:var(--panel);border-radius:0;}
+.cur-modal.ds h3{font-family:var(--cond);font-weight:600;font-style:normal;color:var(--ink);}
+.cur-modal.ds .sub{color:var(--muted);}
+.cur-modal.ds label{font-family:var(--cond);font-weight:600;letter-spacing:.1em;color:var(--faint);}
+.cur-modal.ds input,.cur-modal.ds textarea,.cur-modal.ds select{border:1px solid var(--border);background:var(--panel);color:var(--ink);border-radius:0;font-family:var(--body);}
+.cur-modal.ds .cur-msg-pv{background:var(--ink-dark);}
