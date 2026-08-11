@@ -1,7 +1,7 @@
 {
- "version": 5.9,
+ "version": 6.0,
  "lastUpdated": "2026-08-10",
- "updatedBy": "cowork-morning-briefing 2026-08-10 (Step 1d Part A auto-correct)",
+ "updatedBy": "cowork 2026-08-10 — canonical commission/timeline schema migration per Sara",
  "tasks": [
   {
    "agent": "sara",
@@ -1521,7 +1521,9 @@
    "side": "buyer",
    "agent": "james",
    "listing": {
-    "commission": "3%",
+    "commission": {
+     "pct": 3
+    },
     "commissionNote": "seller pays 2.5%, buyer pays 0.5% (per Sara 7/12; SCO1 seller-paid 2.5% buyer-broker)"
    },
    "listPrice": null,
@@ -1529,8 +1531,9 @@
    "openEscrowDate": null,
    "closingDate": "2026-07-31",
    "timeline": {
+    "coe": "2026-07-31",
     "clockStart": "2026-07-24",
-    "note": "Bankruptcy court sale (ADM1) — all contingency + COE periods start only on seller's written notice of court approval"
+    "note": "Bankruptcy court sale (ADM1) — all contingency and COE periods start only on the seller's written notice of court approval; clockStart 2026-07-24 is that notice date. Escrow closed 2026-07-31."
    },
    "contacts": {
     "coAgent": "Audrey Burton (audreybusybeerealty@gmail.com) / Brandi Jenkins (Bjenkins.RE@outlook.com) — Busy Bee Realty, listing/seller side",
@@ -1745,7 +1748,9 @@
    "side": "buyer",
    "agent": "james",
    "listing": {
-    "commission": "3%",
+    "commission": {
+     "pct": 3
+    },
     "commissionNote": "3% buyer-broker per BCO1 (seller pays)"
    },
    "listPrice": null,
@@ -1755,14 +1760,10 @@
    "timeline": {
     "acceptance": "2026-06-17",
     "coe": "2026-08-17",
-    "loanContingency": "2026-08-12",
-    "extensions": {
-     "loan": "2026-08-12",
-     "source": "ETA No. 2 (C.A.R. Form ETA rev 12/25) executed: proposed by buyer Shomari Turner, ACCEPTED by seller Rebecca Turnage 08/03/2026. COE extended to 2026-08-17; Loan contingency extended to 2026-08-12. Source file: __Pending/8235 Baldwin St/EX/ETA2.pdf (also filed at deal root as 'Extension of Time Amendment 2 - 1225.pdf.pdf' 8/2). Auto-filed by morning briefing 2026-08-10 per Step 1d Part A."
+    "contingencies": {
+     "loan": "2026-08-12"
     },
-    "overrides": {
-     "loan": 56
-    }
+    "note": "ETA No. 2 (C.A.R. Form ETA rev 12/25) executed — proposed by buyer Shomari Turner, accepted by seller Rebecca Turnage 2026-08-03: COE extended to 2026-08-17 and the loan contingency to 2026-08-12. Supersedes ETA No. 1 (executed, filed in EX 7/11, covering the original 7/6 buyer-contingency date). Source: __Pending\\8235 Baldwin St\\EX\\ETA2.pdf. Appraisal contingency omitted deliberately — ETA No. 2 checked Loan only, so the 17-day default from acceptance stands; per Sara 2026-08-10."
    },
    "contacts": {
     "coAgent": "Allyson Overturf (PMZ Real Estate) - listing/seller side",
@@ -1979,7 +1980,10 @@
    "side": "buyer",
    "agent": "sara",
    "listing": {
-    "commission": "2.5% from seller — BRBC buyer-side 0.5% waived by Sara 7/28 at buyers' request; that 0.5% applied to Echo listing (1143 Echo St) commission instead"
+    "commission": {
+     "pct": 2.5
+    },
+    "commissionNote": "2.5% from seller. BRBC buyer-side 0.5% waived by Sara 7/28 at the buyers' request; that 0.5% was applied to the Echo listing (1143 Echo St) commission instead."
    },
    "listPrice": null,
    "salePrice": 615000,
@@ -1988,8 +1992,7 @@
    "timeline": {
     "acceptance": "2026-06-19",
     "coe": "2026-07-28",
-    "remaining": [],
-    "coeNote": "RECORDED 7/28/2026. Buyers signed at Placer Title 11am, lender funded, county recorded same day. Deal closed."
+    "note": "RECORDED 2026-07-28. Buyers signed at Placer Title 11am, lender funded, county recorded same day. Deal closed."
    },
    "contacts": {
     "coAgent": "Kylie Windley / Mitzi Windley (Chase International)",
@@ -2237,7 +2240,9 @@
     "client": "Sarah Blatner",
     "apn": "026-066-032 & 026-066-029",
     "preEscrow": "P-691532",
-    "commission": "4%",
+    "commission": {
+     "pct": 4
+    },
     "disclosurePackage": "https://app.disclosures.io/link/1111-Dunbar-Road-60r8giay"
    },
    "listPrice": null,
@@ -2413,20 +2418,13 @@
     "client": "Jim & Yvonne",
     "dateListed": "2025-12-05",
     "expiration": "2026-11-18",
-    "commission": "2.5%"
+    "commission": {
+     "pct": 2.5
+    }
    },
    "timeline": {
     "acceptance": "2026-06-19",
-    "overrides": {
-     "loan": 47,
-     "appraisal": 27
-    },
-    "coe": "2026-08-10",
-    "extensions": {
-     "loan": "2026-08-05",
-     "appraisal": "2026-07-17",
-     "source": "ETA No. 1 executed 2026-07-10: loan extended to 7/23, appraisal to 7/16 (overrides 34/27 days). UPDATED 7/17: appraisal extended one more day to 7/17 via second ETA. UPDATED 7/24: ETA No. 3 fully executed (all parties signed per Glide 7/24 12:34 AM) — loan contingency extended to 2026-08-05 (override updated to 47 days from acceptance 6/19). COE unchanged 8/10."
-    }
+    "note": "ESCROW CANCELLED 2026-08-05 — buyer Elizabeth Dawson withdrew. Cancellation of Contract, Release of Deposit and Cancellation of Escrow executed and filed in Duds\\433 Highway 4_Neriah Offer\\Ex\\. Dead-escrow history: COE was 2026-08-10; loan contingency ran to 2026-08-05 via ETA No. 3 (fully executed, all parties signed per Glide 7/24 12:34 AM); appraisal to 2026-07-17 via a second ETA; ETA No. 1 (executed 2026-07-10) had set loan 7/23 and appraisal 7/16. Listing re-activated via MOT #3 signed 8/5, submitted to MetroList 8/9 — ML# 226033798, expiration ~2026-11-18. coe and contingencies intentionally removed: closingDate is null and nothing should count down on a cancelled escrow."
    },
    "listPrice": null,
    "salePrice": 1300000,
@@ -2723,7 +2721,9 @@
     "baths": 2,
     "lotAcres": 5.11,
     "yearBuilt": 1979,
-    "commission": "3%"
+    "commission": {
+     "pct": 3
+    }
    },
    "city": "CA",
    "stage": "cancelled",
@@ -2892,7 +2892,10 @@
    "closingDate": null,
    "listing": {
     "client": "Adrianna & Guy Castle",
-    "commission": "3.5% — includes 0.5% from Latigo BRBC that buyers retained and applied here (agreed 7/28)"
+    "commission": {
+     "pct": 3.5
+    },
+    "commissionNote": "Includes the 0.5% from the Latigo BRBC that the buyers retained and applied here (agreed 7/28)."
    },
    "contacts": {
     "seller": "Adrianna & Guy Castle"
@@ -3006,7 +3009,9 @@
     "dateListed": "2026-06-18",
     "expiration": "2026-12-18",
     "preEscrow": "P-708410",
-    "commission": "3%",
+    "commission": {
+     "pct": 3
+    },
     "disclosurePackage": "https://app.disclosures.io/link/324-Augusta-Court-y0xz96n1"
    },
    "listPrice": null,
@@ -3455,7 +3460,9 @@
     "inspection_waived": false
    },
    "listing": {
-    "commission": "3% — seller pays 1%, buyer (Ashley Robinson) pays 2%",
+    "commission": {
+     "pct": 3
+    },
     "commissionNote": "Split compensation: 1% paid by seller Dee Bradley, 2% paid by buyer per BRBC. On $170,000 = $1,700 seller-paid + $3,400 buyer-paid = $5,100 total."
    }
   }
