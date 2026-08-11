@@ -50,6 +50,7 @@ import briefingCalendar from '../_lib/handlers/crm-briefing-calendar.js';
 import driftCheck        from '../_lib/handlers/crm-drift-check.js';
 import briefingBundle    from '../_lib/handlers/crm-briefing-bundle.js';
 import dealStage        from '../_lib/handlers/crm-deal-stage.js';
+import dealEdit         from '../_lib/handlers/crm-deal-edit.js';
 import reviewQueue      from '../_lib/handlers/crm-review-queue.js';
 import dealPhoto        from '../_lib/handlers/crm-deal-photo.js';
 import dealClient       from '../_lib/handlers/crm-deal-client.js';
@@ -107,6 +108,7 @@ const TABLE = {
   'drift-check':       driftCheck,
   'briefing-bundle':   briefingBundle,
   'deal-stage':        dealStage,
+  'deal-edit':         dealEdit,
   'review-queue':      reviewQueue,
   'deal-photo':        dealPhoto,
   'deal-client':       dealClient,

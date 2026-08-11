@@ -85,7 +85,7 @@ export default async function handler(req, res) {
     const BASE = 'id, source_key, address, city, stage, side, agent, list_price, sale_price, coe_date, photo_url, video_url, matterport_url, escrow_officer, title_company, co_agent, milestones';
     // stage_entered_at (db/065) rides on the richer tiers so a pre-migration DB
     // falls back to COLS_MIN cleanly (days-in-stage just reads null until run).
-    const COLS_FULL = BASE + ', mls_number, listing_meta, stage_override, photo_override, party_details, stage_entered_at';
+    const COLS_FULL = BASE + ', mls_number, listing_meta, stage_override, photo_override, party_details, stage_entered_at, agent_overrides';
     const COLS_MLS  = BASE + ', mls_number, stage_override, photo_override, stage_entered_at';
     const COLS_MIN  = BASE;
     const q = (cols) => supa.from('deals').select(cols).in('side', SIDES).order('coe_date', { ascending: true, nullsFirst: false });
@@ -112,7 +112,24 @@ export default async function handler(req, res) {
       const stage = (canOverride && d.stage_override) ? d.stage_override : d.stage;
       const photo = d.photo_override || d.photo_url || youtubeThumb(d.video_url);
       const parties = resolveParties(d);
-      const coeDays = d.coe_date ? Math.round((new Date(d.coe_date + 'T12:00:00Z') - todayMid) / 86400000) : null;
+
+      // Agent field overrides (db/066): a CRM-typed value wins over the synced
+      // (Cowork) column; an absent key falls back to the synced value. Lets James
+      // & Sara fix a blank/wrong price, close date, address, etc. that then sticks
+      // across the hourly deals.json sync (which never writes agent_overrides).
+      const ov = (d.agent_overrides && typeof d.agent_overrides === 'object' && !Array.isArray(d.agent_overrides)) ? d.agent_overrides : {};
+      const pick = (k, synced) => (ov[k] != null && ov[k] !== '') ? ov[k] : synced;
+      const listPrice = pick('list_price', d.list_price);
+      const salePrice = pick('sale_price', d.sale_price);
+      const address   = pick('address', d.address);
+      const city      = pick('city', d.city);
+      const coeDate   = pick('coe_date', d.coe_date);
+      const mls       = pick('mls_number', d.mls_number);
+      const sideEff   = pick('side', d.side);
+      const agentEff  = pick('agent', d.agent);
+      const editedKeys = Object.keys(ov);
+
+      const coeDays = coeDate ? Math.round((new Date(coeDate + 'T12:00:00Z') - todayMid) / 86400000) : null;
 
       // Light contingencies from the milestones jsonb (the deals-motion ledger's
       // fallback source) so the escrow tab has deadlines without a timeline join.
@@ -126,16 +143,17 @@ export default async function handler(req, res) {
 
       const row = {
         source_key: d.source_key,
-        address:    d.address,
-        city:       d.city,
-        side:       d.side,
-        agent:      d.agent,
-        price:      d.sale_price || d.list_price || null,
-        list_price: d.list_price,
-        sale_price: d.sale_price,
-        coe_date:   d.coe_date,
+        address:    address,
+        city:       city,
+        side:       sideEff,
+        agent:      agentEff,
+        price:      salePrice || listPrice || null,
+        list_price: listPrice,
+        sale_price: salePrice,
+        coe_date:   coeDate,
         coe_days:   coeDays,
-        mls:        d.mls_number || null,
+        mls:        mls || null,
+        edited:     editedKeys.length ? editedKeys : null,
         meta:       d.listing_meta || null,
         photo_url:  photo,
         video_url:  d.video_url || null,

@@ -3366,6 +3366,23 @@ body.lp-restyle {
     .ds-hdot.on_track{background:var(--good);}
     .ds-hdot.watch{background:var(--amber);}
     .ds-hdot.at_risk{background:var(--alert);}
+    /* Edit affordance on each card (opens the field-override editor). */
+    .ds-dealcard-edit{position:absolute;right:8px;bottom:8px;z-index:2;font-family:var(--cond);font-weight:600;font-size:12px;letter-spacing:.06em;text-transform:uppercase;padding:5px 9px;border:1px solid var(--border);background:var(--panel);color:var(--ink);cursor:pointer;opacity:.9;}
+    .ds-dealcard-edit:hover{background:var(--ink-dark);color:var(--panel);border-color:var(--ink-dark);opacity:1;}
+    /* Field-override editor modal (appended to <body> with its own `ds` class). */
+    .ds-editmodal{position:fixed;inset:0;z-index:99998;background:rgba(20,22,25,.55);display:flex;align-items:center;justify-content:center;padding:24px;}
+    .ds-editmodal .box{background:var(--panel);border:1px solid var(--border);max-width:470px;width:100%;max-height:92vh;overflow:auto;}
+    .ds-editmodal .hd{padding:16px 20px;border-bottom:1px solid var(--rule);}
+    .ds-editmodal .hd .k{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--faint);}
+    .ds-editmodal .hd h3{font-family:var(--cond);font-weight:600;font-size:23px;margin:2px 0 0;color:var(--ink);line-height:1.1;}
+    .ds-editmodal .bd{padding:16px 20px;display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+    .ds-editmodal label{display:flex;flex-direction:column;gap:5px;font-family:var(--cond);font-weight:600;font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--faint);}
+    .ds-editmodal label.full{grid-column:1/-1;}
+    .ds-editmodal input,.ds-editmodal select{font-family:var(--body);font-size:15px;padding:9px 11px;border:1px solid var(--border);background:var(--panel);color:var(--ink);}
+    .ds-editmodal .hint{grid-column:1/-1;font-family:var(--body);font-size:12.5px;color:var(--faint);font-style:italic;line-height:1.5;}
+    .ds-editmodal .ft{padding:14px 20px;border-top:1px solid var(--rule);display:flex;gap:10px;align-items:center;}
+    .ds-editmodal .ft .msg{font-family:var(--body);font-size:13px;color:var(--muted);flex:1;}
+    .ds-editmodal .ft .msg.err{color:var(--alert);}
     </style>
     <section class="crm-view" data-view="dealsall">
       <div class="ds ds-dealsall">
@@ -3431,13 +3448,15 @@ body.lp-restyle {
         if(coe) foot += '<div class="coe">'+coe+'</div>';
         if(nc) foot += '<div class="cont'+(ncRisk?' atrisk':'')+'" title="Next open contingency">◷ '+esc(nc.label)+' · '+esc(nc.iso)+'</div>';
         if(d.next_event) foot += '<div class="next" title="Next calendar event on this deal">▸ '+esc(d.next_event.label)+' · '+esc(d.next_event.iso)+(d.next_event.time?' '+esc(d.next_event.time):'')+'</div>';
+        var editMark = (d.edited && d.edited.length) ? '<span class="ds-pill" title="Edited in the CRM — these fields override the Cowork value">✎ edited</span>' : '';
         return '<div class="ds-dealcard" data-stg="'+esc(stg)+'" data-dall-open="'+esc(d.source_key)+'" role="link" tabindex="0">'
           + '<div class="ds-dealcard-ph">'+photoInner
-          +   '<span class="ds-dealcard-flag">'+esc(badge)+'</span>'+health+'</div>'
+          +   '<span class="ds-dealcard-flag">'+esc(badge)+'</span>'+health
+          +   '<button class="ds-dealcard-edit" data-dall-edit="'+esc(d.source_key)+'" title="Edit deal details" aria-label="Edit deal details">✎ Edit</button></div>'
           + '<div class="ds-dealcard-b">'
           +   '<div class="ds-dealcard-price">'+priceHtml+'</div>'
           +   '<div class="ds-dealcard-addr">'+esc(d.address||d.source_key)+(d.city?' · '+esc(d.city):'')+'</div>'
-          +   '<div class="ds-dealcard-tags"><span class="ds-pill">'+esc(side)+'</span><span class="ds-pill">'+esc(agent)+'</span>'+docsBadge+healthTag+'</div>'
+          +   '<div class="ds-dealcard-tags"><span class="ds-pill">'+esc(side)+'</span><span class="ds-pill">'+esc(agent)+'</span>'+docsBadge+healthTag+editMark+'</div>'
           +   (parties?'<div class="ds-dealcard-parties">'+parties+'</div>':'')
           +   (foot?'<div class="ds-dealcard-foot">'+foot+'</div>':'')
           + '</div>'
@@ -3458,9 +3477,59 @@ body.lp-restyle {
           state.data=j; setPill(); render();
         }).catch(function(){ state.loading=false; if(!state.data){ var l=root.querySelector('[data-dall-list]'); if(l) l.innerHTML='<div class="ds-col-empty">Could not load deals — try again.</div>'; } });
       }
+      // ---- Field-override editor (price / date / address / etc.) ----
+      function fld(label, key, val, type, full){
+        var t = (type==='number') ? 'text' : (type||'text');
+        var extra = (type==='number') ? ' inputmode="decimal"' : '';
+        return '<label'+(full?' class="full"':'')+'>'+esc(label)
+          + '<input type="'+t+'"'+extra+' data-f="'+esc(key)+'" value="'+esc(val==null?'':val)+'"></label>';
+      }
+      function selFld(label, key, val, opts){
+        var o = '<option value="">—</option>' + opts.map(function(p){ return '<option value="'+esc(p[0])+'"'+(String(val||'')===p[0]?' selected':'')+'>'+esc(p[1])+'</option>'; }).join('');
+        return '<label>'+esc(label)+'<select data-f="'+esc(key)+'">'+o+'</select></label>';
+      }
+      function openEdit(d){
+        var m=document.createElement('div'); m.className='ds-editmodal ds';
+        m.innerHTML='<div class="box" role="dialog" aria-modal="true" aria-label="Edit deal">'
+          + '<div class="hd"><div class="k">Edit deal · overrides Cowork</div><h3>'+esc(d.address||d.source_key)+'</h3></div>'
+          + '<div class="bd">'
+          +   fld('List price','list_price', d.list_price, 'number')
+          +   fld('Sale price','sale_price', d.sale_price, 'number')
+          +   fld('Address','address', d.address, 'text', true)
+          +   fld('City','city', d.city, 'text')
+          +   fld('Close date (COE)','coe_date', d.coe_date, 'date')
+          +   fld('MLS #','mls_number', d.mls, 'text')
+          +   selFld('Side','side', d.side, [['seller','Seller'],['buyer','Buyer'],['both','Both']])
+          +   selFld('Agent','agent', d.agent, [['sara','Sara'],['james','James'],['both','Both']])
+          +   '<div class="hint">Saved as CRM overrides — they stick and win over the hourly Cowork sync. Clear a field to fall back to Cowork’s value.</div>'
+          + '</div>'
+          + '<div class="ft"><span class="msg" data-edit-msg></span><button class="ds-btn" data-edit-cancel>Cancel</button><button class="ds-btn ds-btn--primary" data-edit-save>Save</button></div>'
+          + '</div>';
+        document.body.appendChild(m);
+        var msg=m.querySelector('[data-edit-msg]');
+        function close(){ if(m.parentNode) document.body.removeChild(m); document.removeEventListener('keydown', onKey); }
+        function onKey(ev){ if(ev.key==='Escape') close(); }
+        document.addEventListener('keydown', onKey);
+        m.addEventListener('click', function(e){
+          if(e.target===m || e.target.closest('[data-edit-cancel]')){ close(); return; }
+          var save=e.target.closest('[data-edit-save]'); if(!save) return;
+          var fields={};
+          m.querySelectorAll('[data-f]').forEach(function(el){ fields[el.getAttribute('data-f')]=el.value; });
+          save.disabled=true; msg.className='msg'; msg.textContent='Saving…';
+          fetch('/api/crm/deal-edit',{method:'POST',credentials:'include',headers:{'Content-Type':'application/json'},body:JSON.stringify({source_key:d.source_key,fields:fields})})
+            .then(function(r){ return r.json().then(function(j){ return {ok:r.ok,j:j}; },function(){ return {ok:r.ok,j:{}}; }); })
+            .then(function(res){
+              if(!res.ok){ msg.className='msg err'; msg.textContent=(res.j&&res.j.error)||'Could not save.'; save.disabled=false; return; }
+              close(); state.loading=false; load();
+            })
+            .catch(function(){ msg.className='msg err'; msg.textContent='Network error — try again.'; save.disabled=false; });
+        });
+      }
       root.addEventListener('click', function(e){
         var chip=e.target.closest('[data-dall-f]');
         if(chip){ state.filter=chip.getAttribute('data-dall-f'); render(); return; }
+        var ed=e.target.closest('[data-dall-edit]');
+        if(ed){ e.preventDefault(); e.stopPropagation(); var ek=ed.getAttribute('data-dall-edit'); var dd=(state.data&&state.data.deals||[]).filter(function(x){return x.source_key===ek;})[0]; if(dd) openEdit(dd); return; }
         var open=e.target.closest('[data-dall-open]');
         if(open){ var k=open.getAttribute('data-dall-open'); if(k&&typeof window.openDealByKey==='function') window.openDealByKey(k); return; }
       });
