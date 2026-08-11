@@ -711,6 +711,33 @@ body.viewing-browse .ds-buyer-home{display:none;}
 .ds .lp-tag{font-family:var(--cond);font-weight:600;letter-spacing:.1em;border-radius:0;background:var(--band);color:var(--muted);border-color:var(--rule);}
 .ds .lp-home-p{font-family:var(--cond);font-weight:600;font-style:normal;color:var(--ink);}
 
+/* ---- Deals & offers (listings card grid) ---- */
+.ds .lst{padding:20px 28px 40px;}
+.ds .lst-card{background:var(--panel);border:1px solid var(--rule);border-radius:0;transition:none;}
+.ds .lst-card:hover{border-color:var(--ink);box-shadow:none;transform:none;}
+.ds .lst-card .pr{font-family:var(--cond);font-weight:600;font-style:normal;color:var(--ink);}
+.ds .lst-card .ad{color:var(--muted);}
+.ds .lst-card .ph-empty{background:var(--band);color:var(--faint);font-family:var(--cond);font-weight:600;}
+.ds .lst-badge{font-family:var(--cond);font-weight:600;letter-spacing:.08em;border-radius:0;border:1px solid var(--rule);color:var(--muted);background:var(--band);}
+.ds .lst-badge.offers{background:#e7ecf1;color:#2c455d;border-color:#c3d0dc;}
+.ds .lst-badge.active{background:#e6eef4;color:#35617f;border-color:#c3d9e6;}
+.ds .lst-badge.pending{background:var(--amber-bg);color:var(--amber-ink);border-color:var(--amber-bd);}
+.ds .lst-badge.preparing{background:#e4efee;color:#2f5f5b;border-color:#bcd6d3;}
+.ds .lst-badge.closed{background:#e4efe7;color:#2c4a33;border-color:#b3ccb9;}
+.ds .lst-badge.selling,.ds .lst-badge.buying{background:var(--band);color:var(--muted);border-color:var(--rule);}
+.ds .lst-badge.intake-ok{background:#e4efe7;color:#2c4a33;border-color:#b3ccb9;}
+.ds .lst-badge.intake-need{background:var(--amber-bg);color:var(--amber-ink);border-color:var(--amber-bd);}
+.ds .lst-card .lk{font-family:var(--cond);font-weight:600;letter-spacing:.1em;color:var(--amber-ink);}
+.ds .lst-accept,.ds .lst-restore{font-family:var(--cond);font-weight:600;letter-spacing:.1em;border-radius:0;}
+.ds .lst-accept{background:var(--ink-dark);color:var(--panel);border-color:var(--ink-dark);}
+.ds .lst-restore{background:transparent;color:var(--amber-ink);border-color:var(--amber-bd);}
+.ds .lst-restore:hover{background:var(--amber);color:var(--panel);}
+.ds .lst-drop-btn{border-radius:0;color:var(--muted);border-color:var(--border);}
+.ds .lst-drop-menu{background:var(--panel);border:1px solid var(--border);border-radius:0;box-shadow:none;}
+.ds .lst-drop-item{font-family:var(--cond);font-weight:600;letter-spacing:.1em;color:var(--ink);}
+.ds .lst-drop-item.danger{color:var(--alert);}
+.ds .lst-filter .c{color:var(--faint);}
+
 /* ---- Settings ---- */
 .ds .set{max-width:800px;padding:20px 28px 50px;}
 .ds .set-card{background:var(--panel);border:1px solid var(--rule);padding:20px 22px;margin-bottom:16px;}

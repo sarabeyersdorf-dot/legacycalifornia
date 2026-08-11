@@ -1838,12 +1838,10 @@ body.lp-restyle {
     </style>
     <section class="crm-view" data-view="listings">
       <div data-portal-hint style="display:none;background:var(--shell);border:1px solid var(--brass);border-left:4px solid var(--brass);padding:10px 16px;margin-bottom:14px;font-family:var(--sans);font-size:13.5px;color:var(--ink);">Click any deal to open its <b>deal page</b> — the client's view with your agent console on top. The old in-CRM console is under each card's “Legacy console” link while it retires.</div>
+      <div class="ds"><div class="ds-screen"><div class="ds-corners"><i></i><i></i><i></i><i></i></div>
+        <div class="ds-title"><div><div class="ds-kicker">Your deals and offers</div><h1 class="ds-headline">Deals &amp; offers</h1></div></div>
       <div class="lst">
-        <div class="cur-head"><div>
-          <span class="label-cap" style="color:var(--brass);">Your deals and offers</span>
-          <h1 class="h-section" style="font-size:38px;margin-top:6px;">Deals and Offers.</h1>
-        </div></div>
-        <div class="lst-filter" data-lst-filter style="display:flex;gap:6px;margin-bottom:18px;flex-wrap:wrap;">
+        <div class="lst-filter" data-lst-filter style="display:flex;gap:6px;margin-bottom:18px;flex-wrap:wrap;padding-top:4px;">
           <button class="chip on" data-lst="offers">Offers <span class="c" data-lst-c-offers>—</span></button>
           <button class="chip" data-lst="pending">In escrow <span class="c" data-lst-c-pending>—</span></button>
           <button class="chip" data-lst="preparing">Preparing <span class="c" data-lst-c-preparing>—</span></button>
@@ -1851,8 +1849,8 @@ body.lp-restyle {
           <button class="chip" data-lst="archived">Fell through <span class="c" data-lst-c-archived>—</span></button>
           <button class="chip" data-portal-toggle style="margin-left:auto;" title="Toggle on, then click any deal to open its client-facing seller portal instead of the console">Seller portals</button>
         </div>
-        <div class="lst-grid" data-lst-grid><div class="cur-empty">Loading your listings…</div></div>
-      </div>
+        <div class="lst-grid" data-lst-grid><div class="ds-col-empty">Loading your listings…</div></div>
+      </div></div></div>
     </section>
 
     <!-- ============================================================
