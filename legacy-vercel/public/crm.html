@@ -2211,125 +2211,120 @@ body.lp-restyle {
 
     <!-- PEOPLE / ROSTER VIEW — browsable lists behind Leads/Clients/Past/Sphere -->
     <section class="crm-view" data-view="people">
-      <div style="max-width:1100px;">
-        <div style="display:flex;align-items:baseline;gap:16px;flex-wrap:wrap;margin-bottom:16px;">
-          <h1 class="h-section" style="font-size:32px;" data-people-title>Leads.</h1>
-          <span data-people-count style="font-family:var(--sans);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-mute);font-weight:600;"></span>
-          <input data-people-q placeholder="Search this list…" style="margin-left:auto;min-width:220px;font:inherit;font-size:14px;padding:9px 12px;border:1px solid var(--rule);background:var(--shell);">
+      <!-- ===== Contacts (screen 2A) — re-skin. Two-panel: stage-filtered table
+           + one contact open beside it. Feeds from /api/crm/roster. ===== -->
+      <div class="ds ds-contacts">
+        <div class="ds-screen">
+          <div class="ds-corners"><i></i><i></i><i></i><i></i></div>
+          <div class="ds-title" style="align-items:center;">
+            <div><div class="ds-kicker">Contacts</div><h1 class="ds-headline" data-people-count>Loading…</h1></div>
+            <label class="ds-search" style="margin-left:auto;min-width:300px;"><span class="k">⌕</span><input data-people-q placeholder="Search name, address, phone…"></label>
+          </div>
+          <div class="ds-filter" data-people-tabs>
+            <button class="ds-fpill on" data-people-tab="leads">Leads <b data-cnt="leads">—</b></button>
+            <button class="ds-fpill" data-people-tab="clients">Active clients <b data-cnt="clients">—</b></button>
+            <button class="ds-fpill" data-people-tab="past">Past clients <b data-cnt="past">—</b></button>
+            <button class="ds-fpill" data-people-tab="sphere">Sphere <b data-cnt="sphere">—</b></button>
+          </div>
+          <div class="ds-cbody">
+            <div class="ds-ctbl">
+              <div class="ds-ctbl-h"><span>Name</span><span>Stage</span><span>Last touch</span><span class="ow-col">Source</span></div>
+              <div class="ds-ctbl-scroll" data-people-list></div>
+            </div>
+            <div class="ds-cdetail" data-people-detail><div class="cd-empty">Select a contact to see their details.</div></div>
+          </div>
         </div>
-        <div style="display:flex;gap:8px;margin-bottom:14px;">
-          <button class="feed-chip" data-people-tab="leads">Leads <span data-roster-leads style="opacity:.6;">—</span></button>
-          <button class="feed-chip" data-people-tab="clients">Clients <span data-roster-clients style="opacity:.6;">—</span></button>
-          <button class="feed-chip" data-people-tab="past">Past clients <span data-roster-past style="opacity:.6;">—</span></button>
-          <button class="feed-chip" data-people-tab="sphere">Sphere <span data-roster-sphere style="opacity:.6;">—</span></button>
-        </div>
-        <div data-people-list style="background:var(--shell);border:1px solid var(--rule);"></div>
       </div>
     </section>
     <script>
     (function(){
       'use strict';
-      var view = document.querySelector('.crm-view[data-view="people"]');
+      var view = document.querySelector('.crm-view[data-view="people"] .ds-contacts');
       if(!view) return;
       var esc = function(x){ return (x==null?'':String(x)).replace(/[&<>"]/g,function(c){return({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]);}); };
-      var st = { bucket:'leads', q:'', loading:false };
-      var TITLES = { leads:'Leads.', clients:'Clients.', past:'Past clients.', sphere:'Sphere.' };
-      // Inline side / category picker — change a contact's side straight from the
-      // list (same field the card edits: leads.contact_type). Trash/delete stays
-      // in the card, on purpose.
-      var SIDE_OPTS = [['','— side —'],['buyer','Buyer'],['seller','Seller'],['both','Both'],['past_client','Past client'],['sphere','Sphere'],['do_not_contact','Do not contact']];
-      function sideSelectHtml(pp){
-        var cur = pp.side || '';
-        return '<select class="ppl-side" data-ppl-side="'+esc(pp.id)+'" title="Change this contact’s side">'
-          + SIDE_OPTS.map(function(o){ return '<option value="'+o[0]+'"'+(cur===o[0]?' selected':'')+'>'+esc(o[1])+'</option>'; }).join('')
-          + '</select>';
-      }
-      var PILL = { leads:'[data-roster-leads]', clients:'[data-roster-clients]', past:'[data-roster-past]', sphere:'[data-roster-sphere]' };
-      // Paint all four sidebar pills from a {leads,clients,past,sphere} totals
-      // object — the single source of truth for these counts.
-      function setAllPills(counts){
-        if(!counts) return;
-        Object.keys(PILL).forEach(function(k){
-          if(counts[k]==null) return;
-          document.querySelectorAll(PILL[k]).forEach(function(el){ el.textContent = String(counts[k]); });
-        });
-      }
-      var seq = 0;   // supersede in-flight loads so the LATEST bucket always wins
+      var st = { bucket:'leads', q:'', byId:{} };
+      var STG = { new:'new', nurture:'nurture', consult:'preparing', signed:'preparing', preparing:'preparing', active:'on_market', on_market:'on_market', showing_homes:'on_market', writing_offers:'reviewing_offers', reviewing_offers:'reviewing_offers', under_contract:'in_escrow', in_escrow:'in_escrow', closed:'closed', sphere:'new' };
+      var STAGE_LABEL = { new:'New lead', nurture:'Nurturing', consult:'Consult', signed:'Signed', preparing:'Listing prep', active:'Active', on_market:'On market', writing_offers:'Writing offers', reviewing_offers:'Reviewing offers', under_contract:'In escrow', in_escrow:'In escrow', closed:'Closed', sphere:'Sphere' };
+      function stgFor(pp){ var s=pp.stage||''; if(STG[s]) return STG[s]; if(pp.side==='past_client') return 'closed'; return 'new'; }
+      function stageLabel(pp){ var s=pp.stage||''; if(STAGE_LABEL[s]) return STAGE_LABEL[s]; if(pp.side){ return String(pp.side).replace(/_/g,' ').replace(/^./,function(c){return c.toUpperCase();}); } return '—'; }
+      function fmtLast(iso){ if(!iso) return {t:'—',bad:false}; var days=Math.floor((Date.now()-new Date(iso).getTime())/86400000); var d=new Date(iso).toLocaleDateString('en-US',{month:'short',day:'numeric'}); return {t:d,bad:days>30}; }
+      function initials(n){ var p=(n||'?').trim().split(/\s+/); return ((p[0]||'?')[0]+(p[1]?p[1][0]:'')).toUpperCase(); }
+
+      var seq=0;
       function load(){
-        var want = st.bucket, my = ++seq;
-        var list = view.querySelector('[data-people-list]');
-        list.innerHTML = '<div style="padding:28px;font-family:var(--sans);font-size:14px;color:var(--ink-mute);">Loading…</div>';
+        var want=st.bucket, my=++seq;
+        var list=view.querySelector('[data-people-list]');
+        list.innerHTML='<div class="ds-ctbl-empty">Loading…</div>';
         fetch('/api/crm/roster?bucket='+want+'&q='+encodeURIComponent(st.q),{credentials:'include'})
-          .then(function(r){ return r.ok?r.json():null; })
+          .then(function(r){return r.ok?r.json():null;})
           .then(function(j){
-            // A newer load() started after this one — drop this stale response so
-            // we never paint (e.g.) the Leads list under a "Clients." title.
-            if(my !== seq) return;
-            if(!j){ list.innerHTML = '<div style="padding:28px;font-family:var(--sans);color:var(--ink-mute);">Could not load — try again.</div>'; return; }
-            view.querySelector('[data-people-title]').textContent = TITLES[want];
-            view.querySelector('[data-people-count]').textContent = j.count + (j.count===1?' person':' people') + (st.q?' matching “'+st.q+'”':'');
-            // Sidebar pills: set ALL FOUR from the authoritative bucket totals so
-            // they're consistent no matter which list is open (and never jump
-            // between the Today-page value and the roster value). These totals are
-            // search-independent, so a query in one list never skews the pills.
-            setAllPills(j.counts);
+            if(my!==seq) return;
+            if(!j){ list.innerHTML='<div class="ds-ctbl-empty">Could not load — try again.</div>'; return; }
+            var cnt=j.count||0;
+            view.querySelector('[data-people-count]').textContent = cnt + (cnt===1?' person':' people') + (st.q?' matching “'+st.q+'”':'');
+            if(j.counts){ Object.keys(j.counts).forEach(function(k){ var el=view.querySelector('[data-cnt="'+k+'"]'); if(el) el.textContent=j.counts[k]; document.querySelectorAll('[data-roster-'+k+']').forEach(function(x){x.textContent=j.counts[k];}); }); }
             view.querySelectorAll('[data-people-tab]').forEach(function(b){ b.classList.toggle('on', b.getAttribute('data-people-tab')===want); });
-            var rows = (j.people||[]).map(function(pp){
-              var temp = pp.temperature ? '<span class="ppl-temp '+esc(pp.temperature)+'">'+esc(pp.temperature)+'</span>' : '';
-              var last = pp.last_contact_at ? new Date(pp.last_contact_at).toLocaleDateString('en-US',{month:'short',day:'numeric'}) : '—';
-              return '<div class="ppl-row" data-ppl-open="'+esc(pp.id)+'" role="link" tabindex="0">'
-                + '<span class="ppl-av">'+esc((pp.name||'?').charAt(0).toUpperCase())+'</span>'
-                + '<span class="ppl-name">'+esc(pp.name)+temp+'</span>'
-                + '<span class="ppl-meta">'+esc(pp.email||'')+(pp.phone?' · '+esc(pp.phone):'')+'</span>'
-                + '<span class="ppl-right">'+esc(pp.stage||pp.journey||'')+' · last '+esc(last)+'</span>'
-                + sideSelectHtml(pp)
+            st.byId={};
+            var rows=(j.people||[]).map(function(pp){
+              st.byId[pp.id]=pp;
+              var lt=fmtLast(pp.last_contact_at);
+              return '<div class="ds-ctbl-r" data-stg="'+esc(stgFor(pp))+'" data-ppl-open="'+esc(pp.id)+'" role="link" tabindex="0">'
+                + '<div><div class="nm">'+esc(pp.name)+'</div><div class="cx">'+esc(pp.email||pp.phone||'')+'</div></div>'
+                + '<div><span class="ds-stagepill" data-stg="'+esc(stgFor(pp))+'"><i></i>'+esc(stageLabel(pp))+'</span></div>'
+                + '<div class="lt'+(lt.bad?' bad':'')+'">'+esc(lt.t)+'</div>'
+                + '<div class="ow">'+esc(String(pp.source||'—').replace(/_/g,' '))+'</div>'
                 + '</div>';
             }).join('');
-            list.innerHTML = rows || '<div style="padding:28px;font-family:var(--sans);font-size:14px;color:var(--ink-mute);">Nobody in this list yet.</div>';
-          }).catch(function(){ if(my===seq) list.innerHTML = '<div style="padding:28px;font-family:var(--sans);color:var(--ink-mute);">Could not load — try again.</div>'; });
+            list.innerHTML = rows || '<div class="ds-ctbl-empty">Nobody in this list yet.</div>';
+          })
+          .catch(function(){ if(my===seq) list.innerHTML='<div class="ds-ctbl-empty">Could not load — try again.</div>'; });
       }
+
+      var SIDE_OPTS=[['','— side —'],['buyer','Buyer'],['seller','Seller'],['both','Both'],['past_client','Past client'],['sphere','Sphere'],['do_not_contact','Do not contact']];
+      function paintDetail(pp){
+        var host=view.querySelector('[data-people-detail]');
+        if(!pp){ host.innerHTML='<div class="cd-empty">Select a contact to see their details.</div>'; return; }
+        var lt=fmtLast(pp.last_contact_at);
+        var rows='';
+        if(pp.email) rows+='<div class="cd-row"><span class="k">Email</span><span class="v"><a href="mailto:'+esc(pp.email)+'">'+esc(pp.email)+'</a></span></div>';
+        if(pp.phone) rows+='<div class="cd-row"><span class="k">Phone</span><span class="v"><a href="tel:'+esc(pp.phone)+'">'+esc(pp.phone)+'</a></span></div>';
+        rows+='<div class="cd-row"><span class="k">Stage</span><span class="v">'+esc(stageLabel(pp))+'</span></div>';
+        rows+='<div class="cd-row"><span class="k">Last touch</span><span class="v"'+(lt.bad?' style="color:var(--alert)"':'')+'>'+esc(lt.t)+'</span></div>';
+        if(pp.source) rows+='<div class="cd-row"><span class="k">Source</span><span class="v" style="text-transform:capitalize">'+esc(String(pp.source).replace(/_/g,' '))+'</span></div>';
+        if(pp.temperature||pp.score!=null) rows+='<div class="cd-row"><span class="k">Signal</span><span class="v" style="text-transform:capitalize">'+esc(pp.temperature||'')+(pp.score!=null?' · '+esc(pp.score):'')+'</span></div>';
+        var sideSel='<div class="cd-side"><label>Side / category</label><select data-ppl-side="'+esc(pp.id)+'">'+SIDE_OPTS.map(function(o){return '<option value="'+o[0]+'"'+((pp.side||'')===o[0]?' selected':'')+'>'+esc(o[1])+'</option>';}).join('')+'</select></div>';
+        host.innerHTML=''
+          + '<div class="cd-h"><span class="ds-avatar">'+esc(initials(pp.name))+'</span>'
+          + '<div><div class="cd-name">'+esc(pp.name)+'</div><div class="cd-sub">'+esc(stageLabel(pp))+'</div></div></div>'
+          + '<div class="cd-rows">'+rows+'</div>'
+          + sideSel
+          + '<button class="ds-btn ds-btn--primary" data-ppl-full="'+esc(pp.id)+'" style="width:100%;">Open full profile →</button>';
+      }
+
       document.addEventListener('click', function(e){
-        var nav = e.target.closest('[data-people-bucket]');
-        if(nav){ st.bucket = nav.getAttribute('data-people-bucket'); st.q=''; var qi=view.querySelector('[data-people-q]'); if(qi) qi.value=''; setTimeout(load,0); return; }
-        var tab = e.target.closest('[data-people-tab]');
-        if(tab && view.contains(tab)){ st.bucket = tab.getAttribute('data-people-tab'); load(); return; }
-        // A click on the inline side picker must NOT open the card.
+        var tab=e.target.closest('[data-people-tab]');
+        if(tab && view.contains(tab)){ st.bucket=tab.getAttribute('data-people-tab'); load(); return; }
         if(e.target.closest('[data-ppl-side]')) return;
-        // Open the clicked person's detail by id (not a name search that lands on
-        // whoever was last open).
-        var row = e.target.closest('[data-ppl-open]');
+        var full=e.target.closest('[data-ppl-full]');
+        if(full && view.contains(full)){ var fid=full.getAttribute('data-ppl-full'); if(fid && window.Legacy && window.Legacy.openLead) window.Legacy.openLead(fid); return; }
+        var row=e.target.closest('[data-ppl-open]');
         if(row && view.contains(row)){
-          var id = row.getAttribute('data-ppl-open');
-          if(id && window.Legacy && typeof window.Legacy.openLead === 'function') window.Legacy.openLead(id);
+          view.querySelectorAll('.ds-ctbl-r').forEach(function(r){ r.classList.toggle('on', r===row); });
+          paintDetail(st.byId[row.getAttribute('data-ppl-open')]);
           return;
         }
       });
       document.addEventListener('crm:view', function(ev){ if(ev.detail && ev.detail.name==='people') load(); });
-      // Inline side change → PATCH the contact's contact_type without opening the card.
       document.addEventListener('change', function(e){
-        var sel = e.target.closest('[data-ppl-side]');
-        if(!sel || !view.contains(sel)) return;
-        var id = sel.getAttribute('data-ppl-side'); var val = sel.value;
-        sel.disabled = true; sel.style.borderColor = '';
-        fetch('/api/crm/lead',{method:'PATCH',credentials:'include',headers:{'Content-Type':'application/json'},body:JSON.stringify({ id:id, contact_type: val||null })})
-          .then(function(r){ return r.ok ? r.json().catch(function(){return {};}) : Promise.reject(); })
-          .then(function(){
-            sel.disabled = false; sel.style.borderColor = '#2E7D46';               // green flash = saved
-            setTimeout(function(){ sel.style.borderColor = ''; }, 1400);
-            // A side change can re-bucket someone — refresh the sidebar counts but
-            // leave the list in place so bulk edits aren't disrupted.
-            fetch('/api/crm/roster?bucket=leads',{credentials:'include'}).then(function(r){return r.ok?r.json():null;}).then(function(j){ if(j) setAllPills(j.counts); }).catch(function(){});
-          })
-          .catch(function(){ sel.disabled = false; sel.style.borderColor = '#9B2C2C'; });  // red = failed
+        var sel=e.target.closest('[data-ppl-side]'); if(!sel||!view.contains(sel)) return;
+        var id=sel.getAttribute('data-ppl-side'), val=sel.value; sel.disabled=true;
+        fetch('/api/crm/lead',{method:'PATCH',credentials:'include',headers:{'Content-Type':'application/json'},body:JSON.stringify({id:id,contact_type:val||null})})
+          .then(function(r){return r.ok?r.json().catch(function(){return{};}):Promise.reject();})
+          .then(function(){ sel.disabled=false; sel.style.borderColor='#4a7a55'; setTimeout(function(){sel.style.borderColor='';},1400); if(st.byId[id]) st.byId[id].side=val; })
+          .catch(function(){ sel.disabled=false; sel.style.borderColor='#a33f2f'; });
       });
       var qt; view.querySelector('[data-people-q]').addEventListener('input', function(){ clearTimeout(qt); var v=this.value; qt=setTimeout(function(){ st.q=v.trim(); load(); },350); });
-      // Prime the four sidebar pills once on CRM open so they're correct
-      // immediately — and identical to what opening any bucket shows — instead
-      // of flashing a different number until the people view is first loaded.
-      fetch('/api/crm/roster?bucket=leads',{credentials:'include'})
-        .then(function(r){ return r.ok?r.json():null; })
-        .then(function(j){ if(j) setAllPills(j.counts); })
-        .catch(function(){});
+      fetch('/api/crm/roster?bucket=leads',{credentials:'include'}).then(function(r){return r.ok?r.json():null;}).then(function(j){ if(j&&j.counts){ Object.keys(j.counts).forEach(function(k){ var el=view.querySelector('[data-cnt="'+k+'"]'); if(el) el.textContent=j.counts[k]; }); } }).catch(function(){});
     })();
     </script>
 
