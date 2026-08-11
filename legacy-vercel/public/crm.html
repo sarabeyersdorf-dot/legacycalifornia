@@ -1256,32 +1256,38 @@ body.lp-restyle {
          CALENDAR VIEW
          ============================================================ -->
     <section class="crm-view" data-view="cal">
-      <div class="cal">
-        <div class="cal-h">
-          <div class="cal-h-l">
-            <h1 class="cal-h-title" data-cal-title>Loading…</h1>
-            <div class="cal-h-nav">
-              <button data-cal-prev title="Previous week">‹</button>
-              <button data-cal-next title="Next week">›</button>
+      <!-- ===== Calendar (screen 5A) — re-skin. Default to the week view as an
+           agenda-per-day 7-column board. Same /api/crm/calendar data + chrome
+           hooks (nav, toggle, deal filter, sync, new event, share toggles). ===== -->
+      <div class="ds ds-cal">
+        <div class="ds-screen">
+          <div class="ds-corners"><i></i><i></i><i></i><i></i></div>
+          <div class="ds-title" style="align-items:center;">
+            <div>
+              <div class="ds-kicker"><span data-cal-booked-sub>This week</span></div>
+              <h1 class="ds-headline" data-cal-title>Loading…</h1>
             </div>
-            <button class="btn btn-ghost btn-xs" data-cal-today>Today</button>
+            <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-left:auto;">
+              <div class="ds-alert" data-cal-alert style="display:none;"><span class="sq"></span><b data-cal-alert-text></b></div>
+              <div class="ds-calnav"><button data-cal-prev title="Previous week">‹</button><button data-cal-next title="Next week">›</button></div>
+              <button class="ds-btn" data-cal-today>Today</button>
+              <div class="ds-caltoggle"><button data-cal-view="agenda">Agenda</button><button class="on" data-cal-view="week">Week</button><button data-cal-view="month">Month</button></div>
+              <select class="ds-btn" data-cal-deal aria-label="View by deal" style="padding:7px 10px;"><option value="">All deals</option></select>
+              <button class="ds-btn" data-cal-sync title="Subscribe on your phone">Sync</button>
+              <button class="ds-btn ds-btn--primary" data-cal-new>+ New event</button>
+            </div>
           </div>
-          <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
-            <select class="cal-deal-select" data-cal-deal aria-label="View by deal"><option value="">All deals</option></select>
-            <div class="cal-view-toggle">
-              <button class="on" data-cal-view="agenda">Agenda</button>
-              <button data-cal-view="week">Week</button>
-              <button data-cal-view="month">Month</button>
-            </div>
-            <button class="btn btn-ghost btn-sm" data-cal-sync title="Subscribe to this calendar on your phone">📱 Sync to phone</button>
-            <button class="btn btn-ink btn-sm" data-cal-new>+ New event</button>
+          <div class="ds-callegend" data-cal-legend></div>
+          <div data-cal-agenda style="display:none;"></div>
+          <div data-cal-week></div>
+          <div data-cal-month style="display:none;"></div>
+          <div class="ds-strip c4">
+            <div class="ds-cell inv"><div class="lab">Booked this week</div><div class="fig" data-cal-booked>—</div><div class="sub">events + deadlines</div></div>
+            <div class="ds-cell"><div class="lab">Showings</div><div class="fig" data-cal-showings>—</div><div class="sub">tours this week</div></div>
+            <div class="ds-cell"><div class="lab">Deadlines</div><div class="fig" data-cal-deadlines>—</div><div class="sub">dated, not movable</div></div>
+            <div class="ds-cell"><div class="lab">Free day</div><div class="fig" data-cal-free>—</div><div class="sub">nothing booked</div></div>
           </div>
         </div>
-
-        <div class="cal-legend" data-cal-legend></div>
-        <div class="cal-agenda" data-cal-agenda></div>
-        <div class="cal-week" data-cal-week style="display:none;"></div>
-            <div data-cal-month style="display:none;"></div>
       </div>
     </section>
     <script>

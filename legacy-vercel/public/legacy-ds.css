@@ -512,5 +512,41 @@ body.agent-preview .ds-action-box{cursor:pointer;}
 .ds-ltbl-r.closed{color:var(--muted);}
 @media(max-width:760px){ .ds-ltbl-h,.ds-ltbl-r{grid-template-columns:2fr 1fr 1fr;} .ds-ltbl-h .dom-col,.ds-ltbl-h .next-col,.ds-ltbl-r .dom,.ds-ltbl-r .next{display:none;} }
 
+/* ============================ CALENDAR 5A =============================== */
+.ds-calnav{display:flex;align-items:center;gap:6px;}
+.ds-calnav button{border:1px solid var(--border);background:var(--panel);width:30px;height:30px;cursor:pointer;font-size:15px;color:var(--ink);line-height:1;}
+.ds-calnav button:hover{background:var(--band);}
+.ds-caltoggle{display:flex;border:1px solid var(--border);}
+.ds-caltoggle button{border:none;border-right:1px solid var(--border);background:var(--panel);padding:6px 12px;font-size:13px;cursor:pointer;color:var(--muted);font-family:var(--body);}
+.ds-caltoggle button:last-child{border-right:none;}
+.ds-caltoggle button.on{background:var(--ink-dark);color:var(--panel);}
+.ds-callegend{display:flex;flex-wrap:wrap;align-items:center;gap:9px 16px;padding:12px 28px;background:var(--band);border-bottom:1px solid var(--rule);font-size:13px;color:var(--muted);}
+.ds-callegend .lg{display:inline-flex;align-items:center;gap:7px;cursor:pointer;}
+.ds-callegend .lg .sw{width:12px;height:12px;display:inline-block;flex:none;}
+.ds-callegend .lg.on{color:var(--ink);font-weight:600;}
+.ds-callegend .amber-note{margin-left:auto;color:var(--amber-ink);}
+.ds-callegend .amber-note i{width:12px;height:12px;background:var(--amber);display:inline-block;vertical-align:-2px;margin-right:5px;}
+.ds-calweek-wrap{overflow-x:auto;}
+.ds-calweek{display:grid;grid-template-columns:repeat(7,1fr);gap:1px;background:var(--rule);border-bottom:1px solid var(--rule);}
+.ds-calday{background:var(--panel);min-width:0;display:flex;flex-direction:column;}
+.ds-calday-h{padding:12px;border-bottom:1px solid var(--rule);}
+.ds-calday-h .dow{font-family:var(--cond);font-weight:600;font-size:18px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink);}
+.ds-calday-h .num{font-size:13px;color:var(--faint);margin-left:6px;}
+.ds-calday.today .ds-calday-h{background:#eef2f6;}
+.ds-calday.today .ds-calday-h .num{color:#2c455d;}
+.ds-calday.weekend .ds-calday-h{background:var(--band);}
+.ds-calday-body{padding:11px 10px;display:flex;flex-direction:column;gap:10px;flex:1;min-height:64px;}
+.ds-calev{display:flex;flex-direction:column;gap:1px;padding-left:9px;position:relative;cursor:pointer;}
+.ds-calev::before{content:"";position:absolute;left:0;top:1px;bottom:1px;width:5px;background:var(--_c,#8a8f95);}
+.ds-calev:hover{background:#eeeef0;}
+.ds-calev .tm{font-size:12px;color:var(--faint);font-variant-numeric:tabular-nums;}
+.ds-calev .ti{font-size:14px;font-weight:600;color:var(--ink);line-height:1.2;}
+.ds-calev .cx{font-size:12px;color:var(--muted);}
+.ds-caldl{border:1px solid var(--amber-bd);background:var(--amber-bg);padding:8px 10px;cursor:pointer;}
+.ds-caldl .tm{font-size:12px;color:var(--amber-ink);font-weight:600;}
+.ds-caldl .ti{font-size:14px;font-weight:600;color:var(--ink);line-height:1.2;}
+.ds-calempty{font-size:12px;color:var(--faint);font-style:italic;padding:2px;}
+@media(max-width:900px){.ds-calweek{grid-auto-flow:column;grid-template-columns:none;grid-auto-columns:minmax(155px,1fr);}}
+
 /* focus visibility */
 .ds :focus-visible{outline:2px solid #597ea3;outline-offset:2px;}

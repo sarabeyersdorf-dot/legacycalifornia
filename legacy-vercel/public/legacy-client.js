@@ -4793,7 +4793,7 @@
   ];
   function dealColorFor(key) { return (key && cal.dealColor[key]) || null; }
   const CAL_MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-  const cal = { week: 0, view: 'agenda', days: [], events: [], label: '', deals: [], dealFilter: '', dealColor: {} };
+  const cal = { week: 0, view: 'week', days: [], events: [], label: '', deals: [], dealFilter: '', dealColor: {} };
   const evByKey = (key) => cal.events.find((e) => `${e.source}:${e.id}` === key);
   const monthName = (d) => { const m = /^\d{4}-(\d{2})-\d{2}$/.exec(d || ''); return m ? CAL_MONTHS[+m[1] - 1] : ''; };
 
@@ -4811,6 +4811,7 @@
     populateDealFilter();
     const title = document.querySelector('[data-cal-title]');
     if (title) title.textContent = cal.label;
+    fillCalStrip();
     // Keep the nav/tab "this week" badge accurate. It's otherwise set from a
     // separate counts call that can read 0 while the week actually has events;
     // the calendar itself is the source of truth for the current week.
@@ -4843,11 +4844,33 @@
     if (!el) return;
     const order = [], seen = {};
     visibleEvents().forEach((e) => { if (e.deal_key && !seen[e.deal_key]) { seen[e.deal_key] = 1; order.push(e.deal_key); } });
-    el.innerHTML = order.map((k) => {
+    const swatches = order.map((k) => {
       const c = cal.dealColor[k]; const d = cal.deals.find((x) => x.key === k);
       const label = (d && d.address) || k;
-      return `<span class="lg${cal.dealFilter === k ? ' on' : ''}" data-legend-deal="${esc(k)}"><span class="sw" style="background:${c ? c.border : '#8C6E3D'}"></span>${esc(label)}</span>`;
+      return `<span class="lg${cal.dealFilter === k ? ' on' : ''}" data-legend-deal="${esc(k)}"><span class="sw" style="background:${c ? c.border : '#8a8f95'}"></span>${esc(label)}</span>`;
     }).join('');
+    el.innerHTML = `<span style="font-weight:600;color:var(--ink)">Colour = the deal it belongs to</span>${swatches}<span class="amber-note"><i></i>Amber block = a deadline</span>`;
+  }
+
+  // Week-view stat strip + deadline alert (5A). Computed from the loaded week.
+  function fillCalStrip() {
+    const evs = cal.events || [];
+    const showings = evs.filter((e) => /show|tour/i.test((e.kind_label || '') + ' ' + (e.cls || ''))).length;
+    const deadlines = evs.filter((e) => e.cls === 'coe' || e.cls === 'deadline').length;
+    const busy = {}; evs.forEach((e) => { busy[e.day] = (busy[e.day] || 0) + 1; });
+    let freeDay = '';
+    (cal.days || []).forEach((d, i) => { if (!busy[i] && !freeDay) freeDay = d.dow; });
+    const setT = (sel, v) => { const el = document.querySelector(sel); if (el) el.textContent = v; };
+    setT('[data-cal-booked]', String(evs.length));
+    setT('[data-cal-booked-sub]', `${evs.length} thing${evs.length === 1 ? '' : 's'} booked`);
+    setT('[data-cal-showings]', String(showings));
+    setT('[data-cal-deadlines]', String(deadlines));
+    setT('[data-cal-free]', freeDay || 'None');
+    const al = document.querySelector('[data-cal-alert]');
+    if (al) {
+      if (deadlines > 0) { al.style.display = ''; setT('[data-cal-alert-text]', `${deadlines} dated deadline${deadlines === 1 ? '' : 's'} this week`); }
+      else al.style.display = 'none';
+    }
   }
 
   function renderMonth() {
@@ -4939,47 +4962,39 @@
       });
     }
   }
+  // 5A week: an agenda per day across 7 columns (not time-positioned). A deal's
+  // colour rides the left stripe; a dated deadline gets the amber fill.
   function renderWeek(root) {
-    const heads = cal.days.map((d) => `<div class="calw-dayhead${d.is_today ? ' today' : ''}">${esc(d.dow)}<span class="num">${esc(d.num)}</span></div>`).join('');
-    let times = '';
-    for (let h = 0; h < 24; h++) times += `<div class="calw-hour">${h === 0 ? '12 AM' : h < 12 ? h + ' AM' : h === 12 ? '12 PM' : (h - 12) + ' PM'}</div>`;
+    const days = cal.days || [];
+    const byDay = {};
+    visibleEvents().forEach((e) => { (byDay[e.day] = byDay[e.day] || []).push(e); });
+    const isWeekend = (dow) => /^(sat|sun)/i.test(dow || '');
     let cols = '';
-    for (let i = 0; i < 7; i++) {
-      let lines = ''; for (let h = 0; h < 24; h++) lines += '<div class="calw-line"></div>';
-      cols += `<div class="calw-col" data-cal-col="${i}">${lines}</div>`;
+    for (let i = 0; i < days.length; i++) {
+      const d = days[i];
+      const evs = (byDay[i] || []).slice().sort((a, b) =>
+        (a.all_day ? 0 : 1) - (b.all_day ? 0 : 1) ||
+        ((a.hour || 0) * 60 + (a.minute || 0)) - ((b.hour || 0) * 60 + (b.minute || 0)));
+      const body = evs.length ? evs.map((e) => {
+        const c = dealColorFor(e.deal_key);
+        const stripe = c ? c.border : '#8a8f95';
+        const isDl = e.cls === 'coe' || e.cls === 'deadline';
+        const bits = [];
+        if (e.sub) bits.push(e.sub);
+        if (e.deal_address && bits.indexOf(e.deal_address) < 0) bits.push(e.deal_address);
+        const ctx = bits.join(' · ');
+        const key = `${esc(e.source)}:${esc(e.id)}`;
+        if (isDl) {
+          return `<div class="ds-caldl" data-ev-key="${key}"><div class="tm">${e.all_day ? 'Due end of day' : 'Due ' + esc(e.time_label)}</div><div class="ti">${esc(e.title)}</div>${ctx ? `<div class="tm" style="font-weight:400;">${esc(ctx)}</div>` : ''}</div>`;
+        }
+        return `<div class="ds-calev" data-ev-key="${key}" style="--_c:${stripe}"><span class="tm">${e.all_day ? 'All day' : esc(e.time_label)}</span><span class="ti">${esc(e.title)}</span>${ctx ? `<span class="cx">${esc(ctx)}</span>` : ''}</div>`;
+      }).join('') : '<div class="ds-calempty">Nothing booked.</div>';
+      cols += `<div class="ds-calday${d.is_today ? ' today' : ''}${isWeekend(d.dow) ? ' weekend' : ''}">
+        <div class="ds-calday-h"><span class="dow">${esc(d.dow)}</span><span class="num">${esc(d.num)}</span></div>
+        <div class="ds-calday-body">${body}</div>
+      </div>`;
     }
-    root.innerHTML = `<div class="calw-head"><div class="corner"></div>${heads}</div>
-      <div class="calw-body"><div class="calw-grid"><div class="calw-times">${times}</div>${cols}</div></div>`;
-    visibleEvents().forEach((e) => {
-      const col = root.querySelector(`[data-cal-col="${e.day}"]`);
-      if (!col) return;
-      const c = dealColorFor(e.deal_key);
-      // All-day (multi-day) events don't sit on the hour grid — pin a slim band
-      // at the very top of the day column.
-      if (e.all_day) {
-        const band = document.createElement('div');
-        band.className = 'calw-ev ' + (e.cls === 'coe' || e.cls === 'deadline' ? e.cls : 'block');
-        band.style.cssText = 'top:0;left:2px;right:2px;height:20px;min-height:0;font-size:9.5px;display:flex;align-items:center;opacity:.9;';
-        band.setAttribute('data-ev-key', `${e.source}:${e.id}`);
-        band.title = `All day · ${e.title}`;
-        band.innerHTML = `<span class="ti" style="font-style:normal;">${esc(e.title)}</span>`;
-        col.appendChild(band);
-        return;
-      }
-      const el = document.createElement('div');
-      el.className = `calw-ev ${c ? 'deal' : (['tour', 'call', 'block', 'open'].includes(e.cls) ? e.cls : 'tour')}`;
-      el.style.top = `${Math.round((e.hour * 60 + e.minute) * (CAL_ROW_H / 60))}px`;
-      // Floor the height so a short (e.g. 30-min) event still fits its time +
-      // title instead of clipping them; longer events grow with their duration.
-      el.style.height = `${Math.max(42, Math.round(e.duration_minutes * (CAL_ROW_H / 60)))}px`;
-      if (c) { el.style.background = c.bg; el.style.borderLeftColor = c.border; }
-      el.setAttribute('data-ev-key', `${e.source}:${e.id}`);
-      el.title = `${e.time_label} · ${e.title}${e.deal_address ? ' · ' + e.deal_address : ''}`;
-      el.innerHTML = `<span class="t">${esc(e.time_label)}</span><span class="ti">${esc(e.title)}</span>`;
-      col.appendChild(el);
-    });
-    const body = root.querySelector('.calw-body');
-    if (body) body.scrollTop = 7 * CAL_ROW_H; // open near 7 AM
+    root.innerHTML = `<div class="ds-calweek-wrap"><div class="ds-calweek">${cols}</div></div>`;
   }
   function wireCalendarChrome() {
     const prev = document.querySelector('[data-cal-prev]');
