@@ -4183,9 +4183,9 @@
       ]);
       const mb  = (mbRes && mbRes.ok && mbRes.json) || {};
       const met = (mRes && mRes.ok && mRes.json) || {};
-      const deals  = (lastDealsData && lastDealsData.deals) || [];
-      const groups = (lastDealsData && lastDealsData.groups) || {};
-      const roster = mb.roster || {};
+      const deals  = Array.isArray(lastDealsData && lastDealsData.deals) ? lastDealsData.deals : [];
+      const groups = (lastDealsData && lastDealsData.groups && typeof lastDealsData.groups === 'object') ? lastDealsData.groups : {};
+      const roster = (mb && mb.roster) || {};
 
       // ---- title ----
       const today = new Date();
@@ -4324,7 +4324,9 @@
         : `<div class="ds-empty-line">Nothing overnight.</div>`);
 
     } catch (e) {
-      /* dashboard is best-effort — never blank the app */
+      /* dashboard is best-effort — never blank the app — but surface the reason
+         so a silent throw here can't hide behind an empty Today again. */
+      if (window.console && console.warn) console.warn('[dashboard] paint failed:', e);
     } finally {
       __dashLoading = false;
     }
