@@ -623,18 +623,26 @@ function shapeDealsInMotion(deals) {
           : 'Closing overdue')
       : (isOffer ? (d.side === 'buyer' ? 'Offer out' : 'Offer in') : 'On market');
     const agentName = d.agent === 'james' ? 'James' : 'Sara';
-    // Commission (internal). The value may be a PERCENT ("2.5%" / "2.5") applied
-    // to the price, or a flat DOLLAR amount ("$15,375" / 15375) straight off the
-    // commission demand. Heuristic: a "%" or a bare number ≤ 100 is a percent;
-    // a "$" or a number > 100 is a dollar figure.
+    // Commission (internal). Preferred shape (SPEC_deal_data_format.md) is a
+    // structured object { pct } or { usd }. Legacy shape is a string — a PERCENT
+    // ("2.5%") or a flat DOLLAR amount ("$15,375") — kept as a fallback so
+    // un-migrated deals still work.
     const commRaw = d.listing_meta && d.listing_meta.commission;
     let commPct = null, commUsd = null;
-    if (commRaw != null && String(commRaw).trim() !== '') {
-      const s = String(commRaw).trim();
-      // Take the FIRST number in the string — NOT every digit concatenated. A
+    if (commRaw && typeof commRaw === 'object') {
+      // Structured: exactly one of usd / pct. usd wins if both are present.
+      if (Number.isFinite(+commRaw.usd) && +commRaw.usd > 0) {
+        commUsd = Math.round(+commRaw.usd);
+      } else if (Number.isFinite(+commRaw.pct) && +commRaw.pct > 0) {
+        commPct = +commRaw.pct;
+        commUsd = price ? Math.round(price * commPct / 100) : null;
+      }
+    } else if (commRaw != null && String(commRaw).trim() !== '') {
+      // Legacy string. Take the FIRST number — NOT every digit concatenated. A
       // descriptive commission like "3% — seller pays 1%, buyer pays 2%" was
       // being flattened to "312", turning a 3% fee into 312% ($530K on a $170K
       // home). Handles "$15,375", "2.5%", "3", "3% — …" alike.
+      const s = String(commRaw).trim();
       const m = s.match(/\$?\s*([0-9][0-9,]*(?:\.[0-9]+)?)/);
       const num = m ? parseFloat(m[1].replace(/,/g, '')) : NaN;
       if (Number.isFinite(num)) {

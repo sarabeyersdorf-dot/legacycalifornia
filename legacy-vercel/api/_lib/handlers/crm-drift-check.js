@@ -115,6 +115,43 @@ export default async function handler(req, res) {
       const m = masterById.get(id);
       const c = crmBySrc.get(id);
 
+      // ---- WARN: malformed commission / timeline in master deals.json --------
+      // Catch a bad shape at ingest (SPEC_deal_data_format.md) rather than as a
+      // wrong number on the board — a "3% — seller pays 1%…" string once rendered
+      // as 312% ($530K). Runs on the authored master, before it can drive a read.
+      if (m) {
+        const DATE = /^\d{4}-\d{2}-\d{2}/;
+        const comm = m.commission != null ? m.commission : (m.listing && m.listing.commission);
+        if (comm != null && comm !== '') {
+          const okComm = (typeof comm === 'object')
+            ? ((Number.isFinite(+comm.usd) && +comm.usd > 0) || (Number.isFinite(+comm.pct) && +comm.pct > 0 && +comm.pct <= 100))
+            : /^\s*\$?\s*[0-9]/.test(String(comm));
+          if (!okComm) add('warn', 'bad_commission_format', id, {
+            master: JSON.stringify(comm).slice(0, 80),
+            detail: 'commission won’t parse: expected { pct } / { usd } or a string starting with a number. See SPEC_deal_data_format.md.'
+          });
+        }
+        const tl = m.timeline;
+        if (tl && typeof tl === 'object') {
+          for (const k of ['acceptance', 'coe', 'escrowOpen']) {
+            if (tl[k] != null && !DATE.test(String(tl[k]))) add('warn', 'bad_timeline_date', id, {
+              master: `${k}=${tl[k]}`, detail: `timeline.${k} is not an ISO YYYY-MM-DD date.`
+            });
+          }
+          if (tl.contingencies && typeof tl.contingencies === 'object') {
+            const STD = ['inspection', 'appraisal', 'loan', 'insurance', 'title'];
+            for (const [k, v] of Object.entries(tl.contingencies)) {
+              if (!STD.includes(k)) add('warn', 'unknown_contingency_key', id, {
+                master: k, detail: `timeline.contingencies.${k} isn’t a standard contingency (${STD.join(', ')}).`
+              });
+              else if (!(v === null || v === 'waived' || DATE.test(String(v)))) add('warn', 'bad_contingency_value', id, {
+                master: `${k}=${v}`, detail: `timeline.contingencies.${k} must be an ISO date, "waived", or null.`
+              });
+            }
+          }
+        }
+      }
+
       // deal_only_in_one_source (INFO)
       if (!m || !c) {
         add('info', 'deal_only_in_one_source', id, {

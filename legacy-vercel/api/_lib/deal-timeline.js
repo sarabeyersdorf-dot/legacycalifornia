@@ -198,6 +198,21 @@ function cleanStr(v) { return v == null ? null : String(v).replace(/[<>]/g, '').
 // loan_contingency_days) are the fallback (basis flagged "verify").
 export function dealTimelineInput(row) {
   const tl = row.timeline || {};
+  // Structured contingencies (SPEC_deal_data_format.md) win when present: each of
+  // the five keys is an ISO date (its deadline), or "waived"/null (removed), or
+  // omitted (default 17 days from acceptance). Falls back to the legacy
+  // extensions / <c>Contingency + removed shapes when there's no `contingencies`.
+  let contingencyDates = explicitContingencyDates(tl);
+  let removed = Array.isArray(tl.removed) ? tl.removed : null;
+  if (tl.contingencies && typeof tl.contingencies === 'object') {
+    contingencyDates = {}; removed = [];
+    for (const c of STANDARD_CONTINGENCIES) {
+      const v = tl.contingencies[c];
+      if (v === 'waived' || v === null) removed.push(c);
+      else if (isDateStr(v)) contingencyDates[c] = String(v).slice(0, 10);
+      // omitted → left to computeTimeline's 17-day default (stays active)
+    }
+  }
   const input = {
     // Day 0: explicit acceptance, else the deal's acceptance/escrow-open columns
     // (a deal with no `timeline` block still anchors its dates — Bug 4).
@@ -207,13 +222,11 @@ export function dealTimelineInput(row) {
     overrides:       tl.overrides
                       || (Number.isFinite(+row.loan_contingency_days) && +row.loan_contingency_days !== DEFAULT_CONTINGENCY_DAYS
                           ? { loan: +row.loan_contingency_days } : undefined),
-    // Absolute per-contingency dates (extensions + <c>Contingency keys) win over
-    // the 17-day offset (Bug 3).
-    contingencyDates: explicitContingencyDates(tl),
+    contingencyDates,
     coe:             tl.coe || row.coe_date || null,
     coeDays:         tl.coeDays,
     remaining:       Array.isArray(tl.remaining) ? tl.remaining : null,
-    removed:         Array.isArray(tl.removed) ? tl.removed : null
+    removed
   };
   if (Object.prototype.hasOwnProperty.call(tl, 'clockStart')) input.clockStart = tl.clockStart;
   return input;
