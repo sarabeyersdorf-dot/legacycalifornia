@@ -8,6 +8,7 @@
 <link rel="stylesheet" href="crm.css">
 <link rel="stylesheet" href="legacy-app.css">
 <link rel="stylesheet" href="legacy-ui.css">
+<link rel="stylesheet" href="legacy-ds.css">
 <style>
 /* Legacy UI re-theme — re-point the CRM's own --lp-* design tokens at the lg
    palette so the desk shares the public site's brand: terracotta accent, warm
@@ -1110,39 +1111,65 @@ body.lp-restyle {
          PIPELINE VIEW
          ============================================================ -->
     <section class="crm-view" data-view="pipe">
-      <div class="pipe">
-        <div class="pipe-h">
-          <div>
-            <span class="eyebrow" data-bind-pipe-eyebrow>Active pipeline · — leads</span>
-            <h1 class="h-section" style="margin-top: 8px; font-size: 38px;">Pipeline.</h1>
+      <!-- Re-skinned to the 2026 design system (legacy-ds.css). Scoped under
+           .ds so it doesn't touch the un-migrated views. Data hooks
+           (data-kanban, data-side-filter[data-side], data-stage*) are unchanged
+           so paintKanban()/wireKanbanDnd() drive it exactly as before. -->
+      <div class="ds">
+        <div class="ds-screen">
+          <div class="ds-corners"><i></i><i></i><i></i><i></i></div>
+
+          <div class="ds-topbar">
+            <a href="crm.html" class="ds-wordmark">LEGACY</a>
+            <span class="ds-vr"></span>
+            <span class="ds-prod">Agent workspace</span>
+            <nav class="ds-nav">
+              <button class="ds-navpill on">Pipeline</button>
+              <button class="ds-navpill" onclick="showView(event,'cal')">Calendar</button>
+              <button class="ds-navpill" onclick="showView(event,'people')">Contacts</button>
+              <button class="ds-navpill" onclick="showView(event,'roster')">Listings</button>
+              <button class="ds-navpill" onclick="showView(event,'today')">Today</button>
+            </nav>
+            <div class="ds-right">
+              <button class="ds-btn" data-new-lead>+ New lead</button>
+              <span class="ds-user"><span class="ds-avatar" data-agent-avatar><img src="art/sara-headshot.png" alt=""></span><span data-agent-name>Sara</span></span>
+            </div>
           </div>
-          <div class="pipe-stats">
-            <div><span class="v" data-bind-pipe-inflight>—</span><span class="l">In flight</span></div>
-            <div><span class="v" data-bind-pipe-month>—</span><span class="l">Expected this month</span></div>
-            <div><span class="v" data-bind-pipe-week>—</span><span class="l">Closing this week</span></div>
-            <div><span class="v" data-bind-pipe-rate>—</span><span class="l">Tour → offer rate</span></div>
+
+          <div class="ds-title">
+            <div>
+              <div class="ds-kicker" data-bind-pipe-kicker>The pipeline · what to touch today</div>
+              <h1 class="ds-headline" data-bind-pipe-headline>—</h1>
+            </div>
+            <div class="ds-alert" data-bind-pipe-alert style="display:none;"><span class="sq"></span><b data-bind-pipe-alert-text></b></div>
+          </div>
+
+          <div class="ds-hint">
+            <span>Drag a card to move the deal</span>
+            <span>Amber bar on a card = it has sat in this column too long</span>
+          </div>
+
+          <div class="ds-filter" data-side-filter>
+            <button class="ds-fpill on" data-side="seller">Sellers</button>
+            <button class="ds-fpill" data-side="buyer">Buyers</button>
+            <button class="ds-fpill" data-side="both">Dual</button>
+            <button class="ds-fpill" data-side="all">Everyone</button>
+            <span class="note" data-bind-pipe-sub>—</span>
+          </div>
+
+          <div class="ds-board-wrap">
+            <div class="ds-board" data-kanban></div>
+          </div>
+
+          <div class="ds-strip c4">
+            <div class="ds-cell inv"><div class="lab">Commission in escrow</div><div class="fig" data-bind-pipe-coe>—</div><div class="sub">on deals under contract</div></div>
+            <div class="ds-cell"><div class="lab">In flight</div><div class="fig" data-bind-pipe-inflight>—</div><div class="sub">value across the board</div></div>
+            <div class="ds-cell"><div class="lab">New leads</div><div class="fig" data-bind-pipe-new>—</div><div class="sub">not yet worked</div></div>
+            <div class="ds-cell"><div class="lab">Avg time in stage</div><div class="fig">—</div><div class="sub">not tracked yet</div></div>
           </div>
         </div>
-
-        <div class="pipe-sidefilter" data-side-filter style="display:flex;gap:6px;margin-bottom:16px;flex-wrap:wrap;">
-          <button class="chip on" data-side="all">All</button>
-          <button class="chip" data-side="buyer">Buyers</button>
-          <button class="chip" data-side="seller">Sellers</button>
-          <button class="chip" data-side="both">Dual · both sides</button>
-        </div>
-
-        <!-- Columns are rendered by paintKanban(); they change with the
-             Buyers / Sellers side filter above (side-aware statuses). -->
-        <div class="kanban" data-kanban></div>
       </div>
     </section>
-    <style>
-      .kan-sub { font-family: var(--mono); font-size: 8.5px; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-faint); margin: 2px 0 8px; }
-      .kan-side { font-family: var(--mono); font-size: 8px; letter-spacing: .1em; text-transform: uppercase; padding: 1px 5px; border-radius: 2px; border: 1px solid var(--rule); color: var(--ink-mute); }
-      .kan-side.buyer  { background: #E8F0EA; color: #2E5C3D; border-color: #BFD8C6; }
-      .kan-side.seller { background: #F3EAD6; color: #7C5A16; border-color: #E0CFA0; }
-      .kan-side.both   { background: #EAE6F3; color: #4A3B7C; border-color: #CDC2E0; }
-    </style>
 
     <!-- ============================================================
          CALENDAR VIEW

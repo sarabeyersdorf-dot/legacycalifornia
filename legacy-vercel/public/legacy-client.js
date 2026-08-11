@@ -3844,8 +3844,9 @@
     return m ? `<span class="kan-side ${m.cls}">${m.label}</span>` : '';
   }
   function activeSideFilter() {
-    const on = document.querySelector('[data-side-filter] .chip.on');
-    return (on && on.getAttribute('data-side')) || 'all';
+    // Re-skinned pipeline uses .ds-fpill; keep .chip for any legacy markup.
+    const on = document.querySelector('[data-side-filter] .ds-fpill.on, [data-side-filter] .chip.on');
+    return (on && on.getAttribute('data-side')) || 'seller';
   }
 
   // ---- Side-aware kanban column sets -------------------------------------
@@ -3909,30 +3910,49 @@
     const board = kanBoardFor(side);
     const leads = allLeads.filter(board.keep);
 
-    // Bucket + tally per column.
+    // Bucket + tally per column. value = deal value (sum of midpoints);
+    // comm = the brokerage's rough take on that value.
+    const COMM = 0.025;
     const byCol = {};
-    board.cols.forEach((c) => { byCol[c.key] = { leads: [], value: 0 }; });
-    let totalValue = 0;
+    board.cols.forEach((c) => { byCol[c.key] = { leads: [], value: 0, comm: 0 }; });
+    let totalValue = 0, commEscrow = 0;
     for (const l of leads) {
       const k = board.bucket(l);
       const slot = byCol[k];
       if (!slot) continue;               // no matching column → drop (e.g. sphere)
       slot.leads.push(l);
       const mid = midPrice(l.price_min, l.price_max);
-      if (mid) { slot.value += mid * 0.025; totalValue += mid * 0.025; }
+      if (mid) {
+        slot.value += mid; slot.comm += mid * COMM; totalValue += mid;
+        if (k === 'in_escrow' || k === 'under_contract') commEscrow += mid * COMM;
+      }
     }
 
-    kan.innerHTML = board.cols.map((c) => {
+    // Closed isn't a board column in this design — it lives in the stat strip.
+    const cols = board.cols.filter((c) => c.key !== 'closed');
+    kan.innerHTML = cols.map((c) => {
       const slot = byCol[c.key];
       slot.leads.sort((a, b) => (b.score || 0) - (a.score || 0));
-      const cards = slot.leads.length
-        ? slot.leads.slice(0, 12).map(kanCardHtml).join('')
-        : `<div style="opacity:.4;font-style:italic;font-size:12px;padding:8px 4px;">Empty.</div>`;
+      const shown = slot.leads.slice(0, 12);
+      const moreN = slot.leads.length - shown.length;
+      const cards = shown.length
+        ? shown.map((l) => kanCardHtml(l, c.key)).join('')
+        : `<div class="ds-col-empty">Nothing here.</div>`;
+      const more = moreN > 0 ? `<div class="ds-more">+ ${moreN} more</div>` : '';
+      const n = slot.leads.length;
+      let sub = c.key === 'new'
+        ? `${n} · value unknown`
+        : `${n} · ${fmtUSD(Math.round(slot.value))}`;
+      if ((c.key === 'in_escrow' || c.key === 'under_contract') && slot.comm) {
+        sub += ` · ${fmtUSD(Math.round(slot.comm))} comm`;
+      }
       return `
-        <div class="kan-col" data-stage="${escHtml(c.key)}" data-stage-field="${board.field}">
-          <div class="kan-col-h"><span class="name">${escHtml(c.name)}</span><span class="count" data-stage-count>${slot.leads.length} · <span class="sum">${escHtml(fmtUSD(Math.round(slot.value)))}</span></span></div>
-          <div class="kan-sub">${escHtml(c.sub)}</div>
-          <div class="kan-body" data-stage-body>${cards}</div>
+        <div class="ds-col" data-stg="${escHtml(c.key)}" data-stage="${escHtml(c.key)}" data-stage-field="${board.field}">
+          <div class="ds-col-h">
+            <div class="row"><span class="sq"></span><span class="nm">${escHtml(c.name)}</span></div>
+            <div class="sub">${escHtml(sub)}</div>
+          </div>
+          <div class="ds-col-body" data-stage-body>${cards}${more}</div>
         </div>`;
     }).join('');
 
@@ -3945,10 +3965,23 @@
       });
     });
 
-    const eyebrow = document.querySelector('[data-bind-pipe-eyebrow]');
-    if (eyebrow) eyebrow.textContent = `Active pipeline · ${leads.length} lead${leads.length === 1 ? '' : 's'}`;
-    const inflight = document.querySelector('[data-bind-pipe-inflight]');
-    if (inflight) inflight.textContent = fmtUSD(Math.round(totalValue));
+    // ---- title block + stat strip binds ----
+    const setT = (sel, txt) => { const e = document.querySelector(sel); if (e) e.textContent = txt; };
+    const nNew = (byCol['new'] && byCol['new'].leads.length) || 0;
+    const staleN = leads.filter(isStaleLead).length;
+    setT('[data-bind-pipe-headline]', `${fmtUSD(Math.round(totalValue))} moving`);
+    setT('[data-bind-pipe-kicker]', `${leads.length} in the pipeline · ${nNew} new lead${nNew === 1 ? '' : 's'} not yet worked`);
+    setT('[data-bind-pipe-sub]', 'Sorted by lead score within each stage');
+    setT('[data-bind-pipe-coe]', commEscrow ? fmtUSD(Math.round(commEscrow)) : '—');
+    setT('[data-bind-pipe-inflight]', totalValue ? fmtUSD(Math.round(totalValue)) : '—');
+    setT('[data-bind-pipe-new]', String(nNew));
+    const alertEl = document.querySelector('[data-bind-pipe-alert]');
+    if (alertEl) {
+      if (staleN > 0) {
+        alertEl.style.display = '';
+        setT('[data-bind-pipe-alert-text]', `${staleN} deal${staleN === 1 ? ' has' : 's have'} sat in the same stage over two weeks`);
+      } else { alertEl.style.display = 'none'; }
+    }
 
     // Wire HTML5 drag-and-drop so cards can be moved across stage columns.
     wireKanbanDnd();
@@ -3958,26 +3991,45 @@
     if (min && max) return (min + max) / 2;
     return min || max || 0;
   }
-  function kanCardHtml(l) {
-    const pill = tempPill(l.temperature);
-    const mid  = midPrice(l.price_min, l.price_max);
-    const home = (l.areas && l.areas[0]) || (l.journey_stage || '').replace(/_/g, ' ');
+  // Proxy for "sat in this stage too long": no per-stage history exists yet
+  // (see the audit), so age of the last update stands in for staleness.
+  function isStaleLead(l) {
+    if (!l || !l.updated_at) return false;
+    const days = (Date.now() - new Date(l.updated_at).getTime()) / 86400000;
+    return days > 14;
+  }
+  // stg = the column key the card lives in, so its stripe colour always
+  // matches its column even when a lead's side-stage fields disagree.
+  function kanCardHtml(l, stg) {
+    const mid   = midPrice(l.price_min, l.price_max);
+    const stage = stg || l.seller_stage || l.buyer_stage || kanCoarseKey(l) || 'new';
+    const ctx   = (l.areas && l.areas[0])
+      || (l.journey_stage || '').replace(/_/g, ' ')
+      || (l.source ? String(l.source).replace(/_/g, ' ') : '');
+    const temp  = (l.temperature || '').toLowerCase();
+    const note  = temp === 'hot'
+      ? '<span class="st good">Hot lead</span>'
+      : (temp === 'cold' ? '<span class="st">Cooling</span>' : '');
+    const stale = isStaleLead(l);
     return `
-      <div class="kan-card" data-lead-id="${escHtml(l.id)}">
-        <div class="name">${escHtml(fullName(l))} ${sideChipHtml(l.deal_side)}</div>
-        <div class="home">${mid ? `<span class="price">${escHtml(fmtUSD(mid))}</span> · ` : ''}${escHtml(home || '—')}</div>
-        <div class="kan-card-foot">
-          <span class="pill-status ${pill}">${escHtml((l.temperature || 'new').replace(/^./, (c) => c.toUpperCase()))} · ${l.score == null ? '—' : l.score}</span>
-          <span>· ${escHtml(fmtRel(l.updated_at))}</span>
+      <div class="ds-card${stale ? ' stale' : ''}" data-stg="${escHtml(stage)}" data-lead-id="${escHtml(l.id)}">
+        <span class="stripe"></span>
+        <div class="body">
+          <span class="marks"><i></i><i></i><i></i><i></i></span>
+          <div class="nm">${escHtml(fullName(l))}</div>
+          <div class="ctx">${escHtml(ctx || '—')}</div>
+          <div class="val">${mid ? `<span class="num">${escHtml(fmtUSD(mid))}</span>` : ''}${note}${l.score != null ? `<span class="st">Score ${escHtml(String(l.score))}</span>` : ''}</div>
+          <div class="next">Last touch ${escHtml(fmtRel(l.updated_at))}</div>
         </div>
       </div>`;
   }
 
   // Buyer / Seller / Dual filter above the kanban — re-paints from cache.
   document.addEventListener('click', (e) => {
-    const chip = e.target.closest('[data-side-filter] .chip');
+    const chip = e.target.closest('[data-side-filter] .ds-fpill, [data-side-filter] .chip');
     if (!chip) return;
-    document.querySelectorAll('[data-side-filter] .chip').forEach((c) => c.classList.toggle('on', c === chip));
+    const sel = chip.classList.contains('ds-fpill') ? '[data-side-filter] .ds-fpill' : '[data-side-filter] .chip';
+    document.querySelectorAll(sel).forEach((c) => c.classList.toggle('on', c === chip));
     paintKanban(null);
   });
 
