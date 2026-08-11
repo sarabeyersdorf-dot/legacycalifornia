@@ -3340,37 +3340,32 @@ body.lp-restyle {
        stripe + colour via data-stg (::before rail), mirroring the pipeline board
        and Listings table. The shared people-summary + health/docs signals ride
        along in the design-system pill vocabulary. */
-    .ds-dealsall .ds-list{display:flex;flex-direction:column;gap:1px;background:var(--rule);border:1px solid var(--rule);}
-    .ds-dealsall .ds-list .ds-col-empty{padding:24px;}
-    .ds-drow{position:relative;display:grid;grid-template-columns:72px 1fr auto;gap:14px;align-items:center;
-      background:var(--panel);padding:12px 16px 12px 22px;cursor:pointer;}
-    .ds-drow::before{content:"";position:absolute;left:0;top:0;bottom:0;width:6px;background:var(--stg);}
-    .ds-drow:hover{background:#eeeef0;}
-    .ds-drow-ph{width:72px;height:54px;background:var(--band);overflow:hidden;display:flex;align-items:center;justify-content:center;border:1px solid var(--rule);}
-    .ds-drow-ph img{width:100%;height:100%;object-fit:cover;}
-    .ds-drow-main{min-width:0;}
-    .ds-drow-top{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
-    .ds-drow-price{font-family:var(--cond);font-weight:600;font-size:22px;color:var(--ink);line-height:1;}
-    .ds-drow-addr{font-size:14px;color:var(--ink);margin-top:5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-    .ds-drow-parties{font-size:13px;color:var(--faint);margin-top:5px;}
-    .ds-drow-right{text-align:right;white-space:nowrap;}
-    .ds-drow-coe{font-size:13px;color:var(--muted);font-variant-numeric:tabular-nums;}
-    .ds-drow-cont{font-size:12.5px;color:var(--muted);margin-top:3px;}
-    .ds-drow-cont.atrisk{color:var(--alert);font-weight:600;}
-    .ds-drow-next{font-size:12.5px;color:var(--amber-ink);margin-top:3px;}
-    .ds-drow-open{display:inline-block;margin-top:7px;font-family:var(--cond);font-weight:600;font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);}
-    .ds-drow:hover .ds-drow-open{color:var(--ink);}
+    .ds-dealsall .ds-dgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:1px;background:var(--rule);border:1px solid var(--rule);}
+    .ds-dealsall .ds-dgrid .ds-col-empty{grid-column:1/-1;padding:24px;}
+    .ds-dealcard{position:relative;background:var(--panel);display:flex;flex-direction:column;cursor:pointer;}
+    .ds-dealcard:hover{background:#eeeef0;}
+    .ds-dealcard-ph{position:relative;aspect-ratio:16/10;border-bottom:1px solid var(--rule);overflow:hidden;
+      background-image:repeating-linear-gradient(135deg,#e2e5e8 0 14px,#dde1e5 14px 28px);}
+    .ds-dealcard-ph img{width:100%;height:100%;object-fit:cover;display:block;}
+    .ds-dealcard-flag{position:absolute;left:0;top:0;padding:4px 10px;font-family:var(--cond);font-weight:600;font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:#f2f2f3;background:var(--stg);}
+    .ds-dealcard-health{position:absolute;right:8px;top:8px;width:12px;height:12px;flex:none;box-shadow:0 0 0 1px rgba(0,0,0,.12);cursor:help;}
+    .ds-dealcard-b{padding:13px 15px;display:flex;flex-direction:column;gap:8px;flex:1;}
+    .ds-dealcard-price{font-family:var(--cond);font-weight:600;font-size:28px;color:var(--ink);line-height:1;}
+    .ds-dealcard-price .none{font-family:var(--body);font-weight:400;font-size:15px;color:var(--faint);font-style:italic;}
+    .ds-dealcard-addr{font-size:14px;color:var(--ink);line-height:1.3;}
+    .ds-dealcard-tags{display:flex;gap:6px;flex-wrap:wrap;align-items:center;}
+    .ds-dealcard-parties{font-size:13px;color:var(--faint);}
+    .ds-dealcard-foot{margin-top:auto;padding-top:9px;border-top:1px solid var(--hair);display:flex;flex-direction:column;gap:3px;}
+    .ds-dealcard-foot .coe{font-size:13px;color:var(--muted);font-variant-numeric:tabular-nums;}
+    .ds-dealcard-foot .cont{font-size:12.5px;color:var(--muted);}
+    .ds-dealcard-foot .cont.atrisk{color:var(--alert);font-weight:600;}
+    .ds-dealcard-foot .next{font-size:12.5px;color:var(--amber-ink);}
     .ds-pill.warn{border-color:var(--amber-bd);background:var(--amber-bg);color:var(--amber-ink);}
     .ds-pill.alert{border-color:#d9b3ac;background:#f6e3e0;color:var(--alert);}
     .ds-hdot{width:10px;height:10px;flex:none;display:inline-block;cursor:help;}
     .ds-hdot.on_track{background:var(--good);}
     .ds-hdot.watch{background:var(--amber);}
     .ds-hdot.at_risk{background:var(--alert);}
-    @media (max-width:720px){
-      .ds-drow{grid-template-columns:56px 1fr;}
-      .ds-drow-ph{width:56px;height:44px;}
-      .ds-drow-right{grid-column:2;text-align:left;padding-top:6px;}
-    }
     </style>
     <section class="crm-view" data-view="dealsall">
       <div class="ds ds-dealsall">
@@ -3382,7 +3377,7 @@ body.lp-restyle {
           </div>
           <div class="ds-filter" data-dall-chips></div>
           <div style="padding:20px 22px;">
-            <div class="ds-list" data-dall-list><div class="ds-col-empty">Loading deals…</div></div>
+            <div class="ds-dgrid" data-dall-list><div class="ds-col-empty">Loading deals…</div></div>
           </div>
         </div>
       </div>
@@ -3422,27 +3417,30 @@ body.lp-restyle {
         var side = d.side==='buyer'?'Buying':(d.side==='both'?'Dual':'Selling');
         var agent = d.agent==='james'?'James':(d.agent==='both'?'Sara & James':'Sara');
         var coe = d.coe_date ? ('COE '+esc(d.coe_date)+(d.coe_days!=null?' · '+d.coe_days+'d':'')) : '';
-        var ph = '<div class="ds-drow-ph">'+(d.photo_url?'<img src="'+esc(d.photo_url)+'" alt="">':'')+'</div>';
+        var priceHtml = (d.price!=null) ? esc(fmtUSD(d.price)) : '<span class="none">No price yet</span>';
+        var photoInner = d.photo_url ? '<img src="'+esc(d.photo_url)+'" alt="">' : '';
+        // Health rollup dot (escrow rows): green on-track / amber watch / red at-risk.
+        var health = d.health ? '<span class="ds-dealcard-health ds-hdot '+esc(d.health.level)+'" title="'+esc(d.health.label+(d.health.reasons&&d.health.reasons.length?' — '+d.health.reasons.join(', '):''))+'"></span>' : '';
         var parties = window.LegacyDealParties ? window.LegacyDealParties.summaryHtml(d.party_summary, d.source_key) : '';
         var docsBadge = d.docs_missing ? '<span class="ds-pill warn" title="Open compliance-file gaps">'+d.docs_missing+' doc'+(d.docs_missing===1?'':'s')+' missing</span>' : '';
-        // Health rollup dot (escrow rows): green on-track / amber watch / red at-risk.
-        var health = d.health ? '<span class="ds-hdot '+esc(d.health.level)+'" title="'+esc(d.health.label+(d.health.reasons&&d.health.reasons.length?' — '+d.health.reasons.join(', '):''))+'"></span>' : '';
         var healthTag = (d.health&&d.health.level==='at_risk') ? '<span class="ds-pill alert">At risk</span>' : '';
         // Next open (uncleared) contingency, earliest first.
         var nc = (d.contingencies||[]).filter(function(c){ return c.state!=='cleared'&&c.iso; }).sort(function(a,b){ return String(a.iso).localeCompare(String(b.iso)); })[0];
         var ncRisk = nc && (nc.state==='atrisk'||nc.state==='at_risk'||nc.state==='overdue');
-        return '<div class="ds-drow" data-stg="'+esc(stg)+'" data-dall-open="'+esc(d.source_key)+'" role="link" tabindex="0">'
-          + ph
-          + '<div class="ds-drow-main"><div class="ds-drow-top">'+health+'<span class="ds-drow-price">'+esc(fmtUSD(d.price))+'</span>'
-          +   '<span class="ds-stagepill" data-stg="'+esc(stg)+'"><i></i>'+esc(badge)+'</span>'
-          +   '<span class="ds-pill">'+esc(side)+'</span><span class="ds-pill">'+esc(agent)+'</span>'+docsBadge+healthTag+'</div>'
-          +   '<div class="ds-drow-addr">'+esc(d.address||d.source_key)+(d.city?' · '+esc(d.city):'')+'</div>'
-          +   (parties?'<div class="ds-drow-parties">'+parties+'</div>':'')
+        var foot = '';
+        if(coe) foot += '<div class="coe">'+coe+'</div>';
+        if(nc) foot += '<div class="cont'+(ncRisk?' atrisk':'')+'" title="Next open contingency">◷ '+esc(nc.label)+' · '+esc(nc.iso)+'</div>';
+        if(d.next_event) foot += '<div class="next" title="Next calendar event on this deal">▸ '+esc(d.next_event.label)+' · '+esc(d.next_event.iso)+(d.next_event.time?' '+esc(d.next_event.time):'')+'</div>';
+        return '<div class="ds-dealcard" data-stg="'+esc(stg)+'" data-dall-open="'+esc(d.source_key)+'" role="link" tabindex="0">'
+          + '<div class="ds-dealcard-ph">'+photoInner
+          +   '<span class="ds-dealcard-flag">'+esc(badge)+'</span>'+health+'</div>'
+          + '<div class="ds-dealcard-b">'
+          +   '<div class="ds-dealcard-price">'+priceHtml+'</div>'
+          +   '<div class="ds-dealcard-addr">'+esc(d.address||d.source_key)+(d.city?' · '+esc(d.city):'')+'</div>'
+          +   '<div class="ds-dealcard-tags"><span class="ds-pill">'+esc(side)+'</span><span class="ds-pill">'+esc(agent)+'</span>'+docsBadge+healthTag+'</div>'
+          +   (parties?'<div class="ds-dealcard-parties">'+parties+'</div>':'')
+          +   (foot?'<div class="ds-dealcard-foot">'+foot+'</div>':'')
           + '</div>'
-          + '<div class="ds-drow-right">'+(coe?'<div class="ds-drow-coe">'+coe+'</div>':'')
-          +   (nc?'<div class="ds-drow-cont'+(ncRisk?' atrisk':'')+'" title="Next open contingency">◷ '+esc(nc.label)+' · '+esc(nc.iso)+'</div>':'')
-          +   (d.next_event?'<div class="ds-drow-next" title="Next calendar event on this deal">▸ '+esc(d.next_event.label)+' · '+esc(d.next_event.iso)+(d.next_event.time?' '+esc(d.next_event.time):'')+'</div>':'')
-          +   '<span class="ds-drow-open">Open →</span></div>'
           + '</div>';
       }
       function render(){
