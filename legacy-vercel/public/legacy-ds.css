@@ -133,6 +133,10 @@
 .ds-strip.c4{grid-template-columns:repeat(4,1fr);}
 .ds-strip.c5{grid-template-columns:repeat(5,1fr);}
 .ds-cell{background:var(--panel);padding:18px 22px;}
+/* crm.css defines its own legacy .ds-cell (old stat grid) with display:flex;
+   scope our stat-strip cells so that flex/gap can't leak onto them on crm.html.
+   Kept as .ds-strip .ds-cell (higher specificity) so the old grids are untouched. */
+.ds-strip .ds-cell{display:block;}
 .ds-cell.inv{background:var(--ink-dark);}
 .ds-cell .lab{font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--faint);margin-bottom:9px;}
 .ds-cell.inv .lab{color:var(--inv-label);}

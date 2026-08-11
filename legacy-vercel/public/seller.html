@@ -486,6 +486,8 @@ body.lp-restyle {
     .then(function (r) { return r.ok ? r.json() : null; })
     .then(function (d) {
       var portal = (d && d.portal) || {};
+      // Buy-side deals get no listing marketing — drop the campaign recap.
+      if (portal.is_buyer) { var _camp = document.querySelector('.ds-campaign'); if (_camp) _camp.remove(); }
       var url = portal.status && portal.status.photo;
       var img = document.getElementById('sell-hero-photo');
       if (img && url) { img.src = url; img.style.display = 'block'; }

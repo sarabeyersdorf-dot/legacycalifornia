@@ -681,6 +681,9 @@ export default async function handler(req, res) {
       // Agent-preview affordances (db/040): only an agent viewing gets the
       // tickable checkboxes + the private note-for-Cowork; the client never does.
       viewer_is_agent: !!isAgent,
+      // Buy-side transactions have no listing marketing — the front-end hides
+      // the "campaign" recap when this is true.
+      is_buyer: isBuyerSide,
       source_key: deal.source_key || null,
       seller_note: isAgent ? (deal.portal_seller_note || null) : null,
       tasks_done: tasksDone,
