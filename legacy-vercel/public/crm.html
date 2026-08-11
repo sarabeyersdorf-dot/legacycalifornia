@@ -3276,26 +3276,36 @@ body.lp-restyle {
     @media (max-width: 900px) { .rost { padding: 18px; } }
     </style>
     <section class="crm-view" data-view="roster">
-      <div class="rost">
-        <div class="cur-head"><div>
-          <span class="label-cap" style="color:var(--brass);">Brokerage listings</span>
-          <h1 class="h-section" style="font-size:38px;margin-top:6px;">Listings.</h1>
-        </div></div>
-        <div class="rost-filters">
-          <div class="rost-seg" data-rost-tabs>
-            <button class="chip on" data-rost="active">On market <span class="c" data-rost-c-active>—</span></button>
-            <button class="chip" data-rost="preparing">Preparing <span class="c" data-rost-c-preparing>—</span></button>
-            <button class="chip" data-rost="pending">In escrow <span class="c" data-rost-c-pending>—</span></button>
-            <button class="chip" data-rost="closed">Sold <span class="c" data-rost-c-closed>—</span></button>
+      <!-- ===== Listings (screen 2B) — re-skin. Card grid + "rest of the book"
+           table. Same /api/crm/listings data + click/upload handlers. ===== -->
+      <div class="ds ds-listings">
+        <div class="ds-screen">
+          <div class="ds-corners"><i></i><i></i><i></i><i></i></div>
+          <div class="ds-title" style="align-items:center;">
+            <div><div class="ds-kicker">Brokerage listings</div><h1 class="ds-headline">Listings</h1></div>
           </div>
-          <div class="rost-agents" data-rost-agents>
-            <span class="lbl">Agent</span>
-            <button class="chip on" data-rost-agent="all">All</button>
-            <button class="chip" data-rost-agent="sara">Sara</button>
-            <button class="chip" data-rost-agent="james">James</button>
+          <div class="ds-strip c4">
+            <div class="ds-cell inv"><div class="lab">Live inventory</div><div class="fig" data-rost-inv>—</div><div class="sub">on market + prep</div></div>
+            <div class="ds-cell"><div class="lab">On market</div><div class="fig" data-rost-onmkt>—</div><div class="sub">active listings</div></div>
+            <div class="ds-cell"><div class="lab">In escrow</div><div class="fig" data-rost-esc>—</div><div class="sub">under contract</div></div>
+            <div class="ds-cell"><div class="lab">Sold</div><div class="fig" data-rost-sold>—</div><div class="sub">in this book</div></div>
+          </div>
+          <div class="ds-filter" data-rost-tabs>
+            <button class="ds-fpill on" data-rost="active">On market <b data-rost-c-active>—</b></button>
+            <button class="ds-fpill" data-rost="preparing">Listing prep <b data-rost-c-preparing>—</b></button>
+            <button class="ds-fpill" data-rost="pending">In escrow <b data-rost-c-pending>—</b></button>
+            <button class="ds-fpill" data-rost="closed">Sold <b data-rost-c-closed>—</b></button>
+            <span class="note" data-rost-agents>
+              <button class="ds-fpill on" data-rost-agent="all">All</button>
+              <button class="ds-fpill" data-rost-agent="sara">Sara</button>
+              <button class="ds-fpill" data-rost-agent="james">James</button>
+            </span>
+          </div>
+          <div style="padding:20px 22px;">
+            <div class="ds-lgrid" data-rost-grid><div class="ds-col-empty" style="padding:24px;">Loading listings…</div></div>
+            <div data-rost-table></div>
           </div>
         </div>
-        <div class="rost-grid" data-rost-grid><div class="cur-empty">Loading listings…</div></div>
       </div>
     </section>
 
@@ -5602,28 +5612,50 @@ function selectLead(el) {
     if (m.yearBuilt) bits.push('Built ' + m.yearBuilt);
     return bits.join(' · ');
   }
+  var STAGE_META = {
+    active:    { stg: 'on_market',        flag: 'On market',    note: 'Live — driving showings and saves.' },
+    preparing: { stg: 'preparing',        flag: 'Listing prep', note: 'Getting it ready to hit the market.' },
+    pending:   { stg: 'in_escrow',        flag: 'In escrow',    note: 'Under contract — marching to close.' },
+    closed:    { stg: 'closed',           flag: 'Sold',         note: 'Closed and recorded.' },
+    offers:    { stg: 'reviewing_offers', flag: 'Offer in',     note: 'Offer on the table.' }
+  };
+  function domDays(m) {
+    var s = m && m.dateListed; if (!s) return null;
+    var d = new Date(/^\d{4}-\d{2}-\d{2}$/.test(s) ? s + 'T00:00:00' : s); if (isNaN(d)) return null;
+    return Math.max(0, Math.floor((Date.now() - d.getTime()) / 86400000));
+  }
+  function commLabel(c) {
+    if (c == null) return null;
+    if (typeof c === 'object') return c.pct != null ? c.pct + '%' : (c.usd != null ? fmtUSD(c.usd) : null);
+    return esc(c);
+  }
   function card(d) {
     var m = d.meta || {};
-    var ph = '<div class="ph-wrap">' + (d.photo_url ? '<img class="ph" src="' + esc(d.photo_url) + '" alt="">' : '<div class="ph-empty">No photo yet</div>') + '<button class="ph-up" data-upload="' + esc(d.source_key || '') + '">' + (d.photo_url ? 'Replace photo' : 'Add photo') + '</button></div>';
+    var sm = STAGE_META[state.tab] || STAGE_META.active;
+    var ph = '<div class="ds-lframe">' + (d.photo_url ? '<img src="' + esc(d.photo_url) + '" alt="">' : '') +
+      '<span class="ds-lflag" data-stg="' + sm.stg + '">' + sm.flag + '</span>' +
+      '<span class="ds-lagent">' + (d.agent === 'james' ? 'James' : 'Sara') + '</span>' +
+      '<button class="ds-lup" data-upload="' + esc(d.source_key || '') + '">' + (d.photo_url ? 'Replace' : 'Add photo') + '</button></div>';
     var f = facts(m);
-    var metaBits = [];
-    if (d.mls) metaBits.push('MLS ' + esc(d.mls));
-    if (m.expiration) metaBits.push('Exp ' + esc(fmtDate(m.expiration)));
-    else if (m.dateListed) metaBits.push('Listed ' + esc(fmtDate(m.dateListed)));
-    if (m.commission) metaBits.push(esc(m.commission) + ' comm');
+    var metrics = [];
+    var dom = domDays(m);
+    if (dom != null) metrics.push(['Days on market', dom + 'd']);
+    else if (m.dateListed) metrics.push(['Listed', fmtDate(m.dateListed)]);
+    if (d.mls) metrics.push(['MLS', esc(d.mls)]);
+    var cl = commLabel(m.commission); if (cl) metrics.push(['Commission', cl]);
+    var mHtml = metrics.length ? '<div class="ds-lmetrics">' + metrics.map(function (r) { return '<div class="ds-lmetric"><span class="k">' + r[0] + '</span><span class="v">' + r[1] + '</span></div>'; }).join('') + '</div>' : '';
     var links = [];
     if (d.source_key) links.push('<a href="/seller.html?deal=' + encodeURIComponent(d.source_key) + '" target="_blank" rel="noopener">Portal ↗</a>');
     if (m.disclosurePackage) links.push('<a href="' + esc(m.disclosurePackage) + '" target="_blank" rel="noopener">Disclosures ↗</a>');
-    if (d.has_video) links.push('<a href="/seller.html?deal=' + encodeURIComponent(d.source_key) + '" target="_blank" rel="noopener">Video ↗</a>');
-    return '<div class="rost-card" data-source-key="' + esc(d.source_key || '') + '" role="link" tabindex="0">' + ph + '<div class="rost-bd">' +
-      '<div class="rost-top"><span class="rost-price">' + esc(fmtUSD(d.list_price || d.price)) + '</span>' +
-        '<span class="lst-badge">' + (d.agent === 'james' ? 'James' : 'Sara') + '</span></div>' +
-      '<div class="rost-addr">' + esc(d.address || '') + (d.city ? ' · ' + esc(d.city) : '') + '</div>' +
-      (m.client ? '<div class="rost-client">' + esc(m.client) + '</div>' : '') +
-      (f ? '<div class="rost-facts">' + esc(f) + '</div>' : '') +
-      (metaBits.length ? '<div class="rost-metaline">' + metaBits.join(' &nbsp;·&nbsp; ') + '</div>' : '') +
-      '<div class="rost-open">Open command center →</div>' +
-      (links.length ? '<div class="rost-links">' + links.join('') + '</div>' : '') +
+    return '<div class="ds-lcard rost-card" data-stg="' + sm.stg + '" data-source-key="' + esc(d.source_key || '') + '" role="link" tabindex="0">' + ph +
+      '<div class="ds-lbody">' +
+        '<div class="ds-laddr">' + esc(d.address || 'Untitled') + '</div>' +
+        '<div class="ds-lfacts">' + (m.client ? esc(m.client) + (f ? ' · ' + esc(f) : '') : esc(f || d.city || '')) + '</div>' +
+        '<div class="ds-lprice"><span class="num">' + esc(fmtUSD(d.list_price || d.price)) + '</span>' + (d.sale_price && state.tab === 'closed' ? '<span class="st">sold price</span>' : '') + '</div>' +
+        mHtml +
+        '<div class="ds-lnote">' + sm.note + '</div>' +
+        (links.length ? '<div class="rost-links">' + links.join('') + '</div>' : '') +
+        '<button class="ds-btn ds-lopen">Open listing →</button>' +
       '</div></div>';
   }
   // Find a loaded roster deal by source_key so a card can open its Command Center.
@@ -5644,11 +5676,39 @@ function selectLead(el) {
     ['active', 'preparing', 'pending', 'closed'].forEach(function (t) {
       var el = root.querySelector('[data-rost-c-' + t + ']'); if (el) el.textContent = rowsFor(t).length;
     });
+    var inv = 0;
+    ['active', 'preparing'].forEach(function (t) { forAgent(sellSide(state.data && state.data[t])).forEach(function (r) { inv += (r.list_price || r.price || 0); }); });
+    var setT = function (sel, v) { var el = root.querySelector(sel); if (el) el.textContent = v; };
+    setT('[data-rost-inv]', inv ? fmtUSD(inv) : '—');
+    setT('[data-rost-onmkt]', String(rowsFor('active').length));
+    setT('[data-rost-esc]', String(rowsFor('pending').length));
+    setT('[data-rost-sold]', String(rowsFor('closed').length));
+  }
+  function restTable() {
+    if (!state.data) return '';
+    var all = [];
+    ['active', 'preparing', 'pending', 'closed'].forEach(function (t) {
+      forAgent(sellSide(state.data[t])).forEach(function (r) { all.push({ r: r, tab: t }); });
+    });
+    if (!all.length) return '';
+    var rows = all.map(function (x) {
+      var d = x.r, m = d.meta || {}, sm = STAGE_META[x.tab] || STAGE_META.active, dom = domDays(m);
+      var next = x.tab === 'pending' && d.coe_date ? 'COE ' + fmtDate(d.coe_date) : (x.tab === 'preparing' ? 'Go live' : (x.tab === 'active' ? 'Showings' : 'Closed'));
+      return '<div class="ds-ltbl-r' + (x.tab === 'closed' ? ' closed' : '') + ' rost-card" data-stg="' + sm.stg + '" data-source-key="' + esc(d.source_key || '') + '" role="link" tabindex="0">' +
+        '<span class="prop">' + esc(d.address || 'Untitled') + '</span>' +
+        '<span>' + sm.flag + '</span>' +
+        '<span class="val">' + esc(fmtUSD(d.list_price || d.price)) + '</span>' +
+        '<span class="dom">' + (dom != null ? dom + 'd' : '—') + '</span>' +
+        '<span class="next">' + next + '</span>' +
+        '</div>';
+    }).join('');
+    return '<div class="ds-ltbl-title">The whole book</div><div class="ds-ltbl"><div class="ds-ltbl-h"><span>Listing</span><span>Status</span><span>Price</span><span class="dom-col">DOM</span><span class="next-col">Next</span></div>' + rows + '</div>';
   }
   function render() {
     var grid = root.querySelector('[data-rost-grid]'); if (!grid) return;
     var rows = rowsFor(state.tab);
-    grid.innerHTML = rows.length ? rows.map(card).join('') : '<div class="cur-empty">No ' + (state.tab === 'active' ? 'on-market' : state.tab === 'closed' ? 'sold' : state.tab) + ' listings' + (state.agent !== 'all' ? ' for ' + state.agent : '') + '.</div>';
+    grid.innerHTML = rows.length ? rows.map(card).join('') : '<div class="ds-col-empty" style="padding:24px;">No ' + (state.tab === 'active' ? 'on-market' : state.tab === 'closed' ? 'sold' : state.tab) + ' listings' + (state.agent !== 'all' ? ' for ' + state.agent : '') + '.</div>';
+    var tbl = root.querySelector('[data-rost-table]'); if (tbl) tbl.innerHTML = restTable();
     counts();
   }
   function load() {
