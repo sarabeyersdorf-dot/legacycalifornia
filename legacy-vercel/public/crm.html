@@ -1351,16 +1351,16 @@ body.lp-restyle {
          SEQUENCES VIEW
          ============================================================ -->
     <section class="crm-view" data-view="seq">
-      <div class="seq">
-        <div class="seq-h">
+      <div class="ds"><div class="ds-screen"><div class="ds-corners"><i></i><i></i><i></i><i></i></div>
+        <div class="ds-title">
           <div>
-            <span class="eyebrow">Automated follow-up · Editable cadences</span>
-            <h1 class="h-section" style="margin-top: 8px; font-size: 38px;">Sequences.</h1>
-            <p class="lede" style="margin-top: 12px; max-width: 600px;">Every step is editable. Each message is queued as a draft, ready for Sara to approve before sending — written in her voice, not a template.</p>
+            <div class="ds-kicker">Automated follow-up · Editable cadences</div>
+            <h1 class="ds-headline">Sequences</h1>
+            <p style="margin-top:12px;max-width:600px;font-size:14px;color:var(--muted);line-height:1.5;">Every step is editable. Each message is queued as a draft, ready for Sara to approve before sending — written in her voice, not a template.</p>
           </div>
-          <button class="btn btn-ink" data-seq-new>+ New sequence</button>
+          <button class="ds-btn ds-btn--primary" data-seq-new style="margin-left:auto;">+ New sequence</button>
         </div>
-
+      <div class="seq">
         <div class="seq-grid">
           <!-- Sequences list -->
           <div class="seq-list-card" data-seq-list>
@@ -1475,29 +1475,30 @@ body.lp-restyle {
             </div>
           </div>
         </div>
-      </div>
+      </div></div></div>
     </section>
 
     <!-- ============================================================
          REPORTS VIEW
          ============================================================ -->
     <section class="crm-view" data-view="rep">
-      <div class="rep">
-        <div class="rep-h">
+      <div class="ds"><div class="ds-screen"><div class="ds-corners"><i></i><i></i><i></i><i></i></div>
+        <div class="ds-title" style="align-items:center;">
           <div>
-            <span class="eyebrow">Year to date · Through May 12</span>
-            <h1 class="h-section" style="margin-top: 8px; font-size: 38px;">Performance.</h1>
+            <div class="ds-kicker">Year to date · Through May 12</div>
+            <h1 class="ds-headline">Performance</h1>
           </div>
-          <div style="display: flex; gap: 10px;">
+          <div style="display:flex;gap:10px;margin-left:auto;">
             <select class="field-input" style="min-width: 160px;">
               <option>This year</option>
               <option>This quarter</option>
               <option>This month</option>
               <option>Last 12 months</option>
             </select>
-            <button class="btn btn-ghost btn-sm" data-report-export>Export</button>
+            <button class="ds-btn" data-report-export>Export</button>
           </div>
         </div>
+      <div class="rep">
 
         <!-- LEAD HYGIENE — triage the noise out of the pipeline -->
         <div data-hygiene-card style="display:none;border:1px solid var(--rule);background:var(--shell);padding:16px 18px;margin-bottom:18px;">
@@ -1602,7 +1603,7 @@ body.lp-restyle {
             <p data-closings-foot style="margin-top: 16px; font-family: var(--mono); font-size: 10px; letter-spacing: 0.12em; color: var(--ink-faint); text-transform: uppercase;">— Pulled from Zillow profile. 107 closings to date.</p>
           </div>
         </div>
-      </div>
+      </div></div></div>
     </section>
 
     <!-- ============================================================
@@ -2083,9 +2084,9 @@ body.lp-restyle {
     .bc-bar > span { display: block; height: 100%; width: 0; background: #2E5C3D; transition: width .3s; }
     </style>
     <section class="crm-view" data-view="broadcast">
+      <div class="ds"><div class="ds-screen"><div class="ds-corners"><i></i><i></i><i></i><i></i></div>
+        <div class="ds-title"><div><div class="ds-kicker">Reach out · one send, many people</div><h1 class="ds-headline">Bulk email</h1></div></div>
       <div class="bc">
-        <span class="label-cap" style="color:var(--brass);">Reach out · one send, many people</span>
-        <h1>Bulk email.</h1>
         <p class="bc-sub">Send a newsletter, an update, or the latest Ledger to a whole segment. Anyone who's unsubscribed or marked do-not-contact is skipped automatically, and every message carries a one-click unsubscribe link.</p>
 
         <div class="bc-field">
@@ -2124,6 +2125,7 @@ body.lp-restyle {
 
         <p class="bc-note">Emails send from your verified Legacy Properties address in batches. Large lists take a minute — keep this tab open until it finishes. Every send is logged to the contact's thread.</p>
       </div>
+      </div></div>
 
       <script>
       (function () {
