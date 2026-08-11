@@ -4216,7 +4216,7 @@
       guard('stats', () => {
         const pipeVal = boardDeals.reduce((s, d) => s + (d.price || 0), 0);
         const comm = pending.reduce((s, d) => s + (parseCommissionUsd(d.meta, d.price) || 0), 0);
-        setT('[data-bind-dash-pipeval]', pipeVal ? fmtUSDshort(pipeVal) : '—');
+        setT('[data-bind-dash-pipeval]', pipeVal ? fmtUSD(pipeVal) : '—');
         setT('[data-bind-dash-comm]', comm ? fmtUSD(comm) : '—');
         setT('[data-bind-dash-newleads]', String((mb.new_today || []).length));
         setT('[data-bind-dash-escrow]', String(pending.length));
