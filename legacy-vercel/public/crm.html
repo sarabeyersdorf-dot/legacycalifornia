@@ -805,12 +805,9 @@ body.lp-restyle {
          Replaces the old Tasks + Notes tabs.
          ============================================================ -->
     <section class="crm-view" data-view="cowork">
+      <div class="ds"><div class="ds-screen"><div class="ds-corners"><i></i><i></i><i></i><i></i></div>
+        <div class="ds-title"><div><div class="ds-kicker">Tell Cowork · reads into tomorrow's briefing</div><h1 class="ds-headline">Cowork</h1></div></div>
       <div class="upd">
-        <div class="cur-head"><div>
-          <span class="label-cap" style="color:var(--brass);">Tell Cowork · it reads this into tomorrow's briefing</span>
-          <h1 class="h-section" style="font-size:38px;margin-top:6px;">Cowork.</h1>
-        </div></div>
-
         <!-- Composer — writes agent_updates (behaviour preserved from Notes) -->
         <div class="upd-compose">
           <textarea data-upd-text placeholder="A text you got, something James told you, anything for tomorrow's briefing…"></textarea>
@@ -820,25 +817,26 @@ body.lp-restyle {
               <input type="text" data-upd-contact placeholder="Tag a contact (optional)" autocomplete="off">
               <div class="upd-contact-results" data-upd-contact-results style="display:none;"></div>
             </div>
-            <button class="btn btn-ink btn-sm" data-upd-save>Send to Cowork</button>
+            <button class="ds-btn ds-btn--primary" data-upd-save>Send to Cowork</button>
           </div>
         </div>
 
         <!-- Task list — grouped by deal, from the daily briefing -->
-        <div class="tsk-filter" data-tsk-filter>
-          <button class="chip on" data-tsk="mine">Mine <span data-tsk-c-mine>—</span></button>
-          <button class="chip" data-tsk="all">All <span data-tsk-c-all>—</span></button>
-          <button class="chip" data-tsk="attn">Needs attention <span data-tsk-c-attn>—</span></button>
-          <button class="chip" data-tsk-refresh title="Reload tasks" style="margin-left:auto;">⟳ Refresh</button>
+        <div class="ds-filter tsk-filter" data-tsk-filter style="padding:14px 0;background:none;border:none;">
+          <button class="ds-fpill on" data-tsk="mine">Mine <b data-tsk-c-mine>—</b></button>
+          <button class="ds-fpill" data-tsk="all">All <b data-tsk-c-all>—</b></button>
+          <button class="ds-fpill" data-tsk="attn">Needs attention <b data-tsk-c-attn>—</b></button>
+          <button class="ds-fpill" data-tsk-refresh title="Reload tasks" style="margin-left:auto;">⟳ Refresh</button>
         </div>
-        <div data-tsk-list><div class="cur-empty">Loading tasks…</div></div>
+        <div data-tsk-list><div class="ds-col-empty">Loading tasks…</div></div>
 
         <!-- Recently told Cowork (the running log) -->
         <div style="margin-top:36px;">
-          <span class="label-cap" style="color:var(--ink-mute);">Recently told Cowork</span>
-          <div data-upd-list style="margin-top:10px;"><div class="cur-empty">Loading…</div></div>
+          <div class="ds-kicker" style="margin-bottom:10px;">Recently told Cowork</div>
+          <div data-upd-list><div class="ds-col-empty">Loading…</div></div>
         </div>
       </div>
+    </div></div>
     </section>
 
     <!-- ============================================================
@@ -1787,13 +1785,12 @@ body.lp-restyle {
     @media (max-width: 900px) { .brk { padding: 18px; } }
     </style>
     <section class="crm-view" data-view="broker">
-      <div class="brk">
-        <div class="cur-head"><div>
-          <span class="label-cap" style="color:var(--brass);">Broker oversight · Legacy Properties</span>
-          <h1 class="h-section" style="font-size:38px;margin-top:6px;">The brokerage.</h1>
-        </div></div>
-        <div data-broker-body><div class="cur-empty">Loading…</div></div>
-      </div>
+      <div class="ds"><div class="ds-screen"><div class="ds-corners"><i></i><i></i><i></i><i></i></div>
+        <div class="ds-title"><div><div class="ds-kicker">Broker oversight · Legacy Properties</div><h1 class="ds-headline">The brokerage</h1></div></div>
+        <div class="brk">
+          <div data-broker-body><div class="ds-col-empty">Loading…</div></div>
+        </div>
+      </div></div>
     </section>
 
     <!-- ============================================================
@@ -3494,12 +3491,9 @@ body.lp-restyle {
     </script>
 
     <section class="crm-view" data-view="settings">
+      <div class="ds"><div class="ds-screen"><div class="ds-corners"><i></i><i></i><i></i><i></i></div>
+        <div class="ds-title"><div><div class="ds-kicker">Your account</div><h1 class="ds-headline">Settings</h1></div></div>
       <div class="set">
-        <div class="cur-head"><div>
-          <span class="label-cap" style="color:var(--brass);">Your account</span>
-          <h1 class="h-section" style="font-size:38px;margin-top:6px;">Settings.</h1>
-        </div></div>
-
         <div class="set-card">
           <h2>Signed in as</h2>
           <p class="sub">This is the account the CRM is showing. Everything on your Today, Inbox, and Pipeline is scoped to you.</p>
@@ -3548,6 +3542,7 @@ body.lp-restyle {
           <button class="set-signout" data-sign-out>Sign out</button>
         </div>
       </div>
+    </div></div>
     </section>
 
   </main>

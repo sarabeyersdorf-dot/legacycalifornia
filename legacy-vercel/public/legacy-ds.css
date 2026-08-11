@@ -233,6 +233,14 @@ body.ds-appshell .crm-view[data-view="people"]{padding:22px;}
 body.ds-appshell .crm-view[data-view="roster"]{padding:22px;}
 body.ds-appshell .crm-view[data-view="cal"]{padding:22px;}
 body.ds-appshell .crm-view[data-view="dealsall"]{padding:22px;}
+body.ds-appshell .crm-view[data-view="cowork"]{padding:22px;}
+body.ds-appshell .crm-view[data-view="curate"]{padding:22px;}
+body.ds-appshell .crm-view[data-view="broker"]{padding:22px;}
+body.ds-appshell .crm-view[data-view="seq"]{padding:22px;}
+body.ds-appshell .crm-view[data-view="rep"]{padding:22px;}
+body.ds-appshell .crm-view[data-view="broadcast"]{padding:22px;}
+body.ds-appshell .crm-view[data-view="settings"]{padding:22px;}
+body.ds-appshell .crm-view[data-view="listings"]{padding:22px;}
 /* the bespoke Today body is superseded by the .ds-dash block above it */
 body.ds-appshell .crm-view[data-view="today"] > .today{display:none;}
 
@@ -635,3 +643,61 @@ body.viewing-browse .ds-buyer-home{display:none;}
 
 /* focus visibility */
 .ds :focus-visible{outline:2px solid #597ea3;outline-offset:2px;}
+
+/* ============================================================================
+   SECONDARY SCREENS — legacy component classes restyled to the 2026 look when
+   wrapped in `.ds`. These screens (Cowork, Curated, Broker, Sequences,
+   Reports, Bulk email, Settings, Deals & offers) keep their working JS
+   renderers and class names; only their appearance is re-pointed to the
+   design-system tokens (Barlow, square corners, hairline rules, stage/amber
+   palette). `.ds .foo` outranks the global `.foo`, so nothing else changes.
+   ========================================================================== */
+
+/* ---- Cowork ---- */
+.ds .upd{max-width:860px;padding:20px 28px 40px;}
+.ds .upd-compose{border:1px solid var(--rule);background:var(--band);padding:14px;}
+.ds .upd-compose textarea{font-family:var(--body);font-size:14px;color:var(--ink);}
+.ds .upd-item{border-bottom:1px solid var(--hair);padding:14px 2px;}
+.ds .upd-badge{font-family:var(--cond);font-weight:600;font-size:11px;letter-spacing:.08em;
+  text-transform:uppercase;border-radius:0;background:var(--avatar);color:var(--panel);padding:2px 8px;}
+.ds .upd-badge.james{background:#3a5a7c;}
+.ds .upd-badge.both{background:#6b5a86;}
+.ds .upd-deal,.ds .upd-tag{font-family:var(--cond);font-weight:600;font-size:11px;letter-spacing:.04em;
+  color:var(--muted);border:1px solid var(--rule);}
+.ds .upd-tag.contact{color:#2c4a33;border-color:#b3ccb9;}
+.ds .upd-content{font-family:var(--body);font-size:14.5px;color:var(--ink);}
+.ds .upd-seen{font-family:var(--cond);font-weight:600;color:var(--good);}
+
+/* ---- Shared legacy buttons inside a converted screen ---- */
+.ds .btn{font-family:var(--body);border-radius:0;}
+.ds .btn-ink{background:var(--ink-dark);color:var(--panel);border-color:var(--ink-dark);}
+
+/* ---- Settings ---- */
+.ds .set{max-width:800px;padding:20px 28px 50px;}
+.ds .set-card{background:var(--panel);border:1px solid var(--rule);padding:20px 22px;margin-bottom:16px;}
+.ds .set-card h2{font-family:var(--cond);font-weight:600;font-style:normal;font-size:24px;color:var(--ink);margin:0 0 4px;}
+.ds .set-card .sub{font-family:var(--body);font-size:13px;color:var(--muted);}
+.ds .set-row{border-bottom:1px solid var(--hair);}
+.ds .set-row .k{font-family:var(--cond);font-weight:600;letter-spacing:.1em;color:var(--faint);}
+.ds .set-row .v{font-family:var(--body);color:var(--ink);}
+.ds .set-tools button{border:1px solid var(--border);color:var(--ink);font-family:var(--body);}
+.ds .set-tools button:hover{border-color:var(--ink);background:var(--band);}
+.ds .set-tools button .arw{color:var(--faint);}
+.ds .set-signout{border:1px solid var(--alert);color:var(--alert);font-family:var(--body);}
+.ds .set-signout:hover{background:var(--alert);color:var(--panel);}
+
+/* ---- Broker oversight ---- */
+.ds .brk{padding:20px 28px 50px;}
+.ds .brk-ag{background:var(--panel);border:1px solid var(--rule);padding:20px 22px;}
+.ds .brk-ag h3{font-family:var(--cond);font-weight:600;font-style:normal;font-size:22px;color:var(--ink);}
+.ds .brk-ag .st .n{font-family:var(--cond);font-weight:600;font-style:normal;font-size:30px;color:var(--ink);}
+.ds .brk-ag .st .n.brass{color:var(--amber);}
+.ds .brk-ag .st .l{font-family:var(--cond);font-weight:600;letter-spacing:.1em;color:var(--faint);}
+.ds .brk-ag .stages{font-family:var(--cond);font-weight:600;color:var(--muted);}
+.ds .brk-ag .la{color:var(--faint);}
+.ds .brk-table th{font-family:var(--cond);font-weight:600;letter-spacing:.1em;color:var(--faint);border-bottom:1px solid var(--rule);}
+.ds .brk-table td{border-bottom:1px solid var(--hair);color:var(--ink);}
+.ds .brk-hot{color:var(--alert);font-family:var(--cond);font-weight:600;}
+.ds .brk-prov{background:var(--panel);border:1px solid var(--rule);}
+.ds .brk-prov input,.ds .brk-prov select{border:1px solid var(--border);background:var(--panel);color:var(--ink);}
+.ds .brk-prov label{font-family:var(--cond);font-weight:600;letter-spacing:.1em;color:var(--faint);}
