@@ -6,6 +6,7 @@
 <title>Your Legacy · Dashboard</title>
 <link rel="stylesheet" href="legacy.css">
 <link rel="stylesheet" href="legacy-ui.css">
+<link rel="stylesheet" href="legacy-ds.css">
 <style>
 /* Legacy UI re-theme — the app-shell markup + every data hook is unchanged;
    this only re-points the app's design tokens at the lg system so the
@@ -303,426 +304,136 @@ body.viewing-browse .dash-grid { display: none; } /* Browse takes over the main 
 </head>
 <body data-screen-label="Consumer Dashboard">
 
-<div class="app">
-  <!-- ============ SIDEBAR ============ -->
-  <aside class="app-side">
-    <div class="app-side-brand">
-      <a href="index.html" class="wordmark">
-        <span class="wordmark-word">Legacy</span>
-        <span class="wordmark-sub">Properties</span>
-      </a>
-    </div>
-
-    <div class="app-side-section">Your search</div>
-    <nav class="app-side-nav">
-      <a href="#" class="active" data-view="home">Home <span class="pill" data-bind="nav.new_matches">3</span></a>
-      <a href="property-search.html">Browse properties</a>
-      <a href="#saved" data-view="home" data-scroll="saved">Saved homes <span class="pill" data-bind="nav.saved">12</span></a>
-      <a href="property-organizer.html">Saved searches</a>
-      <a href="property-organizer.html">Notes &amp; tags</a>
-    </nav>
-
-    <div class="app-side-section">Activity</div>
-    <nav class="app-side-nav">
-      <a href="#tours" data-view="home" data-scroll="tours">Tours <span class="pill" data-bind="nav.tours">2</span></a>
-      <a href="contact.html">Messages <span class="pill" data-bind="nav.messages">1</span></a>
-      <a href="property-organizer.html">Documents</a>
-      <a href="contact.html">Offers</a>
-    </nav>
-
-    <div class="app-side-section">Insight</div>
-    <nav class="app-side-nav">
-      <a href="towns.html">Neighborhoods</a>
-      <a href="market-report.html">Market reports</a>
-      <a href="ledger.html">The Ledger</a>
-      <a href="mortgage-calculator.html">Mortgage calc</a>
-    </nav>
-
-    <div class="app-side-foot">
-      <div class="avatar avatar-sm" data-bind="buyer.initials">RD</div>
-      <div style="flex:1;min-width:0;">
-        <div style="font-size:13px;color:var(--ink);font-weight:500;" data-bind="buyer.name">Renee Dawson</div>
-        <div class="mono" style="font-size:9px;letter-spacing:.16em;color:var(--ink-mute);" data-bind="buyer.meta">BUYER · MURPHYS</div>
+<!-- ===== Buyer Portal 1A (still looking) · 2026 re-skin =====
+     Markup rewritten to the design system; binding keys (buyer.*, greeting.*,
+     stats.*, brief.*, digest.*, nav.*, new_matches[], saved[], tours[],
+     security.banner) and the IDX browse toggle (#browse / #browse-idx /
+     [data-view]) are preserved so the dashboard painter + the browse script keep
+     working. Under-contract (1B) is served by the side-aware seller.html. -->
+<div class="ds">
+  <div class="ds-appbar-wrap">
+    <header class="ds-topbar ds-portal-top">
+      <a href="index.html" class="ds-wordmark">LEGACY</a>
+      <span class="ds-vr"></span>
+      <span class="ds-prod">Buyer portal</span>
+      <nav class="ds-nav">
+        <button class="ds-navpill on" data-view="home">Home</button>
+        <button class="ds-navpill" data-view="browse">Browse homes</button>
+      </nav>
+      <div class="ds-right">
+        <span class="ds-portal-addr" data-bind="buyer.name">Your search</span>
+        <a href="contact.html" class="ds-btn ds-btn--primary" id="buyer-msg-btn">Message Sara</a>
       </div>
-    </div>
-  </aside>
+    </header>
+  </div>
 
-  <!-- ============ MAIN ============ -->
-  <main class="app-main">
-    <div class="app-topbar">
-      <div class="app-search">
-        <span style="font-family:var(--mono);font-size:11px;">⌕</span>
-        <input placeholder="Search listings, neighborhoods, MLS#…">
-        <span class="mono" style="font-size:10px;color:var(--ink-faint);">⌘K</span>
+  <main class="ds-portal ds-buyer-home">
+    <div class="ds-screen">
+      <div class="ds-corners"><i></i><i></i><i></i><i></i></div>
+
+      <div class="ds-wire" data-bind="security.banner" data-optional></div>
+
+      <div class="ds-title ds-portal-hero">
+        <div>
+          <div class="ds-kicker" data-bind="greeting.eyebrow">Still looking</div>
+          <h1 class="ds-headline">Welcome back, <span data-bind="greeting.first_name">there</span></h1>
+          <div class="ds-portal-sub" data-bind="greeting.narrative">Here's what's moved since you last looked.</div>
+        </div>
       </div>
-      <div class="app-actions">
-        <button class="icon-btn">◇<span class="dot"></span></button>
-        <button class="icon-btn">✉</button>
-        <a href="property-search.html" class="btn btn-ink btn-sm">Browse listings</a>
+
+      <div class="ds-strip c4">
+        <div class="ds-cell inv"><div class="lab">Saved homes</div><div class="fig" data-bind="stats.saved_homes">—</div><div class="sub">on your shortlist</div></div>
+        <div class="ds-cell"><div class="lab">New matches</div><div class="fig" data-bind="stats.new_matches">—</div><div class="sub">since you last looked</div></div>
+        <div class="ds-cell"><div class="lab">Tours upcoming</div><div class="fig" data-bind="stats.tours_upcoming">—</div><div class="sub">booked</div></div>
+        <div class="ds-cell"><div class="lab">Match strength</div><div class="fig" data-bind="stats.match_strength">—</div><div class="sub">to your brief</div></div>
       </div>
-    </div>
 
-    <!-- WIRE-FRAUD WARNING · shown to every in-escrow buyer, never omitted -->
-    <div class="wire-warn" data-bind="security.banner" data-optional style="display:none;"></div>
-
-    <!-- HERO GREETING -->
-    <section class="dash-hero">
-      <div class="dash-greet">
-        <span class="eyebrow" data-bind="greeting.eyebrow">Tuesday · May 12 · A good morning to look</span>
-        <h1>Welcome back, <em data-bind="greeting.first_name">Renee.</em></h1>
-        <p data-bind="greeting.narrative">Three new homes in your range came on the market overnight — and Sara left you a note about the Ironstone property.</p>
-      </div>
-      <div class="dash-summary">
-        <div class="dash-sum"><span class="v" data-bind="stats.saved_homes">12</span><span class="l">Saved homes</span></div>
-        <div class="dash-sum"><span class="v accent" data-bind="stats.new_matches">3</span><span class="l">New matches</span></div>
-        <div class="dash-sum"><span class="v" data-bind="stats.tours_upcoming">2</span><span class="l">Tours upcoming</span></div>
-        <div class="dash-sum"><span class="v"><span data-bind="stats.match_strength">87</span><span style="font-size:18px;">%</span></span><span class="l">Profile match strength</span></div>
-      </div>
-    </section>
-
-    <!-- BROWSE / IN-PORTAL IDX SEARCH (Phase 1) — the Kestrel search widget is
-         rendered lazily into #browse-idx the first time "Browse properties" is
-         chosen, so search happens inside the logged-in portal. -->
-    <section class="dash-card" id="browse">
-      <div class="dash-card-h">
-        <h2>Browse properties.</h2>
-        <span class="meta">Search every listing — right here in your portal</span>
-      </div>
-      <div class="idx-embed" id="browse-idx">
-        <p class="mono" style="font-size:11px;color:var(--ink-mute);padding:24px 0;">Loading search…</p>
-      </div>
-    </section>
-
-    <!-- GRID -->
-    <div class="dash-grid">
-      <!-- LEFT COLUMN -->
-      <div style="display: flex; flex-direction: column; gap: 28px; min-width: 0;">
-
-        <!-- From your agent · shared transaction items (collapses when empty) -->
-        <section class="dash-card agent-shared" data-list="agent_items" data-optional style="display:none;">
-          <div class="dash-card-h">
-            <h2>From your agent.</h2>
-            <span class="meta">In your transaction</span>
-          </div>
-          <div class="agent-item" data-row>
-            <span class="agent-item-dot"></span>
-            <div class="agent-item-body">
-              <span class="agent-item-label" data-bind="label">Item</span>
-              <span class="agent-item-meta" data-bind="meta" data-optional>From your agent</span>
-            </div>
-          </div>
-        </section>
-
-        <!-- New matches -->
-        <section class="dash-card" data-list="new_matches">
-          <div class="dash-card-h">
-            <h2>New for you, this morning.</h2>
-            <span class="meta"><a href="property-search.html">All 12 →</a></span>
-          </div>
-
-          <div class="dash-state dash-loading" data-state="loading" style="display:none;"><span class="dash-spinner"></span> Finding your matches…</div>
-          <div class="dash-state dash-empty" data-state="empty" style="display:none;">No new matches overnight — Sara is still hunting.</div>
-
-          <div class="saved-row" data-row>
-            <div class="saved-photo">
-              <img src="https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=400&q=85" alt="" data-bind="photo">
-              <span class="badge" data-bind="score" data-optional>94%</span>
-            </div>
-            <div class="saved-info">
-              <span class="saved-meta" data-bind="status">New · Just listed · 4 hrs ago</span>
-              <span class="saved-price" data-bind="specs">$875,000 · 4Bd 3Ba · 2,840 sf</span>
-              <span class="saved-addr" data-bind="address">4182 Oak Hollow Road · Murphys</span>
-              <div class="saved-note" data-bind="note" data-optional>"Single-level, generator, walk-up forest views — this is exactly your brief, Renee." — Sara</div>
-              <div class="saved-tags" data-list="tags" data-optional style="display:none;">
-                <span class="tag-mini" data-row data-bind="label">Tag</span>
-              </div>
-            </div>
-            <div class="saved-actions">
-              <a href="listing.html" class="btn btn-ink btn-sm" data-bind-href="listing_url">View residence</a>
-              <button type="button" class="dash-heart" data-dash-save data-bind-attr="data-save-id:save_id" aria-pressed="false" title="Save this home">&#9825;</button>
+      <div class="ds-portal-body">
+        <!-- LEFT: agent note + shortlist + also saved -->
+        <div class="ds-portal-left">
+          <div class="ds-note">
+            <span class="ds-note-av"><img src="art/sara-headshot.png" alt="" data-bind="digest.agent_avatar"></span>
+            <div>
+              <div class="ds-note-h">A note from <span data-bind="digest.agent_name">Sara</span></div>
+              <p class="ds-note-b" data-bind="digest.letter">I keep pulling listings that match what you told me. Tell me which ones spark a question — or a flat no.</p>
             </div>
           </div>
 
-          <div class="saved-row">
-            <div class="saved-photo">
-              <img src="https://images.unsplash.com/photo-1568605114967-8130f3a36994?w=400&q=85" alt="">
-              <span class="badge">87%</span>
-            </div>
-            <div class="saved-info">
-              <span class="saved-meta">Price drop · −$25,000 · 2 hrs ago</span>
-              <span class="saved-price">$649,000 · 3Bd 2.5Ba · 2,210 sf</span>
-              <span class="saved-addr">217 Ironstone Lane · Murphys</span>
-              <div class="saved-tags">
-                <span class="tag-mini">Walk to Main</span>
-                <span class="tag-mini">Renovated</span>
-                <span class="tag-mini">Oak canopy</span>
+          <section class="ds-card" id="saved">
+            <div class="ds-card-h"><h3>New matches for you</h3><span class="ds-card-meta" data-bind="nav.new_matches" data-optional>0</span></div>
+            <div class="ds-buyer-matches" data-list="new_matches">
+              <div class="ds-bmatch" data-row style="display:none;">
+                <div class="ds-bmatch-frame"><img data-bind="photo" src="" alt=""><span class="ds-bmatch-score" data-bind="score" data-optional>—</span></div>
+                <div class="ds-bmatch-b">
+                  <div class="ds-bmatch-price" data-bind="specs">—</div>
+                  <div class="ds-bmatch-addr" data-bind="address">—</div>
+                  <div class="ds-bmatch-status" data-bind="status" data-optional>—</div>
+                  <div class="ds-bmatch-note" data-bind="note" data-optional>—</div>
+                </div>
               </div>
-            </div>
-            <div class="saved-actions">
-              <a href="listing.html" class="btn btn-ink btn-sm">View residence</a>
-              <button class="btn btn-ghost btn-sm">Compare</button>
-            </div>
-          </div>
-
-          <div class="saved-row">
-            <div class="saved-photo">
-              <img src="https://images.unsplash.com/photo-1605276374104-dee2a0ed3cd6?w=400&q=85" alt="">
-              <span class="badge">81%</span>
-            </div>
-            <div class="saved-info">
-              <span class="saved-meta">New · 9 hrs ago</span>
-              <span class="saved-price">$549,000 · 3Bd 2Ba · 1,640 sf</span>
-              <span class="saved-addr">512 Spring Street · Sutter Creek</span>
-              <div class="saved-tags">
-                <span class="tag-mini">Historic district</span>
-                <span class="tag-mini">Garden</span>
-              </div>
-            </div>
-            <div class="saved-actions">
-              <a href="listing.html" class="btn btn-ghost btn-sm">View residence</a>
-              <button class="btn btn-ghost btn-sm">Not for me</button>
-            </div>
-          </div>
-        </section>
-
-        <!-- Saved + tours row -->
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 28px; min-width: 0;">
-          <section class="dash-card" id="saved" data-list="saved">
-            <div class="dash-card-h">
-              <h2>Saved.</h2>
-              <span class="meta">12 properties</span>
-            </div>
-            <div class="dash-state dash-loading" data-state="loading" style="display:none;"><span class="dash-spinner"></span> Loading…</div>
-            <div class="dash-state dash-empty" data-state="empty" style="display:none;">Nothing saved yet — tap the heart on any listing.</div>
-            <div class="saved-row" data-row style="grid-template-columns: 96px 1fr auto; gap: 14px; padding: 12px 0; align-items: start;">
-              <div class="saved-photo" style="width: 96px; height: 72px;">
-                <img src="https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?w=300&q=85" alt="" data-bind="photo">
-              </div>
-              <div class="saved-info">
-                <span class="saved-price" style="font-size: 18px;" data-bind="price">$1,195,000</span>
-                <a class="saved-addr" style="font-size: 12px;text-decoration:none;color:inherit;" data-bind="address" data-bind-href="listing_url">8001 Vineyard Ridge · Sutter Creek</a>
-                <div class="saved-tags" data-list="tags" data-optional><span class="tag-mini" data-row data-bind="label">Favorite</span></div>
-              </div>
-              <button type="button" class="dash-heart is-on" data-dash-save data-bind-attr="data-save-id:save_id" aria-pressed="true" title="Saved — remove">&#9829;</button>
-            </div>
-            <div class="saved-row" style="grid-template-columns: 96px 1fr; gap: 14px; padding: 12px 0;">
-              <div class="saved-photo" style="width: 96px; height: 72px;">
-                <img src="https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=300&q=85" alt="">
-              </div>
-              <div class="saved-info">
-                <span class="saved-price" style="font-size: 18px;">$725,000</span>
-                <span class="saved-addr" style="font-size: 12px;">8910 Foothill Rd · Angels Camp</span>
-                <div class="saved-tags"><span class="tag-mini">For James</span></div>
-              </div>
-            </div>
-            <div class="saved-row" style="grid-template-columns: 96px 1fr; gap: 14px; padding: 12px 0;">
-              <div class="saved-photo" style="width: 96px; height: 72px;">
-                <img src="https://images.unsplash.com/photo-1613490493576-7fde63acd811?w=300&q=85" alt="">
-              </div>
-              <div class="saved-info">
-                <span class="saved-price" style="font-size: 18px;">$1,450,000</span>
-                <span class="saved-addr" style="font-size: 12px;">4127 Pine Crest Trail · Arnold</span>
-                <div class="saved-tags"><span class="tag-mini">Too pricey?</span></div>
-              </div>
-            </div>
-            <div style="text-align: center; margin-top: 18px;" data-after-rows>
-              <a href="favorites.html" class="btn-link" style="border: none; color: var(--brass);">Open saved board →</a>
             </div>
           </section>
 
-          <section class="dash-card" id="tours" data-list="tours">
-            <div class="dash-card-h">
-              <h2>Tours.</h2>
-              <span class="meta">2 upcoming</span>
-            </div>
-            <div class="dash-state dash-loading" data-state="loading" style="display:none;"><span class="dash-spinner"></span> Loading…</div>
-            <div class="dash-state dash-empty" data-state="empty" style="display:none;">No tours booked yet.</div>
-            <div class="tour-block" data-row>
-              <div class="tour-date">
-                <div class="dow" data-bind="dow">Wed</div>
-                <div class="num" data-bind="day">14</div>
-                <div class="mo" data-bind="month">May</div>
-              </div>
-              <div class="tour-info">
-                <span class="tour-time" data-bind="time">11:30 AM · in person</span>
-                <span class="tour-prop" data-bind="property">8001 Vineyard Ridge</span>
-                <span class="tour-with" data-bind="location">With Sara · Sutter Creek</span>
-              </div>
-              <div class="tour-actions">
-                <button class="btn btn-ghost btn-xs">Reschedule</button>
-              </div>
-            </div>
-            <div class="tour-block">
-              <div class="tour-date">
-                <div class="dow">Sat</div>
-                <div class="num">17</div>
-                <div class="mo">May</div>
-              </div>
-              <div class="tour-info">
-                <span class="tour-time">2:00 PM · open house</span>
-                <span class="tour-prop">217 Ironstone Lane</span>
-                <span class="tour-with">Open · 2–4 PM</span>
-              </div>
-              <div class="tour-actions">
-                <button class="btn btn-ghost btn-xs">Directions</button>
-              </div>
-            </div>
-            <div style="text-align: center; margin-top: 18px;" data-after-rows>
-              <a href="listing.html" class="btn btn-ink btn-sm">Book another tour</a>
+          <section class="ds-card">
+            <div class="ds-card-h"><h3>Also saved</h3><span class="ds-card-meta" data-bind="nav.saved" data-optional>0</span></div>
+            <div class="ds-bsaved" data-list="saved">
+              <a class="ds-bsaved-row" data-row style="display:none;" data-bind-href="listing_url" href="#">
+                <span class="ds-bsaved-price" data-bind="price">—</span>
+                <span class="ds-bsaved-addr" data-bind="address">—</span>
+              </a>
             </div>
           </section>
         </div>
 
-        <!-- Messages -->
-        <section class="dash-card" data-list="messages">
-          <div class="dash-card-h">
-            <h2>From Sara.</h2>
-            <span class="meta"><a href="contact.html">Open inbox →</a></span>
-          </div>
-          <div class="dash-state dash-loading" data-state="loading" style="display:none;"><span class="dash-spinner"></span> Loading…</div>
-          <div class="dash-state dash-empty" data-state="empty" style="display:none;">No messages yet.</div>
-          <div class="msg-thread" data-row>
-            <div class="msg-from"><div class="avatar avatar-sm"><img src="art/sara-headshot.png" alt="Sara" data-bind="avatar"></div></div>
-            <div class="msg-content">
-              <div><span class="msg-name" data-bind="from">Sara Cooper</span><span class="msg-time" data-bind="time">Today · 9:14 AM</span></div>
-              <p class="msg-text" data-bind="body">Morning Renee — quick note on <strong>217 Ironstone Lane</strong>. The sellers dropped $25K this morning, and I've spoken to the listing agent: they had an offer fall through last week (financing). They are quietly motivated. If you'd like, we could walk it this Saturday before the open. ☕</p>
-              <div style="margin-top: 8px; display: flex; gap: 6px;">
-                <button class="btn btn-ink btn-xs">Reply</button>
-                <button class="btn btn-ghost btn-xs">Book private tour</button>
+        <!-- RIGHT: tours + brief + team -->
+        <div class="ds-portal-right">
+          <section class="ds-card" id="tours">
+            <div class="ds-card-h"><h3>Tours booked</h3><span class="ds-card-meta" data-bind="nav.tours" data-optional>0</span></div>
+            <div class="ds-btours" data-list="tours">
+              <div class="ds-btour" data-row style="display:none;">
+                <div class="ds-btour-date"><span class="dow" data-bind="dow">—</span><span class="num" data-bind="day">—</span><span class="mo" data-bind="month">—</span></div>
+                <div class="ds-btour-b">
+                  <div class="ds-btour-prop" data-bind="property">—</div>
+                  <div class="ds-btour-time" data-bind="time">—</div>
+                  <div class="ds-btour-with" data-bind="location">—</div>
+                </div>
               </div>
             </div>
-          </div>
-          <div class="msg-thread">
-            <div class="msg-from"><div class="avatar avatar-sm"><img src="art/sara-headshot.png" alt="Sara"></div></div>
-            <div class="msg-content">
-              <div><span class="msg-name">Sara Cooper</span><span class="msg-time">Yesterday · 4:42 PM</span></div>
-              <p class="msg-text">The Pine Crest listing you favorited went pending today. There's a near-twin coming on Friday I've been tracking off-MLS — I'll send specs tonight.</p>
-            </div>
-          </div>
-        </section>
-      </div>
+          </section>
 
-      <!-- RIGHT COLUMN -->
-      <div style="display: flex; flex-direction: column; gap: 28px;">
+          <section class="ds-card">
+            <div class="ds-card-h"><h3>What I'm looking for</h3><a class="ds-card-meta" href="contact.html">Change →</a></div>
+            <div class="cd-rows" style="margin:14px 16px;">
+              <div class="cd-row"><span class="k">Budget</span><span class="v" data-bind="brief.price">—</span></div>
+              <div class="cd-row"><span class="k">Beds / baths</span><span class="v" data-bind="brief.beds_baths">—</span></div>
+              <div class="cd-row"><span class="k">Lot</span><span class="v" data-bind="brief.lot">—</span></div>
+              <div class="cd-row"><span class="k">Areas</span><span class="v" data-bind="brief.areas">—</span></div>
+              <div class="cd-row"><span class="k">Must-haves</span><span class="v" data-bind="brief.must_haves">—</span></div>
+            </div>
+          </section>
 
-        <!-- Digest preview -->
-        <section class="digest">
-          <div class="digest-h">
-            <span class="label-cap">Tomorrow's digest</span>
-            <span class="when">Delivers 7:30 AM</span>
-          </div>
-          <div class="digest-body">
-            <p class="digest-letter" data-bind="digest.letter">"Renee — three properties to keep an eye on tomorrow. The <strong>Oak Hollow</strong> generator is the same Generac on your shortlist. <strong>Spring Street</strong> won't last past the weekend at that price. And the Sutter Creek property added a video tour overnight."</p>
-            <div class="digest-mini" data-list="digest.items">
-              <a href="listing.html" data-row data-bind-href="listing_url">
-                <span class="p" data-bind="price">$875,000</span>
-                <span class="a" data-bind="address">Oak Hollow · Murphys</span>
-              </a>
-              <a href="listing.html">
-                <span class="p">$549,000</span>
-                <span class="a">Spring St · Sutter Creek</span>
-              </a>
-            </div>
-            <div class="digest-sign">
-              <div class="avatar avatar-sm"><img src="art/sara-headshot.png" alt="Sara" data-bind="digest.agent_avatar"></div>
-              <div>
-                <div class="name" data-bind="digest.agent_name">Sara Cooper</div>
-                <div class="ti" data-bind="digest.agent_title">Your agent · Legacy</div>
+          <section class="ds-card" id="team">
+            <div class="ds-card-h"><h3>Your team</h3></div>
+            <div class="ds-teams">
+              <div class="ds-team">
+                <span class="ds-team-av" style="overflow:hidden;"><img src="art/sara-headshot.png" alt="" data-bind="digest.agent_avatar" style="width:100%;height:100%;object-fit:cover;"></span>
+                <div class="ds-team-b">
+                  <div class="ds-team-id"><span class="ds-team-nm" data-bind="digest.agent_name">Sara Cooper</span><span class="ds-team-role" data-bind="digest.agent_title">Your agent</span></div>
+                  <div class="ds-team-links"><a class="ds-team-link" href="contact.html">Message</a></div>
+                </div>
               </div>
             </div>
-          </div>
-        </section>
-
-        <!-- Search profile -->
-        <section class="dash-card">
-          <div class="dash-card-h">
-            <h2>Your brief.</h2>
-            <span class="meta"><a href="find-my-match.html">Edit →</a></span>
-          </div>
-          <div class="prefs">
-            <div class="pref-card">
-              <span class="label-cap">Price</span>
-              <span class="v" data-bind="brief.price">$650K – $900K</span>
-            </div>
-            <div class="pref-card">
-              <span class="label-cap">Beds / baths</span>
-              <span class="v" data-bind="brief.beds_baths">3+ Bd / 2+ Ba</span>
-            </div>
-            <div class="pref-card">
-              <span class="label-cap">Lot</span>
-              <span class="v" data-bind="brief.lot">1+ acre</span>
-            </div>
-            <div class="pref-card">
-              <span class="label-cap">Areas</span>
-              <span class="v" data-bind="brief.areas">Murphys, Arnold</span>
-            </div>
-            <div class="pref-card" style="grid-column: 1/-1;">
-              <span class="label-cap">Must-haves</span>
-              <span class="v" style="font-size: 14px;" data-bind="brief.must_haves">Single-level · Generator · Views · No HOA</span>
-            </div>
-            <div class="pref-card" style="grid-column: 1/-1;">
-              <span class="label-cap">Lovely-to-haves</span>
-              <span class="v" style="font-size: 14px;" data-bind="brief.nice_to_haves">Detached studio · Wine room · Walk to town</span>
-            </div>
-          </div>
-        </section>
-
-        <!-- Alerts -->
-        <section class="dash-card">
-          <div class="dash-card-h">
-            <h2>Alerts.</h2>
-            <span class="meta"><a href="email-alerts.html">Manage →</a></span>
-          </div>
-          <div class="alerts-list" data-list="alerts">
-            <div class="dash-state dash-empty" data-state="empty" style="display:none;">No alerts set.</div>
-            <div class="alert-row" data-row>
-              <div>
-                <div class="alert-title" data-bind="title">New homes in Murphys</div>
-                <div class="alert-rule" data-bind="rule">$650K – $900K · 3+ Bd · 1+ acre</div>
-              </div>
-              <div class="toggle on" data-toggle="enabled" onclick="this.classList.toggle('on')"></div>
-            </div>
-            <div class="alert-row">
-              <div>
-                <div class="alert-title">Price drops on saved homes</div>
-                <div class="alert-rule">Any drop ≥ 1.5%</div>
-              </div>
-              <div class="toggle on" onclick="this.classList.toggle('on')"></div>
-            </div>
-            <div class="alert-row">
-              <div>
-                <div class="alert-title">Sutter Creek vineyard properties</div>
-                <div class="alert-rule">Stretch budget · 4+ acres</div>
-              </div>
-              <div class="toggle on" onclick="this.classList.toggle('on')"></div>
-            </div>
-            <div class="alert-row">
-              <div>
-                <div class="alert-title">Open houses this weekend</div>
-                <div class="alert-rule">Within 30 mi of Murphys</div>
-              </div>
-              <div class="toggle" onclick="this.classList.toggle('on')"></div>
-            </div>
-          </div>
-        </section>
-
-        <!-- Market mini -->
-        <section class="dash-card" data-list="market">
-          <div class="dash-card-h">
-            <h2>Local market.</h2>
-            <span class="meta">May 2026</span>
-          </div>
-          <div class="market-mini-row" data-row><span class="town" data-bind="town">Murphys</span><span class="pr" data-bind="price">$685,000</span><span class="ch up" data-bind="change" data-sign>+4.2%</span></div>
-          <div class="market-mini-row"><span class="town">Arnold</span><span class="pr">$520,000</span><span class="ch up">+2.8%</span></div>
-          <div class="market-mini-row"><span class="town">Sutter Creek</span><span class="pr">$598,000</span><span class="ch up">+5.1%</span></div>
-          <div class="market-mini-row"><span class="town">Angels Camp</span><span class="pr">$415,000</span><span class="ch up">+3.7%</span></div>
-          <div style="margin-top: 14px;" data-after-rows>
-            <a href="ledger.html" class="btn-link" style="border: none; color: var(--brass);">Read the Ledger →</a>
-          </div>
-        </section>
+          </section>
+        </div>
       </div>
     </div>
   </main>
+
+  <!-- BROWSE (IDX) — hidden until "Browse homes" is chosen (data-view toggle) -->
+  <section class="dash-card ds" id="browse">
+    <div class="ds-title" style="padding:18px 22px;"><div><div class="ds-kicker">Browse</div><h1 class="ds-headline" style="font-size:30px;">Every home for sale</h1></div></div>
+    <div class="idx-embed" id="browse-idx" style="padding:20px 22px;color:var(--muted);">Loading search…</div>
+  </section>
 </div>
 
 <script>
