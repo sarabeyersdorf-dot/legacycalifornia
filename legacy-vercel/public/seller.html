@@ -261,9 +261,10 @@ body.lp-restyle {
      data-row / data-add-class key and every referenced id (#sell-hero-photo,
      #sell-tour, #sell-note-avatar, #sell-msg-btn, #cowork-note, .task-row /
      [data-task-toggle]) is preserved so paintPortal() + the page scripts drive
-     it unchanged. Road dots are coloured by step status (done / current /
-     upcoming); a per-step CATEGORY colour would need a category field from the
-     deal payload — noted for a follow-up. -->
+     it unchanged. Road dots carry both signals: hue by CATEGORY (marketing /
+     paperwork / inspection / money / closing — derived in api/seller/portal.js)
+     and fill/ring by status (done / current / upcoming), via data-add-class
+     "dotclass". -->
 <div class="ds">
   <div class="ds-appbar-wrap">
     <header class="ds-topbar ds-portal-top">
@@ -367,7 +368,7 @@ body.lp-restyle {
             <div class="ds-card-h"><h3>The road to closing</h3><span class="ds-card-meta">every step, as it happens</span></div>
             <div class="ds-road" data-list="road">
               <div class="ds-road-item" data-row style="display:none;">
-                <div class="ds-road-rail"><span class="ds-road-dot" data-add-class="status"></span></div>
+                <div class="ds-road-rail"><span class="ds-road-dot" data-add-class="dotclass"></span></div>
                 <div class="ds-road-body">
                   <div class="ds-road-date" data-bind="date" data-optional>—</div>
                   <div class="ds-road-labelrow">

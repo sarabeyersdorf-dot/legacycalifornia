@@ -805,12 +805,9 @@ body.lp-restyle {
          Replaces the old Tasks + Notes tabs.
          ============================================================ -->
     <section class="crm-view" data-view="cowork">
+      <div class="ds"><div class="ds-screen"><div class="ds-corners"><i></i><i></i><i></i><i></i></div>
+        <div class="ds-title"><div><div class="ds-kicker">Tell Cowork · reads into tomorrow's briefing</div><h1 class="ds-headline">Cowork</h1></div></div>
       <div class="upd">
-        <div class="cur-head"><div>
-          <span class="label-cap" style="color:var(--brass);">Tell Cowork · it reads this into tomorrow's briefing</span>
-          <h1 class="h-section" style="font-size:38px;margin-top:6px;">Cowork.</h1>
-        </div></div>
-
         <!-- Composer — writes agent_updates (behaviour preserved from Notes) -->
         <div class="upd-compose">
           <textarea data-upd-text placeholder="A text you got, something James told you, anything for tomorrow's briefing…"></textarea>
@@ -820,25 +817,26 @@ body.lp-restyle {
               <input type="text" data-upd-contact placeholder="Tag a contact (optional)" autocomplete="off">
               <div class="upd-contact-results" data-upd-contact-results style="display:none;"></div>
             </div>
-            <button class="btn btn-ink btn-sm" data-upd-save>Send to Cowork</button>
+            <button class="ds-btn ds-btn--primary" data-upd-save>Send to Cowork</button>
           </div>
         </div>
 
         <!-- Task list — grouped by deal, from the daily briefing -->
-        <div class="tsk-filter" data-tsk-filter>
-          <button class="chip on" data-tsk="mine">Mine <span data-tsk-c-mine>—</span></button>
-          <button class="chip" data-tsk="all">All <span data-tsk-c-all>—</span></button>
-          <button class="chip" data-tsk="attn">Needs attention <span data-tsk-c-attn>—</span></button>
-          <button class="chip" data-tsk-refresh title="Reload tasks" style="margin-left:auto;">⟳ Refresh</button>
+        <div class="ds-filter tsk-filter" data-tsk-filter style="padding:14px 0;background:none;border:none;">
+          <button class="ds-fpill on" data-tsk="mine">Mine <b data-tsk-c-mine>—</b></button>
+          <button class="ds-fpill" data-tsk="all">All <b data-tsk-c-all>—</b></button>
+          <button class="ds-fpill" data-tsk="attn">Needs attention <b data-tsk-c-attn>—</b></button>
+          <button class="ds-fpill" data-tsk-refresh title="Reload tasks" style="margin-left:auto;">⟳ Refresh</button>
         </div>
-        <div data-tsk-list><div class="cur-empty">Loading tasks…</div></div>
+        <div data-tsk-list><div class="ds-col-empty">Loading tasks…</div></div>
 
         <!-- Recently told Cowork (the running log) -->
         <div style="margin-top:36px;">
-          <span class="label-cap" style="color:var(--ink-mute);">Recently told Cowork</span>
-          <div data-upd-list style="margin-top:10px;"><div class="cur-empty">Loading…</div></div>
+          <div class="ds-kicker" style="margin-bottom:10px;">Recently told Cowork</div>
+          <div data-upd-list><div class="ds-col-empty">Loading…</div></div>
         </div>
       </div>
+    </div></div>
     </section>
 
     <!-- ============================================================
@@ -893,7 +891,7 @@ body.lp-restyle {
     .inb-tab.on { color:var(--ink); border-bottom-color:var(--brass); }
     @media (max-width:900px){ .inbound-tabs { padding:14px 18px 0; } }
     </style>
-    <section class="crm-view" data-view="inbox">
+    <section class="crm-view ds" data-view="inbox">
       <div class="inbound-tabs" role="tablist" aria-label="Inbound">
         <button class="inb-tab on" type="button" data-inb-tab="inbox" onclick="showView(event,'inbox')">Threads</button>
         <button class="inb-tab" type="button" data-inb-tab="messages" onclick="showView(event,'messages')">All inbound</button>
@@ -958,16 +956,13 @@ body.lp-restyle {
     .msg-dot { width: 7px; height: 7px; border-radius: 50%; background: #8B3A3A; flex: none; margin-top: 8px; }
     @media (max-width: 900px) { .msgs { padding: 18px; } }
     </style>
-    <section class="crm-view" data-view="messages">
+    <section class="crm-view ds" data-view="messages">
       <div class="inbound-tabs" role="tablist" aria-label="Inbound">
         <button class="inb-tab" type="button" data-inb-tab="inbox" onclick="showView(event,'inbox')">Threads</button>
         <button class="inb-tab on" type="button" data-inb-tab="messages" onclick="showView(event,'messages')">All inbound</button>
       </div>
       <div class="msgs">
-        <div class="cur-head"><div>
-          <span class="label-cap" style="color:var(--brass);">Everyone who reached out</span>
-          <h1 class="h-section" style="font-size:38px;margin-top:6px;">Messages.</h1>
-        </div></div>
+        <div class="ds-title" style="padding:8px 0 14px;border-bottom:none;"><div><div class="ds-kicker">Everyone who reached out</div><h1 class="ds-headline">Messages</h1></div></div>
         <p class="msgs-sub">Every inbound message in one place — texts to your Legacy number, questions from a curated list, and portal replies. Tap anyone to reply by text or email right here; unknown numbers can be triaged into a lead.</p>
         <div class="msgs-filter" data-msgs-filter>
           <button class="chip on" data-msgf="all">All <span class="ct" data-msgf-c-all>—</span></button>
@@ -1353,16 +1348,16 @@ body.lp-restyle {
          SEQUENCES VIEW
          ============================================================ -->
     <section class="crm-view" data-view="seq">
-      <div class="seq">
-        <div class="seq-h">
+      <div class="ds"><div class="ds-screen"><div class="ds-corners"><i></i><i></i><i></i><i></i></div>
+        <div class="ds-title">
           <div>
-            <span class="eyebrow">Automated follow-up · Editable cadences</span>
-            <h1 class="h-section" style="margin-top: 8px; font-size: 38px;">Sequences.</h1>
-            <p class="lede" style="margin-top: 12px; max-width: 600px;">Every step is editable. Each message is queued as a draft, ready for Sara to approve before sending — written in her voice, not a template.</p>
+            <div class="ds-kicker">Automated follow-up · Editable cadences</div>
+            <h1 class="ds-headline">Sequences</h1>
+            <p style="margin-top:12px;max-width:600px;font-size:14px;color:var(--muted);line-height:1.5;">Every step is editable. Each message is queued as a draft, ready for Sara to approve before sending — written in her voice, not a template.</p>
           </div>
-          <button class="btn btn-ink" data-seq-new>+ New sequence</button>
+          <button class="ds-btn ds-btn--primary" data-seq-new style="margin-left:auto;">+ New sequence</button>
         </div>
-
+      <div class="seq">
         <div class="seq-grid">
           <!-- Sequences list -->
           <div class="seq-list-card" data-seq-list>
@@ -1477,29 +1472,30 @@ body.lp-restyle {
             </div>
           </div>
         </div>
-      </div>
+      </div></div></div>
     </section>
 
     <!-- ============================================================
          REPORTS VIEW
          ============================================================ -->
     <section class="crm-view" data-view="rep">
-      <div class="rep">
-        <div class="rep-h">
+      <div class="ds"><div class="ds-screen"><div class="ds-corners"><i></i><i></i><i></i><i></i></div>
+        <div class="ds-title" style="align-items:center;">
           <div>
-            <span class="eyebrow">Year to date · Through May 12</span>
-            <h1 class="h-section" style="margin-top: 8px; font-size: 38px;">Performance.</h1>
+            <div class="ds-kicker">Year to date · Through May 12</div>
+            <h1 class="ds-headline">Performance</h1>
           </div>
-          <div style="display: flex; gap: 10px;">
+          <div style="display:flex;gap:10px;margin-left:auto;">
             <select class="field-input" style="min-width: 160px;">
               <option>This year</option>
               <option>This quarter</option>
               <option>This month</option>
               <option>Last 12 months</option>
             </select>
-            <button class="btn btn-ghost btn-sm" data-report-export>Export</button>
+            <button class="ds-btn" data-report-export>Export</button>
           </div>
         </div>
+      <div class="rep">
 
         <!-- LEAD HYGIENE — triage the noise out of the pipeline -->
         <div data-hygiene-card style="display:none;border:1px solid var(--rule);background:var(--shell);padding:16px 18px;margin-bottom:18px;">
@@ -1604,7 +1600,7 @@ body.lp-restyle {
             <p data-closings-foot style="margin-top: 16px; font-family: var(--mono); font-size: 10px; letter-spacing: 0.12em; color: var(--ink-faint); text-transform: uppercase;">— Pulled from Zillow profile. 107 closings to date.</p>
           </div>
         </div>
-      </div>
+      </div></div></div>
     </section>
 
     <!-- ============================================================
@@ -1740,14 +1736,12 @@ body.lp-restyle {
     }
     </style>
     <section class="crm-view" data-view="curate">
-      <div class="cur">
-        <div class="cur-head">
-          <div>
-            <span class="label-cap" style="color:var(--brass);">Curated Search &amp; Story Push</span>
-            <h1 class="h-section" style="font-size:38px;margin-top:6px;">Collections.</h1>
-          </div>
-          <button class="btn btn-ink btn-sm" data-cur-new>+ New collection</button>
+      <div class="ds"><div class="ds-screen"><div class="ds-corners"><i></i><i></i><i></i><i></i></div>
+        <div class="ds-title" style="align-items:center;">
+          <div><div class="ds-kicker">Curated Search &amp; Story Push</div><h1 class="ds-headline">Collections</h1></div>
+          <button class="ds-btn ds-btn--primary" data-cur-new style="margin-left:auto;">+ New collection</button>
         </div>
+      <div class="cur">
         <div class="cur-grid">
           <aside class="cur-side">
             <div class="cur-side-h">Your collections</div>
@@ -1760,7 +1754,7 @@ body.lp-restyle {
             <div data-cur-editor style="display:none;"></div>
           </div>
         </div>
-      </div>
+      </div></div></div>
     </section>
 
     <!-- ============================================================
@@ -1787,13 +1781,12 @@ body.lp-restyle {
     @media (max-width: 900px) { .brk { padding: 18px; } }
     </style>
     <section class="crm-view" data-view="broker">
-      <div class="brk">
-        <div class="cur-head"><div>
-          <span class="label-cap" style="color:var(--brass);">Broker oversight · Legacy Properties</span>
-          <h1 class="h-section" style="font-size:38px;margin-top:6px;">The brokerage.</h1>
-        </div></div>
-        <div data-broker-body><div class="cur-empty">Loading…</div></div>
-      </div>
+      <div class="ds"><div class="ds-screen"><div class="ds-corners"><i></i><i></i><i></i><i></i></div>
+        <div class="ds-title"><div><div class="ds-kicker">Broker oversight · Legacy Properties</div><h1 class="ds-headline">The brokerage</h1></div></div>
+        <div class="brk">
+          <div data-broker-body><div class="ds-col-empty">Loading…</div></div>
+        </div>
+      </div></div>
     </section>
 
     <!-- ============================================================
@@ -1845,12 +1838,10 @@ body.lp-restyle {
     </style>
     <section class="crm-view" data-view="listings">
       <div data-portal-hint style="display:none;background:var(--shell);border:1px solid var(--brass);border-left:4px solid var(--brass);padding:10px 16px;margin-bottom:14px;font-family:var(--sans);font-size:13.5px;color:var(--ink);">Click any deal to open its <b>deal page</b> — the client's view with your agent console on top. The old in-CRM console is under each card's “Legacy console” link while it retires.</div>
+      <div class="ds"><div class="ds-screen"><div class="ds-corners"><i></i><i></i><i></i><i></i></div>
+        <div class="ds-title"><div><div class="ds-kicker">Your deals and offers</div><h1 class="ds-headline">Deals &amp; offers</h1></div></div>
       <div class="lst">
-        <div class="cur-head"><div>
-          <span class="label-cap" style="color:var(--brass);">Your deals and offers</span>
-          <h1 class="h-section" style="font-size:38px;margin-top:6px;">Deals and Offers.</h1>
-        </div></div>
-        <div class="lst-filter" data-lst-filter style="display:flex;gap:6px;margin-bottom:18px;flex-wrap:wrap;">
+        <div class="lst-filter" data-lst-filter style="display:flex;gap:6px;margin-bottom:18px;flex-wrap:wrap;padding-top:4px;">
           <button class="chip on" data-lst="offers">Offers <span class="c" data-lst-c-offers>—</span></button>
           <button class="chip" data-lst="pending">In escrow <span class="c" data-lst-c-pending>—</span></button>
           <button class="chip" data-lst="preparing">Preparing <span class="c" data-lst-c-preparing>—</span></button>
@@ -1858,8 +1849,8 @@ body.lp-restyle {
           <button class="chip" data-lst="archived">Fell through <span class="c" data-lst-c-archived>—</span></button>
           <button class="chip" data-portal-toggle style="margin-left:auto;" title="Toggle on, then click any deal to open its client-facing seller portal instead of the console">Seller portals</button>
         </div>
-        <div class="lst-grid" data-lst-grid><div class="cur-empty">Loading your listings…</div></div>
-      </div>
+        <div class="lst-grid" data-lst-grid><div class="ds-col-empty">Loading your listings…</div></div>
+      </div></div></div>
     </section>
 
     <!-- ============================================================
@@ -2086,9 +2077,9 @@ body.lp-restyle {
     .bc-bar > span { display: block; height: 100%; width: 0; background: #2E5C3D; transition: width .3s; }
     </style>
     <section class="crm-view" data-view="broadcast">
+      <div class="ds"><div class="ds-screen"><div class="ds-corners"><i></i><i></i><i></i><i></i></div>
+        <div class="ds-title"><div><div class="ds-kicker">Reach out · one send, many people</div><h1 class="ds-headline">Bulk email</h1></div></div>
       <div class="bc">
-        <span class="label-cap" style="color:var(--brass);">Reach out · one send, many people</span>
-        <h1>Bulk email.</h1>
         <p class="bc-sub">Send a newsletter, an update, or the latest Ledger to a whole segment. Anyone who's unsubscribed or marked do-not-contact is skipped automatically, and every message carries a one-click unsubscribe link.</p>
 
         <div class="bc-field">
@@ -2127,6 +2118,7 @@ body.lp-restyle {
 
         <p class="bc-note">Emails send from your verified Legacy Properties address in batches. Large lists take a minute — keep this tab open until it finishes. Every send is logged to the contact's thread.</p>
       </div>
+      </div></div>
 
       <script>
       (function () {
@@ -2237,7 +2229,7 @@ body.lp-restyle {
               <div class="ds-ctbl-h"><span>Name</span><span>Stage</span><span>Last touch</span><span class="ow-col">Source</span></div>
               <div class="ds-ctbl-scroll" data-people-list></div>
             </div>
-            <div class="ds-cdetail" data-people-detail><div class="cd-empty">Select a contact to see their details.</div></div>
+            <div class="ds-cdetail" data-people-detail><div class="cd-empty">Click a name to open their full profile.</div></div>
           </div>
         </div>
       </div>
@@ -2315,8 +2307,11 @@ body.lp-restyle {
         if(full && view.contains(full)){ var fid=full.getAttribute('data-ppl-full'); if(fid && window.Legacy && window.Legacy.openLead) window.Legacy.openLead(fid); return; }
         var row=e.target.closest('[data-ppl-open]');
         if(row && view.contains(row)){
+          // Clicking a name jumps straight to the full profile — no in-between
+          // preview card. (The old two-step "mini card → Open full profile" is gone.)
+          var pid=row.getAttribute('data-ppl-open');
           view.querySelectorAll('.ds-ctbl-r').forEach(function(r){ r.classList.toggle('on', r===row); });
-          paintDetail(st.byId[row.getAttribute('data-ppl-open')]);
+          if(pid && window.Legacy && window.Legacy.openLead){ window.Legacy.openLead(pid); }
           return;
         }
       });
@@ -3341,46 +3336,67 @@ body.lp-restyle {
          touch the existing Deals & Offers / Deals-in-motion / Listings views.
          ============================================================ -->
     <style>
-    .dall { max-width: 1080px; }
-    .dall-chips { display:flex; gap:6px; flex-wrap:wrap; margin-bottom:16px; }
-    .dall-chip { font-family:var(--sans); font-size:13px; padding:7px 13px; border:1px solid var(--rule); background:transparent; color:var(--ink-soft); cursor:pointer; }
-    .dall-chip.on { background:var(--ink); color:var(--shell); border-color:var(--ink); }
-    .dall-chip .ct { font-family:var(--mono); font-size:10px; opacity:.7; margin-left:5px; }
-    .dall-list { display:flex; flex-direction:column; border:1px solid var(--rule); background:var(--shell); }
-    .dall-row { display:grid; grid-template-columns:64px 1fr auto; gap:14px; align-items:center; padding:12px 16px; border-bottom:1px solid var(--rule-soft,#eee5d8); cursor:pointer; }
-    .dall-row:last-child { border-bottom:none; }
-    .dall-row:hover { background:var(--linen); }
-    .dall-ph { width:64px; height:48px; background:var(--linen); overflow:hidden; display:flex; align-items:center; justify-content:center; }
-    .dall-ph img { width:100%; height:100%; object-fit:cover; }
-    .dall-main { min-width:0; }
-    .dall-top { display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
-    .dall-price { font-family:var(--serif); font-size:16px; color:var(--ink); font-weight:600; }
-    .dall-addr { font-family:var(--sans); font-size:13.5px; color:var(--ink); margin-top:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-    .dall-right { text-align:right; white-space:nowrap; }
-    .dall-coe { font-size:11.5px; color:var(--ink-mute); }
-    .dall-next { font-size:11px; color:var(--brass); margin-top:2px; }
-    .dall-cont { font-size:11px; margin-top:2px; color:var(--ink-mute); }
-    .dall-cont-atrisk { color:#8A2C3B; font-weight:600; }
-    .lst-badge.dall-warn { background:#F6E3E8; color:#8A2C3B; border-color:#e6c3cd; }
-    .dall-hdot { display:inline-block; width:9px; height:9px; border-radius:50%; flex:none; cursor:help; }
-    .dall-h-on_track { background:#2E7D46; }
-    .dall-h-watch { background:#C88A1E; }
-    .dall-h-at_risk { background:#B3261E; }
-    .dall-open { font-family:var(--mono); font-size:10px; letter-spacing:.1em; text-transform:uppercase; color:var(--brass); }
-    .dall-tools { margin-top:12px; font-family:var(--mono); font-size:10px; letter-spacing:.1em; text-transform:uppercase; color:var(--brass); text-decoration:none; border:1px solid var(--brass); padding:8px 13px; white-space:nowrap; }
-    .dall-tools:hover { background:var(--brass); color:var(--shell); }
-    @media (max-width:720px){ .dall-row{ grid-template-columns:48px 1fr; } .dall-ph{ width:48px; height:40px; } .dall-right{ grid-column:2; text-align:left; } }
+    /* All Deals — re-skinned to the 2026 design system. Each row carries a stage
+       stripe + colour via data-stg (::before rail), mirroring the pipeline board
+       and Listings table. The shared people-summary + health/docs signals ride
+       along in the design-system pill vocabulary. */
+    .ds-dealsall .ds-dgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:1px;background:var(--rule);border:1px solid var(--rule);}
+    .ds-dealsall .ds-dgrid .ds-col-empty{grid-column:1/-1;padding:24px;}
+    .ds-dealcard{position:relative;background:var(--panel);display:flex;flex-direction:column;cursor:pointer;}
+    .ds-dealcard:hover{background:#eeeef0;}
+    .ds-dealcard-ph{position:relative;aspect-ratio:16/10;border-bottom:1px solid var(--rule);overflow:hidden;
+      background-image:repeating-linear-gradient(135deg,#e2e5e8 0 14px,#dde1e5 14px 28px);}
+    .ds-dealcard-ph img{width:100%;height:100%;object-fit:cover;display:block;}
+    .ds-dealcard-flag{position:absolute;left:0;top:0;padding:4px 10px;font-family:var(--cond);font-weight:600;font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:#f2f2f3;background:var(--stg);}
+    .ds-dealcard-health{position:absolute;right:8px;top:8px;width:12px;height:12px;flex:none;box-shadow:0 0 0 1px rgba(0,0,0,.12);cursor:help;}
+    .ds-dealcard-b{padding:13px 15px;display:flex;flex-direction:column;gap:8px;flex:1;}
+    .ds-dealcard-price{font-family:var(--cond);font-weight:600;font-size:28px;color:var(--ink);line-height:1;}
+    .ds-dealcard-price .none{font-family:var(--body);font-weight:400;font-size:15px;color:var(--faint);font-style:italic;}
+    .ds-dealcard-addr{font-size:14px;color:var(--ink);line-height:1.3;}
+    .ds-dealcard-tags{display:flex;gap:6px;flex-wrap:wrap;align-items:center;}
+    .ds-dealcard-parties{font-size:13px;color:var(--faint);}
+    .ds-dealcard-foot{margin-top:auto;padding-top:9px;border-top:1px solid var(--hair);display:flex;flex-direction:column;gap:3px;}
+    .ds-dealcard-foot .coe{font-size:13px;color:var(--muted);font-variant-numeric:tabular-nums;}
+    .ds-dealcard-foot .cont{font-size:12.5px;color:var(--muted);}
+    .ds-dealcard-foot .cont.atrisk{color:var(--alert);font-weight:600;}
+    .ds-dealcard-foot .next{font-size:12.5px;color:var(--amber-ink);}
+    .ds-pill.warn{border-color:var(--amber-bd);background:var(--amber-bg);color:var(--amber-ink);}
+    .ds-pill.alert{border-color:#d9b3ac;background:#f6e3e0;color:var(--alert);}
+    .ds-hdot{width:10px;height:10px;flex:none;display:inline-block;cursor:help;}
+    .ds-hdot.on_track{background:var(--good);}
+    .ds-hdot.watch{background:var(--amber);}
+    .ds-hdot.at_risk{background:var(--alert);}
+    /* Edit affordance on each card (opens the field-override editor). */
+    .ds-dealcard-edit{position:absolute;right:8px;bottom:8px;z-index:2;font-family:var(--cond);font-weight:600;font-size:12px;letter-spacing:.06em;text-transform:uppercase;padding:5px 9px;border:1px solid var(--border);background:var(--panel);color:var(--ink);cursor:pointer;opacity:.9;}
+    .ds-dealcard-edit:hover{background:var(--ink-dark);color:var(--panel);border-color:var(--ink-dark);opacity:1;}
+    /* Field-override editor modal (appended to <body> with its own `ds` class). */
+    .ds-editmodal{position:fixed;inset:0;z-index:99998;background:rgba(20,22,25,.55);display:flex;align-items:center;justify-content:center;padding:24px;}
+    .ds-editmodal .box{background:var(--panel);border:1px solid var(--border);max-width:470px;width:100%;max-height:92vh;overflow:auto;}
+    .ds-editmodal .hd{padding:16px 20px;border-bottom:1px solid var(--rule);}
+    .ds-editmodal .hd .k{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--faint);}
+    .ds-editmodal .hd h3{font-family:var(--cond);font-weight:600;font-size:23px;margin:2px 0 0;color:var(--ink);line-height:1.1;}
+    .ds-editmodal .bd{padding:16px 20px;display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+    .ds-editmodal label{display:flex;flex-direction:column;gap:5px;font-family:var(--cond);font-weight:600;font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--faint);}
+    .ds-editmodal label.full{grid-column:1/-1;}
+    .ds-editmodal input,.ds-editmodal select{font-family:var(--body);font-size:15px;padding:9px 11px;border:1px solid var(--border);background:var(--panel);color:var(--ink);}
+    .ds-editmodal .hint{grid-column:1/-1;font-family:var(--body);font-size:12.5px;color:var(--faint);font-style:italic;line-height:1.5;}
+    .ds-editmodal .ft{padding:14px 20px;border-top:1px solid var(--rule);display:flex;gap:10px;align-items:center;}
+    .ds-editmodal .ft .msg{font-family:var(--body);font-size:13px;color:var(--muted);flex:1;}
+    .ds-editmodal .ft .msg.err{color:var(--alert);}
     </style>
     <section class="crm-view" data-view="dealsall">
-      <div class="dall">
-        <div class="cur-head" style="display:flex;justify-content:space-between;align-items:flex-start;gap:16px;flex-wrap:wrap;"><div>
-          <span class="label-cap" style="color:var(--brass);">Every deal, one place</span>
-          <h1 class="h-section" style="font-size:38px;margin-top:6px;">Deals.</h1>
+      <div class="ds ds-dealsall">
+        <div class="ds-screen">
+          <div class="ds-corners"><i></i><i></i><i></i><i></i></div>
+          <div class="ds-title" style="align-items:center;">
+            <div><div class="ds-kicker">Every deal, one place</div><h1 class="ds-headline">Deals</h1></div>
+            <a href="#" onclick="showView(event,'listings')" class="ds-btn" style="margin-left:auto;text-decoration:none;" title="Accept an offer, mark fell through, upload a listing photo">Offers &amp; escrow tools →</a>
+          </div>
+          <div class="ds-filter" data-dall-chips></div>
+          <div style="padding:20px 22px;">
+            <div class="ds-dgrid" data-dall-list><div class="ds-col-empty">Loading deals…</div></div>
+          </div>
         </div>
-          <a href="#" onclick="showView(event,'listings')" class="dall-tools" title="Accept an offer, mark fell through, upload a listing photo">Offers &amp; escrow tools →</a>
-        </div>
-        <div class="dall-chips" data-dall-chips></div>
-        <div class="dall-list" data-dall-list><div class="cur-empty" style="padding:20px;">Loading deals…</div></div>
       </div>
     </section>
     <script>
@@ -3395,6 +3411,8 @@ body.lp-restyle {
       function fmtUSD(n){ if(n==null) return '—'; var v=Math.abs(+n); if(v>=1e6) return '$'+(+n/1e6).toFixed(v>=1e7?0:2)+'M'; if(v>=1e3) return '$'+Math.round(+n/1e3)+'K'; return '$'+Math.round(+n); }
       var GROUPS = [['all','All'],['offers','Offers'],['pending','In escrow'],['active','On market'],['preparing','Preparing'],['closed','Closed'],['archived','Archived']];
       var STAGE_LABEL = { offer:'Offer', pending:'In escrow', listing:'On market', preparing:'Preparing', closed:'Closed', dead:'Archived' };
+      // Map a deal stage to the design-system data-stg colour key (stripe + pill).
+      var STG_ATTR = { offer:'offer', pending:'in_escrow', listing:'on_market', preparing:'preparing', closed:'closed', dead:'dead' };
       var state = { data:null, filter:'all', loading:false };
       function byKey(){ var m={}; (state.data&&state.data.deals||[]).forEach(function(d){ m[d.source_key]=d; }); return m; }
       function currentRows(){
@@ -3407,54 +3425,111 @@ body.lp-restyle {
         var c=state.data.counts||{};
         box.innerHTML = GROUPS.filter(function(g){ return g[0]==='all' || (c[g[0]]||0)>0; }).map(function(g){
           var n = g[0]==='all' ? (state.data.deals||[]).length : (c[g[0]]||0);
-          return '<button class="dall-chip'+(state.filter===g[0]?' on':'')+'" data-dall-f="'+g[0]+'">'+esc(g[1])+'<span class="ct">'+n+'</span></button>';
+          return '<button class="ds-fpill'+(state.filter===g[0]?' on':'')+'" data-dall-f="'+g[0]+'">'+esc(g[1])+' <b>'+n+'</b></button>';
         }).join('');
       }
       function row(d){
         var badge = STAGE_LABEL[d.stage]||d.stage;
+        var stg = STG_ATTR[d.stage]||'';
         var side = d.side==='buyer'?'Buying':(d.side==='both'?'Dual':'Selling');
         var agent = d.agent==='james'?'James':(d.agent==='both'?'Sara & James':'Sara');
         var coe = d.coe_date ? ('COE '+esc(d.coe_date)+(d.coe_days!=null?' · '+d.coe_days+'d':'')) : '';
-        var ph = '<div class="dall-ph">'+(d.photo_url?'<img src="'+esc(d.photo_url)+'" alt="">':'')+'</div>';
-        var parties = window.LegacyDealParties ? window.LegacyDealParties.summaryHtml(d.party_summary, d.source_key) : '';
-        var docsBadge = d.docs_missing ? '<span class="lst-badge dall-warn" title="Open compliance-file gaps">'+d.docs_missing+' doc'+(d.docs_missing===1?'':'s')+' missing</span>' : '';
+        var priceHtml = (d.price!=null) ? esc(fmtUSD(d.price)) : '<span class="none">No price yet</span>';
+        var photoInner = d.photo_url ? '<img src="'+esc(d.photo_url)+'" alt="">' : '';
         // Health rollup dot (escrow rows): green on-track / amber watch / red at-risk.
-        var health = d.health ? '<span class="dall-hdot dall-h-'+esc(d.health.level)+'" title="'+esc(d.health.label+(d.health.reasons&&d.health.reasons.length?' — '+d.health.reasons.join(', '):''))+'"></span>' : '';
-        var healthTag = (d.health&&d.health.level==='at_risk') ? '<span class="lst-badge dall-warn">At risk</span>' : '';
+        var health = d.health ? '<span class="ds-dealcard-health ds-hdot '+esc(d.health.level)+'" title="'+esc(d.health.label+(d.health.reasons&&d.health.reasons.length?' — '+d.health.reasons.join(', '):''))+'"></span>' : '';
+        var parties = window.LegacyDealParties ? window.LegacyDealParties.summaryHtml(d.party_summary, d.source_key) : '';
+        var docsBadge = d.docs_missing ? '<span class="ds-pill warn" title="Open compliance-file gaps">'+d.docs_missing+' doc'+(d.docs_missing===1?'':'s')+' missing</span>' : '';
+        var healthTag = (d.health&&d.health.level==='at_risk') ? '<span class="ds-pill alert">At risk</span>' : '';
         // Next open (uncleared) contingency, earliest first.
         var nc = (d.contingencies||[]).filter(function(c){ return c.state!=='cleared'&&c.iso; }).sort(function(a,b){ return String(a.iso).localeCompare(String(b.iso)); })[0];
-        return '<div class="dall-row" data-dall-open="'+esc(d.source_key)+'" role="link" tabindex="0">'
-          + ph
-          + '<div class="dall-main"><div class="dall-top">'+health+'<span class="dall-price">'+esc(fmtUSD(d.price))+'</span>'
-          +   '<span class="lst-badge '+esc(d.stage==='dead'?'archived':(d.stage==='listing'?'active':d.stage))+'">'+esc(badge)+'</span>'
-          +   '<span class="lst-badge">'+esc(side)+'</span><span class="lst-badge">'+esc(agent)+'</span>'+docsBadge+healthTag+'</div>'
-          +   '<div class="dall-addr">'+esc(d.address||d.source_key)+(d.city?' · '+esc(d.city):'')+'</div>'
-          +   parties
+        var ncRisk = nc && (nc.state==='atrisk'||nc.state==='at_risk'||nc.state==='overdue');
+        var foot = '';
+        if(coe) foot += '<div class="coe">'+coe+'</div>';
+        if(nc) foot += '<div class="cont'+(ncRisk?' atrisk':'')+'" title="Next open contingency">◷ '+esc(nc.label)+' · '+esc(nc.iso)+'</div>';
+        if(d.next_event) foot += '<div class="next" title="Next calendar event on this deal">▸ '+esc(d.next_event.label)+' · '+esc(d.next_event.iso)+(d.next_event.time?' '+esc(d.next_event.time):'')+'</div>';
+        var editMark = (d.edited && d.edited.length) ? '<span class="ds-pill" title="Edited in the CRM — these fields override the Cowork value">✎ edited</span>' : '';
+        return '<div class="ds-dealcard" data-stg="'+esc(stg)+'" data-dall-open="'+esc(d.source_key)+'" role="link" tabindex="0">'
+          + '<div class="ds-dealcard-ph">'+photoInner
+          +   '<span class="ds-dealcard-flag">'+esc(badge)+'</span>'+health
+          +   '<button class="ds-dealcard-edit" data-dall-edit="'+esc(d.source_key)+'" title="Edit deal details" aria-label="Edit deal details">✎ Edit</button></div>'
+          + '<div class="ds-dealcard-b">'
+          +   '<div class="ds-dealcard-price">'+priceHtml+'</div>'
+          +   '<div class="ds-dealcard-addr">'+esc(d.address||d.source_key)+(d.city?' · '+esc(d.city):'')+'</div>'
+          +   '<div class="ds-dealcard-tags"><span class="ds-pill">'+esc(side)+'</span><span class="ds-pill">'+esc(agent)+'</span>'+docsBadge+healthTag+editMark+'</div>'
+          +   (parties?'<div class="ds-dealcard-parties">'+parties+'</div>':'')
+          +   (foot?'<div class="ds-dealcard-foot">'+foot+'</div>':'')
           + '</div>'
-          + '<div class="dall-right">'+(coe?'<div class="dall-coe">'+coe+'</div>':'')
-          +   (nc?'<div class="dall-cont dall-cont-'+esc(nc.state)+'" title="Next open contingency">◷ '+esc(nc.label)+' · '+esc(nc.iso)+'</div>':'')
-          +   (d.next_event?'<div class="dall-next" title="Next calendar event on this deal">▸ '+esc(d.next_event.label)+' · '+esc(d.next_event.iso)+(d.next_event.time?' '+esc(d.next_event.time):'')+'</div>':'')
-          +   '<span class="dall-open">Open →</span></div>'
           + '</div>';
       }
       function render(){
         renderChips();
         var list=root.querySelector('[data-dall-list]'); if(!list) return;
         var rows=currentRows();
-        list.innerHTML = rows.length ? rows.map(row).join('') : '<div class="cur-empty" style="padding:20px;">No deals in this group.</div>';
+        list.innerHTML = rows.length ? rows.map(row).join('') : '<div class="ds-col-empty">No deals in this group.</div>';
       }
       function setPill(){ var p=document.querySelector('[data-dealsall-c]'); if(p&&state.data) p.textContent=String((state.data.deals||[]).length); }
       function load(){
         if(state.loading) return; state.loading=true;
         fetch('/api/crm/deals',{credentials:'include'}).then(function(r){ return r.ok?r.json():null; }).then(function(j){
           state.loading=false;
-          if(!j||!j.deals){ if(!state.data){ var l=root.querySelector('[data-dall-list]'); if(l) l.innerHTML='<div class="cur-empty" style="padding:20px;">Could not load deals — try again.</div>'; } return; }
+          if(!j||!j.deals){ if(!state.data){ var l=root.querySelector('[data-dall-list]'); if(l) l.innerHTML='<div class="ds-col-empty">Could not load deals — try again.</div>'; } return; }
           state.data=j; setPill(); render();
-        }).catch(function(){ state.loading=false; if(!state.data){ var l=root.querySelector('[data-dall-list]'); if(l) l.innerHTML='<div class="cur-empty" style="padding:20px;">Could not load deals — try again.</div>'; } });
+        }).catch(function(){ state.loading=false; if(!state.data){ var l=root.querySelector('[data-dall-list]'); if(l) l.innerHTML='<div class="ds-col-empty">Could not load deals — try again.</div>'; } });
+      }
+      // ---- Field-override editor (price / date / address / etc.) ----
+      function fld(label, key, val, type, full){
+        var t = (type==='number') ? 'text' : (type||'text');
+        var extra = (type==='number') ? ' inputmode="decimal"' : '';
+        return '<label'+(full?' class="full"':'')+'>'+esc(label)
+          + '<input type="'+t+'"'+extra+' data-f="'+esc(key)+'" value="'+esc(val==null?'':val)+'"></label>';
+      }
+      function selFld(label, key, val, opts){
+        var o = '<option value="">—</option>' + opts.map(function(p){ return '<option value="'+esc(p[0])+'"'+(String(val||'')===p[0]?' selected':'')+'>'+esc(p[1])+'</option>'; }).join('');
+        return '<label>'+esc(label)+'<select data-f="'+esc(key)+'">'+o+'</select></label>';
+      }
+      function openEdit(d){
+        var m=document.createElement('div'); m.className='ds-editmodal ds';
+        m.innerHTML='<div class="box" role="dialog" aria-modal="true" aria-label="Edit deal">'
+          + '<div class="hd"><div class="k">Edit deal · overrides Cowork</div><h3>'+esc(d.address||d.source_key)+'</h3></div>'
+          + '<div class="bd">'
+          +   fld('List price','list_price', d.list_price, 'number')
+          +   fld('Sale price','sale_price', d.sale_price, 'number')
+          +   fld('Address','address', d.address, 'text', true)
+          +   fld('City','city', d.city, 'text')
+          +   fld('Close date (COE)','coe_date', d.coe_date, 'date')
+          +   fld('MLS #','mls_number', d.mls, 'text')
+          +   selFld('Side','side', d.side, [['seller','Seller'],['buyer','Buyer'],['both','Both']])
+          +   selFld('Agent','agent', d.agent, [['sara','Sara'],['james','James'],['both','Both']])
+          +   '<div class="hint">Saved as CRM overrides — they stick and win over the hourly Cowork sync. Clear a field to fall back to Cowork’s value.</div>'
+          + '</div>'
+          + '<div class="ft"><span class="msg" data-edit-msg></span><button class="ds-btn" data-edit-cancel>Cancel</button><button class="ds-btn ds-btn--primary" data-edit-save>Save</button></div>'
+          + '</div>';
+        document.body.appendChild(m);
+        var msg=m.querySelector('[data-edit-msg]');
+        function close(){ if(m.parentNode) document.body.removeChild(m); document.removeEventListener('keydown', onKey); }
+        function onKey(ev){ if(ev.key==='Escape') close(); }
+        document.addEventListener('keydown', onKey);
+        m.addEventListener('click', function(e){
+          if(e.target===m || e.target.closest('[data-edit-cancel]')){ close(); return; }
+          var save=e.target.closest('[data-edit-save]'); if(!save) return;
+          var fields={};
+          m.querySelectorAll('[data-f]').forEach(function(el){ fields[el.getAttribute('data-f')]=el.value; });
+          save.disabled=true; msg.className='msg'; msg.textContent='Saving…';
+          fetch('/api/crm/deal-edit',{method:'POST',credentials:'include',headers:{'Content-Type':'application/json'},body:JSON.stringify({source_key:d.source_key,fields:fields})})
+            .then(function(r){ return r.json().then(function(j){ return {ok:r.ok,j:j}; },function(){ return {ok:r.ok,j:{}}; }); })
+            .then(function(res){
+              if(!res.ok){ msg.className='msg err'; msg.textContent=(res.j&&res.j.error)||'Could not save.'; save.disabled=false; return; }
+              close(); state.loading=false; load();
+            })
+            .catch(function(){ msg.className='msg err'; msg.textContent='Network error — try again.'; save.disabled=false; });
+        });
       }
       root.addEventListener('click', function(e){
         var chip=e.target.closest('[data-dall-f]');
         if(chip){ state.filter=chip.getAttribute('data-dall-f'); render(); return; }
+        var ed=e.target.closest('[data-dall-edit]');
+        if(ed){ e.preventDefault(); e.stopPropagation(); var ek=ed.getAttribute('data-dall-edit'); var dd=(state.data&&state.data.deals||[]).filter(function(x){return x.source_key===ek;})[0]; if(dd) openEdit(dd); return; }
         var open=e.target.closest('[data-dall-open]');
         if(open){ var k=open.getAttribute('data-dall-open'); if(k&&typeof window.openDealByKey==='function') window.openDealByKey(k); return; }
       });
@@ -3478,12 +3553,9 @@ body.lp-restyle {
     </script>
 
     <section class="crm-view" data-view="settings">
+      <div class="ds"><div class="ds-screen"><div class="ds-corners"><i></i><i></i><i></i><i></i></div>
+        <div class="ds-title"><div><div class="ds-kicker">Your account</div><h1 class="ds-headline">Settings</h1></div></div>
       <div class="set">
-        <div class="cur-head"><div>
-          <span class="label-cap" style="color:var(--brass);">Your account</span>
-          <h1 class="h-section" style="font-size:38px;margin-top:6px;">Settings.</h1>
-        </div></div>
-
         <div class="set-card">
           <h2>Signed in as</h2>
           <p class="sub">This is the account the CRM is showing. Everything on your Today, Inbox, and Pipeline is scoped to you.</p>
@@ -3532,6 +3604,7 @@ body.lp-restyle {
           <button class="set-signout" data-sign-out>Sign out</button>
         </div>
       </div>
+    </div></div>
     </section>
 
   </main>
@@ -3564,10 +3637,33 @@ body.lp-restyle {
 <script>
 var VIEW_LABELS = { today:'Today', tasks:'Tasks', updates:'Notes', inbox:'Inbox', messages:'Inbox', pipe:'Pipeline', cal:'Calendar', seq:'Sequences', curate:'Curated', rep:'Reports', broker:'Broker', listings:'Deals & offers', dealsall:'All deals', command:'Deal command center', people:'Roster', broadcast:'Bulk email' };
 window.__viewStack = window.__viewStack || [];
+window.__crmHistIdx = window.__crmHistIdx || 0;
 function navBack() {
-  var prev = window.__viewStack.pop();
-  if (prev) showView(null, prev, true);
+  // Route the in-app Back button through the browser's history so it and the
+  // device/browser Back button share one code path (the popstate handler).
+  if (window.__viewStack.length) { try { history.back(); } catch (_) {
+    var prev = window.__viewStack.pop(); if (prev) showView(null, prev, true);
+  } }
 }
+// Browser / hardware Back: without a history entry per view switch, the very
+// first Back left crm.html entirely and dumped the agent on the marketing
+// homepage. Each forward showView() now pushes a state (below); popstate walks
+// __viewStack in step. The idx on each state tells back from forward apart so
+// the Forward button re-enters a view instead of popping the stack again.
+window.addEventListener('popstate', function (ev) {
+  var toIdx = (ev.state && typeof ev.state.idx === 'number') ? ev.state.idx : 0;
+  if (toIdx < window.__crmHistIdx) {            // going back
+    window.__crmHistIdx = toIdx;
+    var prev = window.__viewStack.pop();
+    if (prev) showView(null, prev, true);
+  } else if (toIdx > window.__crmHistIdx && ev.state && ev.state.crmView) { // going forward
+    window.__crmHistIdx = toIdx;
+    var cur = document.querySelector('.crm-view.on');
+    var curName = cur && cur.getAttribute('data-view');
+    if (curName && curName !== ev.state.crmView) window.__viewStack.push(curName);
+    showView(null, ev.state.crmView, true);
+  }
+});
 function showView(e, name, fromBack) {
   if (e) e.preventDefault();
   // Any view switch leaves the focused-contact mode (openLead re-adds it right
@@ -3580,6 +3676,8 @@ function showView(e, name, fromBack) {
     if (!fromBack && curName && curName !== name) {
       window.__viewStack.push(curName);
       if (window.__viewStack.length > 25) window.__viewStack.shift();
+      // Push a browser history entry so Back steps here instead of leaving.
+      try { window.__crmHistIdx++; history.pushState({ crmView: name, idx: window.__crmHistIdx }, ''); } catch (_) {}
     }
     var bk = document.querySelector('[data-nav-back]');
     if (bk) bk.style.display = window.__viewStack.length ? '' : 'none';
@@ -4398,7 +4496,7 @@ function selectLead(el) {
 
   // ---- modals --------------------------------------------------------------
   function modal(html) {
-    var m = document.createElement('div'); m.className = 'cur-modal';
+    var m = document.createElement('div'); m.className = 'cur-modal ds';
     m.innerHTML = '<div class="box">' + html + '</div>';
     document.body.appendChild(m);
     m.addEventListener('click', function (e) { if (e.target === m) document.body.removeChild(m); });
