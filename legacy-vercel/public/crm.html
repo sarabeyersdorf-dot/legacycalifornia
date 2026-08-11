@@ -35,7 +35,7 @@ body.lp-restyle {
 <meta name="apple-mobile-web-app-title" content="Legacy Desk">
   <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 </head>
-<body data-screen-label="Agent CRM" class="lp-restyle">
+<body data-screen-label="Agent CRM" class="lp-restyle ds-appshell">
 <script>
   /* Register the service worker so the CRM is installable to the home screen.
      The worker caches nothing (see sw.js) — the CRM stays live. Fails quietly
@@ -114,13 +114,58 @@ body.lp-restyle {
 
   <!-- ============ MAIN ============ -->
   <main class="app-main crm-main">
+    <!-- ============ TOP NAV (2026 re-skin) — replaces the sidebar ============ -->
+    <div class="ds ds-appbar-wrap">
+      <header class="ds-topbar">
+        <a href="#" class="ds-wordmark" onclick="showView(event,'today')">LEGACY</a>
+        <span class="ds-vr"></span>
+        <span class="ds-prod">Agent workspace</span>
+        <nav class="ds-nav">
+          <button class="ds-navpill" data-view="pipe" onclick="showView(event,'pipe')">Pipeline</button>
+          <button class="ds-navpill" data-view="cal" onclick="showView(event,'cal')">Calendar</button>
+          <button class="ds-navpill" data-view="people" onclick="showView(event,'people')">Contacts</button>
+          <button class="ds-navpill" data-view="roster" onclick="showView(event,'roster')">Listings</button>
+          <button class="ds-navpill" data-view="today" onclick="showView(event,'today')">Today</button>
+          <details class="ds-more">
+            <summary>More</summary>
+            <div class="ds-more-menu">
+              <span class="sep">Daily</span>
+              <a onclick="showView(event,'cowork')">Cowork</a>
+              <a onclick="showView(event,'inbox')">Inbox</a>
+              <a onclick="showView(event,'seq')">Sequences</a>
+              <a onclick="showView(event,'curate')">Curated</a>
+              <span class="sep">Deals &amp; roster</span>
+              <a onclick="showView(event,'dealsall')">All deals</a>
+              <a onclick="showView(event,'broadcast')">Bulk email</a>
+              <span class="sep">Insight &amp; setup</span>
+              <a onclick="showView(event,'rep')">Reports</a>
+              <a href="#" data-open-importer>Import leads…</a>
+              <a href="#" data-open-link-deal>Grant portal access…</a>
+              <a href="#" data-open-listing-media>Listing media…</a>
+              <a onclick="showView(event,'settings')">Settings</a>
+              <a href="#" data-sign-out>Sign out</a>
+            </div>
+          </details>
+        </nav>
+        <div class="ds-right">
+          <label class="ds-search"><span class="k">⌕</span><input placeholder="Search name, address, area…" data-global-search><span class="k">⌘K</span></label>
+          <button class="ds-btn" data-new-lead>+ New lead</button>
+          <span class="ds-user"><span class="ds-avatar"><img src="art/sara-headshot.png" alt="" data-agent-avatar-img></span><span data-agent-name-top>Sara</span></span>
+        </div>
+      </header>
+    </div>
+
+    <!-- Legacy top-bar — retired by body.ds-appshell (hidden). The persistent
+         .ds-appbar above is the live chrome. Kept in the DOM so boot code that
+         reads these nodes doesn't break; search hook renamed to avoid a
+         duplicate [data-global-search] binding. -->
     <div class="app-topbar">
       <button class="nav-toggle" data-nav-toggle aria-label="Menu" aria-expanded="false">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
       </button>
       <div class="app-search">
         <span style="font-family:var(--mono);font-size:11px;">⌕</span>
-        <input placeholder="Search leads by name, email, area…" data-global-search>
+        <input placeholder="Search leads by name, email, area…" data-global-search-old>
         <span class="mono" style="font-size:10px;color:var(--ink-faint);">⌘K</span>
       </div>
       <div class="app-actions">
@@ -1119,23 +1164,6 @@ body.lp-restyle {
         <div class="ds-screen">
           <div class="ds-corners"><i></i><i></i><i></i><i></i></div>
 
-          <div class="ds-topbar">
-            <a href="crm.html" class="ds-wordmark">LEGACY</a>
-            <span class="ds-vr"></span>
-            <span class="ds-prod">Agent workspace</span>
-            <nav class="ds-nav">
-              <button class="ds-navpill on">Pipeline</button>
-              <button class="ds-navpill" onclick="showView(event,'cal')">Calendar</button>
-              <button class="ds-navpill" onclick="showView(event,'people')">Contacts</button>
-              <button class="ds-navpill" onclick="showView(event,'roster')">Listings</button>
-              <button class="ds-navpill" onclick="showView(event,'today')">Today</button>
-            </nav>
-            <div class="ds-right">
-              <button class="ds-btn" data-new-lead>+ New lead</button>
-              <span class="ds-user"><span class="ds-avatar" data-agent-avatar><img src="art/sara-headshot.png" alt=""></span><span data-agent-name>Sara</span></span>
-            </div>
-          </div>
-
           <div class="ds-title">
             <div>
               <div class="ds-kicker" data-bind-pipe-kicker>The pipeline · what to touch today</div>
@@ -1149,14 +1177,6 @@ body.lp-restyle {
             <span>Amber bar on a card = it has sat in this column too long</span>
           </div>
 
-          <div class="ds-filter" data-side-filter>
-            <button class="ds-fpill on" data-side="seller">Sellers</button>
-            <button class="ds-fpill" data-side="buyer">Buyers</button>
-            <button class="ds-fpill" data-side="both">Dual</button>
-            <button class="ds-fpill" data-side="all">Everyone</button>
-            <span class="note" data-bind-pipe-sub>—</span>
-          </div>
-
           <div class="ds-board-wrap">
             <div class="ds-board" data-kanban></div>
           </div>
@@ -1165,7 +1185,7 @@ body.lp-restyle {
             <div class="ds-cell inv"><div class="lab">Commission in escrow</div><div class="fig" data-bind-pipe-coe>—</div><div class="sub">on deals under contract</div></div>
             <div class="ds-cell"><div class="lab">In flight</div><div class="fig" data-bind-pipe-inflight>—</div><div class="sub">value across the board</div></div>
             <div class="ds-cell"><div class="lab">New leads</div><div class="fig" data-bind-pipe-new>—</div><div class="sub">not yet worked</div></div>
-            <div class="ds-cell"><div class="lab">Avg time in stage</div><div class="fig">—</div><div class="sub">not tracked yet</div></div>
+            <div class="ds-cell"><div class="lab">Avg time in stage</div><div class="fig" data-bind-pipe-avgstage>—</div><div class="sub">across deals on the board</div></div>
           </div>
         </div>
       </div>
@@ -3504,6 +3524,9 @@ function showView(e, name, fromBack) {
   // sync sidebar
   document.querySelectorAll('.app-side-nav a').forEach(a => a.classList.remove('active'));
   if (e && e.target.closest('.app-side-nav')) e.target.classList.add('active');
+  // sync 2026 top-nav pills (roster == the Listings pill) + close the More menu
+  document.querySelectorAll('.ds-navpill[data-view]').forEach(p => p.classList.toggle('on', p.getAttribute('data-view') === name));
+  document.querySelectorAll('.ds-more[open]').forEach(d => { d.open = false; });
   // sync mobile bottom nav (the Command Center drill-down keeps Deals lit)
   const mobName = (name === 'command') ? 'listings' : name;
   document.querySelectorAll('.mobnav-item').forEach(b => b.classList.toggle('on', b.getAttribute('data-mob') === mobName));

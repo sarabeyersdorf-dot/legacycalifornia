@@ -83,8 +83,10 @@ export default async function handler(req, res) {
   try {
     const supa = adminClient();
     const BASE = 'id, source_key, address, city, stage, side, agent, list_price, sale_price, coe_date, photo_url, video_url, matterport_url, escrow_officer, title_company, co_agent, milestones';
-    const COLS_FULL = BASE + ', mls_number, listing_meta, stage_override, photo_override, party_details';
-    const COLS_MLS  = BASE + ', mls_number, stage_override, photo_override';
+    // stage_entered_at (db/065) rides on the richer tiers so a pre-migration DB
+    // falls back to COLS_MIN cleanly (days-in-stage just reads null until run).
+    const COLS_FULL = BASE + ', mls_number, listing_meta, stage_override, photo_override, party_details, stage_entered_at';
+    const COLS_MLS  = BASE + ', mls_number, stage_override, photo_override, stage_entered_at';
     const COLS_MIN  = BASE;
     const q = (cols) => supa.from('deals').select(cols).in('side', SIDES).order('coe_date', { ascending: true, nullsFirst: false });
 
@@ -142,6 +144,7 @@ export default async function handler(req, res) {
         has_tour:   !!d.matterport_url,
         stage:      stage,
         base_stage: d.stage,
+        stage_days: d.stage_entered_at ? Math.max(0, Math.floor((Date.now() - new Date(d.stage_entered_at).getTime()) / 86400000)) : null,
         contingencies,
         events:       null,   // filled below for escrow rows
         next_event:   null,

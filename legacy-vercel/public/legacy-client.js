@@ -3895,86 +3895,169 @@
   function kanBuyerKey(l)  { return l.buyer_stage  || PIPE_TO_BUYER[kanCoarseKey(l)]  || null; }
   function kanSellerKey(l) { return l.seller_stage || PIPE_TO_SELLER[kanCoarseKey(l)] || null; }
 
+  // ======================= Pipeline board (transactions) ==================
+  // The board is deal-first (a card is a property/transaction), per Sara's
+  // call. Six columns = the seller journey: two lead-funnel columns (New lead,
+  // Nurturing, sourced from seller-side leads that aren't deals yet) + four
+  // transaction columns sourced from /api/crm/deals. Closed lives in the strip.
   let lastPipelineData = null;
-  function paintKanban(pipelineData) {
+  let lastDealsData = null;
+
+  const BOARD_COLS = [
+    { key: 'new',       name: 'New lead',     kind: 'lead', stg: 'new' },
+    { key: 'nurture',   name: 'Nurturing',    kind: 'lead', stg: 'nurture' },
+    { key: 'preparing', name: 'Listing prep', kind: 'deal', stg: 'preparing',       bucket: 'preparing' },
+    { key: 'active',    name: 'On market',    kind: 'deal', stg: 'on_market',        bucket: 'active' },
+    { key: 'offers',    name: 'Offers',       kind: 'deal', stg: 'reviewing_offers', bucket: 'offers' },
+    { key: 'pending',   name: 'In escrow',    kind: 'deal', stg: 'in_escrow',        bucket: 'pending' }
+  ];
+
+  // Commission dollars from a deal's listing_meta — structured {usd|pct} first
+  // (per the 2026 deals.json format), prose as a fallback. Mirrors the
+  // morning-brief parser. Only ever returns deal-backed money, never an estimate.
+  function parseCommissionUsd(meta, price) {
+    if (!meta) return null;
+    const c = meta.commission;
+    if (c == null) return null;
+    if (typeof c === 'object') {
+      if (Number.isFinite(+c.usd) && +c.usd > 0) return Math.round(+c.usd);
+      if (Number.isFinite(+c.pct) && +c.pct > 0 && price) return Math.round(price * (+c.pct) / 100);
+      return null;
+    }
+    const s = String(c).trim(); if (!s) return null;
+    const m = s.match(/\$?\s*([0-9][0-9,]*(?:\.[0-9]+)?)/); if (!m) return null;
+    const num = parseFloat(m[1].replace(/,/g, '')); if (!Number.isFinite(num)) return null;
+    if (/\$/.test(s) || (!/%/.test(s) && num > 100)) return Math.round(num);
+    return price ? Math.round(price * num / 100) : null;
+  }
+  function fmtShortDate(iso) {
+    const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(String(iso || '')); if (!m) return '';
+    return new Date(+m[1], +m[2] - 1, +m[3]).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+  }
+
+  function dealCardHtml(d, col) {
+    const addr = String(d.address || 'Untitled listing').split(',')[0];
+    const ctx  = [d.city, d.party_summary].filter(Boolean).join(' · ') || (d.mls ? `MLS ${d.mls}` : '');
+    const price = d.price;
+    let noteCls = 'st', note = '';
+    if (col.key === 'pending' && d.coe_days != null) {
+      if (d.coe_days < 0)        { noteCls = 'st bad'; note = `COE ${Math.abs(d.coe_days)}d late`; }
+      else if (d.coe_days === 0) { noteCls = 'st bad'; note = 'Closes today'; }
+      else if (d.coe_days <= 7)  { noteCls = 'st bad'; note = `Closes in ${d.coe_days}d`; }
+      else                       { note = `COE ${fmtShortDate(d.coe_date)}`; }
+    } else if (d.health && d.health.level === 'at_risk') {
+      noteCls = 'st bad'; note = d.health.label;
+    } else if (d.next_event && d.next_event.label) {
+      note = d.next_event.label + (d.next_event.iso ? ` ${fmtShortDate(d.next_event.iso)}` : '');
+    }
+    const days  = d.stage_days != null ? `${d.stage_days}d in stage` : '';
+    const stale = d.stage_days != null && d.stage_days > 14;
+    const due   = col.key === 'pending' && d.coe_days != null && d.coe_days <= 2;
+    return `
+      <div class="ds-card${stale ? ' stale' : ''}${due ? ' due' : ''}" data-stg="${escHtml(col.stg)}" data-deal-key="${escHtml(d.source_key)}" data-bucket="${escHtml(col.key)}">
+        <span class="stripe"></span>
+        <div class="body">
+          <span class="marks"><i></i><i></i><i></i><i></i></span>
+          <div class="nm">${escHtml(addr)}</div>
+          <div class="ctx">${escHtml(ctx || '—')}</div>
+          <div class="val">${price ? `<span class="num">${escHtml(fmtUSD(price))}</span>` : ''}${note ? `<span class="${noteCls}">${escHtml(note)}</span>` : ''}</div>
+          ${days ? `<div class="next">${escHtml(days)}</div>` : ''}
+        </div>
+      </div>`;
+  }
+
+  function paintKanban(pipelineData, dealsData) {
     if (pipelineData) lastPipelineData = pipelineData;
-    const data = pipelineData || lastPipelineData;
-    if (!data) return;
+    if (dealsData) lastDealsData = dealsData;
     const kan = document.querySelector('[data-kanban]');
     if (!kan) return;
 
-    // Flatten every active lead the pipeline API returned (all groups incl.
-    // sphere), then re-bucket by the active board's axis.
-    const allLeads = (data.stages || []).flatMap((s) => s.leads || []);
-    const side  = activeSideFilter();
-    const board = kanBoardFor(side);
-    const leads = allLeads.filter(board.keep);
-
-    // Bucket + tally per column. value = deal value (sum of midpoints);
-    // comm = the brokerage's rough take on that value.
-    const COMM = 0.025;
-    const byCol = {};
-    board.cols.forEach((c) => { byCol[c.key] = { leads: [], value: 0, comm: 0 }; });
-    let totalValue = 0, commEscrow = 0;
-    for (const l of leads) {
-      const k = board.bucket(l);
-      const slot = byCol[k];
-      if (!slot) continue;               // no matching column → drop (e.g. sphere)
-      slot.leads.push(l);
-      const mid = midPrice(l.price_min, l.price_max);
-      if (mid) {
-        slot.value += mid; slot.comm += mid * COMM; totalValue += mid;
-        if (k === 'in_escrow' || k === 'under_contract') commEscrow += mid * COMM;
-      }
+    // Lead funnel (seller-side) → New lead / Nurturing columns.
+    const allLeads = (lastPipelineData && lastPipelineData.stages || []).flatMap((s) => s.leads || []);
+    const sellerLeads = allLeads.filter((l) => ['seller', 'both'].includes(l.deal_side || ''));
+    const leadCols = { new: [], nurture: [] };
+    for (const l of sellerLeads) {
+      const k = l.seller_stage || PIPE_TO_SELLER[kanCoarseKey(l)] || null;
+      if (k === 'new') leadCols.new.push(l);
+      else if (k === 'nurture') leadCols.nurture.push(l);
     }
 
-    // Closed isn't a board column in this design — it lives in the stat strip.
-    const cols = board.cols.filter((c) => c.key !== 'closed');
-    kan.innerHTML = cols.map((c) => {
-      const slot = byCol[c.key];
-      slot.leads.sort((a, b) => (b.score || 0) - (a.score || 0));
-      const shown = slot.leads.slice(0, 12);
-      const moreN = slot.leads.length - shown.length;
-      const cards = shown.length
-        ? shown.map((l) => kanCardHtml(l, c.key)).join('')
-        : `<div class="ds-col-empty">Nothing here.</div>`;
-      const more = moreN > 0 ? `<div class="ds-more">+ ${moreN} more</div>` : '';
-      const n = slot.leads.length;
-      let sub = c.key === 'new'
-        ? `${n} · value unknown`
-        : `${n} · ${fmtUSD(Math.round(slot.value))}`;
-      if ((c.key === 'in_escrow' || c.key === 'under_contract') && slot.comm) {
-        sub += ` · ${fmtUSD(Math.round(slot.comm))} comm`;
+    // Transactions → the four deal columns.
+    const deals  = (lastDealsData && lastDealsData.deals) || [];
+    const groups = (lastDealsData && lastDealsData.groups) || {};
+    const byKey  = new Map(deals.map((d) => [d.source_key, d]));
+    const dealCols = {};
+    for (const col of BOARD_COLS) {
+      if (col.kind !== 'deal') continue;
+      dealCols[col.key] = (groups[col.bucket] || []).map((k) => byKey.get(k)).filter(Boolean);
+    }
+
+    // Tallies (deal-backed money only).
+    let dealCount = 0, totalValue = 0, commEscrow = 0, staleN = 0;
+    const stageDays = [];
+    for (const col of BOARD_COLS) {
+      if (col.kind !== 'deal') continue;
+      for (const d of dealCols[col.key]) {
+        dealCount++;
+        if (d.price) totalValue += d.price;
+        if (d.stage_days != null) { stageDays.push(d.stage_days); if (d.stage_days > 14) staleN++; }
+        if (col.key === 'pending') { const cu = parseCommissionUsd(d.meta, d.price); if (cu) commEscrow += cu; }
+      }
+    }
+    const nNew = leadCols.new.length;
+
+    kan.innerHTML = BOARD_COLS.map((col) => {
+      let cardsHtml, sub, count;
+      if (col.kind === 'lead') {
+        const items = leadCols[col.key].slice().sort((a, b) => (b.score || 0) - (a.score || 0));
+        count = items.length;
+        const shown = items.slice(0, 12);
+        cardsHtml = shown.length ? shown.map((l) => kanCardHtml(l, col.stg)).join('') : `<div class="ds-col-empty">Nothing here.</div>`;
+        if (items.length > shown.length) cardsHtml += `<div class="ds-more-count">+ ${items.length - shown.length} more</div>`;
+        sub = `${count} · ${col.key === 'new' ? 'not yet worked' : 'staying in touch'}`;
+      } else {
+        const items = dealCols[col.key].slice().sort((a, b) => (b.price || 0) - (a.price || 0));
+        count = items.length;
+        const shown = items.slice(0, 12);
+        cardsHtml = shown.length ? shown.map((d) => dealCardHtml(d, col)).join('') : `<div class="ds-col-empty">Nothing here.</div>`;
+        if (items.length > shown.length) cardsHtml += `<div class="ds-more-count">+ ${items.length - shown.length} more</div>`;
+        const val = items.reduce((s, d) => s + (d.price || 0), 0);
+        sub = `${count}${val ? ` · ${fmtUSD(Math.round(val))}` : ''}`;
+        if (col.key === 'pending') { const c = items.reduce((s, d) => s + (parseCommissionUsd(d.meta, d.price) || 0), 0); if (c) sub += ` · ${fmtUSD(Math.round(c))} comm`; }
+        if (col.key === 'offers' && count) cardsHtml += `<div class="ds-notebox">Nothing sits here longer than a day — it goes to escrow or back on market.</div>`;
       }
       return `
-        <div class="ds-col" data-stg="${escHtml(c.key)}" data-stage="${escHtml(c.key)}" data-stage-field="${board.field}">
+        <div class="ds-col" data-stg="${escHtml(col.stg)}" data-col="${escHtml(col.key)}" data-kind="${col.kind}">
           <div class="ds-col-h">
-            <div class="row"><span class="sq"></span><span class="nm">${escHtml(c.name)}</span></div>
+            <div class="row"><span class="sq"></span><span class="nm">${escHtml(col.name)}</span></div>
             <div class="sub">${escHtml(sub)}</div>
           </div>
-          <div class="ds-col-body" data-stage-body>${cards}${more}</div>
+          <div class="ds-col-body" data-stage-body>${cardsHtml}</div>
         </div>`;
     }).join('');
 
+    // Click-through: lead card → inbox detail; deal card → the deal portal.
     kan.querySelectorAll('[data-lead-id]').forEach((card) => {
       card.addEventListener('click', () => {
-        // Switch to the Inbox view (where the detail panel lives) so the
-        // lead actually appears. The global is showView, defined in crm.html.
         if (typeof window.showView === 'function') window.showView(null, 'inbox');
         selectLeadId(card.getAttribute('data-lead-id'));
       });
     });
+    kan.querySelectorAll('[data-deal-key]').forEach((card) => {
+      card.addEventListener('click', () => {
+        if (card.classList.contains('dragging')) return;
+        if (typeof window.openDealByKey === 'function') window.openDealByKey(card.getAttribute('data-deal-key'));
+      });
+    });
 
-    // ---- title block + stat strip binds ----
+    // Title block + stat strip.
     const setT = (sel, txt) => { const e = document.querySelector(sel); if (e) e.textContent = txt; };
-    const nNew = (byCol['new'] && byCol['new'].leads.length) || 0;
-    const staleN = leads.filter(isStaleLead).length;
-    setT('[data-bind-pipe-headline]', `${fmtUSD(Math.round(totalValue))} moving`);
-    setT('[data-bind-pipe-kicker]', `${leads.length} in the pipeline · ${nNew} new lead${nNew === 1 ? '' : 's'} not yet worked`);
-    setT('[data-bind-pipe-sub]', 'Sorted by lead score within each stage');
+    setT('[data-bind-pipe-headline]', totalValue ? `${fmtUSD(Math.round(totalValue))} moving` : 'Your pipeline');
+    setT('[data-bind-pipe-kicker]', `${dealCount} deal${dealCount === 1 ? '' : 's'} · plus ${nNew} new lead${nNew === 1 ? '' : 's'} not yet worked`);
     setT('[data-bind-pipe-coe]', commEscrow ? fmtUSD(Math.round(commEscrow)) : '—');
     setT('[data-bind-pipe-inflight]', totalValue ? fmtUSD(Math.round(totalValue)) : '—');
     setT('[data-bind-pipe-new]', String(nNew));
+    setT('[data-bind-pipe-avgstage]', stageDays.length ? `${Math.round(stageDays.reduce((a, b) => a + b, 0) / stageDays.length)}d` : '—');
     const alertEl = document.querySelector('[data-bind-pipe-alert]');
     if (alertEl) {
       if (staleN > 0) {
@@ -3983,8 +4066,77 @@
       } else { alertEl.style.display = 'none'; }
     }
 
-    // Wire HTML5 drag-and-drop so cards can be moved across stage columns.
-    wireKanbanDnd();
+    wireBoardDnd();
+  }
+
+  // Board drag-and-drop. Leads move within the funnel columns (seller_stage);
+  // deals persist only the accept-offer move (Offers ⇄ In escrow) — every other
+  // deal-stage transition is owned by deals.json/Cowork, so we don't fake it.
+  function wireBoardDnd() {
+    const kan = document.querySelector('[data-kanban]');
+    if (!kan) return;
+    kan.querySelectorAll('[data-lead-id],[data-deal-key]').forEach((card) => {
+      card.setAttribute('draggable', 'true');
+      card.style.cursor = 'grab';
+      card.addEventListener('dragstart', (ev) => {
+        const payload = card.getAttribute('data-lead-id')
+          ? `lead:${card.getAttribute('data-lead-id')}`
+          : `deal:${card.getAttribute('data-deal-key')}:${card.getAttribute('data-bucket')}`;
+        ev.dataTransfer.setData('text/plain', payload);
+        ev.dataTransfer.effectAllowed = 'move';
+        card.classList.add('dragging');
+      });
+      card.addEventListener('dragend', () => card.classList.remove('dragging'));
+    });
+    kan.querySelectorAll('[data-stage-body]').forEach((body) => {
+      const col = body.closest('[data-col]');
+      body.addEventListener('dragover', (ev) => { ev.preventDefault(); ev.dataTransfer.dropEffect = 'move'; if (col) col.classList.add('drop-target'); });
+      body.addEventListener('dragleave', () => { if (col) col.classList.remove('drop-target'); });
+      body.addEventListener('drop', (ev) => {
+        ev.preventDefault();
+        if (col) col.classList.remove('drop-target');
+        const payload = ev.dataTransfer.getData('text/plain') || '';
+        const targetCol = body.closest('[data-col]'); if (!targetCol) return;
+        const toKey = targetCol.getAttribute('data-col');
+        const toKind = targetCol.getAttribute('data-kind');
+        if (payload.indexOf('lead:') === 0) {
+          if (toKind !== 'lead') { flashBoardNote('Leads move between New lead and Nurturing only.'); return; }
+          moveLeadToStage(payload.slice(5), toKey === 'new' ? 'new' : 'nurture', 'seller_stage');
+        } else if (payload.indexOf('deal:') === 0) {
+          const parts = payload.split(':');
+          moveDealToStage(parts[1], parts[2], toKey);
+        }
+      });
+    });
+  }
+
+  async function moveDealToStage(sourceKey, fromKey, toKey) {
+    if (!sourceKey || fromKey === toKey) return;
+    let body = null;
+    if (fromKey === 'offers' && toKey === 'pending') body = { source_key: sourceKey, accepted: true };
+    else if (fromKey === 'pending' && toKey === 'offers') body = { source_key: sourceKey, accepted: false };
+    if (!body) { flashBoardNote('Cowork moves deals between these stages — only Offers ⇄ In escrow is a manual move.'); paintKanban(); return; }
+    const r = await window.Legacy.api('/api/crm/deal-stage', { method: 'POST', body: JSON.stringify(body) });
+    if (r.ok) {
+      const dr = await window.Legacy.api('/api/crm/deals', { method: 'GET' });
+      if (dr.ok) paintKanban(null, dr.json);
+    } else {
+      flashBoardNote((r.json && r.json.error) || 'Stage move failed.');
+      paintKanban();
+    }
+  }
+
+  let __boardNoteEl = null;
+  function flashBoardNote(msg) {
+    if (!__boardNoteEl) {
+      __boardNoteEl = document.createElement('div');
+      __boardNoteEl.style.cssText = 'position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:#1d2d3d;color:#f2f2f3;font-family:Barlow,system-ui,sans-serif;font-size:14px;padding:10px 16px;z-index:9999;border:1px solid #2c455d;max-width:90vw;';
+      document.body.appendChild(__boardNoteEl);
+    }
+    __boardNoteEl.textContent = msg;
+    __boardNoteEl.style.display = '';
+    clearTimeout(__boardNoteEl.__t);
+    __boardNoteEl.__t = setTimeout(() => { __boardNoteEl.style.display = 'none'; }, 3400);
   }
 
   function midPrice(min, max) {
@@ -4112,9 +4264,10 @@
     if (!window.Legacy || !window.Legacy.api) { setTimeout(bootCrmInbox, 50); return; }
     paintFilters();
 
-    const [pipelineRes, inboxRes] = await Promise.all([
+    const [pipelineRes, inboxRes, dealsRes] = await Promise.all([
       window.Legacy.api('/api/crm/pipeline', { method: 'GET' }),
-      window.Legacy.api('/api/crm/inbox?filter=all&limit=100', { method: 'GET' })
+      window.Legacy.api('/api/crm/inbox?filter=all&limit=100', { method: 'GET' }),
+      window.Legacy.api('/api/crm/deals', { method: 'GET' })
     ]);
     if (!pipelineRes.ok) {
       // Don't fail silently — show why, so a blank CRM is never a mystery.
@@ -4141,7 +4294,7 @@
 
     paintLeadCounts();
     paintLeadList();
-    paintKanban(pipelineRes.json);
+    paintKanban(pipelineRes.json, (dealsRes && dealsRes.ok) ? dealsRes.json : null);
 
     // Deep-link: an alert SMS/email links to /crm.html?lead=<id>. Open that
     // exact contact (openLead fetches by id, so it works even if the lead isn't

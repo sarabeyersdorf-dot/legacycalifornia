@@ -185,8 +185,8 @@
 .ds-card.dragging{opacity:.5;}
 .ds-col.drop-target{outline:2px solid var(--stg);outline-offset:-2px;}
 
-.ds-more{font-size:14px;color:var(--faint);padding:2px;}
-.ds-notebox{border:1px solid #a9c2d8;background:#eef2f6;color:#2c455d;font-size:13px;padding:10px 12px;line-height:1.4;}
+.ds-more-count{font-size:14px;color:var(--faint);padding:4px 2px;}
+.ds-notebox{border:1px solid #a9c2d8;background:#eef2f6;color:#2c455d;font-size:13px;padding:10px 12px;line-height:1.4;margin-top:2px;}
 
 /* board scroller on narrow screens */
 .ds-board-wrap{overflow-x:auto;}
@@ -202,6 +202,46 @@
   .ds-strip.c4,.ds-strip.c5{grid-template-columns:1fr 1fr;}
   .ds-hint,.ds-filter{padding:10px 16px;}
 }
+
+/* ============================ APP SHELL ================================= */
+/* Top-nav replaces the sidebar. Gated on body.ds-appshell so it's explicit and
+   reversible. The sidebar markup stays in the DOM (boot code reads some of its
+   nodes) but is hidden; the persistent .ds-appbar carries navigation. */
+body.ds-appshell{background:var(--page);}
+body.ds-appshell .app-side,
+body.ds-appshell .app-topbar,
+body.ds-appshell .crm-tabs,
+body.ds-appshell .nav-scrim{display:none !important;}
+body.ds-appshell .app{display:block;}
+body.ds-appshell .app-main{margin:0;width:100%;max-width:none;}
+body.ds-appshell .crm-main{padding:0;}
+.ds-appbar-wrap{position:sticky;top:0;z-index:20;}
+.ds-appbar-wrap .ds-topbar{background:var(--panel);border-bottom:1px solid var(--rule);}
+/* the persistent app header carries an active-state on its own pills */
+.ds-navpill[data-view]{cursor:pointer;}
+/* the migrated screens get page-ground breathing room under the appbar */
+body.ds-appshell .crm-view[data-view="pipe"]{padding:22px;}
+
+/* "More" overflow menu (native details/summary — no JS) */
+.ds-more{position:relative;}
+.ds-more>summary{list-style:none;cursor:pointer;font-family:var(--body);font-size:13px;
+  letter-spacing:.06em;text-transform:uppercase;padding:5px 13px;color:var(--muted);}
+.ds-more>summary::-webkit-details-marker{display:none;}
+.ds-more>summary::after{content:" ▾";}
+.ds-more[open]>summary{background:var(--ink-dark);color:var(--panel);}
+.ds-more-menu{position:absolute;top:calc(100% + 6px);left:0;min-width:200px;z-index:30;
+  background:var(--panel);border:1px solid var(--border);display:flex;flex-direction:column;}
+.ds-more-menu a{padding:9px 14px;font-size:14px;color:var(--ink);text-decoration:none;border-bottom:1px solid var(--hair);cursor:pointer;}
+.ds-more-menu a:last-child{border-bottom:none;}
+.ds-more-menu a:hover{background:var(--band);}
+.ds-more-menu .sep{font-family:var(--cond);font-weight:600;font-size:11px;letter-spacing:.12em;
+  text-transform:uppercase;color:var(--faint);padding:8px 14px 4px;border-bottom:1px solid var(--hair);}
+
+/* appbar search */
+.ds-search{display:flex;align-items:center;gap:8px;border:1px solid var(--border);
+  background:var(--panel);padding:5px 10px;min-width:200px;}
+.ds-search input{border:none;background:none;outline:none;font-family:var(--body);font-size:14px;color:var(--ink);width:100%;}
+.ds-search .k{font-family:var(--cond);font-size:11px;color:var(--faint);}
 
 /* focus visibility */
 .ds :focus-visible{outline:2px solid #597ea3;outline-offset:2px;}
