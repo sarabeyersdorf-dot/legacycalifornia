@@ -479,16 +479,24 @@ body.agent-preview .ds-action-box{cursor:pointer;}
 .ds-doc-link{font-size:13px;color:#416180;text-decoration:none;white-space:nowrap;}
 
 /* team */
-.ds-team{display:flex;gap:12px;align-items:flex-start;padding:12px 16px;border-bottom:1px solid var(--hair);}
-.ds-team:last-child{border-bottom:none;}
-.ds-team-av{width:38px;height:38px;background:var(--avatar);flex:none;}
+/* Your team — one distinct-colored box per member. Accent (--tc) is bound
+   per row from the payload; it tints the left bar, avatar, role + contact links. */
+.ds-teams{display:flex;flex-direction:column;gap:10px;padding:12px 16px;}
+.ds-team{display:block;}
+.ds-team-inner{display:flex;gap:12px;align-items:flex-start;padding:12px 14px;
+  border:1px solid var(--hair);border-left:4px solid var(--tc,var(--avatar));background:var(--panel);}
+.ds-team-av{width:40px;height:40px;background:var(--tc,var(--avatar));flex:none;
+  display:flex;align-items:center;justify-content:center;color:#fff;
+  font-family:var(--cond);font-weight:600;font-size:17px;line-height:1;}
 .ds-team-b{flex:1;min-width:0;}
 .ds-team-id{display:flex;align-items:baseline;gap:9px;flex-wrap:wrap;}
 .ds-team-nm{font-family:var(--cond);font-weight:600;font-size:18px;color:var(--ink);}
-.ds-team-role{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--faint);}
-.ds-team-links{display:flex;gap:8px;margin-top:7px;flex-wrap:wrap;}
-.ds-team-link{font-size:13px;font-weight:600;text-decoration:none;padding:5px 11px;border:1px solid var(--border);color:var(--ink);white-space:nowrap;}
-.ds-team-link:hover{background:var(--band);}
+.ds-team-role{font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--tc,var(--faint));font-weight:600;}
+.ds-team-contact{display:flex;flex-direction:column;gap:2px;margin-top:6px;}
+.ds-team-line{font-size:13.5px;color:var(--ink);text-decoration:none;}
+a.ds-team-line{color:var(--tc,var(--ink));font-weight:600;word-break:break-word;}
+a.ds-team-line:hover{text-decoration:underline;}
+.ds-team-file{font-size:12px;color:var(--faint);font-weight:400;letter-spacing:.02em;}
 
 .ds-gtk{padding:11px 16px;border-bottom:1px solid var(--hair);}
 .ds-gtk:last-child{border-bottom:none;}

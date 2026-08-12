@@ -426,12 +426,15 @@ body.lp-restyle {
             <div class="ds-card-h"><h3>Your team</h3></div>
             <div class="ds-teams" data-list="team">
               <div class="ds-team" data-row style="display:none;">
-                <span class="ds-team-av"></span>
-                <div class="ds-team-b">
-                  <div class="ds-team-id"><span class="ds-team-nm" data-bind="name">—</span><span class="ds-team-role" data-bind="sub" data-optional>—</span></div>
-                  <div class="ds-team-links">
-                    <a class="ds-team-link" data-bind="phone_label" data-bind-href="phone_href" data-optional href="#">Call</a>
-                    <a class="ds-team-link" data-bind="email_label" data-bind-href="email_href" data-optional href="#">Email</a>
+                <div class="ds-team-inner" data-bind-style="--tc:accent">
+                  <span class="ds-team-av" data-bind="initial">·</span>
+                  <div class="ds-team-b">
+                    <div class="ds-team-id"><span class="ds-team-nm" data-bind="name">—</span><span class="ds-team-role" data-bind="sub" data-optional>—</span></div>
+                    <div class="ds-team-contact">
+                      <a class="ds-team-line ds-team-email" data-bind="email" data-bind-href="email_href" data-optional href="#">—</a>
+                      <a class="ds-team-line ds-team-phone" data-bind="phone" data-bind-href="phone_href" data-optional href="#">—</a>
+                      <span class="ds-team-line ds-team-file" data-bind="file_no" data-optional>—</span>
+                    </div>
                   </div>
                 </div>
               </div>
