@@ -207,22 +207,38 @@ or escrow number in a deal's correspondence, capture it here. All keys optional:
 
 ```json
 "contacts": {
-  "escrow":       "Jane Ramirez",
-  "escrowEmail":  "jramirez@fidelitytitle.com",
-  "escrowPhone":  "209-555-0100",
-  "escrowNumber": "ESC-2026-0433",
-  "title":        "Fidelity National Title",
-  "coAgent":      "John Smith",
-  "coAgentEmail": "john@remax.com",
-  "coAgentPhone": "209-555-0200"
+  "escrow":        "Jane Ramirez",
+  "escrowCompany": "Fidelity National Title",
+  "escrowEmail":   "jramirez@fidelitytitle.com",
+  "escrowPhone":   "209-555-0100",
+  "escrowNumber":  "ESC-2026-0433",
+  "coAgent":        "John Smith",
+  "coAgentCompany": "RE/MAX Gold",
+  "coAgentEmail":   "john@remax.com",
+  "coAgentPhone":   "209-555-0200",
+  "lender":        "Denis Listengourt",
+  "lenderCompany": "K Mortgage",
+  "lenderEmail":   "denis@kmortgage.com",
+  "lenderPhone":   "209-555-0300"
 }
 ```
 
+Each of escrow / co-agent / lender becomes its own **distinct-colored box** in the
+portal's Your-team section (agent = green, escrow = amber, buyer's side = blue,
+lender = purple). The email address shows as a one-tap **click-to-email** link, so
+capture it whenever a thread reveals it.
+
+- **Put ONLY the person's name in `escrow` / `coAgent` / `lender`.** Their company
+  goes in the matching `…Company` field, the order number in `escrowNumber`, and
+  scheduling notes (e.g. "officer out 8/26–9/4") in `notes`/the timeline — NOT
+  crammed into the name string. (The portal salvages a clean name + an email +
+  an "Order P-xxxx" from an old blob, but a clean name field is always better.)
 - The **agent's** own email + phone always show (from the agents table) — no
   exceptions — so you don't need to add Sara/James here.
-- `escrowNumber` renders as the escrow member's **File #** in the portal.
-- Only what you provide shows a Call / Email link; a member with just a name
-  shows name + role. Fill in email/phone the moment a deal's emails reveal them.
+- `escrowNumber` renders as the escrow box's **Escrow #** line — set it the moment
+  the title company's opening email gives you the order/file number.
+- Only what you provide shows an email/phone line; a member with just a name shows
+  name + role. Fill in email/phone the moment a deal's emails reveal them.
 
 ## 1d. Compliance intake — the `"attributes"` object (lights up disclosure tasks)
 

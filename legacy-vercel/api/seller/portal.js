@@ -539,44 +539,72 @@ export default async function handler(req, res) {
     const agentPhone = agentRow?.phone || (deal.agent === 'james' ? '209-770-7523' : '209-559-4966');
     const agentEmail = agentRow?.email || (deal.agent === 'james' ? 'JamesSellsCalifornia@gmail.com' : 'SaraSellsCalifornia@gmail.com');
 
-    // Team — the agent ALWAYS carries email + phone (no exceptions) so a client
-    // can reach them in one tap; escrow / co-agent show whatever the deal stores.
+    // Team — one distinct-colored box per member, each reachable in one tap. The
+    // agent ALWAYS carries email + phone; escrow / co-agent / lender show whatever
+    // the deal stores. Cowork fills structured contact fields from email comms
+    // (see BRIEFING §1c); we ALSO parse an email / order-# out of the older
+    // free-text strings so existing deals render fully without waiting on a re-sync.
     const telHref = (p) => p ? 'tel:' + String(p).replace(/[^\d+]/g, '') : '';
-    const teamMember = (m) => ({
-      name: m.name, sub: m.sub || '', access: m.access || '',
-      phone: m.phone || '', email: m.email || '',
-      phone_label: m.phone || '', email_label: m.email || '',
-      phone_href: telHref(m.phone), email_href: m.email ? 'mailto:' + m.email : ''
-    });
-    // Escrow / co-agent contact details come from the deal's `contacts` object
-    // (Cowork extracts email/phone/escrow-# from email comms into deals.json).
+    const firstEmail = (s) => { const m = /[\w.+-]+@[\w-]+\.[\w.-]+\.\w+|[\w.+-]+@[\w-]+\.\w+/.exec(String(s || '')); return m ? m[0] : ''; };
+    const firstOrderNo = (s) => { const m = /(?:order|file|escrow)\s*#?\s*([A-Za-z]{0,3}-?\d[\w-]{3,})/i.exec(String(s || '')); return m ? m[1].replace(/^-+/, '') : ''; };
+    // A clean display name from a blob: keep the part before the first separator
+    // ( "(", "/", ",", "—", " - " ) so a box shows "Kelly Haakma", not the whole note.
+    const cleanName = (s) => sanitize(String(s || '').split(/\s+[–—-]\s+|[(/,]/)[0]).trim();
+
+    const teamMember = (m) => {
+      const email = sanitize(m.email || '');
+      const phone = sanitize(m.phone || '');
+      const nm = sanitize(m.name || '');
+      return {
+        name: nm, sub: m.sub || '', accent: m.accent || '#4a7a55',
+        initial: (nm.trim().charAt(0) || '·').toUpperCase(),
+        phone, email,
+        phone_href: telHref(phone), email_href: email ? 'mailto:' + email : '',
+        file_no: m.file_no ? ('Escrow #' + sanitize(String(m.file_no)).replace(/^Escrow\s*#?\s*/i, '')) : ''
+      };
+    };
+    // Escrow / co-agent / lender contact details come from the deal's `contacts`.
     const ct = (deal.contacts && typeof deal.contacts === 'object' && !Array.isArray(deal.contacts)) ? deal.contacts : {};
+    const lm = (deal.listing_meta && typeof deal.listing_meta === 'object' && !Array.isArray(deal.listing_meta)) ? deal.listing_meta : {};
 
     const team = [];
     team.push(teamMember({
       name: agentName,
       sub: (agentRow?.title || (deal.agent === 'james' ? 'Agent' : 'Broker-Owner')) + ' · Legacy',
-      access: deal.agent === 'james' ? 'Agent' : 'Broker',
+      accent: '#4a7a55',                                   // green — your agent
       phone: agentPhone, email: agentEmail
     }));
 
-    const escrowName = ct.escrow || deal.escrow_officer;
-    if (escrowName) {
-      const house = ct.title || deal.title_company;
-      const fileNo = ct.escrowNumber ? ' · File #' + sanitize(String(ct.escrowNumber)) : '';
+    const escrowRaw = ct.escrow || deal.escrow_officer;
+    if (escrowRaw) {
+      const house = ct.escrowCompany || ct.title || deal.title_company;
+      const fileNo = ct.escrowNumber || firstOrderNo(escrowRaw) || firstOrderNo(deal.escrow_officer) || lm.preEscrow || '';
       team.push(teamMember({
-        name: sanitize(escrowName),
-        sub: (house ? sanitize(house) + ' · Escrow' : 'Escrow / Title') + fileNo,
-        access: 'Escrow',
-        phone: sanitize(ct.escrowPhone || ''), email: sanitize(ct.escrowEmail || '')
+        name: cleanName(escrowRaw) || 'Escrow / Title',
+        sub: (house ? cleanName(house) + ' · ' : '') + 'Escrow / Title',
+        accent: '#b26a1f',                                 // amber — escrow / title
+        phone: ct.escrowPhone, email: ct.escrowEmail || firstEmail(escrowRaw),
+        file_no: fileNo
       }));
     }
 
-    const coName = ct.coAgent || deal.co_agent;
-    if (coName) {
+    const coRaw = ct.coAgent || deal.co_agent;
+    if (coRaw) {
       team.push(teamMember({
-        name: sanitize(coName), sub: "Buyer's side", access: 'Buyer side',
-        phone: sanitize(ct.coAgentPhone || ''), email: sanitize(ct.coAgentEmail || '')
+        name: cleanName(coRaw) || "Buyer's agent",
+        sub: (ct.coAgentCompany ? cleanName(ct.coAgentCompany) + ' · ' : '') + "Buyer's side",
+        accent: '#597ea3',                                 // blue — the other side
+        phone: ct.coAgentPhone, email: ct.coAgentEmail || firstEmail(coRaw)
+      }));
+    }
+
+    const lenderRaw = ct.lender;
+    if (lenderRaw) {
+      team.push(teamMember({
+        name: cleanName(lenderRaw) || 'Lender',
+        sub: (ct.lenderCompany ? cleanName(ct.lenderCompany) + ' · ' : '') + 'Lender',
+        accent: '#6b5a86',                                 // purple — lender
+        phone: ct.lenderPhone, email: ct.lenderEmail || firstEmail(lenderRaw)
       }));
     }
 
