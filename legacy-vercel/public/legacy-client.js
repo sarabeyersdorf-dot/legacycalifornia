@@ -4717,6 +4717,7 @@
   const M_LAB   = 'font-family:"JetBrains Mono",monospace;font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:#7C6A4D;display:block;margin-bottom:4px;';
   const M_INK   = 'background:#1A1714;color:#FAF6EC;border:none;padding:11px 20px;font-family:"JetBrains Mono",monospace;font-size:11px;letter-spacing:.2em;text-transform:uppercase;cursor:pointer;';
   const M_GHOST = 'background:transparent;border:none;color:#7C6A4D;cursor:pointer;font-size:13px;';
+  const M_MINI  = 'background:#F3EEDF;border:1px solid #D9CFB7;color:#3A332B;padding:7px 14px;font-size:12.5px;cursor:pointer;';
 
   function modalShell(title, intro) {
     const overlay = document.createElement('div');
@@ -5192,6 +5193,7 @@
           <div><label style="${M_LAB}">Title <span style="text-transform:none;letter-spacing:0;">(optional)</span></label><input data-f-title placeholder="Auto-named from the type if left blank" style="${M_INPUT}"></div>
           <div><label style="${M_LAB}">Client email <span style="text-transform:none;letter-spacing:0;">(optional · lets you share to their portal)</span></label><input data-f-apptemail type="email" placeholder="client@example.com" style="${M_INPUT}"></div>
           <label style="display:flex;align-items:flex-start;gap:8px;font-size:13px;color:#3A332B;line-height:1.4;"><input data-f-apptinvite type="checkbox" style="margin-top:3px;"> Email a calendar invite (to the client + any CC below)</label>
+          <label style="display:flex;align-items:flex-start;gap:8px;font-size:13px;color:#3A332B;line-height:1.4;"><input data-f-apptsms type="checkbox" style="margin-top:3px;"> Text the client(s) a reminder now</label>
         </div>
         <div style="display:flex;gap:10px;">
           <div style="flex:1;"><label style="${M_LAB}">Date</label><input data-f-date type="date" style="${M_INPUT}"></div>
@@ -5469,11 +5471,17 @@
       }
 
       saveBtn.disabled = true; saveBtn.textContent = 'Saving…'; m.err.textContent = '';
+      const textReminder = kind !== 'tour' && m.body.querySelector('[data-f-apptsms]') && m.body.querySelector('[data-f-apptsms]').checked;
       let okCount = 0, failMsg = '';
       for (const p of posts) {
         const r = await sendJSON('/api/crm/calendar', 'POST', p);
-        if (r.ok && r.json && (r.json.tour || r.json.appointment)) okCount++;
-        else if (!failMsg) failMsg = (r.json && r.json.error) || 'Could not save.';
+        if (r.ok && r.json && (r.json.tour || r.json.appointment)) {
+          okCount++;
+          // Optional: text the client(s) a reminder for the event we just made.
+          if (textReminder && r.json.appointment && r.json.appointment.id) {
+            sendJSON('/api/crm/calendar', 'POST', { action: 'remind', id: r.json.appointment.id, source: 'appointment', channels: ['sms'] }).catch(function () {});
+          }
+        } else if (!failMsg) failMsg = (r.json && r.json.error) || 'Could not save.';
       }
       if (okCount) {
         m.close();
@@ -5588,7 +5596,15 @@
     m.body.innerHTML = `
       <div style="display:flex;flex-direction:column;gap:10px;font-size:14px;color:#1A1714;">
         ${rows.map(([k, v]) => `<div><span style="${M_LAB}">${k}</span><div style="margin-top:2px;">${v}</div></div>`).join('')}
-        ${e.lead_id ? `<label style="display:flex;align-items:center;gap:8px;padding:9px 0;border-top:1px solid #E4DAC4;font-size:13px;color:#1A1714;cursor:pointer;"><input type="checkbox" data-detail-share ${e.shared ? 'checked' : ''}> Show in ${esc(e.client_name || 'the client')}’s portal</label>` : ''}
+        ${(e.lead_id || e.deal_id) ? `<label style="display:flex;align-items:center;gap:8px;padding:9px 0;border-top:1px solid #E4DAC4;font-size:13px;color:#1A1714;cursor:pointer;"><input type="checkbox" data-detail-share ${e.shared ? 'checked' : ''}> Show in the client portal${e.deal_key ? ' <span style="color:#7A6F60;">(everyone on this deal)</span>' : (e.client_name ? ' · ' + esc(e.client_name) : '')}</label>` : ''}
+        ${(e.lead_id || e.deal_id) ? `<div style="border-top:1px solid #E4DAC4;padding-top:10px;">
+          <div style="${M_LAB};margin-bottom:6px;">Send a reminder</div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;">
+            <button type="button" data-remind="email" style="${M_MINI}">Email</button>
+            <button type="button" data-remind="sms" style="${M_MINI}">Text</button>
+            <button type="button" data-remind="email,sms" style="${M_MINI}">Both</button>
+          </div>
+        </div>` : ''}
         <div data-detail-result style="font-size:13px;min-height:18px;"></div>
         <div style="display:flex;gap:10px;margin-top:6px;flex-wrap:wrap;align-items:center;">
           <button type="button" data-act="edit" style="${M_INK}">Edit</button>
@@ -5605,6 +5621,22 @@
       shareCb.disabled = false;
       if (r.ok) { e.shared = now; result.style.color = '#2E5C3D'; result.textContent = now ? '✓ Shared to their portal.' : 'Hidden from their portal.'; }
       else { shareCb.checked = !now; result.style.color = '#9B2C2C'; result.textContent = (r.json && r.json.error) || 'Could not change visibility.'; }
+    });
+    // Reminder buttons — email, text, or both — to the event's client(s).
+    m.body.querySelectorAll('[data-remind]').forEach((btn) => {
+      btn.addEventListener('click', async () => {
+        const channels = btn.getAttribute('data-remind').split(',');
+        const orig = btn.textContent; btn.disabled = true; btn.textContent = 'Sending…'; result.textContent = '';
+        const r = await sendJSON('/api/crm/calendar', 'POST', { action: 'remind', id: e.id, source: e.source, channels });
+        btn.disabled = false; btn.textContent = orig;
+        if (r.ok && r.json && r.json.reminded) {
+          const bits = [];
+          if (r.json.emailed) bits.push(r.json.emailed + ' email' + (r.json.emailed > 1 ? 's' : ''));
+          if (r.json.texted)  bits.push(r.json.texted + ' text' + (r.json.texted > 1 ? 's' : ''));
+          result.style.color = '#2E5C3D';
+          result.textContent = bits.length ? ('✓ Reminder sent · ' + bits.join(' + ') + '.') : '✓ Reminder sent.';
+        } else { result.style.color = '#9B2C2C'; result.textContent = (r.json && r.json.error) || 'Could not send reminder.'; }
+      });
     });
     m.body.querySelector('[data-act="close"]').addEventListener('click', m.close);
     m.body.querySelector('[data-act="edit"]').addEventListener('click', () => { m.close(); openEventEdit(e); });

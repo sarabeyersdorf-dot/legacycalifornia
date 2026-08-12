@@ -49,6 +49,23 @@ function wireHit(...texts) {
   return null;
 }
 
+// A safe, client-facing label to fall back to when a row is shared without one.
+// NEVER derived from an appointment's title (it can hold a buyer's name) — only
+// from its structured kind / sub_kind.
+const APPT_KIND_LABEL = {
+  listing_appt: 'Listing appointment', showing: 'Showing', walkthrough: 'Walkthrough',
+  follow_up: 'Follow-up', appraisal: 'Appraisal', call: 'Call', meeting: 'Meeting',
+  open: 'Open house', block: 'Scheduled event'
+};
+function safeLabel(kind, row) {
+  if (kind === 'tour') return row.tour_type === 'video' ? 'Video tour' : 'In-person tour';
+  if (kind === 'appointment') {
+    if (row.kind === 'inspection') return row.sub_kind ? `${row.sub_kind} inspection` : 'Inspection';
+    return APPT_KIND_LABEL[row.kind] || 'Scheduled event';
+  }
+  return 'Update';
+}
+
 export default async function handler(req, res) {
   if (handleOptions(req, res)) return;
   const { user, profile } = await getCallerProfile(req, res);
@@ -70,9 +87,15 @@ export default async function handler(req, res) {
     if (!row)    return fail(res, 404, `${kind} not found`);
 
     // Proposed label — an explicit client_label wins; otherwise keep the stored one.
-    const nextLabel = body?.client_label !== undefined
+    let nextLabel = body?.client_label !== undefined
       ? (String(body.client_label || '').trim() || null)
-      : (row.client_label ?? null);
+      : (row.client_label ? String(row.client_label).trim() || null : null);
+    // A row shared to a client MUST carry a client-facing label (the DB constraint
+    // appointments_shared_needs_label, and it's literally what the client reads).
+    // If none is set, derive a SAFE neutral label — never the raw title, which for
+    // an appointment can hold a buyer's name (see db/062). This makes sharing a
+    // label-less event succeed instead of 500-ing on the constraint.
+    if (visibility === 'client' && !nextLabel) nextLabel = safeLabel(kind, row);
 
     // WIRE GUARD — only when the result would be client-visible.
     if (visibility === 'client') {
@@ -84,7 +107,10 @@ export default async function handler(req, res) {
     }
 
     const patch = { visibility };
-    if (body?.client_label !== undefined) patch.client_label = nextLabel;
+    // Always write the label when sharing (constraint); when un-sharing, only if
+    // the caller explicitly changed it.
+    if (visibility === 'client') patch.client_label = nextLabel;
+    else if (body?.client_label !== undefined) patch.client_label = nextLabel;
 
     const { data: updated, error: upErr } = await supa.from(table)
       .update(patch).eq('id', id).select().single();

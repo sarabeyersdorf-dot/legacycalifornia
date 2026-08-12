@@ -16,6 +16,7 @@ import { adminClient } from '../supabase.js';
 import { getCallerProfile, isAgent } from '../auth.js';
 import { handleOptions, readJson, ok, fail } from '../cors.js';
 import { sendEmail, resendConfigured } from '../resend.js';
+import { sendSMS } from '../twilio.js';
 import { timelineEvents } from '../deal-timeline.js';
 
 const EMAIL_RE = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
@@ -392,6 +393,7 @@ async function listWeek(req, res, supa) {
 async function createOrInvite(req, res, supa, agent) {
   const body = await readJson(req);
   if (body?.action === 'invite') return await sendInvite(req, res, supa, body);
+  if (body?.action === 'remind') return await sendRemind(req, res, supa, body);
 
   const scheduled = parseDateTime(body?.date, body?.time);
   if (!scheduled) return fail(res, 400, 'valid date (YYYY-MM-DD) and time (HH:MM) are required');
@@ -585,6 +587,83 @@ async function sendInvite(req, res, supa, body) {
   const result = await inviteForEvent(supa, source, id);
   if (result?.error) return fail(res, 400, result.error);
   return ok(res, result);
+}
+
+// Send a short reminder about an event to its client(s) by email and/or SMS.
+// A deal-scoped event (shared to the whole deal) reminds EVERY party; a
+// lead-linked event reminds that one client. The client-facing summary is the
+// curated label / structured kind — NEVER the raw appointment title (buyer names).
+async function sendRemind(req, res, supa, body) {
+  const id = typeof body?.id === 'string' ? body.id.trim() : '';
+  const source = body?.source === 'appointment' ? 'appointment' : 'tour';
+  if (!id) return fail(res, 400, 'id is required');
+  const chans = Array.isArray(body?.channels) ? body.channels : ['email', 'sms'];
+  const wantEmail = chans.includes('email');
+  const wantSms   = chans.includes('sms');
+  if (!wantEmail && !wantSms) return fail(res, 400, 'pick at least one channel: email or sms');
+
+  const esc = (s) => String(s == null ? '' : s).replace(/[<>]/g, '');
+  let start, summary, recipients = [];
+
+  if (source === 'tour') {
+    const { data: t } = await supa.from('tours')
+      .select('scheduled_at, tour_type, lead_id, leads(first_name,last_name,email,phone), properties(address)')
+      .eq('id', id).maybeSingle();
+    if (!t) return fail(res, 404, 'tour not found');
+    start = new Date(t.scheduled_at);
+    summary = t.tour_type === 'video' ? 'your video tour' : 'your home tour';
+    const l = t.leads || {};
+    if (l.email || l.phone) recipients.push({ name: [l.first_name, l.last_name].filter(Boolean).join(' ') || 'there', email: l.email, phone: l.phone });
+  } else {
+    const { data: a } = await supa.from('appointments')
+      .select('kind, sub_kind, client_label, starts_at, lead_id, deal_id, leads(first_name,last_name,email,phone)')
+      .eq('id', id).maybeSingle();
+    if (!a) return fail(res, 404, 'appointment not found');
+    start = new Date(a.starts_at);
+    summary = a.client_label
+      || (a.kind === 'inspection' ? (a.sub_kind ? `${a.sub_kind} inspection` : 'your inspection') : (KIND_LABEL[a.kind] || 'your appointment'));
+    if (a.lead_id && a.leads) {
+      const l = a.leads;
+      if (l.email || l.phone) recipients.push({ name: [l.first_name, l.last_name].filter(Boolean).join(' ') || 'there', email: l.email, phone: l.phone });
+    } else if (a.deal_id) {
+      const { data: parties } = await supa.from('deal_parties')
+        .select('leads(first_name,last_name,email,phone)').eq('deal_id', a.deal_id);
+      for (const p of (parties || [])) {
+        const l = p.leads;
+        if (l && (l.email || l.phone)) recipients.push({ name: [l.first_name, l.last_name].filter(Boolean).join(' ') || 'there', email: l.email, phone: l.phone });
+      }
+    }
+  }
+  if (!recipients.length) return fail(res, 422, 'no client with an email or phone to remind — link a lead (or the deal parties) with contact info');
+
+  const p = laParts(start);
+  const whenText = `${DOW[(new Date(start).getUTCDay() + 6) % 7]}, ${MONTHS[p.m - 1]} ${p.d} at ${timeLabel(p.hour, p.minute)}`;
+  let emailed = 0, texted = 0; const errors = [];
+  for (const r of recipients) {
+    if (wantEmail && r.email) {
+      if (!resendConfigured()) { errors.push('email not configured (RESEND_API_KEY)'); }
+      else try {
+        const html = `<div style="font-family:Georgia,serif;font-size:15px;line-height:1.6;color:#1A1714;">
+          <p>Hi ${esc(r.name)},</p>
+          <p>A quick reminder about <strong>${esc(summary)}</strong>.</p>
+          <p><strong>When:</strong> ${whenText} (Pacific)</p>
+          <p>If anything changes, just reply or call me at (209) 559-4966.</p>
+          <p>— Sara Cooper<br>Legacy Properties</p></div>`;
+        const er = await sendEmail({ to: r.email, toName: r.name, subject: `Reminder: ${summary} — ${whenText}`, html });
+        if (er && er.error) errors.push(String(er.error)); else emailed++;
+      } catch (e) { errors.push(e.message || String(e)); }
+    }
+    if (wantSms && r.phone) {
+      try {
+        const sr = await sendSMS({ to: r.phone, body: `Reminder: ${summary} on ${whenText} (Pacific). — Sara, Legacy Properties`, signAs: 'Sara' });
+        if (sr && sr.skipped) errors.push(sr.reason || 'SMS not configured (Twilio)');
+        else if (sr && sr.error) errors.push(String(sr.error));
+        else texted++;
+      } catch (e) { errors.push(e.message || String(e)); }
+    }
+  }
+  if (!emailed && !texted) return fail(res, 502, errors[0] || 'nothing could be sent (check email/SMS setup and that the client has that contact method)');
+  return ok(res, { reminded: true, emailed, texted, recipients: recipients.length, errors: errors.length ? errors : undefined });
 }
 
 async function inviteForEvent(supa, source, id, extraInvitees = []) {
