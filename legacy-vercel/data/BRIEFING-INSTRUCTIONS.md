@@ -278,6 +278,47 @@ up. For a deal with none of the three, the card shows a "No photo yet" tile.
   photo fallback).
 - `"matterport"` — the 3D-tour link.
 
+## 2a. Weekly ListTrac marketing stats (the seller portal "Marketing activity" panel)
+
+Once a week ListTrac emails **"Your Listing – Weekly Report of Online Activity"**
+— one email per active listing (subject line is exactly that; sender shows as
+Sara Cooper via ListTrac/MetroList). When you see one, parse it and write a
+`"marketing"` object onto the matching **deal** (match by address). It powers the
+seller portal's Marketing activity panel. It's a full replacement: each week
+**overwrite** the whole object with the newest email's numbers — don't merge.
+
+```json
+"marketing": {
+  "period":      "Jun 25 – Aug 10, 2026",
+  "report_date": "2026-08-10",
+  "views":       2653,
+  "shares":      12,
+  "inquiries":   2,
+  "callouts": [
+    "90% of visitors viewing your listing are new visitors",
+    "Your listing attracted more viewers than other listings in its zip code"
+  ],
+  "top_sites": [
+    { "name": "Zillow.com",  "views": 782, "inquiries": 0 },
+    { "name": "Realtor.com", "views": 347, "inquiries": 0 }
+  ],
+  "top_cities": [
+    { "name": "Valley Springs, CA", "views": 11 },
+    { "name": "Sacramento, CA",     "views": 11 }
+  ]
+}
+```
+
+Email → field map: PROPERTY VIEWS → `views`, SHARES → `shares`, INQUIRIES →
+`inquiries`, the "STATS FOR THE PERIOD" range → `period`, "Report Date" →
+`report_date` (as `YYYY-MM-DD`), the two icon highlight lines → `callouts[]`,
+"TOP 10 WEBSITES" → `top_sites[]`, "TOP 10 CITIES" → `top_cities[]`.
+
+Rules: counts are plain numbers (strip commas). Omit any field you don't have.
+Only sell-side / both-sided listings get this — never a buyer-side deal. The
+YouTube view count under the video is separate and fully automatic — **do not**
+enter it. (Full reference: `docs/SPEC_marketing_stats.md`.)
+
 ## 2b. Listing roster metadata (the CRM "Listings" view)
 
 For sell-side listings, add a `"listing"` object with whatever's on the listing
