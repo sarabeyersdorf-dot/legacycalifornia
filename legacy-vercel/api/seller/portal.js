@@ -104,6 +104,9 @@ export default async function handler(req, res) {
     let user = null, profile = null, isAgent = false, deal = null;
     let portalToken = null, leadId = null;
     let previewKey = null, previewMiss = false;
+    let viewerRole = null;   // this viewer's party role on the deal (seller/buyer) —
+                             // drives doc audience so a buyer never sees seller docs
+                             // even on a both-sided in-house deal.
 
     if (token) {
       // Private-link access — NO login. Resolve the client by their unguessable
@@ -120,9 +123,10 @@ export default async function handler(req, res) {
         .select('deal_id, role, deals(*)')
         .eq('lead_id', lead.id)
         .in('role', ['seller', 'co-seller', 'buyer', 'co-buyer']);
-      const rows = (parties || []).map((p) => p.deals).filter(Boolean);
-      rows.sort((a, b) => new Date(b.updated_at || 0) - new Date(a.updated_at || 0));
-      deal = rows[0] || null;
+      const pr = (parties || []).filter((p) => p.deals);
+      pr.sort((a, b) => new Date(b.deals.updated_at || 0) - new Date(a.deals.updated_at || 0));
+      deal = pr[0]?.deals || null;
+      viewerRole = pr[0]?.role || null;
     } else {
       const caller = await getCallerProfile(req, res);
       user = caller.user; profile = caller.profile;
@@ -163,9 +167,10 @@ export default async function handler(req, res) {
             .select('deal_id, role, deals(*)')
             .eq('lead_id', leadId)
             .in('role', ['seller', 'co-seller', 'buyer', 'co-buyer']);
-          const rows = (parties || []).map((p) => p.deals).filter(Boolean);
-          rows.sort((a, b) => new Date(b.updated_at || 0) - new Date(a.updated_at || 0));
-          deal = rows[0] || null;
+          const pr = (parties || []).filter((p) => p.deals);
+          pr.sort((a, b) => new Date(b.deals.updated_at || 0) - new Date(a.deals.updated_at || 0));
+          deal = pr[0]?.deals || null;
+          viewerRole = pr[0]?.role || null;
         }
       }
 
@@ -233,30 +238,38 @@ export default async function handler(req, res) {
     const isArchivedEscrowDoc = (doc) =>
       doc.scope === 'transaction' && doc.escrow_id && escrowStatusById.get(doc.escrow_id) !== 'active';
 
-    // 2. Documents for this deal — governed, FAIL CLOSED --------------------
-    // Visibility is NOT read from deal_documents.client_safe (which defaults true
-    // and is rebuilt hourly — it fails open). It comes from the governance table
-    // (db/053), which the hourly rebuild never touches. A document is shown only
-    // when a matching grant makes it visible to THIS viewer's audience; anything
-    // ungoverned, mismatched, or key-less stays hidden. See SPEC_portal_document_model.md.
+    // 2. Documents for this deal ---------------------------------------------
+    // A SELLER sees their own file by default: any client-safe document shows,
+    // without waiting on per-doc folder governance (every deal has a different
+    // set — there's no fixed checklist). An explicit grant still wins, so a
+    // document can be pinned to a specific audience or hidden (agent_only), and a
+    // doc marked client_safe = false never shows.
     //
-    //   audience  — a buyer-side deal shows buyer/both; otherwise seller/both, so
-    //               a seller never sees a buyer-only doc and vice-versa.
-    //   fail-open guard — the grant's fingerprint must still match the document's
+    // A BUYER stays locked down: they see ONLY documents explicitly granted to
+    // buyer/both, so a buyer can never pick up a stray seller-side file (e.g. the
+    // listing agreement, or a prior escrow's paperwork). db/053 governance.
+    //
+    //   audience  — follows the VIEWER's role first: a buyer-party is always a
+    //               buyer audience, even on a both-sided in-house deal (side
+    //               'both'), so the buyer never picks up the seller's client-safe
+    //               files (listing agreement, seller disclosures, etc.). Falls
+    //               back to the deal side for the agent preview / logged-in seller.
+    //   fail-open guard — a grant's fingerprint must still match the document's
     //               name, so a reused doc_key can't inherit an old grant.
-    const audience = /buyer/.test(String(deal.side || '').toLowerCase()) ? 'buyer' : 'seller';
+    const isBuyerViewer = /buyer/.test(String(viewerRole || '').toLowerCase());
+    const audience = (isBuyerViewer || /buyer/.test(String(deal.side || '').toLowerCase())) ? 'buyer' : 'seller';
     const normName = (s) => String(s || '').trim().toLowerCase();
     let allDocs = [];
     {
       let dr = await supa.from('deal_documents')
-        .select('doc_type, name, sub, status, party_owed, doc_url, doc_key, scope, escrow_id')
+        .select('doc_type, name, sub, status, party_owed, doc_url, doc_key, scope, escrow_id, client_safe')
         .eq('deal_id', deal.id);
       if (dr.error) {
         // pre-052/055 (no scope/doc_key/escrow_id columns): degrade to the minimal
-        // set. Without doc_key nothing can be governed, so the portal shows zero
-        // docs — the safe (fail-closed) degradation until the migration lands.
+        // set. A seller still sees their client-safe docs; a buyer sees none
+        // (no doc_key to match a grant), which stays safe.
         dr = await supa.from('deal_documents')
-          .select('doc_type, name, sub, status, party_owed, doc_url')
+          .select('doc_type, name, sub, status, party_owed, doc_url, client_safe')
           .eq('deal_id', deal.id);
       }
       allDocs = dr.data || [];
@@ -266,15 +279,22 @@ export default async function handler(req, res) {
       const { data: gov } = await supa.from('deal_document_governance')
         .select('doc_key, visibility, doc_fingerprint').eq('deal_id', deal.id);
       govByKey = new Map((gov || []).map((g) => [g.doc_key, g]));
-    } catch (_) { /* pre-053: no grants → everything stays agent_only (fail closed) */ }
+    } catch (_) { /* pre-053: no grants → seller default below still applies */ }
     // Visibility + audience gate (shared by the live list and escrow history).
     const maySee = (doc) => {
-      if (!doc.doc_key) return false;                      // ungoverned → hidden
-      const g = govByKey.get(doc.doc_key);
-      if (!g) return false;                                // no grant → agent_only
-      if (normName(g.doc_fingerprint) !== normName(doc.name)) return false; // key-reuse guard
-      const v = g.visibility || 'agent_only';
-      return v === 'both' || v === audience;               // audience-scoped
+      // An explicit grant (fingerprint-matched) always wins — it can widen,
+      // narrow, or hide (agent_only) a document for either audience.
+      if (doc.doc_key) {
+        const g = govByKey.get(doc.doc_key);
+        if (g && normName(g.doc_fingerprint) === normName(doc.name)) {
+          const v = g.visibility || 'agent_only';
+          return v === 'both' || v === audience;
+        }
+      }
+      // No explicit grant: the SELLER sees their own client-safe documents by
+      // default; a BUYER sees nothing ungoverned (fail closed for buyers).
+      if (audience !== 'seller') return false;
+      return doc.client_safe !== false;
     };
     // Live list: visible docs that are NOT archived with a dead/other escrow.
     const docs = allDocs.filter((doc) => maySee(doc) && !isArchivedEscrowDoc(doc));
@@ -321,7 +341,12 @@ export default async function handler(req, res) {
     const isListing  = deal.stage === 'listing';
     const isPreparing= deal.stage === 'preparing';
     const isClosed   = deal.stage === 'closed';
-    const isBuyerSide = deal.side === 'buyer';
+    // Buyer-vs-seller FRAMING follows the viewer's role (audience), not just the
+    // deal side — so a buyer-party on a both-sided in-house deal (side 'both')
+    // gets the purchase view: no listing marketing, "Your purchase" framing, and
+    // (below) their own agent's note + contact. A seller-party still gets the
+    // sale view. This drives price label, marketing, headline, note, is_buyer.
+    const isBuyerSide = audience === 'buyer';
 
     // Price is stage-correct: a listing shows its LIST price; an in-escrow /
     // closed deal shows the agreed PRICE. Label matches — "List price" while
@@ -336,10 +361,18 @@ export default async function handler(req, res) {
                      : 'Price';
     const STAGE_LABEL = { pending: 'In escrow', listing: 'On the market', preparing: 'Preparing to list', closed: 'Sold' };
     const stageLabel = STAGE_LABEL[deal.stage] || sanitize(deal.stage || '');
-    const docsKpi = { label: 'Documents', value: `${signed} / ${docs.length}`, change: docs.length > signed ? `${docs.length - signed} open` : 'complete' };
+    // Documents KPI shows the ACTUAL number of documents in this deal's portal —
+    // never a fixed "X / Y" (there's no predetermined checklist; every deal has a
+    // different set). Omitted entirely when there are none, so a deal with no
+    // shared docs shows no misleading "0 / 0" tile — the Documents section below
+    // simply lists what's there (or a short empty note).
+    const docsKpi = docs.length
+      ? { label: 'Documents', value: String(docs.length),
+          change: signed < docs.length ? `${docs.length - signed} to sign` : 'all in' }
+      : null;
 
     // KPIs are stage-appropriate — escrow terms only when actually in escrow.
-    const kpis = inEscrow
+    const kpis = (inEscrow
       ? [
           { label: 'Days to close',   value: dtc != null ? String(dtc) : '—', change: dtc != null && dtc >= 0 ? 'On schedule' : '' },
           { label: priceLabel,        value: fmtUSD(price), change: '' },
@@ -350,7 +383,7 @@ export default async function handler(req, res) {
           { label: priceLabel, value: fmtUSD(price), change: '' },
           { label: 'Status',   value: stageLabel, change: '' },
           docsKpi
-        ];
+        ]).filter(Boolean);
 
     // Road to closing. Preferred source: the curated deal_timeline_items —
     // the plain-English contractual timeline the agent approves updates to
@@ -529,15 +562,21 @@ export default async function handler(req, res) {
 
     // Agent identity (real contact info) — fetched up front so the team block
     // carries the agent's email + phone. Fail-soft to sensible defaults.
+    // The VIEWER's agent: on a both-sided in-house deal (side 'both') deal.agent
+    // is the LISTING agent; the OTHER Legacy agent represents the buyer, so a
+    // buyer viewer sees their own agent (James), their note, and their contact.
+    const agentKey = (isBuyerSide && deal.side === 'both')
+      ? (deal.agent === 'james' ? 'sara' : 'james')
+      : (deal.agent || 'sara');
     let agentRow = null;
     try {
-      const { data } = await supa.from('agents').select('name, phone, email, title, dre_number').eq('agent_key', deal.agent || 'sara').maybeSingle();
+      const { data } = await supa.from('agents').select('name, phone, email, title, dre_number').eq('agent_key', agentKey).maybeSingle();
       agentRow = data || null;
     } catch (_) { /* agents table optional */ }
-    const agentName  = agentRow?.name  || (deal.agent === 'james' ? 'James Beyersdorf' : 'Sara Cooper');
+    const agentName  = agentRow?.name  || (agentKey === 'james' ? 'James Beyersdorf' : 'Sara Cooper');
     const agentFirst = (agentName.split(' ')[0]) || 'Sara';
-    const agentPhone = agentRow?.phone || (deal.agent === 'james' ? '209-770-7523' : '209-559-4966');
-    const agentEmail = agentRow?.email || (deal.agent === 'james' ? 'JamesSellsCalifornia@gmail.com' : 'SaraSellsCalifornia@gmail.com');
+    const agentPhone = agentRow?.phone || (agentKey === 'james' ? '209-770-7523' : '209-559-4966');
+    const agentEmail = agentRow?.email || (agentKey === 'james' ? 'JamesSellsCalifornia@gmail.com' : 'SaraSellsCalifornia@gmail.com');
 
     // Team — one distinct-colored box per member, each reachable in one tap. The
     // agent ALWAYS carries email + phone; escrow / co-agent / lender show whatever
@@ -570,7 +609,7 @@ export default async function handler(req, res) {
     const team = [];
     team.push(teamMember({
       name: agentName,
-      sub: (agentRow?.title || (deal.agent === 'james' ? 'Agent' : 'Broker-Owner')) + ' · Legacy',
+      sub: (agentRow?.title || (agentKey === 'james' ? 'Agent' : 'Broker-Owner')) + ' · Legacy',
       accent: '#4a7a55',                                   // green — your agent
       phone: agentPhone, email: agentEmail
     }));
@@ -588,11 +627,16 @@ export default async function handler(req, res) {
       }));
     }
 
+    // The OTHER side's agent. Labelled from the viewer's seat — a seller sees the
+    // buyer's-side agent, a buyer sees the listing-side agent. Skipped when it
+    // resolves to the viewer's own agent (on a both-sided in-house deal the
+    // co-agent field holds the other Legacy agent, already shown above).
     const coRaw = ct.coAgent || deal.co_agent;
-    if (coRaw) {
+    const coClean = cleanName(coRaw);
+    if (coRaw && normName(coClean) !== normName(agentName)) {
       team.push(teamMember({
-        name: cleanName(coRaw) || "Buyer's agent",
-        sub: (ct.coAgentCompany ? cleanName(ct.coAgentCompany) + ' · ' : '') + "Buyer's side",
+        name: coClean || (isBuyerSide ? 'Listing agent' : "Buyer's agent"),
+        sub: (ct.coAgentCompany ? cleanName(ct.coAgentCompany) + ' · ' : '') + (isBuyerSide ? 'Listing side' : "Buyer's side"),
         accent: '#597ea3',                                 // blue — the other side
         phone: ct.coAgentPhone, email: ct.coAgentEmail || firstEmail(coRaw)
       }));
@@ -764,7 +808,10 @@ export default async function handler(req, res) {
       },
       // Weekly ListTrac marketing digest (null when there's nothing to show).
       marketing,
-      nav: { documents: String(docs.length), tasks: String(tasks.length) },
+      nav: { documents: docs.length ? String(docs.length) : '', tasks: String(tasks.length) },
+      // Shown in the Documents section only when there are none, so the section
+      // never sits empty or implies a fixed checklist.
+      documents_empty: docs.length ? '' : 'No documents have been shared here yet — they’ll appear as your file comes together.',
       kpis, road, documents: documentsArr, tasks, team,
       good_to_know: goodToKnow,
       // Agent-preview affordances (db/040): only an agent viewing gets the

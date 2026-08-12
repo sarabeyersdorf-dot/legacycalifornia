@@ -233,6 +233,16 @@ capture it whenever a thread reveals it.
   scheduling notes (e.g. "officer out 8/26–9/4") in `notes`/the timeline — NOT
   crammed into the name string. (The portal salvages a clean name + an email +
   an "Order P-xxxx" from an old blob, but a clean name field is always better.)
+- **`lender` is the LOAN OFFICER at the lending company — never the borrower.**
+  If you only know the company and not the officer, set `lenderCompany` (e.g.
+  "K Mortgage") and leave `lender` empty until you have the officer's name. NEVER
+  put the buyer's name here just because it's their loan — the buyer is a party
+  (below), not a contact.
+- **The buyer and seller are PARTIES, never `contacts` entries.** Record them as
+  people/leads on the deal (buyer-prospect record + deal party), not in the
+  escrow/coAgent/lender fields. On a both-sided in-house deal, the buyer is the
+  other agent's client — link that buyer's lead to the deal as the `buyer` party
+  so their purchase portal resolves; don't fold the buyer's name into a contact.
 - The **agent's** own email + phone always show (from the agents table) — no
   exceptions — so you don't need to add Sara/James here.
 - `escrowNumber` renders as the escrow box's **Escrow #** line — set it the moment
