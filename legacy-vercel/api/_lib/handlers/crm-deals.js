@@ -127,6 +127,8 @@ export default async function handler(req, res) {
       const mls       = pick('mls_number', d.mls_number);
       const sideEff   = pick('side', d.side);
       const agentEff  = pick('agent', d.agent);
+      const videoUrl  = pick('video_url', d.video_url);
+      const tourUrl   = pick('matterport_url', d.matterport_url);
       const editedKeys = Object.keys(ov);
 
       const coeDays = coeDate ? Math.round((new Date(coeDate + 'T12:00:00Z') - todayMid) / 86400000) : null;
@@ -156,10 +158,10 @@ export default async function handler(req, res) {
         edited:     editedKeys.length ? editedKeys : null,
         meta:       d.listing_meta || null,
         photo_url:  photo,
-        video_url:  d.video_url || null,
-        tour_url:   d.matterport_url || null,
-        has_video:  !!d.video_url,
-        has_tour:   !!d.matterport_url,
+        video_url:  videoUrl || null,
+        tour_url:   tourUrl || null,
+        has_video:  !!videoUrl,
+        has_tour:   !!tourUrl,
         stage:      stage,
         base_stage: d.stage,
         stage_days: d.stage_entered_at ? Math.max(0, Math.floor((Date.now() - new Date(d.stage_entered_at).getTime()) / 86400000)) : null,

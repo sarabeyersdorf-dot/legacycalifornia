@@ -3432,8 +3432,18 @@ body.lp-restyle {
       function row(d){
         var badge = STAGE_LABEL[d.stage]||d.stage;
         var stg = STG_ATTR[d.stage]||'';
-        var side = d.side==='buyer'?'Buying':(d.side==='both'?'Dual':'Selling');
-        var agent = d.agent==='james'?'James':(d.agent==='both'?'Sara & James':'Sara');
+        // Both-sides (Legacy on both sides): show who lists vs who buys instead
+        // of "Dual" — it's two agents in-house, not single-agent dual agency.
+        var AN = { sara:'Sara', james:'James' };
+        var sideAgentTags;
+        if(d.side==='both' && (d.agent==='sara' || d.agent==='james')){
+          var buyerAgent = d.agent==='james' ? 'Sara' : 'James';
+          sideAgentTags = '<span class="ds-pill" title="Legacy Properties on both sides">List: '+AN[d.agent]+' · Buy: '+buyerAgent+'</span>';
+        } else {
+          var side = d.side==='buyer'?'Buying':(d.side==='both'?'Both sides':'Selling');
+          var agent = d.agent==='james'?'James':(d.agent==='both'?'Sara & James':'Sara');
+          sideAgentTags = '<span class="ds-pill">'+esc(side)+'</span><span class="ds-pill">'+esc(agent)+'</span>';
+        }
         var coe = d.coe_date ? ('COE '+esc(d.coe_date)+(d.coe_days!=null?' · '+d.coe_days+'d':'')) : '';
         var priceHtml = (d.price!=null) ? esc(fmtUSD(d.price)) : '<span class="none">No price yet</span>';
         var photoInner = d.photo_url ? '<img src="'+esc(d.photo_url)+'" alt="">' : '';
@@ -3457,7 +3467,7 @@ body.lp-restyle {
           + '<div class="ds-dealcard-b">'
           +   '<div class="ds-dealcard-price">'+priceHtml+'</div>'
           +   '<div class="ds-dealcard-addr">'+esc(d.address||d.source_key)+(d.city?' · '+esc(d.city):'')+'</div>'
-          +   '<div class="ds-dealcard-tags"><span class="ds-pill">'+esc(side)+'</span><span class="ds-pill">'+esc(agent)+'</span>'+docsBadge+healthTag+editMark+'</div>'
+          +   '<div class="ds-dealcard-tags">'+sideAgentTags+docsBadge+healthTag+editMark+'</div>'
           +   (parties?'<div class="ds-dealcard-parties">'+parties+'</div>':'')
           +   (foot?'<div class="ds-dealcard-foot">'+foot+'</div>':'')
           + '</div>'
@@ -4748,22 +4758,23 @@ function selectLead(el) {
   'use strict';
   var IN = 'font:inherit;font-size:15px;text-transform:none;letter-spacing:normal;color:#1A1714;background:#fff;border:1px solid #D9CFB7;padding:9px 11px;';
   var LB = 'font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:#7C6A4D;display:flex;flex-direction:column;gap:4px;';
+  var esc = function (s) { return (s == null ? '' : String(s)).replace(/[&<>"]/g, function (c) { return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]); }); };
+  var dealsByKey = {};
   function open() {
     var id = 'leg-media-modal';
-    if (document.getElementById(id)) { document.getElementById(id).style.display = 'flex'; return; }
+    var existing = document.getElementById(id);
+    if (existing) { existing.parentNode.removeChild(existing); }
     var m = document.createElement('div'); m.id = id;
     m.style.cssText = 'position:fixed;inset:0;z-index:99997;background:rgba(20,18,15,0.6);display:flex;align-items:center;justify-content:center;padding:24px;font-family:Manrope,system-ui,sans-serif;';
     m.innerHTML = ''
       + '<div style="background:#FAF6EC;max-width:520px;width:100%;padding:28px 32px;color:#1A1714;max-height:90vh;overflow:auto;">'
       + '  <div style="font-family:\'JetBrains Mono\',monospace;font-size:10px;letter-spacing:.22em;text-transform:uppercase;color:#7C6A4D;margin-bottom:8px;">Seller portal · media</div>'
       + '  <h2 style="font-family:\'Cormorant Garamond\',serif;font-style:italic;font-weight:500;font-size:28px;margin:0 0 6px;">Attach video &amp; 3D tour.</h2>'
-      + '  <p style="font-size:13.5px;line-height:1.55;color:#3A332B;margin:0 0 18px;">Enter the listing\'s MLS #, then paste its YouTube tour link — the seller portal auto-counts video views. For Matterport, paste the tour link and type its view count from your Matterport dashboard.</p>'
+      + '  <p style="font-size:13.5px;line-height:1.55;color:#3A332B;margin:0 0 18px;">Pick one of your listings, then paste its YouTube tour and/or Matterport 3D-tour link. It shows on that listing\'s seller portal right away and sticks across the nightly sync. Clear a field to remove it.</p>'
       + '  <form id="lm-form" style="display:flex;flex-direction:column;gap:12px;">'
-      + '    <label style="' + LB + '">MLS #<input name="mls_number" required placeholder="e.g. 20250142" style="' + IN + '"></label>'
-      + '    <div id="lm-found" style="font-size:12px;color:#7C6A4D;min-height:16px;"></div>'
+      + '    <label style="' + LB + '">Listing<select name="source_key" required style="' + IN + '"><option value="">Loading your listings…</option></select></label>'
       + '    <label style="' + LB + '">YouTube tour URL<input name="youtube_url" placeholder="https://youtu.be/… or https://www.youtube.com/watch?v=…" style="' + IN + '"></label>'
-      + '    <label style="' + LB + '">Matterport tour URL (optional)<input name="matterport_url" placeholder="https://my.matterport.com/show/?m=…" style="' + IN + '"></label>'
-      + '    <label style="' + LB + '">Matterport views (from your dashboard, optional)<input name="tour_views" type="number" min="0" placeholder="e.g. 384" style="' + IN + '"></label>'
+      + '    <label style="' + LB + '">Matterport 3D tour URL (optional)<input name="matterport_url" placeholder="https://my.matterport.com/show/?m=…" style="' + IN + '"></label>'
       + '    <div style="display:flex;gap:10px;margin-top:6px;">'
       + '      <button type="submit" id="lm-save" style="background:#1A1714;color:#FAF6EC;border:none;padding:12px 20px;font-family:\'JetBrains Mono\',monospace;font-size:11px;letter-spacing:.22em;text-transform:uppercase;cursor:pointer;">Save media</button>'
       + '      <button type="button" id="lm-close" style="margin-left:auto;background:transparent;border:none;color:#7C6A4D;cursor:pointer;font-size:13px;">Close</button>'
@@ -4772,33 +4783,46 @@ function selectLead(el) {
       + '  <div id="lm-result" style="margin-top:14px;font-size:13.5px;line-height:1.5;min-height:20px;"></div>'
       + '</div>';
     document.body.appendChild(m);
-    var form = m.querySelector('#lm-form'), result = m.querySelector('#lm-result'), found = m.querySelector('#lm-found');
-    function close() { m.style.display = 'none'; }
+    var form = m.querySelector('#lm-form'), result = m.querySelector('#lm-result'), sel = form.source_key;
+    function close() { if (m.parentNode) m.parentNode.removeChild(m); }
     m.querySelector('#lm-close').onclick = close;
     m.addEventListener('click', function (e) { if (e.target === m) close(); });
 
-    form.mls_number.addEventListener('blur', function () {
-      var mls = form.mls_number.value.trim(); if (!mls) { found.textContent = ''; return; }
-      fetch('/api/curate/listing-media?mls_number=' + encodeURIComponent(mls), { credentials: 'include' })
-        .then(function (r) { return r.json(); }).then(function (j) {
-          if (j && j.found) {
-            found.style.color = '#2E5C3D';
-            found.textContent = '✓ ' + ((j.listing && j.listing.address) || mls);
-            if (j.media) { form.youtube_url.value = j.media.youtube_url || ''; form.matterport_url.value = j.media.matterport_url || ''; form.tour_views.value = j.media.tour_views != null ? j.media.tour_views : ''; }
-          } else { found.style.color = '#9B2C2C'; found.textContent = 'No listing found for that MLS #.'; }
-        }).catch(function () {});
+    // Dropdown of the agent's sell-side listings, from the same /api/crm/deals
+    // the board uses (which now merges any agent video/tour override).
+    fetch('/api/crm/deals', { credentials: 'include' })
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (j) {
+        var mine = ((j && j.deals) || []).filter(function (d) { return d.side === 'seller' || d.side === 'both'; });
+        dealsByKey = {};
+        mine.forEach(function (d) { dealsByKey[d.source_key] = d; });
+        sel.innerHTML = '<option value="">Choose a listing…</option>' + mine.map(function (d) {
+          return '<option value="' + esc(d.source_key) + '">' + esc((d.address || d.source_key) + (d.city ? ' · ' + d.city : '')) + '</option>';
+        }).join('');
+      })
+      .catch(function () { sel.innerHTML = '<option value="">Could not load your listings</option>'; });
+
+    // Prefill from the picked listing's current media so a save preserves it.
+    sel.addEventListener('change', function () {
+      var d = dealsByKey[sel.value];
+      form.youtube_url.value = (d && d.video_url) || '';
+      form.matterport_url.value = (d && d.tour_url) || '';
     });
 
     form.addEventListener('submit', function (e) {
       e.preventDefault();
-      var body = { mls_number: form.mls_number.value.trim(), youtube_url: form.youtube_url.value.trim(), matterport_url: form.matterport_url.value.trim(), tour_views: form.tour_views.value ? Number(form.tour_views.value) : null };
+      var key = sel.value;
+      if (!key) { result.style.color = '#9B2C2C'; result.textContent = 'Pick a listing first.'; return; }
+      var yt = form.youtube_url.value.trim(), mp = form.matterport_url.value.trim();
       var save = m.querySelector('#lm-save'); save.disabled = true; save.textContent = 'Saving…';
-      fetch('/api/curate/listing-media', { method: 'POST', credentials: 'include', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) })
-        .then(function (r) { return r.json().then(function (j) { return { ok: r.ok, j: j }; }); })
+      fetch('/api/crm/deal-edit', { method: 'POST', credentials: 'include', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ source_key: key, fields: { video_url: yt, matterport_url: mp } }) })
+        .then(function (r) { return r.json().then(function (j) { return { ok: r.ok, j: j }; }, function () { return { ok: r.ok, j: {} }; }); })
         .then(function (x) {
           save.disabled = false; save.textContent = 'Save media';
-          if (x.ok && x.j.saved) { result.style.color = '#2E5C3D'; result.textContent = '✓ Saved for ' + ((x.j.listing && x.j.listing.address) || body.mls_number) + '. The seller portal will show the view count shortly.'; }
-          else { result.style.color = '#9B2C2C'; result.textContent = '✗ ' + ((x.j && x.j.error) || 'Failed'); }
+          if (x.ok) {
+            var d = dealsByKey[key]; if (d) { d.video_url = yt || null; d.tour_url = mp || null; }
+            result.style.color = '#2E5C3D'; result.textContent = '✓ Saved for ' + ((d && d.address) || key) + '. Its seller portal shows the tour now.';
+          } else { result.style.color = '#9B2C2C'; result.textContent = '✗ ' + ((x.j && x.j.error) || 'Failed'); }
         }).catch(function (err) { save.disabled = false; save.textContent = 'Save media'; result.style.color = '#9B2C2C'; result.textContent = '✗ ' + (err.message || 'Network error'); });
     });
   }
@@ -4905,12 +4929,17 @@ function selectLead(el) {
     var set = function (sel, txt) { var el = document.querySelector(sel); if (el) el.textContent = txt; };
     set('[data-agent-deskname]', 'Desk · ' + first);
     set('[data-agent-name]', full);
+    set('[data-agent-name-top]', first);
     set('[data-agent-label]', (isBroker ? 'BROKER' : 'AGENT') + ' · LEGACY');
-    // Non-Sara: swap the hardcoded headshot for a clean initial avatar.
-    if (p.role !== 'agent_sara') {
-      var av = document.querySelector('[data-agent-avatar]');
-      if (av) av.innerHTML = '<span style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;background:var(--brass);color:var(--shell);font-family:var(--serif);font-size:15px;">' + (first.charAt(0) || 'L') + '</span>';
-    }
+    // Point BOTH avatars at the signed-in agent's real headshot: the hidden
+    // legacy sidebar one AND the 2026 top-bar one (data-agent-avatar-img), which
+    // is the visible one now — without setting it, James saw Sara's hardcoded
+    // headshot. Real headshots exist for both agents.
+    var headshot = (p.role === 'agent_james') ? 'art/james-headshot.png' : 'art/sara-headshot.png';
+    var topImg = document.querySelector('[data-agent-avatar-img]');
+    if (topImg) topImg.setAttribute('src', headshot);
+    var sideImg = document.querySelector('[data-agent-avatar] img');
+    if (sideImg) sideImg.setAttribute('src', headshot);
   }).catch(function () {});
 })();
 </script>

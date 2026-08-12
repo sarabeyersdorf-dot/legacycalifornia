@@ -21,8 +21,9 @@ import { handleOptions, ok, fail, readJson } from '../cors.js';
 const NUMERIC = new Set(['list_price', 'sale_price']);
 const TEXT    = new Set(['address', 'city', 'mls_number']);
 const DATE    = new Set(['coe_date']);
+const URLF    = new Set(['video_url', 'matterport_url']);   // listing media → seller portal
 const ENUMS   = { side: ['buyer', 'seller', 'both', 'listing'], agent: ['sara', 'james', 'both'] };
-const ALLOWED = new Set([...NUMERIC, ...TEXT, ...DATE, ...Object.keys(ENUMS)]);
+const ALLOWED = new Set([...NUMERIC, ...TEXT, ...DATE, ...URLF, ...Object.keys(ENUMS)]);
 
 const MISSING_COL = (msg) => /agent_overrides|schema cache|column/i.test(msg || '');
 
@@ -64,6 +65,10 @@ export default async function handler(req, res) {
         const s = String(vRaw).trim().slice(0, 10);
         if (!/^\d{4}-\d{2}-\d{2}$/.test(s)) return fail(res, 400, `${k} must be a YYYY-MM-DD date`);
         cur[k] = s;
+      } else if (URLF.has(k)) {
+        const s = String(vRaw).trim();
+        if (!/^https?:\/\//i.test(s)) return fail(res, 400, `${k} must be a full URL (https://…)`);
+        cur[k] = s.slice(0, 500);
       } else if (ENUMS[k]) {
         const s = String(vRaw).trim().toLowerCase();
         if (!ENUMS[k].includes(s)) return fail(res, 400, `${k} must be one of: ${ENUMS[k].join(', ')}`);
