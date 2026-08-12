@@ -66,10 +66,21 @@ export default async function handler(req, res) {
       'form_submitted','email_opened','sms_replied','score_change','portal_message'
     ];
 
+    // The signed-in agent — appointments are scoped to whoever is looking.
+    const callerAgent = (profile && profile.role === 'agent_james') ? 'james' : 'sara';
+    // "Today" means today in PACIFIC time. A UTC day-window drops evening-Pacific
+    // events (after ~5pm they roll into tomorrow UTC), so pull a wide window and
+    // keep only the rows whose Pacific calendar date is today.
+    const laFmt = new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Los_Angeles' });
+    const todayLA = laFmt.format(now);
+    const wideLo = new Date(now.getTime() - 18 * 3600 * 1000).toISOString();
+    const wideHi = new Date(now.getTime() + 30 * 3600 * 1000).toISOString();
+
     const [drafts, toursToday, radioSilence, newToday, openOffers,
            leadsTotal, clientsCount, pastClientsCount, activeListings, calendarWeek,
            overnightEvents, activeDealsLeads, hoursTours,
-           funnelNew, funnelEngaged, funnelToured, funnelOffered, funnelClosed] = await Promise.all([
+           funnelNew, funnelEngaged, funnelToured, funnelOffered, funnelClosed,
+           appointmentsToday] = await Promise.all([
       supa.from('messages')
           .select('id, lead_id, channel, subject, body, ai_draft_reasoning, created_at, leads(first_name,last_name,email,temperature,score)')
           .eq('status', 'pending_approval')
@@ -124,7 +135,16 @@ export default async function handler(req, res) {
       supa.from('lead_events').select('lead_id', { count: 'exact', head: true }).gte('created_at',  ninetyAgo).in('event_type', ['email_opened','sms_replied','property_viewed','property_saved']),
       supa.from('tours')      .select('lead_id', { count: 'exact', head: true }).gte('scheduled_at', ninetyAgo),
       supa.from('offers')     .select('buyer_lead_id', { count: 'exact', head: true }).gte('created_at', ninetyAgo),
-      supa.from('leads')      .select('id', { count: 'exact', head: true }).in('pipeline_stage', ['closed','close']).gte('updated_at', ninetyAgo)
+      supa.from('leads')      .select('id', { count: 'exact', head: true }).in('pipeline_stage', ['closed','close']).gte('updated_at', ninetyAgo),
+      // Today's appointments (inspections, showings, listing appts, meetings…),
+      // scoped to the signed-in agent. This was missing entirely — the Today
+      // board only knew about tours, so a full day of inspections read "all clear".
+      supa.from('appointments')
+          .select('id, title, kind, sub_kind, client_label, starts_at, duration_minutes, all_day, agent, lead_id, deal_id, leads(first_name,last_name), deals(address,city)')
+          .eq('agent', callerAgent)
+          .gte('starts_at', wideLo)
+          .lte('starts_at', wideHi)
+          .order('starts_at')
     ]);
 
     // "Deals in motion" = live transactions only: open OFFERS + in-escrow
@@ -148,9 +168,17 @@ export default async function handler(req, res) {
       ({ data: dealsInMotion } = await buildDealsQ(DEAL_BASE));
     }
 
+    const apptsToday = (appointmentsToday.data || [])
+      .filter((a) => laFmt.format(new Date(a.starts_at)) === todayLA);
+    // Today's schedule = tours + appointments, in time order.
+    const hoursAll = shapeHours(hoursTours.data || [], now)
+      .concat(shapeApptHours(apptsToday, now))
+      .sort((a, b) => String(a.time_iso || '').localeCompare(String(b.time_iso || '')));
+
     const result = {
       drafts:        drafts.data        || [],
       tours_today:   toursToday.data    || [],
+      appointments_today: apptsToday,
       radio_silence: radioSilence.data  || [],
       new_today:     newToday.data      || [],
       open_offers:   openOffers.data    || [],
@@ -159,14 +187,14 @@ export default async function handler(req, res) {
         clients:         clientsCount.count   || 0,
         past_clients:    pastClientsCount.count || 0,
         active_listings: activeListings.count || 0,
-        today_count:     (drafts.data || []).length + (toursToday.data || []).length,
+        today_count:     (drafts.data || []).length + (toursToday.data || []).length + apptsToday.length,
         inbox_count:     (drafts.data || []).length,
         calendar_week:   calendarWeek.count   || 0,
         pipeline_count:  leadsTotal.count     || 0
       },
       signals:      shapeSignals(overnightEvents.data || []),
       active_deals: shapeDealsInMotion(dealsInMotion || []),
-      hours:        shapeHours(hoursTours.data || [], now),
+      hours:        hoursAll,
       funnel: {
         new_leads: funnelNew.count     || 0,
         engaged:   funnelEngaged.count || 0,
@@ -709,6 +737,35 @@ function shapeActiveDeals(leads, offers) {
   });
 }
 
+const APPT_KIND_LABEL = {
+  inspection: 'Inspection', showing: 'Showing', listing_appt: 'Listing appt',
+  walkthrough: 'Walkthrough', follow_up: 'Follow-up', appraisal: 'Appraisal',
+  call: 'Call', meeting: 'Meeting', open: 'Open house', block: 'Block'
+};
+// Today's appointments → the same hour-item shape as tours, so they sit in the
+// one time-ordered schedule on the Today board (this is the agent's own view, so
+// the real title is fine to show).
+function shapeApptHours(appts, now) {
+  return (appts || []).map((a) => {
+    const lead = a.leads || {}, deal = a.deals || {};
+    const kindLabel = a.kind === 'inspection'
+      ? (a.sub_kind ? `${a.sub_kind} inspection` : 'Inspection')
+      : (APPT_KIND_LABEL[a.kind] || 'Appointment');
+    const name = a.title || a.client_label || kindLabel;
+    const addr = deal.address ? `${deal.address}${deal.city ? ' · ' + deal.city : ''}` : '';
+    const isPast = !a.all_day && new Date(a.starts_at) < now;
+    return {
+      time:     a.all_day ? 'All day' : formatClock(a.starts_at),
+      time_iso: a.starts_at,
+      kind:     kindLabel,
+      title:    addr ? `${name} — ${addr}` : name,
+      sub:      `${a.duration_minutes || 60} min${addr ? '' : ''}`,
+      client:   [lead.first_name, lead.last_name].filter(Boolean).join(' ') || null,
+      past:     isPast,
+      brass:    !isPast
+    };
+  });
+}
 function shapeHours(tours, now) {
   return tours.map((t) => {
     const lead = t.leads || {};
