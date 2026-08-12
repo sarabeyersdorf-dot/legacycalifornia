@@ -676,6 +676,32 @@ export default async function handler(req, res) {
       }
     } catch (_) { /* pre-055 — no escrow records → no history/banner (safe) */ }
 
+    // Weekly ListTrac marketing digest (db/067). Cowork parses the ListTrac
+    // "Online Activity" email into deals.marketing_stats; we sanitize + coerce it
+    // into a display-safe shape. Listing-only — a buy-side deal has no listing
+    // marketing, so it's suppressed (the front-end also hides the panel).
+    const ms = (deal.marketing_stats && typeof deal.marketing_stats === 'object' && !Array.isArray(deal.marketing_stats)) ? deal.marketing_stats : null;
+    let marketing = null;
+    if (ms && !isBuyerSide) {
+      const num = (v) => { const n = Number(v); return Number.isFinite(n) ? n : null; };
+      const str = (v) => (typeof v === 'string' ? sanitize(v).slice(0, 160) : null);
+      const sites = Array.isArray(ms.top_sites) ? ms.top_sites.slice(0, 10)
+        .map((s) => ({ name: str(s && s.name), views: num(s && s.views) || 0, inquiries: num(s && s.inquiries) || 0 }))
+        .filter((s) => s.name) : [];
+      const cities = Array.isArray(ms.top_cities) ? ms.top_cities.slice(0, 10)
+        .map((c) => ({ name: str(c && c.name), views: num(c && c.views) || 0 }))
+        .filter((c) => c.name) : [];
+      const callouts = Array.isArray(ms.callouts) ? ms.callouts.map(str).filter(Boolean).slice(0, 4) : [];
+      const views = num(ms.views), shares = num(ms.shares), inquiries = num(ms.inquiries);
+      if (views != null || shares != null || inquiries != null || sites.length || cities.length || callouts.length) {
+        marketing = {
+          period: str(ms.period), report_date: str(ms.report_date),
+          views, shares, inquiries, callouts, top_sites: sites, top_cities: cities
+        };
+      }
+    }
+    const videoViews = Number.isFinite(+deal.video_views) ? +deal.video_views : null;
+
     // 5. Assemble -----------------------------------------------------------
     const portal = {
       security,
@@ -705,8 +731,11 @@ export default async function handler(req, res) {
       tour: {
         video_url:      effVideoUrl || null,
         video_id:       videoId,
-        matterport_url: effMatterportUrl || null
+        matterport_url: effMatterportUrl || null,
+        video_views:    videoViews
       },
+      // Weekly ListTrac marketing digest (null when there's nothing to show).
+      marketing,
       nav: { documents: String(docs.length), tasks: String(tasks.length) },
       kpis, road, documents: documentsArr, tasks, team,
       good_to_know: goodToKnow,

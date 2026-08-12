@@ -4769,12 +4769,21 @@ function selectLead(el) {
     m.innerHTML = ''
       + '<div style="background:#FAF6EC;max-width:520px;width:100%;padding:28px 32px;color:#1A1714;max-height:90vh;overflow:auto;">'
       + '  <div style="font-family:\'JetBrains Mono\',monospace;font-size:10px;letter-spacing:.22em;text-transform:uppercase;color:#7C6A4D;margin-bottom:8px;">Seller portal · media</div>'
-      + '  <h2 style="font-family:\'Cormorant Garamond\',serif;font-style:italic;font-weight:500;font-size:28px;margin:0 0 6px;">Attach video &amp; 3D tour.</h2>'
-      + '  <p style="font-size:13.5px;line-height:1.55;color:#3A332B;margin:0 0 18px;">Pick one of your listings, then paste its YouTube tour and/or Matterport 3D-tour link. It shows on that listing\'s seller portal right away and sticks across the nightly sync. Clear a field to remove it.</p>'
+      + '  <h2 style="font-family:\'Cormorant Garamond\',serif;font-style:italic;font-weight:500;font-size:28px;margin:0 0 6px;">Listing media.</h2>'
+      + '  <p style="font-size:13.5px;line-height:1.55;color:#3A332B;margin:0 0 18px;">Pick one of your listings, then set its hero photo, YouTube tour, and/or Matterport 3D tour. Everything shows on that listing\'s seller portal right away and sticks across the nightly sync. Clear a URL field to remove it.</p>'
       + '  <form id="lm-form" style="display:flex;flex-direction:column;gap:12px;">'
       + '    <label style="' + LB + '">Listing<select name="source_key" required style="' + IN + '"><option value="">Loading your listings…</option></select></label>'
       + '    <label style="' + LB + '">YouTube tour URL<input name="youtube_url" placeholder="https://youtu.be/… or https://www.youtube.com/watch?v=…" style="' + IN + '"></label>'
       + '    <label style="' + LB + '">Matterport 3D tour URL (optional)<input name="matterport_url" placeholder="https://my.matterport.com/show/?m=…" style="' + IN + '"></label>'
+      + '    <div style="' + LB + '">Hero photo <span style="text-transform:none;letter-spacing:normal;color:#9A876A;">— the big image at the top of the seller portal</span>'
+      + '      <div style="display:flex;gap:12px;align-items:center;margin-top:6px;">'
+      + '        <div id="lm-photo-preview" style="width:112px;height:74px;background:#EFE7D4 no-repeat center/cover;border:1px solid #D9CFB7;flex:none;"></div>'
+      + '        <div style="display:flex;flex-direction:column;gap:6px;min-width:0;">'
+      + '          <input type="file" id="lm-photo-file" accept="image/jpeg,image/png,image/webp" style="font-size:13px;text-transform:none;letter-spacing:normal;color:#3A332B;">'
+      + '          <span id="lm-photo-status" style="font-size:12px;text-transform:none;letter-spacing:normal;color:#7C6A4D;">JPG/PNG · replaces the current hero, sticks across the sync</span>'
+      + '        </div>'
+      + '      </div>'
+      + '    </div>'
       + '    <div style="display:flex;gap:10px;margin-top:6px;">'
       + '      <button type="submit" id="lm-save" style="background:#1A1714;color:#FAF6EC;border:none;padding:12px 20px;font-family:\'JetBrains Mono\',monospace;font-size:11px;letter-spacing:.22em;text-transform:uppercase;cursor:pointer;">Save media</button>'
       + '      <button type="button" id="lm-close" style="margin-left:auto;background:transparent;border:none;color:#7C6A4D;cursor:pointer;font-size:13px;">Close</button>'
@@ -4802,11 +4811,52 @@ function selectLead(el) {
       })
       .catch(function () { sel.innerHTML = '<option value="">Could not load your listings</option>'; });
 
+    var photoPrev = m.querySelector('#lm-photo-preview'), photoFile = m.querySelector('#lm-photo-file'), photoStatus = m.querySelector('#lm-photo-status');
+    function setPreview(url) { photoPrev.style.backgroundImage = url ? 'url("' + url + '")' : 'none'; }
+
     // Prefill from the picked listing's current media so a save preserves it.
     sel.addEventListener('change', function () {
       var d = dealsByKey[sel.value];
       form.youtube_url.value = (d && d.video_url) || '';
       form.matterport_url.value = (d && d.tour_url) || '';
+      setPreview(d && d.photo_url);
+      photoStatus.textContent = 'JPG/PNG · replaces the current hero, sticks across the sync';
+      photoStatus.style.color = '#7C6A4D';
+    });
+
+    // Hero photo: resize client-side to a reasonable JPEG, then upload straight
+    // to /api/crm/deal-photo (deals.photo_override → seller portal hero).
+    photoFile.addEventListener('change', function () {
+      var key = sel.value;
+      if (!key) { result.style.color = '#9B2C2C'; result.textContent = 'Pick a listing first, then choose a photo.'; photoFile.value = ''; return; }
+      var file = photoFile.files && photoFile.files[0];
+      if (!file) return;
+      photoStatus.style.color = '#7C6A4D'; photoStatus.textContent = 'Processing…';
+      var img = new Image();
+      img.onload = function () {
+        var MAX = 1600, w = img.width, h = img.height;
+        if (w > MAX) { h = Math.round(h * MAX / w); w = MAX; }
+        var cv = document.createElement('canvas'); cv.width = w; cv.height = h;
+        cv.getContext('2d').drawImage(img, 0, 0, w, h);
+        var dataUrl = cv.toDataURL('image/jpeg', 0.82);
+        setPreview(dataUrl);
+        photoStatus.textContent = 'Uploading…';
+        fetch('/api/crm/deal-photo', { method: 'POST', credentials: 'include', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ source_key: key, image: dataUrl }) })
+          .then(function (r) { return r.json().then(function (j) { return { ok: r.ok, j: j }; }, function () { return { ok: r.ok, j: {} }; }); })
+          .then(function (x) {
+            if (x.ok && x.j.url) {
+              var d = dealsByKey[key]; if (d) d.photo_url = x.j.url;
+              setPreview(x.j.url);
+              photoStatus.style.color = '#2E5C3D'; photoStatus.textContent = '✓ Hero photo updated — live on the seller portal.';
+            } else {
+              photoStatus.style.color = '#9B2C2C'; photoStatus.textContent = '✗ ' + ((x.j && x.j.error) || 'Upload failed');
+            }
+          }).catch(function (err) { photoStatus.style.color = '#9B2C2C'; photoStatus.textContent = '✗ ' + (err.message || 'Network error'); });
+      };
+      img.onerror = function () { photoStatus.style.color = '#9B2C2C'; photoStatus.textContent = "✗ Couldn't read that image."; };
+      var rd = new FileReader();
+      rd.onload = function () { img.src = rd.result; };
+      rd.readAsDataURL(file);
     });
 
     form.addEventListener('submit', function (e) {
