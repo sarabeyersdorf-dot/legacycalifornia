@@ -1121,23 +1121,29 @@
     });
   }
 
-  // ---- Stable per-deal colors (dark pastels) -------------------------------
-  // One deal = one color, everywhere, forever: slot = hash(source_key), with
-  // deterministic probing so ACTIVE deals (escrow/offer) never share a color.
+  // ===== RULE: every deal is its own BOLD, distinct colour ====================
+  // One deal = one bold colour, everywhere, forever. The palette below is 12
+  // high-chroma, well-separated hues, chosen so two deals never read as "the same
+  // colour" at a glance. (The old palette was muted pastels — browns and greens
+  // blurred together and you couldn't tell deals apart; that is exactly what this
+  // rule forbids.) Slot = hash(source_key) with deterministic probing so ACTIVE
+  // deals (escrow/offer) never collide. If you add colours, keep them BOLD and far
+  // apart in hue — never reintroduce muted/pastel tones — and mirror the change in
+  // DEAL_PALETTE (the calendar fallback) so the two stay identical.
   // Exposed as window.LegacyDealColors for every module + page.
   const LGC_DEAL_PALETTE = [
-    { name: 'wine',     border: '#7A2F3E', bg: '#F2E2E6' },
-    { name: 'pine',     border: '#2E5C3D', bg: '#E2EEE6' },
-    { name: 'indigo',   border: '#4A3B7C', bg: '#E8E4F2' },
-    { name: 'ochre',    border: '#8C6B2E', bg: '#F2EAD6' },
-    { name: 'teal',     border: '#2B6B6B', bg: '#DCEDED' },
-    { name: 'clay',     border: '#8A4A2B', bg: '#F4E6DD' },
-    { name: 'slate',    border: '#3A5A8C', bg: '#E0E8F4' },
-    { name: 'mulberry', border: '#7C2E5A', bg: '#F2DFEA' },
-    { name: 'olive',    border: '#5C6B2E', bg: '#ECF0DC' },
-    { name: 'umber',    border: '#6B4A2B', bg: '#EFE6DA' },
-    { name: 'storm',    border: '#44546B', bg: '#E3E8EF' },
-    { name: 'moss',     border: '#3D6B4F', bg: '#E0EEE6' }
+    { name: 'red',     border: '#D32F2F', bg: '#FADEDE' },
+    { name: 'orange',  border: '#EF6C00', bg: '#FCE7D6' },
+    { name: 'gold',    border: '#F9A825', bg: '#FDF1D3' },
+    { name: 'green',   border: '#2E7D32', bg: '#DFEFE1' },
+    { name: 'teal',    border: '#00838F', bg: '#D5ECEE' },
+    { name: 'blue',    border: '#1565C0', bg: '#DBE8F6' },
+    { name: 'indigo',  border: '#4527A0', bg: '#E4DFF2' },
+    { name: 'purple',  border: '#8E24AA', bg: '#F1DFF5' },
+    { name: 'magenta', border: '#C2185B', bg: '#F9DBE8' },
+    { name: 'brown',   border: '#5D4037', bg: '#E8DED9' },
+    { name: 'slate',   border: '#37474F', bg: '#DEE4E7' },
+    { name: 'lime',    border: '#9E9D24', bg: '#EFEFCF' }
   ];
   function lgcDealHash(k) { let v = 0; for (let i = 0; i < k.length; i++) v = (v * 31 + k.charCodeAt(i)) % 997; return v % 12; }
   window.LegacyDealColors = (function () {
@@ -4806,14 +4812,14 @@
 
   // ---- Calendar (agenda + full-day scrollable week) ----------------------
   const CAL_ROW_H = 48; // px per hour — must match .calw-hour / .calw-line in crm.css
-  // Per-deal colour palette (muted, matches the site). Assigned by deal order so
-  // each deal — in-escrow ones first — gets its own distinct colour.
+  // Per-deal colour fallback — MUST mirror LGC_DEAL_PALETTE (the source of truth).
+  // Bold, distinct hues per the "every deal its own bold colour" rule above.
   const DEAL_PALETTE = [
-    { border: '#8C6E3D', bg: '#F3EAD6' }, { border: '#2E5C3D', bg: '#E4EFE7' },
-    { border: '#7C5A16', bg: '#F3E7CE' }, { border: '#4A3B7C', bg: '#EAE6F3' },
-    { border: '#8A3B2B', bg: '#F6E6E1' }, { border: '#2B6B6B', bg: '#DEEEEE' },
-    { border: '#6B4A2B', bg: '#EFE3D6' }, { border: '#5C6B2E', bg: '#EDF0DE' },
-    { border: '#7C2E5A', bg: '#F3DEEC' }, { border: '#3A5A8C', bg: '#DEE7F3' }
+    { border: '#D32F2F', bg: '#FADEDE' }, { border: '#EF6C00', bg: '#FCE7D6' },
+    { border: '#F9A825', bg: '#FDF1D3' }, { border: '#2E7D32', bg: '#DFEFE1' },
+    { border: '#00838F', bg: '#D5ECEE' }, { border: '#1565C0', bg: '#DBE8F6' },
+    { border: '#4527A0', bg: '#E4DFF2' }, { border: '#8E24AA', bg: '#F1DFF5' },
+    { border: '#C2185B', bg: '#F9DBE8' }, { border: '#5D4037', bg: '#E8DED9' }
   ];
   function dealColorFor(key) { return (key && cal.dealColor[key]) || null; }
   const CAL_MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
@@ -4941,30 +4947,30 @@
     cal.days.forEach((d, i) => {
       const evs = byDay[i];
       if (!evs || !evs.length) return;
-      html += `<div class="cal-ag-day"><div class="cal-ag-dayhead${d.is_today ? ' today' : ''}"><span class="cal-ag-dow">${esc(d.dow)}</span><span class="cal-ag-date">${esc(monthName(d.date))} ${esc(d.num)}</span></div>`;
+      html += `<div class="cal-ag-day"><div class="cal-ag-dayhead${d.is_today ? ' today' : ''}"><span class="cal-ag-dow">${esc(d.dow)}</span><span class="cal-ag-date">${esc(monthName(d.date))} ${esc(d.num)}</span><span class="cal-ag-count">${evs.length}</span></div><div class="cal-ag-cards">`;
       evs.forEach((e) => {
         const c = dealColorFor(e.deal_key);
-        // Events tied to a client get a visibility toggle: flip it on to add
-        // the event to what that client sees in their portal.
-        const toggle = e.lead_id ? `<label class="lp-toggle cal-ag-toggle" title="${e.shared ? 'Shown in the client’s portal' : 'Add this to what the client sees'}" onclick="event.stopPropagation()">
+        // Events tied to a client (or shared to a deal) get a visibility toggle:
+        // flip it on to add the event to what that client / both parties see.
+        const toggle = (e.lead_id || e.deal_id) ? `<label class="lp-toggle cal-ag-toggle" title="${e.shared ? 'Shown in the client’s portal' : 'Add this to what the client sees'}" onclick="event.stopPropagation()">
             <input type="checkbox" data-cal-share data-kind="${esc(e.source)}" data-id="${esc(e.id)}" ${e.shared ? 'checked' : ''}>
             <span class="lp-toggle-track"></span>
             <span class="lp-toggle-cap">${e.shared ? 'Visible' : 'Private'}</span>
           </label>` : '';
         const subBits = [];
-        if (e.sub) subBits.push(esc(e.sub));
+        if (e.sub && e.sub !== e.title) subBits.push(esc(e.sub));
         if (e.deal_address && (!e.sub || String(e.sub).indexOf(e.deal_address) < 0)) subBits.push(esc(e.deal_address));
-        const subHtml = subBits.length ? `<span class="cal-ag-sub">${subBits.join(' · ')}</span>` : '';
+        const subHtml = subBits.length ? `<div class="cal-ag-c-sub">${subBits.join(' · ')}</div>` : '';
         const timeText = e.all_day ? 'All day' : `${esc(e.time_label)}–${esc(e.end_label)}`;
-        html += `<div class="cal-ag-row" data-ev-key="${esc(e.source)}:${esc(e.id)}"${c ? ` style="border-left:3px solid ${c.border};padding-left:11px;"` : ''}>
-          <span class="cal-ag-time">${timeText}</span>
-          <span class="cal-ag-dot ${esc(e.cls)}"${c ? ` style="background:${c.border}"` : ''}></span>
-          <span class="cal-ag-title">${esc(e.title)}${subHtml}</span>
-          <span class="cal-ag-kind">${esc(e.kind_label || '')}</span>
+        const isDeadline = e.cls === 'coe' || e.cls === 'deadline';
+        html += `<div class="cal-ag-card${isDeadline ? ' cal-ag-card--deadline' : ''}" data-ev-key="${esc(e.source)}:${esc(e.id)}"${c ? ` style="border-top-color:${c.border}"` : ''}>
+          <div class="cal-ag-c-top"><span class="cal-ag-c-time">${timeText}</span><span class="cal-ag-c-kind">${esc(e.kind_label || '')}</span></div>
+          <div class="cal-ag-c-title">${esc(e.title)}</div>
+          ${subHtml}
           ${toggle}
         </div>`;
       });
-      html += '</div>';
+      html += '</div></div>';
     });
     root.innerHTML = html;
 
