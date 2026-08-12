@@ -104,6 +104,9 @@ export default async function handler(req, res) {
     let user = null, profile = null, isAgent = false, deal = null;
     let portalToken = null, leadId = null;
     let previewKey = null, previewMiss = false;
+    let viewerRole = null;   // this viewer's party role on the deal (seller/buyer) —
+                             // drives doc audience so a buyer never sees seller docs
+                             // even on a both-sided in-house deal.
 
     if (token) {
       // Private-link access — NO login. Resolve the client by their unguessable
@@ -120,9 +123,10 @@ export default async function handler(req, res) {
         .select('deal_id, role, deals(*)')
         .eq('lead_id', lead.id)
         .in('role', ['seller', 'co-seller', 'buyer', 'co-buyer']);
-      const rows = (parties || []).map((p) => p.deals).filter(Boolean);
-      rows.sort((a, b) => new Date(b.updated_at || 0) - new Date(a.updated_at || 0));
-      deal = rows[0] || null;
+      const pr = (parties || []).filter((p) => p.deals);
+      pr.sort((a, b) => new Date(b.deals.updated_at || 0) - new Date(a.deals.updated_at || 0));
+      deal = pr[0]?.deals || null;
+      viewerRole = pr[0]?.role || null;
     } else {
       const caller = await getCallerProfile(req, res);
       user = caller.user; profile = caller.profile;
@@ -163,9 +167,10 @@ export default async function handler(req, res) {
             .select('deal_id, role, deals(*)')
             .eq('lead_id', leadId)
             .in('role', ['seller', 'co-seller', 'buyer', 'co-buyer']);
-          const rows = (parties || []).map((p) => p.deals).filter(Boolean);
-          rows.sort((a, b) => new Date(b.updated_at || 0) - new Date(a.updated_at || 0));
-          deal = rows[0] || null;
+          const pr = (parties || []).filter((p) => p.deals);
+          pr.sort((a, b) => new Date(b.deals.updated_at || 0) - new Date(a.deals.updated_at || 0));
+          deal = pr[0]?.deals || null;
+          viewerRole = pr[0]?.role || null;
         }
       }
 
@@ -244,10 +249,15 @@ export default async function handler(req, res) {
     // buyer/both, so a buyer can never pick up a stray seller-side file (e.g. the
     // listing agreement, or a prior escrow's paperwork). db/053 governance.
     //
-    //   audience  — a buyer-side deal is a buyer portal; otherwise a seller portal.
+    //   audience  — follows the VIEWER's role first: a buyer-party is always a
+    //               buyer audience, even on a both-sided in-house deal (side
+    //               'both'), so the buyer never picks up the seller's client-safe
+    //               files (listing agreement, seller disclosures, etc.). Falls
+    //               back to the deal side for the agent preview / logged-in seller.
     //   fail-open guard — a grant's fingerprint must still match the document's
     //               name, so a reused doc_key can't inherit an old grant.
-    const audience = /buyer/.test(String(deal.side || '').toLowerCase()) ? 'buyer' : 'seller';
+    const isBuyerViewer = /buyer/.test(String(viewerRole || '').toLowerCase());
+    const audience = (isBuyerViewer || /buyer/.test(String(deal.side || '').toLowerCase())) ? 'buyer' : 'seller';
     const normName = (s) => String(s || '').trim().toLowerCase();
     let allDocs = [];
     {
