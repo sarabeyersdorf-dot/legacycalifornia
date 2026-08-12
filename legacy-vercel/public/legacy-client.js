@@ -4945,9 +4945,12 @@
     evList.forEach((e) => { (byDay[e.day] = byDay[e.day] || []).push(e); });
     let html = '';
     cal.days.forEach((d, i) => {
-      const evs = byDay[i];
-      if (!evs || !evs.length) return;
-      html += `<div class="cal-ag-day"><div class="cal-ag-dayhead${d.is_today ? ' today' : ''}"><span class="cal-ag-dow">${esc(d.dow)}</span><span class="cal-ag-date">${esc(monthName(d.date))} ${esc(d.num)}</span><span class="cal-ag-count">${evs.length}</span></div><div class="cal-ag-cards">`;
+      const evs = byDay[i] || [];
+      // Keep TODAY in the list even when it's empty, so "Today" always lands
+      // somewhere; other empty days are still skipped.
+      if (!evs.length && !d.is_today) return;
+      html += `<div class="cal-ag-day${d.is_today ? ' is-today' : ''}"><div class="cal-ag-dayhead${d.is_today ? ' today' : ''}">${d.is_today ? '<span class="cal-ag-todaypill">Today</span>' : ''}<span class="cal-ag-dow">${esc(d.dow)}</span><span class="cal-ag-date">${esc(monthName(d.date))} ${esc(d.num)}</span>${evs.length ? `<span class="cal-ag-count">${evs.length}</span>` : ''}</div><div class="cal-ag-cards">`;
+      if (!evs.length) { html += '<div class="cal-ag-none">Nothing scheduled today.</div></div></div>'; return; }
       evs.forEach((e) => {
         const c = dealColorFor(e.deal_key);
         // Events tied to a client (or shared to a deal) get a visibility toggle:
@@ -4973,6 +4976,8 @@
       html += '</div></div>';
     });
     root.innerHTML = html;
+    // On the current week, bring today into view so "Today" always lands on it.
+    if (cal.week === 0) { const t = root.querySelector('.cal-ag-day.is-today'); if (t) t.scrollIntoView({ block: 'nearest' }); }
 
     // Delegated visibility toggle (wired once) — flips a calendar event between
     // internal and client-visible via the shared wire-guarded endpoint.
@@ -5025,6 +5030,12 @@
       </div>`;
     }
     root.innerHTML = `<div class="ds-calweek-wrap"><div class="ds-calweek">${cols}</div></div>`;
+    // The week grid scrolls horizontally on narrow screens — pull today's column
+    // into view so "Today" actually shows today instead of leaving it off-screen.
+    if (cal.week === 0) {
+      const wrap = root.querySelector('.ds-calweek-wrap'), t = root.querySelector('.ds-calday.today');
+      if (wrap && t) wrap.scrollLeft = Math.max(0, t.offsetLeft - wrap.clientLeft - (wrap.clientWidth - t.offsetWidth) / 2);
+    }
   }
   function wireCalendarChrome() {
     const prev = document.querySelector('[data-cal-prev]');

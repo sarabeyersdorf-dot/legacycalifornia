@@ -521,6 +521,8 @@
 .cal-ag-date { font-family: var(--serif); font-style: italic; font-size: 18px; color: var(--ink); }
 .cal-ag-count { font-family: var(--mono); font-size: 10px; color: var(--ink-mute); background: var(--linen); border: 1px solid var(--rule); border-radius: 999px; padding: 1px 7px; }
 .cal-ag-dayhead.today .cal-ag-date, .cal-ag-dayhead.today .cal-ag-dow { color: var(--brass); }
+.cal-ag-todaypill { font-family: var(--mono); font-size: 9px; letter-spacing: 0.12em; text-transform: uppercase; color: #fff; background: var(--brass); padding: 2px 8px; border-radius: 999px; }
+.cal-ag-none { font-size: 13px; color: var(--ink-mute); font-style: italic; padding: 2px; }
 .cal-ag-cards { display: flex; flex-wrap: wrap; gap: 8px; padding: 0 4px; }
 .cal-ag-card {
   flex: 1 1 210px; min-width: 190px; max-width: 300px; box-sizing: border-box;
