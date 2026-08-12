@@ -215,7 +215,14 @@ function mapDeal(d) {
     address: d.address,
     city: d.city || null,
     type: d.type || null,
-    side: (d.side === 'listing') ? 'seller' : (d.side || null),
+    // Normalize side to the deals.side check constraint (buyer/seller/both):
+    // deals.json authors a sell-side listing as 'listing' and a both-sides
+    // in-house deal (Legacy on both sides — one agent lists, the other buys) as
+    // 'dual'. Both would fail the constraint and silently drop the whole deal
+    // from the sync — 324 Augusta went 'dual' and got stuck on its stale row.
+    side: (d.side === 'listing') ? 'seller'
+        : (d.side === 'dual') ? 'both'
+        : (['buyer', 'seller', 'both'].includes(d.side) ? d.side : null),
     stage: d.stage || null,
     agent,
     list_price: d.listPrice ?? null,
