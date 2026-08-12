@@ -282,7 +282,14 @@ export default async function handler(req, res) {
     // Hero photo + tour media — driven from deals.json ("photo" / "video" /
     // "matterport"), with a property-photo and YouTube-thumbnail fallback so a
     // real client never sees a stock or blank hero. Fail-soft.
-    const videoId = extractYouTubeId(deal.video_url);
+    // Agent CRM overrides (db/066): a video / 3D-tour link set in the CRM
+    // (deals.agent_overrides) wins over the deals.json value, so an agent can
+    // attach listing media to a deal and the seller portal shows it immediately,
+    // surviving the hourly sync — without waiting on Cowork.
+    const _ov = (deal.agent_overrides && typeof deal.agent_overrides === 'object' && !Array.isArray(deal.agent_overrides)) ? deal.agent_overrides : {};
+    const effVideoUrl = (_ov.video_url != null && _ov.video_url !== '') ? _ov.video_url : deal.video_url;
+    const effMatterportUrl = (_ov.matterport_url != null && _ov.matterport_url !== '') ? _ov.matterport_url : deal.matterport_url;
+    const videoId = extractYouTubeId(effVideoUrl);
     // The agent's uploaded photo (photo_override) wins over everything — same
     // priority as the CRM listing card — so a replaced photo binds here too.
     let heroPhoto = deal.photo_override || deal.photo_url || null;
@@ -696,9 +703,9 @@ export default async function handler(req, res) {
         photo: heroPhoto
       },
       tour: {
-        video_url:      deal.video_url || null,
+        video_url:      effVideoUrl || null,
         video_id:       videoId,
-        matterport_url: deal.matterport_url || null
+        matterport_url: effMatterportUrl || null
       },
       nav: { documents: String(docs.length), tasks: String(tasks.length) },
       kpis, road, documents: documentsArr, tasks, team,
