@@ -5184,15 +5184,10 @@
           <label style="display:flex;align-items:flex-start;gap:8px;font-size:13px;color:#3A332B;line-height:1.4;"><input data-f-invite type="checkbox" style="margin-top:3px;"> Email the client a calendar invite now</label>
         </div>
         <div data-appt-fields style="display:none;flex-direction:column;gap:10px;">
-          <div data-insp-row style="display:none;">
-            <label style="${M_LAB}">Inspection type</label>
-            <select data-f-subkind style="${M_INPUT}">
-              <option value="Home">Home</option>
-              <option value="Pest">Pest</option>
-              <option value="Roof">Roof</option>
-              <option value="Well &amp; Septic">Well &amp; Septic</option>
-              <option value="__other">Other…</option></select>
-            <input data-f-subother placeholder="What kind of inspection?" style="${M_INPUT};display:none;margin-top:8px;">
+          <div data-insp-wrap style="display:none;flex-direction:column;gap:8px;">
+            <label style="${M_LAB}">Inspections <span style="text-transform:none;letter-spacing:0;">(add as many as you like — each with its own time; they all use the date below)</span></label>
+            <div data-insp-list style="display:flex;flex-direction:column;gap:8px;"></div>
+            <button type="button" data-insp-add style="align-self:flex-start;background:transparent;border:1px dashed #B9A98A;color:#6A5A3C;padding:7px 12px;font-size:12.5px;cursor:pointer;">+ Add another inspection</button>
           </div>
           <div><label style="${M_LAB}">Title <span style="text-transform:none;letter-spacing:0;">(optional)</span></label><input data-f-title placeholder="Auto-named from the type if left blank" style="${M_INPUT}"></div>
           <div><label style="${M_LAB}">Client email <span style="text-transform:none;letter-spacing:0;">(optional · lets you share to their portal)</span></label><input data-f-apptemail type="email" placeholder="client@example.com" style="${M_INPUT}"></div>
@@ -5206,6 +5201,9 @@
         <label style="display:flex;align-items:center;gap:8px;font-size:13px;color:#3A332B;"><input data-f-multiday type="checkbox"> Spans multiple days (e.g. a holiday)</label>
         <div data-enddate-cell style="display:none;"><label style="${M_LAB}">End date</label><input data-f-enddate type="date" style="${M_INPUT}"></div>
         <div><label style="${M_LAB}">Link to deal <span style="text-transform:none;letter-spacing:0;">(optional)</span></label><select data-f-deal style="${M_INPUT}"><option value="">No deal</option></select></div>
+        <div data-share-wrap style="display:none;background:#F3EEDF;border:1px solid #E4DAC1;padding:10px 12px;">
+          <label style="display:flex;align-items:flex-start;gap:8px;font-size:13px;color:#3A332B;line-height:1.4;cursor:pointer;"><input data-f-sharedeal type="checkbox" checked style="margin-top:3px;"> <span>Show on the client portal for <b data-share-parties>everyone on this deal</b></span></label>
+        </div>
         <div><label style="${M_LAB}">CC — also send the invite to <span style="text-transform:none;letter-spacing:0;">(search a contact to add, or type emails — a spouse, co-op agent, TC, lender; both agents are included automatically)</span></label>
           <input data-f-ccsearch placeholder="Search your contacts by name, email, phone…" style="${M_INPUT}" autocomplete="off">
           <div data-f-ccresults style="position:relative;"></div>
@@ -5219,32 +5217,73 @@
     const kindSel = m.body.querySelector('[data-f-kind]');
     const tourFields = m.body.querySelector('[data-tour-fields]');
     const apptFields = m.body.querySelector('[data-appt-fields]');
-    const inspRow = m.body.querySelector('[data-insp-row]');
-    const subSel = m.body.querySelector('[data-f-subkind]');
-    const subOther = m.body.querySelector('[data-f-subother]');
+    const inspWrap = m.body.querySelector('[data-insp-wrap]');
+    const inspList = m.body.querySelector('[data-insp-list]');
+    const inspAdd  = m.body.querySelector('[data-insp-add]');
     const saveBtn = m.body.querySelector('[data-save]');
+
+    // One inspection row: type + its own time + remove. Several can be booked in
+    // one save — they share the date below but each keeps its own time.
+    const INSP_TYPES = ['Home', 'Pest', 'Roof', 'Well & Septic', 'Sewer / Septic', 'Chimney', 'Pool', 'Foundation'];
+    function addInspRow(preset) {
+      preset = preset || {};
+      const row = document.createElement('div');
+      row.setAttribute('data-insp-item', '');
+      row.style.cssText = 'display:flex;gap:8px;align-items:center;';
+      row.innerHTML =
+        '<select data-r-kind style="' + M_INPUT + ';flex:1;">' +
+          INSP_TYPES.map(function (t) { return '<option value="' + esc(t) + '"' + (preset.sub_kind === t ? ' selected' : '') + '>' + esc(t) + '</option>'; }).join('') +
+          '<option value="__other">Other…</option></select>' +
+        '<input data-r-other placeholder="Type" style="' + M_INPUT + ';flex:1;display:none;">' +
+        '<select data-r-time style="' + M_INPUT + ';flex:0 0 116px;">' + timeOptionsHtml(preset.time || defaultTimeSlot()) + '</select>' +
+        '<button type="button" data-r-del title="Remove" style="flex:none;background:transparent;border:none;color:#9B7A4A;font-size:20px;cursor:pointer;line-height:1;">&times;</button>';
+      const rk = row.querySelector('[data-r-kind]'), ro = row.querySelector('[data-r-other]');
+      rk.addEventListener('change', function () { ro.style.display = rk.value === '__other' ? 'block' : 'none'; });
+      row.querySelector('[data-r-del]').addEventListener('click', function () {
+        if (inspList.querySelectorAll('[data-insp-item]').length > 1) row.remove();
+      });
+      inspList.appendChild(row);
+    }
+    if (inspAdd) inspAdd.addEventListener('click', function () { addInspRow(); });
+
+    // The top-level Time is for a single event; inspections carry per-row times,
+    // and an all-day span has none — hide the top Time in both cases.
+    function updateTimeCell() {
+      const cell = m.body.querySelector('[data-time-cell]');
+      if (!cell) return;
+      const multi = m.body.querySelector('[data-f-multiday]');
+      const hide = kindSel.value === 'inspection' || (multi && multi.checked);
+      cell.style.display = hide ? 'none' : 'block';
+    }
     const syncKind = () => {
       const isTour = kindSel.value === 'tour';
+      const isInsp = kindSel.value === 'inspection';
       tourFields.style.display = isTour ? 'flex' : 'none';
       apptFields.style.display = isTour ? 'none' : 'flex';
-      inspRow.style.display = kindSel.value === 'inspection' ? 'block' : 'none';
-      saveBtn.textContent = isTour ? 'Schedule tour' : 'Add event';
+      if (inspWrap) inspWrap.style.display = isInsp ? 'flex' : 'none';
+      if (isInsp && inspList && !inspList.querySelector('[data-insp-item]')) addInspRow();
+      saveBtn.textContent = isTour ? 'Schedule tour' : (isInsp ? 'Add inspections' : 'Add event');
+      // Default the deal-share toggle ON for inspections (the common "share with
+      // both sides" case) and OFF for other kinds so an internal event linked to
+      // a deal isn't shared to clients by accident. She can still flip it.
+      const sc = m.body.querySelector('[data-f-sharedeal]'); if (sc) sc.checked = isInsp;
+      updateTimeCell();
     };
-    kindSel.addEventListener('change', syncKind); syncKind();
+    kindSel.addEventListener('change', syncKind);
 
     // Multi-day toggle — reveal the end date, hide time/minutes (an all-day span
     // like a holiday has no clock time).
     const multiCb   = m.body.querySelector('[data-f-multiday]');
     const endCell   = m.body.querySelector('[data-enddate-cell]');
-    const timeCell  = m.body.querySelector('[data-time-cell]');
     const durCell   = m.body.querySelector('[data-dur-cell]');
     const syncMulti = () => {
       const on = multiCb.checked;
       endCell.style.display = on ? 'block' : 'none';
-      timeCell.style.display = on ? 'none' : 'block';
       durCell.style.display = on ? 'none' : 'block';
+      updateTimeCell();
     };
-    multiCb.addEventListener('change', syncMulti); syncMulti();
+    multiCb.addEventListener('change', syncMulti);
+    syncKind(); syncMulti();
 
     // Client search → fills the email/name fields (tour AND general events).
     const csIn = m.body.querySelector('[data-f-clientsearch]');
@@ -5314,8 +5353,25 @@
     // Picking a deal auto-fills the client from that deal's primary linked party,
     // so you don't have to search the contact separately. (Answers "will link to
     // deal populate the client?" — yes, as long as the deal has a linked client.)
+    // Reveal the "share to the deal's portals" toggle and name the parties who
+    // will see it (so it's clear an inspection reaches both seller AND buyer).
+    const shareWrap = m.body.querySelector('[data-share-wrap]');
+    const sharePartiesEl = m.body.querySelector('[data-share-parties]');
+    const syncShare = (parties) => {
+      if (!shareWrap) return;
+      const has = dealSel && dealSel.value;
+      shareWrap.style.display = has ? 'block' : 'none';
+      if (has && sharePartiesEl) {
+        const names = (parties || []).map((p) => {
+          const nm = (p.name || p.email || '').split(/\s+/)[0] || (p.email || '');
+          const role = /buyer/i.test(p.role || '') ? 'buyer' : /seller/i.test(p.role || '') ? 'seller' : '';
+          return nm ? nm + (role ? ' (' + role + ')' : '') : '';
+        }).filter(Boolean);
+        sharePartiesEl.textContent = names.length ? names.join(' · ') : 'everyone on this deal';
+      }
+    };
     const fillFromDeal = async (sourceKey) => {
-      if (!sourceKey) return;
+      if (!sourceKey) { syncShare([]); return; }
       try {
         const r = await window.Legacy.api('/api/crm/deal-client?deal=' + encodeURIComponent(sourceKey), { method: 'GET' });
         const j = r && r.ok && r.json;
@@ -5325,9 +5381,10 @@
         // automatically by CC'ing their emails — no need to add them by hand.
         const extras = ((j && j.parties) || []).slice(1).map((p) => p.email).filter(Boolean);
         if (extras.length) addInvitees(extras);
-      } catch (_) {}
+        syncShare((j && j.parties) || (c ? [c] : []));
+      } catch (_) { syncShare([]); }
     };
-    if (dealSel) dealSel.addEventListener('change', () => fillFromDeal(dealSel.value));
+    if (dealSel) dealSel.addEventListener('change', () => { syncShare([]); fillFromDeal(dealSel.value); });
     fetch('/api/crm/listings', { credentials: 'include' }).then((r) => r.ok ? r.json() : null).then((j) => {
       if (!j || !dealSel) return;
       const all = [].concat(j.pending || [], j.offers || [], j.active || [], j.preparing || []);
@@ -5339,52 +5396,91 @@
     // Prefill from a client page ("Schedule" on a lead) or a deal.
     if (prefill.name || prefill.email) applyClient(prefill.name || prefill.email, prefill.email || '');
     if (prefill.kind) { kindSel.value = prefill.kind; syncKind(); }
-    subSel.addEventListener('change', () => { subOther.style.display = subSel.value === '__other' ? 'block' : 'none'; });
     m.body.querySelector('[data-cancel]').addEventListener('click', m.close);
     saveBtn.addEventListener('click', async () => {
       const kind = kindSel.value;
       const date = m.body.querySelector('[data-f-date]').value;
       const multiDay = multiCb.checked;
       const endDate = m.body.querySelector('[data-f-enddate]').value;
-      // Multi-day (all-day) events run at noon so timezone never rolls the date;
-      // single events use the picked time.
-      const time = multiDay ? '12:00' : m.body.querySelector('[data-f-time]').value;
-      if (!date || !time) { m.err.textContent = multiDay ? 'Pick a start date.' : 'Pick a date and time.'; return; }
+      const isInsp = kind === 'inspection';
+      // Multi-day (all-day) events run at noon so timezone never rolls the date.
+      const time = multiDay ? '12:00' : (isInsp ? null : m.body.querySelector('[data-f-time]').value);
+      if (!date) { m.err.textContent = 'Pick a date.'; return; }
+      if (!multiDay && !isInsp && !time) { m.err.textContent = 'Pick a time.'; return; }
       if (multiDay && (!endDate || endDate < date)) { m.err.textContent = 'Pick an end date on or after the start date.'; return; }
+
+      // Inspection rows → one {sub_kind, time} each. All share the date + duration.
+      let inspItems = [];
+      if (isInsp) {
+        inspItems = Array.prototype.map.call(m.body.querySelectorAll('[data-insp-item]'), function (row) {
+          const rk = row.querySelector('[data-r-kind]');
+          const sub = rk.value === '__other' ? (row.querySelector('[data-r-other]').value.trim() || null) : rk.value;
+          return { sub_kind: sub, time: row.querySelector('[data-r-time]').value };
+        }).filter(function (it) { return it.time; });
+        if (!inspItems.length) { m.err.textContent = 'Add at least one inspection with a time.'; return; }
+      }
+
       let notesVal = m.body.querySelector('[data-f-notes]').value.trim();
       const dealSelEl = m.body.querySelector('[data-f-deal]');
-      if (dealSelEl && dealSelEl.value) {
+      const dealKey = dealSelEl ? dealSelEl.value : '';
+      if (dealKey) {
         const opt = dealSelEl.options[dealSelEl.selectedIndex];
-        notesVal = (notesVal ? notesVal + '\n' : '') + `[deal:${dealSelEl.value} · ${opt ? opt.getAttribute('data-addr') || '' : ''}]`;
+        notesVal = (notesVal ? notesVal + '\n' : '') + `[deal:${dealKey} · ${opt ? opt.getAttribute('data-addr') || '' : ''}]`;
       }
+      // Share to every party on the linked deal (seller + buyer) in one go.
+      const shareDeal = !!(dealKey && m.body.querySelector('[data-f-sharedeal]') && m.body.querySelector('[data-f-sharedeal]').checked);
       const inviteesRaw = (m.body.querySelector('[data-f-invitees]').value || '').split(',').map((x) => x.trim()).filter(Boolean);
-      const common = { date, time, duration_minutes: parseInt(m.body.querySelector('[data-f-dur]').value, 10) || 30, notes: notesVal, invitees: inviteesRaw };
+      const durVal = parseInt(m.body.querySelector('[data-f-dur]').value, 10) || 30;
+      const common = { duration_minutes: durVal, notes: notesVal, invitees: inviteesRaw };
+      if (dealKey) common.deal_key = dealKey;
       if (multiDay) { common.all_day = true; common.end_date = endDate; }
-      let payload;
+
+      // Build the list of POSTs (usually one; several for multiple inspections).
+      const posts = [];
       if (kind === 'tour') {
         const email = m.body.querySelector('[data-f-email]').value.trim();
         if (!email) { m.err.textContent = 'Client email is required for a tour.'; return; }
-        payload = { kind: 'tour', email, first_name: m.body.querySelector('[data-f-first]').value.trim(),
+        posts.push({ kind: 'tour', email, first_name: m.body.querySelector('[data-f-first]').value.trim(),
           last_name: m.body.querySelector('[data-f-last]').value.trim(), tour_type: m.body.querySelector('[data-f-type]').value,
-          send_invite: m.body.querySelector('[data-f-invite]').checked, ...common };
+          send_invite: m.body.querySelector('[data-f-invite]').checked, date, time, ...common });
       } else {
-        payload = { kind, ...common };
         const title = m.body.querySelector('[data-f-title]').value.trim();
-        if (title) payload.title = title;   // optional — the server auto-names structured types
         const email = m.body.querySelector('[data-f-apptemail]').value.trim();
-        if (email) payload.email = email;    // optional — links the lead so it can be shared
-        if (email && m.body.querySelector('[data-f-apptinvite]').checked) payload.send_invite = true;
-        if (kind === 'inspection') {
-          payload.sub_kind = subSel.value === '__other' ? (subOther.value.trim() || null) : subSel.value;
+        const invite = email && m.body.querySelector('[data-f-apptinvite]').checked;
+        const base = { kind, date, ...common };
+        if (email) base.email = email;
+        if (invite) base.send_invite = true;
+        if (isInsp) {
+          inspItems.forEach(function (it) {
+            const label = (it.sub_kind ? it.sub_kind + ' ' : '') + 'inspection';
+            const p = { ...base, time: it.time, sub_kind: it.sub_kind };
+            if (shareDeal) { p.share = 'deal'; p.client_label = label.charAt(0).toUpperCase() + label.slice(1); }
+            posts.push(p);
+          });
+        } else {
+          const p = { ...base, time: multiDay ? '12:00' : time };
+          if (title) p.title = title;
+          if (shareDeal) {
+            p.share = 'deal';
+            p.client_label = title || (kind.charAt(0).toUpperCase() + kind.slice(1).replace(/_/g, ' '));
+          }
+          posts.push(p);
         }
       }
+
       saveBtn.disabled = true; saveBtn.textContent = 'Saving…'; m.err.textContent = '';
-      const r = await sendJSON('/api/crm/calendar', 'POST', payload);
-      if (r.ok && r.json && (r.json.tour || r.json.appointment)) {
+      let okCount = 0, failMsg = '';
+      for (const p of posts) {
+        const r = await sendJSON('/api/crm/calendar', 'POST', p);
+        if (r.ok && r.json && (r.json.tour || r.json.appointment)) okCount++;
+        else if (!failMsg) failMsg = (r.json && r.json.error) || 'Could not save.';
+      }
+      if (okCount) {
         m.close();
         cal.week = Math.round((mondayOf(date + 'T12:00') - mondayOf(new Date())) / (7 * 86400000));
         loadCalendar(cal.week);
-      } else { m.err.textContent = (r.json && r.json.error) || 'Could not save.'; saveBtn.disabled = false; syncKind(); }
+        if (failMsg) console.warn('[calendar] ' + okCount + ' saved, ' + (posts.length - okCount) + ' failed: ' + failMsg);
+      } else { m.err.textContent = failMsg || 'Could not save.'; saveBtn.disabled = false; syncKind(); }
     });
   }
 
