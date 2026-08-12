@@ -1,6 +1,6 @@
 {
-  "version": 6.4,
-  "lastUpdated": "2026-08-11",
+  "version": 6.5,
+  "lastUpdated": "2026-08-12",
   "updatedBy": "cowork 2026-08-10 — canonical commission/timeline schema migration per Sara",
   "tasks": [
     {
@@ -1337,6 +1337,126 @@
       "key": "fub-donald-rester",
       "title": "Donald Rester (209) 482-5744 viewed 1330 Calaveritas 62, San Andreas SEVEN times (Ylopo alert 8/10, unread) - strongest buying signal this week. Call him",
       "due": "Today 8/11",
+      "done": false
+    },
+    {
+      "agent": "james",
+      "client": "8235 Baldwin",
+      "key": "baldwin-eta3-seller-sig",
+      "title": "🔴 Baldwin: get Allyson Overturf's signature on ETA #3 TODAY — Shomari signed 8/11 8:45 PM; until she signs, the loan contingency deadline standing is 8/12",
+      "due": "2026-08-12",
+      "done": false
+    },
+    {
+      "agent": "james",
+      "client": "8235 Baldwin",
+      "key": "baldwin-eta3-verify-date",
+      "title": "Baldwin: open ETA #3 and confirm the COE written inside says 8/31 — '- 12/25' in the filename is the C.A.R. form revision, not a deadline",
+      "due": "2026-08-12",
+      "done": false
+    },
+    {
+      "agent": "james",
+      "client": "8235 Baldwin",
+      "key": "baldwin-eta3-file",
+      "title": "Baldwin: download executed ETA #3 from Authentisign and file in EX — only ETA1 and ETA2 are on disk",
+      "due": "2026-08-16",
+      "done": false
+    },
+    {
+      "agent": "sara",
+      "client": "324 Augusta",
+      "key": "augusta-hoa-package",
+      "title": "🔴 324 Augusta: call Brian re the $605 HOA disclosure package — unpaid, up to 10 calendar days to process, against a 9/9 COE with Ashley out 8/26–9/4",
+      "due": "2026-08-12",
+      "done": false
+    },
+    {
+      "agent": "sara",
+      "client": "324 Augusta",
+      "key": "augusta-duplicate-nhd",
+      "title": "324 Augusta: two NHD orders (PID 4183603 on 8/11, 4183712 + WFDR on 8/12) — likely duplicate charge; net sheet splits the NHD fee. Confirm which stands",
+      "due": "2026-08-16",
+      "done": false
+    },
+    {
+      "agent": "sara",
+      "client": "324 Augusta",
+      "key": "augusta-agentnote-warranty",
+      "title": "324 Augusta: 'the home warranty is placed' is wrong in TWO places — the draft agent note AND the CRM client-facing copy on the 'Escrow opened' milestone desc. Cancelled 8/11; fixing the note alone will not fix the page",
+      "due": "2026-08-12",
+      "done": false
+    },
+    {
+      "agent": "sara",
+      "client": "324 Augusta",
+      "key": "augusta-warranty-charge",
+      "title": "324 Augusta: confirm the AHS warranty cancelled with no surviving charge — order confirmation AND escrow invoice both issued 8/11 before cancellation",
+      "due": "2026-08-16",
+      "done": false
+    },
+    {
+      "agent": "sara",
+      "client": "324 Augusta",
+      "key": "augusta-nhd-sigpages-file",
+      "title": "324 Augusta: move the NHD signature pages from the deal root / James Folder into Ex/NHD with the report",
+      "due": "2026-08-16",
+      "done": false
+    },
+    {
+      "agent": "sara",
+      "client": "7230 Latigo",
+      "key": "castle-ac-seller-agent",
+      "title": "Latigo post-close: forward Guy Castle's Airserv AC invoice to the Windleys; a full replacement quote is coming, so set the position first",
+      "due": "2026-08-16",
+      "done": false
+    },
+    {
+      "agent": "sara",
+      "client": "433 E Hwy 4",
+      "key": "433-dead-milestones",
+      "title": "433: retire three milestones from the cancelled escrow still live in deals.json — loan contingency 8/5, walk-through 8/5, COE 8/10 (status 'key' is invalid)",
+      "due": "2026-08-16",
+      "done": false
+    },
+    {
+      "agent": "sara",
+      "client": "695 Feather",
+      "key": "feather-coe-dealsjson",
+      "title": "695 Feather: closingDate 2026-08-14 must change once Tanya confirms the two-week extension — client page still promises August 14",
+      "due": "2026-08-16",
+      "done": false
+    },
+    {
+      "agent": "sara",
+      "client": "8235 Baldwin",
+      "key": "baldwin-coe-dealsjson",
+      "title": "Baldwin: closingDate 2026-08-17 → 2026-08-31 if ETA #3 executes; 8/17 is a Sunday so the floor is Monday 8/18 regardless",
+      "due": "2026-08-16",
+      "done": false
+    },
+    {
+      "agent": "sara",
+      "client": "Admin",
+      "key": "contacts-completeness",
+      "title": "Contacts gaps: 324 Augusta lender has no named contact; 695 Feather title is null (lender N/A — all cash)",
+      "due": "2026-08-16",
+      "done": false
+    },
+    {
+      "agent": "sara",
+      "client": "Follow Up Boss",
+      "key": "fub-hotsheet-read",
+      "title": "Tuesday 8/11 FUB Hot Sheet still unread — 1 appointment, 2 tasks, latest activity Donald Rester",
+      "due": "2026-08-12",
+      "done": false
+    },
+    {
+      "agent": "james",
+      "client": "Brian Duarte",
+      "key": "brian-duarte-nudge",
+      "title": "Brian Duarte — 'Search for Brian' collection pushed 7/23: 19 days, 1 open. Re-push with different properties or call",
+      "due": "2026-08-16",
       "done": false
     }
   ],
