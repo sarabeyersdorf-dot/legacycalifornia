@@ -178,9 +178,9 @@ async function listWeek(req, res, supa) {
   const apptQuery = (cols) => supa.from('appointments').select(cols)
     .gte('starts_at', startISO).lt('starts_at', endISO)
     .order('starts_at', { ascending: true });
-  const APPT_COLS_MD = 'id, lead_id, title, kind, sub_kind, all_day, ends_at, starts_at, duration_minutes, notes, visibility, client_label, leads(first_name,last_name,email)';
-  const APPT_COLS    = 'id, lead_id, title, kind, sub_kind, starts_at, duration_minutes, notes, visibility, client_label, leads(first_name,last_name,email)';
-  const APPT_COLS_FB = 'id, lead_id, title, kind, starts_at, duration_minutes, notes, visibility, client_label, leads(first_name,last_name,email)';
+  const APPT_COLS_MD = 'id, lead_id, deal_id, title, kind, sub_kind, all_day, ends_at, starts_at, duration_minutes, notes, visibility, client_label, leads(first_name,last_name,email)';
+  const APPT_COLS    = 'id, lead_id, deal_id, title, kind, sub_kind, starts_at, duration_minutes, notes, visibility, client_label, leads(first_name,last_name,email)';
+  const APPT_COLS_FB = 'id, lead_id, deal_id, title, kind, starts_at, duration_minutes, notes, visibility, client_label, leads(first_name,last_name,email)';
 
   let [toursRes, apptRes] = await Promise.all([
     supa.from('tours')
@@ -248,7 +248,7 @@ async function listWeek(req, res, supa) {
             all_day: true, time_label: 'All day', end_label: '',
             kind_label: label, sub_kind: a.sub_kind || null,
             client_email: lead.email || null, client_name: who,
-            lead_id: a.lead_id || null, shared: a.visibility === 'client', client_label: a.client_label || null,
+            lead_id: a.lead_id || null, deal_id: a.deal_id || null, shared: a.visibility === 'client', client_label: a.client_label || null,
             location: null,
             edit: { source: 'appointment', kind: a.kind || 'block', title: a.title || '', sub_kind: a.sub_kind || null,
               date: startKey, time: '12:00', duration_minutes: Number(a.duration_minutes) || 1440,
@@ -277,7 +277,7 @@ async function listWeek(req, res, supa) {
       time_label: timeLabel(p.hour, p.minute), end_label: timeLabel(end.hour, end.minute),
       kind_label: label, sub_kind: a.sub_kind || null,
       client_email: lead.email || null, client_name: who,
-      lead_id: a.lead_id || null, shared: a.visibility === 'client', client_label: a.client_label || null,
+      lead_id: a.lead_id || null, deal_id: a.deal_id || null, shared: a.visibility === 'client', client_label: a.client_label || null,
       location: null,
       edit: {
         source: 'appointment', kind: a.kind || 'block', title: a.title || '', sub_kind: a.sub_kind || null,
@@ -288,12 +288,16 @@ async function listWeek(req, res, supa) {
   }
 
   // ---- Tie each event to its deal (for colour-coding + the by-deal filter) --
-  // Events carry a lead_id; deal_parties maps that lead to a deal. Resolve in
-  // two small batched queries, then stamp deal_key/deal_address on each event.
+  // An event links to a deal directly (deal_id — a deal-scoped shared event) or
+  // via its lead (deal_parties maps the lead to a deal). Resolve both, then stamp
+  // deal_key/deal_address on each event.
   const evLeadIds = [...new Set(events.map((e) => e.lead_id).filter(Boolean))];
-  if (evLeadIds.length) {
-    const { data: parties } = await supa.from('deal_parties').select('lead_id, deal_id').in('lead_id', evLeadIds);
-    const dealIds = [...new Set((parties || []).map((p) => p.deal_id).filter(Boolean))];
+  const evDealIds = [...new Set(events.map((e) => e.deal_id).filter(Boolean))];
+  if (evLeadIds.length || evDealIds.length) {
+    const { data: parties } = evLeadIds.length
+      ? await supa.from('deal_parties').select('lead_id, deal_id').in('lead_id', evLeadIds)
+      : { data: [] };
+    const dealIds = [...new Set([...(parties || []).map((p) => p.deal_id), ...evDealIds].filter(Boolean))];
     if (dealIds.length) {
       const { data: dRows } = await supa.from('deals').select('id, source_key, address, stage').in('id', dealIds);
       const dealById = new Map((dRows || []).map((d) => [d.id, d]));
@@ -303,7 +307,7 @@ async function listWeek(req, res, supa) {
         if (d && d.source_key && !leadToDeal.has(p.lead_id)) leadToDeal.set(p.lead_id, d);
       }
       for (const e of events) {
-        const d = e.lead_id ? leadToDeal.get(e.lead_id) : null;
+        const d = (e.deal_id && dealById.get(e.deal_id)) || (e.lead_id ? leadToDeal.get(e.lead_id) : null);
         if (d) { e.deal_key = d.source_key; e.deal_address = d.address || null; e.deal_stage = d.stage || null; }
       }
     }
@@ -413,7 +417,29 @@ async function createOrInvite(req, res, supa, agent) {
       const { data } = await supa.from('leads').select('id').eq('email', email).maybeSingle();
       leadId = data?.id || null;
     }
-    const rowBase = { title, kind, starts_at: scheduled.toISOString(), duration_minutes: duration, agent, lead_id: leadId, notes };
+    // Deal linkage → colour-coding on the calendar + deal-scoped portal sharing.
+    let dealId = null;
+    const dealKey = typeof body?.deal_key === 'string' ? body.deal_key.trim() : '';
+    if (dealKey) {
+      const { data: dd } = await supa.from('deals').select('id').eq('source_key', dealKey).maybeSingle();
+      dealId = dd?.id || null;
+    }
+    // Sharing to client portals. 'deal' → every party of the deal sees it (one
+    // event, both seller + buyer); 'client' → just the linked lead; else internal.
+    const share = typeof body?.share === 'string' ? body.share.trim().toLowerCase() : 'none';
+    let visibility = 'internal';
+    if (share === 'deal') {
+      if (!dealId) return fail(res, 400, 'share=deal needs a deal_key that resolves to a deal');
+      visibility = 'client';
+      leadId = null;                 // deal-scoped: not tied to a single party
+    } else if (share === 'client') {
+      if (!leadId) return fail(res, 400, 'share=client needs a linked client email');
+      visibility = 'client';
+    }
+    // A shared appointment must carry a client-facing label (DB constraint).
+    const clientLabel = typeof body?.client_label === 'string' ? body.client_label.trim() : '';
+    const label = visibility === 'client' ? (clientLabel || title) : null;
+    const rowBase = { title, kind, starts_at: scheduled.toISOString(), duration_minutes: duration, agent, lead_id: leadId, notes, deal_id: dealId, visibility, client_label: label };
     if (isAllDay && endsAt) { rowBase.all_day = true; rowBase.ends_at = endsAt.toISOString(); }
     const SEL = 'id, title, kind, starts_at, duration_minutes';
     let ins = await supa.from('appointments').insert({ ...rowBase, sub_kind: subKind }).select(SEL).single();
