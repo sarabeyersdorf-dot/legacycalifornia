@@ -243,6 +243,12 @@ function mapDeal(d) {
     photo_url:      d.photo      || d.photoUrl      || null,
     video_url:      d.video      || d.youtube       || d.videoUrl      || null,
     matterport_url: d.matterport || d.matterportUrl || null,
+    // Weekly ListTrac "Online Activity" digest (db/067). Cowork parses the
+    // ListTrac email into deals.json → shows on the seller portal's marketing
+    // panel. Authoritative here, so each week's numbers replace the prior week.
+    // (video_views is deliberately NOT mapped — the youtube-views cron owns it,
+    // so it must survive this sync.)
+    marketing_stats: (d.marketing && typeof d.marketing === 'object' && !Array.isArray(d.marketing)) ? d.marketing : null,
     // Listing-sheet metadata (client, apn, beds/baths, sqft, lot, year, dates,
     // commission, disclosure package, branded video) for the Listings roster.
     // A top-level "client" (buyer/seller name from the executed docs) folds in

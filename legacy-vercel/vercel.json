@@ -218,6 +218,10 @@
     {
       "path": "/api/cron/buyer-matches?key=thisisasecret1234",
       "schedule": "12 15 * * *"
+    },
+    {
+      "path": "/api/cron/youtube-views?key=thisisasecret1234",
+      "schedule": "45 14 * * *"
     }
   ]
 }

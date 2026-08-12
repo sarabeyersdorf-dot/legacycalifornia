@@ -307,42 +307,14 @@ body.lp-restyle {
         </div>
       </section>
 
-      <!-- The campaign (screen 2A) — proof of work. Collapsible: a client can
-           tap the header to close it. Hero walkthrough links to the real video
-           (tour.video_url) when present; the stills reel is a placeholder until
-           real photography lands; the attention/activity panels stay hidden
-           until a campaign data source feeds campaign_channels / _activity. -->
-      <details class="ds-card ds-campaign" open>
-        <summary><h3>The campaign</h3><span class="meta">what we made to sell your home — tap to collapse</span></summary>
-        <div class="ds-campaign-in">
-          <div class="ds-camp-hero">
-            <div class="play"><span>&#9654;</span></div>
-            <div class="ds-camp-cap"><span class="t">The full walkthrough</span><span class="s">A cinematic tour of your home</span><a class="share" data-bind-href="tour.video_url" href="#" target="_blank" rel="noopener">Watch &amp; share &#8599;</a></div>
-          </div>
-          <div class="ds-camp-reel"><span class="ds-camp-still"></span><span class="ds-camp-still"></span><span class="ds-camp-still"></span><span class="ds-camp-still"></span><span class="ds-camp-still"></span><span class="ds-camp-still"></span></div>
-          <div class="ds-camp-reel-cap">Listing photography &amp; stills — replace with the real gallery.</div>
-          <div class="ds-camp-cols">
-            <div>
-              <div class="ds-camp-h4">Where the attention came from</div>
-              <div class="ds-chan" data-list="campaign_channels">
-                <div class="ds-chan-row" data-row data-bind-style="--_c:color" style="display:none;">
-                  <span class="l" data-bind="label">Channel</span>
-                  <span class="track"><span class="fill" data-bind-style="width:width"></span></span>
-                  <span class="v" data-bind="value">—</span>
-                </div>
-              </div>
-            </div>
-            <div>
-              <div class="ds-camp-h4">What we ran</div>
-              <div class="ds-ran" data-list="campaign_activity">
-                <div class="ds-ran-row" data-row data-bind-style="--_c:color" style="display:none;">
-                  <div class="b"><div class="t" data-bind="title">Activity</div><div class="d" data-bind="detail" data-optional>—</div></div>
-                  <span class="w" data-bind="when" data-optional>—</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
+      <!-- Marketing activity (screen 2A) — the weekly ListTrac "Online Activity"
+           digest for this listing (property views / shares / inquiries, the sites
+           and cities the views came from, and any highlight callouts). Collapsible.
+           Rendered by JS from portal.marketing; hidden entirely until there's a
+           report to show, and dropped for buy-side deals (no listing marketing). -->
+      <details class="ds-card ds-campaign" id="sell-campaign-wrap" open hidden>
+        <summary><h3>Marketing activity</h3><span class="meta">how your listing is performing online — tap to collapse</span></summary>
+        <div class="ds-campaign-in" id="sell-campaign"></div>
       </details>
 
       <div class="ds-portal-body">
@@ -496,11 +468,13 @@ body.lp-restyle {
       var ok = function (u) { return typeof u === 'string' && /^https?:\/\//.test(u); };
       var esc = function (u) { return String(u).replace(/"/g, '%22'); };
       // Embed the video + 3D tour as playable frames sitting side by side.
+      var vv = (typeof tour.video_views === 'number' && tour.video_views >= 0)
+        ? ' · ' + tour.video_views.toLocaleString() + ' views' : '';
       if (tour.video_id) {
         cells += '<figure class="ds-tour-cell">' +
           '<iframe src="https://www.youtube.com/embed/' + encodeURIComponent(tour.video_id) + '" title="Video tour" frameborder="0" ' +
           'allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen loading="lazy"></iframe>' +
-          '<figcaption>▶ Video tour</figcaption></figure>';
+          '<figcaption>▶ Video tour' + vv + '</figcaption></figure>';
       } else if (ok(tour.video_url)) {
         cells += '<figure class="ds-tour-cell ds-tour-cell--link"><a href="' + esc(tour.video_url) + '" target="_blank" rel="noopener">▶ Watch the video tour</a></figure>';
       }
@@ -510,6 +484,7 @@ body.lp-restyle {
           '<figcaption>◱ 3D walkthrough</figcaption></figure>';
       }
       if (box) box.innerHTML = cells ? '<div class="ds-tour-grid">' + cells + '</div>' : '';
+      renderMarketing(portal.marketing);
       // Per-agent: "Message {agent}" + note avatar reflect the deal's agent.
       var c = portal.contact || {};
       var first = (c.first || '').replace(/[<>"]/g, '');
@@ -520,6 +495,49 @@ body.lp-restyle {
       // Agent preview: reveal the tickable tasks + the note-for-briefing.
       if (portal.viewer_is_agent) setupAgentPortal(portal);
     }).catch(function () {});
+
+  // Render the weekly ListTrac marketing digest into the "Marketing activity"
+  // panel. Hides the whole panel when there's no report yet (or it was removed
+  // for a buy-side deal). Pure data → HTML, so it always reflects the latest sync.
+  function renderMarketing(mk) {
+    var wrap = document.getElementById('sell-campaign-wrap');
+    var box = document.getElementById('sell-campaign');
+    if (!wrap || !box) return;                 // buy-side removed the panel
+    if (!mk) { wrap.hidden = true; return; }
+    var e = function (s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) { return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]); }); };
+    var n = function (v) { return (typeof v === 'number' && isFinite(v)) ? v.toLocaleString() : '—'; };
+    var html = '';
+    if (mk.period) html += '<div class="ds-mkt-period">Reporting period · ' + e(mk.period) + '</div>';
+    html += '<div class="ds-mkt-stats">' +
+      '<div class="ds-mkt-tile"><div class="fig">' + n(mk.views) + '</div><div class="lab">Property views</div></div>' +
+      '<div class="ds-mkt-tile"><div class="fig">' + n(mk.shares) + '</div><div class="lab">Shares</div></div>' +
+      '<div class="ds-mkt-tile"><div class="fig">' + n(mk.inquiries) + '</div><div class="lab">Inquiries</div></div>' +
+      '</div>';
+    if (mk.callouts && mk.callouts.length) {
+      html += '<div class="ds-mkt-callouts">' + mk.callouts.map(function (c) { return '<div class="ds-mkt-callout">' + e(c) + '</div>'; }).join('') + '</div>';
+    }
+    var cols = '';
+    if (mk.top_sites && mk.top_sites.length) {
+      var max = Math.max.apply(null, mk.top_sites.map(function (s) { return s.views || 0; }).concat([1]));
+      cols += '<div><div class="ds-camp-h4">Where the views came from</div><div class="ds-chan">' +
+        mk.top_sites.map(function (s) {
+          var w = Math.max(4, Math.round((s.views || 0) / max * 100));
+          var inq = s.inquiries ? '<span class="ds-mkt-inq"> · ' + s.inquiries + ' inq</span>' : '';
+          return '<div class="ds-chan-row"><span class="l" title="' + e(s.name) + '">' + e(s.name) + '</span>' +
+            '<span class="track"><span class="fill" style="width:' + w + '%"></span></span>' +
+            '<span class="v">' + n(s.views) + inq + '</span></div>';
+        }).join('') + '</div></div>';
+    }
+    if (mk.top_cities && mk.top_cities.length) {
+      cols += '<div><div class="ds-camp-h4">Top cities</div><div class="ds-mkt-cities">' +
+        mk.top_cities.map(function (c) { return '<div class="ds-mkt-city"><span>' + e(c.name) + '</span><span class="v">' + n(c.views) + '</span></div>'; }).join('') +
+        '</div></div>';
+    }
+    if (cols) html += '<div class="ds-camp-cols" data-painted>' + cols + '</div>';
+    html += '<div class="ds-mkt-foot">Source: ListTrac / MLS' + (mk.report_date ? ' · report dated ' + e(mk.report_date) : '') + '</div>';
+    box.innerHTML = html;
+    wrap.hidden = false;
+  }
 
   // AGENT-ONLY: on an agent's preview, the task checkboxes become tickable
   // (mark complete → drops off the client's list) and a private note-for-the-
