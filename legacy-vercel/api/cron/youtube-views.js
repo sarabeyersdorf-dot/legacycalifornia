@@ -23,11 +23,12 @@ export default async function handler(req, res) {
 
   const supa = adminClient();
   try {
-    // Every deal with a video — deals.json's video_url OR a CRM override.
+    // Every deal — a video can live in the synced video_url column OR in a CRM
+    // override (agent_overrides.video_url). The table is small, so fetch all and
+    // resolve in JS rather than trust a jsonb filter to catch both sources.
     const { data: deals, error } = await supa
       .from('deals')
-      .select('id, source_key, video_url, agent_overrides')
-      .not('video_url', 'is', null);
+      .select('id, source_key, video_url, agent_overrides');
     if (error) return res.status(500).json({ success: false, error: error.message });
 
     let updated = 0, skipped = 0, notFound = 0;
