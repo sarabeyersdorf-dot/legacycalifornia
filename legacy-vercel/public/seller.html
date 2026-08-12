@@ -492,11 +492,24 @@ body.lp-restyle {
       var url = portal.status && portal.status.photo;
       var img = document.getElementById('sell-hero-photo');
       if (img && url) { img.src = url; img.style.display = 'block'; }
-      var tour = portal.tour || {}, box = document.getElementById('sell-tour'), html = '';
+      var tour = portal.tour || {}, box = document.getElementById('sell-tour'), cells = '';
       var ok = function (u) { return typeof u === 'string' && /^https?:\/\//.test(u); };
-      if (ok(tour.video_url))      html += '<a href="' + tour.video_url + '" target="_blank" rel="noopener">▶ Watch the video tour</a>';
-      if (ok(tour.matterport_url)) html += '<a href="' + tour.matterport_url + '" target="_blank" rel="noopener">◱ 3D walkthrough</a>';
-      if (box) box.innerHTML = html;
+      var esc = function (u) { return String(u).replace(/"/g, '%22'); };
+      // Embed the video + 3D tour as playable frames sitting side by side.
+      if (tour.video_id) {
+        cells += '<figure class="ds-tour-cell">' +
+          '<iframe src="https://www.youtube.com/embed/' + encodeURIComponent(tour.video_id) + '" title="Video tour" frameborder="0" ' +
+          'allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen loading="lazy"></iframe>' +
+          '<figcaption>▶ Video tour</figcaption></figure>';
+      } else if (ok(tour.video_url)) {
+        cells += '<figure class="ds-tour-cell ds-tour-cell--link"><a href="' + esc(tour.video_url) + '" target="_blank" rel="noopener">▶ Watch the video tour</a></figure>';
+      }
+      if (ok(tour.matterport_url)) {
+        cells += '<figure class="ds-tour-cell">' +
+          '<iframe src="' + esc(tour.matterport_url) + '" title="3D walkthrough" frameborder="0" allow="xr-spatial-tracking; fullscreen" allowfullscreen loading="lazy"></iframe>' +
+          '<figcaption>◱ 3D walkthrough</figcaption></figure>';
+      }
+      if (box) box.innerHTML = cells ? '<div class="ds-tour-grid">' + cells + '</div>' : '';
       // Per-agent: "Message {agent}" + note avatar reflect the deal's agent.
       var c = portal.contact || {};
       var first = (c.first || '').replace(/[<>"]/g, '');
