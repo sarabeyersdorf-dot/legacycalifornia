@@ -233,30 +233,33 @@ export default async function handler(req, res) {
     const isArchivedEscrowDoc = (doc) =>
       doc.scope === 'transaction' && doc.escrow_id && escrowStatusById.get(doc.escrow_id) !== 'active';
 
-    // 2. Documents for this deal — governed, FAIL CLOSED --------------------
-    // Visibility is NOT read from deal_documents.client_safe (which defaults true
-    // and is rebuilt hourly — it fails open). It comes from the governance table
-    // (db/053), which the hourly rebuild never touches. A document is shown only
-    // when a matching grant makes it visible to THIS viewer's audience; anything
-    // ungoverned, mismatched, or key-less stays hidden. See SPEC_portal_document_model.md.
+    // 2. Documents for this deal ---------------------------------------------
+    // A SELLER sees their own file by default: any client-safe document shows,
+    // without waiting on per-doc folder governance (every deal has a different
+    // set — there's no fixed checklist). An explicit grant still wins, so a
+    // document can be pinned to a specific audience or hidden (agent_only), and a
+    // doc marked client_safe = false never shows.
     //
-    //   audience  — a buyer-side deal shows buyer/both; otherwise seller/both, so
-    //               a seller never sees a buyer-only doc and vice-versa.
-    //   fail-open guard — the grant's fingerprint must still match the document's
+    // A BUYER stays locked down: they see ONLY documents explicitly granted to
+    // buyer/both, so a buyer can never pick up a stray seller-side file (e.g. the
+    // listing agreement, or a prior escrow's paperwork). db/053 governance.
+    //
+    //   audience  — a buyer-side deal is a buyer portal; otherwise a seller portal.
+    //   fail-open guard — a grant's fingerprint must still match the document's
     //               name, so a reused doc_key can't inherit an old grant.
     const audience = /buyer/.test(String(deal.side || '').toLowerCase()) ? 'buyer' : 'seller';
     const normName = (s) => String(s || '').trim().toLowerCase();
     let allDocs = [];
     {
       let dr = await supa.from('deal_documents')
-        .select('doc_type, name, sub, status, party_owed, doc_url, doc_key, scope, escrow_id')
+        .select('doc_type, name, sub, status, party_owed, doc_url, doc_key, scope, escrow_id, client_safe')
         .eq('deal_id', deal.id);
       if (dr.error) {
         // pre-052/055 (no scope/doc_key/escrow_id columns): degrade to the minimal
-        // set. Without doc_key nothing can be governed, so the portal shows zero
-        // docs — the safe (fail-closed) degradation until the migration lands.
+        // set. A seller still sees their client-safe docs; a buyer sees none
+        // (no doc_key to match a grant), which stays safe.
         dr = await supa.from('deal_documents')
-          .select('doc_type, name, sub, status, party_owed, doc_url')
+          .select('doc_type, name, sub, status, party_owed, doc_url, client_safe')
           .eq('deal_id', deal.id);
       }
       allDocs = dr.data || [];
@@ -266,15 +269,22 @@ export default async function handler(req, res) {
       const { data: gov } = await supa.from('deal_document_governance')
         .select('doc_key, visibility, doc_fingerprint').eq('deal_id', deal.id);
       govByKey = new Map((gov || []).map((g) => [g.doc_key, g]));
-    } catch (_) { /* pre-053: no grants → everything stays agent_only (fail closed) */ }
+    } catch (_) { /* pre-053: no grants → seller default below still applies */ }
     // Visibility + audience gate (shared by the live list and escrow history).
     const maySee = (doc) => {
-      if (!doc.doc_key) return false;                      // ungoverned → hidden
-      const g = govByKey.get(doc.doc_key);
-      if (!g) return false;                                // no grant → agent_only
-      if (normName(g.doc_fingerprint) !== normName(doc.name)) return false; // key-reuse guard
-      const v = g.visibility || 'agent_only';
-      return v === 'both' || v === audience;               // audience-scoped
+      // An explicit grant (fingerprint-matched) always wins — it can widen,
+      // narrow, or hide (agent_only) a document for either audience.
+      if (doc.doc_key) {
+        const g = govByKey.get(doc.doc_key);
+        if (g && normName(g.doc_fingerprint) === normName(doc.name)) {
+          const v = g.visibility || 'agent_only';
+          return v === 'both' || v === audience;
+        }
+      }
+      // No explicit grant: the SELLER sees their own client-safe documents by
+      // default; a BUYER sees nothing ungoverned (fail closed for buyers).
+      if (audience !== 'seller') return false;
+      return doc.client_safe !== false;
     };
     // Live list: visible docs that are NOT archived with a dead/other escrow.
     const docs = allDocs.filter((doc) => maySee(doc) && !isArchivedEscrowDoc(doc));
@@ -336,10 +346,18 @@ export default async function handler(req, res) {
                      : 'Price';
     const STAGE_LABEL = { pending: 'In escrow', listing: 'On the market', preparing: 'Preparing to list', closed: 'Sold' };
     const stageLabel = STAGE_LABEL[deal.stage] || sanitize(deal.stage || '');
-    const docsKpi = { label: 'Documents', value: `${signed} / ${docs.length}`, change: docs.length > signed ? `${docs.length - signed} open` : 'complete' };
+    // Documents KPI shows the ACTUAL number of documents in this deal's portal —
+    // never a fixed "X / Y" (there's no predetermined checklist; every deal has a
+    // different set). Omitted entirely when there are none, so a deal with no
+    // shared docs shows no misleading "0 / 0" tile — the Documents section below
+    // simply lists what's there (or a short empty note).
+    const docsKpi = docs.length
+      ? { label: 'Documents', value: String(docs.length),
+          change: signed < docs.length ? `${docs.length - signed} to sign` : 'all in' }
+      : null;
 
     // KPIs are stage-appropriate — escrow terms only when actually in escrow.
-    const kpis = inEscrow
+    const kpis = (inEscrow
       ? [
           { label: 'Days to close',   value: dtc != null ? String(dtc) : '—', change: dtc != null && dtc >= 0 ? 'On schedule' : '' },
           { label: priceLabel,        value: fmtUSD(price), change: '' },
@@ -350,7 +368,7 @@ export default async function handler(req, res) {
           { label: priceLabel, value: fmtUSD(price), change: '' },
           { label: 'Status',   value: stageLabel, change: '' },
           docsKpi
-        ];
+        ]).filter(Boolean);
 
     // Road to closing. Preferred source: the curated deal_timeline_items —
     // the plain-English contractual timeline the agent approves updates to
@@ -764,7 +782,10 @@ export default async function handler(req, res) {
       },
       // Weekly ListTrac marketing digest (null when there's nothing to show).
       marketing,
-      nav: { documents: String(docs.length), tasks: String(tasks.length) },
+      nav: { documents: docs.length ? String(docs.length) : '', tasks: String(tasks.length) },
+      // Shown in the Documents section only when there are none, so the section
+      // never sits empty or implies a fixed checklist.
+      documents_empty: docs.length ? '' : 'No documents have been shared here yet — they’ll appear as your file comes together.',
       kpis, road, documents: documentsArr, tasks, team,
       good_to_know: goodToKnow,
       // Agent-preview affordances (db/040): only an agent viewing gets the

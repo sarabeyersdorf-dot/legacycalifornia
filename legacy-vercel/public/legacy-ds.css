@@ -477,6 +477,7 @@ body.agent-preview .ds-action-box{cursor:pointer;}
 .ds-doc-st{font-size:12px;color:var(--muted);white-space:nowrap;}
 .ds-doc-acts{display:flex;gap:8px;}
 .ds-doc-link{font-size:13px;color:#416180;text-decoration:none;white-space:nowrap;}
+.ds-doc-empty{padding:14px 16px;font-size:13.5px;color:var(--faint);font-style:italic;}
 
 /* team */
 /* Your team — one distinct-colored box per member. Accent (--tc) is bound
