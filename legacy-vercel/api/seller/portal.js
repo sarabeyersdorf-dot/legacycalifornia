@@ -341,7 +341,12 @@ export default async function handler(req, res) {
     const isListing  = deal.stage === 'listing';
     const isPreparing= deal.stage === 'preparing';
     const isClosed   = deal.stage === 'closed';
-    const isBuyerSide = deal.side === 'buyer';
+    // Buyer-vs-seller FRAMING follows the viewer's role (audience), not just the
+    // deal side — so a buyer-party on a both-sided in-house deal (side 'both')
+    // gets the purchase view: no listing marketing, "Your purchase" framing, and
+    // (below) their own agent's note + contact. A seller-party still gets the
+    // sale view. This drives price label, marketing, headline, note, is_buyer.
+    const isBuyerSide = audience === 'buyer';
 
     // Price is stage-correct: a listing shows its LIST price; an in-escrow /
     // closed deal shows the agreed PRICE. Label matches — "List price" while
@@ -557,15 +562,21 @@ export default async function handler(req, res) {
 
     // Agent identity (real contact info) — fetched up front so the team block
     // carries the agent's email + phone. Fail-soft to sensible defaults.
+    // The VIEWER's agent: on a both-sided in-house deal (side 'both') deal.agent
+    // is the LISTING agent; the OTHER Legacy agent represents the buyer, so a
+    // buyer viewer sees their own agent (James), their note, and their contact.
+    const agentKey = (isBuyerSide && deal.side === 'both')
+      ? (deal.agent === 'james' ? 'sara' : 'james')
+      : (deal.agent || 'sara');
     let agentRow = null;
     try {
-      const { data } = await supa.from('agents').select('name, phone, email, title, dre_number').eq('agent_key', deal.agent || 'sara').maybeSingle();
+      const { data } = await supa.from('agents').select('name, phone, email, title, dre_number').eq('agent_key', agentKey).maybeSingle();
       agentRow = data || null;
     } catch (_) { /* agents table optional */ }
-    const agentName  = agentRow?.name  || (deal.agent === 'james' ? 'James Beyersdorf' : 'Sara Cooper');
+    const agentName  = agentRow?.name  || (agentKey === 'james' ? 'James Beyersdorf' : 'Sara Cooper');
     const agentFirst = (agentName.split(' ')[0]) || 'Sara';
-    const agentPhone = agentRow?.phone || (deal.agent === 'james' ? '209-770-7523' : '209-559-4966');
-    const agentEmail = agentRow?.email || (deal.agent === 'james' ? 'JamesSellsCalifornia@gmail.com' : 'SaraSellsCalifornia@gmail.com');
+    const agentPhone = agentRow?.phone || (agentKey === 'james' ? '209-770-7523' : '209-559-4966');
+    const agentEmail = agentRow?.email || (agentKey === 'james' ? 'JamesSellsCalifornia@gmail.com' : 'SaraSellsCalifornia@gmail.com');
 
     // Team — one distinct-colored box per member, each reachable in one tap. The
     // agent ALWAYS carries email + phone; escrow / co-agent / lender show whatever
@@ -598,7 +609,7 @@ export default async function handler(req, res) {
     const team = [];
     team.push(teamMember({
       name: agentName,
-      sub: (agentRow?.title || (deal.agent === 'james' ? 'Agent' : 'Broker-Owner')) + ' · Legacy',
+      sub: (agentRow?.title || (agentKey === 'james' ? 'Agent' : 'Broker-Owner')) + ' · Legacy',
       accent: '#4a7a55',                                   // green — your agent
       phone: agentPhone, email: agentEmail
     }));
@@ -616,11 +627,16 @@ export default async function handler(req, res) {
       }));
     }
 
+    // The OTHER side's agent. Labelled from the viewer's seat — a seller sees the
+    // buyer's-side agent, a buyer sees the listing-side agent. Skipped when it
+    // resolves to the viewer's own agent (on a both-sided in-house deal the
+    // co-agent field holds the other Legacy agent, already shown above).
     const coRaw = ct.coAgent || deal.co_agent;
-    if (coRaw) {
+    const coClean = cleanName(coRaw);
+    if (coRaw && normName(coClean) !== normName(agentName)) {
       team.push(teamMember({
-        name: cleanName(coRaw) || "Buyer's agent",
-        sub: (ct.coAgentCompany ? cleanName(ct.coAgentCompany) + ' · ' : '') + "Buyer's side",
+        name: coClean || (isBuyerSide ? 'Listing agent' : "Buyer's agent"),
+        sub: (ct.coAgentCompany ? cleanName(ct.coAgentCompany) + ' · ' : '') + (isBuyerSide ? 'Listing side' : "Buyer's side"),
         accent: '#597ea3',                                 // blue — the other side
         phone: ct.coAgentPhone, email: ct.coAgentEmail || firstEmail(coRaw)
       }));
