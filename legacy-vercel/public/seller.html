@@ -278,7 +278,7 @@ setTimeout(function(){var p=document.getElementById('portal-loading');if(p&&p.pa
     <header class="ds-topbar ds-portal-top">
       <a href="index.html" class="ds-wordmark">LEGACY</a>
       <span class="ds-vr"></span>
-      <span class="ds-prod">Seller portal</span>
+      <span class="ds-prod" data-bind="status.product_label">Seller portal</span>
       <div class="ds-right">
         <span class="ds-portal-addr" data-bind="status.address">Your listing</span>
         <button class="ds-btn ds-btn--primary" id="sell-msg-btn" type="button">Message Sara</button>
@@ -474,6 +474,14 @@ setTimeout(function(){var p=document.getElementById('portal-loading');if(p&&p.pa
       var portal = (d && d.portal) || {};
       // Buy-side deals get no listing marketing — drop the campaign recap.
       if (portal.is_buyer) { var _camp = document.querySelector('.ds-campaign'); if (_camp) _camp.remove(); }
+      // Side-aware chrome: a buyer must never see "Seller" in the tab title or
+      // the screen label. Driven from the payload so it matches the top-bar label.
+      try {
+        var _hl = (portal.status && portal.status.headline) || (portal.is_buyer ? 'Your purchase' : 'Your sale');
+        var _pl = (portal.status && portal.status.product_label) || (portal.is_buyer ? 'Buyer portal' : 'Seller portal');
+        document.title = _hl + ' · Legacy ' + (portal.is_buyer ? 'Buyer' : 'Seller') + ' Portal';
+        document.body.setAttribute('data-screen-label', _pl);
+      } catch (e) {}
       var url = portal.status && portal.status.photo;
       var img = document.getElementById('sell-hero-photo');
       if (img && url) { img.src = url; img.style.display = 'block'; }
