@@ -4194,8 +4194,10 @@
       const roster = (mb && mb.roster) || {};
       const drafts = mb.drafts || [], tours = mb.tours_today || [], quiet = mb.radio_silence || [];
       const appts = mb.appointments_today || [];
+      const viewerAgent = mb.viewer_agent || 'sara';
       const APPT_LABEL = { inspection: 'Inspection', showing: 'Showing', listing_appt: 'Listing appt', walkthrough: 'Walkthrough', follow_up: 'Follow-up', appraisal: 'Appraisal', call: 'Call', meeting: 'Meeting', open: 'Open house', block: 'Block' };
       const apptLabel = (a) => a.kind === 'inspection' ? (a.sub_kind ? a.sub_kind + ' inspection' : 'Inspection') : (APPT_LABEL[a.kind] || 'Appointment');
+      const apptWho = (a) => (a.agent && a.agent !== viewerAgent) ? (a.agent === 'james' ? 'James' : 'Sara') : '';
       // Resolve a group's source_keys to their deal rows (skip any that aren't in
       // the flat list — e.g. a just-added escrow that hasn't synced into deals yet).
       const dealsIn = (g) => (Array.isArray(groups[g]) ? groups[g] : []).map((k) => deals.find((d) => d && d.source_key === k)).filter(Boolean);
@@ -4237,7 +4239,7 @@
         const items = []
           .concat(drafts.map((d) => ({ kind: 'draft', lead_id: d.lead_id, name: fullName(d.leads || {}) || 'A lead', title: d.subject || 'Draft reply ready', ctx: `Draft ${d.channel || 'reply'} awaiting your approval`, due: 'Review', stg: 'nurture' })))
           .concat(tours.map((t) => ({ kind: 'tour', lead_id: (t.leads && t.leads.id) || null, name: fullName(t.leads || {}) || 'Client', title: `${t.tour_type === 'video' ? 'Video tour' : 'Showing'} · ${fullName(t.leads || {}) || 'client'}`, ctx: (t.properties && [t.properties.address, t.properties.city].filter(Boolean).join(', ')) || 'Location TBD', due: dashClock(t.scheduled_at), stg: 'on_market' })))
-          .concat(appts.map((a) => { const addr = a.deals ? [a.deals.address, a.deals.city].filter(Boolean).join(', ') : ''; const lbl = apptLabel(a); return { kind: 'appt', lead_id: null, name: a.title || lbl, title: a.title ? `${lbl} · ${a.title}` : lbl, ctx: addr || a.client_label || 'On your calendar', due: a.all_day ? 'All day' : dashClock(a.starts_at), stg: 'on_market' }; }));
+          .concat(appts.map((a) => { const addr = a.deals ? [a.deals.address, a.deals.city].filter(Boolean).join(', ') : ''; const lbl = apptLabel(a); const who = apptWho(a); const base = a.title ? `${lbl} · ${a.title}` : lbl; return { kind: 'appt', lead_id: null, name: a.title || lbl, title: who ? `${who} · ${base}` : base, ctx: addr || a.client_label || 'On your calendar', due: a.all_day ? 'All day' : dashClock(a.starts_at), stg: 'on_market' }; }));
         const todayHost = root.querySelector('[data-dash-today]');
         setT('[data-bind-dash-todaycount]', `${items.length} item${items.length === 1 ? '' : 's'}${drafts.length ? ` · ${drafts.length} to review` : ''}`);
         if (todayHost) {

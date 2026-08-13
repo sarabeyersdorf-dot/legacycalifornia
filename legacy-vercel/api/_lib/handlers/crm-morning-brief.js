@@ -66,8 +66,11 @@ export default async function handler(req, res) {
       'form_submitted','email_opened','sms_replied','score_change','portal_message'
     ];
 
-    // The signed-in agent — appointments are scoped to whoever is looking.
+    // The signed-in agent. James sees only his own appointments; the broker-owner
+    // (Sara / admin) sees the whole brokerage's day — both agents' appointments,
+    // each tagged with whose it is on the front-end.
     const callerAgent = (profile && profile.role === 'agent_james') ? 'james' : 'sara';
+    const brokerView  = !(profile && profile.role === 'agent_james');
     // "Today" means today in PACIFIC time. A UTC day-window drops evening-Pacific
     // events (after ~5pm they roll into tomorrow UTC), so pull a wide window and
     // keep only the rows whose Pacific calendar date is today.
@@ -75,6 +78,11 @@ export default async function handler(req, res) {
     const todayLA = laFmt.format(now);
     const wideLo = new Date(now.getTime() - 18 * 3600 * 1000).toISOString();
     const wideHi = new Date(now.getTime() + 30 * 3600 * 1000).toISOString();
+
+    let apptQuery = supa.from('appointments')
+      .select('id, title, kind, sub_kind, client_label, starts_at, duration_minutes, all_day, agent, lead_id, deal_id, leads(first_name,last_name), deals(address,city)')
+      .gte('starts_at', wideLo).lte('starts_at', wideHi).order('starts_at');
+    if (!brokerView) apptQuery = apptQuery.eq('agent', 'james');
 
     const [drafts, toursToday, radioSilence, newToday, openOffers,
            leadsTotal, clientsCount, pastClientsCount, activeListings, calendarWeek,
@@ -136,15 +144,11 @@ export default async function handler(req, res) {
       supa.from('tours')      .select('lead_id', { count: 'exact', head: true }).gte('scheduled_at', ninetyAgo),
       supa.from('offers')     .select('buyer_lead_id', { count: 'exact', head: true }).gte('created_at', ninetyAgo),
       supa.from('leads')      .select('id', { count: 'exact', head: true }).in('pipeline_stage', ['closed','close']).gte('updated_at', ninetyAgo),
-      // Today's appointments (inspections, showings, listing appts, meetings…),
-      // scoped to the signed-in agent. This was missing entirely — the Today
-      // board only knew about tours, so a full day of inspections read "all clear".
-      supa.from('appointments')
-          .select('id, title, kind, sub_kind, client_label, starts_at, duration_minutes, all_day, agent, lead_id, deal_id, leads(first_name,last_name), deals(address,city)')
-          .eq('agent', callerAgent)
-          .gte('starts_at', wideLo)
-          .lte('starts_at', wideHi)
-          .order('starts_at')
+      // Today's appointments (inspections, showings, listing appts, meetings…).
+      // This was missing entirely — the Today board only knew about tours, so a
+      // full day of inspections read "all clear". James sees his; the broker sees
+      // both agents'.
+      apptQuery
     ]);
 
     // "Deals in motion" = live transactions only: open OFFERS + in-escrow
@@ -172,13 +176,14 @@ export default async function handler(req, res) {
       .filter((a) => laFmt.format(new Date(a.starts_at)) === todayLA);
     // Today's schedule = tours + appointments, in time order.
     const hoursAll = shapeHours(hoursTours.data || [], now)
-      .concat(shapeApptHours(apptsToday, now))
+      .concat(shapeApptHours(apptsToday, now, callerAgent))
       .sort((a, b) => String(a.time_iso || '').localeCompare(String(b.time_iso || '')));
 
     const result = {
       drafts:        drafts.data        || [],
       tours_today:   toursToday.data    || [],
       appointments_today: apptsToday,
+      viewer_agent:  callerAgent,
       radio_silence: radioSilence.data  || [],
       new_today:     newToday.data      || [],
       open_offers:   openOffers.data    || [],
@@ -745,13 +750,15 @@ const APPT_KIND_LABEL = {
 // Today's appointments → the same hour-item shape as tours, so they sit in the
 // one time-ordered schedule on the Today board (this is the agent's own view, so
 // the real title is fine to show).
-function shapeApptHours(appts, now) {
+function shapeApptHours(appts, now, viewer) {
   return (appts || []).map((a) => {
     const lead = a.leads || {}, deal = a.deals || {};
     const kindLabel = a.kind === 'inspection'
       ? (a.sub_kind ? `${a.sub_kind} inspection` : 'Inspection')
       : (APPT_KIND_LABEL[a.kind] || 'Appointment');
-    const name = a.title || a.client_label || kindLabel;
+    // On the broker's board, tag whose appointment it is when it isn't hers.
+    const other = (a.agent && viewer && a.agent !== viewer) ? (a.agent === 'james' ? 'James' : 'Sara') : null;
+    const name = (other ? other + ' · ' : '') + (a.title || a.client_label || kindLabel);
     const addr = deal.address ? `${deal.address}${deal.city ? ' · ' + deal.city : ''}` : '';
     const isPast = !a.all_day && new Date(a.starts_at) < now;
     return {
@@ -759,8 +766,9 @@ function shapeApptHours(appts, now) {
       time_iso: a.starts_at,
       kind:     kindLabel,
       title:    addr ? `${name} — ${addr}` : name,
-      sub:      `${a.duration_minutes || 60} min${addr ? '' : ''}`,
+      sub:      `${a.duration_minutes || 60} min`,
       client:   [lead.first_name, lead.last_name].filter(Boolean).join(' ') || null,
+      agent:    a.agent || null,
       past:     isPast,
       brass:    !isPast
     };
