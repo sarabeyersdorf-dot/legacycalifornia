@@ -1,5 +1,5 @@
 {
-  "version": 6.7,
+  "version": 7.1,
   "lastUpdated": "2026-08-13",
   "updatedBy": "cowork 2026-08-10 — canonical commission/timeline schema migration per Sara",
   "tasks": [
@@ -1385,7 +1385,7 @@
       "key": "augusta-agentnote-warranty",
       "title": "324 Augusta: 'the home warranty is placed' is wrong in TWO places — the draft agent note AND the CRM client-facing copy on the 'Escrow opened' milestone desc. Cancelled 8/11; fixing the note alone will not fix the page",
       "due": "2026-08-12",
-      "done": false
+      "done": true
     },
     {
       "agent": "sara",
@@ -1529,7 +1529,7 @@
       "key": "augusta-agentnote-warranty-2",
       "title": "324 Augusta: 'the home warranty is placed' still live in the draft note AND the CRM 'Escrow opened' milestone — ticked 8/12 but text unchanged",
       "due": "2026-08-13",
-      "done": false
+      "done": true
     },
     {
       "agent": "sara",
@@ -2691,30 +2691,6 @@
           "col": "contingencies",
           "badge": "Done",
           "desc": "The buyer's lender received the appraisal report and is finalizing its review."
-        },
-        {
-          "date": "2026-08-05",
-          "label": "Buyer loan contingency due",
-          "status": "upcoming",
-          "col": "contingencies",
-          "badge": "Key date",
-          "desc": "Extended to 8/5 via ETA No. 3 (all parties signed 7/24). The last major hurdle — once the buyer removes her loan contingency, the sale is substantially de-risked."
-        },
-        {
-          "date": "2026-08-05",
-          "label": "Buyer's final walk-through",
-          "status": "upcoming",
-          "col": "closing",
-          "badge": "",
-          "desc": "The buyer verifies the property's condition about 5 days before closing."
-        },
-        {
-          "date": "2026-08-10",
-          "label": "Close of Escrow",
-          "status": "key",
-          "col": "closing",
-          "badge": "Closing day",
-          "desc": "Deed records, funds disburse, and the sale is complete."
         }
       ],
       "agentNote": {
@@ -3366,9 +3342,13 @@
       "listingExpiration": "2026-12-18",
       "contacts": {
         "coAgent": "James Beyersdorf (Legacy Properties), buyer side — Sara is on BOTH sides of this transaction",
-        "escrow": "Kelly Haakma / Team Cuslidge, Placer Title — Order P-708410 (Ashley Cuslidge OUT 8/26–9/4; Placer closed 9/7 Labor Day)",
-        "lender": "K Mortgage (Denis Listengourt) — named contact not yet recorded",
-        "title": "Placer Title — prelim ordered 2026-08-11"
+        "escrow": "Kelly Haakma",
+        "lender": "",
+        "title": "Placer Title — prelim ordered 2026-08-11",
+        "lenderCompany": "K Mortgage",
+        "escrowCompany": "Placer Title",
+        "escrowNumber": "P-708410",
+        "escrowNote": "Team Cuslidge. Ashley Cuslidge out 2026-08-26 to 09-04; Placer closed 9/7 Labor Day."
       },
       "docs": {
         "RPA": "executed — Authentisign 2026-08-09, filed __Pending/324 Augusta/Ex/RPA.pdf",
@@ -3421,7 +3401,7 @@
         }
       ],
       "correspondence": [],
-      "notes": "IN ESCROW as of 2026-08-11. Listed 6/25/2026, MLS 226081050. Sellers Brian and Trisha Fitzgerald; buyer Denis Listengourt (James Beyersdorf, buyer side) — Legacy is on BOTH sides. Offer $450,000 received 8/9; SCO#1 buyer-signed 8/9; buyer counter $460,000 8/10 (highest and best, escrow shortened from 45 days); SCO#2 seller-signed and BCO#1 executed 8/10 evening. Escrow opened at Placer Title 8/11, Order P-708410, COE 9/9, prelim ordered, AHS home warranty placed 8/11. Commission 4% total (3 listing / 1 buyer) per Sara's escrow instructions 8/10. OPEN: K Mortgage pre-qual letter shows a $437,000 loan — against $460,000 that is ~95% LTV, matching what Sara told the sellers; confirm with James the letter was reissued at the new price. Escrow-opening documents (AAA, EMD receipt, escrow holder acknowledgment, buyer-signed disclosure set, AVIDs) not yet on file — expected, escrow is one day old.",
+      "notes": "IN ESCROW as of 2026-08-11. Listed 6/25/2026, MLS 226081050. Sellers Brian and Trisha Fitzgerald; buyer Denis Listengourt (James Beyersdorf, buyer side) — Legacy is on BOTH sides. Offer $450,000 received 8/9; SCO#1 buyer-signed 8/9; buyer counter $460,000 8/10 (highest and best, escrow shortened from 45 days); SCO#2 seller-signed and BCO#1 executed 8/10 evening. Escrow opened at Placer Title 8/11, Order P-708410, COE 9/9, prelim ordered. AHS home warranty ORDERED IN ERROR AND CANCELLED 8/11 — seller declined to pay per SCO #2; confirm no residual charge on the AHS escrow invoice. Commission 4% total (3 listing / 1 buyer) per Sara's escrow instructions 8/10. OPEN: K Mortgage pre-qual letter shows a $437,000 loan — against $460,000 that is ~95% LTV, matching what Sara told the sellers; confirm with James the letter was reissued at the new price. Escrow-opening documents (AAA, EMD receipt, escrow holder acknowledgment, buyer-signed disclosure set, AVIDs) not yet on file — expected, escrow is one day old.",
       "alerts": [
         "IN ESCROW — Placer Title P-708410, COE 9/9/2026",
         "DUAL AGENCY — Sara listing side, James buyer side; dual-agency paperwork required",
@@ -3530,7 +3510,71 @@
         "status": "draft",
         "updated": "2026-08-11",
         "body": "Brian and Trish — we're in escrow. The buyer came back at $460,000, which was $10,000 over their first offer and their highest and best, and they shortened the escrow at the same time. Everything was signed the evening of August 10 and Placer opened escrow this morning: Order P-708410, closing September 9. The preliminary report is ordered. Next up is the buyer's inspection and appraisal period, which runs to August 27. I'll walk you through each step. — Sara Cooper, (209) 559-4966"
-      }
+      },
+      "buyerMilestones": [
+        {
+          "date": "2026-08-09",
+          "label": "Your offer — $450,000",
+          "col": "complete",
+          "status": "done",
+          "badge": "Submitted",
+          "desc": "You offered $450,000 with conventional financing. The seller countered the same day and you signed it."
+        },
+        {
+          "date": "2026-08-10",
+          "label": "Your offer was accepted at $460,000",
+          "col": "complete",
+          "status": "done",
+          "badge": "Accepted",
+          "desc": "You came up to $460,000 — your highest and best — and shortened the escrow period. Both counters were fully executed the evening of August 10."
+        },
+        {
+          "date": "2026-08-11",
+          "label": "Escrow opened",
+          "col": "complete",
+          "status": "done",
+          "badge": "Open",
+          "desc": "Escrow is open at Placer Title, Order P-708410. The preliminary title report has been ordered for your review."
+        },
+        {
+          "date": "2026-08-27",
+          "label": "Your contingency period",
+          "col": "contingencies",
+          "status": "next",
+          "badge": "Key date",
+          "desc": "You have 17 days from acceptance to complete your inspections, appraisal and loan approval. That period runs through August 27 unless we amend the contract."
+        },
+        {
+          "date": "2026-09-09",
+          "label": "Close of escrow",
+          "col": "closing",
+          "status": "upcoming",
+          "badge": "Closing day",
+          "desc": "You take ownership on closing day, set for September 9, 2026 — a 30-day close from acceptance."
+        }
+      ],
+      "buyerTasks": [
+        {
+          "when": "By Aug 27",
+          "label": "Complete your inspections, appraisal and loan approval before your contingency period ends",
+          "status": "open"
+        },
+        {
+          "when": "This week",
+          "label": "Review the seller's disclosures in your portal and tell James if anything needs a closer look",
+          "status": "open"
+        },
+        {
+          "when": "Ongoing",
+          "label": "Respond quickly to any document requests from your lender so the loan stays on schedule",
+          "status": "open"
+        },
+        {
+          "when": "Before closing",
+          "label": "Verify any wire instructions by phone with Placer Title before you send funds",
+          "status": "open"
+        }
+      ]
     },
     {
       "id": "preparing-1789-love-creek",
