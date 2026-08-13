@@ -389,7 +389,8 @@ setTimeout(function(){var p=document.getElementById('portal-loading');if(p&&p.pa
         <div class="ds-portal-right">
           <section class="ds-card ds-actionwrap" id="tasks">
             <div class="ds-card-h"><h3>What I need from you</h3><span class="ds-card-meta" data-bind="nav.tasks" data-optional>0</span></div>
-            <p class="ds-card-p">I only reach out when something genuinely needs your signature. Those requests land right here — and I’ll text you too.</p>
+            <p class="ds-card-p" data-bind="tasks_intro">I only reach out when something genuinely needs your signature. Those requests land right here — and I’ll text you too.</p>
+            <p class="ds-doc-empty" data-bind="tasks_empty" data-optional></p>
             <div class="ds-actions" data-list="tasks">
               <div class="ds-action task-row" data-row data-add-class="status" style="display:none;">
                 <button type="button" class="ds-action-box task-box" data-task-toggle aria-label="Mark complete"></button>

@@ -273,6 +273,11 @@ function mapDeal(d) {
     agent_note:     d.agentNote || null,
     // v1.5 client-portal content: "What I need from you" + "Good to know".
     client_tasks:   Array.isArray(d.clientTasks) ? d.clientTasks : null,
+    // Buyer-perspective tasks (db/071) — Cowork authors these for a buyer-side /
+    // both-sided deal so the buyer's "What I need from you" reads from the buyer's
+    // seat instead of the seller's to-do list.
+    buyer_tasks:    Array.isArray(d.buyerTasks) ? d.buyerTasks
+                  : (Array.isArray(d.tasks_buyer) ? d.tasks_buyer : null),
     good_to_know:   Array.isArray(d.goodToKnow) ? d.goodToKnow : null,
     // Compliance intake facts Cowork reads from the contract + disclosures
     // (data/ATTRIBUTES-INTAKE.md). Drives the checklist's conditional tasks and
@@ -960,8 +965,8 @@ export default async function handler(req, res) {
         // referenced before its migration runs, retry without them rather than
         // dropping the whole deal — a missing column must never blank the list.
         // They're restored automatically on the next sync once migrated.
-        if (wErr && /(listing_meta|timeline|milestones|agent_note|client_tasks|good_to_know|contacts|attributes)/i.test(wErr.message || '')) {
-          const { listing_meta, timeline, milestones, agent_note, client_tasks, good_to_know, contacts, attributes, ...safe } = mapped;
+        if (wErr && /(listing_meta|timeline|milestones|agent_note|client_tasks|buyer_tasks|buyer_milestones|good_to_know|contacts|attributes)/i.test(wErr.message || '')) {
+          const { listing_meta, timeline, milestones, buyer_milestones, agent_note, client_tasks, buyer_tasks, good_to_know, contacts, attributes, ...safe } = mapped;
           ({ error: wErr, id: dealId } = await writeDeal(safe));
         }
         if (wErr) throw new Error(`${ex ? 'update' : 'insert'}: ${wErr.message}`);
