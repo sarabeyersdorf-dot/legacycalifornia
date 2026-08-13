@@ -403,6 +403,39 @@ buyer-side too — it does NOT have to be inside the `listing` block):
   auto-correct stale wording. Whenever a date slips or un-slips, update the
   milestone and the note in the same pass so the portal never shows a stale state.
 
+### Buyer-side road milestones (`buyerMilestones`)
+
+`milestones` is written from the **seller's** seat ("Listed at…", "Offer
+received", "Your home went on the market"). On a deal where **Legacy also
+represents the buyer** — any `side: "dual"` (both-sided) deal, or a buyer-side
+deal — the buyer opens the SAME transaction portal and must read it from **their**
+seat. So author a parallel **`buyerMilestones`** array on the deal, same shape as
+`milestones` (`[{ "date","label","desc","badge","status","col" }]`), from the
+buyer's perspective:
+
+```json
+"buyerMilestones": [
+  { "date": "2026-08-09", "label": "Your offer — $450,000", "col": "money",
+    "status": "done", "badge": "Submitted",
+    "desc": "You offered $450,000 with conventional financing; the seller countered the same day." },
+  { "date": "2026-08-10", "label": "Your offer was accepted at $460,000", "col": "money",
+    "status": "done", "badge": "Accepted",
+    "desc": "You countered at $460,000 — your highest and best — and shortened escrow. Both counters were fully executed the evening of Aug 10." },
+  { "date": "2026-09-09", "label": "Close of escrow", "col": "closing",
+    "status": "next", "badge": "On track", "desc": "You take ownership on closing day." }
+]
+```
+
+Rules:
+- Write it from the **buyer's** point of view: "Your offer", "Your offer was
+  accepted", "the home" (never "your home"), "you countered" (never "the buyer").
+- **Do NOT include the listing steps** (Listed / went on the market / price
+  changes) — those are the seller's story, not the buyer's.
+- Keep it in step with `milestones` and the dates — update both in the same pass.
+- If you don't author `buyerMilestones`, the portal auto-re-frames the seller
+  milestones for the buyer as a fallback, but a hand-authored buyer array always
+  reads better — write one for every both-sided / buyer-side deal.
+
 ## 3. Documents in the client portal
 
 ### The simple way — just drop the files in (use this for most transactions)

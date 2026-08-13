@@ -391,12 +391,20 @@ export default async function handler(req, res) {
     // the original date-heuristic road when a deal hasn't been seeded yet.
     let road = [];
     let timelineTasks = null;
+    // A buyer viewer prefers Cowork's buyer-authored milestones (db/070) when
+    // present; those are already written from the buyer's seat, so they skip the
+    // heuristic buyerizeRoad() re-frame later. Otherwise fall back to the seller
+    // milestones (which buyerizeRoad softens for a buyer).
+    const buyerMs = (isBuyerSide && Array.isArray(deal.buyer_milestones) && deal.buyer_milestones.length) ? deal.buyer_milestones : null;
+    let usedBuyerMilestones = false;
+    const msSource = buyerMs || (Array.isArray(deal.milestones) ? deal.milestones : null);
 
     // Preferred source: the deals.json milestones (v1.5 — each carries a full
     // `desc` paragraph, a `badge` chip, a status dot and an At-a-Glance `col`).
     // This is Cowork's maintained source of truth and matches the Today board.
     // Suppressed when back on market (no active escrow) — see noActiveEscrow.
-    if (!noActiveEscrow && Array.isArray(deal.milestones) && deal.milestones.length) {
+    if (!noActiveEscrow && msSource && msSource.length) {
+      usedBuyerMilestones = !!buyerMs;
       const msLabel = (d) => {
         const s = /^(\d{4}-\d{2}-\d{2})/.exec(String(d || ''));
         return s ? new Date(s[1] + 'T12:00:00Z').toLocaleDateString('en-US', { month: 'short', day: 'numeric', timeZone: 'UTC' }) : '';
@@ -410,7 +418,7 @@ export default async function handler(req, res) {
       const dayNum = (s) => Date.UTC(+String(s).slice(0, 4), +String(s).slice(5, 7) - 1, +String(s).slice(8, 10));
       const coeStr = deal.coe_date ? String(deal.coe_date).slice(0, 10) : null;
       const coeDays = coeStr ? Math.round((dayNum(coeStr) - dayNum(laToday)) / 86400000) : null;
-      road = deal.milestones.map((m) => {
+      road = msSource.map((m) => {
         const item = {
           date: msLabel(m && m.date),
           label: sanitize((m && m.label) || ''),
@@ -774,10 +782,11 @@ export default async function handler(req, res) {
     }
     const videoViews = Number.isFinite(+deal.video_views) ? +deal.video_views : null;
 
-    // The road/milestones are authored from the SELLER's seat. For a buyer viewer,
-    // re-frame them to the buyer's perspective (and drop listing-only steps) so a
-    // buyer never reads "your home went on the market" or "offer received".
-    if (isBuyerSide) road = buyerizeRoad(road);
+    // The seller milestones are authored from the SELLER's seat. For a buyer
+    // viewer we re-frame them (drop listing-only steps, flip perspective) — UNLESS
+    // Cowork already gave us buyer-authored milestones (db/070), which are correct
+    // as written.
+    if (isBuyerSide && !usedBuyerMilestones) road = buyerizeRoad(road);
 
     // 5. Assemble -----------------------------------------------------------
     const portal = {
