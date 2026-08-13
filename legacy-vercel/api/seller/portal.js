@@ -774,6 +774,11 @@ export default async function handler(req, res) {
     }
     const videoViews = Number.isFinite(+deal.video_views) ? +deal.video_views : null;
 
+    // The road/milestones are authored from the SELLER's seat. For a buyer viewer,
+    // re-frame them to the buyer's perspective (and drop listing-only steps) so a
+    // buyer never reads "your home went on the market" or "offer received".
+    if (isBuyerSide) road = buyerizeRoad(road);
+
     // 5. Assemble -----------------------------------------------------------
     const portal = {
       security,
@@ -841,6 +846,50 @@ export default async function handler(req, res) {
 // ---------------------------------------------------------------------------
 // Sub-helpers
 // ---------------------------------------------------------------------------
+
+// Re-frame the seller-authored road for a BUYER. The milestones live in
+// deals.json written from the seller's seat ("Listed at…", "Offer received",
+// "Your home went on the market"). For a buyer we (1) drop listing-only steps,
+// (2) relabel the offer/acceptance steps to their point of view, and (3) swap the
+// seller-facing phrasing in the descriptions. Heuristic but safe — it only ever
+// softens perspective wording, never invents facts.
+function buyerizeRoad(road) {
+  if (!Array.isArray(road)) return road;
+  const amt = (s) => { const m = String(s || '').match(/\$[\d,]+/); return m ? m[0] : ''; };
+  const flip = (s) => String(s || '')
+    .replace(/\byour home\b/gi, 'the home')
+    .replace(/\byour listing\b/gi, 'the home')
+    .replace(/\bthe buyer countered\b/gi, 'you countered')
+    .replace(/\bbuyer countered\b/gi, 'you countered')
+    .replace(/\ban offer came in\b/gi, 'you made an offer')
+    .replace(/\boffer received\b/gi, 'your offer')
+    .replace(/\btheir highest and best\b/gi, 'your highest and best')
+    .replace(/\bbuyer-signed\b/gi, 'signed')
+    .replace(/\bthe buyer'?s\b/gi, 'your')
+    .replace(/\bthe buyer\b/gi, 'you');
+  const out = [];
+  for (const m of road) {
+    const label = String(m && m.label || '');
+    const desc  = String(m && m.description || '');
+    const col   = m && m.col;
+    // Drop listing / marketing steps — they're about the seller's listing, not
+    // the buyer's purchase.
+    const isListingStep = col === 'marketing'
+      || /\blisted\b|on the market|went on the market|listing agreement|price (?:drop|reduc)/i.test(label + ' ' + desc);
+    if (isListingStep) continue;
+    let newLabel;
+    if (/\baccepted\b|under contract|mutual|ratified|in escrow/i.test(label)) {
+      newLabel = 'Your offer was accepted' + (amt(label) ? ' at ' + amt(label) : '');
+    } else if (/offer received|offer came in|an offer came/i.test(label)) {
+      newLabel = 'Your offer' + (amt(label) ? ' — ' + amt(label) : '');
+    } else {
+      newLabel = flip(label);
+    }
+    out.push({ ...m, label: newLabel, description: flip(desc) });
+  }
+  return out;
+}
+
 function sellerFirstName(deal) {
   // Best effort from stored notes/first party; safe fallback to ''.
   const m = /Sellers?\s+([A-Z][a-z]+)/.exec(deal.notes_internal || '');
