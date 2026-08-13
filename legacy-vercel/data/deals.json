@@ -1,6 +1,6 @@
 {
-  "version": 6.5,
-  "lastUpdated": "2026-08-12",
+  "version": 6.7,
+  "lastUpdated": "2026-08-13",
   "updatedBy": "cowork 2026-08-10 — canonical commission/timeline schema migration per Sara",
   "tasks": [
     {
@@ -1456,6 +1456,134 @@
       "client": "Brian Duarte",
       "key": "brian-duarte-nudge",
       "title": "Brian Duarte — 'Search for Brian' collection pushed 7/23: 19 days, 1 open. Re-push with different properties or call",
+      "due": "2026-08-16",
+      "done": false
+    },
+    {
+      "agent": "sara",
+      "client": "8235 Baldwin",
+      "key": "baldwin-aea-read-terms",
+      "title": "🔴 Baldwin: READ the AEA amendment before anyone signs — seller already signed 8/13, terms only inside the PDF, James accepted before his buyer saw it",
+      "due": "2026-08-13",
+      "done": false
+    },
+    {
+      "agent": "james",
+      "client": "8235 Baldwin",
+      "key": "baldwin-contingency-lapsed",
+      "title": "🔴 Baldwin: loan contingency lapsed 8/12 and CR #2 never filed — buyer is outside contingency protection",
+      "due": "2026-08-13",
+      "done": false
+    },
+    {
+      "agent": "james",
+      "client": "695 Feather",
+      "key": "feather-eta1-seller-sig",
+      "title": "🔴 695 Feather: confirm Dee Bradley's seller signed ETA1 — buyer signed 8/11, no seller signature anywhere. COE is TOMORROW 8/14",
+      "due": "2026-08-13",
+      "done": false
+    },
+    {
+      "agent": "james",
+      "client": "324 Augusta",
+      "key": "augusta-sunrun-denis",
+      "title": "🔴 324 Augusta: walk Denis through the four Sunrun transfer steps — seller deceased, buyer-only action, email often lands in spam, must clear before 9/9",
+      "due": "2026-08-13",
+      "done": false
+    },
+    {
+      "agent": "sara",
+      "client": "Joe Garnica",
+      "key": "fub-joe-garnica",
+      "title": "NEW LEAD: Joe Garnica (209) 815-3309 — Realtor.com 8/12 on 609 Dolores Way, Copperopolis $519,000. Unworked",
+      "due": "2026-08-13",
+      "done": false
+    },
+    {
+      "agent": "james",
+      "client": "8235 Baldwin",
+      "key": "baldwin-appraisal-in-writing",
+      "title": "Baldwin: get the appraisal outcome in writing — Kim Hesser's 8/12 email body is an image with no readable text",
+      "due": "2026-08-13",
+      "done": false
+    },
+    {
+      "agent": "james",
+      "client": "695 Feather",
+      "key": "feather-hoa-docs-check",
+      "title": "695 Feather: confirm all three parts of the HOA document set arrived intact (Tanya split them 8/13 after size rejections)",
+      "due": "2026-08-16",
+      "done": false
+    },
+    {
+      "agent": "james",
+      "client": "695 Feather",
+      "key": "feather-eta1-file",
+      "title": "695 Feather: ETA1 signed 8/11 but not filed — EX holds only ADM 1pdf.pdf",
+      "due": "2026-08-16",
+      "done": false
+    },
+    {
+      "agent": "sara",
+      "client": "324 Augusta",
+      "key": "augusta-agentnote-warranty-2",
+      "title": "324 Augusta: 'the home warranty is placed' still live in the draft note AND the CRM 'Escrow opened' milestone — ticked 8/12 but text unchanged",
+      "due": "2026-08-13",
+      "done": false
+    },
+    {
+      "agent": "sara",
+      "client": "324 Augusta",
+      "key": "augusta-emd-now-real",
+      "title": "324 Augusta: the EMD card dismissed 8/12 is now genuinely satisfiable — receipt on disk (Ex/Receipt_416170.pdf); CRM still shows deposit due",
+      "due": "2026-08-13",
+      "done": false
+    },
+    {
+      "agent": "sara",
+      "client": "433 E Hwy 4",
+      "key": "433-dead-milestones-2",
+      "title": "433: three dead-escrow milestones unchanged in deals.json — ticked 8/12 but the file was not edited",
+      "due": "2026-08-16",
+      "done": false
+    },
+    {
+      "agent": "sara",
+      "client": "Admin",
+      "key": "contacts-completeness-2",
+      "title": "Contacts gaps unchanged: 324 Augusta lender unnamed, 695 Feather title null — ticked 8/12 but the file was not edited",
+      "due": "2026-08-16",
+      "done": false
+    },
+    {
+      "agent": "sara",
+      "client": "8235 Baldwin",
+      "key": "baldwin-coe-8-31",
+      "title": "Baldwin: closingDate 8/17 likely becomes 8/31 per Allyson's 'end of the month'. NOTE 8/17 is a MONDAY — yesterday's task wrongly said Sunday",
+      "due": "2026-08-16",
+      "done": false
+    },
+    {
+      "agent": "sara",
+      "client": "324 Augusta",
+      "key": "augusta-hoa-8-21",
+      "title": "324 Augusta: La Contenta HOA package ordered 8/12 (HomeWiseDocs #HDC5LZ8Y2), delivery due 8/21",
+      "due": "2026-08-21",
+      "done": false
+    },
+    {
+      "agent": "sara",
+      "client": "Devon",
+      "key": "dorrington-devon-prep",
+      "title": "Showing for Devon in Dorrington — Sunday 8/16 11 AM; realtor.com flagged 1 new listing + 1 price drop in that market",
+      "due": "2026-08-16",
+      "done": false
+    },
+    {
+      "agent": "sara",
+      "client": "433 E Hwy 4",
+      "key": "433-marketing-push",
+      "title": "433: pest work done, four silent days, relisted to ~11/18 — good week for a marketing push",
       "due": "2026-08-16",
       "done": false
     }
@@ -3249,11 +3377,11 @@
         "sellerCounter2": "executed — seller-signed 2026-08-10, filed Ex/SCO2.pdf",
         "prequal": "K Mortgage pre-approval for Denis Listengourt, filed 2026-08-10 Ex/'Denis Pre apprv.pdf' — shows $437,000 loan; reconcile against the $460,000 price",
         "netSheet": "seller net sheet from Ashley Cuslidge 2026-08-10, filed Seller/net sheet.pdf",
-        "homeWarranty": "American Home Shield ordered 2026-08-11 — warranty order confirmation + escrow invoice received",
+        "homeWarranty": "CANCELLED 2026-08-11 — American Home Shield order placed in error; seller declined to pay per SCO #2, James instructed Placer 8/11 and Kaitlyn Haakma confirmed cancellation same day. Confirm no residual charge on the AHS escrow invoice.",
         "prelim": "ORDERED 2026-08-11 by Placer — not yet received",
-        "AAA": "NOT YET FILED — escrow opened 8/11",
-        "EMD": "NOT YET RECEIVED",
-        "sellerDisclosures": "Pre-sale package on file from listing (TDS, SPQ, advisories, FIRPTA); buyer-signed set not yet returned"
+        "AAA": "NOT REQUIRED — separate agents on each side (Sara listing side, James buyer side), so no Additional Agent Acknowledgment is needed. Per Sara 2026-08-13.",
+        "EMD": "received — Earnest Money Deposit Receipt + Escrow Acknowledgement issued by Placer Title 2026-08-12, filed __Pending/324 Augusta/Ex/Receipt_416170.pdf and Ex/'escrow holder acknowledgement.pdf'; James confirmed receipt 2026-08-12",
+        "sellerDisclosures": "Seller-signed disclosure package filed 2026-08-12 (23 documents) at __Pending/324 Augusta/James Folder/seller signed disclosures/ — includes TDS, SPQ, FIRPTA, CC&Rs, Road Maintenance Agreement, solar contracts, roof clearance, NOC set. Buyer-signed set still outstanding."
       },
       "clientDocuments": [
         {
