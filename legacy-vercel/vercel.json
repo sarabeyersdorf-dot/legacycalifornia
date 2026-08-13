@@ -5,6 +5,18 @@
       "destination": "/collection.html"
     },
     {
+      "source": "/buyer/:token",
+      "destination": "/seller.html"
+    },
+    {
+      "source": "/seller/:token",
+      "destination": "/seller.html"
+    },
+    {
+      "source": "/portal/:token",
+      "destination": "/seller.html"
+    },
+    {
       "source": "/my-listing",
       "destination": "/my-listing.html"
     },

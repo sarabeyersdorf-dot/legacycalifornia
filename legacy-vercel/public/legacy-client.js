@@ -16,6 +16,35 @@
  * Drop it in once per page:
  *   <script src="/legacy-client.js" defer></script>
  */
+
+/* Portal link resolver — the client transaction portal lives at
+ * /seller.html?t=<token>, and (side-branded, via vercel.json rewrites) at
+ * /buyer/<token> and /seller/<token>. Both branded paths serve the SAME page;
+ * the audience is decided server-side from the viewer's deal-party role, so the
+ * URL prefix is purely cosmetic. This resolves the token and recognises the path
+ * from any of those shapes, so one portal code path serves all of them. Defined
+ * globally (outside the IIFEs) so every module can share it. */
+window.LGPortal = window.LGPortal || {
+  token: function () {
+    try {
+      var q = new URLSearchParams(location.search).get('t');
+      if (q) return q;
+      var m = location.pathname.match(/^\/(?:buyer|seller|portal)\/([^\/?#]+)\/?$/);
+      return m ? decodeURIComponent(m[1]) : null;
+    } catch (e) { return null; }
+  },
+  // True on the portal page in any of its URL shapes.
+  isPath: function () {
+    return /\/seller\.html$/.test(location.pathname)
+        || /^\/(?:buyer|seller|portal)\/[^\/?#]+\/?$/.test(location.pathname);
+  },
+  // Build a client's shareable portal link, branded to their side.
+  link: function (token, side) {
+    var seg = (side === 'buyer') ? 'buyer' : 'seller';
+    return location.origin + '/' + seg + '/' + encodeURIComponent(token);
+  }
+};
+
 (function () {
   'use strict';
 
@@ -1725,10 +1754,10 @@
       if (session) await wireCrmPage(session);
     }
     if (/\/dashboard\.html$/.test(path)) await gate(['buyer','agent_sara','agent_james','admin']);
-    if (/\/seller\.html$/.test(path)) {
-      // Private-link access (?t=<portal_token>) needs no login — the token is
-      // the credential. Only gate when there's no token.
-      const hasToken = new URLSearchParams(location.search).get('t');
+    if (window.LGPortal.isPath()) {
+      // Private-link access (?t=<portal_token>, or /buyer|/seller/<token>) needs
+      // no login — the token is the credential. Only gate when there's no token.
+      const hasToken = window.LGPortal.token();
       if (!hasToken) await gate(['seller','agent_sara','agent_james','admin']);
     }
   });
@@ -2001,7 +2030,7 @@
  * ======================================================================== */
 (function () {
   'use strict';
-  if (!/\/seller\.html$/.test(location.pathname)) return;
+  if (!window.LGPortal.isPath()) return;   // /seller.html or /buyer|/seller/<token>
 
   const tplStore = new WeakMap();
 
@@ -2151,7 +2180,7 @@
     setTimeout(revealPortal, 6000);
     let res;
     const params = new URLSearchParams(location.search);
-    const token = params.get('t');
+    const token = window.LGPortal.token();   // ?t= or /buyer|/seller/<token>
     const deal  = params.get('deal');   // agent preview of a specific deal
     let url = '/api/seller/portal';
     if (token)     url += '?t=' + encodeURIComponent(token);
@@ -2807,7 +2836,7 @@
         : `Your Sale — ${(lead.areas && lead.areas[0]) || 'Your listing'}`;
       return `
         <div class="lp-preview">
-          ${portalOk ? `<div class="lp-urlchip"><span class="dot"></span>${escHtml(location.host)}/seller.html?t=${escHtml(mask(lead.portal_token))}</div>` : ''}
+          ${portalOk ? `<div class="lp-urlchip"><span class="dot"></span>${escHtml(location.host)}/${isBuyer ? 'buyer' : 'seller'}/${escHtml(mask(lead.portal_token))}</div>` : ''}
           <div class="lp-preview-head">
             <div>
               <div class="lp-preview-title">${escHtml(previewTitle)}</div>
@@ -2997,7 +3026,8 @@
     // Copy the client's private, no-login portal link.
     const portalBtn = detailEl.querySelector('[data-detail-action="portal-link"]');
     if (portalBtn) portalBtn.addEventListener('click', () => {
-      const link = `${location.origin}/seller.html?t=${encodeURIComponent(lead.portal_token)}`;
+      // Side-branded link: a buyer gets /buyer/<token>, a seller /seller/<token>.
+      const link = window.LGPortal.link(lead.portal_token, lead.deal_side === 'buyer' ? 'buyer' : 'seller');
       const done = () => { portalBtn.textContent = 'Copied ✓'; setTimeout(() => { portalBtn.textContent = 'Copy portal link'; }, 1600); };
       if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(link).then(done).catch(() => window.prompt('Copy this private portal link:', link));
       else window.prompt('Copy this private portal link:', link);
