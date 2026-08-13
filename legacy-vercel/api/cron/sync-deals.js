@@ -362,7 +362,18 @@ function mapDocs(dealId, d, escrowIdByKey, manifest) {
   // seller saw 0 documents even with the listing agreement + advisories on file
   // (324 Augusta). An explicit per-doc visibility still wins, and the governance
   // seed is insert-only, so an agent who later hides one keeps it hidden.
-  const defaultClientVis = (d.side === 'buyer') ? 'buyer' : (d.side === 'both' ? 'both' : 'seller');
+  //
+  // A DUAL (side:'both') deal is the exception: clientDocuments are authored from
+  // the SELLER's seat (they're the listing's disclosures/agreements — potentially
+  // incl. the listing agreement itself), so they default to SELLER-ONLY, never
+  // 'both'. If they defaulted to 'both', a dual deal's buyer would auto-receive
+  // the seller's whole flat list — including seller-only paperwork — by
+  // construction (same failure class as clientTasks/milestones). A buyer instead
+  // gets EXECUTED docs via an explicit grant (or a buyerDocuments manifest). This
+  // never bites 324 Augusta (it publishes from a folder manifest, which takes its
+  // own per-doc visibility), but it closes the hole for any dual deal that leans
+  // on the flat clientDocuments path.
+  const defaultClientVis = (d.side === 'buyer') ? 'buyer' : 'seller';
   // Guarantee a unique doc_key per row even if two docs slug to the same thing.
   const uniqueKey = (base) => {
     let k = base, n = 2;
