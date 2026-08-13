@@ -265,6 +265,11 @@ function mapDeal(d) {
     // portal, and buyer dashboard so all three show the same thing. Milestones
     // carry their own `badge`/`desc`/`col` inside the jsonb.
     milestones:     Array.isArray(d.milestones) ? d.milestones : null,
+    // Buyer-perspective milestones (db/070) — Cowork authors these for a
+    // buyer-side / both-sided deal so the buyer's portal reads from the buyer's
+    // seat ("Your offer", "Your offer was accepted") instead of the seller text.
+    buyer_milestones: Array.isArray(d.buyerMilestones) ? d.buyerMilestones
+                    : (Array.isArray(d.milestones_buyer) ? d.milestones_buyer : null),
     agent_note:     d.agentNote || null,
     // v1.5 client-portal content: "What I need from you" + "Good to know".
     client_tasks:   Array.isArray(d.clientTasks) ? d.clientTasks : null,
