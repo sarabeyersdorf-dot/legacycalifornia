@@ -420,7 +420,7 @@ setTimeout(function(){var p=document.getElementById('portal-loading');if(p&&p.pa
             <p class="ds-doc-empty" data-bind="documents_empty" data-optional>—</p>
             <div class="ds-docs" data-list="documents">
               <div class="ds-doc" data-row style="display:none;">
-                <span class="ds-doc-ic" data-bind="type" data-optional>DOC</span>
+                <span class="ds-doc-ic" data-bind="type" data-bind-attr="data-cat:cat" data-optional>DOC</span>
                 <div class="ds-doc-nm"><span data-bind="name">Document</span><span class="ds-doc-sub" data-bind="sub" data-optional>—</span></div>
                 <span class="ds-doc-st" data-bind="status" data-optional>On file</span>
                 <span class="ds-doc-acts">
