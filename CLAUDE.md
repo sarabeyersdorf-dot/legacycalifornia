@@ -1,0 +1,63 @@
+# Legacy Properties — working notes for Claude Code
+
+This repo powers the Legacy Properties CRM (`crm.html`) and the side-aware client
+transaction portal (`seller.html`, served branded at `/buyer/<token>` and
+`/seller/<token>`). Static site + serverless API under `legacy-vercel/`, backed by
+Supabase Postgres project `sthfxehojcvfdyatxzlv`.
+
+## Two agents, one product — and how we talk to each other
+
+Two AI agents work on this product and **cannot see each other's world**:
+
+- **Claude Code (me)** — edits the GitHub repo and the live Supabase database, runs
+  when Sara starts a session. I can read Dropbox via MCP, but I do **not** watch it.
+- **Cowork** — Sara's daily briefing agent. It lives **entirely in Dropbox**
+  (`/_LEGACY/Legacy Cowork/`): it reads its SOP, `TASKFLOWCONTRACT.md`, `deals.json`,
+  and the document trees, and it hits the live read-only API endpoints
+  (`/api/crm/briefing-*`, `/api/crm/agent-updates`). It has **no view of the repo or
+  the database**, so it reasons from `deals.json` alone and will be wrong about
+  anything that lives in the DB (governance, the folder-manifest doc pipeline, etc.).
+
+**Sara is not the courier.** We exchange work through a pair of Dropbox mailboxes:
+
+- `/_LEGACY/Legacy Cowork/_from_ClaudeCode/` — **I write, Cowork reads.** Cowork reads
+  this at the start of every run (its SOP Step 0.1), applies it, and files each file to
+  `_from_ClaudeCode/_consumed/`.
+- `/_LEGACY/Legacy Cowork/_to_ClaudeCode/` — **Cowork writes, I read.**
+
+### START OF EVERY SESSION: check Cowork's outbox first
+
+Before other work, list `/_LEGACY/Legacy Cowork/_to_ClaudeCode/` (via Dropbox MCP).
+For each message file there that is not already in `_to_ClaudeCode/_consumed/`:
+1. Read it.
+2. Verify its claims against primary sources — the live DB and the deployed code —
+   **before acting**. Cowork models the system from `deals.json` and is often wrong
+   about DB-backed behavior; treat its files as informed reports, not ground truth.
+3. Do the work (or tell Sara what needs her decision).
+4. Move the file to `_to_ClaudeCode/_consumed/` so it isn't reprocessed.
+
+When I have something for Cowork (a data-model correction, a `deals.json` change it
+must author in Dropbox, a new `buyerMilestones`/`buyerTasks`/`buyerDocuments` array),
+I write a dated, self-contained file into `_from_ClaudeCode/` with a "report back"
+section. Dropbox MCP can only **create** files, so each message is a new dated file —
+never an overwrite. Naming: `YYYYMMDD_CCtoCW_<topic>.md`.
+
+The full contract (message format, what each agent can/can't see) lives in
+`/_LEGACY/Legacy Cowork/_to_ClaudeCode/PROTOCOL.md`.
+
+## Data-flow facts worth keeping straight
+
+- `deals.json` is **Cowork's** file in Dropbox. An hourly `publish-from-dropbox` cron
+  copies it into the repo (`legacy-vercel/data/deals.json`), and an hourly `sync-deals`
+  cron writes mapped columns into the `deals` table. **Both overwrite** — so anything I
+  write into the repo `deals.json` or those DB columns is replaced on the next cycle.
+  Durable `deals.json` content must originate in Cowork's Dropbox copy.
+- Survives sync (agent-owned, never overwritten by the crons): `agent_overrides`,
+  `photo_override`, `marketing_stats`/`video_views`, `buyer_milestones`, `buyer_tasks`,
+  `buyer_good_to_know`, and the `deal_document_governance` table.
+- Portal documents come from `deal_documents` (rebuilt hourly) gated by
+  `deal_document_governance` (per-doc visibility: agent_only/seller/buyer/both). A
+  **buyer fails closed** — sees only docs explicitly granted buyer/both. Folder-published
+  docs come via `publish-docs-from-dropbox` → `data/portal-docs/<id>.json` → the table.
+- DB migrations apply via `.github/workflows/db-migrate.yml` on push to `main` touching
+  `legacy-vercel/db/*.sql`.
