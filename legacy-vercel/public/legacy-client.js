@@ -2664,9 +2664,13 @@
           <span style="${cap}">Sell status</span>
           <select data-seller-stage style="${fld}">${optTags(SELLER_STAGE_LABEL, lead.seller_stage || '')}</select>
         </div>
-        <div data-assign-deal-row style="display:${(lead.buyer_stage === 'in_escrow' || lead.seller_stage === 'in_escrow') ? 'flex' : 'none'};align-items:center;gap:8px;margin:6px 0;">
-          <span style="${cap}">Deal</span>
-          <select data-assign-deal style="${fld}"><option value="">— loading deals… —</option></select>
+        <div data-assign-buy-row style="display:${showBuy ? 'flex' : 'none'};align-items:center;gap:8px;margin:6px 0;">
+          <span style="${cap}">Buy-side deal</span>
+          <select data-assign-deal-buy style="${fld}"><option value="">— none —</option></select>
+        </div>
+        <div data-assign-sell-row style="display:${showSell ? 'flex' : 'none'};align-items:center;gap:8px;margin:6px 0;">
+          <span style="${cap}">Sell-side deal</span>
+          <select data-assign-deal-sell style="${fld}"><option value="">— none —</option></select>
         </div>
         <div style="display:flex;gap:8px;align-items:center;margin-top:12px;">
           <button class="btn btn-ink btn-sm" data-detail-action="save-consent">Save contact</button>
@@ -3065,38 +3069,50 @@
       const sellRow  = consentPanel.querySelector('[data-sell-status]');
       const buyStageSel  = consentPanel.querySelector('[data-buyer-stage]');
       const sellStageSel = consentPanel.querySelector('[data-seller-stage]');
-      const dealRow  = consentPanel.querySelector('[data-assign-deal-row]');
-      const dealSel  = consentPanel.querySelector('[data-assign-deal]');
+      const buyDealRow  = consentPanel.querySelector('[data-assign-buy-row]');
+      const sellDealRow = consentPanel.querySelector('[data-assign-sell-row]');
+      const buyDealSel  = consentPanel.querySelector('[data-assign-deal-buy]');
+      const sellDealSel = consentPanel.querySelector('[data-assign-deal-sell]');
       let dealsLoaded = false;
-      // When either side reaches "In escrow", offer a deal to link the contact
-      // to (their portal). Populate the dropdown lazily from /api/crm/listings.
+      // Link the contact to the deal(s) they're a party to — a buy-side deal
+      // (they're buying) and/or a sell-side deal (their listing). A contact who is
+      // both buying and selling can have one of each. Preselect whatever they're
+      // already linked to. Populated lazily from /api/crm/listings.
       async function loadDealOptions() {
-        if (dealsLoaded || !dealSel) return;
+        if (dealsLoaded || (!buyDealSel && !sellDealSel)) return;
         dealsLoaded = true;
         const r = await window.Legacy.api('/api/crm/listings', { method: 'GET' });
         const j = r.ok ? r.json : {};
-        const all = [...(j.active || []), ...(j.pending || []), ...(j.preparing || []), ...(j.closed || [])];
-        const cur = lead.deal_source_key || (lead.deal && lead.deal.source_key) || '';
-        dealSel.innerHTML = '<option value="">— pick a deal —</option>' + all.map((d) => {
+        const all = [...(j.active || []), ...(j.pending || []), ...(j.offers || []), ...(j.preparing || []), ...(j.closed || [])];
+        // Deals this contact is already a party to, by role (from the linked-deals
+        // list shown above), so the pickers open on the current link.
+        const linked = Array.isArray(deals) ? deals : [];
+        const curBuy  = (linked.find((d) => (d.roles || []).some((rl) => /buyer/i.test(rl))) || {}).source_key || '';
+        const curSell = (linked.find((d) => (d.roles || []).some((rl) => /seller/i.test(rl))) || {}).source_key || '';
+        const optionsFor = (cur) => '<option value="">— none —</option>' + all.map((d) => {
           const label = [d.address, d.city].filter(Boolean).join(', ') || d.source_key;
           return `<option value="${escHtml(d.source_key)}"${cur === d.source_key ? ' selected' : ''}>${escHtml(label)}</option>`;
         }).join('');
-        if (!all.length) dealSel.innerHTML = '<option value="">No deals found</option>';
+        if (buyDealSel)  buyDealSel.innerHTML  = all.length ? optionsFor(curBuy)  : '<option value="">No deals found</option>';
+        if (sellDealSel) sellDealSel.innerHTML = all.length ? optionsFor(curSell) : '<option value="">No deals found</option>';
       }
       const syncRows = () => {
         const v = sideSel ? sideSel.value : '';
-        if (buyRow)  buyRow.style.display  = (v === 'buyer'  || v === 'both') ? 'flex' : 'none';
-        if (sellRow) sellRow.style.display = (v === 'seller' || v === 'both') ? 'flex' : 'none';
-        const buyEsc  = buyStageSel  && (v === 'buyer'  || v === 'both') && buyStageSel.value  === 'in_escrow';
-        const sellEsc = sellStageSel && (v === 'seller' || v === 'both') && sellStageSel.value === 'in_escrow';
-        if (dealRow) dealRow.style.display = (buyEsc || sellEsc) ? 'flex' : 'none';
-        if (buyEsc || sellEsc) loadDealOptions();
+        const showBuyV  = (v === 'buyer'  || v === 'both');
+        const showSellV = (v === 'seller' || v === 'both');
+        if (buyRow)  buyRow.style.display  = showBuyV  ? 'flex' : 'none';
+        if (sellRow) sellRow.style.display = showSellV ? 'flex' : 'none';
+        // The deal link appears as soon as a side is chosen — no longer gated on
+        // "in escrow" — so you can attach the contact to their deal any time.
+        if (buyDealRow)  buyDealRow.style.display  = showBuyV  ? 'flex' : 'none';
+        if (sellDealRow) sellDealRow.style.display = showSellV ? 'flex' : 'none';
+        if (showBuyV || showSellV) loadDealOptions();
       };
       if (sideSel)      sideSel.addEventListener('change', syncRows);
       if (buyStageSel)  buyStageSel.addEventListener('change', syncRows);
       if (sellStageSel) sellStageSel.addEventListener('change', syncRows);
-      // If the contact is already in escrow, load the deal list on open.
-      if (dealRow && dealRow.style.display !== 'none') loadDealOptions();
+      // Load the deal list on open if a side is already set.
+      if ((buyDealRow && buyDealRow.style.display !== 'none') || (sellDealRow && sellDealRow.style.display !== 'none')) loadDealOptions();
       const saveBtn = consentPanel.querySelector('[data-detail-action="save-consent"]');
       const msgEl   = consentPanel.querySelector('[data-consent-status-msg]');
       if (saveBtn) saveBtn.addEventListener('click', async () => {
@@ -3131,20 +3147,30 @@
           msgEl.style.color = '#9B2C2C'; msgEl.textContent = (r.json && r.json.error) || 'Failed to save.';
           return;
         }
-        // In escrow + a deal picked → link the contact to their deal (portal).
-        const dealKey = (dealRow && dealRow.style.display !== 'none' && dealSel) ? dealSel.value : '';
+        // Link the contact to their deal(s): buy-side (role buyer) and/or sell-side
+        // (role seller). A contact who's both buying and selling links to one of each.
+        const buyKey  = (buyDealRow  && buyDealRow.style.display  !== 'none' && buyDealSel)  ? buyDealSel.value  : '';
+        const sellKey = (sellDealRow && sellDealRow.style.display !== 'none' && sellDealSel) ? sellDealSel.value : '';
         let linkMsg = '';
-        if (dealKey) {
+        if (buyKey || sellKey) {
           const email = (patch.email || lead.email || '').trim();
           if (!email) {
             linkMsg = ' — add an email to link the deal.';
           } else {
-            const role = (patch.buyer_stage === 'in_escrow') ? 'buyer' : 'seller';
-            const lr = await window.Legacy.api('/api/crm/link-deal-party', {
-              method: 'POST',
-              body: { deal: dealKey, email, first_name: patch.first_name || undefined, last_name: patch.last_name || undefined, phone: patch.phone || undefined, role, provision: false }
-            });
-            linkMsg = (lr.ok && lr.json && lr.json.linked) ? ' Linked to deal.' : ' — deal link failed.';
+            const linkOne = async (dealKey, role) => {
+              if (!dealKey) return null;
+              const lr = await window.Legacy.api('/api/crm/link-deal-party', {
+                method: 'POST',
+                body: { deal: dealKey, email, first_name: patch.first_name || undefined, last_name: patch.last_name || undefined, phone: patch.phone || undefined, role, provision: false }
+              });
+              return !!(lr.ok && lr.json && lr.json.linked);
+            };
+            const okBuy  = await linkOne(buyKey, 'buyer');
+            const okSell = await linkOne(sellKey, 'seller');
+            const done = [okBuy && 'buy-side', okSell && 'sell-side'].filter(Boolean);
+            const failed = [(buyKey && okBuy === false) && 'buy-side', (sellKey && okSell === false) && 'sell-side'].filter(Boolean);
+            if (done.length)   linkMsg += ` Linked ${done.join(' + ')} deal${done.length > 1 ? 's' : ''}.`;
+            if (failed.length) linkMsg += ` — ${failed.join(' + ')} link failed.`;
           }
         }
         saveBtn.disabled = false; saveBtn.textContent = 'Save contact';
