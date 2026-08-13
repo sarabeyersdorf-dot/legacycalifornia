@@ -4193,6 +4193,9 @@
       const groups = (lastDealsData && lastDealsData.groups && typeof lastDealsData.groups === 'object') ? lastDealsData.groups : {};
       const roster = (mb && mb.roster) || {};
       const drafts = mb.drafts || [], tours = mb.tours_today || [], quiet = mb.radio_silence || [];
+      const appts = mb.appointments_today || [];
+      const APPT_LABEL = { inspection: 'Inspection', showing: 'Showing', listing_appt: 'Listing appt', walkthrough: 'Walkthrough', follow_up: 'Follow-up', appraisal: 'Appraisal', call: 'Call', meeting: 'Meeting', open: 'Open house', block: 'Block' };
+      const apptLabel = (a) => a.kind === 'inspection' ? (a.sub_kind ? a.sub_kind + ' inspection' : 'Inspection') : (APPT_LABEL[a.kind] || 'Appointment');
       // Resolve a group's source_keys to their deal rows (skip any that aren't in
       // the flat list — e.g. a just-added escrow that hasn't synced into deals yet).
       const dealsIn = (g) => (Array.isArray(groups[g]) ? groups[g] : []).map((k) => deals.find((d) => d && d.source_key === k)).filter(Boolean);
@@ -4208,7 +4211,7 @@
       guard('title', () => {
         const today = new Date();
         setT('[data-bind-dash-date]', today.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' }));
-        const moveCount = drafts.length + tours.length;
+        const moveCount = drafts.length + tours.length + appts.length;
         setT('[data-bind-dash-headline]', moveCount ? `${moveCount} thing${moveCount === 1 ? '' : 's'} move today` : 'You’re clear today');
         const dueSoon = pending.filter((d) => d.coe_days != null && d.coe_days <= 2).length;
         const alertEl = root.querySelector('[data-bind-dash-alert]');
@@ -4233,7 +4236,8 @@
       guard('today', () => {
         const items = []
           .concat(drafts.map((d) => ({ kind: 'draft', lead_id: d.lead_id, name: fullName(d.leads || {}) || 'A lead', title: d.subject || 'Draft reply ready', ctx: `Draft ${d.channel || 'reply'} awaiting your approval`, due: 'Review', stg: 'nurture' })))
-          .concat(tours.map((t) => ({ kind: 'tour', lead_id: (t.leads && t.leads.id) || null, name: fullName(t.leads || {}) || 'Client', title: `${t.tour_type === 'video' ? 'Video tour' : 'Showing'} · ${fullName(t.leads || {}) || 'client'}`, ctx: (t.properties && [t.properties.address, t.properties.city].filter(Boolean).join(', ')) || 'Location TBD', due: dashClock(t.scheduled_at), stg: 'on_market' })));
+          .concat(tours.map((t) => ({ kind: 'tour', lead_id: (t.leads && t.leads.id) || null, name: fullName(t.leads || {}) || 'Client', title: `${t.tour_type === 'video' ? 'Video tour' : 'Showing'} · ${fullName(t.leads || {}) || 'client'}`, ctx: (t.properties && [t.properties.address, t.properties.city].filter(Boolean).join(', ')) || 'Location TBD', due: dashClock(t.scheduled_at), stg: 'on_market' })))
+          .concat(appts.map((a) => { const addr = a.deals ? [a.deals.address, a.deals.city].filter(Boolean).join(', ') : ''; const lbl = apptLabel(a); return { kind: 'appt', lead_id: null, name: a.title || lbl, title: a.title ? `${lbl} · ${a.title}` : lbl, ctx: addr || a.client_label || 'On your calendar', due: a.all_day ? 'All day' : dashClock(a.starts_at), stg: 'on_market' }; }));
         const todayHost = root.querySelector('[data-dash-today]');
         setT('[data-bind-dash-todaycount]', `${items.length} item${items.length === 1 ? '' : 's'}${drafts.length ? ` · ${drafts.length} to review` : ''}`);
         if (todayHost) {
@@ -4248,15 +4252,16 @@
               <div class="tt">${escHtml(hero.title)}</div>
               <div class="cx">${escHtml(hero.ctx)}</div>
               <div class="acts">
-                <button class="ds-btn ds-btn--amber" data-dash-open="${escHtml(hero.lead_id || '')}">Open ${escHtml(hero.kind === 'draft' ? 'draft' : 'showing')}</button>
-                <button class="ds-btn" data-dash-cal>See calendar</button>
+                ${hero.kind === 'appt'
+                  ? `<button class="ds-btn ds-btn--amber" data-dash-cal>Open calendar</button>`
+                  : `<button class="ds-btn ds-btn--amber" data-dash-open="${escHtml(hero.lead_id || '')}">Open ${escHtml(hero.kind === 'draft' ? 'draft' : 'showing')}</button><button class="ds-btn" data-dash-cal>See calendar</button>`}
               </div>
             </div>`;
             const rowsHtml = `<div class="ds-today-list">` + rest.map((it) => `
-            <div class="ds-today-row" data-stg="${escHtml(it.stg)}" data-dash-open="${escHtml(it.lead_id || '')}">
+            <div class="ds-today-row" data-stg="${escHtml(it.stg)}" ${it.kind === 'appt' ? 'data-dash-cal' : `data-dash-open="${escHtml(it.lead_id || '')}"`}>
               <span class="stripe"></span>
               <div class="tr-b"><div class="tt">${escHtml(it.title)}</div><div class="cx">${escHtml(it.ctx)}</div></div>
-              <span class="due${it.kind === 'tour' ? '' : ''}">${escHtml(it.due)}</span>
+              <span class="due">${escHtml(it.due)}</span>
             </div>`).join('') + `</div>`;
             todayHost.innerHTML = heroHtml + rowsHtml;
           }
