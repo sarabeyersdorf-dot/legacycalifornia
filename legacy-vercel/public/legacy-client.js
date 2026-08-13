@@ -2785,7 +2785,9 @@
           <div class="lp-wire-b">We will never send wire instructions through this portal, by email, or by text. Before wiring funds, always call the title company directly at a phone number you have independently verified.</div>
         </div>` : '';
       const isBuyer  = lead.deal_side === 'buyer';
-      const portalOk = lead.portal_token && !isBuyer;
+      // The transaction portal (seller.html?t=…) is side-aware — a buyer opens
+      // their purchase view — so a buyer with a token has a real portal link too.
+      const portalOk = !!lead.portal_token;
       const previewTitle = isBuyer
         ? 'Your Search'
         : `Your Sale — ${(lead.areas && lead.areas[0]) || 'Your listing'}`;
@@ -2924,14 +2926,14 @@
           </div>
         </div>
         <div class="ld-head-actions">
-          ${lead.portal_token && lead.deal_side !== 'buyer'
+          ${lead.portal_token
             ? `<span class="lp-hpill live" title="This client has a live private portal link"><span class="dot"></span>Portal live · token active</span>`
             : ''}
           ${lead.phone
             ? `<a class="btn btn-ghost btn-sm" href="tel:${escHtml(lead.phone)}" title="Call ${escHtml(lead.phone)}">Call</a>`
             : `<button class="btn btn-ghost btn-sm" disabled title="No phone number on file">Call</button>`}
           <button class="btn btn-ghost btn-sm" data-detail-action="schedule" title="Open the calendar to book a tour">Schedule</button>
-          ${lead.portal_token && lead.deal_side !== 'buyer'
+          ${lead.portal_token
             ? `<button class="btn btn-ghost btn-sm" data-detail-action="portal-link" title="Copy this client's private, no-login portal link">Copy portal link</button>`
             : ''}
           <span style="position:relative;display:inline-block;">
