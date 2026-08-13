@@ -538,13 +538,22 @@ export default async function handler(req, res) {
     // from deals.json) — the real to-do list, so a deal with genuine tasks no
     // longer shows the empty state just because no doc is owed. Fall back to the
     // owed-docs + timeline derivation when clientTasks isn't present.
+    const mapTask = (t) => ({
+      label:  sanitize((t && t.label) || ''),
+      when:   sanitize((t && t.when) || 'Open'),
+      status: (t && t.status === 'done') ? 'done' : 'open'
+    });
     let tasks;
-    if (Array.isArray(deal.client_tasks) && deal.client_tasks.length) {
-      tasks = deal.client_tasks.map((t) => ({
-        label:  sanitize((t && t.label) || ''),
-        when:   sanitize((t && t.when) || 'Open'),
-        status: (t && t.status === 'done') ? 'done' : 'open'
-      })).filter((t) => t.label).concat(sharedTasks);
+    if (isBuyerSide) {
+      // A BUYER never sees the seller's to-do list — deal.client_tasks are written
+      // from the seller's seat ("watch for the buyer's inspection", "review the
+      // seller net sheet"). Use Cowork's buyer-authored tasks (deal.buyer_tasks)
+      // when present; otherwise show nothing but the friendly empty state. We also
+      // skip the owed-docs derivation, since those are the seller's documents.
+      const bt = Array.isArray(deal.buyer_tasks) ? deal.buyer_tasks : [];
+      tasks = bt.map(mapTask).filter((t) => t.label).concat(sharedTasks);
+    } else if (Array.isArray(deal.client_tasks) && deal.client_tasks.length) {
+      tasks = deal.client_tasks.map(mapTask).filter((t) => t.label).concat(sharedTasks);
     } else {
       tasks = (timelineTasks || [])
         .concat(docs
@@ -561,6 +570,16 @@ export default async function handler(req, res) {
     tasks = tasks.map((t) => doneSet.has(t.label) ? { ...t, status: 'done' } : t);
     const tasksDone = isAgent ? tasks.filter((t) => t.status === 'done') : [];
     tasks = tasks.filter((t) => t.status !== 'done');
+
+    // "What I need from you" copy is side-aware: the intro and the empty-state
+    // line both read from the viewer's seat (buyer vs seller), so a buyer never
+    // sees seller-flavoured phrasing like "needs your signature" on a listing.
+    const tasksIntro = isBuyerSide
+      ? 'Anything I need from you during your purchase shows up here. I’ll text you too, so nothing slips through.'
+      : 'I only reach out when something genuinely needs your signature. Those requests land right here — and I’ll text you too.';
+    const tasksEmpty = tasks.length ? '' : (isBuyerSide
+      ? 'Nothing needed from you right now. I’m on the next steps and will reach out the moment something needs you.'
+      : 'Nothing needs your signature right now. I’ll post anything the moment it comes up.');
 
     // "Good to know" — titled context bullets shown alongside the agent note
     // (v1.5, from deals.json goodToKnow[]).
@@ -824,6 +843,9 @@ export default async function handler(req, res) {
       // Weekly ListTrac marketing digest (null when there's nothing to show).
       marketing,
       nav: { documents: docs.length ? String(docs.length) : '', tasks: String(tasks.length) },
+      // Side-aware "What I need from you" copy (buyer vs seller seat).
+      tasks_intro: tasksIntro,
+      tasks_empty: tasksEmpty,
       // Shown in the Documents section only when there are none, so the section
       // never sits empty or implies a fixed checklist.
       documents_empty: docs.length ? '' : 'No documents have been shared here yet — they’ll appear as your file comes together.',
@@ -866,9 +888,19 @@ export default async function handler(req, res) {
 function buyerizeRoad(road) {
   if (!Array.isArray(road)) return road;
   const amt = (s) => { const m = String(s || '').match(/\$[\d,]+/); return m ? m[0] : ''; };
+  const cap = (s) => { s = String(s || '').trim(); return s ? s.charAt(0).toUpperCase() + s.slice(1) : s; };
   const flip = (s) => String(s || '')
     .replace(/\byour home\b/gi, 'the home')
     .replace(/\byour listing\b/gi, 'the home')
+    // Conjugate "the buyer <verb>" → "you <verb>" BEFORE the bare-noun swap, so we
+    // never produce ungrammatical "you has" / "you is".
+    .replace(/\bthe buyer has\b/gi, 'you have')
+    .replace(/\bthe buyer is\b/gi, 'you are')
+    .replace(/\bthe buyer was\b/gi, 'you were')
+    .replace(/\bthe buyer does\b/gi, 'you do')
+    .replace(/\bthe buyer needs\b/gi, 'you need')
+    .replace(/\bthe buyer gets\b/gi, 'you get')
+    .replace(/\bthe buyer will\b/gi, 'you will')
     .replace(/\bthe buyer countered\b/gi, 'you countered')
     .replace(/\bbuyer countered\b/gi, 'you countered')
     .replace(/\ban offer came in\b/gi, 'you made an offer')
@@ -876,7 +908,16 @@ function buyerizeRoad(road) {
     .replace(/\btheir highest and best\b/gi, 'your highest and best')
     .replace(/\bbuyer-signed\b/gi, 'signed')
     .replace(/\bthe buyer'?s\b/gi, 'your')
+    .replace(/\bbuyer'?s\b/gi, 'your')
     .replace(/\bthe buyer\b/gi, 'you');
+  // Remove seller closing-prep phrasing a buyer shouldn't see — most importantly
+  // the seller's home warranty, which is the seller's cost, not the buyer's.
+  const stripSeller = (s) => String(s || '')
+    .replace(/,?\s*and\s+(?:the\s+)?home warranty[^.!?]*/gi, '')                 // "..., and the home warranty ... AHS"
+    .replace(/(^|[.!?]\s+)[^.!?]*home warranty[^.!?]*[.!?]/gi, '$1')             // a whole sentence about it
+    .replace(/\s{2,}/g, ' ')
+    .replace(/\s+([.,])/g, '$1')
+    .trim();
   const out = [];
   for (const m of road) {
     const label = String(m && m.label || '');
@@ -888,14 +929,18 @@ function buyerizeRoad(road) {
       || /\blisted\b|on the market|went on the market|listing agreement|price (?:drop|reduc)/i.test(label + ' ' + desc);
     if (isListingStep) continue;
     let newLabel;
-    if (/\baccepted\b|under contract|mutual|ratified|in escrow/i.test(label)) {
+    if (/contingenc/i.test(label)) {
+      // "Buyer's contingency period ends" → the buyer's own contingencies, framed
+      // personally.
+      newLabel = 'Your contingency period';
+    } else if (/\baccepted\b|under contract|mutual|ratified|in escrow/i.test(label)) {
       newLabel = 'Your offer was accepted' + (amt(label) ? ' at ' + amt(label) : '');
     } else if (/offer received|offer came in|an offer came/i.test(label)) {
       newLabel = 'Your offer' + (amt(label) ? ' — ' + amt(label) : '');
     } else {
-      newLabel = flip(label);
+      newLabel = cap(flip(label));
     }
-    out.push({ ...m, label: newLabel, description: flip(desc) });
+    out.push({ ...m, label: newLabel, description: cap(stripSeller(flip(desc))) });
   }
   return out;
 }
@@ -982,7 +1027,8 @@ Voice: warm, direct, reassuring, never salesy. Short sentences. No exclamation p
 Hard rules:
 1. Your phone is ${agentPhone}. Never invent other contact info.
 2. Only mention facts given below. Do NOT mention commission, financing problems, legal matters, or the buyer's private details.
-3. 3-4 short sentences. No salutation line, no signoff (those are added separately). Plain prose.`;
+3. 3-4 short sentences. No salutation line, no signoff (those are added separately). Plain prose.${isBuyerSide ? `
+4. This is the BUYER's note. NEVER reference a seller net sheet, the listing, a listing agreement, showings, seller proceeds, or a home warranty — those belong to the seller, not your buyer. Speak only to their purchase: escrow, inspections, appraisal, loan, contingencies, and closing.` : ''}`;
   const owed = tasks.length ? tasks.map((t) => t.label.replace(/^Sign /, '')).join(', ') : 'nothing right now';
   const who = firstName || (isBuyerSide ? 'the buyer' : 'the seller');
   const prompt = `Write the weekly note to ${who} about their ${isBuyerSide ? 'purchase' : 'sale'} at ${deal.address}.

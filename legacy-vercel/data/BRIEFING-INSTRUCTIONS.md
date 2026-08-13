@@ -436,6 +436,42 @@ Rules:
   milestones for the buyer as a fallback, but a hand-authored buyer array always
   reads better — write one for every both-sided / buyer-side deal.
 
+### Buyer-side "What I need from you" (`buyerTasks`)
+
+`clientTasks` is written from the **seller's** seat too ("watch for the buyer's
+inspection", "keep utilities on", "review the seller net sheet"). A buyer must
+**never** see the seller's to-do list. So on any both-sided / buyer-side deal,
+author a parallel **`buyerTasks`** array, same shape as `clientTasks`
+(`[{ "label","when","status" }]`), listing only what **the buyer** actually needs
+to do — e.g. wire the earnest money, schedule inspections, review the seller
+disclosures, keep the loan on track, remove contingencies, verify wire
+instructions by phone before closing.
+
+```json
+"buyerTasks": [
+  { "when": "Now", "label": "Wire your earnest money deposit to escrow and confirm receipt", "status": "open" },
+  { "when": "By Aug 27", "label": "Complete your inspections, appraisal and loan approval before your contingency period ends", "status": "open" },
+  { "when": "This week", "label": "Review the seller's disclosures shared in your portal and tell me if anything needs follow-up", "status": "open" }
+]
+```
+
+- Write from the **buyer's** seat. Never reference the seller's net sheet, the
+  listing, showings, or seller proceeds.
+- If you don't author `buyerTasks`, the buyer's "What I need from you" simply
+  shows a friendly empty state — it will **never** fall back to the seller's
+  tasks. So author one whenever the buyer genuinely has open items.
+
+### Correcting a fact that already went out (e.g. the home warranty)
+
+When a fact turns out to be wrong — for example a home warranty that was
+**ordered in error and never actually placed** — fixing the draft agent note is
+not enough. The wrong text usually also lives in the **client-facing**
+`milestones[].desc` (and `buyerMilestones[].desc`). Search the deal for the
+phrase and remove it from **every** place it appears, in the same pass. Example
+already corrected on 324 Augusta: the "Escrow opened" milestone must **not** say
+a home warranty was placed — it now reads "The preliminary title report has been
+ordered." only.
+
 ## 3. Documents in the client portal
 
 ### The simple way — just drop the files in (use this for most transactions)
