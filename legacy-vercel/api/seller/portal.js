@@ -582,8 +582,15 @@ export default async function handler(req, res) {
       : 'Nothing needs your signature right now. I’ll post anything the moment it comes up.');
 
     // "Good to know" — titled context bullets shown alongside the agent note
-    // (v1.5, from deals.json goodToKnow[]).
-    const goodToKnow = (Array.isArray(deal.good_to_know) ? deal.good_to_know : [])
+    // (v1.5, from deals.json goodToKnow[]). These are authored from the SELLER's
+    // seat ("Sara represents you as the seller", "Sara is lining up a backup"), so
+    // a BUYER must never see them verbatim. A buyer reads Cowork's buyer-authored
+    // buyer_good_to_know (db/072) when present; otherwise the section is simply
+    // empty for the buyer — never the seller's bullets.
+    const gtkSource = isBuyerSide
+      ? (Array.isArray(deal.buyer_good_to_know) ? deal.buyer_good_to_know : [])
+      : (Array.isArray(deal.good_to_know) ? deal.good_to_know : []);
+    const goodToKnow = gtkSource
       .map((g) => ({ title: sanitize((g && g.title) || ''), body: sanitize((g && g.body) || '') }))
       .filter((g) => g.title || g.body);
 
@@ -813,11 +820,16 @@ export default async function handler(req, res) {
       security,
       // 0-or-1 array so the front-end data-list hides the whole section when absent.
       back_on_market: backOnMarket ? [backOnMarket] : [],
-      escrow_history: escrowHistory,
+      // Prior escrows are the SELLER's listing history (a cancelled buyer, etc.) —
+      // never shown to a buyer, who only has their own purchase.
+      escrow_history: isBuyerSide ? [] : escrowHistory,
       seller: { first_name: firstName || '', who: sanitize(deal.address) },
       status: {
         label: stageLabel,
         badge: stageLabel,
+        // Product label in the top bar + document title, side-aware so a buyer
+        // never sees "Seller portal".
+        product_label: isBuyerSide ? 'Buyer portal' : 'Seller portal',
         address: sanitize(deal.address),
         city: sanitize(deal.city || ''),
         type: sanitize(deal.type || ''),
