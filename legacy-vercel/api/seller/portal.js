@@ -664,6 +664,7 @@ export default async function handler(req, res) {
       const raw = (d.doc_url && /^(https?:\/\/|\/docs\/)/i.test(d.doc_url)) ? d.doc_url : '';
       return {
         type: (d.doc_type || '').toUpperCase().slice(0, 6),
+        cat: docCategory(d.doc_type, d.name),   // colour class for the type badge
         name: sanitize(d.name), sub: sanitize(d.sub || ''),
         status: d.status ? (DOC_STATUS_LABEL[d.status] || 'On file') : '',   // optional — blank for flat drops
         view_url:       raw ? portalDocUrl(raw, false) : '',   // same-origin /docs or Dropbox dl=0
@@ -897,6 +898,20 @@ function buyerizeRoad(road) {
     out.push({ ...m, label: newLabel, description: flip(desc) });
   }
   return out;
+}
+
+// Colour category for a document's little type badge, from its doc_type + name.
+// Grouped so related paperwork shares a hue (contract, title/escrow, money,
+// disclosures, inspections, listing). Everything else stays neutral ('doc').
+function docCategory(docType, name) {
+  const s = (String(docType || '') + ' ' + String(name || '')).toLowerCase();
+  if (/\brpa\b|purchase agreement|counter|\boffer\b|addendum|amendment/.test(s)) return 'contract';
+  if (/prelim|\btitle\b|escrow|commitment|grant deed|\bdeed\b/.test(s))          return 'title';
+  if (/\bemd\b|earnest|deposit|commission|closing statement|settlement|\bhud\b|proceeds/.test(s)) return 'money';
+  if (/inspect|\bpest\b|termite|\broof\b|apprais|walk-?through|\breport\b|septic|\bwell\b|sewer|chimney/.test(s)) return 'inspection';
+  if (/\btds\b|\bspq\b|disclosur|advisory|\bsbsa\b|\bavid\b|\bnhd\b|\blead\b|firpta|questionnaire|carbon|smoke|water heater/.test(s)) return 'disclosure';
+  if (/listing|agreement|modification/.test(s))                                  return 'listing';
+  return 'doc';
 }
 
 function sellerFirstName(deal) {

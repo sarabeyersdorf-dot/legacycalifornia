@@ -471,6 +471,14 @@ body.agent-preview .ds-action-box{cursor:pointer;}
 .ds-doc{display:flex;align-items:center;gap:12px;padding:11px 16px;border-bottom:1px solid var(--hair);}
 .ds-doc:last-child{border-bottom:none;}
 .ds-doc-ic{font-family:var(--cond);font-weight:600;font-size:11px;letter-spacing:.06em;color:var(--muted);background:var(--band);border:1px solid var(--rule);padding:3px 6px;flex:none;}
+/* Colour the little type badge by document category (contract / title / money /
+   disclosure / inspection / listing); anything else stays neutral. */
+.ds-doc-ic[data-cat="contract"]{color:#14508F;background:#E4EDF9;border-color:#BFD5EF;}
+.ds-doc-ic[data-cat="title"]{color:#056E78;background:#DCEFF1;border-color:#A9D9DD;}
+.ds-doc-ic[data-cat="money"]{color:#8F5316;background:#F6EAD8;border-color:#E3C79A;}
+.ds-doc-ic[data-cat="disclosure"]{color:#574A70;background:#ECE7F2;border-color:#C9BEDD;}
+.ds-doc-ic[data-cat="inspection"]{color:#3A6344;background:#E1EFE4;border-color:#B4D2BB;}
+.ds-doc-ic[data-cat="listing"]{color:#454F66;background:#E5E8EE;border-color:#BEC6D3;}
 .ds-doc-nm{flex:1;min-width:0;}
 .ds-doc-nm>span:first-child{display:block;font-size:14.5px;color:var(--ink);font-weight:500;}
 .ds-doc-sub{font-size:12.5px;color:var(--faint);}
