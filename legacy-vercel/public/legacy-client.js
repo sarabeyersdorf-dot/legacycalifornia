@@ -2135,7 +2135,20 @@
     });
   }
 
+  // Reveal the portal only once it's painted — the page ships with seller-framed
+  // placeholder text, so showing it before the (side-aware) payload paints would
+  // flash "Your home"/"Sara" to a buyer. A cover hides everything until ready.
+  function revealPortal() {
+    const pl = document.getElementById('portal-loading');
+    if (!pl) return;
+    pl.style.transition = 'opacity .18s ease';
+    pl.style.opacity = '0';
+    setTimeout(() => { if (pl && pl.parentNode) pl.parentNode.removeChild(pl); }, 200);
+  }
+
   async function loadSeller() {
+    // Safety: never let the cover hang if the fetch stalls or the gate redirects.
+    setTimeout(revealPortal, 6000);
     let res;
     const params = new URLSearchParams(location.search);
     const token = params.get('t');
@@ -2149,13 +2162,14 @@
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include'
       });
-    } catch (_) { return; }
-    if (!res.ok) return;            // 401 → gate handles sign-in
+    } catch (_) { revealPortal(); return; }
+    if (!res.ok) { revealPortal(); return; }   // 401 → gate handles sign-in
     let json = null;
-    try { json = await res.json(); } catch (_) { return; }
+    try { json = await res.json(); } catch (_) { revealPortal(); return; }
     const portal = json && json.portal ? json.portal : json;
     window.__legacySellerPortal = portal;
     paintPortal(portal);
+    revealPortal();
   }
 
   document.addEventListener('DOMContentLoaded', loadSeller);

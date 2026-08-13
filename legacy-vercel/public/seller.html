@@ -255,6 +255,14 @@ body.lp-restyle {
   <link rel="apple-touch-icon" href="/art/legacy-icon-180.png">
 </head>
 <body data-screen-label="Seller Portal" class="lp-restyle">
+<!-- Hides the seller-framed placeholder content until the side-aware payload
+     paints, so a buyer never sees a flash of "Your home"/"Sara". Removed by JS
+     (revealPortal) after paint, with a 6s safety fallback. -->
+<div id="portal-loading" aria-hidden="true" style="position:fixed;inset:0;z-index:10000;background:#FAF6EC;display:flex;align-items:center;justify-content:center;">
+  <div style="font-family:'Barlow Condensed','Barlow',system-ui,sans-serif;font-size:15px;letter-spacing:.14em;text-transform:uppercase;color:#9A876A;">Loading…</div>
+</div>
+<script>/* hard fallback: never let the cover hang even if the main script fails */
+setTimeout(function(){var p=document.getElementById('portal-loading');if(p&&p.parentNode)p.parentNode.removeChild(p);},7000);</script>
 
 <!-- ===== Seller Portal (screen 1A — spine) · 2026 re-skin =====
      Markup rewritten to the design system; every data-bind / data-list /
