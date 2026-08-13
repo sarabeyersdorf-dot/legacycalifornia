@@ -3361,6 +3361,48 @@
           "desc": "Close of escrow is set for September 9, 2026, a 30-day close from acceptance."
         }
       ],
+      "buyerMilestones": [
+        {
+          "date": "2026-08-09",
+          "label": "Your offer — $450,000",
+          "status": "done",
+          "col": "money",
+          "badge": "Submitted",
+          "desc": "You offered $450,000 with conventional financing. The seller countered the same day (Seller Counter Offer #1), which you signed."
+        },
+        {
+          "date": "2026-08-10",
+          "label": "Your offer was accepted at $460,000",
+          "status": "done",
+          "col": "money",
+          "badge": "Accepted",
+          "desc": "You countered at $460,000 — your highest and best — and shortened the escrow period. Seller Counter Offer #2 and your counter were both fully executed the evening of August 10."
+        },
+        {
+          "date": "2026-08-11",
+          "label": "Escrow opened",
+          "status": "done",
+          "col": "paperwork",
+          "badge": "Open",
+          "desc": "Escrow is open at Placer Title (Order P-708410). Your preliminary title report has been ordered and a home warranty placed with American Home Shield."
+        },
+        {
+          "date": "2026-08-27",
+          "label": "Your contingencies are due",
+          "status": "next",
+          "col": "inspection",
+          "badge": "Key date",
+          "desc": "You have 17 days from acceptance to complete your inspections, appraisal and loan approval. That period runs to August 27 unless the contract is amended."
+        },
+        {
+          "date": "2026-09-09",
+          "label": "Close of escrow — 9/9",
+          "status": "upcoming",
+          "col": "closing",
+          "badge": "Closing day",
+          "desc": "You take ownership on closing day, set for September 9, 2026 — a 30-day close from acceptance."
+        }
+      ],
       "clientTasks": [
         {
           "label": "Watch for the buyer's inspection scheduling — plan to have the home accessible",
