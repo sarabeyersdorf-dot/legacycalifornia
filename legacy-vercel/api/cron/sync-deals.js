@@ -481,6 +481,43 @@ function mapDocs(dealId, d, escrowIdByKey, manifest) {
     pushSeed(doc_key, dispName, doc.visibility || defaultClientVis);
   }
 
+  // BUYER DOCUMENT LIST (buyerDocuments) — the executed files the BUYER sees on a
+  // dual/buyer-side deal, authored by Cowork parallel to clientDocuments (same
+  // shape: { name, url, sub?, status?, key?, scope?, visibility? }). This is the
+  // buyer counterpart to clientDocuments, exactly like buyerTasks/buyerMilestones
+  // are to clientTasks/milestones — so a buyer never inherits the seller's list
+  // and Cowork can curate the buyer's set from Dropbox without an agent granting
+  // by hand. Always processed (a folder manifest does NOT suppress it), keyed
+  // under a `-buyer-` prefix so it never collides with the seller docs, and
+  // seeded buyer-visible by default (set visibility:"both" on a row to show it to
+  // the seller too).
+  const buyerFlat = Array.isArray(d.buyerDocuments) ? d.buyerDocuments : [];
+  for (const doc of buyerFlat) {
+    if (!doc) continue;
+    const name = String(doc.name || doc.title || doc.label || '').trim();
+    const url  = doc.url || doc.link || doc.href || doc.file || null;
+    if (!name && !url) continue;
+    const dispName = name || 'Document';
+    const doc_key = uniqueKey(String(doc.key || doc.doc_key || `${prefix}-buyer-${docSlug(dispName) || 'doc'}`));
+    const scope = SCOPE_ENUM.has(String(doc.scope || '').toLowerCase())
+      ? String(doc.scope).toLowerCase() : 'transaction';
+    out.push({
+      deal_id: dealId,
+      doc_type: extType(name || url),
+      name: dispName,
+      sub: doc.sub || doc.note || null,
+      status: doc.status ? docStatus(doc.status) : null,
+      status_raw: doc.status != null ? String(doc.status) : null,
+      doc_url: url ? String(url) : null,
+      doc_key,
+      scope,
+      escrow_id: resolveEscrow(doc.escrow),
+      client_safe: true,
+      updated_at: new Date().toISOString()
+    });
+    pushSeed(doc_key, dispName, doc.visibility || 'buyer');
+  }
+
   // FOLDER-PUBLISHED PATH — documents published from Dropbox share folders by
   // publish-docs-from-dropbox, listed in data/portal-docs/<id>.json. Each entry
   // already carries the scope + visibility derived from the folder it sat in, so
