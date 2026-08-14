@@ -5,6 +5,24 @@ transaction portal (`seller.html`, served branded at `/buyer/<token>` and
 `/seller/<token>`). Static site + serverless API under `legacy-vercel/`, backed by
 Supabase Postgres project `sthfxehojcvfdyatxzlv`.
 
+## Working with Sara (standing instruction)
+
+Sara is not a programmer and relies on Claude Code to know the better path. So:
+**whenever there's a clearly better, simpler, or more efficient way to do what she's
+asking — say so, briefly, and recommend it — even when she didn't ask for options.**
+Offer the suggestion, explain the trade-off in plain language, and let her choose; don't
+silently do the literal thing when a better one exists, and don't over-engineer or bury
+her in choices. Default to the simplest thing that works.
+
+## Buyer vs seller portal content — the pattern
+
+The transaction portal is side-aware: a buyer and seller open the same page but must see
+their own seat. Seller-authored content never leaks to a buyer. For every seller field
+there is a buyer counterpart Cowork authors in `deals.json`, and the buyer reads it (never
+falling back to the seller's): `milestones`→`buyerMilestones`, `clientTasks`→`buyerTasks`,
+`goodToKnow`→`buyerGoodToKnow`, `clientDocuments`→`buyerDocuments`. A buyer with no
+counterpart authored sees a friendly empty state, never the seller's version.
+
 ## Two agents, one product — and how we talk to each other
 
 Two AI agents work on this product and **cannot see each other's world**:
