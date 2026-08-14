@@ -1,6 +1,6 @@
 {
-  "version": 7.1,
-  "lastUpdated": "2026-08-13",
+  "version": 7.4,
+  "lastUpdated": "2026-08-14",
   "updatedBy": "cowork 2026-08-10 — canonical commission/timeline schema migration per Sara",
   "tasks": [
     {
@@ -1382,14 +1382,6 @@
     {
       "agent": "sara",
       "client": "324 Augusta",
-      "key": "augusta-agentnote-warranty",
-      "title": "324 Augusta: 'the home warranty is placed' is wrong in TWO places — the draft agent note AND the CRM client-facing copy on the 'Escrow opened' milestone desc. Cancelled 8/11; fixing the note alone will not fix the page",
-      "due": "2026-08-12",
-      "done": true
-    },
-    {
-      "agent": "sara",
-      "client": "324 Augusta",
       "key": "augusta-warranty-charge",
       "title": "324 Augusta: confirm the AHS warranty cancelled with no surviving charge — order confirmation AND escrow invoice both issued 8/11 before cancellation",
       "due": "2026-08-16",
@@ -1526,14 +1518,6 @@
     {
       "agent": "sara",
       "client": "324 Augusta",
-      "key": "augusta-agentnote-warranty-2",
-      "title": "324 Augusta: 'the home warranty is placed' still live in the draft note AND the CRM 'Escrow opened' milestone — ticked 8/12 but text unchanged",
-      "due": "2026-08-13",
-      "done": true
-    },
-    {
-      "agent": "sara",
-      "client": "324 Augusta",
       "key": "augusta-emd-now-real",
       "title": "324 Augusta: the EMD card dismissed 8/12 is now genuinely satisfiable — receipt on disk (Ex/Receipt_416170.pdf); CRM still shows deposit due",
       "due": "2026-08-13",
@@ -1585,6 +1569,62 @@
       "key": "433-marketing-push",
       "title": "433: pest work done, four silent days, relisted to ~11/18 — good week for a marketing push",
       "due": "2026-08-16",
+      "done": false
+    },
+    {
+      "agent": "sara",
+      "client": "324 Augusta",
+      "key": "aug-roof-dispute",
+      "title": "🔴 324 Augusta: roof dispute — buyer's inspector says repairs not completed ($1,700 scope); Brian says two roofers did the work, paid in full, and questions the inspector's motives. Send Denis the documentation, not the conflict-of-interest comment. Contingency ends 8/27 — consider a neutral third bid.",
+      "due": "Today 8/14",
+      "done": false
+    },
+    {
+      "agent": "sara",
+      "client": "695 Feather",
+      "key": "feather-agentnote-coe",
+      "title": "🔴 695 Feather: the draft note to Ashley still says \"COE is confirmed for August 14, 2026\" — wrong as of today; it closes 8/21. Fix before she reads it.",
+      "due": "Today 8/14",
+      "done": false
+    },
+    {
+      "agent": "james",
+      "client": "8235 Baldwin",
+      "key": "baldwin-aea-buyer-sig",
+      "title": "🔴 Baldwin: confirm Shomari actually signed the AEA — filed to EX seller-signed only; James said \"I think this will be fine\"; buyer out of town, death in the family. COE Monday 8/17.",
+      "due": "Today 8/14",
+      "done": false
+    },
+    {
+      "agent": "sara",
+      "client": "324 Augusta",
+      "key": "aug-inspection-response",
+      "title": "324 Augusta: Denis's inspections are all in — home + sewer landed 8/14, roof and pest 8/13. Expect a repair request; contingency ends 8/27.",
+      "due": "This week",
+      "done": false
+    },
+    {
+      "agent": "sara",
+      "client": "695 Feather",
+      "key": "feather-coe-821",
+      "title": "695 Feather: set closingDate + timeline.coe + the COE milestone to 2026-08-21 once Dee executes the ETA. File still carries the 8/14 contract date.",
+      "due": "When ETA executes",
+      "done": false
+    },
+    {
+      "agent": "james",
+      "client": "695 Feather",
+      "key": "feather-adm2-file",
+      "title": "695 Feather: ADM #2 still not filed — EX holds only ADM 1pdf.pdf.",
+      "due": "This week",
+      "done": false
+    },
+    {
+      "agent": "sara",
+      "client": "324 Augusta",
+      "key": "aug-homelight-listing",
+      "title": "324 Augusta: HomeLight shows the property packet viewed AND downloaded 8/12 — the home is in escrow; check the listing is not still publicly soliciting.",
+      "due": "This week",
       "done": false
     }
   ],
@@ -3832,19 +3872,19 @@
           "desc": "Purchase price confirmed at $170,000, all-cash purchase."
         },
         {
-          "date": "2026-08-14",
-          "label": "Close of Escrow — 8/14",
+          "date": "2026-08-21",
+          "label": "Close of Escrow — 8/21",
           "status": "next",
           "col": "closing",
-          "badge": "Closing 8/14",
-          "desc": "Close of escrow confirmed for August 14, 2026 with Orange Coast Title (Escrow #2473532-TS)."
+          "badge": "Closing 8/21",
+          "desc": "Close of escrow moves to Friday, August 21 under Extension of Time Addendum No. 1. The deed records and funds release that day."
         }
       ],
       "agentNote": {
         "author": "james",
         "status": "draft",
-        "updated": "2026-08-07",
-        "body": "Ashley and Bert, you are under contract at $170,000 cash on 695 Feather Dr. Escrow is open with Orange Coast Title (#2473532-TS, Tanya Salgado). Your earnest money is in. Disclosures are on file. COE is confirmed for August 14, 2026. Watch for closing instructions from Orange Coast Title (Escrow #2473532-TS)."
+        "updated": "2026-08-14",
+        "body": "Ashley — a quick update on 695 Feather. We're moving your close of escrow from August 14 to Friday, August 21. The extension is signed on your side and we're waiting on the seller's signature to make it final; I'll confirm the moment it comes back. Nothing about your price or terms changes — you're still at $170,000, all cash.\n\nThe HOA documents were what held things up, and that part is now resolved. Orange Coast sent the full Copper Cove package through on August 13 — CC&Rs, bylaws, the budget and reserve study, and the current board minutes. They're in your file to read through. There's one form in there, the new homeowner contact sheet, that needs completing and returning.\n\nTwo things to watch for. Your closing instructions will come from Tanya Salgado at Orange Coast Title, escrow #2473532-TS. And before you send any funds, verify the wire details by phone using the number you already have for Orange Coast — not one from an email. Wire fraud in real estate is common enough that this is worth the two minutes every time.\n\nI'll let you know as soon as the extension is fully executed.\n\n— James Beyersdorf, (209) 770-7523"
       },
       "clientTasks": [
         {
@@ -3873,7 +3913,7 @@
       "listPrice": null,
       "salePrice": 170000,
       "openEscrowDate": null,
-      "closingDate": "2026-08-14",
+      "closingDate": "2026-08-21",
       "contacts": {
         "coAgent": "Dee Bradley (Bradley and Santos Realty), listing side (dee@caltel.com)",
         "escrow": "Tanya Salgado, Orange Coast Title Company of Southern California (Santa Ana) — Escrow #2473532-TS",
@@ -3969,8 +4009,8 @@
       },
       "timeline": {
         "acceptance": "2026-07-15",
-        "coe": "2026-08-14",
-        "note": "Timeline block added 2026-08-11 by the morning briefing (Step 1d Part A). acceptance 2026-07-15 = RPA/SCO1 fully executed via Authentisign (milestone 'Offer accepted - RPA executed'). coe 2026-08-14 = closingDate, confirmed 8/7. All-cash purchase, so no loan or appraisal contingency; inspection/title/insurance not separately dated in the file, so the 17-day default from acceptance applies. Previously null, which rendered the buyer page with no dates."
+        "coe": "2026-08-21",
+        "note": "Timeline block added 2026-08-11 by the morning briefing (Step 1d Part A). acceptance 2026-07-15 = RPA/SCO1 fully executed via Authentisign (milestone 'Offer accepted - RPA executed'). coe 2026-08-14 = closingDate, confirmed 8/7. All-cash purchase, so no loan or appraisal contingency; inspection/title/insurance not separately dated in the file, so the 17-day default from acceptance applies. Previously null, which rendered the buyer page with no dates. ETA No. 1 extends COE 2026-08-14 → 2026-08-21 (Friday): buyer Ashley Robinson signed 2026-08-11; seller Dee Bradley's signature still outstanding as of 2026-08-14, ETA with Dee and James chasing. Date recorded 2026-08-14 on Sara's instruction ahead of full execution — if the ETA is not executed, the contract date reverts to 2026-08-14."
       }
     }
   ]
