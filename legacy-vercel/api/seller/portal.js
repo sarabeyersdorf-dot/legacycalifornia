@@ -282,6 +282,13 @@ export default async function handler(req, res) {
     } catch (_) { /* pre-053: no grants → seller default below still applies */ }
     // Visibility + audience gate (shared by the live list and escrow history).
     const maySee = (doc) => {
+      // Buyer hard guardrail: the seller's listing agreement (and its
+      // modifications) is NEVER a buyer document — it belongs to the listing
+      // relationship, not the purchase. Block it for a buyer even if a grant was
+      // mistakenly set to buyer/both. Purchase Agreement / counters classify as
+      // 'contract' (checked first in docCategory), so this only ever hits the
+      // listing agreement family.
+      if (audience === 'buyer' && docCategory(doc.doc_type, doc.name) === 'listing') return false;
       // An explicit grant (fingerprint-matched) always wins — it can widen,
       // narrow, or hide (agent_only) a document for either audience.
       if (doc.doc_key) {
