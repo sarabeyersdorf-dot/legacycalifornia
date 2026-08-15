@@ -1,6 +1,6 @@
 {
-  "version": 7.4,
-  "lastUpdated": "2026-08-14",
+  "version": 7.5,
+  "lastUpdated": "2026-08-15",
   "updatedBy": "cowork 2026-08-10 — canonical commission/timeline schema migration per Sara",
   "tasks": [
     {
@@ -1626,6 +1626,70 @@
       "title": "324 Augusta: HomeLight shows the property packet viewed AND downloaded 8/12 — the home is in escrow; check the listing is not still publicly soliciting.",
       "due": "This week",
       "done": false
+    },
+    {
+      "agent": "sara",
+      "client": "324 Augusta",
+      "key": "augusta-escrow-cancelled",
+      "title": "🔴 324 Augusta ESCROW CANCELLED 8/14 — executed by both parties, full deposit released to Denis. deals.json still shows pending/$460K/COE 9/9 and the seller portal is live. Approve the stage change.",
+      "due": "Today",
+      "done": false
+    },
+    {
+      "agent": "sara",
+      "client": "324 Augusta",
+      "key": "augusta-relist-decision",
+      "title": "324 Augusta: relist decision, and how the roof/pest repair discrepancy gets disclosed to the next buyer",
+      "due": "This week",
+      "done": false
+    },
+    {
+      "agent": "james",
+      "client": "8235 Baldwin",
+      "key": "baldwin-aea-expired",
+      "title": "🔴 Baldwin: settle whether AEA1 is actually executed — filed copy has Acceptance blank and expired 8/14 11 AM, but Authentisign reportedly showed Signing Complete 8/13. Open the envelope.",
+      "due": "Today",
+      "done": false
+    },
+    {
+      "agent": "james",
+      "client": "8235 Baldwin",
+      "key": "baldwin-eta-deadlock",
+      "title": "🔴 Baldwin: break the ETA deadlock with Allyson — she signs only after the amendment returns; 2 days to COE",
+      "due": "Today",
+      "done": false
+    },
+    {
+      "agent": "james",
+      "client": "695 Feather",
+      "key": "feather-eta-pdf-locked",
+      "title": "🔴 695 Feather: the ETA filed 8/14 is password-protected and cannot be opened — request an unlocked copy",
+      "due": "Today",
+      "done": false
+    },
+    {
+      "agent": "sara",
+      "client": "8235 Baldwin",
+      "key": "baldwin-seller-name",
+      "title": "Baldwin: seller name mismatch — AEA says Rebecca Johnson, deals.json says Rebecca Turnage",
+      "due": "This week",
+      "done": false
+    },
+    {
+      "agent": "sara",
+      "client": "433 E Hwy 4",
+      "key": "433-lawson-followup",
+      "title": "433: follow up with Joel Lawson — pest work done, relisted to ~11/18, no showing activity",
+      "due": "This week",
+      "done": false
+    },
+    {
+      "agent": "james",
+      "client": "695 Feather",
+      "key": "feather-dee-closing-info",
+      "title": "695 Feather: Dee Bradley promised closing timeline + service-provider contacts on 8/14 — not received. Chase before the 8/21 COE.",
+      "due": "This week",
+      "done": false
     }
   ],
   "deals": [
@@ -2743,7 +2807,7 @@
         {
           "label": "Section 1 pest work with Joel Lawson — appointment Tuesday Aug 11 at 1:00 PM. Worth completing now so the report is in hand for the next buyer. Keep receipts for the file.",
           "when": "Aug 11",
-          "status": "open"
+          "status": "done"
         },
         {
           "label": "Send the well results when ready — production (GPM) and bacterial test, the replaced-pump update, and confirmation of the sprinkler fixes",
