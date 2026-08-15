@@ -64,6 +64,14 @@
     "rev": "016574e4cf32107000000029e854303"
   },
   {
+    "name": "addendum removing Bert",
+    "url": "/docs/offer-695-feather/addendum-removing-bert.pdf",
+    "scope": "transaction",
+    "visibility": "both",
+    "key": "offer-695-feather-addendum-removing-bert",
+    "rev": "016590d40ce6e2f000000029e854303"
+  },
+  {
     "name": "ADM 1pdf",
     "url": "/docs/offer-695-feather/adm-1pdf.pdf",
     "scope": "transaction",
@@ -94,6 +102,14 @@
     "visibility": "agent_only",
     "key": "offer-695-feather-commission-instructions",
     "rev": "016574e4d9b3d15000000029e854303"
+  },
+  {
+    "name": "eta addition to escrow for featherpdf",
+    "url": "/docs/offer-695-feather/eta-addition-to-escrow-for-featherpdf.pdf",
+    "scope": "transaction",
+    "visibility": "both",
+    "key": "offer-695-feather-eta-addition-to-escrow-for-featherpdf",
+    "rev": "0165907939e7507000000029e854303"
   },
   {
     "name": "Fire Hardening and Defensible Space Advisory, Disclosure, and Addendum 625pdfpdf",
