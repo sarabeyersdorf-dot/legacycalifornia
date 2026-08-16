@@ -70,6 +70,32 @@ export async function apiGet(path, params = {}) {
   return r.json();
 }
 
+/**
+ * Fetch just the licensed photo URLs for one listing, by MLS number.
+ *
+ * Best-effort by design: returns [] when the feed isn't configured, the MLS is
+ * blank, or the listing/media can't be fetched — so callers can use it to
+ * self-heal a capture without ever risking the request. Photos come back in the
+ * feed's display order (RESO Media.Order) so index 0 is the hero shot.
+ */
+export async function photosByMls(mls) {
+  if (!isConfigured() || !mls) return [];
+  try {
+    const data = await apiGet(`/Property('${encodeURIComponent(String(mls).trim())}')`, {
+      '$expand': 'Media',
+      '$select': 'ListingId',
+    });
+    const media = Array.isArray(data?.Media) ? data.Media.slice() : [];
+    media.sort((a, b) => (a?.Order ?? 9999) - (b?.Order ?? 9999));
+    return media
+      .filter((m) => m && (m.MediaCategory === 'Photo' || m.MediaType === 'image/jpeg' || m.MediaURL))
+      .map((m) => m.MediaURL)
+      .filter(Boolean);
+  } catch {
+    return [];
+  }
+}
+
 /** Known IDs from env (so callers don't reach for env directly) */
 export const ids = {
   agent:  AGENT_ID,
