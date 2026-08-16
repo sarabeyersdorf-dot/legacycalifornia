@@ -282,6 +282,10 @@ async function patchCollection(supa, agent, req, res) {
   if (!b?.id) return fail(res, 400, 'id required');
   const patch = {};
   if ('title' in b)        patch.title = b.title;
+  // Attach / change / clear the client on an existing collection. Without this
+  // the "Choose client" button on an open collection silently no-ops (the PATCH
+  // was dropped), so the collection never showed up under that client's contact.
+  if ('client_lead_id' in b) patch.client_lead_id = b.client_lead_id || null;
   if ('intro_note' in b)   patch.intro_note = b.intro_note;
   if ('closing_note' in b) patch.closing_note = b.closing_note;
   if ('expires_at' in b)   patch.expires_at = b.expires_at || null;

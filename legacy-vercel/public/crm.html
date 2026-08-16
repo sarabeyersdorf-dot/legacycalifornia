@@ -4454,7 +4454,10 @@ function selectLead(el) {
     if ((t = e.target.closest('[data-client]'))) {
       pickClient(function (cl) {
         api('collections', { method: 'PATCH', body: { id: state.active.id, client_lead_id: cl ? cl.id : null } })
-          .then(function () { openCollection(state.active.id); });
+          .then(function (r) {
+            if (r.ok) { curToast(cl ? ('Attached to ' + (cl.name || 'client') + '.') : 'Client cleared.', true); openCollection(state.active.id); }
+            else { curToast((r.j && r.j.error) || 'Could not attach the client.', false); }
+          });
       });
       return;
     }
