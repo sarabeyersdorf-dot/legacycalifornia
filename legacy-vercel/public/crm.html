@@ -4188,6 +4188,18 @@ function selectLead(el) {
     // "create curated search" action). client = { id, name }.
     newForClient: function (client) { ensureLoaded(); newCollectionModal(client && client.id ? client : null); }
   };
+  // Deep-link: /crm.html?curate=<id> — returning from the MLS-search picker
+  // ("Done — back to collection") lands here and opens the Curated view on that
+  // exact collection, so the freshly-added homes are visible immediately.
+  (function () {
+    var cid = new URLSearchParams(location.search).get('curate');
+    if (!cid) return;
+    function go() {
+      try { if (typeof showView === 'function') showView(null, 'curate'); } catch (e) {}
+      try { window.LegacyCurate.open(cid); } catch (e) {}
+    }
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', go); else go();
+  })();
   function openCollection(id) {
     api('collections?id=' + encodeURIComponent(id)).then(function (r) {
       if (!r.ok) { alert((r.j && r.j.error) || 'Could not open collection'); return; }

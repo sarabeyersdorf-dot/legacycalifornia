@@ -46,17 +46,23 @@
     (isDetailPage
       ? '<button type="button" id="lgcCaptureThis" style="background:#B08D57;color:#1A1714;border:none;border-radius:8px;padding:8px 15px;font-size:12px;font-weight:600;cursor:pointer;">＋ Add this listing</button>'
       : '<span style="color:#C9BEA8;font-size:12px;">Click “＋ Add to collection” on any listing</span>') +
-    '<button type="button" id="lgcCaptureStop" style="background:transparent;color:#C9BEA8;border:1px solid #4a443c;border-radius:8px;padding:8px 15px;font-size:12px;font-weight:600;cursor:pointer;">Done — stop adding</button>';
+    '<span id="lgcCaptureCount" style="font-size:12px;font-weight:700;color:#8FCF9F;">0 added</span>' +
+    '<button type="button" id="lgcCaptureStop" style="background:#2E5C3D;color:#FAF6EC;border:none;border-radius:8px;padding:8px 15px;font-size:12px;font-weight:600;cursor:pointer;">Done — back to collection</button>';
   document.body.insertBefore(bar, document.body.firstChild);
+
+  var addedCount = 0;
+  function bumpCount() {
+    addedCount++;
+    var el = bar.querySelector('#lgcCaptureCount');
+    if (el) el.textContent = addedCount + ' added';
+  }
 
   bar.querySelector('#lgcCaptureStop').addEventListener('click', function () {
     try { sessionStorage.removeItem(KEY); } catch (e) {}
-    bar.remove();
-    widgetRoots().forEach(function (root) {
-      root.querySelectorAll('[data-lgc-addbtn]').forEach(function (b) { b.remove(); });
-    });
-    observed.forEach(function (o) { o.disconnect(); });
-    clearInterval(pollTimer);
+    // Return to THIS collection in the CRM so the new picks are visible right
+    // away — no more guessing whether anything landed, and no stale picker page
+    // pointed at an old/deleted collection.
+    location.href = '/crm.html?curate=' + encodeURIComponent(target.id);
   });
   var detailBtn = bar.querySelector('#lgcCaptureThis');
   if (detailBtn) detailBtn.addEventListener('click', function () { onAdd(null, detailBtn); });
@@ -190,10 +196,19 @@
       .then(function (r) {
         if (r.ok && r.j && r.j.listing) {
           btn.textContent = '✓ Added'; btn.style.background = '#2E5C3D'; btn.style.color = '#FAF6EC';
+          bumpCount();
           toast('Added ' + (listing.address || listing.mls_number || 'listing') + ' to “' + target.title + '”.', true);
         } else if (r.status === 401) {
           btn.textContent = orig; btn.disabled = false;
           toast('Sign in to the CRM in this browser first, then try again.', false);
+        } else if (r.status === 404) {
+          // The target collection no longer exists (deleted, or this is a stale
+          // picker page). Say so loudly — nothing is being saved — and point back
+          // to the CRM to reopen "Add listings" on the live collection.
+          btn.textContent = orig; btn.disabled = false;
+          var c = bar.querySelector('#lgcCaptureCount');
+          if (c) { c.textContent = 'collection is gone'; c.style.color = '#F0A58A'; }
+          toast('This collection was deleted — go back to the CRM and click “Add listings” on the current one.', false);
         } else {
           btn.textContent = orig; btn.disabled = false;
           toast((r.j && r.j.error) || 'Could not add that listing.', false);
