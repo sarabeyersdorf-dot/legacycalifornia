@@ -20,6 +20,7 @@ import { sendSMS } from '../twilio.js';
 import { timelineEvents } from '../deal-timeline.js';
 
 const EMAIL_RE = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
+const APPT_LEAD_ID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const TZ = 'America/Los_Angeles';
 const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 const DOW = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
@@ -414,8 +415,14 @@ async function createOrInvite(req, res, supa, agent) {
     let title = typeof body?.title === 'string' ? body.title.trim() : '';
     if (!title) title = defaultTitle(kind, subKind);   // structured types self-title
     let leadId = null;
+    // Prefer an explicit lead_id (the "Set a reminder" button on a contact card
+    // passes it) so the event links to the exact contact even when they have no
+    // email on file; fall back to resolving by email for older callers.
+    const directLeadId = typeof body?.lead_id === 'string' ? body.lead_id.trim() : '';
     const email = typeof body?.email === 'string' ? body.email.trim().toLowerCase() : '';
-    if (email && EMAIL_RE.test(email)) {
+    if (APPT_LEAD_ID_RE.test(directLeadId)) {
+      leadId = directLeadId;
+    } else if (email && EMAIL_RE.test(email)) {
       const { data } = await supa.from('leads').select('id').eq('email', email).maybeSingle();
       leadId = data?.id || null;
     }

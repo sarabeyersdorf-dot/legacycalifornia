@@ -6192,5 +6192,63 @@ function selectLead(el) {
 .cc-name, .cur-client .cc-name { font-style: normal; }
 .hours-link, .feed-chip { font-family: var(--sans); font-weight: 600; }
 </style>
+
+<!-- Cowork quick-note widget — a floating box on every CRM view so Sara/James
+     can drop a note to Cowork (the morning-briefing agent) without navigating
+     to the Notes tab. POSTs to /api/crm/agent-updates, the same append-only log
+     the briefing reads back. -->
+<div id="cwNote" style="position:fixed;right:20px;bottom:20px;z-index:90;font-family:system-ui,sans-serif;">
+  <div id="cwPanel" style="display:none;width:320px;max-width:calc(100vw - 40px);background:#FAF6EC;color:#1A1714;border:1px solid #E1D6BC;border-radius:14px;box-shadow:0 16px 48px rgba(0,0,0,.28);overflow:hidden;margin-bottom:10px;">
+    <div style="padding:12px 15px;background:#1A1714;color:#FAF6EC;display:flex;align-items:center;justify-content:space-between;">
+      <b style="font-size:13px;">Note to Cowork</b>
+      <button type="button" id="cwClose" style="background:none;border:none;color:#C9BEA8;font-size:18px;line-height:1;cursor:pointer;">×</button>
+    </div>
+    <div style="padding:13px 15px;">
+      <p style="margin:0 0 9px;font-size:12px;color:#6B5F49;line-height:1.45;">A text you got, a verbal update, anything Cowork can't see — it folds these into tomorrow's briefing.</p>
+      <textarea id="cwText" rows="4" placeholder="What should Cowork know?" style="width:100%;border:1px solid #D9CFB7;border-radius:9px;padding:9px 11px;font:inherit;font-size:14px;background:#fff;resize:vertical;"></textarea>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-top:9px;gap:8px;">
+        <span id="cwStatus" style="font-size:12px;color:#8A7B60;min-height:15px;"></span>
+        <button type="button" id="cwSend" style="background:#1A1714;color:#FAF6EC;border:none;border-radius:9px;padding:8px 15px;font-size:13px;font-weight:600;cursor:pointer;">Send</button>
+      </div>
+    </div>
+  </div>
+  <button type="button" id="cwToggle" title="Send a quick note to Cowork" style="background:#B08D57;color:#1A1714;border:none;border-radius:24px;padding:11px 17px;font-size:13px;font-weight:700;cursor:pointer;box-shadow:0 6px 20px rgba(0,0,0,.25);display:flex;align-items:center;gap:7px;">✎ Note to Cowork</button>
+</div>
+<script>
+(function () {
+  'use strict';
+  var el = function (id) { return document.getElementById(id); };
+  var panel = el('cwPanel'), toggle = el('cwToggle'), text = el('cwText'), send = el('cwSend'), status = el('cwStatus');
+  if (!panel || !toggle) return;
+  function open(o) { panel.style.display = o ? 'block' : 'none'; if (o) setTimeout(function () { text.focus(); }, 40); }
+  toggle.addEventListener('click', function () { open(panel.style.display !== 'block'); });
+  el('cwClose').addEventListener('click', function () { open(false); });
+  function post() {
+    var content = (text.value || '').trim();
+    if (!content) { status.style.color = '#8A3B2B'; status.textContent = 'Type a note first.'; text.focus(); return; }
+    send.disabled = true; send.textContent = 'Sending…'; status.style.color = '#8A7B60'; status.textContent = '';
+    fetch('/api/crm/agent-updates', {
+      method: 'POST', credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ content: content })
+    }).then(function (r) { return r.json().then(function (j) { return { ok: r.ok, status: r.status, j: j }; }).catch(function () { return { ok: r.ok, status: r.status, j: {} }; }); })
+      .then(function (r) {
+        send.disabled = false; send.textContent = 'Send';
+        if (r.ok) {
+          text.value = ''; open(false);
+          if (window.Legacy && window.Legacy.toast) window.Legacy.toast('Sent to Cowork ✓', true);
+          else { status.style.color = '#2E5C3D'; status.textContent = 'Sent ✓'; }
+        } else if (r.status === 401) {
+          status.style.color = '#8A3B2B'; status.textContent = 'Sign in to the CRM first.';
+        } else {
+          status.style.color = '#8A3B2B'; status.textContent = (r.j && r.j.error) || 'Could not send — try again.';
+        }
+      }).catch(function () { send.disabled = false; send.textContent = 'Send'; status.style.color = '#8A3B2B'; status.textContent = 'Network error — try again.'; });
+  }
+  send.addEventListener('click', post);
+  // Cmd/Ctrl+Enter sends from the textarea.
+  text.addEventListener('keydown', function (e) { if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') { e.preventDefault(); post(); } });
+})();
+</script>
 </body>
 </html>
