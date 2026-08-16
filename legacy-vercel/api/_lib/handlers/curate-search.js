@@ -64,7 +64,11 @@ const fmtUSDfull = (n) => (n == null || !Number.isFinite(+n)) ? '—' : '$' + Ma
 // MetroList mark. Filtered out so the render falls back to a clean tile instead
 // of showing the red placeholder (Bev's lakefront collection).
 function isPlaceholderPhoto(u) {
-  return typeof u !== 'string' || /^data:|logo|placeholder|no[-_ ]?photo|no[-_ ]?image|coming[-_ ]?soon|metrolist|\/blank|spacer|1x1/i.test(u);
+  // Match the IDX logo/"no photo" placeholder (e.g.
+  // idx-logos.idxhome.com/cametrolist.png) but NOT a real listing photo — real
+  // MetroList photos are hosted at mediarem.metrolist.net/.../listingpics/…,
+  // whose URL contains "metrolist", so never key off that word.
+  return typeof u !== 'string' || /^data:|idx-logos|\blogo\b|logos?\/|placeholder|no[-_ ]?photo|no[-_ ]?image|coming[-_ ]?soon|\/blank|spacer|1x1/i.test(u);
 }
 
 export function shapeListing(r) {
