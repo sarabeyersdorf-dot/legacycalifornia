@@ -85,14 +85,18 @@ export default async function handler(req, res) {
     const newRefresh    = tokenJson.refresh_token || null; // may be absent on re-auth
 
     // ---- Resolve the ACTUAL connected mailbox from Google, not from `state` --
-    const userinfoRes = await fetch('https://www.googleapis.com/oauth2/v2/userinfo', {
+    // Read the address from Gmail's own profile endpoint, which the
+    // gmail.readonly scope we request already grants. The generic
+    // /oauth2/v2/userinfo endpoint needs an openid/email scope we do NOT ask
+    // for, so it returned no email and aborted the connect (userinfo_failed).
+    const profileRes = await fetch('https://gmail.googleapis.com/gmail/v1/users/me/profile', {
       headers: { Authorization: `Bearer ${accessToken}` }
     });
-    const userinfo = await userinfoRes.json().catch(() => ({}));
-    const emailAddress = String(userinfo?.email || '').trim().toLowerCase();
+    const gprofile = await profileRes.json().catch(() => ({}));
+    const emailAddress = String(gprofile?.emailAddress || '').trim().toLowerCase();
 
-    if (!userinfoRes.ok || !emailAddress || !emailAddress.includes('@')) {
-      console.error('[email-oauth-callback] userinfo lookup failed', userinfoRes.status, userinfo);
+    if (!profileRes.ok || !emailAddress || !emailAddress.includes('@')) {
+      console.error('[email-oauth-callback] gmail profile lookup failed', profileRes.status, gprofile);
       return redirectTo(res, { email_oauth: 'error', owner: state, reason: 'userinfo_failed' });
     }
 
