@@ -4339,8 +4339,8 @@ function selectLead(el) {
     return '<div class="cur-idx cur-idx-cta" data-cur-idx>' +
         '<div class="cur-idx-h">Search the MLS <span>· the same live search your website uses</span></div>' +
         '<div class="cur-idx-cta-body">' +
-          '<p>Opens the MLS search in a new tab. Browse listings just like your buyers do, and click <b>“＋ Add to collection”</b> on any home to drop it into <b>“' + esc(title) + '”</b>.</p>' +
-          '<button class="btn btn-ink" type="button" data-open-mls>Open MLS search ↗</button>' +
+          '<p>The MLS search just opened in a new tab. Browse listings just like your buyers do, and click <b>“＋ Add to collection”</b> on any home to drop it into <b>“' + esc(title) + '”</b>. Don’t see it? Your browser may have blocked the pop-up — use the button below.</p>' +
+          '<button class="btn btn-ink" type="button" data-open-mls>Reopen MLS search ↗</button>' +
           '<div class="cur-idx-hint">Added a few? Switch back to this tab — they’ll appear under <b>“Collection”</b> automatically.</div>' +
         '</div>' +
       '</div>';
@@ -4443,7 +4443,7 @@ function selectLead(el) {
     if ((t = e.target.closest('[data-cur-new]'))) { newCollectionModal(); return; }
     if ((t = e.target.closest('[data-open-coll]'))) { openCollection(t.getAttribute('data-open-coll')); return; }
     if ((t = e.target.closest('[data-apply-saved]'))) { applySaved(t.getAttribute('data-apply-saved')); return; }
-    if ((t = e.target.closest('[data-sub]'))) { state.sub = t.getAttribute('data-sub'); renderSub(); root.querySelectorAll('[data-sub]').forEach(function (b) { b.classList.toggle('on', b === t); }); return; }
+    if ((t = e.target.closest('[data-sub]'))) { state.sub = t.getAttribute('data-sub'); renderSub(); root.querySelectorAll('[data-sub]').forEach(function (b) { b.classList.toggle('on', b === t); }); if (state.sub === 'search') openMlsSearch(); return; }
     if ((t = e.target.closest('[data-run-search]'))) { doSearch(); return; }
     if ((t = e.target.closest('[data-save-search]'))) { saveSearchModal(); return; }
     if ((t = e.target.closest('[data-toggle]'))) { toggleListing(t.getAttribute('data-toggle')); return; }
