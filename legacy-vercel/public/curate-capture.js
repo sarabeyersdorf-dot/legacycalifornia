@@ -96,7 +96,10 @@
   // real photo arrives, so a naive scrape captures the logo (324 Augusta / Bev's
   // lakefront collection: 7 of 8 tiles showed the red MetroList mark).
   function isPlaceholderPhoto(u) {
-    return !u || /^data:|logo|placeholder|no[-_ ]?photo|no[-_ ]?image|coming[-_ ]?soon|metrolist|\/blank|spacer|1x1/i.test(u);
+    // Skip the IDX logo/"no photo" placeholder (idx-logos.idxhome.com/…) but NOT
+    // a real listing photo — real MetroList photos live at mediarem.metrolist.net
+    // and their URL contains "metrolist", so never key off that word.
+    return !u || /^data:|idx-logos|\blogo\b|logos?\/|placeholder|no[-_ ]?photo|no[-_ ]?image|coming[-_ ]?soon|\/blank|spacer|1x1/i.test(u);
   }
   // Grab the REAL listing photo: prefer the lazy-load target (data-src / srcset)
   // over the visible <img src> (often the placeholder), and skip any URL that
