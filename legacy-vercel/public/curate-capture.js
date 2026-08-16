@@ -101,22 +101,45 @@
     // and their URL contains "metrolist", so never key off that word.
     return !u || /^data:|idx-logos|\blogo\b|logos?\/|placeholder|no[-_ ]?photo|no[-_ ]?image|coming[-_ ]?soon|\/blank|spacer|1x1/i.test(u);
   }
-  // Grab the REAL listing photo: prefer the lazy-load target (data-src / srcset)
-  // over the visible <img src> (often the placeholder), and skip any URL that
-  // looks like a logo/placeholder. Returns null if only a placeholder is present,
-  // so we never store the logo as a home's photo (the render then shows a clean
-  // fallback instead of the red mark).
+  function absUrl(u) {
+    try { return u.indexOf('http') === 0 ? u : new URL(u, location.href).href; } catch (e) { return u; }
+  }
+  // Pull a url(...) out of an element's computed background-image. IDX grid cards
+  // paint the hero as a CSS background on a <div> (NOT an <img>), so a photo that
+  // is plainly visible on screen has no <img> to read — this is why captures made
+  // with the photo clearly showing still landed with no photo. We read the
+  // background too. background-image can hold multiple layers / gradients;
+  // take the first real image url.
+  function bgUrl(el) {
+    try {
+      var bg = getComputedStyle(el).backgroundImage || '';
+      var m = bg.match(/url\((['"]?)(.*?)\1\)/);
+      return m ? m[2] : '';
+    } catch (e) { return ''; }
+  }
+  // Grab the REAL listing photo. Look in three places, first real hit wins:
+  //   1) <img> — prefer the lazy-load target (data-src / srcset) over the visible
+  //      src (often the placeholder); also read <picture><source srcset>.
+  //   2) CSS background-image on the card and its descendants (the grid cards).
+  // Skip any URL that looks like a logo/placeholder. Returns null when only a
+  // placeholder is present, so we never store the logo as a home's photo.
   function pickPhoto(scope) {
-    var imgs = scope.querySelectorAll('img');
+    var imgs = scope.querySelectorAll('img, source');
     for (var i = 0; i < imgs.length; i++) {
       var im = imgs[i];
       var cand = im.getAttribute('data-src') || im.getAttribute('data-lazy-src') || im.getAttribute('data-original') || '';
       var ss = im.getAttribute('srcset') || im.getAttribute('data-srcset');
       if (ss) { var parts = ss.split(',').map(function (s) { return s.trim().split(/\s+/)[0]; }).filter(Boolean); if (parts.length) cand = parts[parts.length - 1]; }
       if (!cand) cand = im.currentSrc || im.getAttribute('src') || '';
-      if (cand && !isPlaceholderPhoto(cand)) {
-        try { return cand.indexOf('http') === 0 ? cand : new URL(cand, location.href).href; } catch (e) { return cand; }
-      }
+      if (cand && !isPlaceholderPhoto(cand)) return absUrl(cand);
+    }
+    // No usable <img> — try background-image on the card, then its descendants.
+    var b = bgUrl(scope);
+    if (b && !isPlaceholderPhoto(b)) return absUrl(b);
+    var kids = scope.querySelectorAll('*');
+    for (var k = 0; k < kids.length; k++) {
+      var kb = bgUrl(kids[k]);
+      if (kb && !isPlaceholderPhoto(kb)) return absUrl(kb);
     }
     return null;
   }

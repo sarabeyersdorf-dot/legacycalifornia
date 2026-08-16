@@ -234,10 +234,6 @@
     {
       "path": "/api/cron/agent-day-reminders?key=thisisasecret1234",
       "schedule": "0 14 * * *"
-    },
-    {
-      "path": "/api/cron/photo-backfill?key=thisisasecret1234",
-      "schedule": "50 6 * * *"
     }
   ]
 }

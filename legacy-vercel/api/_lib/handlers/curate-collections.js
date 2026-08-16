@@ -18,7 +18,6 @@ import { adminClient } from '../supabase.js';
 import { getCallerProfile, isAgent } from '../auth.js';
 import { handleOptions, readJson, ok, fail } from '../cors.js';
 import { shapeListing, runSearch, isPlaceholderPhoto } from './curate-search.js';
-import { photosByMls } from '../../_metrolist.js';
 
 const agentKey = (profile) => (profile.role === 'agent_james' ? 'james' : 'sara');
 const NOTE_STYLES = ['sticky', 'highlight', 'banner'];
@@ -245,15 +244,11 @@ async function postAction(supa, agent, req, res) {
     if (!mls && !address) return fail(res, 400, 'listing needs at least an MLS number or address');
     const photo = s(L.photo);
     // The scraped photo is only kept if it's a real home shot — a capture made
-    // before the lazy image loaded grabs the IDX placeholder logo, which we drop.
-    let photos = (photo && !isPlaceholderPhoto(photo)) ? [photo] : [];
-    // Self-heal: when we're missing a real photo but have an MLS number, pull the
-    // licensed photos straight from MetroList so every tile shows the home instead
-    // of "no photo available". No-ops cleanly if the feed isn't configured.
-    if (!photos.length && mls) {
-      const real = await photosByMls(mls);
-      if (real.length) photos = real;
-    }
+    // before the lazy image loaded grabs the IDX placeholder logo, which we drop
+    // so the tile shows a clean fallback instead of the red MetroList mark. The
+    // real photo comes from the browser scrape (curate-capture.js); there is no
+    // server-side MLS photo feed to fall back on (no MetroList RESO API).
+    const photos = (photo && !isPlaceholderPhoto(photo)) ? [photo] : [];
     // Only columns that won't trip a CHECK (skip property_type / listed_by).
     const row = {
       mls_number: mls, address, city: s(L.city), state: s(L.state) || 'CA', zip: s(L.zip),
