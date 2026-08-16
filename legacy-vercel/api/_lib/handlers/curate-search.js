@@ -63,7 +63,7 @@ const fmtUSDfull = (n) => (n == null || !Number.isFinite(+n)) ? '—' : '$' + Ma
 // not a home's photo — a capture before the lazy image loaded grabbed the
 // MetroList mark. Filtered out so the render falls back to a clean tile instead
 // of showing the red placeholder (Bev's lakefront collection).
-function isPlaceholderPhoto(u) {
+export function isPlaceholderPhoto(u) {
   // Match the IDX logo/"no photo" placeholder (e.g.
   // idx-logos.idxhome.com/cametrolist.png) but NOT a real listing photo — real
   // MetroList photos are hosted at mediarem.metrolist.net/.../listingpics/…,

@@ -17,7 +17,8 @@
 import { adminClient } from '../supabase.js';
 import { getCallerProfile, isAgent } from '../auth.js';
 import { handleOptions, readJson, ok, fail } from '../cors.js';
-import { shapeListing, runSearch } from './curate-search.js';
+import { shapeListing, runSearch, isPlaceholderPhoto } from './curate-search.js';
+import { photosByMls } from '../../_metrolist.js';
 
 const agentKey = (profile) => (profile.role === 'agent_james' ? 'james' : 'sara');
 const NOTE_STYLES = ['sticky', 'highlight', 'banner'];
@@ -243,12 +244,26 @@ async function postAction(supa, agent, req, res) {
     const address = s(L.address);
     if (!mls && !address) return fail(res, 400, 'listing needs at least an MLS number or address');
     const photo = s(L.photo);
+    // The scraped photo is only kept if it's a real home shot — a capture made
+    // before the lazy image loaded grabs the IDX placeholder logo, which we drop.
+    let photos = (photo && !isPlaceholderPhoto(photo)) ? [photo] : [];
+    // Self-heal: when we're missing a real photo but have an MLS number, pull the
+    // licensed photos straight from MetroList so every tile shows the home instead
+    // of "no photo available". No-ops cleanly if the feed isn't configured.
+    if (!photos.length && mls) {
+      const real = await photosByMls(mls);
+      if (real.length) photos = real;
+    }
     // Only columns that won't trip a CHECK (skip property_type / listed_by).
     const row = {
       mls_number: mls, address, city: s(L.city), state: s(L.state) || 'CA', zip: s(L.zip),
       price: intv(L.price), bedrooms: intv(L.beds), bathrooms: fltv(L.baths), sq_ft: intv(L.sqft),
-      status: 'active', ihomefinder_idx_id: mls || null, photos: photo ? [photo] : []
+      status: 'active', ihomefinder_idx_id: mls || null
     };
+    // Only write photos when we actually have real ones — never let an empty
+    // capture (feed briefly down, image not loaded) blank out photos an earlier
+    // capture already stored on this MLS.
+    if (photos.length) row.photos = photos;
 
     let propId = null;
     if (mls) {
