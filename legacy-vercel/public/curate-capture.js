@@ -85,6 +85,33 @@
   }
   function num(v) { return v ? (String(v).replace(/[^0-9.]/g, '') || null) : null; }
 
+  // A URL that is the widget's own logo / "no photo" placeholder, NOT a home's
+  // photo. The IDX grid lazy-loads images and shows the MetroList logo until the
+  // real photo arrives, so a naive scrape captures the logo (324 Augusta / Bev's
+  // lakefront collection: 7 of 8 tiles showed the red MetroList mark).
+  function isPlaceholderPhoto(u) {
+    return !u || /^data:|logo|placeholder|no[-_ ]?photo|no[-_ ]?image|coming[-_ ]?soon|metrolist|\/blank|spacer|1x1/i.test(u);
+  }
+  // Grab the REAL listing photo: prefer the lazy-load target (data-src / srcset)
+  // over the visible <img src> (often the placeholder), and skip any URL that
+  // looks like a logo/placeholder. Returns null if only a placeholder is present,
+  // so we never store the logo as a home's photo (the render then shows a clean
+  // fallback instead of the red mark).
+  function pickPhoto(scope) {
+    var imgs = scope.querySelectorAll('img');
+    for (var i = 0; i < imgs.length; i++) {
+      var im = imgs[i];
+      var cand = im.getAttribute('data-src') || im.getAttribute('data-lazy-src') || im.getAttribute('data-original') || '';
+      var ss = im.getAttribute('srcset') || im.getAttribute('data-srcset');
+      if (ss) { var parts = ss.split(',').map(function (s) { return s.trim().split(/\s+/)[0]; }).filter(Boolean); if (parts.length) cand = parts[parts.length - 1]; }
+      if (!cand) cand = im.currentSrc || im.getAttribute('src') || '';
+      if (cand && !isPlaceholderPhoto(cand)) {
+        try { return cand.indexOf('http') === 0 ? cand : new URL(cand, location.href).href; } catch (e) { return cand; }
+      }
+    }
+    return null;
+  }
+
   function scrapeCard(card) {
     var a = card.querySelector('a[href*="listing"]');
     var idm = a ? (a.getAttribute('href') || '').match(/[?&]id=([A-Za-z0-9]+)/) : null;
@@ -93,9 +120,7 @@
     var streets = card.querySelectorAll('.ihf-gallery-street-name');
     var cityLine = streets[1] ? (streets[1].textContent || '').trim() : '';
     var cm = cityLine.match(/^(.*?),\s*([A-Z]{2})\s+(\d{5})/);
-    var img = card.querySelector('img');
-    var photo = img ? (img.currentSrc || img.getAttribute('src') || img.getAttribute('data-src') || null) : null;
-    if (photo && photo.indexOf('http') !== 0) { try { photo = new URL(photo, location.href).href; } catch (e) {} }
+    var photo = pickPhoto(card);
     return {
       mls_number: mls,
       address: streets[0] ? (streets[0].textContent || '').trim() : null,
@@ -134,7 +159,6 @@
       var x = (n.textContent || '').match(re);
       return x ? x[1].replace(/,/g, '') : null;
     }
-    var img = root ? root.querySelector('img') : null;
     return {
       mls_number: mls || (field('.listing-number', /#\s*([A-Za-z0-9-]+)/) || null),
       address: street || (document.title || '').trim() || null,
@@ -145,7 +169,7 @@
       beds: field('.bedrooms', /^\s*(\d{1,2})/),
       baths: field('.bathrooms', /^\s*(\d{1,2}(?:\.\d+)?)/),
       sqft: field('.square-feet', /^\s*([\d,]{2,})/),
-      photo: img ? (img.currentSrc || img.getAttribute('src') || null) : null
+      photo: root ? pickPhoto(root) : null
     };
   }
 
