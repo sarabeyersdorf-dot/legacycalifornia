@@ -1,6 +1,6 @@
 {
-  "version": 7.5,
-  "lastUpdated": "2026-08-15",
+  "version": 8.0,
+  "lastUpdated": "2026-08-16",
   "updatedBy": "cowork 2026-08-10 — canonical commission/timeline schema migration per Sara",
   "tasks": [
     {
@@ -1393,7 +1393,8 @@
       "key": "augusta-nhd-sigpages-file",
       "title": "324 Augusta: move the NHD signature pages from the deal root / James Folder into Ex/NHD with the report",
       "due": "2026-08-16",
-      "done": false
+      "done": true,
+      "note": "Moot 8/16 — escrow cancelled; NHD no longer owed."
     },
     {
       "agent": "sara",
@@ -1521,7 +1522,8 @@
       "key": "augusta-emd-now-real",
       "title": "324 Augusta: the EMD card dismissed 8/12 is now genuinely satisfiable — receipt on disk (Ex/Receipt_416170.pdf); CRM still shows deposit due",
       "due": "2026-08-13",
-      "done": false
+      "done": true,
+      "note": "Moot 8/16 — escrow cancelled, deposit returned to buyer."
     },
     {
       "agent": "sara",
@@ -1545,7 +1547,8 @@
       "key": "baldwin-coe-8-31",
       "title": "Baldwin: closingDate 8/17 likely becomes 8/31 per Allyson's 'end of the month'. NOTE 8/17 is a MONDAY — yesterday's task wrongly said Sunday",
       "due": "2026-08-16",
-      "done": false
+      "done": true,
+      "note": "Applied 8/16: COE moved to 8/31. Premise corrected — it was ETA #3 that executed, not the AEA."
     },
     {
       "agent": "sara",
@@ -1553,7 +1556,8 @@
       "key": "augusta-hoa-8-21",
       "title": "324 Augusta: La Contenta HOA package ordered 8/12 (HomeWiseDocs #HDC5LZ8Y2), delivery due 8/21",
       "due": "2026-08-21",
-      "done": false
+      "done": true,
+      "note": "Moot 8/16 — escrow cancelled."
     },
     {
       "agent": "sara",
@@ -1633,7 +1637,8 @@
       "key": "augusta-escrow-cancelled",
       "title": "🔴 324 Augusta ESCROW CANCELLED 8/14 — executed by both parties, full deposit released to Denis. deals.json still shows pending/$460K/COE 9/9 and the seller portal is live. Approve the stage change.",
       "due": "Today",
-      "done": false
+      "done": true,
+      "note": "Applied 8/16: stage->listing, COE/salePrice/openEscrowDate cleared, portal content retired."
     },
     {
       "agent": "sara",
@@ -1688,6 +1693,47 @@
       "client": "695 Feather",
       "key": "feather-dee-closing-info",
       "title": "695 Feather: Dee Bradley promised closing timeline + service-provider contacts on 8/14 — not received. Chase before the 8/21 COE.",
+      "due": "This week",
+      "done": false
+    },
+    {
+      "agent": "sara",
+      "client": "8235 Baldwin",
+      "key": "baldwin-eta3-coe-831",
+      "title": "🔴 Baldwin: ETA #3 executed 8/15 — seller accepted. Approve COE 8/17 → 8/31 and loan contingency 8/12 → 8/21 in deals.json.",
+      "due": "Today 8/16 — COE is tomorrow until you do",
+      "done": true,
+      "note": "Applied 8/16: COE 8/17->8/31 written from executed ETA #3."
+    },
+    {
+      "agent": "sara",
+      "client": "324 Augusta",
+      "key": "augusta-nhd-proposal-dismiss",
+      "title": "324 Augusta: dismiss the NHD timeline card (raised 8/15, due 8/17) — the escrow was cancelled 8/14, nothing is owed.",
+      "due": "Today 8/16",
+      "done": false
+    },
+    {
+      "agent": "sara",
+      "client": "Sally Thompson",
+      "key": "sally-thompson-brbc",
+      "title": "NEW BUYER CLIENT: Sally Thompson BRBC executed via Authentisign 8/15 1:56 PM. File the BRBC and open a buyer-prospect record in deals.json.",
+      "due": "This week",
+      "done": false
+    },
+    {
+      "agent": "sara",
+      "client": "Follow Up Boss",
+      "key": "fub-manuel-freitas",
+      "title": "NEW LEAD: Manuel Freitas (209) 996-9907 manueljamesfreitas@gmail.com — Realtor.com via FUB 8/15. Unworked.",
+      "due": "Today 8/16",
+      "done": false
+    },
+    {
+      "agent": "sara",
+      "client": "324 Augusta",
+      "key": "augusta-roof-pest-responses",
+      "title": "324 Augusta: no reply from Victor Malagon (Gold Sierra Roofing) or Douglas Rushing (Rushing Termite) on the repair discrepancy — you emailed both 8/14. Chase before relisting.",
       "due": "This week",
       "done": false
     }
@@ -2140,20 +2186,20 @@
           "desc": "You signed Buyer Contingency Removal #1, and the listing side acknowledged it July 14 — but CR#1 only removed the INSPECTION contingency. Appraisal, loan, title, and insurance contingencies are still open (corrected 7/19 per James)."
         },
         {
-          "date": "2026-08-12",
+          "date": "2026-08-21",
           "label": "Loan contingency deadline",
           "status": "next",
           "col": "contingencies",
           "badge": "Key date",
-          "desc": "Your loan contingency runs to August 12 under Extension of Time Amendment No. 2, accepted August 3. Buyer Contingency Removal #2 (appraisal, loan, title, insurance) is the document that clears it."
+          "desc": "Your loan contingency now runs to August 21 under Extension of Time Amendment No. 3, accepted by the seller August 15, 2026."
         },
         {
-          "date": "2026-08-17",
-          "label": "Close of Escrow — 8/17",
+          "date": "2026-08-31",
+          "label": "Close of Escrow — 8/31",
           "status": "upcoming",
           "col": "closing",
-          "badge": "Closing 8/17",
-          "desc": "Close of escrow confirmed for August 17, 2026."
+          "badge": "Closing 8/31",
+          "desc": "Close of escrow moves to Monday, August 31, 2026 under Extension of Time Amendment No. 3, accepted by the seller August 15, 2026."
         }
       ],
       "agentNote": {
@@ -2204,14 +2250,14 @@
       "listPrice": null,
       "salePrice": 207000,
       "openEscrowDate": null,
-      "closingDate": "2026-08-17",
+      "closingDate": "2026-08-31",
       "timeline": {
         "acceptance": "2026-06-17",
-        "coe": "2026-08-17",
+        "coe": "2026-08-31",
         "contingencies": {
-          "loan": "2026-08-12"
+          "loan": "2026-08-21"
         },
-        "note": "ETA No. 2 (C.A.R. Form ETA rev 12/25) executed — proposed by buyer Shomari Turner, accepted by seller Rebecca Turnage 2026-08-03: COE extended to 2026-08-17 and the loan contingency to 2026-08-12. Supersedes ETA No. 1 (executed, filed in EX 7/11, covering the original 7/6 buyer-contingency date). Source: __Pending\\8235 Baldwin St\\EX\\ETA2.pdf. Appraisal contingency omitted deliberately — ETA No. 2 checked Loan only, so the 17-day default from acceptance stands; per Sara 2026-08-10."
+        "note": "ETA No. 2 (C.A.R. Form ETA rev 12/25) executed — proposed by buyer Shomari Turner, accepted by seller Rebecca Turnage 2026-08-03: COE extended to 2026-08-17 and the loan contingency to 2026-08-12. Supersedes ETA No. 1 (executed, filed in EX 7/11, covering the original 7/6 buyer-contingency date). Source: __Pending\\8235 Baldwin St\\EX\\ETA2.pdf. Appraisal contingency omitted deliberately — ETA No. 2 checked Loan only, so the 17-day default from acceptance stands; per Sara 2026-08-10. ETA No. 3 (C.A.R. Form ETA rev 12/25, Authentisign 6DC613D9-F495-F111-9B33-000D3A4FF82A) executed — proposed by buyer Shomari Turner, ACCEPTED by seller (signed 'Rebecca Johnson', party of record Rebecca Turnage) 2026-08-15: COE extended to 2026-08-31 and the loan contingency to 2026-08-21. Source: __Pending\\8235 Baldwin St\\EX\\ETA3.pdf. Loan contingency auto-corrected to 2026-08-21 by the 2026-08-16 briefing (Step 1d Part A). coe and closingDate moved 2026-08-17 -> 2026-08-31 by the 2026-08-16 run under Sara's 2026-08-16 standing instruction to auto-apply fully-executed documents (ETA No. 3 is signed by both parties, no blank signature block, no lapsed acceptance deadline). NOTE: AEA No. 1 (seller-proposed 2026-08-12, $1,000 buyer credit + $56.65/day per-diem + full-deposit-release condition for any extension past 8/31) was NEVER ACCEPTED — paragraph 3 is blank and it expired unsigned at 11:00 AM 2026-08-14; ETA No. 3 carries none of those terms."
       },
       "contacts": {
         "coAgent": "Allyson Overturf (PMZ Real Estate) - listing/seller side",
@@ -2304,7 +2350,7 @@
       "correspondence": [],
       "notes": "UNDER CONTRACT / ACCEPTED 6/17/2026. James Beyersdorf's deal (buyer-side). Buyer Shomari Turner; seller Rebecca Johnson (a.k.a. Rebecca Turnage); listing agent Allyson Overturf, PMZ Real Estate. Original offer $200k 6/12; SCO1 $205k 6/15 (escrow pre-opened Chicago Title - Veronica Barragan; fire disclosure in NHD); BCO1 $207,000 accepted by seller 6/17, seller to pay buyer-broker comp 3%. Financing: FHA 203(k) rehab loan (~$193k, 96.5% LTV), $4,500 down, $2,500 initial deposit. As-is; buyer waived home warranty. Key dates from acceptance 6/17: deposit $2,500 by 6/22; seller docs ~6/24; all buyer contingencies (17 days) roll to 7/6 (7/4 holiday/weekend); final walk ~7/29; COE 45 days = 8/1 (Sat) rolls to ~8/3. EMD receipt + escrow holder acknowledgement on file. FHA 203(k) rehab loan — lender milestones will drive the timeline. ESCROW/TITLE DISCREPANCY: executed SCO names Chicago Title (Veronica Barragan); a 6/22 amended prelim (reason 'Added Buyer') references Fidelity National Title Order #FSST-5312600364 (Veronica Barragan & Kim McCray) — confirm which company holds escrow. | 8/7: COE confirmed 8/17. Loan contingency due 8/12. ETA2 in Baldwin Ex. Lender Kim Hesser, Chicago Title FSST-5312600364.",
       "alerts": [
-        "⚠️ LOAN CONTINGENCY due 8/12 — James to confirm buyer Shomari Turner removes contingency; coordinate with Kim Hesser (209-768-8277) + Chicago Title (FSST-5312600364)",
+        "ETA No. 3 fully executed — seller accepted 2026-08-15. COE 2026-08-31, loan contingency 2026-08-21. AEA No. 1 was NEVER ACCEPTED (paragraph 3 blank, expired unsigned 11:00 AM 2026-08-14) — its $1,000 buyer credit, full-deposit-release condition and $56.65/day per-diem do NOT apply.",
         "CORRECTION 7/19 (per James): CR#1 (7/13) only removed the INSPECTION contingency — appraisal, loan, title, and insurance contingencies are still OUTSTANDING. Prior 'contingencies removed' language was incomplete/incorrect. A follow-up Buyer Contingency Removal is needed once those clear.",
         "CR#1 NOT visible in the listing side's (Allyson Overturf) portal as of 7/19 (per James) — even though she acknowledged it 7/14, it isn't showing on her end. Needs to be resent/re-confirmed filed on the seller side.",
         "COE ~Aug 3 (45 days; 8/1 is Saturday)",
@@ -2750,7 +2796,7 @@
       "milestones": [
         {
           "date": "2026-06-19",
-          "label": "Contract accepted ($1.3M)",
+          "label": "Contract accepted ($1.3M) — escrow later cancelled",
           "status": "done",
           "col": "complete",
           "badge": "Done",
@@ -2848,10 +2894,10 @@
       },
       "timeline": {
         "acceptance": "2026-06-19",
-        "note": "ESCROW CANCELLED 2026-08-05 — buyer Elizabeth Dawson withdrew. Cancellation of Contract, Release of Deposit and Cancellation of Escrow executed and filed in Duds\\433 Highway 4_Neriah Offer\\Ex\\. Dead-escrow history: COE was 2026-08-10; loan contingency ran to 2026-08-05 via ETA No. 3 (fully executed, all parties signed per Glide 7/24 12:34 AM); appraisal to 2026-07-17 via a second ETA; ETA No. 1 (executed 2026-07-10) had set loan 7/23 and appraisal 7/16. Listing re-activated via MOT #3 signed 8/5, submitted to MetroList 8/9 — ML# 226033798, expiration ~2026-11-18. coe and contingencies intentionally removed: closingDate is null and nothing should count down on a cancelled escrow."
+        "note": "ESCROW CANCELLED 2026-08-05 — buyer Elizabeth Dawson withdrew. Cancellation of Contract, Release of Deposit and Cancellation of Escrow executed and filed in Duds\\433 Highway 4_Neriah Offer\\Ex\\. Dead-escrow history: COE was 2026-08-10; loan contingency ran to 2026-08-05 via ETA No. 3 (fully executed, all parties signed per Glide 7/24 12:34 AM); appraisal to 2026-07-17 via a second ETA; ETA No. 1 (executed 2026-07-10) had set loan 7/23 and appraisal 7/16. Listing re-activated via MOT #3 signed 8/5, submitted to MetroList 8/9 — ML# 226033798, expiration ~2026-11-18. coe and contingencies intentionally removed: closingDate is null and nothing should count down on a cancelled escrow. PRICE REVERTED 2026-08-16 per Sara's standing rule: on a cancelled escrow the price returns to the LIST price from the seller RLA or the last MOT that set one. Chain of record in _Listings\\433 E Highway 4\\Seller\\: RLA (agreement dated 2025-11-19) $1,850,000 -> MOT #1 (2026-03-14) $1,399,000 -> MOT #2 (2026-06-30) expiration only, price field blank -> MOT #3 (2026-08-05) expiration 2026-11-19 only, price field blank. Operative list price is therefore $1,399,000. The dead escrow's accepted contract price of $1,300,000 is history and no longer a price field."
       },
-      "listPrice": null,
-      "salePrice": 1300000,
+      "listPrice": 1399000,
+      "salePrice": null,
       "openEscrowDate": "2026-06-22",
       "closingDate": null,
       "contacts": {
@@ -3420,7 +3466,7 @@
       "id": "preparing-324-augusta",
       "address": "324 Augusta Ct",
       "city": "Valley Springs, CA",
-      "stage": "pending",
+      "stage": "listing",
       "type": "residential",
       "side": "dual",
       "agent": "sara",
@@ -3439,10 +3485,10 @@
         "disclosurePackage": "https://app.disclosures.io/link/324-Augusta-Court-y0xz96n1",
         "commissionNote": "4% total: 3% listing side, 1% buyer side, per Sara's escrow-opening instructions to Placer Title 2026-08-10. On $460,000 = $13,800 + $4,600 = $18,400."
       },
-      "listPrice": null,
-      "salePrice": 460000,
-      "openEscrowDate": "2026-08-11",
-      "closingDate": "2026-09-09",
+      "listPrice": 495000,
+      "salePrice": null,
+      "openEscrowDate": null,
+      "closingDate": null,
       "listingExpiration": "2026-12-18",
       "contacts": {
         "coAgent": "James Beyersdorf (Legacy Properties), buyer side — Sara is on BOTH sides of this transaction",
@@ -3507,11 +3553,9 @@
       "correspondence": [],
       "notes": "IN ESCROW as of 2026-08-11. Listed 6/25/2026, MLS 226081050. Sellers Brian and Trisha Fitzgerald; buyer Denis Listengourt (James Beyersdorf, buyer side) — Legacy is on BOTH sides. Offer $450,000 received 8/9; SCO#1 buyer-signed 8/9; buyer counter $460,000 8/10 (highest and best, escrow shortened from 45 days); SCO#2 seller-signed and BCO#1 executed 8/10 evening. Escrow opened at Placer Title 8/11, Order P-708410, COE 9/9, prelim ordered. AHS home warranty ORDERED IN ERROR AND CANCELLED 8/11 — seller declined to pay per SCO #2; confirm no residual charge on the AHS escrow invoice. Commission 4% total (3 listing / 1 buyer) per Sara's escrow instructions 8/10. OPEN: K Mortgage pre-qual letter shows a $437,000 loan — against $460,000 that is ~95% LTV, matching what Sara told the sellers; confirm with James the letter was reissued at the new price. Escrow-opening documents (AAA, EMD receipt, escrow holder acknowledgment, buyer-signed disclosure set, AVIDs) not yet on file — expected, escrow is one day old.",
       "alerts": [
-        "IN ESCROW — Placer Title P-708410, COE 9/9/2026",
-        "DUAL AGENCY — Sara listing side, James buyer side; dual-agency paperwork required",
-        "Buyer contingency period ends 8/27 (17 days from 8/10 acceptance)",
-        "Ashley Cuslidge OUT 8/26–9/4 and Placer closed 9/7 — against a 9/9 COE. Backup escrow contact needed.",
-        "Confirm K Mortgage pre-qual ($437,000) was reissued at the $460,000 price"
+        "ESCROW CANCELLED 2026-08-14 — buyer Denis Listengourt cancelled under paragraphs 8C/12; both parties signed; Placer P-708410 closed; deposit returned to buyer in full.",
+        "RELIST PENDING — listing agreement runs to 2026-12-18. Decide timing and price.",
+        "OPEN: roof/pest repair discrepancy raised by the buyer's inspector. Sara wrote Victor Malagon (Gold Sierra Roofing) and Douglas Rushing (Rushing Termite) 2026-08-14; Brian wrote Tom Bolin (Bolin Roofing). No replies as of 2026-08-16. This is now a DISCLOSURE question for the next buyer."
       ],
       "attributes": {
         "seller_type": "standard"
@@ -3520,8 +3564,7 @@
       "buyer": "Denis Listengourt (lasolara@gmail.com, 323-334-5218) — James Beyersdorf buyer-side",
       "timeline": {
         "acceptance": "2026-08-10",
-        "coe": "2026-09-09",
-        "note": "Offer received 2026-08-09 at $450,000. SCO #1 buyer-signed 8/9; buyer countered 8/10 at $460,000 (stated highest and best, escrow shortened from 45 days); SCO #2 seller-signed and BCO #1 executed via Authentisign 2026-08-10 6:25 PM PT = acceptance. Escrow opened at Placer Title 2026-08-11, Order P-708410, COE 09/09 per Kelly Haakma. Contingencies omitted deliberately — no separate dates negotiated, so the 17-day default from acceptance (2026-08-27) applies. Recorded 2026-08-11 per Sara. Address is 324 Augusta Court — '342' in the 8/10 escrow-opening email was a typo, confirmed by Sara 2026-08-11; Placer opened it correctly as 324."
+        "note": "ESCROW CANCELLED 2026-08-14 — buyer Denis Listengourt cancelled under paragraphs 8C and 12. Cancellation of Contract, Disposition of Deposit and Cancellation of Escrow (C.A.R. Form CC rev 6/24) executed by BOTH parties (Denis Listengourt, buyer; Brian Fitzgerald, seller); escrow #P-708410 at Placer Title cancelled with full mutual release; buyer's deposit released back to buyer in full, less buyer's fees and costs. Filed __Pending\\324 Augusta\\Ex\\Cancellation of Contract, Release of Deposit and Cancellation of Escrow.pdf and \\Buyer\\...- 624pdf.pdf; both Authentisign envelopes completed 2026-08-14 evening; Sara forwarded to Placer (acuslidge@placertitle.com) 2026-08-15. Dead-escrow history: accepted 2026-08-10 at $460,000 (SCO#2 + BCO#1), escrow opened 2026-08-11 (P-708410), COE was 2026-09-09, buyer contingency period was 2026-08-27. coe, closingDate, openEscrowDate and salePrice intentionally cleared — nothing should count down on a cancelled escrow and the home did not sell. Recorded by the 2026-08-16 run under Sara's standing instruction to auto-apply fully-executed documents. PRICE REVERTED 2026-08-16 per Sara's standing rule: listPrice set to $495,000 from the last MOT that set a price. Chain of record in _Listings\\324 Augusta\\Seller\\: MOT #1 (2026-07-24) $529,000 -> MOT #2 (2026-08-01) $495,000. salePrice stays null — the cancelled contract price of $460,000 is history, not a price field."
       },
       "milestones": [
         {
@@ -3557,128 +3600,33 @@
           "desc": "Escrow is open at Placer Title, Order P-708410. The preliminary title report has been ordered."
         },
         {
-          "date": "2026-08-27",
-          "label": "Buyer's contingency period ends",
-          "status": "next",
-          "col": "contingencies",
-          "badge": "Key date",
-          "desc": "The buyer has 17 days from acceptance to complete inspections, appraisal and loan approval. That period runs to August 27 unless the contract is amended."
-        },
-        {
-          "date": "2026-09-09",
-          "label": "Close of Escrow — 9/9",
-          "status": "upcoming",
-          "col": "closing",
-          "badge": "Closing day",
-          "desc": "Close of escrow is set for September 9, 2026, a 30-day close from acceptance."
+          "date": "2026-08-14",
+          "label": "Escrow cancelled",
+          "status": "done",
+          "col": "complete",
+          "badge": "Done",
+          "desc": "The buyer cancelled the purchase on August 14 under paragraphs 8C and 12 of the agreement. Escrow at Placer Title was cancelled by mutual release and the buyer's deposit was returned to him. The home is coming back on the market."
         }
       ],
-      "clientTasks": [
-        {
-          "label": "Watch for the buyer's inspection scheduling — plan to have the home accessible",
-          "when": "Next 2 weeks",
-          "status": "open"
-        },
-        {
-          "label": "Keep utilities on through closing so inspections and the appraisal can be completed",
-          "when": "Through 9/9",
-          "status": "open"
-        },
-        {
-          "label": "Review the seller net sheet Sara sent you and tell her if anything looks off",
-          "when": "Now",
-          "status": "open"
-        },
-        {
-          "label": "Watch for signing instructions from Placer Title, and verify any wire instructions by phone before sending funds",
-          "when": "Near closing",
-          "status": "open"
-        }
-      ],
+      "clientTasks": [],
       "goodToKnow": [
         {
-          "title": "You accepted $460,000",
-          "body": "The buyer's counter at $460,000 was their highest and best, and it came with a shorter escrow than the original offer — so you got both a better price and a faster close."
+          "title": "Your deposit obligation is closed out",
+          "body": "The cancellation was signed by both sides, so escrow is formally closed and neither party owes the other anything further under that contract."
         },
         {
-          "title": "Your escrow officer is away in late August",
-          "body": "Ashley Cuslidge is out of the office August 26 through September 4, and Placer is closed September 7 for Labor Day. Sara is lining up a backup contact so nothing stalls ahead of the September 9 close."
-        },
-        {
-          "title": "Both sides of this sale are with Legacy",
-          "body": "Sara represents you as the seller and James Beyersdorf represents the buyer. Both are Legacy Properties agents, and the required dual-agency paperwork is part of your file."
+          "title": "You now have current inspection reports",
+          "body": "The buyer completed home, pest, roof and sewer inspections and shared the reports. Most sellers relist without this. It is an advantage — and it also means the roof and pest findings are now known facts we will need to address up front."
         }
       ],
       "agentNote": {
         "author": "sara",
         "status": "draft",
-        "updated": "2026-08-11",
-        "body": "Brian and Trish — we're in escrow. The buyer came back at $460,000, which was $10,000 over their first offer and their highest and best, and they shortened the escrow at the same time. Everything was signed the evening of August 10 and Placer opened escrow this morning: Order P-708410, closing September 9. The preliminary report is ordered. Next up is the buyer's inspection and appraisal period, which runs to August 27. I'll walk you through each step. — Sara Cooper, (209) 559-4966"
+        "updated": "2026-08-16",
+        "body": "Brian and Trish — the buyer cancelled on Friday. He signed the cancellation under his inspection and contingency rights, we both signed it back, and Placer has closed the file; his deposit goes back to him. I know that is a disappointment after a strong price. The good news is that we now have a full set of current inspection reports — home, pest, roof and sewer — which most sellers do not have going into a relist, and the buyer's own repair estimate. The one thing I want to settle before we go back on the market is the roof and pest question his inspector raised: I have written to both contractors who did the original work and I am waiting on them. Once I have that in writing we will decide together how it gets presented, and then talk about timing and price. — Sara Cooper, (209) 559-4966"
       },
-      "buyerMilestones": [
-        {
-          "date": "2026-08-09",
-          "label": "Your offer — $450,000",
-          "col": "complete",
-          "status": "done",
-          "badge": "Submitted",
-          "desc": "You offered $450,000 with conventional financing. The seller countered the same day and you signed it."
-        },
-        {
-          "date": "2026-08-10",
-          "label": "Your offer was accepted at $460,000",
-          "col": "complete",
-          "status": "done",
-          "badge": "Accepted",
-          "desc": "You came up to $460,000 — your highest and best — and shortened the escrow period. Both counters were fully executed the evening of August 10."
-        },
-        {
-          "date": "2026-08-11",
-          "label": "Escrow opened",
-          "col": "complete",
-          "status": "done",
-          "badge": "Open",
-          "desc": "Escrow is open at Placer Title, Order P-708410. The preliminary title report has been ordered for your review."
-        },
-        {
-          "date": "2026-08-27",
-          "label": "Your contingency period",
-          "col": "contingencies",
-          "status": "next",
-          "badge": "Key date",
-          "desc": "You have 17 days from acceptance to complete your inspections, appraisal and loan approval. That period runs through August 27 unless we amend the contract."
-        },
-        {
-          "date": "2026-09-09",
-          "label": "Close of escrow",
-          "col": "closing",
-          "status": "upcoming",
-          "badge": "Closing day",
-          "desc": "You take ownership on closing day, set for September 9, 2026 — a 30-day close from acceptance."
-        }
-      ],
-      "buyerTasks": [
-        {
-          "when": "By Aug 27",
-          "label": "Complete your inspections, appraisal and loan approval before your contingency period ends",
-          "status": "open"
-        },
-        {
-          "when": "This week",
-          "label": "Review the seller's disclosures in your portal and tell James if anything needs a closer look",
-          "status": "open"
-        },
-        {
-          "when": "Ongoing",
-          "label": "Respond quickly to any document requests from your lender so the loan stays on schedule",
-          "status": "open"
-        },
-        {
-          "when": "Before closing",
-          "label": "Verify any wire instructions by phone with Placer Title before you send funds",
-          "status": "open"
-        }
-      ]
+      "buyerMilestones": [],
+      "buyerTasks": []
     },
     {
       "id": "preparing-1789-love-creek",
