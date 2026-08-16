@@ -59,9 +59,17 @@ const fmtUSD = (n) => {
 const fmtUSDfull = (n) => (n == null || !Number.isFinite(+n)) ? '—' : '$' + Math.round(+n).toLocaleString('en-US');
 
 // Shape a raw properties row into a display-ready listing card.
+// A stored URL that is really the IDX widget's logo / "no photo" placeholder,
+// not a home's photo — a capture before the lazy image loaded grabbed the
+// MetroList mark. Filtered out so the render falls back to a clean tile instead
+// of showing the red placeholder (Bev's lakefront collection).
+function isPlaceholderPhoto(u) {
+  return typeof u !== 'string' || /^data:|logo|placeholder|no[-_ ]?photo|no[-_ ]?image|coming[-_ ]?soon|metrolist|\/blank|spacer|1x1/i.test(u);
+}
+
 export function shapeListing(r) {
   const ppsf = (r.price && r.sq_ft) ? Math.round(r.price / r.sq_ft) : null;
-  const photos = Array.isArray(r.photos) ? r.photos.filter(Boolean) : [];
+  const photos = (Array.isArray(r.photos) ? r.photos.filter(Boolean) : []).filter((p) => !isPlaceholderPhoto(p));
   return {
     id: r.id,
     mls_number: r.mls_number || null,
