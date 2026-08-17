@@ -176,8 +176,13 @@ function mergeMeta(d) {
   // carry one too — it's the buyer-broker comp from the accepted offer. Accepts
   // a percent ("2.5%") or a flat dollar amount from the commission demand.
   const commission = d.commission ?? (base && base.commission) ?? null;
-  if (!base && !client && commission == null) return null;
-  return { ...(base || {}), ...(client ? { client } : {}), ...(commission != null ? { commission } : {}) };
+  // ListTrac / MetroList weekly seller report (deals.json v8.1) — Cowork authors
+  // it at the deal level (or inside the listing block). Carry it through
+  // listing_meta so the seller portal can surface it without a new column.
+  const listTrac = (d.listTrac && typeof d.listTrac === 'object' && !Array.isArray(d.listTrac))
+    ? d.listTrac : ((base && base.listTrac) || null);
+  if (!base && !client && commission == null && !listTrac) return null;
+  return { ...(base || {}), ...(client ? { client } : {}), ...(commission != null ? { commission } : {}), ...(listTrac ? { listTrac } : {}) };
 }
 
 // Slice 2 (SPEC_portal_document_model.md): a property may carry an escrows[]

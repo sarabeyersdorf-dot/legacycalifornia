@@ -655,8 +655,18 @@ export default async function handler(req, res) {
       phone: agentPhone, email: agentEmail
     }));
 
+    // The counterparty team — the other side's agent, escrow/title, and lender —
+    // only exists while a deal is genuinely in an active transaction. On a
+    // listing, a deal in preparation, or a cancelled/closed deal there is no live
+    // counterparty, so none of these render even if a stale contact string still
+    // lingers in the data. This is an agency-representation statement, not a
+    // label: never show a buyer's-side agent on a deal with no live buyer
+    // (Cowork flag 2026-08-16 — 324 Augusta cancelled but still listed James as
+    // the buyer's agent). The escrow-history section carries any past record.
+    const hasCounterparty = inEscrow || deal.stage === 'offer';
+
     const escrowRaw = ct.escrow || deal.escrow_officer;
-    if (escrowRaw) {
+    if (hasCounterparty && escrowRaw) {
       const house = ct.escrowCompany || ct.title || deal.title_company;
       const fileNo = ct.escrowNumber || firstOrderNo(escrowRaw) || firstOrderNo(deal.escrow_officer) || lm.preEscrow || '';
       team.push(teamMember({
@@ -674,7 +684,7 @@ export default async function handler(req, res) {
     // co-agent field holds the other Legacy agent, already shown above).
     const coRaw = ct.coAgent || deal.co_agent;
     const coClean = cleanName(coRaw);
-    if (coRaw && normName(coClean) !== normName(agentName)) {
+    if (hasCounterparty && coRaw && normName(coClean) !== normName(agentName)) {
       team.push(teamMember({
         name: coClean || (isBuyerSide ? 'Listing agent' : "Buyer's agent"),
         sub: (ct.coAgentCompany ? cleanName(ct.coAgentCompany) + ' · ' : '') + (isBuyerSide ? 'Listing side' : "Buyer's side"),
@@ -684,7 +694,7 @@ export default async function handler(req, res) {
     }
 
     const lenderRaw = ct.lender;
-    if (lenderRaw) {
+    if (hasCounterparty && lenderRaw) {
       team.push(teamMember({
         name: cleanName(lenderRaw) || 'Lender',
         sub: (ct.lenderCompany ? cleanName(ct.lenderCompany) + ' · ' : '') + 'Lender',
@@ -816,6 +826,26 @@ export default async function handler(req, res) {
     }
     const videoViews = Number.isFinite(+deal.video_views) ? +deal.video_views : null;
 
+    // ListTrac / MetroList weekly seller report (deals.json v8.1, carried in
+    // listing_meta). A compact "your listing is getting seen" card shown at the
+    // top of the seller portal, beside the tour. Listing-side only — a buyer has
+    // no listing to report on, so it's suppressed for a buyer viewer.
+    const lt = (lm.listTrac && typeof lm.listTrac === 'object' && !Array.isArray(lm.listTrac)) ? lm.listTrac : null;
+    let listTrac = null;
+    if (lt && !isBuyerSide) {
+      const n = (v) => { const x = Number(v); return Number.isFinite(x) ? x : null; };
+      const s = (v) => (typeof v === 'string' ? sanitize(v).slice(0, 220) : null);
+      const views = n(lt.views), last30 = n(lt.last30), shares = n(lt.shares),
+            inquiries = n(lt.inquiries), favorites = n(lt.favorites), newPct = n(lt.newPct);
+      if (views != null || last30 != null || shares != null || inquiries != null || favorites != null) {
+        listTrac = {
+          views, last30, shares, inquiries, favorites, new_pct: newPct,
+          since: s(lt.since), note: s(lt.note),
+          report_date: s(lt.reportDate), source: s(lt.source) || 'ListTrac · MetroList weekly report'
+        };
+      }
+    }
+
     // The seller milestones are authored from the SELLER's seat. For a buyer
     // viewer we re-frame them (drop listing-only steps, flip perspective) — UNLESS
     // Cowork already gave us buyer-authored milestones (db/070), which are correct
@@ -861,6 +891,8 @@ export default async function handler(req, res) {
       },
       // Weekly ListTrac marketing digest (null when there's nothing to show).
       marketing,
+      // Compact ListTrac headline stats card shown at the top, beside the tour.
+      list_trac: listTrac,
       nav: { documents: docs.length ? String(docs.length) : '', tasks: String(tasks.length) },
       // Side-aware "What I need from you" copy (buyer vs seller seat).
       tasks_intro: tasksIntro,

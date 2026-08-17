@@ -80,7 +80,7 @@
 
     bar.addEventListener('click', function (e) {
       if (e.target.closest('[data-ac-collapse]')) { setCollapsed(bar, pill, true); return; }
-      if (e.target.closest('[data-ac-desk]')) { location.href = '/crm.html'; return; }
+      if (e.target.closest('[data-ac-desk]')) { location.href = '/crm.html?deal=' + encodeURIComponent(dealKey); return; }
       if (e.target.closest('[data-ac-back]')) {
         if (history.length > 1) { history.back(); return; }
         window.close();

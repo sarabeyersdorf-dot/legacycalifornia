@@ -243,6 +243,19 @@ body.lp-restyle {
 .sell-tour a { font-family: var(--mono); font-size: 10px; letter-spacing: .14em; text-transform: uppercase; color: var(--brass); text-decoration: none; border-bottom: 1px solid var(--brass); padding-bottom: 3px; }
 .sell-tour a:hover { color: var(--ink); border-color: var(--ink); }
 
+/* ListTrac stats card — sits in the tour grid beside the 3D walkthrough, so a
+   listing with only a Matterport no longer leaves half the row empty. Stretches
+   to the tour cell's height. */
+.lt-cell { display: flex; }
+.lt-card { flex: 1; box-sizing: border-box; display: flex; flex-direction: column; justify-content: center; gap: 11px; padding: 18px 20px; border: 1px solid var(--rule, #e4dcc9); background: var(--band, #f4eede); min-height: 190px; }
+.lt-kick { font-family: var(--mono, monospace); font-size: 10px; letter-spacing: .16em; text-transform: uppercase; color: var(--muted, #8a7b60); }
+.lt-big b { display: block; font-family: var(--serif, 'Cormorant Garamond', serif); font-size: 40px; line-height: .98; color: var(--ink, #1a1714); }
+.lt-big span { display: block; font-size: 12.5px; color: var(--muted, #8a7b60); margin-top: 3px; }
+.lt-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 9px 18px; }
+.lt-stat b { font-size: 18px; color: var(--ink, #1a1714); }
+.lt-stat span { display: block; font-size: 10px; letter-spacing: .06em; text-transform: uppercase; color: var(--muted, #8a7b60); margin-top: 1px; }
+.lt-note { font-family: var(--serif, 'Cormorant Garamond', serif); font-style: italic; font-size: 14px; line-height: 1.35; color: var(--ink-soft, #5b5347); }
+
 @media (max-width: 1100px) {
   .sell-hero { grid-template-columns: 1fr; }
   .sell-photo { width: 100%; }
@@ -489,6 +502,34 @@ setTimeout(function(){var p=document.getElementById('portal-loading');if(p&&p.pa
       var url = portal.status && portal.status.photo;
       var img = document.getElementById('sell-hero-photo');
       if (img && url) { img.src = url; img.style.display = 'block'; }
+      // Build the ListTrac stats card from portal.list_trac (server sanitizes the
+      // strings; we HTML-escape again here for defence in depth).
+      function ltCardHtml(lt) {
+        if (!lt) return '';
+        var e = function (s) { return String(s == null ? '' : s).replace(/[&<>]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]; }); };
+        var num = function (v) { return (typeof v === 'number' && isFinite(v)) ? v : null; };
+        var fmt = function (v) { return v.toLocaleString(); };
+        var headVal = num(lt.last30) != null ? lt.last30 : num(lt.views);
+        if (headVal == null) return '';
+        var headSub = num(lt.last30) != null ? 'views · last 30 days' : 'total views';
+        var stats = [];
+        if (num(lt.last30) != null && num(lt.views) != null) stats.push(['Total views', fmt(lt.views)]);
+        if (num(lt.new_pct) != null) stats.push(['New visitors', lt.new_pct + '%']);
+        if (num(lt.shares) != null) stats.push(['Shares', fmt(lt.shares)]);
+        if (num(lt.inquiries) != null) stats.push(['Inquiries', fmt(lt.inquiries)]);
+        if (num(lt.favorites) != null) stats.push(['Saves', fmt(lt.favorites)]);
+        var statsHtml = stats.slice(0, 4).map(function (s) { return '<div class="lt-stat"><b>' + e(s[1]) + '</b><span>' + e(s[0]) + '</span></div>'; }).join('');
+        var note = lt.note ? '<div class="lt-note">' + e(lt.note) + '</div>' : '';
+        var src = e(lt.source || 'ListTrac');
+        return '<figure class="ds-tour-cell lt-cell">' +
+          '<div class="lt-card">' +
+            '<div class="lt-kick">Buyer interest</div>' +
+            '<div class="lt-big"><b>' + e(fmt(headVal)) + '</b><span>' + headSub + '</span></div>' +
+            (statsHtml ? '<div class="lt-grid">' + statsHtml + '</div>' : '') +
+            note +
+          '</div>' +
+          '<figcaption>📈 ' + src + '</figcaption></figure>';
+      }
       var tour = portal.tour || {}, box = document.getElementById('sell-tour'), cells = '';
       var ok = function (u) { return typeof u === 'string' && /^https?:\/\//.test(u); };
       var esc = function (u) { return String(u).replace(/"/g, '%22'); };
@@ -508,6 +549,11 @@ setTimeout(function(){var p=document.getElementById('portal-loading');if(p&&p.pa
           '<iframe src="' + esc(tour.matterport_url) + '" title="3D walkthrough" frameborder="0" allow="xr-spatial-tracking; fullscreen" allowfullscreen loading="lazy"></iframe>' +
           '<figcaption>◱ 3D walkthrough</figcaption></figure>';
       }
+      // ListTrac headline stats — a content card beside the tour so the row reads
+      // balanced (a lone Matterport left the other half empty). Seller-side only;
+      // the server sends portal.list_trac === null for a buyer or when there's no
+      // report yet, so the card simply doesn't appear.
+      cells += ltCardHtml(portal.list_trac);
       if (box) box.innerHTML = cells ? '<div class="ds-tour-grid">' + cells + '</div>' : '';
       renderMarketing(portal.marketing);
       // Per-agent: "Message {agent}" + note avatar reflect the deal's agent.
