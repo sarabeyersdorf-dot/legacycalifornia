@@ -2255,6 +2255,113 @@ window.LGPortal = window.LGPortal || {
     return [lead && lead.first_name, lead && lead.last_name].filter(Boolean).join(' ')
       || (lead && lead.email) || 'Lead';
   }
+
+  // "Set a reminder" — a small modal on a contact's card that books a follow-up
+  // or call for THIS contact on the calendar (and the agent's subscribed .ics
+  // feed) without leaving the page. POSTs to the same /api/crm/calendar endpoint
+  // the Calendar view uses; the event is internal (never shared to the client).
+  function openReminderModal(lead) {
+    if (document.querySelector('[data-reminder-modal]')) return; // one at a time
+    const name = fullName(lead);
+    // Local date/time helpers — the API reads date (YYYY-MM-DD) + time (HH:MM)
+    // as Pacific wall-clock, which matches the agent's own clock.
+    const pad = (n) => String(n).padStart(2, '0');
+    const ymd = (d) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+    const atHour = (daysAhead, hour) => { const d = new Date(); d.setDate(d.getDate() + daysAhead); d.setHours(hour, 0, 0, 0); return d; };
+    const nextMonday9 = () => { const d = new Date(); const add = ((8 - d.getDay()) % 7) || 7; d.setDate(d.getDate() + add); d.setHours(9, 0, 0, 0); return d; };
+    const def = atHour(1, 9); // default: tomorrow 9 AM
+
+    const wrap = document.createElement('div');
+    wrap.setAttribute('data-reminder-modal', '1');
+    wrap.style.cssText = 'position:fixed;inset:0;z-index:100000;background:rgba(26,23,20,.45);display:flex;align-items:center;justify-content:center;padding:20px;';
+    wrap.innerHTML = `
+      <div role="dialog" aria-label="Set a reminder" style="background:#FAF6EC;color:#1A1714;width:100%;max-width:440px;border-radius:14px;box-shadow:0 18px 60px rgba(0,0,0,.35);overflow:hidden;font-family:system-ui,sans-serif;">
+        <div style="padding:16px 20px;border-bottom:1px solid #E7DCC4;display:flex;align-items:center;justify-content:space-between;">
+          <b style="font-size:15px;">Set a reminder</b>
+          <button type="button" data-rm-x style="background:none;border:none;font-size:20px;line-height:1;cursor:pointer;color:#8A7B60;">×</button>
+        </div>
+        <div style="padding:18px 20px;display:flex;flex-direction:column;gap:14px;">
+          <div style="font-size:13px;color:#6B5F49;">For <b>${escHtml(name)}</b>${lead.phone ? ' · ' + escHtml(lead.phone) : ''}</div>
+          <div style="display:flex;gap:8px;">
+            <button type="button" data-rm-kind="follow_up" class="rm-kind" style="flex:1;">Follow up</button>
+            <button type="button" data-rm-kind="call" class="rm-kind" style="flex:1;">Call</button>
+          </div>
+          <label style="font-size:12px;font-weight:600;color:#6B5F49;">Reminder
+            <input data-rm-title type="text" value="Follow up with ${escHtml(name)}" style="width:100%;margin-top:5px;border:1px solid #D9CFB7;border-radius:8px;padding:9px 11px;font:inherit;font-size:14px;background:#fff;">
+          </label>
+          <div>
+            <div style="font-size:12px;font-weight:600;color:#6B5F49;margin-bottom:5px;">When</div>
+            <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px;">
+              <button type="button" data-rm-when="tom" style="font-size:12px;border:1px solid #D9CFB7;border-radius:14px;padding:5px 11px;background:#fff;cursor:pointer;">Tomorrow 9 AM</button>
+              <button type="button" data-rm-when="d3" style="font-size:12px;border:1px solid #D9CFB7;border-radius:14px;padding:5px 11px;background:#fff;cursor:pointer;">In 3 days</button>
+              <button type="button" data-rm-when="mon" style="font-size:12px;border:1px solid #D9CFB7;border-radius:14px;padding:5px 11px;background:#fff;cursor:pointer;">Next Monday</button>
+            </div>
+            <div style="display:flex;gap:8px;">
+              <input data-rm-date type="date" value="${ymd(def)}" style="flex:2;border:1px solid #D9CFB7;border-radius:8px;padding:9px 11px;font:inherit;font-size:14px;background:#fff;">
+              <input data-rm-time type="time" value="09:00" style="flex:1;border:1px solid #D9CFB7;border-radius:8px;padding:9px 11px;font:inherit;font-size:14px;background:#fff;">
+            </div>
+          </div>
+          <div data-rm-status style="font-size:12.5px;min-height:16px;color:#8A3B2B;"></div>
+        </div>
+        <div style="padding:14px 20px;border-top:1px solid #E7DCC4;display:flex;justify-content:flex-end;gap:8px;">
+          <button type="button" data-rm-cancel class="btn btn-ghost btn-sm">Cancel</button>
+          <button type="button" data-rm-save class="btn btn-ink btn-sm">Set reminder</button>
+        </div>
+      </div>`;
+    document.body.appendChild(wrap);
+
+    const q = (s) => wrap.querySelector(s);
+    let kind = 'follow_up';
+    const paintKind = () => wrap.querySelectorAll('[data-rm-kind]').forEach((b) => {
+      const on = b.getAttribute('data-rm-kind') === kind;
+      b.style.cssText = `flex:1;border-radius:8px;padding:9px;font:inherit;font-size:13px;cursor:pointer;border:1px solid ${on ? '#1A1714' : '#D9CFB7'};background:${on ? '#1A1714' : '#fff'};color:${on ? '#FAF6EC' : '#1A1714'};font-weight:600;`;
+    });
+    paintKind();
+    wrap.querySelectorAll('[data-rm-kind]').forEach((b) => b.addEventListener('click', () => {
+      kind = b.getAttribute('data-rm-kind');
+      const t = q('[data-rm-title]');
+      // Keep the title in step with the type unless the agent has customised it.
+      if (t && (t.value === `Follow up with ${name}` || t.value === `Call ${name}`)) {
+        t.value = kind === 'call' ? `Call ${name}` : `Follow up with ${name}`;
+      }
+      paintKind();
+    }));
+    const setWhen = (d) => { q('[data-rm-date]').value = ymd(d); q('[data-rm-time]').value = `${pad(d.getHours())}:${pad(d.getMinutes())}`; };
+    q('[data-rm-when="tom"]').addEventListener('click', () => setWhen(atHour(1, 9)));
+    q('[data-rm-when="d3"]').addEventListener('click', () => setWhen(atHour(3, 9)));
+    q('[data-rm-when="mon"]').addEventListener('click', () => setWhen(nextMonday9()));
+
+    const close = () => wrap.remove();
+    q('[data-rm-x]').addEventListener('click', close);
+    q('[data-rm-cancel]').addEventListener('click', close);
+    wrap.addEventListener('click', (e) => { if (e.target === wrap) close(); });
+
+    q('[data-rm-save]').addEventListener('click', async () => {
+      const date = q('[data-rm-date]').value;
+      const time = q('[data-rm-time]').value;
+      const title = (q('[data-rm-title]').value || '').trim() || (kind === 'call' ? `Call ${name}` : `Follow up with ${name}`);
+      const status = q('[data-rm-status]');
+      if (!date || !time) { status.textContent = 'Pick a date and time.'; return; }
+      const saveBtn = q('[data-rm-save]');
+      saveBtn.disabled = true; saveBtn.textContent = 'Setting…'; status.style.color = '#8A7B60'; status.textContent = '';
+      const r = await window.Legacy.api('/api/crm/calendar', {
+        method: 'POST',
+        body: { kind, title, date, time, duration_minutes: 30, lead_id: lead.id, email: lead.email || '', notes: `Reminder set from ${name}'s contact card.` }
+      });
+      if (r.ok && r.json && (r.json.appointment || r.json.source)) {
+        close();
+        const when = new Date(date + 'T' + time);
+        const nice = isNaN(when) ? `${date} ${time}` : when.toLocaleString(undefined, { weekday: 'short', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
+        toast(`Reminder set for ${nice} — it's on your calendar.`, true);
+      } else {
+        saveBtn.disabled = false; saveBtn.textContent = 'Set reminder';
+        status.style.color = '#8A3B2B';
+        status.textContent = (r.json && r.json.error) || 'Could not set the reminder — try again.';
+      }
+    });
+
+    setTimeout(() => { const t = q('[data-rm-title]'); if (t) t.focus(); }, 60);
+  }
   function fmtUSD(n) {
     if (n == null || !Number.isFinite(+n)) return '—';
     const v = Math.abs(+n);
@@ -2975,6 +3082,7 @@ window.LGPortal = window.LGPortal || {
           ${lead.phone
             ? `<a class="btn btn-ghost btn-sm" href="tel:${escHtml(lead.phone)}" title="Call ${escHtml(lead.phone)}">Call</a>`
             : `<button class="btn btn-ghost btn-sm" disabled title="No phone number on file">Call</button>`}
+          <button class="btn btn-ghost btn-sm" data-detail-action="remind" title="Set a follow-up reminder — lands on your calendar">Set a reminder</button>
           <button class="btn btn-ghost btn-sm" data-detail-action="schedule" title="Open the calendar to book a tour">Schedule</button>
           ${lead.portal_token
             ? `<button class="btn btn-ghost btn-sm" data-detail-action="portal-link" title="Copy this client's private, no-login portal link">Copy portal link</button>`
@@ -3022,6 +3130,11 @@ window.LGPortal = window.LGPortal || {
         window.__openEventCreate({ name: fullName(lead), email: lead.email || '', kind: 'tour' });
       }
     });
+
+    // Set a reminder → inline modal that creates a follow-up/call on the
+    // calendar for THIS contact, without leaving the page.
+    const remindBtn = detailEl.querySelector('[data-detail-action="remind"]');
+    if (remindBtn) remindBtn.addEventListener('click', () => openReminderModal(lead));
 
     // Copy the client's private, no-login portal link.
     const portalBtn = detailEl.querySelector('[data-detail-action="portal-link"]');
