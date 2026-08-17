@@ -189,3 +189,25 @@ board.
 > `"waived"` if it's been removed, or leave it out for the standard 17-day
 > default. Do the extension math yourself and store the **final date** — no
 > day-counts, no `extensions`/`overrides` blocks. Put the ETA history in `note`.
+>
+> **ListTrac (seller marketing stats):** optional, seller-side listings only.
+> Write it at the deal level (or inside `listing`) as
+> `"listTrac": { "views", "last30", "shares", "inquiries", "favorites",
+> "newPct", "since", "note", "reportDate", "source" }`. Numbers are **numbers**,
+> never strings ("3,018", not `"3,018 views"`). `views` = total; `last30` =
+> views in the trailing 30 days (the headline the portal shows large); `newPct`
+> = the percentage of **NEW** visitors — normalise a "75% returning" report to
+> `"newPct": 25`; `favorites` may be `null`. `note` is one client-facing line
+> ("beat its zip code"), `reportDate` the report's date, `source` names it.
+
+---
+
+## 6. `listTrac` — where it surfaces
+
+Carried through `listing_meta` by the deals sync and shown on the **seller**
+portal as a compact stats card beside the video / 3D tour (the "Buyer interest"
+card). A buyer viewer never receives it (`portal.list_trac` is `null`), and it's
+suppressed on any non-listing side. The card renders whenever at least one of
+`views` / `last30` / `shares` / `inquiries` / `favorites` is present, so a
+partial report still shows. It never appears in the buyer portal or the client's
+document set — it's marketing, not a transaction record.

@@ -6100,6 +6100,39 @@ function selectLead(el) {
 })();
 </script>
 <script>
+/* "Open in CRM" deep link. The agent-preview bar on a client's portal sends the
+   agent to /crm.html?deal=<source_key>. The in-app Command Center was retired
+   (the per-deal workspace is the portal itself), so instead of dumping the agent
+   on the dashboard we land them in-app on that deal in the Deals list — scrolled
+   to and briefly highlighted so they're oriented on the record they were just
+   previewing. */
+(function () {
+  'use strict';
+  var key = new URLSearchParams(location.search).get('deal');
+  if (!key) return;
+  function sel() { return '[data-dall-open="' + (window.CSS && CSS.escape ? CSS.escape(key) : key.replace(/"/g, '\\"')) + '"]'; }
+  function focusDeal() {
+    if (typeof window.showView !== 'function') return false;
+    var card = document.querySelector(sel());
+    if (!card) {
+      if (!document.querySelector('.crm-view[data-view="dealsall"].on')) window.showView(null, 'dealsall');
+      return false;
+    }
+    card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    card.style.outline = '2px solid var(--brass)';
+    card.style.outlineOffset = '2px';
+    setTimeout(function () { card.style.outline = ''; card.style.outlineOffset = ''; }, 2600);
+    return true;
+  }
+  function boot() {
+    if (focusDeal()) return;
+    var tries = 0;
+    var t = setInterval(function () { if (focusDeal() || ++tries > 40) clearInterval(t); }, 200); // ~8s max
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot); else boot();
+})();
+</script>
+<script>
 /* Shared listing-photo uploader — lets any listing card replace its photo
    (including ones currently pulled from a video thumbnail) via the same
    /api/crm/deal-photo endpoint the Command Center uses. Resizes client-side to
