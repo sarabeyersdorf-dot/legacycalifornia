@@ -1,6 +1,6 @@
 {
-  "version": 8.0,
-  "lastUpdated": "2026-08-16",
+  "version": 8.4,
+  "lastUpdated": "2026-08-17",
   "updatedBy": "cowork 2026-08-10 — canonical commission/timeline schema migration per Sara",
   "tasks": [
     {
@@ -1670,7 +1670,8 @@
       "key": "feather-eta-pdf-locked",
       "title": "🔴 695 Feather: the ETA filed 8/14 is password-protected and cannot be opened — request an unlocked copy",
       "due": "Today",
-      "done": false
+      "done": true,
+      "note": "Closed 8/17 — Sara confirmed the ETA is executed and COE 8/21 stands."
     },
     {
       "agent": "sara",
@@ -1711,7 +1712,8 @@
       "key": "augusta-nhd-proposal-dismiss",
       "title": "324 Augusta: dismiss the NHD timeline card (raised 8/15, due 8/17) — the escrow was cancelled 8/14, nothing is owed.",
       "due": "Today 8/16",
-      "done": false
+      "done": true,
+      "note": "Superseded — CRM drift-check flagged the same card 8/16; deal recorded as listing."
     },
     {
       "agent": "sara",
@@ -1719,7 +1721,8 @@
       "key": "sally-thompson-brbc",
       "title": "NEW BUYER CLIENT: Sally Thompson BRBC executed via Authentisign 8/15 1:56 PM. File the BRBC and open a buyer-prospect record in deals.json.",
       "due": "This week",
-      "done": false
+      "done": true,
+      "note": "Closed 8/17 — buyer-prospect record created; shown Castlewood, prequal with Kim Hesser in progress."
     },
     {
       "agent": "sara",
@@ -1727,13 +1730,79 @@
       "key": "fub-manuel-freitas",
       "title": "NEW LEAD: Manuel Freitas (209) 996-9907 manueljamesfreitas@gmail.com — Realtor.com via FUB 8/15. Unworked.",
       "due": "Today 8/16",
-      "done": false
+      "done": true,
+      "note": "Closed 8/17 per Sara — Manuel was calling for his mother Bev Woltjer; she was shown Bret Harte and did not like the water view."
     },
     {
       "agent": "sara",
       "client": "324 Augusta",
       "key": "augusta-roof-pest-responses",
       "title": "324 Augusta: no reply from Victor Malagon (Gold Sierra Roofing) or Douglas Rushing (Rushing Termite) on the repair discrepancy — you emailed both 8/14. Chase before relisting.",
+      "due": "This week",
+      "done": true,
+      "note": "Partially resolved 8/17 — Victor Malagon made repairs 8/16 and will re-certify. Rushing (pest) still silent; tracked under augusta-pest-recert."
+    },
+    {
+      "agent": "sara",
+      "client": "1143 Echo",
+      "key": "echo-mod-not-filed",
+      "title": "1143 Echo: the MOD transferring the unpaid 0.5% ($3,075) from Latigo is not on disk — Ex holds only the RLA. File it; it is what makes the 3.5% collectable.",
+      "due": "This week",
+      "done": false
+    },
+    {
+      "agent": "sara",
+      "client": "9568 Sheep Ranch",
+      "key": "sheepranch-marketing-call",
+      "title": "9568 Sheep Ranch: 87 shares / 728 views in 30 days, most-shared in the book, one escrow already cancelled. Price/marketing call with Sean Moffatt.",
+      "due": "This week",
+      "done": false
+    },
+    {
+      "agent": "sara",
+      "client": "433 E Hwy 4",
+      "key": "433-fub-expiration-wrong",
+      "title": "🔴 FUB Hot Sheet says '433 HWY 4 listing expiration' TODAY 8/17 — MOT #3 extended it to 11/19/2026. FUB is carrying a stale date; fix it before someone pulls the listing.",
+      "due": "Today 8/17",
+      "done": false
+    },
+    {
+      "agent": "james",
+      "client": "8235 Baldwin",
+      "key": "baldwin-seller-name-james",
+      "title": "Baldwin seller name — Sara flagged this to James 8/17. ETA #3 and the AEA are both signed 'Rebecca Johnson'; the party of record on both is 'Rebecca Turnage'. Settle before vesting at the 8/31 close.",
+      "due": "Before COE 8/31",
+      "done": false
+    },
+    {
+      "agent": "sara",
+      "client": "324 Augusta",
+      "key": "augusta-roof-recert",
+      "title": "324 Augusta: get Victor Malagon's roof RE-CERTIFICATION in writing — he repaired 8/16. That document is what closes the disclosure question for the relist.",
+      "due": "This week",
+      "done": false
+    },
+    {
+      "agent": "sara",
+      "client": "324 Augusta",
+      "key": "augusta-pest-recert",
+      "title": "324 Augusta: Douglas Rushing (Rushing Termite) still has not responded on the pest discrepancy — you and Brian both wrote 8/14. Chase or get a second pest opinion.",
+      "due": "This week",
+      "done": false
+    },
+    {
+      "agent": "sara",
+      "client": "324 Augusta",
+      "key": "augusta-folder-move",
+      "title": "324 Augusta: the deal folder is still under __Pending but the escrow cancelled 8/14 and the deal is a listing again. Move it so the document sweep reads it as listing paperwork.",
+      "due": "This week",
+      "done": false
+    },
+    {
+      "agent": "sara",
+      "client": "Sally Thompson",
+      "key": "sally-prequal-followup",
+      "title": "Sally Thompson: follow up with Kim Hesser on the prequal so she can write. Shown Castlewood already.",
       "due": "This week",
       "done": false
     }
@@ -2723,7 +2792,7 @@
     {
       "id": "1111-dunbar",
       "address": "1111 Dunbar Rd",
-      "city": "Arnold, CA",
+      "city": "Arnold, CA 95223",
       "stage": "listing",
       "type": "commercial",
       "side": "listing",
@@ -2737,9 +2806,13 @@
         "commission": {
           "pct": 4
         },
-        "disclosurePackage": "https://app.disclosures.io/link/1111-Dunbar-Road-60r8giay"
+        "disclosurePackage": "https://app.disclosures.io/link/1111-Dunbar-Road-60r8giay",
+        "commissionNote": "4.0% per the Commercial & Residential Income Listing Agreement (rev 12/25) dated 2026-01-17. RLA listing price $650,000; MOT #1 changed the expiration only and left the price field blank.",
+        "dateListed": "2026-01-17",
+        "expiration": "2026-11-18",
+        "agreementForm": "Commercial and Residential Income Listing Agreement - 1225"
       },
-      "listPrice": null,
+      "listPrice": 650000,
       "salePrice": null,
       "openEscrowDate": null,
       "closingDate": null,
@@ -2789,6 +2862,16 @@
       "alerts": [],
       "attributes": {
         "seller_type": "standard"
+      },
+      "listTrac": {
+        "views": 198,
+        "shares": 4,
+        "inquiries": 1,
+        "newPct": 87,
+        "last30": 18,
+        "since": "2026-02-02",
+        "reportDate": "2026-08-16",
+        "source": "ListTrac / MetroList weekly seller report"
       }
     },
     {
@@ -2885,12 +2968,14 @@
       "video": "https://youtu.be/LgdfPW_QlWQ",
       "mls": "225149467",
       "listing": {
-        "client": "Jim & Yvonne",
+        "client": "Jim & Yvonne Heryford",
         "dateListed": "2025-12-05",
-        "expiration": "2026-11-18",
+        "expiration": "2026-11-19",
         "commission": {
           "pct": 2.5
-        }
+        },
+        "clientLegalNames": "James R Heryford and Yvonne Heryford (Gold Electric) — LEGAL names as they appear on the RLA, MOTs and all executed documents. USE 'Jim' in anything the clients read; use the legal names only on contracts and vesting.",
+        "commissionNote": "2.5% per the RLA (rev 6/25), agreement dated 2025-11-19. Listing price chain: RLA $1,850,000 -> MOT #1 (2026-03-14) $1,399,000 -> MOT #2 (6/30) expiration 8/14 only -> MOT #3 (8/5) expiration 11/19/2026 only."
       },
       "timeline": {
         "acceptance": "2026-06-19",
@@ -3064,12 +3149,24 @@
           "cancelledAt": "2026-08-05"
         }
       ],
-      "docFolder": "/_LEGACY/_Listings/433 E Highway 4"
+      "docFolder": "/_LEGACY/_Listings/433 E Highway 4",
+      "client": "Jim & Yvonne Heryford",
+      "listTrac": {
+        "views": 5673,
+        "shares": 18,
+        "inquiries": 0,
+        "newPct": 94,
+        "last30": 278,
+        "since": "2026-03-20",
+        "note": "Beat its zip code for views. A separate ListTrac report on the earlier MLS number covers 2025-12-05 onward: 4,015 views / 4 shares / 99% new / 68 in the last 30 days.",
+        "reportDate": "2026-08-16",
+        "source": "ListTrac / MetroList weekly seller report"
+      }
     },
     {
       "id": "467-skyline",
       "address": "467 Skyline Dr",
-      "city": "CA",
+      "city": "Arnold, CA 95223-9427",
       "stage": "listing",
       "type": "residential",
       "side": "listing",
@@ -3080,7 +3177,12 @@
         "client": "Laura Redding",
         "dateListed": "2026-06-04",
         "expiration": "2027-01-31",
-        "preEscrow": "P-706807"
+        "preEscrow": "P-706807",
+        "commission": {
+          "pct": 3
+        },
+        "commissionNote": "3.0% per the RLA (rev 12/25) dated 2026-06-04. RLA listing price $98,500 -> MOT #1 $89,000.",
+        "agreementForm": "Residential Listing Agreement - Exclusive - 1225"
       },
       "salePrice": null,
       "openEscrowDate": null,
@@ -3179,6 +3281,17 @@
       "attributes": {
         "seller_type": "standard",
         "tenant_occupied": false
+      },
+      "listTrac": {
+        "views": 9838,
+        "shares": 30,
+        "inquiries": 1,
+        "newPct": 25,
+        "last30": 3018,
+        "since": "2026-06-04",
+        "note": "BEST PERFORMING LISTING IN THE BOOK. 3,018 views in the last 30 days — Zillow 1,947, Realtor.com 854. Beat its zip code. Unusually, 75% of visitors are RETURNING, not new: people are coming back to look again.",
+        "reportDate": "2026-08-16",
+        "source": "ListTrac / MetroList weekly seller report"
       }
     },
     {
@@ -3186,21 +3299,24 @@
       "address": "9568 Sheep Ranch Rd",
       "mls": "226043130",
       "listing": {
-        "client": "Sean Moffat",
+        "client": "Sean Cristian Moffatt",
         "beds": 3,
         "baths": 2,
         "lotAcres": 5.11,
         "yearBuilt": 1979,
         "commission": {
           "pct": 3
-        }
+        },
+        "commissionNote": "3.0% per the RLA (rev 12/25) dated 2026-03-10. RLA listing price $400,000 -> MOT #1 $389,000.",
+        "dateListed": "2026-03-10",
+        "agreementForm": "Residential Listing Agreement - Exclusive - 1225"
       },
-      "city": "CA",
-      "stage": "cancelled",
+      "city": "Mountain Ranch, CA 95246",
+      "stage": "listing",
       "type": "residential",
       "side": "listing",
       "agent": "sara",
-      "listPrice": null,
+      "listPrice": 389000,
       "salePrice": null,
       "openEscrowDate": null,
       "closingDate": null,
@@ -3241,15 +3357,31 @@
       "correspondence": [],
       "notes": "Listing agreement executed. Prelim and disclosures received. Showing was requested for Wed 6/24 1:00 PM by agent Loretta Kilpatrick — CANCELED by the agent (per Sara 6/25). Escrow P-698773 cancellation: buyer SIGNED 7/7; now awaiting SELLER signature so Placer can close it out. | 8/7: Escrow cancellation fully resolved. Sean signed. Placer/Ashley issued deposit check to buyer. File closed — moved to Duds.",
       "alerts": [
-        "Escrow P-698773 CANCELLED — Sean Moffat (seller) signed cancellation, Placer issued deposit refund check to buyer; file fully resolved 8/7"
+        "LISTING LIVE — actively marketing. Do not read the cancelled escrow as a cancelled listing.",
+        "ESCROW CANCELLED — buyer Kayla Priestley, contract dated 2026-04-21, cancelled under para L(1) 8A; Placer Title P-698773 closed, deposit returned to buyer in full. Both parties signed.",
+        "Strongest share activity in the book: 87 shares, 728 views in the last 30 days. Worth a price/marketing conversation with Sean."
       ],
       "attributes": {
         "seller_type": "standard"
+      },
+      "listTrac": {
+        "views": 3165,
+        "shares": 87,
+        "inquiries": 0,
+        "newPct": 93,
+        "last30": 728,
+        "since": "2026-04-08",
+        "note": "87 shares — the most-shared listing in the book. Beat its zip code. Still receiving ListTrac reports and 728 views in the last 30 days despite being marked 'cancelled' in deals.json — worth confirming which is right.",
+        "reportDate": "2026-08-16",
+        "source": "ListTrac / MetroList weekly seller report"
+      },
+      "timeline": {
+        "note": "LISTING IS LIVE. An ESCROW on this listing cancelled — do not confuse the two. Purchase Agreement dated 2026-04-21 between buyer Kayla Priestley and seller Sean Cristian Moffatt. Cancellation of Contract, Disposition of Deposit and Cancellation of Escrow (C.A.R. Form CC rev 6/24) executed by BOTH parties; buyer cancelled under paragraph L(1) 8A; escrow #P-698773 at Placer Title Company cancelled with full mutual release; seller authorised release of the buyer's deposit back to the buyer in full, less buyer's fees and costs. Filed Duds\\9568 Sheep Ranch Rd\\Cancellation of Contract, Release of Deposit and Cancellation of Escrow - 624.pdf. Per Sara 2026-08-16: 'sheep ranch had an escrow cancel buyer Kayla Priestly but the listing is not canceled.' stage corrected 'cancelled' -> 'listing' and salePrice cleared to the RLA/MOT list price of $389,000 the same day. The listing is still marketing and still generating ListTrac traffic (3,165 views, 87 shares, 728 in the last 30 days)."
       }
     },
     {
       "id": "fowler",
-      "address": "Fowler Rd",
+      "address": "2841 Fowler Rd Space 144",
       "mls": "226034830",
       "listing": {
         "client": "Allen and Danielle Carey",
@@ -3257,14 +3389,20 @@
         "beds": 3,
         "baths": 2,
         "sqft": 1200,
-        "preEscrow": "P-698870"
+        "preEscrow": "P-698870",
+        "commission": {
+          "pct": 3
+        },
+        "commissionNote": "3.0% per the RLA (rev 12/25) dated 2026-03-19. RLA listing price $210,000 -> MOT #1 $199,000.",
+        "dateListed": "2026-03-19",
+        "agreementForm": "Residential Listing Agreement - Exclusive - 1225"
       },
-      "city": "CA",
+      "city": "Ceres, CA 95307",
       "stage": "listing",
       "type": "residential",
       "side": "listing",
       "agent": "sara",
-      "listPrice": null,
+      "listPrice": 199000,
       "salePrice": null,
       "openEscrowDate": null,
       "closingDate": null,
@@ -3284,6 +3422,17 @@
       "alerts": [],
       "attributes": {
         "seller_type": "standard"
+      },
+      "listTrac": {
+        "views": 5368,
+        "shares": 44,
+        "inquiries": 5,
+        "newPct": 87,
+        "last30": 698,
+        "since": "2026-03-24",
+        "note": "5 inquiries — the most of any listing. Beat its zip code. Zillow drove 526 of the last 30 days' 698 views.",
+        "reportDate": "2026-08-16",
+        "source": "ListTrac / MetroList weekly seller report"
       }
     },
     {
@@ -3351,12 +3500,12 @@
     {
       "id": "preparing-1143-echo",
       "address": "1143 Echo St",
-      "city": "Angels Camp, CA",
+      "city": "Angels Camp, CA 95222",
       "stage": "listing",
       "type": "residential",
       "side": "listing",
       "agent": "sara",
-      "listPrice": null,
+      "listPrice": 349000,
       "salePrice": null,
       "openEscrowDate": null,
       "closingDate": null,
@@ -3365,7 +3514,9 @@
         "commission": {
           "pct": 3.5
         },
-        "commissionNote": "Includes the 0.5% from the Latigo BRBC that the buyers retained and applied here (agreed 7/28)."
+        "commissionNote": "3.5% TOTAL, and 3.5% is the operative rate — do not 'correct' it back to 3.0%. The RLA (rev 6/26) dated 2026-07-12 sets 3.0%. A Modification of Terms then adds the 0.5% carried over from 7230 Latigo, per Sara 2026-08-16: 'Echo is 3.5 commission, we have a MOD to transfer the unpaid .5 from Latigo to Echo.' Origin of the 0.5%: the Latigo BRBC (C.A.R. form, 2024 rev) set buyer-side compensation at 3.000% of the acquisition price, but the seller paid only 2.5% — the Latigo commission demand (P-708659) shows Gross $15,375, Seller Paid 2.5%, Buyer Paid blank. The 0.5% shortfall on the $615,000 Latigo sale is $3,075, and that is what the MOD moves to this listing. On the $349,000 Echo list price, 3.5% = $12,215. DOCUMENT GAP as of 2026-08-16: the MOD is NOT on disk — _Listings\\1143 Echo\\Ex\\ holds only the RLA. File it.",
+        "dateListed": "2026-07-12",
+        "agreementForm": "Residential Listing Agreement - Exclusive - 626"
       },
       "contacts": {
         "seller": "Adrianna & Guy Castle"
@@ -3404,12 +3555,12 @@
     {
       "id": "preparing-5255-charles",
       "address": "5255 Charles St",
-      "city": "CA",
+      "city": "Wilseyville, CA 95257",
       "stage": "preparing",
       "type": "residential",
       "side": "listing",
       "agent": "sara",
-      "listPrice": null,
+      "listPrice": 269000,
       "salePrice": null,
       "openEscrowDate": null,
       "closingDate": null,
@@ -3417,7 +3568,15 @@
       "docs": {},
       "correspondence": [],
       "notes": "Preparing to list.",
-      "alerts": []
+      "alerts": [],
+      "listing": {
+        "commission": {
+          "pct": 3
+        },
+        "commissionNote": "3.0% per the RLA (rev 6/25) dated 2025-11-16, filed in _Listings\\preparing to list\\.",
+        "dateListed": "2025-11-16",
+        "agreementForm": "Residential Listing Agreement - Exclusive - 625"
+      }
     },
     {
       "id": "preparing-7653-cave-city",
@@ -3468,7 +3627,7 @@
       "city": "Valley Springs, CA",
       "stage": "listing",
       "type": "residential",
-      "side": "dual",
+      "side": "seller",
       "agent": "sara",
       "video": "https://youtu.be/XRt2j7joL7E",
       "mls": "226081050",
@@ -3480,10 +3639,10 @@
         "expiration": "2026-12-18",
         "preEscrow": "P-708410",
         "commission": {
-          "pct": 4
+          "pct": 3
         },
         "disclosurePackage": "https://app.disclosures.io/link/324-Augusta-Court-y0xz96n1",
-        "commissionNote": "4% total: 3% listing side, 1% buyer side, per Sara's escrow-opening instructions to Placer Title 2026-08-10. On $460,000 = $13,800 + $4,600 = $18,400."
+        "commissionNote": "3.0% per the RLA (rev 6/26) dated 2026-06-18 — this is the LISTING-side rate and it is what applies now. deals.json carried 4% until 2026-08-16; that 4% was 3% listing side + 1% buyer side per Sara's escrow-opening instructions to Placer Title 2026-08-10, which was correct only for the Denis Listengourt dual transaction. That escrow cancelled 2026-08-14, so the buyer-side 1% is gone and the RLA rate of 3% stands. Listing price chain: RLA $545,000 -> MOT #1 (2026-07-24) $529,000 -> MOT #2 (2026-08-01) $495,000."
       },
       "listPrice": 495000,
       "salePrice": null,
@@ -3491,14 +3650,15 @@
       "closingDate": null,
       "listingExpiration": "2026-12-18",
       "contacts": {
-        "coAgent": "James Beyersdorf (Legacy Properties), buyer side — Sara is on BOTH sides of this transaction",
-        "escrow": "Kelly Haakma",
-        "lender": "",
-        "title": "Placer Title — prelim ordered 2026-08-11",
-        "lenderCompany": "K Mortgage",
-        "escrowCompany": "Placer Title",
-        "escrowNumber": "P-708410",
-        "escrowNote": "Team Cuslidge. Ashley Cuslidge out 2026-08-26 to 09-04; Placer closed 9/7 Labor Day."
+        "coAgent": null,
+        "escrow": null,
+        "escrowCompany": null,
+        "escrowNumber": null,
+        "escrowNote": null,
+        "lender": null,
+        "lenderCompany": null,
+        "title": null,
+        "note": "All escrow/lender/title/co-agent contacts cleared 2026-08-16 — escrow P-708410 at Placer Title was cancelled 2026-08-14 and there is no buyer. James Beyersdorf was the buyer-side agent on the cancelled Denis Listengourt transaction ONLY; he has no role in the relisting. Historical detail is in timeline.note."
       },
       "docs": {
         "RPA": "executed — Authentisign 2026-08-09, filed __Pending/324 Augusta/Ex/RPA.pdf",
@@ -3555,13 +3715,13 @@
       "alerts": [
         "ESCROW CANCELLED 2026-08-14 — buyer Denis Listengourt cancelled under paragraphs 8C/12; both parties signed; Placer P-708410 closed; deposit returned to buyer in full.",
         "RELIST PENDING — listing agreement runs to 2026-12-18. Decide timing and price.",
-        "OPEN: roof/pest repair discrepancy raised by the buyer's inspector. Sara wrote Victor Malagon (Gold Sierra Roofing) and Douglas Rushing (Rushing Termite) 2026-08-14; Brian wrote Tom Bolin (Bolin Roofing). No replies as of 2026-08-16. This is now a DISCLOSURE question for the next buyer."
+        "ROOF RESOLVING — Victor Malagon (Gold Sierra Roofing) went out 2026-08-16, made the repairs and will RE-CERTIFY (per Sara 2026-08-17). Get the re-certification in writing; it is the document that closes the disclosure question for the relist. Douglas Rushing (Rushing Termite) has still not responded on the pest side."
       ],
       "attributes": {
         "seller_type": "standard"
       },
-      "client": "Brian and Trisha Fitzgerald (sellers) / Denis Listengourt (buyer)",
-      "buyer": "Denis Listengourt (lasolara@gmail.com, 323-334-5218) — James Beyersdorf buyer-side",
+      "client": "Brian and Trisha Fitzgerald",
+      "buyer": null,
       "timeline": {
         "acceptance": "2026-08-10",
         "note": "ESCROW CANCELLED 2026-08-14 — buyer Denis Listengourt cancelled under paragraphs 8C and 12. Cancellation of Contract, Disposition of Deposit and Cancellation of Escrow (C.A.R. Form CC rev 6/24) executed by BOTH parties (Denis Listengourt, buyer; Brian Fitzgerald, seller); escrow #P-708410 at Placer Title cancelled with full mutual release; buyer's deposit released back to buyer in full, less buyer's fees and costs. Filed __Pending\\324 Augusta\\Ex\\Cancellation of Contract, Release of Deposit and Cancellation of Escrow.pdf and \\Buyer\\...- 624pdf.pdf; both Authentisign envelopes completed 2026-08-14 evening; Sara forwarded to Placer (acuslidge@placertitle.com) 2026-08-15. Dead-escrow history: accepted 2026-08-10 at $460,000 (SCO#2 + BCO#1), escrow opened 2026-08-11 (P-708410), COE was 2026-09-09, buyer contingency period was 2026-08-27. coe, closingDate, openEscrowDate and salePrice intentionally cleared — nothing should count down on a cancelled escrow and the home did not sell. Recorded by the 2026-08-16 run under Sara's standing instruction to auto-apply fully-executed documents. PRICE REVERTED 2026-08-16 per Sara's standing rule: listPrice set to $495,000 from the last MOT that set a price. Chain of record in _Listings\\324 Augusta\\Seller\\: MOT #1 (2026-07-24) $529,000 -> MOT #2 (2026-08-01) $495,000. salePrice stays null — the cancelled contract price of $460,000 is history, not a price field."
@@ -3615,8 +3775,12 @@
           "body": "The cancellation was signed by both sides, so escrow is formally closed and neither party owes the other anything further under that contract."
         },
         {
+          "title": "The roof question is being put right",
+          "body": "The roofer who did the original work went back out on August 16, made the repairs the buyer's inspector called out, and will re-certify the roof. Once that certificate is in hand it becomes a strength going into the relist rather than an open question."
+        },
+        {
           "title": "You now have current inspection reports",
-          "body": "The buyer completed home, pest, roof and sewer inspections and shared the reports. Most sellers relist without this. It is an advantage — and it also means the roof and pest findings are now known facts we will need to address up front."
+          "body": "The previous buyer completed home, pest, roof and sewer inspections and shared the reports. Most sellers relist without this."
         }
       ],
       "agentNote": {
@@ -3657,13 +3821,13 @@
     {
       "id": "701-mark-twain",
       "address": "701 Mark Twain Rd",
-      "city": "Angels Camp, CA",
+      "city": "Angels Camp, CA 95222",
       "stage": "listing",
-      "type": "land",
+      "type": "vacant land",
       "side": "listing",
       "agent": "both",
       "video": "https://youtu.be/KlSz4OV6Bjk",
-      "listPrice": null,
+      "listPrice": 1400000,
       "salePrice": null,
       "openEscrowDate": null,
       "closingDate": null,
@@ -3679,18 +3843,37 @@
       "alerts": [],
       "attributes": {
         "seller_type": "standard"
+      },
+      "listing": {
+        "commission": {
+          "pct": 5
+        },
+        "commissionNote": "5.0% per the Vacant Land Listing Agreement (rev 12/24) dated 2025-01-10. Highest-priced listing in the book at $1,400,000.",
+        "dateListed": "2025-01-10",
+        "agreementForm": "Vacant Land Listing Agreement - 1224"
+      },
+      "listTrac": {
+        "views": 564,
+        "shares": 4,
+        "inquiries": 0,
+        "newPct": 94,
+        "last30": 58,
+        "since": "2025-01-17",
+        "note": "Beat its zip code. Zillow drove 39 of the last 30 days' 58 views.",
+        "reportDate": "2026-08-16",
+        "source": "ListTrac / MetroList weekly seller report"
       }
     },
     {
       "id": "635-s-main",
       "address": "635 S Main St",
-      "city": "Angels Camp, CA",
+      "city": "Angels Camp, CA 95222",
       "stage": "listing",
-      "type": "land",
+      "type": "vacant land",
       "side": "listing",
       "agent": "both",
       "video": "https://youtu.be/PU4eAT9Dq6k",
-      "listPrice": null,
+      "listPrice": 699000,
       "salePrice": null,
       "openEscrowDate": null,
       "closingDate": null,
@@ -3706,18 +3889,36 @@
       "alerts": [],
       "attributes": {
         "seller_type": "standard"
+      },
+      "listing": {
+        "commission": {
+          "pct": 5
+        },
+        "commissionNote": "5.0% per the Vacant Land Listing Agreement (rev 12/24) dated 2025-01-10. NOTE: the RLA states the same $699,000 listing price as 2000 Gun Club Rd — confirm that is intentional and not a form copy-paste.",
+        "dateListed": "2025-01-10",
+        "agreementForm": "Vacant Land Listing Agreement - 1224"
+      },
+      "listTrac": {
+        "views": 252,
+        "shares": 10,
+        "inquiries": 0,
+        "newPct": 96,
+        "last30": 21,
+        "since": "2025-01-17",
+        "reportDate": "2026-08-16",
+        "source": "ListTrac / MetroList weekly seller report"
       }
     },
     {
       "id": "2000-gun-club",
-      "address": "2000 Gun Club Rd",
-      "city": "Angels Camp, CA",
+      "address": "0 Gun Club Rd",
+      "city": "Angels Camp, CA 95222",
       "stage": "listing",
-      "type": "land",
+      "type": "vacant land",
       "side": "listing",
       "agent": "both",
       "video": "https://youtu.be/kM3AeK00xvg",
-      "listPrice": null,
+      "listPrice": 699000,
       "salePrice": null,
       "openEscrowDate": null,
       "closingDate": null,
@@ -3733,18 +3934,37 @@
       "alerts": [],
       "attributes": {
         "seller_type": "standard"
+      },
+      "listing": {
+        "commission": {
+          "pct": 5
+        },
+        "commissionNote": "5.0% per the Vacant Land Listing Agreement (rev 12/24) dated 2025-01-10. Highest rate in the book — all four Angels Camp land listings are at 5%.",
+        "dateListed": "2025-01-10",
+        "agreementForm": "Vacant Land Listing Agreement - 1224"
+      },
+      "listTrac": {
+        "views": 294,
+        "shares": 11,
+        "inquiries": 0,
+        "newPct": 100,
+        "last30": 17,
+        "since": "2025-01-17",
+        "note": "100% new visitors — no one is coming back for a second look.",
+        "reportDate": "2026-08-16",
+        "source": "ListTrac / MetroList weekly seller report"
       }
     },
     {
       "id": "590-598-s-main",
-      "address": "590-598 S Main St",
-      "city": "Angels Camp, CA",
+      "address": "590 S Main Street",
+      "city": "Angels Camp, CA 95222",
       "stage": "listing",
-      "type": "land",
+      "type": "vacant land",
       "side": "listing",
       "agent": "both",
       "video": "https://youtu.be/QU8iHD43oeU",
-      "listPrice": null,
+      "listPrice": 440000,
       "salePrice": null,
       "openEscrowDate": null,
       "closingDate": null,
@@ -3760,6 +3980,25 @@
       "alerts": [],
       "attributes": {
         "seller_type": "standard"
+      },
+      "listing": {
+        "commission": {
+          "pct": 5
+        },
+        "commissionNote": "5.0% per the Vacant Land Listing Agreement (rev 12/24) dated 2025-01-10.",
+        "dateListed": "2025-01-10",
+        "agreementForm": "Vacant Land Listing Agreement - 1224"
+      },
+      "listTrac": {
+        "views": 214,
+        "shares": 3,
+        "inquiries": 0,
+        "newPct": 93,
+        "last30": 14,
+        "since": "2025-01-17",
+        "note": "Quietest listing in the book — 14 views in the last 30 days.",
+        "reportDate": "2026-08-16",
+        "source": "ListTrac / MetroList weekly seller report"
       }
     },
     {
@@ -3768,10 +4007,10 @@
       "mls": "226003169",
       "city": "Angels Camp, CA 95222",
       "stage": "listing",
-      "type": "land",
+      "type": "vacant land",
       "side": "listing",
       "agent": "sara",
-      "listPrice": null,
+      "listPrice": 33000,
       "salePrice": null,
       "openEscrowDate": null,
       "closingDate": null,
@@ -3785,6 +4024,26 @@
       "alerts": [],
       "attributes": {
         "seller_type": "standard"
+      },
+      "listing": {
+        "commission": {
+          "usd": 1000
+        },
+        "commissionNote": "FLAT FEE $1,000 per the Vacant Land Listing Agreement (rev 12/24) dated 2025-06-18 — the percentage field is blank and the flat-fee box is checked. This is the only flat-fee listing in the book. RLA listing price was blank -> MOT #1 $33,000; MOT #3 extended the expiration to 2027-01-18.",
+        "dateListed": "2025-06-18",
+        "expiration": "2027-01-18",
+        "agreementForm": "Vacant Land Listing Agreement - 1224"
+      },
+      "listTrac": {
+        "views": 1943,
+        "shares": 17,
+        "inquiries": 0,
+        "newPct": 98,
+        "last30": 158,
+        "since": "2025-06-20",
+        "note": "Beat its zip code. Zillow 79 and Realtor.com 32 of the last 30 days' 158 views.",
+        "reportDate": "2026-08-16",
+        "source": "ListTrac / MetroList weekly seller report"
       }
     },
     {
@@ -4000,10 +4259,10 @@
       ],
       "notes": "Pivot for Ashley Robinson (James's buyer) after the 992 Iroquois offer went dead 7/12. Offer sent to listing agent Dee 7/12 for 695 Feather Dr, Copperopolis. Docs in _Offers/Buy Side/Robinson 695 Feather Dr/. UPDATE 7/18 (from James's 7/18 Gmail review, cross-checked against Sara's Gmail): Offer accepted 7/15; escrow opened at Orange Coast Title Company of Southern California (Santa Ana), Escrow #2473532-TS, escrow officer Tanya Salgado (tanyas@octitle.com) — switched from Placer Title because the property was acquired via tax sale last year and Placer is restricted from insuring/escrowing such properties for 3-5 years. EMD confirmed received by escrow 7/16. ClosingLock wire instructions sent to both buyers 7/15-7/16; Ashley Robinson submitted proof of funds 7/16. NOT yet confirmed: final accepted purchase price/terms (a preliminary net sheet referenced a $170,000 cash-purchase figure sent 7/15 before escrow opened — not verified as final); what listing agent Dee Bradley committed to doing \"Monday\" (7/20) per her 7/17 email; and what the \"Page 17\" document escrow sent 7/17 actually is (likely the RPA escrow acknowledgment James requested, not confirmed). | 8/7: COE confirmed 8/14.",
       "alerts": [
+        "COE 2026-08-21 CONFIRMED — ETA No. 1 executed, per Sara 2026-08-17. Closes Friday.",
         "Offer ACCEPTED 7/15 — moved off \"offer\" stage 7/18; RPA/SCO1 fully executed via Authentisign, both buyers signed",
         "Escrow OPEN at Orange Coast Title (Santa Ana), Escrow #2473532-TS, Tanya Salgado — switched from Placer (tax-sale restriction, 3-5yr)",
         "EMD confirmed received by escrow 7/16",
-        "NEEDS CONFIRMATION: what Dee Bradley (listing agent) committed to doing \"Monday\" 7/20 per her 7/17 email — content unclear from snippet",
         "\"Page 17\" = RPA escrow acknowledgment (695 feather escrow acknowledgement.pdf) filed in EX — confirmed 7/23"
       ],
       "attributes": {
@@ -4022,8 +4281,25 @@
       "timeline": {
         "acceptance": "2026-07-15",
         "coe": "2026-08-21",
-        "note": "Timeline block added 2026-08-11 by the morning briefing (Step 1d Part A). acceptance 2026-07-15 = RPA/SCO1 fully executed via Authentisign (milestone 'Offer accepted - RPA executed'). coe 2026-08-14 = closingDate, confirmed 8/7. All-cash purchase, so no loan or appraisal contingency; inspection/title/insurance not separately dated in the file, so the 17-day default from acceptance applies. Previously null, which rendered the buyer page with no dates. ETA No. 1 extends COE 2026-08-14 → 2026-08-21 (Friday): buyer Ashley Robinson signed 2026-08-11; seller Dee Bradley's signature still outstanding as of 2026-08-14, ETA with Dee and James chasing. Date recorded 2026-08-14 on Sara's instruction ahead of full execution — if the ETA is not executed, the contract date reverts to 2026-08-14."
+        "note": "Timeline block added 2026-08-11 by the morning briefing (Step 1d Part A). acceptance 2026-07-15 = RPA/SCO1 fully executed via Authentisign (milestone 'Offer accepted - RPA executed'). coe 2026-08-14 = closingDate, confirmed 8/7. All-cash purchase, so no loan or appraisal contingency; inspection/title/insurance not separately dated in the file, so the 17-day default from acceptance applies. Previously null, which rendered the buyer page with no dates. ETA No. 1 extends COE 2026-08-14 → 2026-08-21 (Friday): buyer Ashley Robinson signed 2026-08-11. EXECUTION CONFIRMED BY SARA 2026-08-17 ('confirmed') — COE 2026-08-21 is firm and no longer provisional. The filed copy (EX\\eta addition to escrow for featherpdf.pdf) is password-protected and cannot be opened by the briefing run, so the confirmation rests on Sara's word, not on a document read; request an unlocked copy for the file at some point, but it is not blocking the close."
       }
+    },
+    {
+      "id": "buyer-sally-thompson",
+      "address": "Sally Thompson (buyer client)",
+      "city": "Calaveras County, CA",
+      "stage": "buyer-prospect",
+      "type": "residential",
+      "side": "buyer",
+      "agent": "sara",
+      "notes": "BRBC executed via Authentisign 2026-08-15 1:56 PM. Shown Castlewood. Connected to Kim Hesser (khesser@primeres.com, 209-768-8277, Prime Residential Mortgage) to secure a pre-qualification (per Sara 2026-08-17). Awaiting prequal before writing.",
+      "contacts": {
+        "lender": "Kim Hesser (Prime Residential Mortgage) — prequal in progress"
+      },
+      "alerts": [
+        "BRBC executed 2026-08-15 — active buyer client.",
+        "Waiting on Kim Hesser prequal before offers."
+      ]
     }
   ]
 }
