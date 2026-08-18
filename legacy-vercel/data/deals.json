@@ -1,5 +1,5 @@
 {
- "version": 8.5,
+ "version": 8.6,
  "lastUpdated": "2026-08-18",
  "updatedBy": "cowork 2026-08-10 — canonical commission/timeline schema migration per Sara",
  "tasks": [
@@ -1184,7 +1184,7 @@
    "key": "scot-greiner-nudge",
    "title": "Scot Greiner — collection pushed 8/1, 6 days with zero opens. Call or re-push with different properties",
    "due": "this week",
-   "done": false,
+   "done": true,
    "dateAdded": "2026-08-08"
   },
   {
