@@ -197,6 +197,16 @@ body.lp-restyle {
         <div class="ds-screen">
           <div class="ds-corners"><i></i><i></i><i></i><i></i></div>
 
+          <!-- Work the day — a ranked, actionable follow-up list (new leads +
+               reminders due + unanswered messages) with one-tap actions. -->
+          <div id="fu-widget" class="fu-card" style="display:none;">
+            <div class="fu-head">
+              <div><span class="fu-kick">Work the day</span><h3 class="fu-title" data-fu-title>Follow-ups</h3></div>
+              <button type="button" class="fu-refresh" data-fu-refresh title="Refresh">↻</button>
+            </div>
+            <div data-fu-list><div class="fu-loading">Loading your follow-ups…</div></div>
+          </div>
+
           <div class="ds-title">
             <div>
               <div class="ds-kicker" data-bind-dash-date>Today</div>
@@ -6281,6 +6291,106 @@ function selectLead(el) {
   send.addEventListener('click', post);
   // Cmd/Ctrl+Enter sends from the textarea.
   text.addEventListener('keydown', function (e) { if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') { e.preventDefault(); post(); } });
+})();
+</script>
+<style>
+/* Work-the-day follow-up card (top of Today) */
+.fu-card { background:#FAF6EC; border:1px solid #E1D6BC; border-left:3px solid #B08D57; border-radius:14px; padding:16px 18px; margin:0 0 20px; box-shadow:0 6px 22px rgba(26,23,20,.10); font-family:system-ui,sans-serif; }
+.fu-head { display:flex; align-items:flex-start; justify-content:space-between; margin-bottom:10px; }
+.fu-kick { font-family:'JetBrains Mono',monospace; font-size:10px; letter-spacing:.16em; text-transform:uppercase; color:#8A7B60; }
+.fu-title { font-family:'Cormorant Garamond',Georgia,serif; font-style:italic; font-size:24px; color:#1A1714; margin:2px 0 0; }
+.fu-refresh { background:none; border:1px solid #E1D6BC; border-radius:8px; width:30px; height:30px; cursor:pointer; color:#8A7B60; font-size:15px; }
+.fu-refresh:hover { background:#efe7d4; }
+.fu-loading, .fu-empty { color:#8A7B60; font-size:14px; padding:10px 0; }
+.fu-item { display:flex; gap:11px; align-items:flex-start; padding:12px 0; border-top:1px solid #EDE4CF; }
+.fu-item:first-child { border-top:0; padding-top:2px; }
+.fu-dot { width:8px; height:8px; border-radius:50%; margin-top:6px; flex:none; }
+.fu-main { min-width:0; flex:1; }
+.fu-line1 { display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+.fu-tag { font-size:9.5px; letter-spacing:.09em; text-transform:uppercase; font-weight:700; padding:2px 7px; border-radius:10px; }
+.fu-name { font-size:15px; font-weight:600; color:#1A1714; }
+.fu-sub { font-size:12.5px; color:#8A7B60; margin-top:2px; overflow:hidden; text-overflow:ellipsis; }
+.fu-reason { font-size:12.5px; color:#5B5347; margin-top:3px; }
+.fu-actions { display:flex; gap:6px; flex-wrap:wrap; align-items:flex-start; margin-left:auto; }
+.fu-btn { display:inline-flex; align-items:center; background:#fff; color:#1A1714; border:1px solid #D9CFB7; border-radius:8px; padding:6px 11px; font-size:12.5px; font-weight:600; cursor:pointer; text-decoration:none; line-height:1.2; }
+.fu-btn:hover { background:#efe7d4; }
+.fu-btn.fu-ink { background:#1A1714; color:#FAF6EC; border-color:#1A1714; }
+.fu-btn.fu-ink:hover { background:#2c2620; }
+.fu-btn.fu-ghost { color:#8A7B60; }
+@media (max-width:760px){ .fu-item{ flex-wrap:wrap; } .fu-actions{ margin-left:19px; width:100%; } }
+</style>
+<script>
+/* Work the day — daily follow-up action list. Sources: new inbound leads,
+   reminders due/overdue, and unanswered messages (GET /api/crm/follow-ups).
+   Each row acts in place: AI draft reply, call, open the contact, or resolve
+   (done / snooze / dismiss / reached-out). Never breaks Today on error. */
+(function () {
+  'use strict';
+  var widget = document.getElementById('fu-widget');
+  if (!widget) return;
+  var listEl  = widget.querySelector('[data-fu-list]');
+  var titleEl = widget.querySelector('[data-fu-title]');
+  var TAG = { new_lead: { t: 'New lead', c: '#2E5C3D' }, reminder: { t: 'Reminder', c: '#B08D57' }, unanswered: { t: 'Unanswered', c: '#8A3B2B' } };
+  function esc(s) { return (s == null ? '' : String(s)).replace(/[&<>"]/g, function (c) { return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]); }); }
+  function toast(m, g) { if (window.Legacy && window.Legacy.toast) window.Legacy.toast(m, !!g); }
+  function post(body) { return fetch('/api/crm/follow-ups', { method: 'POST', credentials: 'include', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) }); }
+
+  function actionsHtml(it) {
+    var b = [], lead = it.lead_id ? (' data-fu-lead="' + esc(it.lead_id) + '"') : '';
+    if (it.actions.indexOf('draft') >= 0 && it.lead_id) b.push('<button class="fu-btn fu-ink" data-fu-act="draft"' + lead + '>✦ Draft reply</button>');
+    if (it.actions.indexOf('call') >= 0 && it.phone)    b.push('<a class="fu-btn" href="tel:' + esc(it.phone) + '">Call</a>');
+    if (it.lead_id)                                       b.push('<button class="fu-btn" data-fu-act="open"' + lead + '>Open</button>');
+    if (it.kind === 'reminder') { b.push('<button class="fu-btn" data-fu-act="done" data-fu-appt="' + esc(it.appointment_id) + '">✓ Done</button>'); b.push('<button class="fu-btn fu-ghost" data-fu-act="snooze" data-fu-appt="' + esc(it.appointment_id) + '">Snooze</button>'); }
+    else if (it.kind === 'unanswered') b.push('<button class="fu-btn fu-ghost" data-fu-act="dismiss"' + lead + '>Dismiss</button>');
+    else if (it.kind === 'new_lead')   b.push('<button class="fu-btn" data-fu-act="contacted"' + lead + '>✓ Reached out</button>');
+    return b.join('');
+  }
+  function itemHtml(it) {
+    var tag = TAG[it.kind] || { t: '', c: '#8a7b60' };
+    return '<div class="fu-item" data-fu-key="' + esc(it.key) + '">'
+      + '<span class="fu-dot" style="background:' + tag.c + '"></span>'
+      + '<div class="fu-main"><div class="fu-line1"><span class="fu-tag" style="background:' + tag.c + '22;color:' + tag.c + '">' + tag.t + '</span><span class="fu-name">' + esc(it.name) + '</span></div>'
+      + '<div class="fu-sub">' + esc(it.subtitle) + '</div>'
+      + '<div class="fu-reason">' + esc(it.reason) + '</div></div>'
+      + '<div class="fu-actions">' + actionsHtml(it) + '</div></div>';
+  }
+  function paintCount() { var n = listEl.querySelectorAll('.fu-item').length; titleEl.textContent = n ? ('Follow-ups · ' + n) : 'Follow-ups'; if (!n) listEl.innerHTML = '<div class="fu-empty">You’re all caught up — no follow-ups waiting. ✓</div>'; }
+  function render(data) {
+    widget.style.display = 'block';
+    var items = (data && data.items) || [];
+    if (!items.length) { titleEl.textContent = 'Follow-ups'; listEl.innerHTML = '<div class="fu-empty">You’re all caught up — no follow-ups waiting. ✓</div>'; return; }
+    listEl.innerHTML = items.map(itemHtml).join('');
+    titleEl.textContent = 'Follow-ups · ' + items.length;
+  }
+  function load() {
+    fetch('/api/crm/follow-ups', { credentials: 'include' })
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (j) { if (j) render(j); })
+      .catch(function () { /* never break Today */ });
+  }
+  function removeRow(el) { var row = el.closest('.fu-item'); if (row) row.remove(); paintCount(); }
+
+  widget.addEventListener('click', function (e) {
+    if (e.target.closest('[data-fu-refresh]')) { listEl.innerHTML = '<div class="fu-loading">Refreshing…</div>'; load(); return; }
+    var t = e.target.closest('[data-fu-act]'); if (!t) return;
+    var act = t.getAttribute('data-fu-act'), lead = t.getAttribute('data-fu-lead'), appt = t.getAttribute('data-fu-appt');
+    if (act === 'open') { if (window.Legacy && window.Legacy.openLead && lead) window.Legacy.openLead(lead); return; }
+    if (act === 'draft') {
+      if (!lead) return; t.disabled = true; t.textContent = 'Drafting…';
+      fetch('/api/ai/draft-reply', { method: 'POST', credentials: 'include', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ lead_id: lead, channel: 'email' }) })
+        .then(function (r) { return r.ok ? r.json().catch(function () { return {}; }) : Promise.reject(); })
+        .then(function () { toast('Draft ready — review & send in their thread.', true); if (window.Legacy && window.Legacy.openLead) window.Legacy.openLead(lead); })
+        .catch(function () { t.disabled = false; t.textContent = '✦ Draft reply'; toast('Could not draft a reply — open the contact to write one.', false); });
+      return;
+    }
+    if (act === 'done')      { post({ op: 'reminder-done', appointment_id: appt }).then(function () { removeRow(t); toast('Marked done.', true); }); return; }
+    if (act === 'snooze')    { post({ op: 'reminder-snooze', appointment_id: appt, days: 1 }).then(function () { removeRow(t); toast('Snoozed to tomorrow.', true); }); return; }
+    if (act === 'dismiss')   { post({ op: 'dismiss-message', contact_id: lead }).then(function () { removeRow(t); toast('Dismissed.', true); }); return; }
+    if (act === 'contacted') { fetch('/api/crm/log-contact', { method: 'POST', credentials: 'include', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ lead_id: lead }) }).then(function () { removeRow(t); toast('Logged as reached out.', true); }); return; }
+  });
+
+  load();
+  document.addEventListener('crm:view', function (ev) { if (ev.detail && ev.detail.name === 'today') load(); });
 })();
 </script>
 </body>
