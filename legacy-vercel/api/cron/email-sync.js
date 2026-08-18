@@ -36,9 +36,96 @@
 
 import { adminClient } from '../_lib/supabase.js';
 import { handleOptions, ok, fail } from '../_lib/cors.js';
+import { detectLeadSource, parseLead } from '../_lib/lead-intake.js';
 
 const GMAIL_METADATA_HEADERS = ['From', 'Subject'];
 const MAX_MESSAGES_PER_MAILBOX = 50; // keep each 15-minute run bounded
+
+const agentForMailbox = (addr) => /james/i.test(String(addr || '')) ? 'james' : 'sara';
+
+// ── Lead intake helpers ────────────────────────────────────────────────────
+function decodeB64Url(data) {
+  try { return Buffer.from(String(data || '').replace(/-/g, '+').replace(/_/g, '/'), 'base64').toString('utf8'); }
+  catch { return ''; }
+}
+function stripHtml(html) {
+  return String(html || '')
+    .replace(/<style[\s\S]*?<\/style>/gi, ' ').replace(/<script[\s\S]*?<\/script>/gi, ' ')
+    .replace(/<[^>]+>/g, ' ').replace(/&nbsp;/g, ' ').replace(/&amp;/g, '&')
+    .replace(/&#39;|&rsquo;/g, "'").replace(/\s+/g, ' ').trim();
+}
+function bodyFromPayload(payload) {
+  const walk = (node, type) => {
+    if (!node) return '';
+    if (node.mimeType === type && node.body && node.body.data) return decodeB64Url(node.body.data);
+    for (const c of (node.parts || [])) { const r = walk(c, type); if (r) return r; }
+    return '';
+  };
+  return walk(payload, 'text/plain') || stripHtml(walk(payload, 'text/html'));
+}
+// Full plain-text body — fetched ONLY for a detected lead email (a handful a
+// day), so the metadata-only fast path for ordinary mail is untouched.
+async function getMessageBody(accessToken, id) {
+  const url = `https://gmail.googleapis.com/gmail/v1/users/me/messages/${id}?format=full`;
+  const r = await fetch(url, { headers: { Authorization: `Bearer ${accessToken}` } });
+  if (!r.ok) return '';
+  const json = await r.json().catch(() => ({}));
+  return bodyFromPayload(json.payload) || json.snippet || '';
+}
+
+// Create (or find) a hot lead from a parsed portal inquiry. Dedups on the unique
+// leads.email, falling back to phone when the portal gave no email — so the same
+// prospect arriving via several notifications collapses to one lead. Returns
+// true only when a NEW lead was created.
+async function upsertHotLead(supa, p, agent) {
+  const today = new Date().toISOString().slice(0, 10);
+  const noteBits = [
+    `Hot lead from ${p.portal_label} — auto-captured ${today} from ${agent === 'james' ? "James's" : "Sara's"} inbox.`,
+    p.property ? `Interested in: ${p.property}.` : '',
+    p.message ? `Message: “${p.message}”` : ''
+  ].filter(Boolean);
+  const row = {
+    first_name: p.first_name || null,
+    last_name:  p.last_name || null,
+    email:      p.email || null,
+    phone:      p.phone || null,
+    source:     'inbound_email',
+    lead_type:  'buyer',
+    temperature:'hot',
+    assigned_agent: agent,
+    status:     'active',
+    notes:      noteBits.join(' ')
+  };
+
+  let leadId = null, isNew = false;
+  if (p.email) {
+    const ex = await supa.from('leads').select('id').eq('email', p.email).maybeSingle();
+    if (ex.data) leadId = ex.data.id;
+    else {
+      const ins = await supa.from('leads').insert(row).select('id').single();
+      if (ins.error) throw new Error(ins.error.message);
+      leadId = ins.data.id; isNew = true;
+    }
+  } else if (p.phone) {
+    const ex = await supa.from('leads').select('id').eq('phone', p.phone).limit(1);
+    if (ex.data && ex.data[0]) leadId = ex.data[0].id;
+    else {
+      const ins = await supa.from('leads').insert(row).select('id').single();
+      if (ins.error) throw new Error(ins.error.message);
+      leadId = ins.data.id; isNew = true;
+    }
+  }
+
+  // Always log the inquiry as an event so a re-inquiry from an existing lead
+  // still shows fresh activity (and the property/message is preserved).
+  if (leadId) {
+    await supa.from('lead_events').insert({
+      lead_id: leadId, event_type: 'form_submitted', source: 'portal',
+      event_data: { portal: p.portal, property: p.property || null, message: p.message || null }
+    }).then(() => {}, () => {});
+  }
+  return isNew;
+}
 
 // Thrown only for a failed access-token refresh, so the caller can tell
 // "the refresh_token is dead, flag needs_reconnect" apart from any other
@@ -131,7 +218,7 @@ async function syncMailbox(supa, account, clientId, clientSecret) {
 
   const ids = await listMessageIds(accessToken, sinceUnix);
 
-  let inserted = 0, matched = 0, skipped = 0;
+  let inserted = 0, matched = 0, skipped = 0, leadsCreated = 0;
   const syncStartedAt = new Date().toISOString();
 
   if (ids.length) {
@@ -161,6 +248,25 @@ async function syncMailbox(supa, account, clientId, clientSecret) {
         // filed into inbox that this account itself sent) as an inbound lead
         // message from itself.
         if (senderEmail === String(account.email_address || '').toLowerCase()) { skipped += 1; continue; }
+
+        // Portal lead intake: a lead-notification email (Realtor.com / Homes.com
+        // / Zillow, either direct or forwarded through Follow Up Boss) becomes a
+        // HOT lead in the CRM rather than a pending_review inbox message. The full
+        // body is fetched only for these detected leads, so ordinary mail keeps
+        // the cheap metadata-only path.
+        const leadSource = detectLeadSource(senderEmail, subject);
+        if (leadSource) {
+          try {
+            const body = await getMessageBody(accessToken, id);
+            const parsed = parseLead(leadSource, { subject, body: body || snippet });
+            if (parsed && (parsed.email || parsed.phone)) {
+              if (await upsertHotLead(supa, parsed, agentForMailbox(account.email_address))) leadsCreated += 1;
+            }
+          } catch (_) {
+            // A parse/insert hiccup on one lead must never abort the mailbox sync.
+          }
+          continue; // handled as a lead — don't also file it as an inbox message
+        }
 
         const contactId = leadByEmail.get(senderEmail) || null;
         if (contactId) matched += 1;
@@ -194,7 +300,7 @@ async function syncMailbox(supa, account, clientId, clientSecret) {
     })
     .eq('id', account.id);
 
-  return { mailbox: account.email_address, checked: ids.length, inserted, matched, skipped };
+  return { mailbox: account.email_address, checked: ids.length, inserted, matched, skipped, leadsCreated };
 }
 
 export default async function handler(req, res) {
