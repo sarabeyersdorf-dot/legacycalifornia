@@ -207,9 +207,20 @@ function deriveFromEscrows(d) {
       timeline: a.timeline || d.timeline || null
     };
   }
-  // No active escrow → back on market (or closed, if the property was authored so).
-  const revert = (d.stage && d.stage !== 'pending' && d.stage !== 'offer') ? d.stage : 'listing';
-  return { stage: revert, sale_price: null, coe_date: null, escrow_open_date: null, timeline: null };
+  // No active escrow → the escrow closed or fell through.
+  // If the deal was explicitly authored to a post-escrow stage (closed / listing
+  // / preparing / dead), honour that — the human/Cowork has already re-staged it.
+  if (d.stage && !ESCROW_STAGES.has(d.stage)) {
+    return { stage: d.stage, sale_price: null, coe_date: null, escrow_open_date: null, timeline: null };
+  }
+  // A stale pending/offer stage with no live escrow: the deal LEFT escrow (a
+  // cancellation) and deals.json hasn't been re-staged yet. Make the escrow
+  // status authoritative so this doesn't wait on a manual stage edit — but
+  // preserve the LIST side when it's ours: a deal where we hold the listing goes
+  // back on market, while a buyer-only deal we represented has no listing to keep
+  // and retires as dead rather than resurrecting a listing we don't hold.
+  const ourListing = ['listing', 'seller', 'both', 'dual'].includes(String(d.side || '').toLowerCase());
+  return { stage: ourListing ? 'listing' : 'dead', sale_price: null, coe_date: null, escrow_open_date: null, timeline: null };
 }
 
 function mapDeal(d) {
