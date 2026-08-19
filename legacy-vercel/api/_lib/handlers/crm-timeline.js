@@ -26,6 +26,16 @@ const requireJson = createRequire(import.meta.url);
 
 const ITEM_FIELDS = ['title', 'plain', 'owner', 'due_date', 'status', 'done_at', 'detail', 'client_visible', 'sort_order', 'kind'];
 const pick = (obj, keys) => Object.fromEntries(Object.entries(obj || {}).filter(([k]) => keys.includes(k)));
+// Order-independent signature of a change payload, so a re-proposed change is
+// recognised as the same one an agent already rejected regardless of key order.
+const canonChange = (c) => {
+  try {
+    if (c && typeof c === 'object' && !Array.isArray(c)) {
+      return JSON.stringify(Object.keys(c).sort().reduce((a, k) => { a[k] = c[k]; return a; }, {}));
+    }
+    return JSON.stringify(c);
+  } catch (_) { return String(c); }
+};
 
 async function loadDeal(supa, { deal_id, source_key }) {
   let q = supa.from('deals').select('*');
@@ -116,13 +126,30 @@ export default async function handler(req, res) {
       if (b.item_id) ({ data: item } = await supaK.from('deal_timeline_items').select('*').eq('id', b.item_id).maybeSingle());
       else if (b.item_key) ({ data: item } = await supaK.from('deal_timeline_items').select('*').eq('deal_id', b.deal_id).eq('key', b.item_key).maybeSingle());
       if (!item) return fail(res, 404, 'timeline item not found');
-      const { count } = await supaK.from('deal_timeline_proposals').select('id', { count: 'exact', head: true }).eq('item_id', item.id).eq('status', 'pending');
-      if (count > 0) return ok(res, { deduped: true });
+      const proposedChange = pick(b.change, ITEM_FIELDS);
+      // Skip a proposal that wouldn't change anything — the item already holds
+      // these values (e.g. Cowork re-proposing a change an agent already approved
+      // and that's since been applied).
+      const isNoop = Object.keys(proposedChange).length > 0 &&
+        Object.entries(proposedChange).every(([k, v]) => canonChange(item[k] ?? null) === canonChange(v ?? null));
+      if (isNoop) return ok(res, { deduped: 'noop' });
+      // Dedup against PENDING and respect prior REJECTIONS. Cowork re-proposes the
+      // same changes on every briefing run; checking only pending (the old bug)
+      // let an item an agent already rejected repopulate every morning — James's
+      // 30+ that came back after the 10am run. Now an identical rejected change is
+      // suppressed, exactly like the timeline-scan cron already does.
+      const { data: prior } = await supaK.from('deal_timeline_proposals')
+        .select('status, change').eq('item_id', item.id).in('status', ['pending', 'rejected']);
+      if ((prior || []).some((p) => p.status === 'pending')) return ok(res, { deduped: true });
+      const wantKey = canonChange(proposedChange);
+      if ((prior || []).some((p) => p.status === 'rejected' && canonChange(p.change) === wantKey)) {
+        return ok(res, { suppressed_rejected: true });
+      }
       const { data: deal } = await supaK.from('deals').select('address, city').eq('id', b.deal_id).maybeSingle();
       const { data, error } = await supaK.from('deal_timeline_proposals').insert({
         deal_id: b.deal_id, item_id: item.id, item_key: item.key,
         address: deal ? [deal.address, deal.city].filter(Boolean).join(', ') : null,
-        change: pick(b.change, ITEM_FIELDS), reason: (b.reason || '').toString().slice(0, 500) || null,
+        change: proposedChange, reason: (b.reason || '').toString().slice(0, 500) || null,
         source: 'cowork'
       }).select('id').single();
       if (error) return fail(res, 500, error.message);
@@ -280,6 +307,20 @@ export default async function handler(req, res) {
       }
       if (upd.error) return fail(res, 500, upd.error.message);
       return ok(res, { [op === 'approve' ? 'approved' : 'rejected']: true });
+    }
+
+    // Clear the whole approval queue in one action instead of one-by-one. Scoped
+    // to a deal when deal_id is given, else every pending proposal. Rejecting
+    // (not deleting) is deliberate: it records the "no" so the fixed propose path
+    // won't re-file the same changes on the next briefing run.
+    if (op === 'reject-all') {
+      let q = supa.from('deal_timeline_proposals')
+        .update({ status: 'rejected', decided_by: who, decided_at: new Date().toISOString() })
+        .eq('status', 'pending');
+      if (b?.deal_id) q = q.eq('deal_id', b.deal_id);
+      const { data, error } = await q.select('id');
+      if (error) return fail(res, 500, error.message);
+      return ok(res, { rejected_all: (data || []).length });
     }
 
     return fail(res, 400, `unknown op: ${op}`);
