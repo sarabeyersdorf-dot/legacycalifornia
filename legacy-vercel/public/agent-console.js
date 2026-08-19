@@ -69,7 +69,7 @@
         chip('Open in CRM', 'background:#2E5C3D;border-color:#2E5C3D;', 'data-ac-desk') +
         '<button data-ac-collapse title="Collapse this bar" style="background:transparent;border:1px solid rgba(250,246,236,.3);color:' + PAPER + ';border-radius:5px;width:27px;height:27px;line-height:1;font-size:16px;cursor:pointer;">–</button>' +
       '</div>' +
-      approvalsPanel(proposals);
+      approvalsPanel(proposals, d.id);
 
     pill.innerHTML = '<span style="color:' + GOLD + ';">●</span> Agent preview' + (n ? ' <span style="background:#5A0E24;color:#F4E6C8;border-radius:9px;padding:1px 7px;">' + n + '</span>' : '');
 
@@ -90,6 +90,14 @@
       if (e.target.closest('[data-ac-toggle-approvals]')) {
         var p = bar.querySelector('[data-ac-panel="approvals"]');
         if (p) p.style.display = (p.style.display === 'none') ? 'flex' : 'none';
+        return;
+      }
+      var rall = e.target.closest('[data-ac-reject-all]');
+      if (rall) {
+        if (!window.confirm('Reject every pending proposal for this deal? The fix means Cowork won’t re-file the same ones tomorrow.')) return;
+        rall.disabled = true; rall.textContent = '…';
+        api('/api/crm/timeline', { method: 'POST', body: { op: 'reject-all', deal_id: rall.getAttribute('data-ac-reject-all') } })
+          .then(function (r) { if (r.ok) location.reload(); else { rall.disabled = false; rall.textContent = 'Failed'; } });
         return;
       }
       var ap = e.target.closest('[data-ac-approve]');
@@ -120,10 +128,13 @@
 
   // Cowork's proposed timeline updates, awaiting the agent's OK. Collapsed by
   // default; the "N to approve" button expands it.
-  function approvalsPanel(proposals) {
+  function approvalsPanel(proposals, dealId) {
     if (!proposals.length) return '';
     return '<div data-ac-panel="approvals" style="display:none;flex-direction:column;gap:8px;border-top:1px solid rgba(250,246,236,.15);padding:10px 16px;">' +
-      '<div style="font-size:10px;font-weight:700;letter-spacing:.14em;color:' + GOLD + ';">AWAITING YOUR OK — applies to the client’s page the moment you approve</div>' +
+      '<div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;">' +
+        '<span style="font-size:10px;font-weight:700;letter-spacing:.14em;color:' + GOLD + ';">AWAITING YOUR OK — applies to the client’s page the moment you approve</span>' +
+        (dealId ? '<button data-ac-reject-all="' + esc(dealId) + '" title="Reject every pending proposal for this deal" style="background:transparent;border:1px solid rgba(250,246,236,.3);color:' + PAPER + ';border-radius:13px;padding:4px 11px;font-size:10.5px;font-weight:600;cursor:pointer;">Clear all ' + proposals.length + '</button>' : '') +
+      '</div>' +
       proposals.map(function (p) {
         var key = esc((p.item_key || '').replace(/^custom:/, '').replace(/_/g, ' ').toUpperCase());
         return '<div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;font-size:13px;">' +
