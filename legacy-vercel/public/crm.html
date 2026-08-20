@@ -3285,6 +3285,9 @@ body.lp-restyle {
     .rost-links { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 8px; padding-top: 10px; border-top: 1px solid var(--rule-soft); }
     .rost-links a { font-family: var(--mono); font-size: 10px; letter-spacing: .08em; text-transform: uppercase; color: var(--brass); text-decoration: none; }
     .rost-links a:hover { color: var(--ink); }
+    .rost-invite { font-family: var(--mono); font-size: 10px; letter-spacing: .08em; text-transform: uppercase; color: var(--brass); background: none; border: 0; padding: 0; cursor: pointer; }
+    .rost-invite:hover { color: var(--ink); }
+    .rost-invite[disabled] { opacity: .55; cursor: default; }
     @media (max-width: 900px) { .rost { padding: 18px; } }
     </style>
     <section class="crm-view" data-view="roster">
@@ -5546,6 +5549,7 @@ function selectLead(el) {
       (window.LegacyDealParties ? window.LegacyDealParties.summaryHtml(d.party_summary, d.source_key) : '') +
       '<span class="lk">Deal page ↗ · client view + agent console</span>' +
       (d.source_key ? '<a class="lk" data-as-seller href="/seller.html?deal=' + encodeURIComponent(d.source_key) + '&as=seller" title="Open exactly what the client sees — no agent bar" style="display:block;">View as seller ↗</a>' : '') +
+      (d.source_key ? '<button type="button" class="lk rost-invite" data-invite-portal="' + esc(d.source_key) + '" data-invite-side="' + esc(d.side || '') + '" title="Copy this client’s private portal link to share (no email sent)" style="display:block;margin-top:4px;">Invite to portal</button>' : '') +
       accept +
       '</div></div>';
   }
@@ -5757,6 +5761,8 @@ function selectLead(el) {
       if (ph) ph.style.display = state.portalMode ? '' : 'none';
       return;
     }
+    var invb2 = e.target.closest('[data-invite-portal]');
+    if (invb2) { e.preventDefault(); e.stopPropagation(); window.LegacyPortalInvite(invb2, invb2.getAttribute('data-invite-portal'), invb2.getAttribute('data-invite-side')); return; }
     var asLink = e.target.closest('.lst-card a[data-as-seller]');
     if (asLink) { e.preventDefault(); e.stopPropagation(); var au = asLink.getAttribute('href'); var aw = window.open(au, '_blank', 'noopener'); if (!aw) location.href = au; return; }
     var cardEl = e.target.closest('.lst-card[data-source-key]');
@@ -5811,6 +5817,31 @@ function selectLead(el) {
   var state = { data: null, tab: 'active', agent: 'all', loading: false };
   var BUCKET = { active: 'active', preparing: 'preparing', pending: 'pending', closed: 'closed' };
 
+  // "Invite to portal" — copy the client's OWN branded portal link so the agent
+  // can paste it to them (no email is ever sent — respects the send freeze).
+  // Shared with the Listings grid via window. Falls back to a prompt() if the
+  // clipboard API is unavailable, and tells the agent to link a client first if
+  // the deal has no portal party yet.
+  window.LegacyPortalInvite = function (btn, sourceKey, side) {
+    if (!btn || !sourceKey || btn.disabled) return;
+    var orig = btn.getAttribute('data-label') || btn.textContent;
+    btn.setAttribute('data-label', orig);
+    btn.disabled = true; btn.textContent = 'Getting link…';
+    var flash = function (msg, ms) { btn.textContent = msg; setTimeout(function () { btn.textContent = orig; btn.disabled = false; }, ms || 1800); };
+    fetch('/api/crm/deal-client?deal=' + encodeURIComponent(sourceKey), { credentials: 'include' })
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (j) {
+        var client = j && j.client;
+        if (!client || !client.portal_token) { flash('Link a client first', 2600); return; }
+        var seg = (side === 'buyer') ? 'buyer' : 'seller';
+        var linkUrl = location.origin + '/' + seg + '/' + client.portal_token;
+        var manual = function () { window.prompt('Copy this portal link for ' + (client.name || 'your client') + ' — paste it to them (no email is sent):', linkUrl); btn.textContent = orig; btn.disabled = false; };
+        if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(linkUrl).then(function () { flash('Link copied ✓'); }).catch(manual);
+        else manual();
+      })
+      .catch(function () { flash('Try again', 2000); });
+  };
+
   function sellSide(rows) { return (rows || []).filter(function (r) { return r.side !== 'buyer'; }); }
   function forAgent(rows) { return state.agent === 'all' ? rows : rows.filter(function (r) { return r.agent === state.agent; }); }
   function rowsFor(tab) { return forAgent(sellSide(state.data && state.data[BUCKET[tab]])); }
@@ -5859,6 +5890,7 @@ function selectLead(el) {
     var links = [];
     if (d.source_key) links.push('<a href="/seller.html?deal=' + encodeURIComponent(d.source_key) + '" target="_blank" rel="noopener">Portal ↗</a>');
     if (d.source_key) links.push('<a href="/seller.html?deal=' + encodeURIComponent(d.source_key) + '&as=seller" target="_blank" rel="noopener" title="Open exactly what the client sees — no agent bar">As seller ↗</a>');
+    if (d.source_key) links.push('<button type="button" class="rost-invite" data-invite-portal="' + esc(d.source_key) + '" data-invite-side="' + esc(d.side || '') + '" title="Copy this client’s private portal link to share (no email sent)">Invite to portal</button>');
     if (m.disclosurePackage) links.push('<a href="' + esc(m.disclosurePackage) + '" target="_blank" rel="noopener">Disclosures ↗</a>');
     return '<div class="ds-lcard rost-card" data-stg="' + sm.stg + '" data-source-key="' + esc(d.source_key || '') + '" role="link" tabindex="0">' + ph +
       '<div class="ds-lbody">' +
@@ -5952,6 +5984,8 @@ function selectLead(el) {
     }
     // Open Portal / Disclosures / Video reliably (window.open with a same-tab
     // fallback) rather than relying on target=_blank, which webviews can drop.
+    var invb = e.target.closest('[data-invite-portal]');
+    if (invb) { e.preventDefault(); e.stopPropagation(); window.LegacyPortalInvite(invb, invb.getAttribute('data-invite-portal'), invb.getAttribute('data-invite-side')); return; }
     var link = e.target.closest('.rost-links a[href]');
     if (link) { e.preventDefault(); var u = link.getAttribute('href'); var w = window.open(u, '_blank', 'noopener'); if (!w) location.href = u; return; }
     var openEl = e.target.closest('.rost-card[data-source-key]');
