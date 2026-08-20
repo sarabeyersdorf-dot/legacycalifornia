@@ -411,7 +411,20 @@ window.LGPortal = window.LGPortal || {
   // Auth gating for /crm.html, /dashboard.html, /seller.html
   // ---------------------------------------------------------------------------
   async function ensureSession(requiredRoles) {
-    const { ok, json } = await api('/api/auth/session', { method: 'GET' });
+    // Never let the "Checking session…" overlay trap the user: if the session
+    // check rejects (network) or hangs (backend not responding), fall through to
+    // the sign-in card rather than spinning forever. An 8s cap covers a slow or
+    // stuck /api/auth/session so the page always resolves to something usable.
+    let res;
+    try {
+      res = await Promise.race([
+        api('/api/auth/session', { method: 'GET' }),
+        new Promise(function (_, rej) { setTimeout(function () { rej(new Error('session-timeout')); }, 8000); })
+      ]);
+    } catch (_) {
+      return null;
+    }
+    const { ok, json } = res || {};
     if (!ok) return null;
     const role = json?.profile?.role;
     if (requiredRoles && !requiredRoles.includes(role)) return null;
