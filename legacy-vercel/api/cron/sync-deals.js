@@ -565,7 +565,11 @@ function mapDocs(dealId, d, escrowIdByKey, manifest) {
         client_safe: clientSafeFor(doc.visibility, true), // agent_only folder ⇒ hidden from client
         updated_at: new Date().toISOString()
       });
-      pushSeed(doc_key, String(doc.name), doc.visibility);
+      // A folder-published doc with NO recognised audience defaults to agent_only
+      // (db/053's intent: "default to agent_only on any miss"), so a prior sale's
+      // paperwork dropped into an unlabelled folder never fails open to the
+      // client. An explicit seller/buyer/both grant still shows it.
+      pushSeed(doc_key, String(doc.name), doc.visibility || 'agent_only');
     }
   }
   return { rows: out, seeds };
