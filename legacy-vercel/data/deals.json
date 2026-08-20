@@ -1,7 +1,7 @@
 {
-  "version": 8.9,
+  "version": 9.0,
   "lastUpdated": "2026-08-20",
-  "updatedBy": "cowork 2026-08-10 — canonical commission/timeline schema migration per Sara",
+  "updatedBy": "cowork 2026-08-20 10:10 — scheduled 10am run: 3 new tasks (Baldwin lender docs, Baldwin appraisal, Sheep Ranch net sheet)",
   "tasks": [
     {
       "agent": "sara",
@@ -1948,6 +1948,24 @@
       "key": "forestmeadows-prior-file",
       "title": "517 Forest Meadows: pull the prior NHD, HOA bylaws and disclosures from _Sold\\517 Forest Meadows — Legacy sold her this home, the file is reusable",
       "due": "This week",
+      "done": false
+    },
+    {
+      "agent": "james",
+      "client": "8235 Baldwin",
+      "title": "🔴 Baldwin: Chicago Title has received NO lender requests — Veronica Barragan asked Kim Hesser for loan doc status 8/19. Loan contingency is 8/21, COE 8/31",
+      "done": false
+    },
+    {
+      "agent": "james",
+      "client": "8235 Baldwin",
+      "title": "Baldwin: confirm the appraisal actually landed — Kim Hesser said the appraiser would deliver end of business 8/19; Allyson Overturf still waiting on it",
+      "done": false
+    },
+    {
+      "agent": "sara",
+      "client": "9568 Sheep Ranch",
+      "title": "9568 Sheep Ranch: seller net sheet received from Placer 8/20 at $369,000 (3% sell / 2.5% buy, split escrow+NHD, seller pays transfer tax) — confirm the offer terms and record it",
       "done": false
     }
   ],
