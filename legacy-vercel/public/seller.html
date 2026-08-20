@@ -485,7 +485,11 @@ setTimeout(function(){var p=document.getElementById('portal-loading');if(p&&p.pa
   // agent deal preview (?deal=). Without ?deal this fetch fell back to the
   // newest pending deal, so every agent preview showed that deal's hero photo
   // and video tour (e.g. 433's) instead of the listing's own.
-  var _q = _t ? ('?t=' + encodeURIComponent(_t)) : (_deal ? ('?deal=' + encodeURIComponent(_deal)) : '');
+  // "View as seller" (?as=seller) must reach the API too, or the client view
+  // renders identically to the agent preview. Only meaningful on the ?deal=
+  // preview path; a real client token (?t=) is already the client.
+  var _as = /^(seller|client)$/i.test(_p.get('as') || '') ? '&as=seller' : '';
+  var _q = _t ? ('?t=' + encodeURIComponent(_t)) : (_deal ? ('?deal=' + encodeURIComponent(_deal) + _as) : '');
   fetch('/api/seller/portal' + _q, { credentials: 'include' })
     .then(function (r) { return r.ok ? r.json() : null; })
     .then(function (d) {
