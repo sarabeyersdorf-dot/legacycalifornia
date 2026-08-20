@@ -122,13 +122,27 @@ export default async function handler(req, res) {
     }
 
     // 2. Appointments → listing appointments / inspections / manual entries ---
-    const apptRes = await supa.from('appointments')
-      .select('id, title, kind, starts_at, duration_minutes, notes, agent, leads(first_name,last_name,email)')
+    // completed_at lets us drop a "Set a reminder" follow-up/call the agent has
+    // already marked ✓ Done in the Work-the-day widget — otherwise Cowork keeps
+    // briefing a reminder that's already handled. Degrade if db/075 hasn't run.
+    const APPT_SEL = 'id, title, kind, starts_at, duration_minutes, notes, agent, completed_at, leads(first_name,last_name,email)';
+    let apptRes = await supa.from('appointments').select(APPT_SEL)
       .gte('starts_at', startISO).lt('starts_at', endISO)
       .order('starts_at', { ascending: true });
+    if (apptRes.error && /completed_at/i.test(apptRes.error.message || '')) {
+      apptRes = await supa.from('appointments')
+        .select('id, title, kind, starts_at, duration_minutes, notes, agent, leads(first_name,last_name,email)')
+        .gte('starts_at', startISO).lt('starts_at', endISO)
+        .order('starts_at', { ascending: true });
+    }
     const apptMissing = apptRes.error && /relation .*appointments.* does not exist/i.test(apptRes.error.message || '');
     if (apptRes.error && !apptMissing) return fail(res, 500, `appointments: ${apptRes.error.message}`);
     for (const row of (apptRes.data || [])) {
+      // A finished follow-up/call reminder is a done to-do, not a calendar item.
+      if (row.completed_at) {
+        const k = String(row.kind || '').toLowerCase();
+        if (k === 'follow_up' || k === 'call') continue;
+      }
       const start = new Date(row.starts_at);
       if (isNaN(start)) continue;
       const dur = Number(row.duration_minutes) || 30;

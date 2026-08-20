@@ -180,7 +180,7 @@ async function listWeek(req, res, supa) {
   const apptQuery = (cols) => supa.from('appointments').select(cols)
     .gte('starts_at', startISO).lt('starts_at', endISO)
     .order('starts_at', { ascending: true });
-  const APPT_COLS_MD = 'id, lead_id, deal_id, title, kind, sub_kind, all_day, ends_at, starts_at, duration_minutes, notes, visibility, client_label, leads(first_name,last_name,email)';
+  const APPT_COLS_MD = 'id, lead_id, deal_id, title, kind, sub_kind, all_day, ends_at, starts_at, duration_minutes, notes, visibility, client_label, completed_at, leads(first_name,last_name,email)';
   const APPT_COLS    = 'id, lead_id, deal_id, title, kind, sub_kind, starts_at, duration_minutes, notes, visibility, client_label, leads(first_name,last_name,email)';
   const APPT_COLS_FB = 'id, lead_id, deal_id, title, kind, starts_at, duration_minutes, notes, visibility, client_label, leads(first_name,last_name,email)';
 
@@ -193,7 +193,7 @@ async function listWeek(req, res, supa) {
   ]);
   if (toursRes.error) return fail(res, 500, `tours: ${toursRes.error.message}`);
   // Degrade gracefully if db/045 (all_day/ends_at) or 027 (sub_kind) haven't run.
-  if (apptRes.error && /all_day|ends_at/i.test(apptRes.error.message || '')) apptRes = await apptQuery(APPT_COLS);
+  if (apptRes.error && /all_day|ends_at|completed_at/i.test(apptRes.error.message || '')) apptRes = await apptQuery(APPT_COLS);
   if (apptRes.error && /sub_kind/i.test(apptRes.error.message || '')) apptRes = await apptQuery(APPT_COLS_FB);
   const apptMissing = apptRes.error && /relation .*appointments.* does not exist/i.test(apptRes.error.message || '');
   if (apptRes.error && !apptMissing) return fail(res, 500, `appointments: ${apptRes.error.message}`);
@@ -230,6 +230,10 @@ async function listWeek(req, res, supa) {
   }
 
   for (const a of apptRes.data || []) {
+    // A completed follow-up/call reminder (✓ Done in Work-the-day) drops off the
+    // calendar — it's a finished to-do, not a standing event. Mirrors the
+    // Work-the-day widget, which already hides it.
+    if (a.completed_at && (a.kind === 'follow_up' || a.kind === 'call')) continue;
     // Multi-day / all-day event (e.g. a holiday) → emit one all-day marker per
     // day it covers within this range, so it shows across the month/agenda.
     if (a.all_day && a.ends_at) {
@@ -644,7 +648,9 @@ async function sendRemind(req, res, supa, body) {
   if (!recipients.length) return fail(res, 422, 'no client with an email or phone to remind — link a lead (or the deal parties) with contact info');
 
   const p = laParts(start);
-  const whenText = `${DOW[(new Date(start).getUTCDay() + 6) % 7]}, ${MONTHS[p.m - 1]} ${p.d} at ${timeLabel(p.hour, p.minute)}`;
+  // Weekday must come from the Pacific parts (p.dow), NOT getUTCDay() — an evening
+  // Pacific event is already the next day in UTC, which mislabels the day.
+  const whenText = `${p.dow}, ${MONTHS[p.m - 1]} ${p.d} at ${timeLabel(p.hour, p.minute)}`;
   let emailed = 0, texted = 0; const errors = [];
   for (const r of recipients) {
     if (wantEmail && r.email) {
@@ -703,7 +709,8 @@ async function inviteForEvent(supa, source, id, extraInvitees = []) {
 
   const end = new Date(start.getTime() + dur * 60000);
   const p = laParts(start);
-  const whenText = `${DOW[(new Date(start).getUTCDay() + 6) % 7]}, ${MONTHS[p.m - 1]} ${p.d} at ${timeLabel(p.hour, p.minute)} (Pacific)`;
+  // Pacific weekday (p.dow) — getUTCDay() rolls to the next day for evening events.
+  const whenText = `${p.dow}, ${MONTHS[p.m - 1]} ${p.d} at ${timeLabel(p.hour, p.minute)} (Pacific)`;
   // Both agents ride along as attendees so the .ics lands on their external
   // calendars too; extra invitees (TCs, lenders, co-op agents) are attendees
   // AND receive the invite email.
