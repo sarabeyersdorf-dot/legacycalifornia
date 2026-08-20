@@ -1,6 +1,6 @@
 {
-  "version": 8.8,
-  "lastUpdated": "2026-08-19",
+  "version": 8.9,
+  "lastUpdated": "2026-08-20",
   "updatedBy": "cowork 2026-08-10 — canonical commission/timeline schema migration per Sara",
   "tasks": [
     {
@@ -1916,6 +1916,38 @@
       "key": "fub-eva-mifsud",
       "title": "New FUB lead Eva Mifsud (925) 303-6013 eva.mifsud@graybar.com via Realtor.com — unworked",
       "due": "Today",
+      "done": false
+    },
+    {
+      "agent": "james",
+      "client": "695 Feather",
+      "key": "feather-heloc-funds-friday",
+      "title": "🔴 695 Feather: HELOC funds due at escrow Friday 8/21 — confirm with the bank and Tanya Salgado (OC Title #2473532-TS). Loan contingency 8/25, COE 8/28",
+      "due": "2026-08-21",
+      "done": false
+    },
+    {
+      "agent": "james",
+      "client": "695 Feather",
+      "key": "feather-lender-contact",
+      "title": "695 Feather: contacts.lender is still null — add the home equity line lender now that the deal is financed, not all-cash",
+      "due": "This week",
+      "done": false
+    },
+    {
+      "agent": "sara",
+      "client": "517 Forest Meadows",
+      "key": "forestmeadows-rla",
+      "title": "517 Forest Meadows: get the RLA signed with Chitra Brahme — list price, commission, expiration and agreement form are all unset",
+      "due": "This week",
+      "done": false
+    },
+    {
+      "agent": "sara",
+      "client": "517 Forest Meadows",
+      "key": "forestmeadows-prior-file",
+      "title": "517 Forest Meadows: pull the prior NHD, HOA bylaws and disclosures from _Sold\\517 Forest Meadows — Legacy sold her this home, the file is reusable",
+      "due": "This week",
       "done": false
     }
   ],
@@ -4255,9 +4287,25 @@
           "desc": "Purchase price confirmed at $170,000, all-cash purchase."
         },
         {
+          "date": "2026-08-21",
+          "label": "Loan funds expected",
+          "status": "next",
+          "col": "contingencies",
+          "badge": "Key date",
+          "desc": "The home equity line of credit funding your purchase was signed Monday, August 17. The funds are expected to reach escrow Friday, August 21."
+        },
+        {
+          "date": "2026-08-25",
+          "label": "Loan contingency deadline",
+          "status": "upcoming",
+          "col": "contingencies",
+          "badge": "Watch",
+          "desc": "Your loan contingency runs to August 25 under Extension of Time Amendment No. 1, accepted by the seller August 14."
+        },
+        {
           "date": "2026-08-28",
           "label": "Close of Escrow — 8/28",
-          "status": "next",
+          "status": "upcoming",
           "col": "closing",
           "badge": "Closing 8/28",
           "desc": "Close of escrow moves to Friday, August 28 under Extension of Time Amendment No. 1, signed by you August 12 and accepted by the seller August 14. The deed records and funds release that day."
@@ -4266,8 +4314,8 @@
       "agentNote": {
         "author": "james",
         "status": "draft",
-        "updated": "2026-08-19",
-        "body": "Ashley — an update on 695 Feather. Your close of escrow is now Friday, August 28. The extension is fully signed: you signed it August 12 and the seller signed it back on August 14, so this is final, not pending. Nothing about your price or terms changes — you're still at $170,000, all cash.\n\nThe HOA documents were what held things up, and that part is resolved. Orange Coast sent the full Copper Cove package through on August 13 — CC&Rs, bylaws, the budget and reserve study, and the current board minutes. They're in your file to read through.\n\nOne thing to take care of now: complete your ClosingLock wire instructions, and call to verify them by phone before you send any funds. Never wire from instructions you received only by email.\n\n— James Beyersdorf, (209) 770-7523"
+        "updated": "2026-08-20",
+        "body": "Ashley — an update on 695 Feather. Your close of escrow is now Friday, August 28. The extension is fully signed: you signed it August 12 and the seller signed it back on August 14, so this is final, not pending. Your price is unchanged at $170,000.\n\nOn funding: the home equity line your father signed on Monday is what we're now waiting on, and those funds are expected at escrow this Friday, August 21. Your loan contingency runs to August 25, which gives us a few days' cushion if the bank is slow. If you hear anything from them about timing, tell me the same day — that date is the one thing standing between here and closing.\n\nThe HOA documents that held things up earlier are resolved. Orange Coast sent the full Copper Cove package through on August 13 — CC&Rs, bylaws, the budget and reserve study, and the current board minutes. They're in your file to read through.\n\nOne thing to take care of now: complete your ClosingLock wire instructions, and call to verify them by phone before you send any funds. Never wire from instructions you received only by email.\n\n— James Beyersdorf, (209) 770-7523"
       },
       "clientTasks": [
         {
@@ -4372,6 +4420,7 @@
       "notes": "Pivot for Ashley Robinson (James's buyer) after the 992 Iroquois offer went dead 7/12. Offer sent to listing agent Dee 7/12 for 695 Feather Dr, Copperopolis. Docs in _Offers/Buy Side/Robinson 695 Feather Dr/. UPDATE 7/18 (from James's 7/18 Gmail review, cross-checked against Sara's Gmail): Offer accepted 7/15; escrow opened at Orange Coast Title Company of Southern California (Santa Ana), Escrow #2473532-TS, escrow officer Tanya Salgado (tanyas@octitle.com) — switched from Placer Title because the property was acquired via tax sale last year and Placer is restricted from insuring/escrowing such properties for 3-5 years. EMD confirmed received by escrow 7/16. ClosingLock wire instructions sent to both buyers 7/15-7/16; Ashley Robinson submitted proof of funds 7/16. NOT yet confirmed: final accepted purchase price/terms (a preliminary net sheet referenced a $170,000 cash-purchase figure sent 7/15 before escrow opened — not verified as final); what listing agent Dee Bradley committed to doing \"Monday\" (7/20) per her 7/17 email; and what the \"Page 17\" document escrow sent 7/17 actually is (likely the RPA escrow acknowledgment James requested, not confirmed). | 8/7: COE confirmed 8/14.",
       "alerts": [
         "COE 2026-08-28 — executed ETA No. 1 (buyer signed 8/12, seller Christopher Jewett accepted 8/14) filed to EX\\eta_1.pdf on 8/18 and read this morning. This CORRECTS the 8/21 date the file, the client page and the CRM were all carrying. Closes Friday 8/28.",
+        "FUNDING: home equity line of credit — Ashley Robinson's father signed 2026-08-17, funds expected at escrow Friday 2026-08-21. Loan contingency 2026-08-25 per ETA No. 1. The earlier 'all cash' description reflects the original funding source (Bert Andrews, removed by addendum 2026-08-14); price is unchanged at $170,000. Per Sara 2026-08-20.",
         "Offer ACCEPTED 7/15 — moved off \"offer\" stage 7/18; RPA/SCO1 fully executed via Authentisign, both buyers signed",
         "Escrow OPEN at Orange Coast Title (Santa Ana), Escrow #2473532-TS, Tanya Salgado — switched from Placer (tax-sale restriction, 3-5yr)",
         "EMD confirmed received by escrow 7/16",
@@ -4393,7 +4442,10 @@
       "timeline": {
         "acceptance": "2026-07-15",
         "coe": "2026-08-28",
-        "note": "Timeline block added 2026-08-11 by the morning briefing (Step 1d Part A). acceptance 2026-07-15 = RPA/SCO1 fully executed via Authentisign (milestone 'Offer accepted - RPA executed'). coe 2026-08-14 = closingDate, confirmed 8/7. All-cash purchase, so no loan or appraisal contingency; inspection/title/insurance not separately dated in the file, so the 17-day default from acceptance applies. Previously null, which rendered the buyer page with no dates. ETA No. 1 extends COE 2026-08-14 → 2026-08-21 (Friday): buyer Ashley Robinson signed 2026-08-11. EXECUTION CONFIRMED BY SARA 2026-08-17 ('confirmed') — COE 2026-08-21 is firm and no longer provisional. The filed copy (EX\\eta addition to escrow for featherpdf.pdf) is password-protected and cannot be opened by the briefing run, so the confirmation rests on Sara's word, not on a document read; request an unlocked copy for the file at some point, but it is not blocking the close. || SUPERSEDED 2026-08-19: the ACTUAL executed ETA No. 1 (C.A.R. Form ETA rev 12/25, Authentisign 9B754FE7-1198-F111-9B33-000D3A4FF82A) was filed to __Pending\\695 Feather\\EX\\eta_1.pdf on 2026-08-18 and IS readable (scanned; OCR). It reads: para 1 Close Of Escrow extended to 08/28/2026; para 2 contingency extended to 08/25/2026 with the 'Loan' box checked. Proposed and signed by buyer Ashley Robinson 08/12/26; ACCEPTED at para 6 by seller Christopher Jewett 08/14/26 — both blocks filled, within the 3-day acceptance window, so the document is FULLY EXECUTED. coe and closingDate therefore moved 2026-08-21 -> 2026-08-28 (Friday, a business day) by the 2026-08-19 run under Sara's 2026-08-16 auto-apply standing instruction (Step 1d Part D). The prior note recorded COE 8/21 from a password-protected copy that could not be read plus Sara's verbal confirmation on 8/17 — the readable executed document supersedes both. James confirmed in the CRM 8/18: 'the documents have all been filed with the appropriate people. the ETA is in effect.' NOT WRITTEN, DELIBERATELY: the 08/25/2026 'Loan' contingency from para 2 is NOT recorded in contingencies — this is an ALL-CASH purchase with no loan, so the checkbox contradicts the deal terms and fails part 5 of the fully-executed test. Flagged for James to confirm what that checkbox was meant to extend."
+        "note": "Timeline block added 2026-08-11 by the morning briefing (Step 1d Part A). acceptance 2026-07-15 = RPA/SCO1 fully executed via Authentisign (milestone 'Offer accepted - RPA executed'). coe 2026-08-14 = closingDate, confirmed 8/7. All-cash purchase, so no loan or appraisal contingency; inspection/title/insurance not separately dated in the file, so the 17-day default from acceptance applies. Previously null, which rendered the buyer page with no dates. ETA No. 1 extends COE 2026-08-14 → 2026-08-21 (Friday): buyer Ashley Robinson signed 2026-08-11. EXECUTION CONFIRMED BY SARA 2026-08-17 ('confirmed') — COE 2026-08-21 is firm and no longer provisional. The filed copy (EX\\eta addition to escrow for featherpdf.pdf) is password-protected and cannot be opened by the briefing run, so the confirmation rests on Sara's word, not on a document read; request an unlocked copy for the file at some point, but it is not blocking the close. || SUPERSEDED 2026-08-19: the ACTUAL executed ETA No. 1 (C.A.R. Form ETA rev 12/25, Authentisign 9B754FE7-1198-F111-9B33-000D3A4FF82A) was filed to __Pending\\695 Feather\\EX\\eta_1.pdf on 2026-08-18 and IS readable (scanned; OCR). It reads: para 1 Close Of Escrow extended to 08/28/2026; para 2 contingency extended to 08/25/2026 with the 'Loan' box checked. Proposed and signed by buyer Ashley Robinson 08/12/26; ACCEPTED at para 6 by seller Christopher Jewett 08/14/26 — both blocks filled, within the 3-day acceptance window, so the document is FULLY EXECUTED. coe and closingDate therefore moved 2026-08-21 -> 2026-08-28 (Friday, a business day) by the 2026-08-19 run under Sara's 2026-08-16 auto-apply standing instruction (Step 1d Part D). The prior note recorded COE 8/21 from a password-protected copy that could not be read plus Sara's verbal confirmation on 8/17 — the readable executed document supersedes both. James confirmed in the CRM 8/18: 'the documents have all been filed with the appropriate people. the ETA is in effect.' LOAN CONTINGENCY RESOLVED 2026-08-20 BY SARA: the 'Loan' checkbox is CORRECT and is now recorded as contingencies.loan = 2026-08-25. Her correction, in substance: the buyer DID have a loan — a HOME EQUITY LINE OF CREDIT; Ashley Robinson's father signed for it Monday 2026-08-17 and the funds are due to arrive Friday 2026-08-21. The 2026-08-19 run withheld this value because the file described the purchase as all-cash (RPA written cash, 'Proof of funds Bert Andrews.pdf' in EX, milestone 'Price confirmed — $170,000 cash'); that description reflected the ORIGINAL funding source. Bert Andrews was removed by the addendum filed 2026-08-14 ('addendum removing Bert.pdf') and the HELOC replaced him, which is what para 2 of ETA No. 1 was extending. Consideration is still $170,000 and the price is unchanged — only the source of the buyer's funds changed.",
+        "contingencies": {
+          "loan": "2026-08-25"
+        }
       }
     },
     {
@@ -4412,6 +4464,38 @@
         "BRBC executed 2026-08-15 — active buyer client.",
         "Waiting on Kim Hesser prequal before offers."
       ]
+    },
+    {
+      "id": "preparing-517-forest-meadows",
+      "stage": "preparing",
+      "side": "seller",
+      "agent": "sara",
+      "address": "517 Forest Meadows Dr",
+      "city": "Murphys, CA 95247",
+      "type": "residential",
+      "client": "Chitra Brahme",
+      "color": {
+        "name": "indigo",
+        "border": "#4A3B7C",
+        "bg": "#E8E4F2"
+      },
+      "listing": {
+        "client": "Chitra Brahme"
+      },
+      "contacts": {
+        "seller": "Chitra Brahme (chitracottage@gmail.com)"
+      },
+      "timeline": {
+        "note": "Added 2026-08-20 at Sara's instruction. Preparing to list. Chitra Brahme is a PAST CLIENT — Legacy sold her 517 Forest Meadows Dr previously and the closed file is in _Sold\\517 Forest Meadows (commission demand, NHD, HOA bylaws, disclosures). She has since renovated and is preparing to sell. History: James emailed her 2026-08-08 ('sounds like you have accomplished all you wanted with that home'); she replied 2026-08-10 asking for the pest control and roof reports the previous owner provided, and postponed that week's meeting; Sara confirmed she would bring them. Listing appointment held 2026-08-20 11:00 AM (Sara + James). No RLA yet — listPrice, commission, dateListed, expiration and agreementForm are all UNKNOWN and deliberately omitted rather than guessed."
+      },
+      "alerts": [
+        "Preparing to list — no RLA executed yet. listPrice and commission not yet set.",
+        "Past client: Legacy sold her this same home; the closed file is in _Sold\\517 Forest Meadows and the prior NHD, HOA bylaws and disclosures can be reused as a starting point."
+      ],
+      "milestones": [],
+      "clientTasks": [],
+      "goodToKnow": [],
+      "docs": {}
     }
   ]
 }
