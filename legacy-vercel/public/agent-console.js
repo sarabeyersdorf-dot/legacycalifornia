@@ -14,6 +14,9 @@
   var params = new URLSearchParams(location.search);
   var dealKey = params.get('deal');
   if (!dealKey) return;
+  // "View as seller" mode (?as=seller) renders the pure client view — the agent
+  // bar must never appear there, or it wouldn't be what the client sees.
+  if (/^(seller|client)$/i.test(params.get('as') || '')) return;
 
   var INK = '#141210', PAPER = '#FAF6EC', GOLD = '#C9A75B', GREEN = '#7FBF9A';
   var COLLAPSE_KEY = 'lgc-ac-collapsed';
@@ -66,6 +69,7 @@
         '<span style="font-size:11px;color:rgba(250,246,236,.5);">· clients don’t see this bar</span>' +
         '<span style="flex:1;"></span>' +
         (n ? '<button data-ac-toggle-approvals style="background:#5A0E24;color:#F4E6C8;border:none;border-radius:13px;padding:5px 12px;font-size:11px;font-weight:600;cursor:pointer;">' + n + ' to approve ▾</button>' : '') +
+        chip('View as seller ↗', 'background:' + GOLD + ';border-color:' + GOLD + ';color:#1A1714;', 'data-ac-as-seller title="Open exactly what the client sees — no agent bar"') +
         chip('Open in CRM', 'background:#2E5C3D;border-color:#2E5C3D;', 'data-ac-desk') +
         '<button data-ac-collapse title="Collapse this bar" style="background:transparent;border:1px solid rgba(250,246,236,.3);color:' + PAPER + ';border-radius:5px;width:27px;height:27px;line-height:1;font-size:16px;cursor:pointer;">–</button>' +
       '</div>' +
@@ -81,6 +85,7 @@
     bar.addEventListener('click', function (e) {
       if (e.target.closest('[data-ac-collapse]')) { setCollapsed(bar, pill, true); return; }
       if (e.target.closest('[data-ac-desk]')) { location.href = '/crm.html?deal=' + encodeURIComponent(dealKey); return; }
+      if (e.target.closest('[data-ac-as-seller]')) { window.open('/seller.html?deal=' + encodeURIComponent(dealKey) + '&as=seller', '_blank', 'noopener'); return; }
       if (e.target.closest('[data-ac-back]')) {
         if (history.length > 1) { history.back(); return; }
         window.close();

@@ -100,6 +100,11 @@ export default async function handler(req, res) {
   try {
     const supa = adminClient();
     const token = req.query?.t ? String(req.query.t).trim() : null;
+    // "View as seller" preview: an agent can render the PURE client view of a
+    // ?deal= preview (?as=seller) — exactly what the seller sees, with no agent
+    // console, no Completed list, no private note. Authorization still uses the
+    // agent session; only the presentation switches to the client's.
+    const clientView = /^(seller|client)$/i.test(String(req.query?.as || ''));
 
     let user = null, profile = null, isAgent = false, deal = null;
     let portalToken = null, leadId = null;
@@ -182,6 +187,10 @@ export default async function handler(req, res) {
         deal = data || null;
       }
     }
+
+    // Presentation gate: agent extras (console, Completed list, private note)
+    // show only for a real agent viewer who is NOT in "view as seller" mode.
+    const showAgent = isAgent && !clientView;
 
     if (!deal && previewMiss) return ok(res, { portal: notFoundPortal(previewKey) });
     if (!deal) return ok(res, { portal: emptyPortal(user) });
@@ -587,7 +596,7 @@ export default async function handler(req, res) {
     // mistaken tick can be undone; the client gets none.
     const doneSet = new Set(Array.isArray(deal.client_task_done) ? deal.client_task_done : []);
     tasks = tasks.map((t) => doneSet.has(t.label) ? { ...t, status: 'done' } : t);
-    const tasksDone = isAgent ? tasks.filter((t) => t.status === 'done') : [];
+    const tasksDone = showAgent ? tasks.filter((t) => t.status === 'done') : [];
     tasks = tasks.filter((t) => t.status !== 'done');
 
     // "What I need from you" copy is side-aware: the intro and the empty-state
@@ -916,12 +925,12 @@ export default async function handler(req, res) {
       good_to_know: goodToKnow,
       // Agent-preview affordances (db/040): only an agent viewing gets the
       // tickable checkboxes + the private note-for-Cowork; the client never does.
-      viewer_is_agent: !!isAgent,
+      viewer_is_agent: !!showAgent,
       // Buy-side transactions have no listing marketing — the front-end hides
       // the "campaign" recap when this is true.
       is_buyer: isBuyerSide,
       source_key: deal.source_key || null,
-      seller_note: isAgent ? (deal.portal_seller_note || null) : null,
+      seller_note: showAgent ? (deal.portal_seller_note || null) : null,
       tasks_done: tasksDone,
       activity: [],
       note: {
