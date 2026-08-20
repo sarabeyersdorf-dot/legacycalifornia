@@ -1198,7 +1198,13 @@ export default async function handler(req, res) {
       .replace(/\s+/g, ' ').trim().toLowerCase();
     const keepByCd = new Map(prior.map((t) => [sig(t.agent, t.client, stripCd(t.title)), t]));
 
-    await supa.from('agent_tasks').delete().eq('source', 'briefing').is('source_key', null);
+    // Rebuild ONLY the still-OPEN briefing tasks. A task an agent CHECKED OFF must
+    // survive the hourly rebuild: deleting done rows and re-matching them by
+    // title/key is exactly why cleared tasks reappeared when Cowork reworded or
+    // re-keyed them (James's "30+ back after the 10am run"). Done rows now persist,
+    // and the rebuild below skips any task that matches a surviving done row — so
+    // there's no open duplicate and, crucially, no re-open of a completed task.
+    await supa.from('agent_tasks').delete().eq('source', 'briefing').is('source_key', null).eq('done', false);
     if (tasks.length) {
       const rows = tasks.map((t) => {
         const agent  = normAgent(t.agent);
@@ -1209,6 +1215,10 @@ export default async function handler(req, res) {
         // brief_key match first (stable across title countdowns), then signature.
         const kept = (hasBriefKey && taskKey && keepByKey.get(taskKey)) || keepBySig.get(s)
           || keepByCd.get(sig(agent, client, stripCd(title)));
+        // If this task matches one the agent already completed, that done row is
+        // still in the table (we no longer delete done rows) — don't re-emit it,
+        // or we'd create an open duplicate of a task that's already checked off.
+        if (kept && kept.done) return null;
         const row = {
           agent,
           client,
@@ -1228,7 +1238,7 @@ export default async function handler(req, res) {
           row.agent_note_at = kept.agent_note_at ?? null;
         }
         return row;
-      }).filter((r) => r.title);
+      }).filter((r) => r && r.title);
       if (rows.length) {
         // A stable source_key that already exists is an INTENDED repeat
         // (idempotency — see TASKFLOWCONTRACT.md), not an error. The old code
