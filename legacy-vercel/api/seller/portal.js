@@ -298,6 +298,18 @@ export default async function handler(req, res) {
           return v === 'both' || v === audience;
         }
       }
+      // Prior-sale guardrail (fail closed for trust): the previous buyer's
+      // contract file is NEVER a default client document. A transaction-scope
+      // doc tied to a cancelled/closed escrow — or any transaction-scope doc
+      // once the deal has no active escrow (back on market) — belongs to a
+      // prior sale. Without this, a governance seed that never tightened (the
+      // seeds are insert-only) let the seller pick the prior buyer's RPA,
+      // counters and addenda straight out of the live list and the escrow
+      // history. An explicit seller/both grant (handled above) still opts a
+      // specific document back in; everything else stays hidden.
+      const priorSaleDoc = String(doc.scope || '') === 'transaction' &&
+        (doc.escrow_id ? escrowStatusById.get(doc.escrow_id) !== 'active' : !activeEscrow);
+      if (priorSaleDoc) return false;
       // No explicit grant: the SELLER sees their own client-safe documents by
       // default; a BUYER sees nothing ungoverned (fail closed for buyers).
       if (audience !== 'seller') return false;
