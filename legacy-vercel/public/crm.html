@@ -5545,6 +5545,7 @@ function selectLead(el) {
       (d.coe_date ? '<div style="font-size:11px;color:var(--ink-mute);">COE ' + esc(d.coe_date) + '</div>' : '') +
       (window.LegacyDealParties ? window.LegacyDealParties.summaryHtml(d.party_summary, d.source_key) : '') +
       '<span class="lk">Deal page ↗ · client view + agent console</span>' +
+      (d.source_key ? '<a class="lk" data-as-seller href="/seller.html?deal=' + encodeURIComponent(d.source_key) + '&as=seller" title="Open exactly what the client sees — no agent bar" style="display:block;">View as seller ↗</a>' : '') +
       accept +
       '</div></div>';
   }
@@ -5756,6 +5757,8 @@ function selectLead(el) {
       if (ph) ph.style.display = state.portalMode ? '' : 'none';
       return;
     }
+    var asLink = e.target.closest('.lst-card a[data-as-seller]');
+    if (asLink) { e.preventDefault(); e.stopPropagation(); var au = asLink.getAttribute('href'); var aw = window.open(au, '_blank', 'noopener'); if (!aw) location.href = au; return; }
     var cardEl = e.target.closest('.lst-card[data-source-key]');
     if (cardEl) { openCard(cardEl); return; }
     var t = e.target.closest('[data-lst]'); if (!t) return;
@@ -5855,6 +5858,7 @@ function selectLead(el) {
     var mHtml = metrics.length ? '<div class="ds-lmetrics">' + metrics.map(function (r) { return '<div class="ds-lmetric"><span class="k">' + r[0] + '</span><span class="v">' + r[1] + '</span></div>'; }).join('') + '</div>' : '';
     var links = [];
     if (d.source_key) links.push('<a href="/seller.html?deal=' + encodeURIComponent(d.source_key) + '" target="_blank" rel="noopener">Portal ↗</a>');
+    if (d.source_key) links.push('<a href="/seller.html?deal=' + encodeURIComponent(d.source_key) + '&as=seller" target="_blank" rel="noopener" title="Open exactly what the client sees — no agent bar">As seller ↗</a>');
     if (m.disclosurePackage) links.push('<a href="' + esc(m.disclosurePackage) + '" target="_blank" rel="noopener">Disclosures ↗</a>');
     return '<div class="ds-lcard rost-card" data-stg="' + sm.stg + '" data-source-key="' + esc(d.source_key || '') + '" role="link" tabindex="0">' + ph +
       '<div class="ds-lbody">' +
