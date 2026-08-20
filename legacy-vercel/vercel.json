@@ -1,6 +1,10 @@
 {
   "rewrites": [
     {
+      "source": "/433-e-highway-4-murphys",
+      "destination": "/showcase/433/index.html"
+    },
+    {
       "source": "/c/:token",
       "destination": "/collection.html"
     },
