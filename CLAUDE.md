@@ -70,9 +70,19 @@ The full contract (message format, what each agent can/can't see) lives in
   cron writes mapped columns into the `deals` table. **Both overwrite** — so anything I
   write into the repo `deals.json` or those DB columns is replaced on the next cycle.
   Durable `deals.json` content must originate in Cowork's Dropbox copy.
-- Survives sync (agent-owned, never overwritten by the crons): `agent_overrides`,
-  `photo_override`, `marketing_stats`/`video_views`, `buyer_milestones`, `buyer_tasks`,
-  `buyer_good_to_know`, and the `deal_document_governance` table.
+- **Genuinely survives sync (agent-owned, never written by the crons):**
+  `agent_overrides`, `photo_override`, `stage_override`, `party_details`, `video_views`,
+  and the `deal_document_governance` table. These are the ONLY columns safe to write
+  directly from the CRM/DB and trust across the hourly cycle.
+- **Cowork-authored in `deals.json`, refreshed from it every sync (do NOT write these to
+  the DB directly — the next `sync-deals` overwrites them):** `milestones`,
+  `buyer_milestones` (`buyerMilestones`), `buyer_tasks` (`buyerTasks`),
+  `buyer_good_to_know` (`buyerGoodToKnow`), `marketing_stats` (`marketing`), `client_tasks`
+  (`clientTasks`), `timeline`, and the other mapped columns (`mapDeal`, `sync-deals.js`).
+  A durable change to any of these must originate in Cowork's Dropbox `deals.json`.
+  (Corrected 2026-08-20: an earlier version of this list wrongly filed the `buyer_*` and
+  `marketing_stats` columns as agent-owned — they are deals.json-driven and clobbered
+  hourly. Verify ownership against `mapDeal` before trusting it.)
 - Portal documents come from `deal_documents` (rebuilt hourly) gated by
   `deal_document_governance` (per-doc visibility: agent_only/seller/buyer/both). A
   **buyer fails closed** — sees only docs explicitly granted buyer/both. Folder-published
