@@ -390,6 +390,13 @@ function mapDocs(dealId, d, escrowIdByKey, manifest) {
   // own per-doc visibility), but it closes the hole for any dual deal that leans
   // on the flat clientDocuments path.
   const defaultClientVis = (d.side === 'buyer') ? 'buyer' : 'seller';
+  // A document authored agent_only must NOT be client-visible, independent of the
+  // (insert-only) governance seed — which never tightens an existing grant, so a
+  // doc flipped to agent_only in deals.json otherwise kept leaking to the client.
+  // Driving client_safe straight off the visibility closes that: the portal's
+  // seller default hides any client_safe:false doc, and an explicit seller/both
+  // CRM grant still wins (it's checked first in the portal's maySee).
+  const clientSafeFor = (vis, base) => (String(vis || '').toLowerCase() === 'agent_only') ? false : base;
   // Guarantee a unique doc_key per row even if two docs slug to the same thing.
   const uniqueKey = (base) => {
     let k = base, n = 2;
@@ -491,7 +498,7 @@ function mapDocs(dealId, d, escrowIdByKey, manifest) {
       doc_key,
       scope,
       escrow_id: resolveEscrow(doc.escrow),
-      client_safe: doc.client_safe === false ? false : true, // legacy flag; governance is the real gate
+      client_safe: clientSafeFor(doc.visibility || defaultClientVis, doc.client_safe !== false), // agent_only ⇒ hidden from client
       updated_at: new Date().toISOString()
     });
     pushSeed(doc_key, dispName, doc.visibility || defaultClientVis);
@@ -555,7 +562,7 @@ function mapDocs(dealId, d, escrowIdByKey, manifest) {
         doc_key,
         scope,
         escrow_id: resolveEscrow(doc.escrow),
-        client_safe: true,
+        client_safe: clientSafeFor(doc.visibility, true), // agent_only folder ⇒ hidden from client
         updated_at: new Date().toISOString()
       });
       pushSeed(doc_key, String(doc.name), doc.visibility);
