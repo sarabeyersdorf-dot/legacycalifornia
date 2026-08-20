@@ -75,14 +75,9 @@ body.lp-restyle {
       <a href="#" onclick="showView(event,'broadcast')" title="Email a whole segment at once — newsletters, updates, The Ledger">Bulk email</a>
     </nav>
 
-    <div class="app-side-section">Deals &amp; offers</div>
+    <div class="app-side-section">Deals</div>
     <nav class="app-side-nav">
-      <a href="#" onclick="showView(event,'dealsall')" title="Every deal in one list — offers, escrow, listings, preparing, closed">Deals <span class="pill" data-dealsall-c>—</span></a>
-    </nav>
-
-    <div class="app-side-section">Listings</div>
-    <nav class="app-side-nav">
-      <a href="#" onclick="showView(event,'roster')" title="All brokerage listings, filterable by agent and stage">Listings</a>
+      <a href="#" onclick="showView(event,'listings')" title="Every deal — offers, escrow, on the market and preparing — with the tools to work each one">Deals</a>
     </nav>
 
     <div class="app-side-section">Import</div>
@@ -125,7 +120,7 @@ body.lp-restyle {
           <button class="ds-navpill" data-view="pipe" onclick="showView(event,'pipe')">Pipeline</button>
           <button class="ds-navpill" data-view="cal" onclick="showView(event,'cal')">Calendar</button>
           <button class="ds-navpill" data-view="people" onclick="showView(event,'people')">Contacts</button>
-          <button class="ds-navpill" data-view="roster" onclick="showView(event,'roster')">Listings</button>
+          <button class="ds-navpill" data-view="listings" onclick="showView(event,'listings')">Deals</button>
           <button class="ds-navpill" data-view="today" onclick="showView(event,'today')">Today</button>
           <details class="ds-more">
             <summary>More</summary>
@@ -135,8 +130,6 @@ body.lp-restyle {
               <a onclick="showView(event,'inbox')">Inbox</a>
               <a onclick="showView(event,'seq')">Sequences</a>
               <a onclick="showView(event,'curate')">Curated</a>
-              <span class="sep">Deals &amp; roster</span>
-              <a onclick="showView(event,'dealsall')">All deals</a>
               <a onclick="showView(event,'broadcast')">Bulk email</a>
               <span class="sep">Insight &amp; setup</span>
               <a onclick="showView(event,'rep')">Reports</a>
@@ -1850,7 +1843,7 @@ body.lp-restyle {
     <section class="crm-view" data-view="listings">
       <div data-portal-hint style="display:none;background:var(--shell);border:1px solid var(--brass);border-left:4px solid var(--brass);padding:10px 16px;margin-bottom:14px;font-family:var(--sans);font-size:13.5px;color:var(--ink);">Click any deal to open its <b>deal page</b> — the client's view with your agent console on top. The old in-CRM console is under each card's “Legacy console” link while it retires.</div>
       <div class="ds"><div class="ds-screen"><div class="ds-corners"><i></i><i></i><i></i><i></i></div>
-        <div class="ds-title"><div><div class="ds-kicker">Your deals and offers</div><h1 class="ds-headline">Deals &amp; offers</h1></div></div>
+        <div class="ds-title"><div><div class="ds-kicker">Every deal, one place</div><h1 class="ds-headline">Deals</h1></div></div>
       <div class="lst">
         <div class="lst-filter" data-lst-filter style="display:flex;gap:6px;margin-bottom:18px;flex-wrap:wrap;padding-top:4px;">
           <button class="chip on" data-lst="offers">Offers <span class="c" data-lst-c-offers>—</span></button>
@@ -3288,6 +3281,9 @@ body.lp-restyle {
     .rost-invite { font-family: var(--mono); font-size: 10px; letter-spacing: .08em; text-transform: uppercase; color: var(--brass); background: none; border: 0; padding: 0; cursor: pointer; }
     .rost-invite:hover { color: var(--ink); }
     .rost-invite[disabled] { opacity: .55; cursor: default; }
+    .lst-metrics { display: flex; flex-wrap: wrap; gap: 5px 14px; margin-top: 8px; }
+    .lst-metric { font-family: var(--mono); font-size: 10.5px; letter-spacing: .03em; text-transform: uppercase; color: var(--ink-mute); }
+    .lst-metric b { color: var(--ink); font-weight: 700; }
     @media (max-width: 900px) { .rost { padding: 18px; } }
     </style>
     <section class="crm-view" data-view="roster">
@@ -3659,7 +3655,7 @@ body.lp-restyle {
 </div>
 
 <script>
-var VIEW_LABELS = { today:'Today', tasks:'Tasks', updates:'Notes', inbox:'Inbox', messages:'Inbox', pipe:'Pipeline', cal:'Calendar', seq:'Sequences', curate:'Curated', rep:'Reports', broker:'Broker', listings:'Deals & offers', dealsall:'All deals', command:'Deal command center', people:'Roster', broadcast:'Bulk email' };
+var VIEW_LABELS = { today:'Today', tasks:'Tasks', updates:'Notes', inbox:'Inbox', messages:'Inbox', pipe:'Pipeline', cal:'Calendar', seq:'Sequences', curate:'Curated', rep:'Reports', broker:'Broker', listings:'Deals', dealsall:'All deals', command:'Deal command center', people:'Roster', broadcast:'Bulk email' };
 window.__viewStack = window.__viewStack || [];
 window.__crmHistIdx = window.__crmHistIdx || 0;
 function navBack() {
@@ -5540,11 +5536,22 @@ function selectLead(el) {
           ? '<span class="lst-badge intake-ok" title="Compliance intake complete — checklist facts captured">Intake ✓</span>'
           : '<span class="lst-badge intake-need" title="Compliance facts not captured yet — some checklist tasks can’t generate until Cowork logs them">Intake ⚠</span>')
       : '';
+    // Days-on-market / MLS / commission — carried over from the old brokerage
+    // roster so the unified Deals card stays as rich as before.
+    var lm = d.meta || {};
+    var lmet = [];
+    var _dl = lm.dateListed ? new Date(/^\d{4}-\d{2}-\d{2}$/.test(lm.dateListed) ? lm.dateListed + 'T00:00:00' : lm.dateListed) : null;
+    if (_dl && !isNaN(_dl)) lmet.push('<span class="lst-metric"><b>' + Math.max(0, Math.floor((Date.now() - _dl.getTime()) / 86400000)) + 'd</b> on market</span>');
+    if (d.mls) lmet.push('<span class="lst-metric">MLS <b>' + esc(d.mls) + '</b></span>');
+    var _c = lm.commission;
+    if (_c != null) { var _cl = (typeof _c === 'object') ? (_c.pct != null ? _c.pct + '%' : (_c.usd != null ? fmtUSD(_c.usd) : null)) : String(_c); if (_cl) lmet.push('<span class="lst-metric"><b>' + esc(_cl) + '</b> comm</span>'); }
+    var lmetHtml = lmet.length ? '<div class="lst-metrics">' + lmet.join('') + '</div>' : '';
     return '<div class="lst-card" data-source-key="' + esc(d.source_key || '') + '"' + (lc ? ' style="border-top:5px solid ' + lc.border + ';"' : '') + ' role="link" tabindex="0">' + ph + '<div class="bd">' +
       '<div class="pr">' + esc(fmtUSD(d.price)) + '</div>' +
       '<div class="ad">' + esc(d.address || '') + (d.city ? ' · ' + esc(d.city) : '') + '</div>' +
       '<div class="mt"><span class="lst-badge ' + state.tab + '">' + ((state.tab === 'archived' && d.base_stage === 'preparing') ? 'Won’t list' : badge(state.tab)) + '</span>' + sideBadge +
         '<span class="lst-badge">' + (d.agent === 'james' ? 'James' : 'Sara') + '</span>' + tour + intake + '</div>' +
+      lmetHtml +
       (d.coe_date ? '<div style="font-size:11px;color:var(--ink-mute);">COE ' + esc(d.coe_date) + '</div>' : '') +
       (window.LegacyDealParties ? window.LegacyDealParties.summaryHtml(d.party_summary, d.source_key) : '') +
       '<span class="lk">Deal page ↗ · client view + agent console</span>' +
