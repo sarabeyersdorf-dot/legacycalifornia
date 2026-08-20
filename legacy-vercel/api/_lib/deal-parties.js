@@ -51,7 +51,13 @@ export function resolveParties(d) {
     escrow:   party(ov.escrow) || escrowBase,
     lender:   party(ov.lender),
     // True when the agent has saved any structured overlay (vs pure deals.json).
-    has_overlay: !!(d && d.party_details && Object.keys(d.party_details).length)
+    has_overlay: !!(d && d.party_details && Object.keys(d.party_details).length),
+    // The counterparty (the OTHER side's agent) is only real on a live deal — an
+    // accepted offer / in escrow. On a listing or back-on-market deal there is no
+    // buyer, so a co_agent carried over from a cancelled escrow (e.g. the buyer's
+    // agent) must not surface on the card. The value stays available for the
+    // deal-parties editor; only the compact summary is gated.
+    has_counterparty: ['pending', 'offer'].includes(String((d && d.stage) || '').toLowerCase())
   };
 }
 
@@ -63,7 +69,7 @@ export function partySummary(parties) {
   const nm = (p) => p && (p.name || p.officer || p.company);
   if (nm(parties.buyer))    bits.push('Buyer: ' + nm(parties.buyer));
   if (nm(parties.seller))   bits.push('Seller: ' + nm(parties.seller));
-  if (nm(parties.co_agent)) bits.push('Co-agent: ' + nm(parties.co_agent));
+  if (parties.has_counterparty && nm(parties.co_agent)) bits.push('Co-agent: ' + nm(parties.co_agent));
   if (parties.escrow && parties.escrow.number) bits.push('Escrow #' + parties.escrow.number);
   return bits.join(' · ');
 }
