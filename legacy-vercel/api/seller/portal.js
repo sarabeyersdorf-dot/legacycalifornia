@@ -341,6 +341,11 @@ export default async function handler(req, res) {
     // agent_overrides). Seller-side only — it's their home's showcase; a buyer's
     // purchase portal has no use for "your home's marketing page".
     const effShowcaseUrl = (_ov.showcase_url != null && _ov.showcase_url !== '') ? String(_ov.showcase_url) : null;
+    // The listing's vertical marketing reel (agent-set, survives sync via
+    // agent_overrides). A self-hosted page on our own site (e.g.
+    // /showcase/<id>/reel.html) that the portal embeds. Seller-side only — a
+    // buyer's purchase portal has no listing reel.
+    const effReelUrl = (_ov.reel_url != null && _ov.reel_url !== '') ? String(_ov.reel_url) : null;
     const videoId = extractYouTubeId(effVideoUrl);
     // The agent's uploaded photo (photo_override) wins over everything — same
     // priority as the CRM listing card — so a replaced photo binds here too.
@@ -913,7 +918,8 @@ export default async function handler(req, res) {
         video_id:       videoId,
         matterport_url: effMatterportUrl || null,
         video_views:    videoViews,
-        showcase_url:   (effShowcaseUrl && !isBuyerSide) ? effShowcaseUrl : null
+        showcase_url:   (effShowcaseUrl && !isBuyerSide) ? effShowcaseUrl : null,
+        reel_url:       (effReelUrl && !isBuyerSide) ? effReelUrl : null
       },
       // Weekly ListTrac marketing digest (null when there's nothing to show).
       marketing,

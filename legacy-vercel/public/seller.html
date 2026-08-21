@@ -239,6 +239,14 @@ body.lp-restyle {
 .share-row .who .sub { display: block; font-family: var(--mono); font-size: 9.5px; letter-spacing: 0.12em; color: var(--ink-mute); margin-top: 2px; text-transform: uppercase; }
 .share-row .access { font-family: var(--mono); font-size: 10px; letter-spacing: 0.14em; color: var(--ink-mute); text-transform: uppercase; }
 
+/* Listing reel — portrait embed, centred, phone-sized on the portal. */
+.sell-reel-wrap { margin-top: 22px; }
+.sell-reel-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin-bottom: 12px; }
+.sell-reel-head .ss-k { font-family: var(--mono); font-size: 11px; letter-spacing: .16em; text-transform: uppercase; color: var(--ink); }
+.sell-reel-open { font-family: var(--mono); font-size: 10px; letter-spacing: .14em; text-transform: uppercase; color: var(--brass); text-decoration: none; border-bottom: 1px solid var(--brass); padding-bottom: 2px; }
+.sell-reel-open:hover { color: var(--ink); border-color: var(--ink); }
+.sell-reel-frame { position: relative; width: 100%; max-width: 340px; margin: 0 auto; aspect-ratio: 9 / 16; background: #201e1d; border-radius: 16px; overflow: hidden; box-shadow: 0 14px 38px rgba(20,18,15,.28); }
+.sell-reel-frame iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; display: block; }
 .sell-tour { display: flex; gap: 16px; margin-top: 16px; flex-wrap: wrap; }
 .sell-tour a { font-family: var(--mono); font-size: 10px; letter-spacing: .14em; text-transform: uppercase; color: var(--brass); text-decoration: none; border-bottom: 1px solid var(--brass); padding-bottom: 3px; }
 .sell-tour a:hover { color: var(--ink); border-color: var(--ink); }
@@ -326,6 +334,12 @@ setTimeout(function(){var p=document.getElementById('portal-loading');if(p&&p.pa
       </div>
       <img id="sell-hero-photo" src="" alt="" style="display:none;width:100%;max-height:300px;object-fit:cover;border-bottom:1px solid var(--rule);">
       <div id="sell-tour" class="ds-portal-tour" style="padding:0 24px;"></div>
+
+      <!-- Listing reel (vertical marketing reel) — a self-hosted animated page
+           embedded portrait. Rendered by JS from portal.tour.reel_url; hidden
+           entirely when there's no reel, and seller-side only (the API sends
+           reel_url:null to a buyer). -->
+      <div id="sell-reel" class="sell-reel-wrap" style="padding:0 24px; display:none;"></div>
 
       <section class="ds-strip ds-strip--kpis" data-list="kpis">
         <div class="ds-cell" data-row style="display:none;">
@@ -572,6 +586,7 @@ setTimeout(function(){var p=document.getElementById('portal-loading');if(p&&p.pa
       // report yet, so the card simply doesn't appear.
       cells += ltCardHtml(portal.list_trac);
       if (box) box.innerHTML = cells ? '<div class="ds-tour-grid">' + cells + '</div>' : '';
+      renderReel(tour.reel_url);
       renderMarketing(portal.marketing);
       // Per-agent: "Message {agent}" + note avatar reflect the deal's agent.
       var c = portal.contact || {};
@@ -583,6 +598,22 @@ setTimeout(function(){var p=document.getElementById('portal-loading');if(p&&p.pa
       // Agent preview: reveal the tickable tasks + the note-for-briefing.
       if (portal.viewer_is_agent) setupAgentPortal(portal);
     }).catch(function () {});
+
+  // Embed the vertical listing reel (a self-hosted animated page) portrait,
+  // centred, phone-sized. Hidden entirely when there's no reel URL. The reel
+  // page autoplays on its own (pure animation, no audio), so no gesture needed.
+  function renderReel(url) {
+    var wrap = document.getElementById('sell-reel');
+    if (!wrap) return;
+    var okUrl = typeof url === 'string' && /^https?:\/\//.test(url);
+    if (!okUrl) { wrap.style.display = 'none'; wrap.innerHTML = ''; return; }
+    var safe = url.replace(/"/g, '%22');
+    wrap.innerHTML =
+      '<div class="sell-reel-head"><span class="ss-k">Your listing reel</span>' +
+      '<a class="sell-reel-open" href="' + safe + '" target="_blank" rel="noopener">Open full screen ↗</a></div>' +
+      '<div class="sell-reel-frame"><iframe src="' + safe + '" title="Your listing reel" loading="lazy" allow="autoplay" referrerpolicy="no-referrer"></iframe></div>';
+    wrap.style.display = '';
+  }
 
   // Render the weekly ListTrac marketing digest into the "Marketing activity"
   // panel. Hides the whole panel when there's no report yet (or it was removed

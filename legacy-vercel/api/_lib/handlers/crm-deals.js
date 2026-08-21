@@ -130,6 +130,7 @@ export default async function handler(req, res) {
       const videoUrl  = pick('video_url', d.video_url);
       const tourUrl   = pick('matterport_url', d.matterport_url);
       const showcaseUrl = pick('showcase_url', null);   // agent-set marketing page (no DB column)
+      const reelUrl     = pick('reel_url', null);       // agent-set vertical reel (no DB column)
       const editedKeys = Object.keys(ov);
 
       const coeDays = coeDate ? Math.round((new Date(coeDate + 'T12:00:00Z') - todayMid) / 86400000) : null;
@@ -162,6 +163,7 @@ export default async function handler(req, res) {
         video_url:  videoUrl || null,
         tour_url:   tourUrl || null,
         showcase_url: showcaseUrl || null,
+        reel_url:   reelUrl || null,
         has_video:  !!videoUrl,
         has_tour:   !!tourUrl,
         stage:      stage,
