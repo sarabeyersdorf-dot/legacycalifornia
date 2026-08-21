@@ -337,6 +337,10 @@ export default async function handler(req, res) {
     const _ov = (deal.agent_overrides && typeof deal.agent_overrides === 'object' && !Array.isArray(deal.agent_overrides)) ? deal.agent_overrides : {};
     const effVideoUrl = (_ov.video_url != null && _ov.video_url !== '') ? _ov.video_url : deal.video_url;
     const effMatterportUrl = (_ov.matterport_url != null && _ov.matterport_url !== '') ? _ov.matterport_url : deal.matterport_url;
+    // The listing's public marketing page (agent-set, survives sync via
+    // agent_overrides). Seller-side only — it's their home's showcase; a buyer's
+    // purchase portal has no use for "your home's marketing page".
+    const effShowcaseUrl = (_ov.showcase_url != null && _ov.showcase_url !== '') ? String(_ov.showcase_url) : null;
     const videoId = extractYouTubeId(effVideoUrl);
     // The agent's uploaded photo (photo_override) wins over everything — same
     // priority as the CRM listing card — so a replaced photo binds here too.
@@ -908,7 +912,8 @@ export default async function handler(req, res) {
         video_url:      effVideoUrl || null,
         video_id:       videoId,
         matterport_url: effMatterportUrl || null,
-        video_views:    videoViews
+        video_views:    videoViews,
+        showcase_url:   (effShowcaseUrl && !isBuyerSide) ? effShowcaseUrl : null
       },
       // Weekly ListTrac marketing digest (null when there's nothing to show).
       marketing,
