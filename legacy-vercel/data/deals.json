@@ -1,6 +1,6 @@
 {
-  "version": 9.1,
-  "lastUpdated": "2026-08-20",
+  "version": 9.3,
+  "lastUpdated": "2026-08-21",
   "updatedBy": "cowork 2026-08-20 — Homes.com Listing Analytics weekly pull added to 4 listings (homesCom block)",
   "tasks": [
     {
@@ -917,12 +917,12 @@
     {
       "agent": "james",
       "client": "Baldwin",
-      "title": "Baldwin: Chase listing agent for their LA AVID (seller-side Agent Visual Inspection Disclosure) — missing from Ex. James's Buyer AVID is now filed. Need listing agent counterpart.",
+      "title": "Baldwin: OPEN __Pending\\8235 Baldwin St\\Disclosures\\AVID_pdf-DigiSign.pdf before emailing Allyson — a 3-page AVID initialled 'RJ' is already on disk with the seller-side NHD and advisories, almost certainly the listing-agent counterpart. Flattened DigiSign scan, no text layer, so the briefing cannot confirm which side it is.",
       "note": "Baldwin Ex now has 'Buyer AVID.pdf' (James). LA AVID from listing agent still missing. Added 2026-07-28.",
       "dateAdded": "2026-07-28",
       "done": false,
       "key": "baldwin-la-avid-verify",
-      "due": "2026-08-12"
+      "due": "This week"
     },
     {
       "agent": "sara",
@@ -1072,19 +1072,21 @@
       "agent": "james",
       "client": "695 Feather",
       "title": "695 Feather compliance 🔴: AAA (Additional Agent Acknowledgment) not in EX folder. Locate from Authentisign history or obtain new execution from buyers.",
-      "done": false,
+      "done": true,
       "due": "2026-08-09",
       "dateAdded": "2026-08-07",
-      "key": "695-feather-aaa-missing"
+      "key": "695-feather-aaa-missing",
+      "agent_note": "Resolved 2026-08-21: on disk at __Pending\\695 Feather\\Buyer\\695 feather dr AAA buyer signed.pdf — filed one level out from EX."
     },
     {
       "agent": "james",
       "client": "695 Feather",
       "title": "695 Feather compliance 🔴: NHD (Natural Hazard Disclosure) + signature page not in EX folder. Request from listing agent Dee Bradley (dee@caltel.com).",
-      "done": false,
+      "done": true,
       "due": "2026-08-09",
       "dateAdded": "2026-08-07",
-      "key": "695-feather-nhd-missing"
+      "key": "695-feather-nhd-missing",
+      "agent_note": "Resolved 2026-08-21: on disk at __Pending\\695 Feather\\From Escrow\\NHD PIDMAXReport_4178560.pdf plus NHD PIDMAXSignaturePages_4178560.pdf."
     },
     {
       "agent": "james",
@@ -1193,7 +1195,8 @@
       "key": "feather-escrow-pkg-scan",
       "title": "695 Feather: open 'From Escrow/Escrow Package Buyer.pdf' (25pp, scanned, no text layer) and check whether the SPQ is stacked inside BEFORE re-chasing Dee Bradley",
       "due": "2026-08-11",
-      "done": false
+      "done": true,
+      "agent_note": "Resolved 2026-08-21: all 25 pages OCR'd. It is an Orange Coast Title escrow-instruction package — no SPQ stacked inside. feather-spq-missing stands; chase Dee Bradley."
     },
     {
       "agent": "james",
@@ -1796,7 +1799,8 @@
       "key": "augusta-folder-move",
       "title": "324 Augusta: the deal folder is still under __Pending but the escrow cancelled 8/14 and the deal is a listing again. Move it so the document sweep reads it as listing paperwork.",
       "due": "This week",
-      "done": false
+      "done": true,
+      "agent_note": "Folder confirmed moved out of __Pending into _Listings by the 2026-08-21 briefing sweep; __Pending now holds only 695 Feather and 8235 Baldwin."
     },
     {
       "agent": "sara",
@@ -1966,6 +1970,70 @@
       "agent": "sara",
       "client": "9568 Sheep Ranch",
       "title": "9568 Sheep Ranch: seller net sheet received from Placer 8/20 at $369,000 (3% sell / 2.5% buy, split escrow+NHD, seller pays transfer tax) — confirm the offer terms and record it",
+      "done": false
+    },
+    {
+      "agent": "james",
+      "client": "8235 Baldwin",
+      "key": "baldwin-walkthrough-confirm",
+      "title": "Baldwin: confirm the 8/26 final walk-through actually exists — the CRM timeline carries it, deals.json has no walk-through milestone at all, and nothing on disk shows it was scheduled with Shomari",
+      "due": "2026-08-26",
+      "done": false
+    },
+    {
+      "agent": "james",
+      "client": "695 Feather",
+      "key": "feather-docusign-confirm",
+      "title": "695 Feather: confirm Ashley signed Tanya Salgado's 8/20 DocuSign (estimate of fees, escrow amendments, HOA forms) — and separately that Bert Andrews signed the escrow amendment removing himself",
+      "due": "Today",
+      "done": false
+    },
+    {
+      "agent": "james",
+      "client": "695 Feather",
+      "key": "feather-dee-spq-reply",
+      "title": "695 Feather: reply to Dee Bradley on the SPQ Section 5 correction — open since Tue 8/19 5:43 PM, Sent folder confirms nothing went back. Fold the missing-SPQ chase into the same email",
+      "due": "Today",
+      "done": false
+    },
+    {
+      "agent": "sara",
+      "client": "324 Augusta",
+      "key": "augusta-hoa-order-cancelled",
+      "title": "324 Augusta: HomeWiseDocs says the HOA order Placer placed is 'partially complete' — but that escrow cancelled 8/14. Confirm nothing is still billing, and whether the package can be kept for the relist rather than re-ordered at $605",
+      "due": "This week",
+      "done": false
+    },
+    {
+      "agent": "sara",
+      "client": "9568 Sheep Ranch",
+      "key": "sheepranch-reduction-answer",
+      "title": "9568 Sheep Ranch: chase Sean Moffatt on the price reduction — net sheet went out 8/20 at $369,000 with 'let me know if you want to go ahead', no answer. Ashley Cuslidge is out 8/26-9/4",
+      "due": "This week",
+      "done": false
+    },
+    {
+      "agent": "sara",
+      "client": "433 E Hwy 4",
+      "key": "433-fire-hardening-remove",
+      "title": "433: remove the fire hardening item from the Heryfords' seller portal — their CRM note 8/21: 'remove the fire hardening I have sent this back to you many times'. Second time asking",
+      "due": "Today",
+      "done": false
+    },
+    {
+      "agent": "sara",
+      "client": "Follow Up Boss",
+      "key": "fub-ryan-vega",
+      "title": "New FUB lead Ryan Vega (408) 476-5618 ryan.vega08@gmail.com via Realtor.com, came in 8/21 3:32 AM — unworked",
+      "due": "Today",
+      "done": false
+    },
+    {
+      "agent": "sara",
+      "client": "Hovey",
+      "key": "hovey-duchac-statement",
+      "title": "Hovey: get Teri Duchac's account in writing while she is willing — she has now named Dimitri and Yulia as another pair who refused to sign Volkmar's RMA, alongside Caroline Selfridge and herself",
+      "due": "This week",
       "done": false
     }
   ],
@@ -2437,7 +2505,7 @@
         "author": "james",
         "status": "draft",
         "updated": "2026-07-19",
-        "body": "Shomari, your inspection contingency is removed. Appraisal, loan, title, and insurance contingencies are still open while your renovation loan moves through underwriting — I'll have you sign the remaining removal as soon as those clear. Please keep responding quickly to your lender's requests."
+        "body": "Shomari, here is where we stand. Your close of escrow is Monday, August 31 — that is the date in the fully executed Extension of Time (ETA No. 3), which the seller signed back on August 15, so it is firm. Your loan contingency runs to today, Friday August 21.\n\nThe one thing outstanding is your lender. Chicago Title has told us they have not yet received any loan document requests from Prime Residential, and we are still waiting on written confirmation that the appraisal has been delivered. I am chasing both today. Please keep answering Kimberly Hesser's requests the same day she sends them — that is the single thing that moves this to the closing table.\n\nYour inspection contingency came off on July 13. The appraisal, loan, title and insurance contingencies are still open, and I will have you sign the remaining removal as soon as the loan clears. Plan for your final walk-through on Tuesday, August 26.\n\n— James Beyersdorf, (209) 770-7523"
       },
       "clientTasks": [
         {
@@ -2451,8 +2519,8 @@
           "status": "open"
         },
         {
-          "label": "Plan for the final walk-through around July 29 with James",
-          "when": "~Jul 29",
+          "label": "Plan for the final walk-through on Tuesday, August 26 with James",
+          "when": "Aug 26",
           "status": "open"
         }
       ],
@@ -2972,7 +3040,17 @@
         "commissionNote": "4.0% per the Commercial & Residential Income Listing Agreement (rev 12/25) dated 2026-01-17. RLA listing price $650,000; MOT #1 changed the expiration only and left the price field blank.",
         "dateListed": "2026-01-17",
         "expiration": "2026-11-18",
-        "agreementForm": "Commercial and Residential Income Listing Agreement - 1225"
+        "agreementForm": "Commercial and Residential Income Listing Agreement - 1225",
+        "listTrac": {
+          "views": 198,
+          "shares": 4,
+          "inquiries": 1,
+          "newPct": 87,
+          "last30": 18,
+          "since": "2026-02-02",
+          "reportDate": "2026-08-16",
+          "source": "ListTrac / MetroList weekly seller report"
+        }
       },
       "listPrice": 650000,
       "salePrice": null,
@@ -3137,7 +3215,18 @@
           "pct": 2.5
         },
         "clientLegalNames": "James R Heryford and Yvonne Heryford (Gold Electric) — LEGAL names as they appear on the RLA, MOTs and all executed documents. USE 'Jim' in anything the clients read; use the legal names only on contracts and vesting.",
-        "commissionNote": "2.5% per the RLA (rev 6/25), agreement dated 2025-11-19. Listing price chain: RLA $1,850,000 -> MOT #1 (2026-03-14) $1,399,000 -> MOT #2 (6/30) expiration 8/14 only -> MOT #3 (8/5) expiration 11/19/2026 only."
+        "commissionNote": "2.5% per the RLA (rev 6/25), agreement dated 2025-11-19. Listing price chain: RLA $1,850,000 -> MOT #1 (2026-03-14) $1,399,000 -> MOT #2 (6/30) expiration 8/14 only -> MOT #3 (8/5) expiration 11/19/2026 only.",
+        "listTrac": {
+          "views": 5673,
+          "shares": 18,
+          "inquiries": 0,
+          "newPct": 94,
+          "last30": 278,
+          "since": "2026-03-20",
+          "note": "Beat its zip code for views. A separate ListTrac report on the earlier MLS number covers 2025-12-05 onward: 4,015 views / 4 shares / 99% new / 68 in the last 30 days.",
+          "reportDate": "2026-08-16",
+          "source": "ListTrac / MetroList weekly seller report"
+        }
       },
       "timeline": {
         "acceptance": "2026-06-19",
@@ -3365,7 +3454,18 @@
           "pct": 3
         },
         "commissionNote": "3.0% per the RLA (rev 12/25) dated 2026-06-04. RLA listing price $98,500 -> MOT #1 $89,000.",
-        "agreementForm": "Residential Listing Agreement - Exclusive - 1225"
+        "agreementForm": "Residential Listing Agreement - Exclusive - 1225",
+        "listTrac": {
+          "views": 9838,
+          "shares": 30,
+          "inquiries": 1,
+          "newPct": 25,
+          "last30": 3018,
+          "since": "2026-06-04",
+          "note": "BEST PERFORMING LISTING IN THE BOOK. 3,018 views in the last 30 days — Zillow 1,947, Realtor.com 854. Beat its zip code. Unusually, 75% of visitors are RETURNING, not new: people are coming back to look again.",
+          "reportDate": "2026-08-16",
+          "source": "ListTrac / MetroList weekly seller report"
+        }
       },
       "salePrice": null,
       "openEscrowDate": null,
@@ -3512,7 +3612,18 @@
         },
         "commissionNote": "3.0% per the RLA (rev 12/25) dated 2026-03-10. RLA listing price $400,000 -> MOT #1 $389,000.",
         "dateListed": "2026-03-10",
-        "agreementForm": "Residential Listing Agreement - Exclusive - 1225"
+        "agreementForm": "Residential Listing Agreement - Exclusive - 1225",
+        "listTrac": {
+          "views": 3165,
+          "shares": 87,
+          "inquiries": 0,
+          "newPct": 93,
+          "last30": 728,
+          "since": "2026-04-08",
+          "note": "87 shares — the most-shared listing in the book. Beat its zip code. Still receiving ListTrac reports and 728 views in the last 30 days despite being marked 'cancelled' in deals.json — worth confirming which is right.",
+          "reportDate": "2026-08-16",
+          "source": "ListTrac / MetroList weekly seller report"
+        }
       },
       "city": "Mountain Ranch, CA 95246",
       "stage": "listing",
@@ -3618,7 +3729,18 @@
         },
         "commissionNote": "3.0% per the RLA (rev 12/25) dated 2026-03-19. RLA listing price $210,000 -> MOT #1 $199,000.",
         "dateListed": "2026-03-19",
-        "agreementForm": "Residential Listing Agreement - Exclusive - 1225"
+        "agreementForm": "Residential Listing Agreement - Exclusive - 1225",
+        "listTrac": {
+          "views": 5368,
+          "shares": 44,
+          "inquiries": 5,
+          "newPct": 87,
+          "last30": 698,
+          "since": "2026-03-24",
+          "note": "5 inquiries — the most of any listing. Beat its zip code. Zillow drove 526 of the last 30 days' 698 views.",
+          "reportDate": "2026-08-16",
+          "source": "ListTrac / MetroList weekly seller report"
+        }
       },
       "city": "Ceres, CA 95307",
       "stage": "listing",
@@ -4095,7 +4217,18 @@
         },
         "commissionNote": "5.0% per the Vacant Land Listing Agreement (rev 12/24) dated 2025-01-10. Highest-priced listing in the book at $1,400,000.",
         "dateListed": "2025-01-10",
-        "agreementForm": "Vacant Land Listing Agreement - 1224"
+        "agreementForm": "Vacant Land Listing Agreement - 1224",
+        "listTrac": {
+          "views": 564,
+          "shares": 4,
+          "inquiries": 0,
+          "newPct": 94,
+          "last30": 58,
+          "since": "2025-01-17",
+          "note": "Beat its zip code. Zillow drove 39 of the last 30 days' 58 views.",
+          "reportDate": "2026-08-16",
+          "source": "ListTrac / MetroList weekly seller report"
+        }
       },
       "listTrac": {
         "views": 564,
@@ -4141,7 +4274,17 @@
         },
         "commissionNote": "5.0% per the Vacant Land Listing Agreement (rev 12/24) dated 2025-01-10. NOTE: the RLA states the same $699,000 listing price as 2000 Gun Club Rd — confirm that is intentional and not a form copy-paste.",
         "dateListed": "2025-01-10",
-        "agreementForm": "Vacant Land Listing Agreement - 1224"
+        "agreementForm": "Vacant Land Listing Agreement - 1224",
+        "listTrac": {
+          "views": 252,
+          "shares": 10,
+          "inquiries": 0,
+          "newPct": 96,
+          "last30": 21,
+          "since": "2025-01-17",
+          "reportDate": "2026-08-16",
+          "source": "ListTrac / MetroList weekly seller report"
+        }
       },
       "listTrac": {
         "views": 252,
@@ -4186,7 +4329,18 @@
         },
         "commissionNote": "5.0% per the Vacant Land Listing Agreement (rev 12/24) dated 2025-01-10. Highest rate in the book — all four Angels Camp land listings are at 5%.",
         "dateListed": "2025-01-10",
-        "agreementForm": "Vacant Land Listing Agreement - 1224"
+        "agreementForm": "Vacant Land Listing Agreement - 1224",
+        "listTrac": {
+          "views": 294,
+          "shares": 11,
+          "inquiries": 0,
+          "newPct": 100,
+          "last30": 17,
+          "since": "2025-01-17",
+          "note": "100% new visitors — no one is coming back for a second look.",
+          "reportDate": "2026-08-16",
+          "source": "ListTrac / MetroList weekly seller report"
+        }
       },
       "listTrac": {
         "views": 294,
@@ -4232,7 +4386,18 @@
         },
         "commissionNote": "5.0% per the Vacant Land Listing Agreement (rev 12/24) dated 2025-01-10.",
         "dateListed": "2025-01-10",
-        "agreementForm": "Vacant Land Listing Agreement - 1224"
+        "agreementForm": "Vacant Land Listing Agreement - 1224",
+        "listTrac": {
+          "views": 214,
+          "shares": 3,
+          "inquiries": 0,
+          "newPct": 93,
+          "last30": 14,
+          "since": "2025-01-17",
+          "note": "Quietest listing in the book — 14 views in the last 30 days.",
+          "reportDate": "2026-08-16",
+          "source": "ListTrac / MetroList weekly seller report"
+        }
       },
       "listTrac": {
         "views": 214,
@@ -4277,7 +4442,18 @@
         "commissionNote": "FLAT FEE $1,000 per the Vacant Land Listing Agreement (rev 12/24) dated 2025-06-18 — the percentage field is blank and the flat-fee box is checked. This is the only flat-fee listing in the book. RLA listing price was blank -> MOT #1 $33,000; MOT #3 extended the expiration to 2027-01-18.",
         "dateListed": "2025-06-18",
         "expiration": "2027-01-18",
-        "agreementForm": "Vacant Land Listing Agreement - 1224"
+        "agreementForm": "Vacant Land Listing Agreement - 1224",
+        "listTrac": {
+          "views": 1943,
+          "shares": 17,
+          "inquiries": 0,
+          "newPct": 98,
+          "last30": 158,
+          "since": "2025-06-20",
+          "note": "Beat its zip code. Zillow 79 and Realtor.com 32 of the last 30 days' 158 views.",
+          "reportDate": "2026-08-16",
+          "source": "ListTrac / MetroList weekly seller report"
+        }
       },
       "listTrac": {
         "views": 1943,
@@ -4431,8 +4607,8 @@
           "body": "Your offer is accepted and escrow is open with Orange Coast Title. Your earnest money is in."
         },
         {
-          "title": "All-cash purchase at $170,000",
-          "body": "Your purchase price is confirmed at $170,000, all cash. Escrow is working through the remaining steps toward close."
+          "title": "Your price is $170,000 — funded by the home equity line",
+          "body": "Your purchase price is confirmed at $170,000 and has not changed. The funds are coming from the home equity line your father signed on August 17, which replaced the original all-cash source. Those funds are due at escrow Friday, August 21, and your loan contingency runs to August 25."
         }
       ],
       "address": "695 Feather Dr",
