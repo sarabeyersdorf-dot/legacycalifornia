@@ -4435,6 +4435,62 @@ window.LGPortal = window.LGPortal || {
         }
       });
 
+      // ---- deadlines at a glance ----
+      // One ranked strip of every upcoming/overdue contingency + close-of-escrow
+      // across the deals in motion, so "what's due next" is answerable without
+      // opening each deal. Sourced from mb.active_deals — the SAME agent-scoped
+      // deal data (and the same milestones) the deal cards use, so the strip can
+      // never disagree with a deal. James sees his; the broker sees all, tagged.
+      guard('deadlines', () => {
+        const host = root.querySelector('[data-dash-deadlines]');
+        if (!host) return;
+        const todayStr = new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Los_Angeles' }).format(new Date());
+        const dd = (iso) => {
+          if (!iso || !/^\d{4}-\d{2}-\d{2}/.test(iso)) return null;
+          const a = Date.UTC(+iso.slice(0, 4), +iso.slice(5, 7) - 1, +iso.slice(8, 10));
+          const b = Date.UTC(+todayStr.slice(0, 4), +todayStr.slice(5, 7) - 1, +todayStr.slice(8, 10));
+          return Math.round((a - b) / 86400000);
+        };
+        const rows = [];
+        (mb.active_deals || []).forEach((d) => {
+          const addr = String(d.address || d.lead_name || '').split(',')[0];
+          const agent = d.agent || null;
+          const cols = (d.at_a_glance && d.at_a_glance.columns) || [];
+          cols.forEach((c) => {
+            if (c.key !== 'contingencies' && c.key !== 'closing') return;
+            (c.items || []).forEach((it) => {
+              if (!it.date || it.status === 'done') return;
+              const n = dd(it.date);
+              if (n == null || n < -3) return;           // small overdue grace
+              rows.push({ date: it.date, days: n, label: it.label || (c.key === 'closing' ? 'Closing' : 'Contingency'), addr, agent, type: c.key });
+            });
+          });
+          // COE straight off the deal (mirrors the deal card's countdown).
+          if (d.coe_date && d.days_to_coe != null && d.days_to_coe >= -3) {
+            rows.push({ date: d.coe_date, days: d.days_to_coe, label: 'Close of escrow', addr, agent, type: 'closing' });
+          }
+        });
+        // Dedup exact repeats (a closing milestone that equals the COE date).
+        const seen = new Set();
+        const uniq = rows.filter((r) => { const k = r.addr + '|' + r.date + '|' + r.label; if (seen.has(k)) return false; seen.add(k); return true; });
+        uniq.sort((a, b) => (a.date < b.date ? -1 : a.date > b.date ? 1 : 0) || ((a.type === 'closing') - (b.type === 'closing')));
+        const dueSoonN = uniq.filter((r) => r.days <= 2).length;
+        setT('[data-bind-dash-dlsub]', uniq.length ? (dueSoonN ? `${dueSoonN} inside 48h · ${uniq.length} total` : `${uniq.length} upcoming`) : '');
+        if (!uniq.length) { host.innerHTML = `<div class="ds-empty-line">No contingencies or closings coming up.</div>`; return; }
+        const MO = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+        const fmtD = (s) => `${MO[+s.slice(5, 7) - 1]} ${+s.slice(8, 10)}`;
+        const chip = (r) => r.days < 0 ? `${Math.abs(r.days)}d late` : r.days === 0 ? 'Today' : r.days === 1 ? 'Tomorrow' : `${r.days} days`;
+        const urg = (r) => r.days < 0 ? 'over' : r.days <= 2 ? 'soon' : r.days <= 7 ? 'wk' : '';
+        host.innerHTML = uniq.slice(0, 10).map((r) => {
+          const who = (r.agent && r.agent !== viewerAgent) ? ' · ' + (r.agent === 'james' ? 'James' : 'Sara') : '';
+          return `<div class="ds-dl-row" data-stg="${r.type === 'closing' ? 'closing' : 'contingencies'}">
+            <span class="ds-dl-days ${urg(r)}">${escHtml(chip(r))}</span>
+            <span class="ds-dl-main"><span class="ds-dl-lab">${escHtml(r.label)}</span><span class="ds-dl-sub">${escHtml(r.addr)}${escHtml(who)}</span></span>
+            <span class="ds-dl-date">${escHtml(fmtD(r.date))}</span>
+          </div>`;
+        }).join('');
+      });
+
       // ---- stat strip (deal-backed money only) ----
       guard('stats', () => {
         const pipeVal = boardDeals.reduce((s, d) => s + (d.price || 0), 0);

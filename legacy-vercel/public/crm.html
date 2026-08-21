@@ -226,6 +226,25 @@ body.lp-restyle {
             <span class="ds-sw" data-stg="in_escrow"><i></i>In escrow</span>
           </div>
 
+          <style>
+            .ds-deadlines-band { margin: 2px 0 4px; }
+            .ds-deadlines { display: flex; flex-direction: column; gap: 6px; margin-top: 8px; }
+            .ds-dl-row { display: grid; grid-template-columns: 88px 1fr auto; align-items: center; gap: 12px; padding: 9px 12px; border: 1px solid var(--rule, #E4DAC6); border-left: 3px solid var(--rule, #E4DAC6); border-radius: 10px; background: var(--shell, #FAF6EC); }
+            .ds-dl-row[data-stg="closing"] { border-left-color: var(--brass, #B08D57); }
+            .ds-dl-days { font-family: var(--mono, 'JetBrains Mono', monospace); font-size: 11px; letter-spacing: .04em; text-transform: uppercase; text-align: center; padding: 4px 6px; border-radius: 999px; background: rgba(20,18,15,.06); color: var(--ink, #1A1714); white-space: nowrap; }
+            .ds-dl-days.over { background: #9B2C2C; color: #fff; }
+            .ds-dl-days.soon { background: #B8703E; color: #fff; }
+            .ds-dl-days.wk { background: rgba(176,141,87,.20); color: var(--brass-deep, #8a6b3f); }
+            .ds-dl-main { min-width: 0; display: flex; flex-direction: column; }
+            .ds-dl-lab { font-size: 14px; font-weight: 600; color: var(--ink, #1A1714); }
+            .ds-dl-sub { font-size: 12px; color: var(--muted-ink, #7C6A4D); margin-top: 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+            .ds-dl-date { font-family: var(--mono, 'JetBrains Mono', monospace); font-size: 12px; color: var(--muted-ink, #7C6A4D); white-space: nowrap; }
+          </style>
+          <div class="ds-deadlines-band">
+            <div class="ds-panel-h"><h3>Deadlines</h3><span class="ds-panel-sub" data-bind-dash-dlsub></span></div>
+            <div class="ds-deadlines" data-dash-deadlines><div class="ds-empty-line">Loading deadlines…</div></div>
+          </div>
+
           <div class="ds-dash-body">
             <div class="ds-dash-left">
               <div class="ds-panel-h"><h3>Today</h3><span class="ds-panel-sub" data-bind-dash-todaycount>—</span></div>
