@@ -4800,6 +4800,7 @@ function selectLead(el) {
       + '    <label style="' + LB + '">YouTube tour URL<input name="youtube_url" placeholder="https://youtu.be/… or https://www.youtube.com/watch?v=…" style="' + IN + '"></label>'
       + '    <label style="' + LB + '">Matterport 3D tour URL (optional)<input name="matterport_url" placeholder="https://my.matterport.com/show/?m=…" style="' + IN + '"></label>'
       + '    <label style="' + LB + '">Marketing page URL (optional)<input name="showcase_url" placeholder="https://legacycalifornia.com/your-listing" style="' + IN + '"></label>'
+      + '    <label style="' + LB + '">Listing reel URL (optional)<input name="reel_url" placeholder="https://legacycalifornia.com/showcase/…/reel.html" style="' + IN + '"></label>'
       + '    <div style="' + LB + '">Hero photo <span style="text-transform:none;letter-spacing:normal;color:#9A876A;">— the big image at the top of the seller portal</span>'
       + '      <div style="display:flex;gap:12px;align-items:center;margin-top:6px;">'
       + '        <div id="lm-photo-preview" style="width:112px;height:74px;background:#EFE7D4 no-repeat center/cover;border:1px solid #D9CFB7;flex:none;"></div>'
@@ -4845,6 +4846,7 @@ function selectLead(el) {
       form.youtube_url.value = (d && d.video_url) || '';
       form.matterport_url.value = (d && d.tour_url) || '';
       form.showcase_url.value = (d && d.showcase_url) || '';
+      form.reel_url.value = (d && d.reel_url) || '';
       setPreview(d && d.photo_url);
       photoStatus.textContent = 'JPG/PNG · replaces the current hero, sticks across the sync';
       photoStatus.style.color = '#7C6A4D';
@@ -4889,9 +4891,9 @@ function selectLead(el) {
       e.preventDefault();
       var key = sel.value;
       if (!key) { result.style.color = '#9B2C2C'; result.textContent = 'Pick a listing first.'; return; }
-      var yt = form.youtube_url.value.trim(), mp = form.matterport_url.value.trim(), sc = form.showcase_url.value.trim();
+      var yt = form.youtube_url.value.trim(), mp = form.matterport_url.value.trim(), sc = form.showcase_url.value.trim(), rl = form.reel_url.value.trim();
       var save = m.querySelector('#lm-save'); save.disabled = true; save.textContent = 'Saving…';
-      fetch('/api/crm/deal-edit', { method: 'POST', credentials: 'include', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ source_key: key, fields: { video_url: yt, matterport_url: mp, showcase_url: sc } }) })
+      fetch('/api/crm/deal-edit', { method: 'POST', credentials: 'include', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ source_key: key, fields: { video_url: yt, matterport_url: mp, showcase_url: sc, reel_url: rl } }) })
         .then(function (r) { return r.json().then(function (j) { return { ok: r.ok, j: j }; }, function () { return { ok: r.ok, j: {} }; }); })
         .then(function (x) {
           save.disabled = false; save.textContent = 'Save media';

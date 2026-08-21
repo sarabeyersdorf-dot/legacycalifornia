@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>433 East Highway 4 — Listing Reel · Legacy Properties</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root { --ink:#201e1d; --paper:#f3f2f2; --green:#1f6b3c; --green-deep:#14512c; --muted:#605d5d; }
+  * { box-sizing: border-box; }
+  html, body { height: 100%; }
+  body {
+    margin: 0; background: var(--ink);
+    font-family: "Archivo", system-ui, -apple-system, sans-serif;
+    display: flex; align-items: center; justify-content: center;
+    overflow: hidden;
+  }
+  /* The reel is authored at a fixed 1080×1920 and scaled to fit its frame
+     (standalone tab or an embedded portal iframe) — always shown whole. */
+  #reel-fit { position: relative; }
+  #stage {
+    position: absolute; left: 0; top: 0; width: 1080px; height: 1920px;
+    transform-origin: 0 0; background: var(--ink); overflow: hidden;
+  }
+  #stage img { display: block; max-width: none; }
+  .rl-abs { position: absolute; inset: 0; }
+  .rl-hidden { visibility: hidden; }
+</style>
+</head>
+<body>
+<div id="reel-fit"><div id="stage" aria-label="433 East Highway 4 listing reel"></div></div>
+<script>
+(function () {
+  'use strict';
+
+  // ── colours ───────────────────────────────────────────────────────────────
+  var INK = '#201e1d', PAPER = '#f3f2f2', GREEN = '#1f6b3c', GREEN_DEEP = '#14512c', MUTED = '#605d5d';
+  var PHOTO_H = 1220, PANEL_Y = PHOTO_H, PANEL_H = 1920 - PHOTO_H;
+
+  // ── timing (ported from the design canvas scene list) ───────────────────────
+  var SCENES = [
+    { name: 'Open',   dur: 3.2 },
+    { name: 'Estate', dur: 3.6 },
+    { name: 'Inside', dur: 4.0 },
+    { name: 'Income', dur: 4.4 },
+    { name: 'Zoned',  dur: 3.4 },
+    { name: 'Close',  dur: 4.4 }
+  ];
+  var CUES = {}, TOTAL = 0;
+  for (var i = 0; i < SCENES.length; i++) { CUES[SCENES[i].name] = TOTAL; TOTAL += SCENES[i].dur; }
+  TOTAL = Math.round(TOTAL * 1000) / 1000;   // 23.0
+  var O = CUES.Open, E = CUES.Estate, I = CUES.Inside, N = CUES.Income, Z = CUES.Zoned, C = CUES.Close;
+
+  // ── easing + tween (exact match to animations-v3.jsx) ───────────────────────
+  var Easing = {
+    linear: function (t) { return t; },
+    easeOutCubic: function (t) { t = t - 1; return t * t * t + 1; },
+    easeOutBack: function (t) { var c1 = 1.70158, c3 = c1 + 1; return 1 + c3 * Math.pow(t - 1, 3) + c1 * Math.pow(t - 1, 2); }
+  };
+  function clamp(v, lo, hi) { return Math.max(lo, Math.min(hi, v)); }
+  function tween(from, to, start, end, ease) {
+    return function (t) {
+      if (t <= start) return from;
+      if (t >= end) return to;
+      return from + (to - from) * ease((t - start) / (end - start));
+    };
+  }
+  var enter = function (f, t, s, e) { return tween(f, t, s, e, Easing.easeOutCubic); };
+  var drift = function (f, t, s, e) { return tween(f, t, s, e, Easing.linear); };
+  var pop   = function (f, t, s, e) { return tween(f, t, s, e, Easing.easeOutBack); };
+  function money(v) { return '$' + Math.round(v).toLocaleString('en-US'); }
+
+  // ── tiny DOM builder ────────────────────────────────────────────────────────
+  function el(tag, style, kids) {
+    var n = document.createElement(tag);
+    if (style) n.style.cssText = style;
+    if (kids != null) {
+      if (!Array.isArray(kids)) kids = [kids];
+      kids.forEach(function (k) { n.appendChild(typeof k === 'string' ? document.createTextNode(k) : k); });
+    }
+    return n;
+  }
+  var stage = document.getElementById('stage');
+  var updaters = [];   // per-frame fns: (T) => void
+
+  // ── photo windows ───────────────────────────────────────────────────────────
+  // Each: {src, from, to, z0, z1, x1, y1} — scale/drift across its own shot.
+  var PHOTOS = [
+    { src: 'hero.jpg',           from: O,         to: E,         z0: 1.04, z1: 1.16, y1: -30 },
+    { src: 'facade.jpg',         from: E,         to: E + 1.8,   z0: 1.06, z1: 1.15, x1: -40 },
+    { src: 'porch.jpg',          from: E + 1.8,   to: I,         z0: 1.05, z1: 1.14, y1: -24 },
+    { src: 'kitchen.jpg',        from: I,         to: I + 1.35,  z0: 1.05, z1: 1.13, x1: -30 },
+    { src: 'stair.jpg',          from: I + 1.35,  to: I + 2.7,   z0: 1.06, z1: 1.14, y1: -20 },
+    { src: 'bed-primary.jpg',    from: I + 2.7,   to: N,         z0: 1.05, z1: 1.13, x1: 30 },
+    { src: 'aerial-grounds.jpg', from: N,         to: Z,         z0: 1.05, z1: 1.18, y1: -40 },
+    { src: 'frontage.jpg',       from: Z,         to: C,         z0: 1.06, z1: 1.16, x1: -50 },
+    { src: 'twilight-aerial.jpg',from: C,         to: TOTAL + 1, z0: 1.05, z1: 1.18, y1: -30 }
+  ];
+  PHOTOS.forEach(function (p) {
+    var win = el('div', 'position:absolute;left:0;top:0;width:1080px;height:' + PHOTO_H + 'px;overflow:hidden;background:' + INK + ';visibility:hidden;');
+    var img = el('img', 'position:absolute;left:50%;top:50%;width:100%;height:100%;object-fit:cover;');
+    img.src = 'img/' + p.src; img.alt = ''; img.loading = 'eager'; img.decoding = 'async';
+    win.appendChild(img);
+    stage.appendChild(win);
+    var fz = drift(p.z0 || 1.05, p.z1 || 1.16, p.from, p.to);
+    var fx = drift(0, p.x1 || 0, p.from, p.to);
+    var fy = drift(0, p.y1 || 0, p.from, p.to);
+    updaters.push(function (T) {
+      var on = T >= p.from && T < p.to;
+      win.style.visibility = on ? 'visible' : 'hidden';
+      if (on) img.style.transform = 'translate(-50%,-50%) scale(' + fz(T) + ') translate(' + fx(T) + 'px,' + fy(T) + 'px)';
+    });
+  });
+
+  // photo scrim — always on
+  stage.appendChild(el('div',
+    'position:absolute;left:0;top:0;width:1080px;height:' + PHOTO_H + 'px;pointer-events:none;' +
+    'background:linear-gradient(180deg,rgba(32,30,29,.62) 0%,rgba(32,30,29,.04) 30%,rgba(32,30,29,.30) 62%,rgba(32,30,29,.78) 100%);'));
+
+  // ── persistent brand chrome ─────────────────────────────────────────────────
+  var mark = el('img', 'width:34px;height:auto;');
+  mark.src = '/showcase/_brand/legacy-mark.png'; mark.alt = '';
+  var chrome = el('div',
+    'position:absolute;left:0;top:0;width:1080px;padding:44px 64px;display:flex;justify-content:space-between;align-items:center;',
+    [ el('div', 'display:flex;align-items:center;gap:14px;', [ mark,
+        el('span', 'font:800 28px/1 Archivo,system-ui,sans-serif;letter-spacing:.2em;text-transform:uppercase;color:#fff;', 'Legacy Properties') ]),
+      el('span', 'font:700 22px/1 Archivo,system-ui,sans-serif;letter-spacing:.24em;text-transform:uppercase;color:rgba(255,255,255,.8);', 'Murphys, CA') ]);
+  stage.appendChild(chrome);
+
+  // helper: a Shot wrapper that toggles visibility over [from,to)
+  function shot(from, to, node) {
+    node.style.visibility = 'hidden';
+    updaters.push(function (T) { node.style.visibility = (T >= from && T < to) ? 'visible' : 'hidden'; });
+    stage.appendChild(node);
+    return node;
+  }
+  function kicker(text, color) {
+    return el('div', 'display:flex;align-items:center;gap:18px;', [
+      el('span', 'display:block;width:46px;height:4px;background:' + (color || GREEN) + ';'),
+      el('span', 'font:800 26px/1 Archivo,system-ui,sans-serif;letter-spacing:.22em;text-transform:uppercase;color:' + (color || GREEN_DEEP) + ';', text)
+    ]);
+  }
+  function panelBox(bg, fg) {
+    return el('div',
+      'position:absolute;left:0;top:' + PANEL_Y + 'px;width:1080px;height:' + PANEL_H + 'px;background:' + (bg || PAPER) +
+      ';color:' + (fg || INK) + ';padding:56px 64px;display:flex;flex-direction:column;gap:26px;justify-content:center;');
+  }
+
+  // ── OPEN: title over the photo ──────────────────────────────────────────────
+  var subLine = el('div', 'display:flex;align-items:center;gap:18px;margin-bottom:26px;', [
+    el('span', 'display:block;width:46px;height:4px;background:#8fd0a5;'),
+    el('span', 'font:800 26px/1 Archivo,system-ui,sans-serif;letter-spacing:.22em;text-transform:uppercase;color:#fff;', 'A legacy estate for sale')
+  ]);
+  var titleWrap = el('div', '', el('h1',
+    'margin:0;font:800 128px/0.88 Archivo,system-ui,sans-serif;letter-spacing:-.035em;text-transform:uppercase;color:#fff;'));
+  titleWrap.firstChild.innerHTML = '433 East<br>Highway 4';
+  var titleGroup = el('div', 'position:absolute;left:64px;right:64px;bottom:' + (1920 - PHOTO_H + 72) + 'px;', [subLine, titleWrap]);
+  shot(O, E, titleGroup);
+  var fSubO = enter(0, 1, O + 0.15, O + 0.8), fTitleO = enter(0, 1, O + 0.35, O + 1.2), fTitleY = enter(120, 0, O + 0.35, O + 1.5);
+  updaters.push(function (T) {
+    subLine.style.opacity = fSubO(T);
+    titleWrap.style.opacity = fTitleO(T);
+    titleWrap.style.transform = 'translateY(' + fTitleY(T) + 'px)';
+  });
+
+  // ── PANEL: Open — the offering ──────────────────────────────────────────────
+  shot(O, E, panelBox(PAPER, INK)).append(
+    kicker('The offering'),
+    el('div', 'font:800 92px/0.92 Archivo,system-ui,sans-serif;letter-spacing:-.03em;', '$1,399,000'),
+    el('div', 'font:600 34px/1.35 Archivo,system-ui,sans-serif;color:' + MUTED + ';', '2.6 usable acres · Highway 4 frontage · commercially zoned')
+  );
+
+  // ── PANEL: Estate ───────────────────────────────────────────────────────────
+  var estTitle = el('div', 'font:800 74px/0.96 Archivo,system-ui,sans-serif;letter-spacing:-.03em;text-transform:uppercase;');
+  estTitle.innerHTML = 'An 1902 farmhouse,<br>restored';
+  shot(E, I, panelBox(PAPER, INK)).append(
+    kicker('The estate'), estTitle,
+    el('div', 'font:500 34px/1.4 Archivo,system-ui,sans-serif;color:' + MUTED + ';',
+      'Ten-foot ceilings, original woodwork, period hardware — and a porch built for long evenings.')
+  );
+
+  // ── PANEL: Inside — stats ───────────────────────────────────────────────────
+  var statRow = el('div', 'display:flex;gap:0;border-top:4px solid ' + INK + ';');
+  [['4', 'Bedrooms'], ['3', 'Baths'], ['2,854', 'Sq ft']].forEach(function (p, idx) {
+    statRow.appendChild(el('div',
+      'flex:1;padding:28px 0;' + (idx < 2 ? 'border-right:2px solid rgba(32,30,29,.18);' : ''), [
+        el('div', 'font:800 76px/0.9 Archivo,system-ui,sans-serif;letter-spacing:-.03em;', p[0]),
+        el('div', 'font:700 24px/1 Archivo,system-ui,sans-serif;letter-spacing:.18em;text-transform:uppercase;color:' + MUTED + ';margin-top:12px;', p[1])
+      ]));
+  });
+  shot(I, N, panelBox(PAPER, INK)).append(
+    kicker('Inside'), statRow,
+    el('div', 'font:500 32px/1.4 Archivo,system-ui,sans-serif;color:' + MUTED + ';', 'Delivered vacant — move in, or place a tenant.')
+  );
+
+  // ── PANEL: Income — dark, animated counters + bars ──────────────────────────
+  var incomeRows = [
+    { label: 'In place today',   note: 'Studio leased, NNN',        annual: 18000,  pct: 6,   color: '#8fd0a5' },
+    { label: 'House re-leased',  note: 'Prior terms restored',      annual: 54000,  pct: 19,  color: '#5ba777' },
+    { label: 'Aggressive',       note: 'STR across the buildings',  annual: 152400, pct: 54,  color: GREEN },
+    { label: 'Developer vision', note: 'Boutique lodging + venue',  annual: 284400, pct: 100, color: GREEN_DEEP }
+  ];
+  var incomeGrid = el('div', 'display:grid;gap:22px;');
+  incomeRows.forEach(function (r, idx) {
+    var start = N + 0.5 + idx * 0.55;
+    var fill = el('span', 'display:block;height:100%;width:0%;background:' + r.color + ';');
+    var bar = el('div', 'height:16px;background:rgba(32,30,29,.12);margin-top:12px;', fill);
+    var fig = el('div', 'font:800 46px/1 Archivo,system-ui,sans-serif;letter-spacing:-.02em;text-align:right;color:' + (idx === 3 ? '#8fd0a5' : '#fff') + ';', '$0');
+    var left = el('div', '', [
+      el('div', 'font:700 32px/1.1 Archivo,system-ui,sans-serif;', r.label),
+      el('div', 'font:500 22px/1.2 Archivo,system-ui,sans-serif;color:#9b9797;margin-top:6px;', r.note),
+      bar
+    ]);
+    incomeGrid.appendChild(el('div', 'display:grid;grid-template-columns:1fr 300px;gap:24px;align-items:center;', [left, fig]));
+    var fVal = enter(0, r.annual, start, start + 0.9);
+    var fPct = enter(0, r.pct, start, start + 0.9);
+    updaters.push(function (T) {
+      fig.textContent = money(clamp(fVal(T), 0, r.annual));
+      fill.style.width = clamp(fPct(T), 0, r.pct) + '%';
+    });
+  });
+  shot(N, Z, panelBox(INK, '#fff')).append(
+    kicker('The numbers', '#8fd0a5'), incomeGrid,
+    el('div', 'font:500 20px/1.4 Archivo,system-ui,sans-serif;color:#9b9797;', 'Annual, illustrative modelling only — buyer to verify.')
+  );
+
+  // ── PANEL: Zoned — chips popping in ─────────────────────────────────────────
+  var chipWrap = el('div', 'display:flex;flex-wrap:wrap;gap:16px;');
+  ['Boutique inn', 'Tasting room', 'STR compound', 'Retreat & wellness'].forEach(function (u, idx) {
+    var at = Z + 0.45 + idx * 0.42;
+    var chip = el('span',
+      'border:4px solid ' + INK + ';padding:18px 26px;font:800 34px/1 Archivo,system-ui,sans-serif;letter-spacing:-.01em;text-transform:uppercase;opacity:0;', u);
+    chipWrap.appendChild(chip);
+    var fO = enter(0, 1, at, at + 0.4), fY = pop(26, 0, at, at + 0.55);
+    updaters.push(function (T) { chip.style.opacity = fO(T); chip.style.transform = 'translateY(' + fY(T) + 'px)'; });
+  });
+  shot(Z, C, panelBox(PAPER, INK)).append(
+    kicker("Zoned for what's next"), chipWrap,
+    el('div', 'font:500 32px/1.4 Archivo,system-ui,sans-serif;color:' + MUTED + ';', 'Commercial zoning, three structures, one landmark address.')
+  );
+
+  // ── PANEL: Close — green, price stamp + contact ─────────────────────────────
+  var priceGroup = el('div', 'transform-origin:left center;opacity:0;', [
+    el('div', 'font:700 24px/1 Archivo,system-ui,sans-serif;letter-spacing:.22em;text-transform:uppercase;color:rgba(255,255,255,.8);', 'Offered at'),
+    el('div', 'font:800 116px/0.92 Archivo,system-ui,sans-serif;letter-spacing:-.035em;margin-top:10px;', '$1,399,000')
+  ]);
+  var contactRight = el('div', 'text-align:right;', [
+    el('div', 'font:800 40px/1.1 Archivo,system-ui,sans-serif;', '(209) 559-4966'),
+    el('div', 'font:500 26px/1.3 Archivo,system-ui,sans-serif;margin-top:8px;', 'legacycalifornia.com')
+  ]);
+  var contactLeft = el('div', '', [
+    el('div', 'font:800 46px/1 Archivo,system-ui,sans-serif;letter-spacing:-.02em;text-transform:uppercase;', 'Sara Cooper'),
+    (function () { var d = el('div', 'font:600 24px/1.4 Archivo,system-ui,sans-serif;letter-spacing:.1em;text-transform:uppercase;margin-top:10px;'); d.innerHTML = 'Broker / Owner · Legacy Properties<br>DRE #02141987'; return d; })()
+  ]);
+  shot(C, TOTAL + 1, panelBox(GREEN, '#fff')).append(
+    priceGroup,
+    el('div', 'height:4px;background:#fff;'),
+    el('div', 'display:flex;justify-content:space-between;align-items:flex-end;gap:24px;', [contactLeft, contactRight])
+  );
+  var fPriceO = enter(0, 1, C + 0.2, C + 0.8), fPriceS = pop(0.86, 1, C + 0.25, C + 1.1);
+  updaters.push(function (T) { priceGroup.style.opacity = fPriceO(T); priceGroup.style.transform = 'scale(' + fPriceS(T) + ')'; });
+
+  // ── loop cover: green wipe off the head, back on the tail ────────────────────
+  var coverMark = el('img', 'width:70px;height:auto;'); coverMark.src = '/showcase/_brand/legacy-mark.png'; coverMark.alt = '';
+  var cover = el('div',
+    'position:absolute;left:0;top:0;width:1080px;height:1920px;background:' + GREEN_DEEP + ';display:flex;align-items:center;justify-content:center;',
+    el('div', 'display:flex;align-items:center;gap:24px;', [ coverMark,
+      el('span', 'font:800 64px/1 Archivo,system-ui,sans-serif;letter-spacing:.2em;text-transform:uppercase;color:#fff;', 'Legacy Properties') ]));
+  stage.appendChild(cover);
+  var fCoverIn = enter(0, -100, 0, 0.55), fCoverOut = enter(-100, 0, TOTAL - 0.55, TOTAL);
+  updaters.push(function (T) {
+    var y = T < TOTAL - 0.6 ? fCoverIn(T) : fCoverOut(T);
+    cover.style.transform = 'translateY(' + y + '%)';
+  });
+
+  // ── fit the fixed stage into whatever frame we're shown in ───────────────────
+  var fit = document.getElementById('reel-fit');
+  function resize() {
+    var vw = window.innerWidth, vh = window.innerHeight;
+    var scale = Math.min(vw / 1080, vh / 1920);
+    fit.style.width = (1080 * scale) + 'px';
+    fit.style.height = (1920 * scale) + 'px';
+    stage.style.transform = 'scale(' + scale + ')';
+  }
+  window.addEventListener('resize', resize);
+  resize();
+
+  // ── play loop (authored seconds, wall-clock driven, wraps at TOTAL) ──────────
+  var t0 = null, reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  function frame(now) {
+    if (t0 == null) t0 = now;
+    var T = ((now - t0) / 1000) % TOTAL;
+    for (var k = 0; k < updaters.length; k++) updaters[k](T);
+    requestAnimationFrame(frame);
+  }
+  // Reduced-motion: hold a representative frame (the price close) instead of animating.
+  if (reduce) { for (var k = 0; k < updaters.length; k++) updaters[k](C + 1.4); }
+  else requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>
