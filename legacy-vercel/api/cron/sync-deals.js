@@ -1162,6 +1162,7 @@ export default async function handler(req, res) {
     const tasks = Array.isArray(data.tasks) ? data.tasks : [];
     const normAgent = (a) => { a = String(a || '').toLowerCase(); return /james/.test(a) ? 'james' : (/both/.test(a) ? 'both' : 'sara'); };
     const sig = (agent, client, title) => `${agent}|${client || ''}|${title}`;
+    const slug = (s) => String(s || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 70);
 
     // Preserve, across the re-sync, the done checkmark AND the agents'
     // note-back-to-briefing + attention flag (matched by agent|client|title),
@@ -1241,7 +1242,19 @@ export default async function handler(req, res) {
           source:     'briefing',
           done:       kept ? !!kept.done : (t.done === true)
         };
-        if (hasBriefKey) row.brief_key = taskKey;
+        // Stable per-task identity. Prefer Cowork's explicit `key`; otherwise
+        // DERIVE one from agent + client + countdown-stripped title so every
+        // briefing task carries a stable, dedup-able key even when Cowork didn't
+        // set one. (Before this, brief_key was null unless Cowork provided `key`,
+        // and source_key is null for deal-less briefing tasks — so the briefing
+        // had NO stable key to dedup on and fell back to brittle title matching.)
+        // Exposed to Cowork via /api/crm/briefing-feedback as `key`. brief_key has
+        // no unique constraint, so a derived collision only means two genuinely
+        // identical tasks share a check-off — the intended behaviour.
+        if (hasBriefKey) {
+          row.brief_key = taskKey
+            || ('d:' + agent + ':' + slug(client) + ':' + slug(stripCd(title))).slice(0, 120);
+        }
         if (hasFbCols && kept) {
           row.agent_note    = kept.agent_note ?? null;
           row.attention     = !!kept.attention;

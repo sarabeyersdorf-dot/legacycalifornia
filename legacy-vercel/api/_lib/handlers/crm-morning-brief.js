@@ -43,8 +43,9 @@ export default async function handler(req, res) {
     // symptom (Bug 5) — so it never surfaced collection_nudges / timeline_
     // approvals. A key pull gets the broker (full) scope and the documented shape.
     const secret = process.env.SYNC_SECRET || process.env.BRIEFING_FEEDBACK_SECRET;
+    const headless = !!(secret && req.query?.key === secret);   // Cowork's key pull
     let profile;
-    if (secret && req.query?.key === secret) {
+    if (headless) {
       profile = { role: 'admin' };
     } else {
       ({ profile } = await getCallerProfile(req, res));
@@ -437,6 +438,18 @@ export default async function handler(req, res) {
     // the "never surface James's status in Sara's brief or vice versa" rule
     // used for the narrative below.
     result.email_reconnect_needed = reconnectOwners.includes(agent) ? [agent] : [];
+
+    // Headless callers (Cowork's ?key= pull) don't use the AI narrative and must
+    // never block on Anthropic. Generating it is the slowest step here, and if
+    // the model call stalls the whole function can hit the platform timeout and
+    // return an EMPTY 200 to Cowork — the "morning-brief has no usable body"
+    // symptom. Skip it entirely for the key path; the CRM UI still gets it below.
+    if (headless) {
+      result.narrative = null;
+      result.narrative_from = 'skipped_headless';
+      return ok(res, result);
+    }
+
     const today = new Date().toISOString().slice(0, 10);
     const { data: cached } = await supa
       .from('briefs')
@@ -477,12 +490,18 @@ Snapshot for ${agent === 'sara' ? 'Sara' : 'James'}:
   ${ctx.radio_silence_count} lead(s) with no contact in 14+ days${ctx.sample_radio_lead ? ' (e.g. ' + ctx.sample_radio_lead + ')' : ''}
   ${ctx.open_offer_count} open offer(s) in negotiation${emailReconnectSelf ? '\n  Your Gmail connection has expired — email sync is paused until you reconnect it from Settings' : ''}
 Write the brief paragraph now. Lead with the most important signal${emailReconnectSelf ? ' — the expired Gmail connection is important and should be mentioned' : ''}.`;
-      const { text } = await anthropicMessage({
-        system: briefSystem(agent),
-        messages: [{ role: 'user', content: userPrompt }],
-        max_tokens: 400,
-        temperature: 0.6
-      });
+      // Cap the model call so a slow/hung Anthropic response can't run the whole
+      // function into the platform timeout (which surfaces as an empty 200). On
+      // timeout we fall through to the catch and serve the cached narrative.
+      const { text } = await Promise.race([
+        anthropicMessage({
+          system: briefSystem(agent),
+          messages: [{ role: 'user', content: userPrompt }],
+          max_tokens: 400,
+          temperature: 0.6
+        }),
+        new Promise((_, reject) => setTimeout(() => reject(new Error('narrative_timeout')), 12000))
+      ]);
       result.narrative      = text.trim();
       result.narrative_from = 'fresh';
 
