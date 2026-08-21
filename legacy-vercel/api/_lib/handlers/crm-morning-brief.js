@@ -328,12 +328,21 @@ export default async function handler(req, res) {
     // this it was invisible on the Today feed and only bumped a hidden counter.
     // Surface each unmatched inbound from the last 24h as a live-feed signal so
     // nothing a client sends can silently disappear. Fail-soft.
+    //
+    // EMAIL EXCLUDED: once a mailbox is connected (email-sync.js), every inbound
+    // email from a non-CRM address (newsletters, vendors, personal mail) is filed
+    // as a pending_review deal_message — and this block would surface each one on
+    // the Today feed, mislabeled "New text from an unknown number." That's inbox
+    // noise, not client activity, so unmatched EMAILS are excluded here; they
+    // still wait in the review queue for triage. Unmatched texts/calls from an
+    // unknown NUMBER stay (an unknown number can be a real prospect).
     try {
       const dayAgoIso = new Date(Date.now() - 24 * 3600 * 1000).toISOString();
       const { data: unmatched } = await supa.from('deal_messages')
         .select('id, channel, content, raw_phone_number, call_duration_seconds, created_at')
         .eq('status', 'pending_review')
         .eq('direction', 'inbound')
+        .neq('channel', 'email')
         .gte('created_at', dayAgoIso)
         .order('created_at', { ascending: false })
         .limit(12);
