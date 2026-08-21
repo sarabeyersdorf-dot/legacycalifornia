@@ -1,7 +1,7 @@
 {
-  "version": 9.0,
+  "version": 9.1,
   "lastUpdated": "2026-08-20",
-  "updatedBy": "cowork 2026-08-20 10:10 — scheduled 10am run: 3 new tasks (Baldwin lender docs, Baldwin appraisal, Sheep Ranch net sheet)",
+  "updatedBy": "cowork 2026-08-20 — Homes.com Listing Analytics weekly pull added to 4 listings (homesCom block)",
   "tasks": [
     {
       "agent": "sara",
@@ -3323,6 +3323,27 @@
         "note": "Beat its zip code for views. A separate ListTrac report on the earlier MLS number covers 2025-12-05 onward: 4,015 views / 4 shares / 99% new / 68 in the last 30 days.",
         "reportDate": "2026-08-16",
         "source": "ListTrac / MetroList weekly seller report"
+      },
+      "homesCom": {
+        "shareUrl": "https://www.homes.com/t/h3kn9nsqsh4t5?s=6",
+        "listingKey": "5myhkcnnb487k",
+        "addressShown": "433 E HIGHWAY 4",
+        "priceShown": 1399000,
+        "listedShown": "2026-03-20",
+        "daysOnMarket": 149,
+        "totalViews": 63789,
+        "displayAdViews": 17717,
+        "detailPageViews": 844,
+        "topOfSearchResults": 21658,
+        "favorites": 10,
+        "matterportViews": 44,
+        "shares": 2,
+        "agentViews": 866,
+        "consumerViews": 53609,
+        "combinedViews": 54475,
+        "reportDate": "2026-08-20",
+        "source": "Homes.com Listing Analytics",
+        "note": "Homes.com Listing Analytics (CoStar), agent tier Silver. Captured from the shareable /t/ report link, which is client-safe: it mints a fresh 180-day token on each open, so the link itself does not expire. These view counts are NOT comparable to listTrac's — different platform, different counting. Label both by source on the seller portal."
       }
     },
     {
@@ -3454,6 +3475,26 @@
         "note": "BEST PERFORMING LISTING IN THE BOOK. 3,018 views in the last 30 days — Zillow 1,947, Realtor.com 854. Beat its zip code. Unusually, 75% of visitors are RETURNING, not new: people are coming back to look again.",
         "reportDate": "2026-08-16",
         "source": "ListTrac / MetroList weekly seller report"
+      },
+      "homesCom": {
+        "shareUrl": "https://www.homes.com/t/0nlntp2hg4hv0?s=6",
+        "listingKey": "c1d7q816m3enr",
+        "addressShown": "467 Skyline Drive",
+        "priceShown": 89500,
+        "listedShown": "2026-06-04",
+        "daysOnMarket": 78,
+        "totalViews": 36195,
+        "displayAdViews": 2695,
+        "detailPageViews": 601,
+        "topOfSearchResults": 3516,
+        "favorites": 16,
+        "shares": 7,
+        "agentViews": 538,
+        "consumerViews": 34864,
+        "combinedViews": 35402,
+        "reportDate": "2026-08-20",
+        "source": "Homes.com Listing Analytics",
+        "note": "Homes.com Listing Analytics (CoStar), agent tier Silver. Captured from the shareable /t/ report link, which is client-safe: it mints a fresh 180-day token on each open, so the link itself does not expire. These view counts are NOT comparable to listTrac's — different platform, different counting. Label both by source on the seller portal."
       }
     },
     {
@@ -3539,6 +3580,26 @@
       },
       "timeline": {
         "note": "LISTING IS LIVE. An ESCROW on this listing cancelled — do not confuse the two. Purchase Agreement dated 2026-04-21 between buyer Kayla Priestley and seller Sean Cristian Moffatt. Cancellation of Contract, Disposition of Deposit and Cancellation of Escrow (C.A.R. Form CC rev 6/24) executed by BOTH parties; buyer cancelled under paragraph L(1) 8A; escrow #P-698773 at Placer Title Company cancelled with full mutual release; seller authorised release of the buyer's deposit back to the buyer in full, less buyer's fees and costs. Filed Duds\\9568 Sheep Ranch Rd\\Cancellation of Contract, Release of Deposit and Cancellation of Escrow - 624.pdf. Per Sara 2026-08-16: 'sheep ranch had an escrow cancel buyer Kayla Priestly but the listing is not canceled.' stage corrected 'cancelled' -> 'listing' and salePrice cleared to the RLA/MOT list price of $389,000 the same day. The listing is still marketing and still generating ListTrac traffic (3,165 views, 87 shares, 728 in the last 30 days)."
+      },
+      "homesCom": {
+        "shareUrl": "https://www.homes.com/t/jj8nrwzs7nljy?s=6",
+        "listingKey": "zvcl2khs7dj7z",
+        "addressShown": "9568 Sheep Ranch Road",
+        "priceShown": 389000,
+        "listedShown": "2026-04-08",
+        "daysOnMarket": 135,
+        "totalViews": 28725,
+        "displayAdViews": 4570,
+        "detailPageViews": 260,
+        "topOfSearchResults": 2386,
+        "favorites": 7,
+        "shares": 5,
+        "agentViews": 607,
+        "consumerViews": 27475,
+        "combinedViews": 28082,
+        "reportDate": "2026-08-20",
+        "source": "Homes.com Listing Analytics",
+        "note": "Homes.com Listing Analytics (CoStar), agent tier Silver. Captured from the shareable /t/ report link, which is client-safe: it mints a fresh 180-day token on each open, so the link itself does not expire. These view counts are NOT comparable to listTrac's — different platform, different counting. Label both by source on the seller portal."
       }
     },
     {
@@ -3952,7 +4013,29 @@
         "body": "Brian and Trish — the buyer cancelled on Friday. He signed the cancellation under his inspection and contingency rights, we both signed it back, and Placer has closed the file; his deposit goes back to him. I know that is a disappointment after a strong price. The good news is that we now have a full set of current inspection reports — home, pest, roof and sewer — which most sellers do not have going into a relist, and the buyer's own repair estimate. The one thing I want to settle before we go back on the market is the roof and pest question his inspector raised: I have written to both contractors who did the original work and I am waiting on them. Once I have that in writing we will decide together how it gets presented, and then talk about timing and price. — Sara Cooper, (209) 559-4966"
       },
       "buyerMilestones": [],
-      "buyerTasks": []
+      "buyerTasks": [],
+      "homesCom": {
+        "shareUrl": "https://www.homes.com/t/tvm2nkc7ypd8g?s=6",
+        "listingKey": "cybmwj41ds6er",
+        "addressShown": "324 Augusta Court #3",
+        "priceShown": 495000,
+        "listedShown": "2026-06-25",
+        "daysOnMarket": 57,
+        "totalViews": 18427,
+        "displayAdViews": 4655,
+        "detailPageViews": 252,
+        "topOfSearchResults": 7729,
+        "favorites": 6,
+        "matterportViews": 16,
+        "matterportViewTime": "5 h 3 min",
+        "shares": 5,
+        "agentViews": 787,
+        "consumerViews": 16972,
+        "combinedViews": 17759,
+        "reportDate": "2026-08-20",
+        "source": "Homes.com Listing Analytics",
+        "note": "Homes.com Listing Analytics (CoStar), agent tier Silver. Captured from the shareable /t/ report link, which is client-safe: it mints a fresh 180-day token on each open, so the link itself does not expire. These view counts are NOT comparable to listTrac's — different platform, different counting. Label both by source on the seller portal."
+      }
     },
     {
       "id": "preparing-1789-love-creek",
