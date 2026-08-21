@@ -2173,6 +2173,13 @@ window.LGPortal = window.LGPortal || {
     topLevelLists().forEach((c) => {
       const arr = dget(data, c.getAttribute('data-list'));
       if (arr === undefined) return;
+      // Optional list sections collapse entirely when empty (mirrors
+      // paintDashboard). Without this a section carrying static header/label
+      // text — e.g. the agent-only "Completed / Only you see this…" list —
+      // would render its shell to a real client even with zero rows, leaking
+      // agent-facing copy. The server already sends tasks_done:[] to a client,
+      // so this reliably hides it there while keeping it in the agent preview.
+      if (c.hasAttribute('data-optional')) c.style.display = (Array.isArray(arr) && arr.length) ? '' : 'none';
       paintList(c, arr);
     });
   }
