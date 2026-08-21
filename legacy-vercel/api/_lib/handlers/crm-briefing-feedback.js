@@ -24,17 +24,29 @@ export default async function handler(req, res) {
   const secret = process.env.SYNC_SECRET || process.env.BRIEFING_FEEDBACK_SECRET;
   if (secret && req.query?.key !== secret) return fail(res, 401, 'bad key');
 
+  // Drop the DONE rows by default so the payload can't outgrow the consumer's
+  // fetch limit. The whole file was serialising all ~240 tasks (most of them
+  // done), which pushed the response past ~94K and truncated it mid-JSON —
+  // silently dropping rejected_proposals off the end. `?all=1` restores the full
+  // set for anyone who needs the history.
+  const openOnly = !/^(1|true|yes)$/i.test(String(req.query?.all || ''));
+
   try {
     const supa = adminClient();
-    const COLS = 'agent, client, title, sub, due_label, done, agent_note, attention, agent_note_by, agent_note_at, source_key, created_at';
-    let { data, error } = await supa.from('agent_tasks').select(COLS)
-      .eq('source', 'briefing')
-      .order('created_at', { ascending: true });
-    // Fall back gracefully if migration 017 hasn't run yet.
+    const COLS = 'agent, client, title, sub, due_label, done, agent_note, attention, agent_note_by, agent_note_at, source_key, brief_key, created_at';
+    const baseQ = () => {
+      let q = supa.from('agent_tasks').select(COLS).eq('source', 'briefing');
+      if (openOnly) q = q.eq('done', false);
+      return q.order('created_at', { ascending: true });
+    };
+    let { data, error } = await baseQ();
+    // Fall back gracefully if brief_key / feedback columns aren't migrated yet.
     if (error) {
-      ({ data, error } = await supa.from('agent_tasks')
+      let q = supa.from('agent_tasks')
         .select('agent, client, title, sub, due_label, done, source_key, created_at')
-        .eq('source', 'briefing').order('created_at', { ascending: true }));
+        .eq('source', 'briefing');
+      if (openOnly) q = q.eq('done', false);
+      ({ data, error } = await q.order('created_at', { ascending: true }));
     }
     if (error) return fail(res, 500, error.message);
 
@@ -47,7 +59,11 @@ export default async function handler(req, res) {
       agent_note: t.agent_note || null,
       note_by:    t.agent_note_by || null,
       note_at:    t.agent_note_at || null,
-      deal:       t.source_key || null
+      deal:       t.source_key || null,
+      // Stable per-task dedup key (populated by sync-deals). Dedup on THIS, not
+      // on `deal` (which is null for deal-less tasks) or `title` (which carries a
+      // volatile countdown). Survives rewording and day-to-day countdown changes.
+      key:        t.brief_key || null
     }));
 
     // Seller-portal feedback (db/040): the note the agent wrote for the briefing
@@ -114,24 +130,47 @@ export default async function handler(req, res) {
     const cacheAgeSeconds = dataGeneratedAt ? Math.max(0, Math.floor((Date.now() - new Date(dataGeneratedAt).getTime()) / 1000)) : null;
     const stale = cacheAgeSeconds != null && cacheAgeSeconds > 3600;
 
+    // Counts over the FULL set, independent of the ?open filter (so `done`/`total`
+    // stay meaningful even though `tasks` below is open-only by default). Cheap
+    // head-only counts; falls back to the returned-rows tally if the feedback
+    // columns aren't migrated.
+    let counts = {
+      total: tasks.length, done: 0, open: tasks.length,
+      with_notes: tasks.filter((t) => t.agent_note).length,
+      attention: tasks.filter((t) => t.needs_attention).length,
+      rejected_proposals: rejected_proposals.length
+    };
+    try {
+      const [tot, dn, wn, att] = await Promise.all([
+        supa.from('agent_tasks').select('id', { count: 'exact', head: true }).eq('source', 'briefing'),
+        supa.from('agent_tasks').select('id', { count: 'exact', head: true }).eq('source', 'briefing').eq('done', true),
+        supa.from('agent_tasks').select('id', { count: 'exact', head: true }).eq('source', 'briefing').not('agent_note', 'is', null),
+        supa.from('agent_tasks').select('id', { count: 'exact', head: true }).eq('source', 'briefing').eq('attention', true)
+      ]);
+      const total = tot.count || 0;
+      counts = {
+        total, done: dn.count || 0, open: total - (dn.count || 0),
+        with_notes: wn.count || 0, attention: att.count || 0,
+        rejected_proposals: rejected_proposals.length
+      };
+    } catch (_) { /* pre-feedback-cols schema — keep the returned-rows tally */ }
+
+    // Field order matters: counts, rejected_proposals and needs_review come
+    // BEFORE the large `tasks` array so that if the payload is ever truncated by
+    // a downstream fetch cap, the small high-value fields survive (the old order
+    // put rejected_proposals last, so truncation silently dropped it).
     return ok(res, {
       generated_at: new Date().toISOString(),
       data_generated_at: dataGeneratedAt,
       cache_age_seconds: cacheAgeSeconds,
       stale,
-      counts: {
-        total:      tasks.length,
-        done:       tasks.filter((t) => t.done).length,
-        open:       tasks.filter((t) => !t.done).length,
-        with_notes: tasks.filter((t) => t.agent_note).length,
-        attention:  tasks.filter((t) => t.needs_attention).length,
-        rejected_proposals: rejected_proposals.length
-      },
+      open_only: openOnly,   // done rows omitted unless ?all=1
+      counts,
+      rejected_proposals,
       // The list Cowork should act on first: flagged or annotated.
       needs_review: tasks.filter((t) => t.needs_attention || t.agent_note),
-      tasks,
       deal_portal_notes,
-      rejected_proposals
+      tasks
     });
   } catch (e) {
     return fail(res, 500, e.message);
