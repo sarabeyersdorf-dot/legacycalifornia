@@ -2202,9 +2202,16 @@ window.LGPortal = window.LGPortal || {
     const params = new URLSearchParams(location.search);
     const token = window.LGPortal.token();   // ?t= or /buyer|/seller/<token>
     const deal  = params.get('deal');   // agent preview of a specific deal
+    // "View as seller" (?as=seller|client) must ride along on the ?deal= preview,
+    // or this main painter fetches the AGENT view while the inline hero script
+    // (which does forward it) fetches the client view — the two disagree and the
+    // preview shows agent-only extras (Completed list, private note, tickable
+    // tasks) that the real /seller/<token> link never shows. A real client token
+    // (?t=) is already the client, so `as` only matters on the ?deal= path.
+    const asClient = /^(seller|client)$/i.test(params.get('as') || '');
     let url = '/api/seller/portal';
     if (token)     url += '?t=' + encodeURIComponent(token);
-    else if (deal) url += '?deal=' + encodeURIComponent(deal);
+    else if (deal) url += '?deal=' + encodeURIComponent(deal) + (asClient ? '&as=seller' : '');
     try {
       res = await fetch(url, {
         method: 'GET',
