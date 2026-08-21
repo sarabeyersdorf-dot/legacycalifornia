@@ -143,5 +143,14 @@ export default async function handler(req, res) {
     res.setHeader('Content-Type', 'application/json');
     return res.end(JSON.stringify({ success: false, error: `unknown crm action: ${action}` }));
   }
+  // CRM data is live and per-agent. Without an explicit no-store, a browser or
+  // the Vercel edge can cache a read response and serve it stale — e.g. one
+  // agent's board showing a lead list from before a new lead synced (Ryan Vega
+  // visible to Sara but not James), or a "pending today" list that lags reality.
+  // Set it for the whole CRM surface here so no individual handler can forget;
+  // a handler that needs different caching can still override after this.
+  res.setHeader('Cache-Control', 'private, no-store, no-cache, must-revalidate');
+  res.setHeader('CDN-Cache-Control', 'no-store');
+  res.setHeader('Vercel-CDN-Cache-Control', 'no-store');
   return fn(req, res);
 }
