@@ -21,7 +21,7 @@ import { handleOptions, ok, fail, readJson } from '../cors.js';
 const NUMERIC = new Set(['list_price', 'sale_price']);
 const TEXT    = new Set(['address', 'city', 'mls_number']);
 const DATE    = new Set(['coe_date']);
-const URLF    = new Set(['video_url', 'matterport_url']);   // listing media → seller portal
+const URLF    = new Set(['video_url', 'matterport_url', 'showcase_url']);   // listing media + marketing page → seller portal
 const ENUMS   = { side: ['buyer', 'seller', 'both', 'listing'], agent: ['sara', 'james', 'both'] };
 const ALLOWED = new Set([...NUMERIC, ...TEXT, ...DATE, ...URLF, ...Object.keys(ENUMS)]);
 
