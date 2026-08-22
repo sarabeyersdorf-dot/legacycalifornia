@@ -21,8 +21,8 @@
   'use strict';
 
   var CONFIG = {
-    GA4_MEASUREMENT_ID: 'G-XXXXXXXXXX',
-    GOOGLE_ADS_ID:      'AW-XXXXXXXXX',
+    GA4_MEASUREMENT_ID: 'G-43P5CYDS1B',
+    GOOGLE_ADS_ID:      'AW-16991290125',
     ADS_CONVERSION_LABELS: {
       phoneClick:    '',   // e.g. "AW-XXXXXXXXX/AbCdEfGh1234"
       packetRequest: ''    // e.g. "AW-XXXXXXXXX/IjKlMnOp5678"
