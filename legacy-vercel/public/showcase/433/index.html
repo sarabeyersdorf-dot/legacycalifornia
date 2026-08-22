@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>433 E Highway 4, Murphys — Legacy Properties</title>
+<script src="/legacy-analytics.js"></script>
 <meta name="description" content="A restored 1902 farmhouse on 2.6 usable acres with Highway 4 frontage, commercial zoning and rent in place — offered at $1,399,000 in Murphys wine country by Legacy Properties.">
 <link rel="canonical" href="https://legacycalifornia.com/433-e-highway-4-murphys">
 <meta property="og:type" content="website">
@@ -15,6 +16,46 @@
 <meta name="twitter:title" content="433 E Highway 4, Murphys — $1,399,000">
 <meta name="twitter:description" content="Restored 1902 farmhouse on 2.6 usable acres — Highway 4 frontage, commercial zoning, income in place.">
 <meta name="twitter:image" content="https://legacycalifornia.com/showcase/433/img/hero.jpg">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": ["Product", "SingleFamilyResidence"],
+  "name": "433 E Highway 4, Murphys, CA — For Sale",
+  "description": "A restored 1902 farmhouse on 2.6 usable acres with Highway 4 frontage, commercial zoning and rent in place, in Murphys wine country.",
+  "url": "https://legacycalifornia.com/433-e-highway-4-murphys",
+  "image": [
+    "https://legacycalifornia.com/showcase/433/img/hero.jpg",
+    "https://legacycalifornia.com/showcase/433/img/facade.jpg"
+  ],
+  "address": {
+    "@type": "PostalAddress",
+    "streetAddress": "433 E Highway 4",
+    "addressLocality": "Murphys",
+    "addressRegion": "CA",
+    "postalCode": "95247",
+    "addressCountry": "US"
+  },
+  "numberOfRooms": 4,
+  "floorSize": { "@type": "QuantitativeValue", "value": 2854, "unitCode": "FTK" },
+  "brand": { "@type": "RealEstateAgent", "name": "Legacy Properties", "telephone": "+1-209-559-4966" },
+  "offers": {
+    "@type": "Offer",
+    "price": "1399000",
+    "priceCurrency": "USD",
+    "availability": "https://schema.org/InStock",
+    "url": "https://legacycalifornia.com/433-e-highway-4-murphys",
+    "seller": { "@type": "RealEstateAgent", "name": "Sara Cooper", "telephone": "+1-209-559-4966" }
+  },
+  "additionalProperty": [
+    { "@type": "PropertyValue", "name": "Bedrooms", "value": 4 },
+    { "@type": "PropertyValue", "name": "Bathrooms", "value": 3 },
+    { "@type": "PropertyValue", "name": "Living area (sq ft)", "value": 2854 },
+    { "@type": "PropertyValue", "name": "Lot size (acres)", "value": 2.6 },
+    { "@type": "PropertyValue", "name": "Year built", "value": 1902 },
+    { "@type": "PropertyValue", "name": "Zoning", "value": "Commercial / mixed use" }
+  ]
+}
+</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
@@ -456,13 +497,30 @@ html { scroll-behavior: smooth; }
           <div style="display: flex; justify-content: space-between; gap: 16px;"><span style="color: rgba(255,255,255,.72); font-size: 11px; font-weight: 700; letter-spacing: .18em; text-transform: uppercase;">DRE</span><span style="font-weight: 700;">#02141987</span></div>
         </div>
       </div>
+      <div id="lp-packet" style="border: 2px solid #ffffff; padding: clamp(24px, 3vw, 44px); display: flex; flex-direction: column; gap: 18px; align-self: start;">
+        <div>
+          <div style="font-size: 10px; font-weight: 700; letter-spacing: .22em; text-transform: uppercase; color: rgba(255,255,255,.72);">Request the property portfolio</div>
+          <div style="margin-top: 8px; font-size: clamp(20px, 2vw, 28px); font-weight: 800; letter-spacing: -.02em; line-height: 1.1;">Get the full investor packet.</div>
+          <p style="margin: 10px 0 0; font-size: 14px; line-height: 1.5; color: rgba(255,255,255,.86);">Zoning summary, lease copies, site plan and income modelling — sent to your inbox.</p>
+        </div>
+        <form id="lp-packet-form" novalidate style="display: flex; flex-direction: column; gap: 12px;">
+          <!-- Honeypot: real people never see or fill this; a filled value flags a bot (checked server-side). -->
+          <input type="text" name="company" tabindex="-1" autocomplete="off" aria-hidden="true" style="position: absolute; left: -9999px; width: 1px; height: 1px; opacity: 0;">
+          <input name="name" required placeholder="Name" autocomplete="name" style="background: rgba(255,255,255,.10); border: 1px solid rgba(255,255,255,.45); color: #ffffff; font-family: inherit; font-size: 15px; padding: 12px 14px; width: 100%; box-sizing: border-box;">
+          <input name="email" type="email" required placeholder="Email" autocomplete="email" style="background: rgba(255,255,255,.10); border: 1px solid rgba(255,255,255,.45); color: #ffffff; font-family: inherit; font-size: 15px; padding: 12px 14px; width: 100%; box-sizing: border-box;">
+          <input name="phone" type="tel" placeholder="Phone (optional)" autocomplete="tel" style="background: rgba(255,255,255,.10); border: 1px solid rgba(255,255,255,.45); color: #ffffff; font-family: inherit; font-size: 15px; padding: 12px 14px; width: 100%; box-sizing: border-box;">
+          <textarea name="message" rows="3" placeholder="Anything you'd like to know? (optional)" style="background: rgba(255,255,255,.10); border: 1px solid rgba(255,255,255,.45); color: #ffffff; font-family: inherit; font-size: 15px; padding: 12px 14px; width: 100%; box-sizing: border-box; resize: vertical;"></textarea>
+          <button type="submit" id="lp-packet-submit" style="background: #ffffff; color: #1f6b3c; border: none; font-family: inherit; font-size: 12px; font-weight: 800; letter-spacing: .16em; text-transform: uppercase; padding: 16px 24px; cursor: pointer;">Send me the packet →</button>
+          <div id="lp-packet-status" role="status" aria-live="polite" style="font-size: 13px; line-height: 1.5; min-height: 1em;"></div>
+        </form>
+      </div>
     </div>
   </section>
 
   <footer style="background: #201e1d; color: #9b9797; padding: clamp(36px, 5vw, 64px) clamp(20px, 4vw, 72px);">
     <div style="max-width: 1440px; margin: 0 auto; display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 28px; align-items: start;">
       <div style="display: flex; align-items: center; gap: 14px;"><img src="/showcase/_brand/legacy-mark.png" alt="Legacy Properties" style="height: 48px; width: auto; display: block;"><div style="color: #ffffff; font-size: 12px; font-weight: 800; letter-spacing: .2em; text-transform: uppercase;">Legacy Properties<br><span style="color: #9b9797; font-weight: 600; letter-spacing: .14em;">Every home has a story</span></div></div>
-      <p style="margin: 0; font-size: 12px; line-height: 1.6; max-width: 640px;">433 E Highway 4, Murphys, CA 95247. Offered at $1,399,000. Information deemed reliable but not guaranteed; square footage, acreage, zoning, permitted uses and lease terms to be independently verified by buyer. Income figures are illustrative estimates only and are not a projection of future performance. Sara Cooper, Broker/Owner, Legacy Properties, DRE #02141987. Equal Housing Opportunity.</p>
+      <p style="margin: 0; font-size: 12px; line-height: 1.6; max-width: 640px;">433 E Highway 4, Murphys, CA 95247. Offered at $1,399,000. Information deemed reliable but not guaranteed; square footage, acreage, zoning, permitted uses and lease terms to be independently verified by buyer. Income figures are illustrative estimates only and are not a projection of future performance. Sara Cooper, Broker/Owner, Legacy Properties, DRE #02141987. Equal Housing Opportunity. <a href="/privacy.html" style="color: #c9b892; text-decoration: underline;">Privacy policy</a>.</p>
     </div>
   </footer>
 
@@ -751,6 +809,83 @@ html { scroll-behavior: smooth; }
   function boot(){ try { new LP().setup(); } catch(e){} applyHover(); }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
   else boot();
+})();
+</script>
+
+<script>
+/* 433 investor-packet form → POST /api/leads/intake — the same endpoint every
+   Legacy form uses (Supabase lead insert + Twilio/Resend agent alert + honeypot
+   + rate limit). Also sends the marketing attribution (utm_* + referrer +
+   landing path) via property_inquiry, and fires the GA4 packet_request event on
+   success. */
+(function () {
+  var form = document.getElementById('lp-packet-form');
+  if (!form) return;
+  var statusEl = document.getElementById('lp-packet-status');
+  var btn = document.getElementById('lp-packet-submit');
+  var loadedAt = Date.now();
+  var sent = false;
+
+  function say(msg, color) { if (statusEl) { statusEl.textContent = msg; statusEl.style.color = color || '#ffffff'; } }
+
+  form.addEventListener('submit', function (e) {
+    e.preventDefault();
+    if (sent) return;
+
+    // Spam guard: time-on-page. A real person takes more than a couple of seconds
+    // to fill this in; a near-instant submit is a bot. Recoverable for humans.
+    if (Date.now() - loadedAt < 2500) { say('One moment, then tap send again.', '#ffe9c7'); return; }
+
+    var name = (form.name.value || '').trim();
+    var email = (form.email.value || '').trim();
+    if (!name || !email) { say('Please add your name and email.', '#ffe9c7'); return; }
+
+    var parts = name.split(/\s+/);
+    var q = new URLSearchParams(location.search);
+    var payload = {
+      source: 'website_form',
+      lead_type: 'buyer',
+      first_name: parts.shift() || null,
+      last_name: parts.join(' ') || null,
+      email: email,
+      phone: (form.phone.value || '').trim() || null,
+      message: (form.message.value || '').trim() || '433 E Highway 4 — investor packet request',
+      company: (form.company.value || ''),   // honeypot passthrough (server checks it)
+      property_inquiry: {
+        property: '433-e-highway-4-murphys',
+        utm_source: q.get('utm_source') || null,
+        utm_medium: q.get('utm_medium') || null,
+        utm_campaign: q.get('utm_campaign') || null,
+        referrer: document.referrer || null,
+        landing_path: location.pathname + location.search
+      }
+    };
+
+    if (btn) btn.disabled = true;
+    say('Sending…', '#ffffff');
+
+    fetch('/api/leads/intake', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify(payload)
+    }).then(function (r) {
+      return r.json().then(function (j) { return { ok: r.ok, j: j }; }, function () { return { ok: r.ok, j: {} }; });
+    }).then(function (res) {
+      if (res.ok && res.j && res.j.success !== false) {
+        sent = true;
+        form.style.display = 'none';
+        say('Thank you — your packet is on the way. Sara will follow up shortly.', '#ffffff');
+        try { if (window.LegacyAnalytics) window.LegacyAnalytics.packetRequest({ page_path: location.pathname, property: '433-e-highway-4-murphys' }); } catch (err) {}
+      } else {
+        if (btn) btn.disabled = false;
+        say((res.j && res.j.error) ? ('Sorry — ' + res.j.error) : 'Sorry, something went wrong. Please call (209) 559-4966 or email Sara.', '#ffd7d0');
+      }
+    }).catch(function () {
+      if (btn) btn.disabled = false;
+      say('Network error — please call (209) 559-4966 or email Sara.', '#ffd7d0');
+    });
+  });
 })();
 </script>
 </body>

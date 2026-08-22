@@ -19,6 +19,9 @@
 //   property_mls?:  string,                       // listing.html context
 //   property_id?:   uuid,                         // saved properties context
 //   tour?:          { scheduled_at, tour_type? }  // when intake is from tour booking
+//   property_inquiry?: {                           // marketing attribution (e.g. 433 packet form)
+//     property, utm_source?, utm_medium?, utm_campaign?, referrer?, landing_path?
+//   }
 // }
 //
 // Returns: { success: true, lead_id, is_new }
@@ -194,6 +197,30 @@ export default async function handler(req, res) {
       });
     }
 
+    // Property inquiry (e.g. the 433 investor-packet form): store the marketing
+    // ATTRIBUTION on its own row so we can tell which tagged link produced the
+    // lead. Gated + fail-soft; mirrors the optional tour block above. Placed
+    // before the internal-test return so an end-to-end test still writes the row.
+    if (body.property_inquiry && typeof body.property_inquiry === 'object' && !Array.isArray(body.property_inquiry)) {
+      try {
+        const pi = body.property_inquiry;
+        const clip = (v, n) => (v == null || v === '' ? null : String(v).slice(0, n));
+        await supa.from('property_inquiries').insert({
+          lead_id:      lead.id,
+          property:     clip(pi.property, 160),
+          name:         clip([fields.first_name, fields.last_name].filter(Boolean).join(' ') || pi.name, 200),
+          email:        fields.email,
+          phone:        fields.phone,
+          message:      fields.notes,
+          utm_source:   clip(pi.utm_source, 200),
+          utm_medium:   clip(pi.utm_medium, 200),
+          utm_campaign: clip(pi.utm_campaign, 200),
+          referrer:     clip(pi.referrer, 600),
+          landing_path: clip(pi.landing_path, 600)
+        });
+      } catch (_) { /* attribution is additive — never block the lead over it */ }
+    }
+
     // Internal test submissions record the lead and its event (so the pipeline
     // is verified end to end) but skip scoring, drafting, FUB sync, and the
     // agent alert entirely.
@@ -228,6 +255,13 @@ export default async function handler(req, res) {
       if (fields.areas && fields.areas.length) bits.push('areas: ' + fields.areas.join(', '));
       if (fields.price_min || fields.price_max) bits.push('budget: ' + (fields.price_min ? '$' + fields.price_min : '?') + '–' + (fields.price_max ? '$' + fields.price_max : '?'));
       if (fields.phone) bits.push(fields.phone);
+      // Surface which listing + tagged campaign an inquiry came from, so the alert
+      // itself answers "which link produced this lead".
+      if (body.property_inquiry && body.property_inquiry.property) {
+        bits.push('re: ' + String(body.property_inquiry.property));
+        const camp = [body.property_inquiry.utm_source, body.property_inquiry.utm_campaign].filter(Boolean).join(' / ');
+        if (camp) bits.push('via ' + camp);
+      }
       const desk = deskUrl(lead.id);
       const sms = `New ${is_new ? '' : 'returning '}lead: ${name} ${action}${bits.length ? ' — ' + bits.join(' · ') : ''}. Open lead: ${desk}`;
       const text = `${name} ${action} on legacycalifornia.com.\n\n`
