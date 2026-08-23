@@ -88,6 +88,14 @@
     "rev": "016583fb37d3ab6000000029e854303"
   },
   {
+    "name": "Buyer Contingency Removal 2 624pdf",
+    "url": "/docs/offer-695-feather/buyer-contingency-removal-2-624pdf.pdf",
+    "scope": "transaction",
+    "visibility": "both",
+    "key": "offer-695-feather-buyer-contingency-removal-2-624pdf",
+    "rev": "01659aca41458fb000000029e854303"
+  },
+  {
     "name": "Buyer Investigation Waiver 625pdf",
     "url": "/docs/offer-695-feather/buyer-investigation-waiver-625pdf.pdf",
     "scope": "transaction",
@@ -150,6 +158,14 @@
     "visibility": "agent_only",
     "key": "offer-695-feather-proof-of-funds-bert-andrews",
     "rev": "016574e4cf32109000000029e854303"
+  },
+  {
+    "name": "SPQpdf",
+    "url": "/docs/offer-695-feather/spqpdf.pdf",
+    "scope": "property",
+    "visibility": "both",
+    "key": "offer-695-feather-spqpdf",
+    "rev": "01659aca4d226be000000029e854303"
   },
   {
     "name": "Statewide Buyer and Seller Advisory 626pdfpdf",
