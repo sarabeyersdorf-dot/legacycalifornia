@@ -17,9 +17,29 @@ import { adminClient } from '../supabase.js';
 import { getCallerProfile, isAgent } from '../auth.js';
 import { handleOptions, ok, fail } from '../cors.js';
 
-// Prefer the principal over a co-party when choosing the "primary" client.
-const ROLE_RANK = { seller: 0, buyer: 0, 'co-seller': 1, 'co-buyer': 1 };
 const THREAD_LIMIT = 40;
+
+// Rank a party for "who is the primary client on THIS deal", by the deal's
+// current side. deal_parties can retain an opposite-side party — e.g. a
+// fallen-through buyer still linked to a seller-side deal (324 Augusta: seller
+// Brian + a stale buyer Denis). Ranking buyer and seller equally made whichever
+// was linked first win, leaking that party's stale email into the messaging
+// panel, the portal-share list, and the calendar-event prefill. So the deal's
+// OWN side ranks first and the opposite side sorts to the bottom. When the
+// side is unknown we fall back to the old behavior (principals tie at 0).
+function partyRank(role, side) {
+  const r = String(role || '').toLowerCase();
+  if (side !== 'buyer' && side !== 'seller') {
+    if (r === 'seller' || r === 'buyer')       return 0;
+    if (r === 'co-seller' || r === 'co-buyer') return 1;
+    return 2;
+  }
+  const opposite = side === 'buyer' ? 'seller' : 'buyer';
+  if (r === side)              return 0;
+  if (r === 'co-' + side)      return 1;
+  if (r === opposite || r === 'co-' + opposite) return 3; // wrong side → bottom
+  return 2;                                               // untagged role
+}
 
 function fullName(lead) {
   return [lead.first_name, lead.last_name].filter(Boolean).join(' ') || lead.email || 'Client';
@@ -64,7 +84,9 @@ export default async function handler(req, res) {
       leadsById = new Map((leadRows || []).map((l) => [l.id, l]));
     }
 
-    const parties = (partyRows || [])
+    const side = (deal.side === 'buyer' || deal.side === 'seller') ? deal.side : null;
+
+    let parties = (partyRows || [])
       .map((r) => ({ role: r.role, lead: leadsById.get(r.lead_id) }))
       .filter((p) => p.lead)
       .map((p) => ({
@@ -79,8 +101,16 @@ export default async function handler(req, res) {
         sms_opt_out:   p.lead.sms_opt_out === true,
         email_opt_out: p.lead.email_opt_out === true,
         portal_token:  p.lead.portal_token || null
-      }))
-      .sort((a, b) => (ROLE_RANK[a.role] ?? 2) - (ROLE_RANK[b.role] ?? 2));
+      }));
+
+    // On a sided deal, drop opposite-side parties entirely so a stale buyer can't
+    // appear on a seller deal (or vice-versa). Guard: only prune when at least
+    // one same-side/untagged party remains, so the panel never blanks.
+    if (side) {
+      const own = parties.filter((p) => partyRank(p.role, side) <= 2);
+      if (own.length) parties = own;
+    }
+    parties.sort((a, b) => partyRank(a.role, side) - partyRank(b.role, side));
 
     const client = parties[0] || null;
 

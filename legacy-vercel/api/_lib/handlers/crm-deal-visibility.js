@@ -48,11 +48,27 @@ export default async function handler(req, res) {
     if (dealErr) return fail(res, 500, `deal lookup: ${dealErr.message}`);
     if (!deal)   return fail(res, 404, `deal not found (${dealId || sourceKey})`);
 
-    // 2. The deal's client lead(s).
+    // 2. The deal's client lead(s) — scoped to the deal's OWN side. An
+    //    opposite-side party still linked to the deal (e.g. a fallen-through
+    //    buyer on a seller deal — 324 Augusta had a stale buyer) must not surface
+    //    its items in this side's share list. Guard: only prune when a same-side
+    //    party remains, so the panel never blanks.
     const { data: partyRows, error: partyErr } = await supa
-      .from('deal_parties').select('lead_id').eq('deal_id', deal.id);
+      .from('deal_parties').select('role, lead_id').eq('deal_id', deal.id);
     if (partyErr) return fail(res, 500, `deal_parties: ${partyErr.message}`);
-    const leadIds = [...new Set((partyRows || []).map((r) => r.lead_id).filter(Boolean))];
+    const side     = (deal.side === 'buyer' || deal.side === 'seller') ? deal.side : null;
+    const opposite = side === 'buyer' ? 'seller' : 'buyer';
+    const isWrongSide = (role) => {
+      if (!side) return false;
+      const r = String(role || '').toLowerCase();
+      return r === opposite || r === 'co-' + opposite;
+    };
+    let rows = partyRows || [];
+    if (side) {
+      const own = rows.filter((r) => !isWrongSide(r.role));
+      if (own.length) rows = own;
+    }
+    const leadIds = [...new Set(rows.map((r) => r.lead_id).filter(Boolean))];
 
     // 3. Toggleable items tied to those leads. Each query is fail-soft — if a
     //    table/column is missing, that group is just empty (never a 500).
