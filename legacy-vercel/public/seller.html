@@ -270,7 +270,23 @@ body.lp-restyle {
 .lt-grid { display: grid; grid-template-columns: repeat(2, max-content); gap: 9px 28px; }
 .lt-stat b { font-size: 18px; color: var(--ink, #1a1714); }
 .lt-stat span { display: block; font-size: 10px; letter-spacing: .06em; text-transform: uppercase; color: var(--muted, #8a7b60); margin-top: 1px; }
-.lt-note { font-family: var(--serif, 'Cormorant Garamond', serif); font-style: italic; font-size: 14px; line-height: 1.35; color: var(--ink-soft, #5b5347); max-width: 46ch; }
+.lt-note { font-family: var(--serif, 'Cormorant Garamond', serif); font-style: italic; font-size: 14px; line-height: 1.4; color: var(--ink-soft, #5b5347); }
+/* Insights band under the tour: Buyer interest + Showings, roomy + coloured. */
+.sell-insights { margin: 16px 0 4px; }
+.ins-grid { display: flex; gap: 14px; flex-wrap: wrap; align-items: stretch; }
+.ins-card { flex: 1 1 320px; box-sizing: border-box; border: 1px solid var(--rule, #e4dcc9); border-radius: 4px; padding: 18px 20px; display: flex; flex-direction: column; gap: 11px; overflow: visible; }
+.ins-card--interest { background: #e9f2ec; }
+.ins-card--showings { background: #eef2f7; }
+.ins-src { font-family: var(--mono, monospace); font-size: 10.5px; letter-spacing: .06em; color: var(--muted, #8a7b60); text-transform: uppercase; margin-top: auto; }
+.sh-total b { font-family: var(--serif, 'Cormorant Garamond', serif); font-size: 34px; line-height: 1; color: var(--ink, #1a1714); }
+.sh-total span { font-size: 12.5px; color: var(--muted, #8a7b60); margin-left: 8px; }
+.sh-list { display: flex; flex-direction: column; gap: 8px; }
+.sh-row { display: flex; justify-content: space-between; gap: 16px; align-items: baseline; }
+.sh-row + .sh-row { border-top: 1px solid rgba(20,18,15,.08); padding-top: 8px; }
+.sh-agent { font-weight: 600; color: var(--ink, #1a1714); }
+.sh-count { font-size: 13px; color: var(--muted, #8a7b60); text-align: right; white-space: nowrap; }
+.sh-more > summary { cursor: pointer; font-size: 13px; color: var(--muted, #8a7b60); list-style: revert; }
+.sh-more[open] > summary { margin-bottom: 8px; }
 
 @media (max-width: 1100px) {
   .sell-hero { grid-template-columns: 1fr; }
@@ -342,6 +358,11 @@ setTimeout(function(){var p=document.getElementById('portal-loading');if(p&&p.pa
            reel_url:null to a buyer). -->
       <div id="sell-reel" class="sell-reel-wrap" style="padding:0 24px; display:none;"></div>
 
+      <!-- Insights band (seller-side): Buyer interest (ListTrac) + Showings, in a
+           roomy coloured band under the tour so neither is cramped or buried. JS
+           renders both from the payload; hidden entirely when there's nothing. -->
+      <div id="sell-insights" class="sell-insights" style="padding:0 24px; display:none;"></div>
+
       <section class="ds-strip ds-strip--kpis" data-list="kpis">
         <div class="ds-cell" data-row style="display:none;">
           <div class="lab" data-bind="label">—</div>
@@ -393,14 +414,6 @@ setTimeout(function(){var p=document.getElementById('portal-loading');if(p&&p.pa
                   <div class="ds-road-desc" data-bind="description" data-optional>—</div>
                 </div>
               </div>
-            </div>
-          </section>
-
-          <section class="ds-card" id="showings" data-list="showings" data-optional>
-            <div class="ds-card-h"><h3>Showings</h3><span class="ds-card-meta">who has toured your home</span></div>
-            <div class="ds-gtk" data-row style="display:none;">
-              <div class="ds-gtk-t" data-bind="agent">Agent</div>
-              <div class="ds-gtk-b" data-bind="count_label" data-optional>—</div>
             </div>
           </section>
 
@@ -556,14 +569,41 @@ setTimeout(function(){var p=document.getElementById('portal-loading');if(p&&p.pa
         var statsHtml = stats.slice(0, 4).map(function (s) { return '<div class="lt-stat"><b>' + e(s[1]) + '</b><span>' + e(s[0]) + '</span></div>'; }).join('');
         var note = lt.note ? '<div class="lt-note">' + e(lt.note) + '</div>' : '';
         var src = e(lt.source || 'ListTrac');
-        return '<figure class="ds-tour-cell lt-cell">' +
-          '<div class="lt-card">' +
+        return '<div class="ins-card ins-card--interest">' +
             '<div class="lt-kick">Buyer interest</div>' +
             '<div class="lt-big"><b>' + e(fmt(headVal)) + '</b><span>' + headSub + '</span></div>' +
             (statsHtml ? '<div class="lt-grid">' + statsHtml + '</div>' : '') +
             note +
-          '</div>' +
-          '<figcaption>📈 ' + src + '</figcaption></figure>';
+            '<div class="ins-src">📈 ' + src + '</div>' +
+          '</div>';
+      }
+      // Showings card for the seller (portal.showings): one row per agent with an
+      // auto-count. Collapses under a summary when there are many agents.
+      function showingsCardHtml(list) {
+        if (!Array.isArray(list) || !list.length) return '';
+        var e = function (s) { return String(s == null ? '' : s).replace(/[&<>]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]; }); };
+        var total = list.reduce(function (n, s) { return n + (Number(s.count) || 0); }, 0);
+        var rows = list.map(function (s) {
+          return '<div class="sh-row"><span class="sh-agent">' + e(s.agent) + '</span>' +
+                 '<span class="sh-count">' + e(s.count_label || '') + '</span></div>';
+        }).join('');
+        var head = '<div class="lt-kick">Showings</div>' +
+          '<div class="sh-total"><b>' + total + '</b><span>' + (total === 1 ? 'showing so far' : 'showings so far') + '</span></div>';
+        // Many agents → collapse the list under a tap-to-open summary.
+        if (list.length > 4) {
+          return '<div class="ins-card ins-card--showings">' + head +
+            '<details class="sh-more"><summary>' + list.length + ' agents · tap to see each</summary>' +
+            '<div class="sh-list">' + rows + '</div></details></div>';
+        }
+        return '<div class="ins-card ins-card--showings">' + head + '<div class="sh-list">' + rows + '</div></div>';
+      }
+      // Fill the insights band with the showings + buyer-interest cards.
+      function renderInsights(portal) {
+        var box = document.getElementById('sell-insights');
+        if (!box) return;
+        var html = showingsCardHtml(portal.showings) + ltCardHtml(portal.list_trac);
+        box.innerHTML = html ? '<div class="ins-grid">' + html + '</div>' : '';
+        box.style.display = html ? '' : 'none';
       }
       var tour = portal.tour || {}, box = document.getElementById('sell-tour'), cells = '';
       var ok = function (u) { return typeof u === 'string' && /^https?:\/\//.test(u); };
@@ -589,13 +629,11 @@ setTimeout(function(){var p=document.getElementById('portal-loading');if(p&&p.pa
           '<iframe src="' + esc(tour.matterport_url) + '" title="3D walkthrough" frameborder="0" allow="xr-spatial-tracking; fullscreen" allowfullscreen loading="lazy"></iframe>' +
           '<figcaption>◱ 3D walkthrough</figcaption></figure>';
       }
-      // ListTrac headline stats — a content card beside the tour so the row reads
-      // balanced (a lone Matterport left the other half empty). Seller-side only;
-      // the server sends portal.list_trac === null for a buyer or when there's no
-      // report yet, so the card simply doesn't appear.
-      cells += ltCardHtml(portal.list_trac);
       if (box) box.innerHTML = cells ? '<div class="ds-tour-grid">' + cells + '</div>' : '';
       renderReel(tour.reel_url);
+      // Buyer interest + Showings now live in a roomy coloured band under the
+      // tour (renderInsights) instead of cramped inside the tour media row.
+      renderInsights(portal);
       renderMarketing(portal.marketing);
       // Per-agent: "Message {agent}" + note avatar reflect the deal's agent.
       var c = portal.contact || {};
