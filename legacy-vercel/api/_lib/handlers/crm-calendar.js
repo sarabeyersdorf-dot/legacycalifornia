@@ -452,12 +452,21 @@ async function createOrInvite(req, res, supa, agent) {
     // A shared appointment must carry a client-facing label (DB constraint).
     const clientLabel = typeof body?.client_label === 'string' ? body.client_label.trim() : '';
     const label = visibility === 'client' ? (clientLabel || title) : null;
-    const rowBase = { title, kind, starts_at: scheduled.toISOString(), duration_minutes: duration, agent, lead_id: leadId, notes, deal_id: dealId, visibility, client_label: label };
+    // Outside showing agent (kind='showing' only) — the name (+ brokerage) of the
+    // agent who toured the home when it wasn't Sara/James. Sellers see it + a count.
+    const showingAgent = (kind === 'showing' && typeof body?.showing_agent === 'string')
+      ? (body.showing_agent.trim().slice(0, 160) || null) : null;
+    const rowBase = { title, kind, starts_at: scheduled.toISOString(), duration_minutes: duration, agent, lead_id: leadId, notes, deal_id: dealId, visibility, client_label: label, showing_agent: showingAgent };
     if (isAllDay && endsAt) { rowBase.all_day = true; rowBase.ends_at = endsAt.toISOString(); }
     const SEL = 'id, title, kind, starts_at, duration_minutes';
     let ins = await supa.from('appointments').insert({ ...rowBase, sub_kind: subKind }).select(SEL).single();
-    // Degrade gracefully if db/045 (all_day/ends_at) or 027 (sub_kind) haven't
-    // run yet — strip the missing column and retry so nothing is lost.
+    // Degrade gracefully if db/045 (all_day/ends_at), 027 (sub_kind), or 078
+    // (showing_agent) haven't run yet — strip the missing column and retry so
+    // nothing is lost.
+    if (ins.error && /showing_agent/i.test(ins.error.message || '')) {
+      delete rowBase.showing_agent;
+      ins = await supa.from('appointments').insert({ ...rowBase, sub_kind: subKind }).select(SEL).single();
+    }
     if (ins.error && /all_day|ends_at/i.test(ins.error.message || '')) {
       const { all_day, ends_at, ...base } = rowBase;
       ins = await supa.from('appointments').insert({ ...base, sub_kind: subKind }).select(SEL).single();

@@ -5483,6 +5483,15 @@ window.LGPortal = window.LGPortal || {
             <button type="button" data-insp-add style="align-self:flex-start;background:transparent;border:1px dashed #B9A98A;color:#6A5A3C;padding:7px 12px;font-size:12.5px;cursor:pointer;">+ Add another inspection</button>
           </div>
           <div><label style="${M_LAB}">Title <span style="text-transform:none;letter-spacing:0;">(optional)</span></label><input data-f-title placeholder="Auto-named from the type if left blank" style="${M_INPUT}"></div>
+          <div data-showing-fields style="display:none;flex-direction:column;gap:10px;">
+            <div style="font-size:12px;color:#6A5A3C;background:#F3EEDF;border:1px solid #E4DAC1;padding:8px 10px;">Link the listing under <b>Link to deal</b> below so this showing appears on your seller's portal.</div>
+            <div><label style="${M_LAB}">Who showed it?</label><select data-f-showingwho style="${M_INPUT}">
+              <option value="self">Me or James (our team)</option>
+              <option value="outside">Another agent (buyer's agent)</option></select></div>
+            <div data-showing-agent-wrap style="display:none;"><label style="${M_LAB}">Showing agent — name &amp; brokerage</label>
+              <input data-f-showingagent placeholder="e.g. Jane Doe, Coldwell Banker" maxlength="160" style="${M_INPUT}">
+              <div style="font-size:12px;color:#6A5A3C;margin-top:4px;">Your seller sees this agent and an automatic count of how many times they've shown.</div></div>
+          </div>
           <div><label style="${M_LAB}">Client email <span style="text-transform:none;letter-spacing:0;">(optional · lets you share to their portal)</span></label><input data-f-apptemail type="email" placeholder="client@example.com" style="${M_INPUT}"></div>
           <label style="display:flex;align-items:flex-start;gap:8px;font-size:13px;color:#3A332B;line-height:1.4;"><input data-f-apptinvite type="checkbox" style="margin-top:3px;"> Email a calendar invite (to the client + any CC below)</label>
           <label style="display:flex;align-items:flex-start;gap:8px;font-size:13px;color:#3A332B;line-height:1.4;"><input data-f-apptsms type="checkbox" style="margin-top:3px;"> Text the client(s) a reminder now</label>
@@ -5540,6 +5549,11 @@ window.LGPortal = window.LGPortal || {
     }
     if (inspAdd) inspAdd.addEventListener('click', function () { addInspRow(); });
 
+    // Assigned once the share row is set up (below); syncKind calls it to re-run
+    // the share row when the event type changes. Declared here so the early
+    // syncKind() call can safely `typeof`-check it before it exists.
+    var refreshShare = null;
+
     // The top-level Time is for a single event; inspections carry per-row times,
     // and an all-day span has none — hide the top Time in both cases.
     function updateTimeCell() {
@@ -5552,16 +5566,21 @@ window.LGPortal = window.LGPortal || {
     const syncKind = () => {
       const isTour = kindSel.value === 'tour';
       const isInsp = kindSel.value === 'inspection';
+      const isShowing = kindSel.value === 'showing';
       tourFields.style.display = isTour ? 'flex' : 'none';
       apptFields.style.display = isTour ? 'none' : 'flex';
       if (inspWrap) inspWrap.style.display = isInsp ? 'flex' : 'none';
       if (isInsp && inspList && !inspList.querySelector('[data-insp-item]')) addInspRow();
+      // Showing-only fields (who showed it + outside agent name).
+      const shf = m.body.querySelector('[data-showing-fields]'); if (shf) shf.style.display = isShowing ? 'flex' : 'none';
       saveBtn.textContent = isTour ? 'Schedule tour' : (isInsp ? 'Add inspections' : 'Add event');
-      // Default the deal-share toggle ON for inspections (the common "share with
-      // both sides" case) and OFF for other kinds so an internal event linked to
-      // a deal isn't shared to clients by accident. She can still flip it.
-      const sc = m.body.querySelector('[data-f-sharedeal]'); if (sc) sc.checked = isInsp;
+      // Default the deal-share toggle ON for inspections (share with both sides)
+      // and for showings (a showing exists to tell the SELLER their home was
+      // toured — portal_items scopes it to the seller only). OFF for other kinds
+      // so an internal event linked to a deal isn't shared by accident. Flippable.
+      const sc = m.body.querySelector('[data-f-sharedeal]'); if (sc) sc.checked = isInsp || isShowing;
       updateTimeCell();
+      if (typeof refreshShare === 'function') refreshShare();
     };
     kindSel.addEventListener('change', syncKind);
 
@@ -5651,19 +5670,40 @@ window.LGPortal = window.LGPortal || {
     // will see it (so it's clear an inspection reaches both seller AND buyer).
     const shareWrap = m.body.querySelector('[data-share-wrap]');
     const sharePartiesEl = m.body.querySelector('[data-share-parties]');
+    let lastParties = [];
     const syncShare = (parties) => {
+      if (parties) lastParties = parties;
       if (!shareWrap) return;
-      const has = dealSel && dealSel.value;
+      // A "Client tour" is buyer-side and its create path CANNOT deal-share, so
+      // showing this toggle there was a trap (ticking it did nothing). Hide it
+      // for tours — a showing is the way to put an event on the seller's portal.
+      const isTour = kindSel.value === 'tour';
+      const has = dealSel && dealSel.value && !isTour;
       shareWrap.style.display = has ? 'block' : 'none';
       if (has && sharePartiesEl) {
-        const names = (parties || []).map((p) => {
-          const nm = (p.name || p.email || '').split(/\s+/)[0] || (p.email || '');
-          const role = /buyer/i.test(p.role || '') ? 'buyer' : /seller/i.test(p.role || '') ? 'seller' : '';
-          return nm ? nm + (role ? ' (' + role + ')' : '') : '';
-        }).filter(Boolean);
-        sharePartiesEl.textContent = names.length ? names.join(' · ') : 'everyone on this deal';
+        if (kindSel.value === 'showing') {
+          // A showing is scoped to the SELLER only (portal_items gates buyers out).
+          sharePartiesEl.textContent = 'your seller';
+        } else {
+          const names = (lastParties || []).map((p) => {
+            const nm = (p.name || p.email || '').split(/\s+/)[0] || (p.email || '');
+            const role = /buyer/i.test(p.role || '') ? 'buyer' : /seller/i.test(p.role || '') ? 'seller' : '';
+            return nm ? nm + (role ? ' (' + role + ')' : '') : '';
+          }).filter(Boolean);
+          sharePartiesEl.textContent = names.length ? names.join(' · ') : 'everyone on this deal';
+        }
       }
     };
+    refreshShare = () => syncShare(lastParties);
+
+    // Reveal the outside-agent name field only when "Another agent" is picked.
+    const showingWhoSel = m.body.querySelector('[data-f-showingwho]');
+    const showingAgentWrap = m.body.querySelector('[data-showing-agent-wrap]');
+    if (showingWhoSel && showingAgentWrap) {
+      showingWhoSel.addEventListener('change', () => {
+        showingAgentWrap.style.display = showingWhoSel.value === 'outside' ? 'block' : 'none';
+      });
+    }
     const fillFromDeal = async (sourceKey) => {
       if (!sourceKey) { syncShare([]); return; }
       try {
@@ -5754,6 +5794,12 @@ window.LGPortal = window.LGPortal || {
         } else {
           const p = { ...base, time: multiDay ? '12:00' : time };
           if (title) p.title = title;
+          // Showing by an outside agent → record their name (seller sees it + a count).
+          if (kind === 'showing') {
+            const who = m.body.querySelector('[data-f-showingwho]');
+            const nm = m.body.querySelector('[data-f-showingagent]');
+            if (who && who.value === 'outside' && nm && nm.value.trim()) p.showing_agent = nm.value.trim();
+          }
           if (shareDeal) {
             p.share = 'deal';
             p.client_label = title || (kind.charAt(0).toUpperCase() + kind.slice(1).replace(/_/g, ' '));
