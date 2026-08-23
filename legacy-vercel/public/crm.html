@@ -6462,5 +6462,47 @@ function selectLead(el) {
   document.addEventListener('crm:view', function (ev) { if (ev.detail && ev.detail.name === 'today') load(); });
 })();
 </script>
+
+<style>
+/* ═══ CRM filter pills — rectangular, bigger, colour-coded (approved by Sara, 2026-08-23).
+      Loaded last so it wins the cascade over the per-view chip styles above. ═══ */
+.ds-fpill, .chip, .dl-chip {
+  --c: #5d5d60;
+  display: inline-flex; align-items: center; gap: 8px;
+  font-size: 14.5px; font-weight: 600; line-height: 1;
+  padding: 9px 15px; border-radius: 5px; cursor: pointer;
+  border: 1px solid color-mix(in srgb, var(--c) 42%, #b7b7ba);
+  border-left: 4px solid var(--c);
+  background: color-mix(in srgb, var(--c) 9%, #ffffff);
+  color: color-mix(in srgb, var(--c) 74%, #202018);
+  transition: background .12s ease, color .12s ease, border-color .12s ease;
+}
+/* count badge inside a pill */
+.ds-fpill > b, .chip > .c, .chip > .ct, .dl-chip > .ct, .tsk-filter .chip > span {
+  font-family: inherit !important; font-weight: 800 !important; font-size: 12.5px !important;
+  min-width: 20px; text-align: center; padding: 2px 6px; border-radius: 4px;
+  margin-left: 2px !important; letter-spacing: 0 !important;
+  background: color-mix(in srgb, var(--c) 16%, #ffffff) !important;
+  color: var(--c) !important; opacity: 1 !important;
+}
+/* selected pill fills solid */
+.ds-fpill.on, .chip.on, .dl-chip.on { background: var(--c); color: #fff; border-color: var(--c); }
+.ds-fpill.on > b, .chip.on > .c, .chip.on > .ct, .dl-chip.on > .ct, .tsk-filter .chip.on > span {
+  background: rgba(255,255,255,.22) !important; color: #fff !important;
+}
+/* ── colour map by stage / bucket ── */
+[data-people-tab="leads"], [data-filter="new"], [data-rost="pending"], [data-lst="pending"] { --c: #2f6f86; }  /* blue */
+[data-people-tab="clients"], [data-rost="active"], [data-lst="active"] { --c: #2e7d46; }                        /* green */
+[data-people-tab="past"] { --c: #8a6d3b; }                                                                       /* brown */
+[data-people-tab="sphere"], [data-rost="preparing"], [data-lst="preparing"] { --c: #6b4fa0; }                    /* purple */
+[data-lst="offers"], [data-filter="warm"] { --c: #b07d1a; }                                                      /* gold */
+[data-rost="closed"], [data-lst="closed"] { --c: #3a4a5a; }                                                      /* charcoal */
+[data-lst="archived"], [data-filter="hot"] { --c: #a8432c; }                                                     /* red */
+
+/* ═══ De-pill the little rounded chips/badges across the CRM → clean rectangles ═══ */
+.ds-dl-days, .dl-sidechip, .dl-waitchip, .cc-statuschip, .cc-photo .st-overlay, .cc-pill, .cc-vtog {
+  border-radius: 4px !important;
+}
+</style>
 </body>
 </html>
