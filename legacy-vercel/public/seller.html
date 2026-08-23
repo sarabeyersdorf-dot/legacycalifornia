@@ -287,6 +287,25 @@ body.lp-restyle {
 .sh-count { font-size: 13px; color: var(--muted, #8a7b60); text-align: right; white-space: nowrap; }
 .sh-more > summary { cursor: pointer; font-size: 13px; color: var(--muted, #8a7b60); list-style: revert; }
 .sh-more[open] > summary { margin-bottom: 8px; }
+/* Buyer-interest stats as rectangular, colour-coded pills in a SANS face — the
+   numbers pop off the surrounding serif and each metric reads at a glance. */
+.ins-card--interest { --lt-sans: 'Barlow','Barlow Condensed',system-ui,-apple-system,'Segoe UI',sans-serif; }
+.lt-hero { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.lt-hero-sub { font-family: var(--lt-sans); font-size: 12.5px; color: var(--muted, #8a7b60); }
+.lt-pill { display: inline-flex; align-items: center; justify-content: center;
+  font-family: var(--lt-sans); font-variant-numeric: tabular-nums; font-weight: 700;
+  letter-spacing: .01em; line-height: 1; border-radius: 6px; padding: 6px 10px; font-size: 16px; }
+.lt-pill--hero { font-size: 30px; padding: 9px 15px; border-radius: 9px; }
+.ins-card--interest .lt-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px 16px; }
+.ins-card--interest .lt-stat { display: flex; align-items: center; gap: 9px; }
+.ins-card--interest .lt-stat b { all: unset; }
+.ins-card--interest .lt-stat > span { display: block; font-family: var(--lt-sans);
+  font-size: 10.5px; letter-spacing: .07em; text-transform: uppercase; color: var(--muted, #8a7b60); margin: 0; }
+.lt-c-views  { background: #dbe8fb; color: #1d4ed8; }   /* views  — blue  */
+.lt-c-new    { background: #d6f0dc; color: #15803d; }   /* new    — green */
+.lt-c-shares { background: #e7e0fb; color: #6d28d9; }   /* shares — purple*/
+.lt-c-inq    { background: #fde9c2; color: #b45309; }   /* inquiries — amber */
+.lt-c-saves  { background: #fcdfe4; color: #be123c; }   /* saves  — rose  */
 
 @media (max-width: 1100px) {
   .sell-hero { grid-template-columns: 1fr; }
@@ -560,18 +579,23 @@ setTimeout(function(){var p=document.getElementById('portal-loading');if(p&&p.pa
         var headVal = num(lt.last30) != null ? lt.last30 : num(lt.views);
         if (headVal == null) return '';
         var headSub = num(lt.last30) != null ? 'views · last 30 days' : 'total views';
+        // [label, value, colour-class] — each metric gets its own rectangular
+        // colour-coded pill so the seller reads the numbers at a glance.
         var stats = [];
-        if (num(lt.last30) != null && num(lt.views) != null) stats.push(['Total views', fmt(lt.views)]);
-        if (num(lt.new_pct) != null) stats.push(['New visitors', lt.new_pct + '%']);
-        if (num(lt.shares) != null) stats.push(['Shares', fmt(lt.shares)]);
-        if (num(lt.inquiries) != null) stats.push(['Inquiries', fmt(lt.inquiries)]);
-        if (num(lt.favorites) != null) stats.push(['Saves', fmt(lt.favorites)]);
-        var statsHtml = stats.slice(0, 4).map(function (s) { return '<div class="lt-stat"><b>' + e(s[1]) + '</b><span>' + e(s[0]) + '</span></div>'; }).join('');
+        if (num(lt.last30) != null && num(lt.views) != null) stats.push(['Total views', fmt(lt.views), 'lt-c-views']);
+        if (num(lt.new_pct) != null) stats.push(['New visitors', lt.new_pct + '%', 'lt-c-new']);
+        if (num(lt.shares) != null) stats.push(['Shares', fmt(lt.shares), 'lt-c-shares']);
+        if (num(lt.inquiries) != null) stats.push(['Inquiries', fmt(lt.inquiries), 'lt-c-inq']);
+        if (num(lt.favorites) != null) stats.push(['Saves', fmt(lt.favorites), 'lt-c-saves']);
+        var statsHtml = stats.slice(0, 4).map(function (s) {
+          return '<div class="lt-stat"><span class="lt-pill ' + s[2] + '">' + e(s[1]) + '</span><span>' + e(s[0]) + '</span></div>';
+        }).join('');
         var note = lt.note ? '<div class="lt-note">' + e(lt.note) + '</div>' : '';
         var src = e(lt.source || 'ListTrac');
         return '<div class="ins-card ins-card--interest">' +
             '<div class="lt-kick">Buyer interest</div>' +
-            '<div class="lt-big"><b>' + e(fmt(headVal)) + '</b><span>' + headSub + '</span></div>' +
+            '<div class="lt-hero"><span class="lt-pill lt-pill--hero lt-c-views">' + e(fmt(headVal)) + '</span>' +
+              '<span class="lt-hero-sub">' + headSub + '</span></div>' +
             (statsHtml ? '<div class="lt-grid">' + statsHtml + '</div>' : '') +
             note +
             '<div class="ins-src">📈 ' + src + '</div>' +

@@ -156,6 +156,26 @@ export default async function handler(req, res) {
         // back to "newest pending" (that's how a listing showed 433's escrow) —
         // return a clear "not found" state instead.
         if (!deal) previewMiss = true;
+        // The agent preview (?deal=) has no client token, so portal_items —
+        // the source of SHOWINGS and shared tasks/events — never loaded and the
+        // preview showed an empty showings band even right after "show on client
+        // portal" was ticked. Resolve the deal's own party token so the preview
+        // mirrors exactly what the client sees. Prefer the seller side (this is
+        // the listing portal); fall back to any party that has a token. Harmless
+        // when the deal has no tokened party yet (portalToken simply stays null).
+        if (deal && !portalToken) {
+          const { data: pp } = await supa.from('deal_parties')
+            .select('lead_id, role, leads(portal_token)')
+            .eq('deal_id', deal.id)
+            .in('role', ['seller', 'co-seller', 'buyer', 'co-buyer']);
+          const rows = (pp || []).filter((p) => p.leads?.portal_token);
+          const chosen = rows.find((p) => /seller/i.test(p.role || '')) || rows[0] || null;
+          if (chosen) {
+            leadId = chosen.lead_id;
+            portalToken = chosen.leads.portal_token;
+            viewerRole = viewerRole || chosen.role;
+          }
+        }
       }
 
       if (!deal && !isAgent) {
@@ -928,12 +948,26 @@ export default async function handler(req, res) {
     if (lt && !isBuyerSide) {
       const n = (v) => { const x = Number(v); return Number.isFinite(x) ? x : null; };
       const s = (v) => (typeof v === 'string' ? sanitize(v).slice(0, 220) : null);
+      // Cowork's ListTrac note mixes a client-friendly lead ("Beating its zip
+      // code for views.") with INTERNAL ops guidance ("NOTE ON INQUIRIES: …
+      // route to agents who buy leads … never as a lead to work.", escrow
+      // fall-through details, buyer names). The seller must never see that tail.
+      // Keep only the opening sentence, and hard-cut at any internal marker —
+      // this also ends the 220-char mid-word truncation the seller was seeing.
+      const clientNote = (v) => {
+        if (typeof v !== 'string') return null;
+        let t = sanitize(v).replace(/\s+/g, ' ').trim();
+        t = t.split(/\s*(?:NOTE ON\b|NOTE:|\binternal\b)/i)[0].trim();
+        const m = t.match(/^.*?[.!?](?=\s|$)/);          // first sentence only
+        if (m) t = m[0];
+        return t.replace(/[\s,;:–—-]+$/, '').trim() || null;
+      };
       const views = n(lt.views), last30 = n(lt.last30), shares = n(lt.shares),
             inquiries = n(lt.inquiries), favorites = n(lt.favorites), newPct = n(lt.newPct);
       if (views != null || last30 != null || shares != null || inquiries != null || favorites != null) {
         listTrac = {
           views, last30, shares, inquiries, favorites, new_pct: newPct,
-          since: s(lt.since), note: s(lt.note),
+          since: s(lt.since), note: clientNote(lt.note),
           report_date: s(lt.reportDate), source: s(lt.source) || 'ListTrac · MetroList weekly report'
         };
       }
