@@ -6503,6 +6503,42 @@ function selectLead(el) {
 .ds-dl-days, .dl-sidechip, .dl-waitchip, .cc-statuschip, .cc-photo .st-overlay, .cc-pill, .cc-vtog {
   border-radius: 4px !important;
 }
+
+/* ═══ Deals in motion → CARD GRID (replaces the wide sparse table; approved by Sara) ═══ */
+#dlRoot .dl-card { border: none; box-shadow: none; background: transparent; overflow: visible; }
+#dlRoot .dl-scroll { overflow: visible; }
+#dlRoot .dl-inner { min-width: 0; }
+#dlRoot .dl-head { display: none; }
+#dlRoot [data-rows] { display: grid; grid-template-columns: repeat(auto-fill, minmax(370px, 1fr)); gap: 14px; padding: 2px 0; }
+#dlRoot [data-rows] > .dl-group, #dlRoot [data-rows] > .dl-loading, #dlRoot [data-rows] > .dl-empty-row { grid-column: 1 / -1; }
+#dlRoot .dl-row {
+  display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 11px 16px; align-content: start;
+  min-height: 0; padding: 15px 16px 14px; position: relative;
+  border: 1px solid #e6e1d5; border-left: 4px solid #b08d57; border-radius: 14px;
+  background: #fff; box-shadow: 0 3px 14px rgba(45,35,12,.05);
+}
+#dlRoot .dl-row:hover { box-shadow: 0 6px 20px rgba(45,35,12,.10); background: #fff; }
+#dlRoot .dl-row.foc { box-shadow: 0 0 0 2px #b08d57, 0 6px 20px rgba(45,35,12,.10); }
+#dlRoot .dl-check-wrap { position: absolute; top: 13px; right: 13px; width: auto; }
+#dlRoot .dl-deal { grid-column: 1 / -1; flex: none; padding: 0 26px 3px 0; }
+#dlRoot .dl-deal .dl-spine { display: none; }
+#dlRoot .dl-side, #dlRoot .dl-price, #dlRoot .dl-wait, #dlRoot .dl-cont, #dlRoot .dl-insp, #dlRoot .dl-coe { flex: none; min-width: 0; }
+#dlRoot .dl-side { align-items: flex-start; flex-direction: column; gap: 6px; }
+#dlRoot .dl-act { grid-column: 1 / -1; justify-content: flex-start; width: auto; padding: 5px 0 0; gap: 6px; }
+#dlRoot .dl-side::before, #dlRoot .dl-price::before, #dlRoot .dl-wait::before,
+#dlRoot .dl-cont::before, #dlRoot .dl-insp::before, #dlRoot .dl-coe::before {
+  display: block; font-size: 10px; font-weight: 700; letter-spacing: .09em; text-transform: uppercase; color: #a89a80; margin-bottom: 4px;
+}
+#dlRoot .dl-side::before { content: "Side · Agent"; }
+#dlRoot .dl-price::before { content: "Price"; }
+#dlRoot .dl-wait::before { content: "Waiting on"; }
+#dlRoot .dl-cont::before { content: "Next contingency"; }
+#dlRoot .dl-insp::before { content: "Next event"; }
+#dlRoot .dl-coe::before { content: "Close of escrow"; }
+#dlRoot .dl-celllabel { white-space: normal; overflow: visible; line-height: 1.25; }
+#dlRoot .dl-cell-top { align-items: flex-start; }
+#dlRoot .dl-client { white-space: normal; }
+@media (max-width: 520px) { #dlRoot .dl-row { grid-template-columns: 1fr; } }
 </style>
 </body>
 </html>
