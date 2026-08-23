@@ -332,6 +332,23 @@ export default async function handler(req, res) {
       // 'contract' (checked first in docCategory), so this only ever hits the
       // listing agreement family.
       if (audience === 'buyer' && docCategory(doc.doc_type, doc.name) === 'listing') return false;
+      // Prior-offer paperwork (durable guard — runs BEFORE the grant check so it
+      // overrides an auto-seeded grant). The buyer-side purchase file — the RPA &
+      // counters/addenda ('contract'), title/escrow/commitment docs ('title'),
+      // and earnest-money/settlement docs ('money') — belongs to one specific
+      // offer. Once a deal is back on the market (not under contract, no active
+      // escrow), that offer is dead, so this paperwork is hidden from BOTH
+      // clients regardless of any seller/both grant — which is exactly what let a
+      // fallen-through offer's RPA, counters and EMD resurface on 324 Augusta.
+      // Scoped to docs NOT tied to an escrow row: escrow-linked docs are handled
+      // by isArchivedEscrowDoc + the escrow history, which we must not disturb.
+      // Disclosures, the listing agreement, and inspections are never swept up; a
+      // pending/closed deal keeps its live purchase file.
+      const notUnderContract = !activeEscrow && deal.stage !== 'pending' && deal.stage !== 'closed';
+      if (notUnderContract && !doc.escrow_id) {
+        const cat = docCategory(doc.doc_type, doc.name);
+        if (cat === 'contract' || cat === 'title' || cat === 'money') return false;
+      }
       // An explicit grant (fingerprint-matched) always wins — it can widen,
       // narrow, or hide (agent_only) a document for either audience.
       if (doc.doc_key) {
