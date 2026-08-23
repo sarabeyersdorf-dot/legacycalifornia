@@ -32,6 +32,8 @@ import { draftWelcome } from '../_lib/handlers/ai-welcome.js';
 import { scoreLead }    from '../_lib/handlers/ai-score-lead.js';
 import { syncLeadToFUB } from '../fub/sync.js';
 import { alertAgents, deskUrl } from '../_lib/agent-alert.js';
+import { sendEmail as sendEmailResend, resendConfigured } from '../_lib/resend.js';
+import { sendEmail as sendEmailSendgrid, sendgridConfigured } from '../_lib/sendgrid.js';
 
 const ALLOWED_SOURCE  = new Set(['website_form','open_house','referral','ihomefinder_idx','manual']);
 const ALLOWED_JOURNEY = new Set(['discovering','narrowing','touring','ready_to_offer']);
@@ -144,12 +146,22 @@ export default async function handler(req, res) {
 
     let lead, is_new;
     if (existing) {
-      // Merge: only fill blanks, never overwrite agent-curated fields like score/notes
+      // Merge on match: only fill fields that are genuinely EMPTY or NULL on the
+      // stored record — NEVER overwrite a value already curated in the CRM. This
+      // is the guarantee that a lead carefully saved as "Robert Ellison Jr.,
+      // trustee" is not flattened to "bob" the night he types his name quickly
+      // into a form: his stored name is non-empty, so the incoming value is
+      // dropped. (Use an explicit blank test rather than !existing[k], so a
+      // legitimate stored 0 / false is treated as present, not blank.)
+      const isBlank = (x) => x === null || x === undefined || x === '';
       const patch = {};
       for (const [k, v] of Object.entries(fields)) {
-        if (v != null && v !== '' && !existing[k]) patch[k] = v;
+        if (v != null && v !== '' && isBlank(existing[k])) patch[k] = v;
       }
-      // Journey stage can be re-stated (lead progressing)
+      // Journey stage / lead type are the ONE intentional exception: a returning
+      // lead may have genuinely progressed (discovering → ready_to_offer), so a
+      // freshly stated value updates. These are pipeline signals, not the curated
+      // identity/contact fields the rule above protects.
       if (fields.journey_stage)   patch.journey_stage   = fields.journey_stage;
       if (fields.lead_type)       patch.lead_type       = fields.lead_type;
       patch.last_contact_at = new Date().toISOString();
@@ -202,13 +214,19 @@ export default async function handler(req, res) {
     // lead. Gated + fail-soft; mirrors the optional tour block above. Placed
     // before the internal-test return so an end-to-end test still writes the row.
     if (body.property_inquiry && typeof body.property_inquiry === 'object' && !Array.isArray(body.property_inquiry)) {
+      const pi = body.property_inquiry;
+      const clip = (v, n) => (v == null || v === '' ? null : String(v).slice(0, n));
+      const piName    = clip([fields.first_name, fields.last_name].filter(Boolean).join(' ') || pi.name, 200);
+      const propLabel = clip(pi.property, 160);
+
+      // Store the attribution row. Fail-soft: attribution is additive, so a
+      // write hiccup here must never block the lead.
+      let inquiryStored = true;
       try {
-        const pi = body.property_inquiry;
-        const clip = (v, n) => (v == null || v === '' ? null : String(v).slice(0, n));
         await supa.from('property_inquiries').insert({
           lead_id:      lead.id,
-          property:     clip(pi.property, 160),
-          name:         clip([fields.first_name, fields.last_name].filter(Boolean).join(' ') || pi.name, 200),
+          property:     propLabel,
+          name:         piName,
           email:        fields.email,
           phone:        fields.phone,
           message:      fields.notes,
@@ -218,7 +236,45 @@ export default async function handler(req, res) {
           referrer:     clip(pi.referrer, 600),
           landing_path: clip(pi.landing_path, 600)
         });
-      } catch (_) { /* attribution is additive — never block the lead over it */ }
+      } catch (_) { inquiryStored = false; }
+
+      // Notify Sara on EVERY inquiry — directly, here, not through the general
+      // agent alert below. That alert is deliberately suppressed for staff
+      // addresses (scoring/drafting to ourselves), which is exactly why the two
+      // Aug 22–23 staff test submissions landed in the table silently. A packet
+      // request on a $1.4M listing is too important to depend on that path, so
+      // this fires for every inquiry, staff or not. LOUD on failure: the row is
+      // already saved above; if the email can't send we log it AND drop a
+      // `notification_failed` lead_event so the miss is visible in the CRM,
+      // never silently swallowed.
+      try {
+        const emailProvider = resendConfigured() ? sendEmailResend
+          : (sendgridConfigured() ? sendEmailSendgrid : null);
+        if (!emailProvider) throw new Error('no email provider configured (RESEND_API_KEY / SENDGRID_API_KEY both unset)');
+        const who = piName || fields.email;
+        const subject = `New property inquiry — ${who}${propLabel ? ' · ' + propLabel : ''}`;
+        const text =
+            `A new investor-packet / property inquiry just came in on legacycalifornia.com.\n\n`
+          + `Name:     ${who}\n`
+          + `Email:    ${fields.email}\n`
+          + `Phone:    ${fields.phone || '(none)'}\n`
+          + `Property: ${propLabel || '(unspecified)'}\n`
+          + `Source:   ${clip(pi.utm_source, 200) || '(none)'}\n`
+          + (fields.notes ? `Message:  ${fields.notes}\n` : '')
+          + `\nOpen this lead in the CRM: ${deskUrl(lead.id)}`;
+        await emailProvider({ agent: 'sara', to: 'sarasellscalifornia@gmail.com', toName: 'Sara Cooper', subject, text });
+      } catch (notifyErr) {
+        const msg = (notifyErr && notifyErr.message) || String(notifyErr);
+        console.error('[property_inquiry] notification to Sara FAILED:', msg);
+        try {
+          await supa.from('lead_events').insert({
+            lead_id:    lead.id,
+            event_type: 'notification_failed',
+            source:     'system',
+            event_data: { kind: 'property_inquiry_email', to: 'sarasellscalifornia@gmail.com', error: msg, inquiry_stored: inquiryStored }
+          });
+        } catch (_) { /* console.error above is the last-resort record */ }
+      }
     }
 
     // Internal test submissions record the lead and its event (so the pipeline

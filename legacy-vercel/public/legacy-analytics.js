@@ -7,15 +7,17 @@
  *
  *   GA4_MEASUREMENT_ID — Google Analytics → Admin → Data Streams. Looks like "G-XXXXXXXXXX".
  *   GOOGLE_ADS_ID      — Google Ads account. Looks like "AW-XXXXXXXXX".
- *   ADS_CONVERSION_LABELS.phoneClick / .packetRequest — paste when you create each
- *       conversion action in Google Ads. Looks like "AW-XXXXXXXXX/AbCdEfGh1234".
+ *   ADS_CONVERSION_LABELS.phoneClick / .packetRequest — LEAVE EMPTY. Conversions
+ *       are imported from GA4 (the GA4↔Ads link), not fired with native labels.
+ *       See the note on the ADS_CONVERSION_LABELS block below before touching.
  *
  * BEHAVIOUR (safe to ship with everything blank):
  *   • A value still on its "XXXX" placeholder (or empty) is treated as NOT SET —
  *     that tag is silently skipped. With both IDs unset, no tag loads at all and
  *     the site works perfectly.
  *   • An empty conversion label fires the GA4 event only and skips the Ads
- *     conversion — so this ships today and lights up when you paste labels in.
+ *     conversion. That is the PERMANENT setup here — the Ads conversions are
+ *     imported from GA4, so the labels stay empty for good (see below).
  * ─────────────────────────────────────────────────────────────────────────── */
 (function () {
   'use strict';
@@ -23,9 +25,19 @@
   var CONFIG = {
     GA4_MEASUREMENT_ID: 'G-43P5CYDS1B',
     GOOGLE_ADS_ID:      'AW-16991290125',
+    // ── PERMANENTLY EMPTY — DO NOT FILL THESE IN. ────────────────────────────
+    // We do NOT use native Google Ads conversion labels. The GA4 property
+    // (G-…) is LINKED to the Google Ads account, and `phone_click` /
+    // `packet_request` are marked as GA4 key events and IMPORTED into Google Ads
+    // as the conversion actions "Submit lead form" and "Phone call lead". Google
+    // does the attribution on its side from the GA4 events this tag already
+    // sends — there is no "AW-…/label" send_to anywhere in that path.
+    // Leaving both empty is the CORRECT and only behaviour: track() fires the
+    // GA4 event and skips the Ads conversion call. Pasting a label here would
+    // double-count. Keep the keys (track() reads them); just never populate them.
     ADS_CONVERSION_LABELS: {
-      phoneClick:    '',   // e.g. "AW-XXXXXXXXX/AbCdEfGh1234"
-      packetRequest: ''    // e.g. "AW-XXXXXXXXX/IjKlMnOp5678"
+      phoneClick:    '',
+      packetRequest: ''
     }
   };
 
