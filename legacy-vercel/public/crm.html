@@ -3805,17 +3805,28 @@ function selectLead(el) {
     fetch('/api/crm/deals-lite', { credentials: 'include' })
       .then(function (r) { return r.ok ? r.json() : null; })
       .then(function (j) {
-        var deals = ((j && j.deals) || []).filter(function (d) { return d.stage === 'pending'; })
-          .sort(function (a, b) { return (a.label || a.address || '').localeCompare(b.label || b.address || ''); });
+        // Deals a client can be granted a portal for: those in escrow (pending)
+        // AND those on the market (listing) — a seller of a live listing needs a
+        // portal before any escrow exists. Effective stage already honours
+        // stage_override server-side, so a listing moved back to "preparing"
+        // won't show here. Escrow first, then on-market, each alphabetical.
+        var deals = ((j && j.deals) || []).filter(function (d) { return d.stage === 'pending' || d.stage === 'listing'; })
+          .sort(function (a, b) {
+            var rank = function (d) { return d.stage === 'pending' ? 0 : 1; };
+            return (rank(a) - rank(b)) || (a.label || a.address || '').localeCompare(b.label || b.address || '');
+          });
         var keep = sel.value;
         sel.innerHTML = '';
         var ph = document.createElement('option');
-        ph.value = ''; ph.textContent = deals.length ? 'Select a deal in escrow…' : 'No deals in escrow';
+        ph.value = ''; ph.textContent = deals.length ? 'Select a deal…' : 'No open deals';
         sel.appendChild(ph);
         deals.forEach(function (d) {
           var o = document.createElement('option');
           o.value = d.source_key;
-          o.textContent = (d.label || d.address || d.source_key) + (d.agent ? ' · ' + (d.agent === 'james' ? 'James' : 'Sara') : '');
+          var tag = d.stage === 'pending' ? 'In escrow' : 'On market';
+          o.textContent = (d.label || d.address || d.source_key)
+            + ' · ' + tag
+            + (d.agent ? ' · ' + (d.agent === 'james' ? 'James' : 'Sara') : '');
           sel.appendChild(o);
         });
         if (keep) sel.value = keep;   // preserve a prior selection across reopens
@@ -3898,9 +3909,9 @@ function selectLead(el) {
       + '  <h2 style="font-family:\'Cormorant Garamond\',serif;font-style:italic;font-weight:500;font-size:28px;margin:0 0 6px;">Grant portal access.</h2>'
       + '  <p style="font-size:13.5px;line-height:1.55;color:#3A332B;margin:0 0 18px;">Ties a client to a transaction so that when they sign in they see only their own portal. Finds or creates their lead by email, then links it to the deal.</p>'
       + '  <form id="leg-linkdeal-form" style="display:flex;flex-direction:column;gap:12px;">'
-      + '    <label style="font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:#7C6A4D;display:flex;flex-direction:column;gap:4px;">Deal in escrow'
+      + '    <label style="font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:#7C6A4D;display:flex;flex-direction:column;gap:4px;">Deal (in escrow or on market)'
       + '      <select name="deal" id="leg-linkdeal-deal" required style="font:inherit;font-size:15px;color:#1A1714;background:#fff;border:1px solid #D9CFB7;padding:9px 11px;">'
-      + '        <option value="">Loading deals in escrow…</option>'
+      + '        <option value="">Loading deals…</option>'
       + '      </select></label>'
       + '    <label style="position:relative;font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:#7C6A4D;display:flex;flex-direction:column;gap:4px;">Search your contacts'
       + '      <input id="leg-linkdeal-search" autocomplete="off" placeholder="Type a name, email, or phone…" style="font:inherit;font-size:15px;text-transform:none;letter-spacing:normal;color:#1A1714;background:#fff;border:1px solid #D9CFB7;padding:9px 11px;">'
