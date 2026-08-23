@@ -1,7 +1,7 @@
 {
-  "version": 9.3,
-  "lastUpdated": "2026-08-21",
-  "updatedBy": "cowork 2026-08-20 — Homes.com Listing Analytics weekly pull added to 4 listings (homesCom block)",
+  "version": 9.6,
+  "lastUpdated": "2026-08-23",
+  "updatedBy": "cowork-morning-briefing 2026-08-23",
   "tasks": [
     {
       "agent": "sara",
@@ -697,14 +697,14 @@
       "key": "skyline-showingtime-showing-request"
     },
     {
-      "agent": "both",
+      "agent": "sara",
       "client": "Wendell",
       "title": "CRITICAL — Order to Sell (bankruptcy court approval) received 2026-07-24 7:57 PM from Audrey Burton / attorney Ken Fugate ('You are good to go'). James forwarded to Sara. THIS IS Day 0 — all contingency and COE clocks start 2026-07-24. Confirm Day 0 with Ken Fugate and escrow officer Amanda Boitano (Placer Title).",
       "done": true,
       "key": "wendell-critical"
     },
     {
-      "agent": "both",
+      "agent": "sara",
       "client": "Wendell",
       "title": "Closing documents and funds must route to Chapter 13 trustee Tracy Updike (P.O. Box 11550, South Bend IN 46634, case #25-31761 In re Marshall Guthrie) per attorney Ken Fugate — NOT to seller directly. Update escrow instructions with Amanda Boitano (Placer Title).",
       "done": true,
@@ -885,7 +885,7 @@
       "due": "2026-08-14"
     },
     {
-      "agent": "both",
+      "agent": "sara",
       "client": "CRM",
       "title": "CRM: 7 pending timeline approvals need manual decision — Latigo: cont_loan; 433: nhd/cont_inspection/cont_title/cont_insurance; Baldwin: cont_appraisal/cont_insurance/cont_loan. CRM → Timeline tab → Approvals. Reconcile engine did not auto-apply any (conservative).",
       "note": "Stale 8/6 — Latigo closed 7/28; Baldwin CR2 confirmed doc-backed 7/19; 433 deal cancelling. Reconcile 8/6 auto-filed Baldwin appraisal+loan proposals. Remaining 433 proposals (loan cont + walkthrough) should be REJECTED in CRM.",
@@ -1958,19 +1958,22 @@
       "agent": "james",
       "client": "8235 Baldwin",
       "title": "🔴 Baldwin: Chicago Title has received NO lender requests — Veronica Barragan asked Kim Hesser for loan doc status 8/19. Loan contingency is 8/21, COE 8/31",
-      "done": false
+      "done": false,
+      "due": "This week"
     },
     {
       "agent": "james",
       "client": "8235 Baldwin",
       "title": "Baldwin: confirm the appraisal actually landed — Kim Hesser said the appraiser would deliver end of business 8/19; Allyson Overturf still waiting on it",
-      "done": false
+      "done": false,
+      "due": "This week"
     },
     {
       "agent": "sara",
       "client": "9568 Sheep Ranch",
       "title": "9568 Sheep Ranch: seller net sheet received from Placer 8/20 at $369,000 (3% sell / 2.5% buy, split escrow+NHD, seller pays transfer tax) — confirm the offer terms and record it",
-      "done": false
+      "done": false,
+      "due": "This week"
     },
     {
       "agent": "james",
@@ -2033,6 +2036,38 @@
       "client": "Hovey",
       "key": "hovey-duchac-statement",
       "title": "Hovey: get Teri Duchac's account in writing while she is willing — she has now named Dimitri and Yulia as another pair who refused to sign Volkmar's RMA, alongside Caroline Selfridge and herself",
+      "due": "This week",
+      "done": false
+    },
+    {
+      "agent": "james",
+      "client": "695 Feather",
+      "key": "feather-cr2-portal-update",
+      "title": "695 Feather: CR No. 2 removed ALL buyer contingencies 8/22 - Ashley's deposit is now at risk. Update her buyer page and tell her, before COE Fri 8/28",
+      "due": "Today",
+      "done": false
+    },
+    {
+      "agent": "james",
+      "client": "8235 Baldwin",
+      "key": "baldwin-appraisal-monday",
+      "title": "Baldwin: Kimberly Hesser says the appraisal cleared the AMC and is delivered first thing Mon 8/24 - get it in writing and confirm lender docs went to Chicago Title the same day",
+      "due": "2026-08-24",
+      "done": false
+    },
+    {
+      "agent": "sara",
+      "client": "Bev Woltjer",
+      "key": "bev-lakefront-nudge",
+      "title": "Bev Woltjer has opened the 'Lakefront for Bev' collection twice since you pushed it 3 days ago but hasn't reacted - worth a nudge",
+      "due": "This week",
+      "done": false
+    },
+    {
+      "agent": "james",
+      "client": "Brian Duarte",
+      "key": "duarte-search-nudge",
+      "title": "'Search for Brian' was pushed to Brian Duarte 26 days ago with 1 open and no reaction - he is flagged hot and has had no contact since 8/1",
       "due": "This week",
       "done": false
     }
@@ -3042,14 +3077,15 @@
         "expiration": "2026-11-18",
         "agreementForm": "Commercial and Residential Income Listing Agreement - 1225",
         "listTrac": {
-          "views": 198,
+          "last30": 22,
+          "views": 204,
+          "newPct": 90,
           "shares": 4,
           "inquiries": 1,
-          "newPct": 87,
-          "last30": 18,
-          "since": "2026-02-02",
-          "reportDate": "2026-08-16",
-          "source": "ListTrac / MetroList weekly seller report"
+          "since": "Since going live Feb 2, 2026",
+          "note": "Commercial listing (Commercial and Residential Income Listing Agreement) - it does not syndicate to Zillow, Realtor.com or Trulia by design, so its traffic is not comparable to the residential book. Views come from MetroList and broker sites, which is the correct channel for this property type.",
+          "reportDate": "2026-08-23",
+          "source": "ListTrac - MetroList weekly report"
         }
       },
       "listPrice": 650000,
@@ -3112,6 +3148,65 @@
         "since": "2026-02-02",
         "reportDate": "2026-08-16",
         "source": "ListTrac / MetroList weekly seller report"
+      },
+      "marketing": {
+        "period": "Feb 02 - Aug 23, 2026",
+        "report_date": "2026-08-23",
+        "views": 22,
+        "shares": 4,
+        "inquiries": 1,
+        "callouts": [
+          "Commercial listing - MetroList and broker-site traffic only, by design"
+        ],
+        "top_sites": [
+          {
+            "name": "searchrem.metrolist.net",
+            "views": 5,
+            "inquiries": 0
+          },
+          {
+            "name": "premiercaproperties.com",
+            "views": 4,
+            "inquiries": 0
+          },
+          {
+            "name": "Paragon",
+            "views": 3,
+            "inquiries": 0
+          },
+          {
+            "name": "legacycalifornia.com",
+            "views": 3,
+            "inquiries": 0
+          },
+          {
+            "name": "weichert.com",
+            "views": 2,
+            "inquiries": 0
+          }
+        ],
+        "top_cities": [
+          {
+            "name": "El Dorado Hills, CA",
+            "views": 2
+          },
+          {
+            "name": "Sacramento, CA",
+            "views": 2
+          },
+          {
+            "name": "Stockton, CA",
+            "views": 1
+          },
+          {
+            "name": "Lathrop, CA",
+            "views": 1
+          },
+          {
+            "name": "Sonora, CA",
+            "views": 1
+          }
+        ]
       }
     },
     {
@@ -3217,15 +3312,15 @@
         "clientLegalNames": "James R Heryford and Yvonne Heryford (Gold Electric) — LEGAL names as they appear on the RLA, MOTs and all executed documents. USE 'Jim' in anything the clients read; use the legal names only on contracts and vesting.",
         "commissionNote": "2.5% per the RLA (rev 6/25), agreement dated 2025-11-19. Listing price chain: RLA $1,850,000 -> MOT #1 (2026-03-14) $1,399,000 -> MOT #2 (6/30) expiration 8/14 only -> MOT #3 (8/5) expiration 11/19/2026 only.",
         "listTrac": {
-          "views": 5673,
+          "last30": 384,
+          "views": 5837,
+          "newPct": 92,
           "shares": 18,
           "inquiries": 0,
-          "newPct": 94,
-          "last30": 278,
-          "since": "2026-03-20",
-          "note": "Beat its zip code for views. A separate ListTrac report on the earlier MLS number covers 2025-12-05 onward: 4,015 views / 4 shares / 99% new / 68 in the last 30 days.",
-          "reportDate": "2026-08-16",
-          "source": "ListTrac / MetroList weekly seller report"
+          "since": "Since the current MLS number went live Mar 20, 2026",
+          "note": "Mixed-use, so it carries on BOTH the commercial channels and the residential portals - Zillow leads at 226 views in 30 days. Beating its zip code for views. A separate ListTrac report on the earlier MLS number covers 2025-12-05 onward: 4,027 views / 6 shares / 97% new / 54 in the last 30 days.",
+          "reportDate": "2026-08-23",
+          "source": "ListTrac - MetroList weekly report"
         }
       },
       "timeline": {
@@ -3433,6 +3528,66 @@
         "reportDate": "2026-08-20",
         "source": "Homes.com Listing Analytics",
         "note": "Homes.com Listing Analytics (CoStar), agent tier Silver. Captured from the shareable /t/ report link, which is client-safe: it mints a fresh 180-day token on each open, so the link itself does not expire. These view counts are NOT comparable to listTrac's — different platform, different counting. Label both by source on the seller portal."
+      },
+      "marketing": {
+        "period": "Mar 20 - Aug 23, 2026",
+        "report_date": "2026-08-23",
+        "views": 384,
+        "shares": 18,
+        "inquiries": 0,
+        "callouts": [
+          "Beat its zip code for views",
+          "92% new visitors"
+        ],
+        "top_sites": [
+          {
+            "name": "Zillow.com",
+            "views": 226,
+            "inquiries": 0
+          },
+          {
+            "name": "Realtor.com",
+            "views": 84,
+            "inquiries": 0
+          },
+          {
+            "name": "searchrem.metrolist.net",
+            "views": 20,
+            "inquiries": 0
+          },
+          {
+            "name": "Trulia",
+            "views": 12,
+            "inquiries": 0
+          },
+          {
+            "name": "metrolist.com",
+            "views": 8,
+            "inquiries": 0
+          }
+        ],
+        "top_cities": [
+          {
+            "name": "Stockton, CA",
+            "views": 10
+          },
+          {
+            "name": "Valley Springs, CA",
+            "views": 9
+          },
+          {
+            "name": "Gilroy, CA",
+            "views": 2
+          },
+          {
+            "name": "Naples, Italy",
+            "views": 2
+          },
+          {
+            "name": "Seattle, WA",
+            "views": 1
+          }
+        ]
       }
     },
     {
@@ -3456,15 +3611,15 @@
         "commissionNote": "3.0% per the RLA (rev 12/25) dated 2026-06-04. RLA listing price $98,500 -> MOT #1 $89,000.",
         "agreementForm": "Residential Listing Agreement - Exclusive - 1225",
         "listTrac": {
-          "views": 9838,
-          "shares": 30,
+          "last30": 3017,
+          "views": 10670,
+          "newPct": 80,
+          "shares": 31,
           "inquiries": 1,
-          "newPct": 25,
-          "last30": 3018,
-          "since": "2026-06-04",
-          "note": "BEST PERFORMING LISTING IN THE BOOK. 3,018 views in the last 30 days — Zillow 1,947, Realtor.com 854. Beat its zip code. Unusually, 75% of visitors are RETURNING, not new: people are coming back to look again.",
-          "reportDate": "2026-08-16",
-          "source": "ListTrac / MetroList weekly seller report"
+          "since": "Since going live Jun 4, 2026",
+          "note": "Beating its zip code for views. Highest total views in the book.",
+          "reportDate": "2026-08-23",
+          "source": "ListTrac - MetroList weekly report"
         }
       },
       "salePrice": null,
@@ -3595,6 +3750,66 @@
         "reportDate": "2026-08-20",
         "source": "Homes.com Listing Analytics",
         "note": "Homes.com Listing Analytics (CoStar), agent tier Silver. Captured from the shareable /t/ report link, which is client-safe: it mints a fresh 180-day token on each open, so the link itself does not expire. These view counts are NOT comparable to listTrac's — different platform, different counting. Label both by source on the seller portal."
+      },
+      "marketing": {
+        "period": "Jun 04 - Aug 23, 2026",
+        "report_date": "2026-08-23",
+        "views": 3017,
+        "shares": 31,
+        "inquiries": 1,
+        "callouts": [
+          "Beat its zip code for views",
+          "80% new visitors"
+        ],
+        "top_sites": [
+          {
+            "name": "Zillow.com",
+            "views": 1982,
+            "inquiries": 0
+          },
+          {
+            "name": "Realtor.com",
+            "views": 805,
+            "inquiries": 0
+          },
+          {
+            "name": "Trulia",
+            "views": 160,
+            "inquiries": 0
+          },
+          {
+            "name": "Paragon",
+            "views": 18,
+            "inquiries": 0
+          },
+          {
+            "name": "getrenee.com",
+            "views": 13,
+            "inquiries": 0
+          }
+        ],
+        "top_cities": [
+          {
+            "name": "Sacramento, CA",
+            "views": 10
+          },
+          {
+            "name": "Dublin, CA",
+            "views": 5
+          },
+          {
+            "name": "Pleasanton, CA",
+            "views": 4
+          },
+          {
+            "name": "Danville, CA",
+            "views": 4
+          },
+          {
+            "name": "Watsonville, CA",
+            "views": 3
+          }
+        ]
       }
     },
     {
@@ -3614,15 +3829,16 @@
         "dateListed": "2026-03-10",
         "agreementForm": "Residential Listing Agreement - Exclusive - 1225",
         "listTrac": {
-          "views": 3165,
-          "shares": 87,
+          "last30": 737,
+          "views": 3373,
+          "newPct": 94,
+          "shares": 91,
           "inquiries": 0,
-          "newPct": 93,
-          "last30": 728,
-          "since": "2026-04-08",
-          "note": "87 shares — the most-shared listing in the book. Beat its zip code. Still receiving ListTrac reports and 728 views in the last 30 days despite being marked 'cancelled' in deals.json — worth confirming which is right.",
-          "reportDate": "2026-08-16",
-          "source": "ListTrac / MetroList weekly seller report"
+          "since": "Since going live Apr 8, 2026",
+          "note": "Most-shared listing in the book at 91 shares, and beating its zip code for views. The listing is live and marketing well - the Kayla Priestly ESCROW cancelled, the listing did not.",
+          "reportDate": "2026-08-23",
+          "source": "ListTrac - MetroList weekly report",
+          "favorites": 1
         }
       },
       "city": "Mountain Ranch, CA 95246",
@@ -3711,6 +3927,66 @@
         "reportDate": "2026-08-20",
         "source": "Homes.com Listing Analytics",
         "note": "Homes.com Listing Analytics (CoStar), agent tier Silver. Captured from the shareable /t/ report link, which is client-safe: it mints a fresh 180-day token on each open, so the link itself does not expire. These view counts are NOT comparable to listTrac's — different platform, different counting. Label both by source on the seller portal."
+      },
+      "marketing": {
+        "period": "Apr 08 - Aug 23, 2026",
+        "report_date": "2026-08-23",
+        "views": 737,
+        "shares": 91,
+        "inquiries": 0,
+        "callouts": [
+          "Most-shared listing in the book (91 shares)",
+          "Beat its zip code for views"
+        ],
+        "top_sites": [
+          {
+            "name": "Zillow.com",
+            "views": 414,
+            "inquiries": 0
+          },
+          {
+            "name": "Realtor.com",
+            "views": 177,
+            "inquiries": 0
+          },
+          {
+            "name": "Trulia",
+            "views": 46,
+            "inquiries": 0
+          },
+          {
+            "name": "metrolist.com",
+            "views": 29,
+            "inquiries": 0
+          },
+          {
+            "name": "dannymarinelli.metrolist.com",
+            "views": 15,
+            "inquiries": 0
+          }
+        ],
+        "top_cities": [
+          {
+            "name": "Sonora, CA",
+            "views": 5
+          },
+          {
+            "name": "Valley Springs, CA",
+            "views": 4
+          },
+          {
+            "name": "Sacramento, CA",
+            "views": 4
+          },
+          {
+            "name": "Manteca, CA",
+            "views": 2
+          },
+          {
+            "name": "Kiev, Ukraine",
+            "views": 2
+          }
+        ]
       }
     },
     {
@@ -3731,15 +4007,15 @@
         "dateListed": "2026-03-19",
         "agreementForm": "Residential Listing Agreement - Exclusive - 1225",
         "listTrac": {
-          "views": 5368,
+          "last30": 672,
+          "views": 5547,
+          "newPct": 83,
           "shares": 44,
           "inquiries": 5,
-          "newPct": 87,
-          "last30": 698,
-          "since": "2026-03-24",
-          "note": "5 inquiries — the most of any listing. Beat its zip code. Zillow drove 526 of the last 30 days' 698 views.",
-          "reportDate": "2026-08-16",
-          "source": "ListTrac / MetroList weekly seller report"
+          "since": "Since going live Mar 24, 2026",
+          "note": "Beating its zip code for views - the busiest listing in the book by 30-day traffic. NOTE ON INQUIRIES: ListTrac 'inquiries' are portal contact-link clicks routed to lead-buying agents in this zip, not to the listing agent.",
+          "reportDate": "2026-08-23",
+          "source": "ListTrac - MetroList weekly report"
         }
       },
       "city": "Ceres, CA 95307",
@@ -3778,6 +4054,65 @@
         "note": "5 inquiries — the most of any listing. Beat its zip code. Zillow drove 526 of the last 30 days' 698 views.",
         "reportDate": "2026-08-16",
         "source": "ListTrac / MetroList weekly seller report"
+      },
+      "marketing": {
+        "period": "Mar 24 - Aug 23, 2026",
+        "report_date": "2026-08-23",
+        "views": 672,
+        "shares": 44,
+        "inquiries": 5,
+        "callouts": [
+          "Beat its zip code for views"
+        ],
+        "top_sites": [
+          {
+            "name": "Zillow.com",
+            "views": 522,
+            "inquiries": 0
+          },
+          {
+            "name": "Realtor.com",
+            "views": 90,
+            "inquiries": 0
+          },
+          {
+            "name": "Trulia",
+            "views": 28,
+            "inquiries": 0
+          },
+          {
+            "name": "searchrem.metrolist.net",
+            "views": 7,
+            "inquiries": 0
+          },
+          {
+            "name": "remax.com",
+            "views": 7,
+            "inquiries": 0
+          }
+        ],
+        "top_cities": [
+          {
+            "name": "Toronto, Canada",
+            "views": 5
+          },
+          {
+            "name": "Modesto, CA",
+            "views": 4
+          },
+          {
+            "name": "Hollister, CA",
+            "views": 2
+          },
+          {
+            "name": "Stockton, CA",
+            "views": 2
+          },
+          {
+            "name": "Ceres, CA",
+            "views": 2
+          }
+        ]
       }
     },
     {
@@ -3987,7 +4322,18 @@
           "pct": 3
         },
         "disclosurePackage": "https://app.disclosures.io/link/324-Augusta-Court-y0xz96n1",
-        "commissionNote": "3.0% per the RLA (rev 6/26) dated 2026-06-18 — this is the LISTING-side rate and it is what applies now. deals.json carried 4% until 2026-08-16; that 4% was 3% listing side + 1% buyer side per Sara's escrow-opening instructions to Placer Title 2026-08-10, which was correct only for the Denis Listengourt dual transaction. That escrow cancelled 2026-08-14, so the buyer-side 1% is gone and the RLA rate of 3% stands. Listing price chain: RLA $545,000 -> MOT #1 (2026-07-24) $529,000 -> MOT #2 (2026-08-01) $495,000."
+        "commissionNote": "3.0% per the RLA (rev 6/26) dated 2026-06-18 — this is the LISTING-side rate and it is what applies now. deals.json carried 4% until 2026-08-16; that 4% was 3% listing side + 1% buyer side per Sara's escrow-opening instructions to Placer Title 2026-08-10, which was correct only for the Denis Listengourt dual transaction. That escrow cancelled 2026-08-14, so the buyer-side 1% is gone and the RLA rate of 3% stands. Listing price chain: RLA $545,000 -> MOT #1 (2026-07-24) $529,000 -> MOT #2 (2026-08-01) $495,000.",
+        "listTrac": {
+          "last30": 1477,
+          "views": 3254,
+          "newPct": 87,
+          "shares": 19,
+          "inquiries": 4,
+          "since": "Since going live Jun 25, 2026",
+          "note": "Beating its zip code for views. NOTE ON INQUIRIES: ListTrac 'inquiries' are clicks on a portal contact link and route to agents who buy leads in this zip code - they do NOT reach Sara. Treat as an interest signal only, never as a lead to work.",
+          "reportDate": "2026-08-23",
+          "source": "ListTrac - MetroList weekly report"
+        }
       },
       "listPrice": 495000,
       "salePrice": null,
@@ -4157,6 +4503,70 @@
         "reportDate": "2026-08-20",
         "source": "Homes.com Listing Analytics",
         "note": "Homes.com Listing Analytics (CoStar), agent tier Silver. Captured from the shareable /t/ report link, which is client-safe: it mints a fresh 180-day token on each open, so the link itself does not expire. These view counts are NOT comparable to listTrac's — different platform, different counting. Label both by source on the seller portal."
+      },
+      "marketing": {
+        "period": "Jun 25 - Aug 23, 2026",
+        "report_date": "2026-08-23",
+        "views": 1477,
+        "shares": 19,
+        "inquiries": 4,
+        "callouts": [
+          "Beat its zip code for views"
+        ],
+        "top_sites": [
+          {
+            "name": "Zillow.com",
+            "views": 916,
+            "inquiries": 0
+          },
+          {
+            "name": "Realtor.com",
+            "views": 398,
+            "inquiries": 0
+          },
+          {
+            "name": "Trulia",
+            "views": 45,
+            "inquiries": 0
+          },
+          {
+            "name": "coldwellbanker.com",
+            "views": 42,
+            "inquiries": 0
+          },
+          {
+            "name": "searchrem.metrolist.net",
+            "views": 33,
+            "inquiries": 0
+          },
+          {
+            "name": "mrem.metrolist.net",
+            "views": 10,
+            "inquiries": 3
+          }
+        ],
+        "top_cities": [
+          {
+            "name": "Sacramento, CA",
+            "views": 15
+          },
+          {
+            "name": "Valley Springs, CA",
+            "views": 14
+          },
+          {
+            "name": "Antelope, CA",
+            "views": 6
+          },
+          {
+            "name": "North Hollywood, CA",
+            "views": 3
+          },
+          {
+            "name": "Pleasant Hill, CA",
+            "views": 2
+          }
+        ]
       }
     },
     {
@@ -4219,15 +4629,16 @@
         "dateListed": "2025-01-10",
         "agreementForm": "Vacant Land Listing Agreement - 1224",
         "listTrac": {
-          "views": 564,
+          "last30": 55,
+          "views": 577,
+          "newPct": 100,
           "shares": 4,
           "inquiries": 0,
-          "newPct": 94,
-          "last30": 58,
-          "since": "2025-01-17",
-          "note": "Beat its zip code. Zillow drove 39 of the last 30 days' 58 views.",
-          "reportDate": "2026-08-16",
-          "source": "ListTrac / MetroList weekly seller report"
+          "since": "Since going live Jan 17, 2025",
+          "note": "Vacant-land listing - not comparable to the residential book; land traffic runs an order of magnitude lower by nature. Beating its zip code for views; 100% new visitors.",
+          "reportDate": "2026-08-23",
+          "source": "ListTrac - MetroList weekly report",
+          "favorites": 1
         }
       },
       "listTrac": {
@@ -4240,6 +4651,62 @@
         "note": "Beat its zip code. Zillow drove 39 of the last 30 days' 58 views.",
         "reportDate": "2026-08-16",
         "source": "ListTrac / MetroList weekly seller report"
+      },
+      "marketing": {
+        "period": "Jan 17, 2025 - Aug 23, 2026",
+        "report_date": "2026-08-23",
+        "views": 55,
+        "shares": 4,
+        "inquiries": 0,
+        "callouts": [
+          "Beat its zip code for views",
+          "100% new visitors"
+        ],
+        "top_sites": [
+          {
+            "name": "Zillow.com",
+            "views": 33,
+            "inquiries": 0
+          },
+          {
+            "name": "Realtor.com",
+            "views": 5,
+            "inquiries": 0
+          },
+          {
+            "name": "Homes.com",
+            "views": 5,
+            "inquiries": 0
+          },
+          {
+            "name": "legacycalifornia.com",
+            "views": 4,
+            "inquiries": 0
+          },
+          {
+            "name": "sothebysrealty.com",
+            "views": 3,
+            "inquiries": 0
+          }
+        ],
+        "top_cities": [
+          {
+            "name": "Toronto, Canada",
+            "views": 1
+          },
+          {
+            "name": "Berkeley, CA",
+            "views": 1
+          },
+          {
+            "name": "Valley Springs, CA",
+            "views": 1
+          },
+          {
+            "name": "Clarksville, TN",
+            "views": 1
+          }
+        ]
       }
     },
     {
@@ -4276,14 +4743,15 @@
         "dateListed": "2025-01-10",
         "agreementForm": "Vacant Land Listing Agreement - 1224",
         "listTrac": {
-          "views": 252,
-          "shares": 10,
+          "last30": 27,
+          "views": 263,
+          "newPct": 94,
+          "shares": 11,
           "inquiries": 0,
-          "newPct": 96,
-          "last30": 21,
-          "since": "2025-01-17",
-          "reportDate": "2026-08-16",
-          "source": "ListTrac / MetroList weekly seller report"
+          "since": "Since going live Jan 17, 2025",
+          "note": "Vacant-land listing - not comparable to the residential book; land traffic runs an order of magnitude lower by nature. legacycalifornia.com is the top traffic source on this one.",
+          "reportDate": "2026-08-23",
+          "source": "ListTrac - MetroList weekly report"
         }
       },
       "listTrac": {
@@ -4295,6 +4763,63 @@
         "since": "2025-01-17",
         "reportDate": "2026-08-16",
         "source": "ListTrac / MetroList weekly seller report"
+      },
+      "marketing": {
+        "period": "Jan 17, 2025 - Aug 23, 2026",
+        "report_date": "2026-08-23",
+        "views": 27,
+        "shares": 11,
+        "inquiries": 0,
+        "callouts": [],
+        "top_sites": [
+          {
+            "name": "legacycalifornia.com",
+            "views": 6,
+            "inquiries": 0
+          },
+          {
+            "name": "Homes.com",
+            "views": 5,
+            "inquiries": 0
+          },
+          {
+            "name": "remaxaccord.com",
+            "views": 4,
+            "inquiries": 0
+          },
+          {
+            "name": "neriahdavisrealtor.com",
+            "views": 3,
+            "inquiries": 0
+          },
+          {
+            "name": "andrewdavid.windermereca.com",
+            "views": 2,
+            "inquiries": 0
+          }
+        ],
+        "top_cities": [
+          {
+            "name": "Stockton, CA",
+            "views": 3
+          },
+          {
+            "name": "Valley Springs, CA",
+            "views": 2
+          },
+          {
+            "name": "Clarksville, TN",
+            "views": 1
+          },
+          {
+            "name": "Berkeley, CA",
+            "views": 1
+          },
+          {
+            "name": "Rancho Cordova, CA",
+            "views": 1
+          }
+        ]
       }
     },
     {
@@ -4331,15 +4856,16 @@
         "dateListed": "2025-01-10",
         "agreementForm": "Vacant Land Listing Agreement - 1224",
         "listTrac": {
-          "views": 294,
+          "last30": 20,
+          "views": 301,
+          "newPct": 100,
           "shares": 11,
           "inquiries": 0,
-          "newPct": 100,
-          "last30": 17,
-          "since": "2025-01-17",
-          "note": "100% new visitors — no one is coming back for a second look.",
-          "reportDate": "2026-08-16",
-          "source": "ListTrac / MetroList weekly seller report"
+          "since": "Since going live Jan 17, 2025",
+          "note": "Vacant-land listing - not comparable to the residential book; land traffic runs an order of magnitude lower by nature. 100% new visitors. Land listing - low but steady traffic.",
+          "reportDate": "2026-08-23",
+          "source": "ListTrac - MetroList weekly report",
+          "favorites": 1
         }
       },
       "listTrac": {
@@ -4352,6 +4878,65 @@
         "note": "100% new visitors — no one is coming back for a second look.",
         "reportDate": "2026-08-16",
         "source": "ListTrac / MetroList weekly seller report"
+      },
+      "marketing": {
+        "period": "Jan 17, 2025 - Aug 23, 2026",
+        "report_date": "2026-08-23",
+        "views": 20,
+        "shares": 11,
+        "inquiries": 0,
+        "callouts": [
+          "100% new visitors"
+        ],
+        "top_sites": [
+          {
+            "name": "Homes.com",
+            "views": 5,
+            "inquiries": 0
+          },
+          {
+            "name": "legacycalifornia.com",
+            "views": 3,
+            "inquiries": 0
+          },
+          {
+            "name": "weichert.com",
+            "views": 2,
+            "inquiries": 0
+          },
+          {
+            "name": "searchrem.metrolist.net",
+            "views": 2,
+            "inquiries": 0
+          },
+          {
+            "name": "remaxaccord.com",
+            "views": 2,
+            "inquiries": 0
+          }
+        ],
+        "top_cities": [
+          {
+            "name": "Valley Springs, CA",
+            "views": 2
+          },
+          {
+            "name": "Berkeley, CA",
+            "views": 1
+          },
+          {
+            "name": "Manteca, CA",
+            "views": 1
+          },
+          {
+            "name": "Rancho Cordova, CA",
+            "views": 1
+          },
+          {
+            "name": "Stockton, CA",
+            "views": 1
+          }
+        ]
       }
     },
     {
@@ -4388,15 +4973,15 @@
         "dateListed": "2025-01-10",
         "agreementForm": "Vacant Land Listing Agreement - 1224",
         "listTrac": {
-          "views": 214,
+          "last30": 18,
+          "views": 221,
+          "newPct": 94,
           "shares": 3,
           "inquiries": 0,
-          "newPct": 93,
-          "last30": 14,
-          "since": "2025-01-17",
-          "note": "Quietest listing in the book — 14 views in the last 30 days.",
-          "reportDate": "2026-08-16",
-          "source": "ListTrac / MetroList weekly seller report"
+          "since": "Since going live Jan 17, 2025",
+          "note": "Vacant-land listing - not comparable to the residential book; land traffic runs an order of magnitude lower by nature. Steady low-volume commercial traffic; Homes.com is the top source.",
+          "reportDate": "2026-08-23",
+          "source": "ListTrac - MetroList weekly report"
         }
       },
       "listTrac": {
@@ -4409,6 +4994,51 @@
         "note": "Quietest listing in the book — 14 views in the last 30 days.",
         "reportDate": "2026-08-16",
         "source": "ListTrac / MetroList weekly seller report"
+      },
+      "marketing": {
+        "period": "Jan 17, 2025 - Aug 23, 2026",
+        "report_date": "2026-08-23",
+        "views": 18,
+        "shares": 3,
+        "inquiries": 0,
+        "callouts": [],
+        "top_sites": [
+          {
+            "name": "Homes.com",
+            "views": 6,
+            "inquiries": 0
+          },
+          {
+            "name": "nexthomeutica.com",
+            "views": 3,
+            "inquiries": 0
+          },
+          {
+            "name": "searchrem.metrolist.net",
+            "views": 2,
+            "inquiries": 0
+          },
+          {
+            "name": "search.mlslistings.com",
+            "views": 1,
+            "inquiries": 0
+          },
+          {
+            "name": "metrolistpro.com",
+            "views": 1,
+            "inquiries": 0
+          }
+        ],
+        "top_cities": [
+          {
+            "name": "Sacramento, CA",
+            "views": 3
+          },
+          {
+            "name": "Valley Springs, CA",
+            "views": 1
+          }
+        ]
       }
     },
     {
@@ -4444,15 +5074,15 @@
         "expiration": "2027-01-18",
         "agreementForm": "Vacant Land Listing Agreement - 1224",
         "listTrac": {
-          "views": 1943,
+          "last30": 165,
+          "views": 1992,
+          "newPct": 97,
           "shares": 17,
           "inquiries": 0,
-          "newPct": 98,
-          "last30": 158,
-          "since": "2025-06-20",
-          "note": "Beat its zip code. Zillow 79 and Realtor.com 32 of the last 30 days' 158 views.",
-          "reportDate": "2026-08-16",
-          "source": "ListTrac / MetroList weekly seller report"
+          "since": "Since going live Jun 20, 2025",
+          "note": "Vacant-land listing - not comparable to the residential book; land traffic runs an order of magnitude lower by nature. Beating its zip code for views.",
+          "reportDate": "2026-08-23",
+          "source": "ListTrac - MetroList weekly report"
         }
       },
       "listTrac": {
@@ -4465,6 +5095,65 @@
         "note": "Beat its zip code. Zillow 79 and Realtor.com 32 of the last 30 days' 158 views.",
         "reportDate": "2026-08-16",
         "source": "ListTrac / MetroList weekly seller report"
+      },
+      "marketing": {
+        "period": "Jun 20, 2025 - Aug 23, 2026",
+        "report_date": "2026-08-23",
+        "views": 165,
+        "shares": 17,
+        "inquiries": 0,
+        "callouts": [
+          "Beat its zip code for views"
+        ],
+        "top_sites": [
+          {
+            "name": "Zillow.com",
+            "views": 90,
+            "inquiries": 0
+          },
+          {
+            "name": "Realtor.com",
+            "views": 30,
+            "inquiries": 0
+          },
+          {
+            "name": "metrolist.com",
+            "views": 15,
+            "inquiries": 0
+          },
+          {
+            "name": "Trulia",
+            "views": 7,
+            "inquiries": 0
+          },
+          {
+            "name": "Homes.com",
+            "views": 5,
+            "inquiries": 0
+          }
+        ],
+        "top_cities": [
+          {
+            "name": "Madrid, Spain",
+            "views": 2
+          },
+          {
+            "name": "Valley Springs, CA",
+            "views": 2
+          },
+          {
+            "name": "Elche, Spain",
+            "views": 1
+          },
+          {
+            "name": "Barcelona, Spain",
+            "views": 1
+          },
+          {
+            "name": "Buenos Aires, Argentina",
+            "views": 1
+          }
+        ]
       }
     },
     {
@@ -4573,11 +5262,11 @@
         },
         {
           "date": "2026-08-25",
-          "label": "Loan contingency deadline",
-          "status": "upcoming",
+          "label": "All contingencies removed",
+          "status": "done",
           "col": "contingencies",
-          "badge": "Watch",
-          "desc": "Your loan contingency runs to August 25 under Extension of Time Amendment No. 1, accepted by the seller August 14."
+          "badge": "Done",
+          "desc": "You signed Buyer Contingency Removal No. 2 on August 22, removing every remaining contingency including the loan contingency - three days ahead of its August 25 deadline. Because all contingencies are now off, your deposit is at risk if the purchase does not close, so the funding has to land on time."
         },
         {
           "date": "2026-08-28",
@@ -4633,7 +5322,9 @@
         "RPA": "RPA fully executed via Authentisign 7/15 (buyer-signed 7/12, sent to Dee; both buyers — Ashley Robinson and Bert Andrews — signed 7/15)",
         "AAA": "buyer-signed 7/13",
         "sellerCounter1": "SCO1 fully executed 7/15 (Authentisign) — offer accepted at $170,000 cash; price confirmed by Sara 7/23",
-        "EMD": "confirmed received by escrow 7/16 (receipt sent to Ashley Robinson, James, and Sara by Tanya Salgado/Orange Coast Title 7/16, verified in Sara's Gmail)"
+        "EMD": "confirmed received by escrow 7/16 (receipt sent to Ashley Robinson, James, and Sara by Tanya Salgado/Orange Coast Title 7/16, verified in Sara's Gmail)",
+        "contingencyRemoval2": "EXECUTED - Buyer Contingency Removal No. 2 (C.A.R. Form CR-B rev 6/24, Authentisign 50A96C77-489E-F111-9B33-000D3A4FF82A). Paragraph 4 checked: 'BUYER HEREBY REMOVES ANY AND ALL BUYER CONTINGENCIES.' Signed by buyer Ashley Robinson, dated 08/22/2026 (sole remaining buyer - Bert Andrews was removed by the addendum filed 2026-08-14). CR-B requires the buyer's signature only; there is no seller acceptance block, and the second buyer line is correctly blank. Signed 3 days inside the 2026-08-25 loan-contingency deadline. Filed to __Pending\\695 Feather\\EX\\Buyer Contingency Removal 2 - 624pdf.pdf on 2026-08-22 16:25.",
+        "SPQ": "on file - SPQpdf.pdf filed to EX 2026-08-22 16:25"
       },
       "correspondence": [],
       "clientDocuments": [
@@ -4696,6 +5387,7 @@
       ],
       "notes": "Pivot for Ashley Robinson (James's buyer) after the 992 Iroquois offer went dead 7/12. Offer sent to listing agent Dee 7/12 for 695 Feather Dr, Copperopolis. Docs in _Offers/Buy Side/Robinson 695 Feather Dr/. UPDATE 7/18 (from James's 7/18 Gmail review, cross-checked against Sara's Gmail): Offer accepted 7/15; escrow opened at Orange Coast Title Company of Southern California (Santa Ana), Escrow #2473532-TS, escrow officer Tanya Salgado (tanyas@octitle.com) — switched from Placer Title because the property was acquired via tax sale last year and Placer is restricted from insuring/escrowing such properties for 3-5 years. EMD confirmed received by escrow 7/16. ClosingLock wire instructions sent to both buyers 7/15-7/16; Ashley Robinson submitted proof of funds 7/16. NOT yet confirmed: final accepted purchase price/terms (a preliminary net sheet referenced a $170,000 cash-purchase figure sent 7/15 before escrow opened — not verified as final); what listing agent Dee Bradley committed to doing \"Monday\" (7/20) per her 7/17 email; and what the \"Page 17\" document escrow sent 7/17 actually is (likely the RPA escrow acknowledgment James requested, not confirmed). | 8/7: COE confirmed 8/14.",
       "alerts": [
+        "ALL BUYER CONTINGENCIES REMOVED 2026-08-22 - Ashley Robinson signed Buyer Contingency Removal No. 2 (para 4, all contingencies), filed to EX. Ashley's deposit is now at risk if this does not close. COE is Friday 2026-08-28 and the HELOC funds expected at Orange Coast Title on Friday 2026-08-21 are STILL UNCONFIRMED in the email record. Confirm funding in writing.",
         "COE 2026-08-28 — executed ETA No. 1 (buyer signed 8/12, seller Christopher Jewett accepted 8/14) filed to EX\\eta_1.pdf on 8/18 and read this morning. This CORRECTS the 8/21 date the file, the client page and the CRM were all carrying. Closes Friday 8/28.",
         "FUNDING: home equity line of credit — Ashley Robinson's father signed 2026-08-17, funds expected at escrow Friday 2026-08-21. Loan contingency 2026-08-25 per ETA No. 1. The earlier 'all cash' description reflects the original funding source (Bert Andrews, removed by addendum 2026-08-14); price is unchanged at $170,000. Per Sara 2026-08-20.",
         "Offer ACCEPTED 7/15 — moved off \"offer\" stage 7/18; RPA/SCO1 fully executed via Authentisign, both buyers signed",
@@ -4719,7 +5411,7 @@
       "timeline": {
         "acceptance": "2026-07-15",
         "coe": "2026-08-28",
-        "note": "Timeline block added 2026-08-11 by the morning briefing (Step 1d Part A). acceptance 2026-07-15 = RPA/SCO1 fully executed via Authentisign (milestone 'Offer accepted - RPA executed'). coe 2026-08-14 = closingDate, confirmed 8/7. All-cash purchase, so no loan or appraisal contingency; inspection/title/insurance not separately dated in the file, so the 17-day default from acceptance applies. Previously null, which rendered the buyer page with no dates. ETA No. 1 extends COE 2026-08-14 → 2026-08-21 (Friday): buyer Ashley Robinson signed 2026-08-11. EXECUTION CONFIRMED BY SARA 2026-08-17 ('confirmed') — COE 2026-08-21 is firm and no longer provisional. The filed copy (EX\\eta addition to escrow for featherpdf.pdf) is password-protected and cannot be opened by the briefing run, so the confirmation rests on Sara's word, not on a document read; request an unlocked copy for the file at some point, but it is not blocking the close. || SUPERSEDED 2026-08-19: the ACTUAL executed ETA No. 1 (C.A.R. Form ETA rev 12/25, Authentisign 9B754FE7-1198-F111-9B33-000D3A4FF82A) was filed to __Pending\\695 Feather\\EX\\eta_1.pdf on 2026-08-18 and IS readable (scanned; OCR). It reads: para 1 Close Of Escrow extended to 08/28/2026; para 2 contingency extended to 08/25/2026 with the 'Loan' box checked. Proposed and signed by buyer Ashley Robinson 08/12/26; ACCEPTED at para 6 by seller Christopher Jewett 08/14/26 — both blocks filled, within the 3-day acceptance window, so the document is FULLY EXECUTED. coe and closingDate therefore moved 2026-08-21 -> 2026-08-28 (Friday, a business day) by the 2026-08-19 run under Sara's 2026-08-16 auto-apply standing instruction (Step 1d Part D). The prior note recorded COE 8/21 from a password-protected copy that could not be read plus Sara's verbal confirmation on 8/17 — the readable executed document supersedes both. James confirmed in the CRM 8/18: 'the documents have all been filed with the appropriate people. the ETA is in effect.' LOAN CONTINGENCY RESOLVED 2026-08-20 BY SARA: the 'Loan' checkbox is CORRECT and is now recorded as contingencies.loan = 2026-08-25. Her correction, in substance: the buyer DID have a loan — a HOME EQUITY LINE OF CREDIT; Ashley Robinson's father signed for it Monday 2026-08-17 and the funds are due to arrive Friday 2026-08-21. The 2026-08-19 run withheld this value because the file described the purchase as all-cash (RPA written cash, 'Proof of funds Bert Andrews.pdf' in EX, milestone 'Price confirmed — $170,000 cash'); that description reflected the ORIGINAL funding source. Bert Andrews was removed by the addendum filed 2026-08-14 ('addendum removing Bert.pdf') and the HELOC replaced him, which is what para 2 of ETA No. 1 was extending. Consideration is still $170,000 and the price is unchanged — only the source of the buyer's funds changed.",
+        "note": "Timeline block added 2026-08-11 by the morning briefing (Step 1d Part A). acceptance 2026-07-15 = RPA/SCO1 fully executed via Authentisign (milestone 'Offer accepted - RPA executed'). coe 2026-08-14 = closingDate, confirmed 8/7. All-cash purchase, so no loan or appraisal contingency; inspection/title/insurance not separately dated in the file, so the 17-day default from acceptance applies. Previously null, which rendered the buyer page with no dates. ETA No. 1 extends COE 2026-08-14 → 2026-08-21 (Friday): buyer Ashley Robinson signed 2026-08-11. EXECUTION CONFIRMED BY SARA 2026-08-17 ('confirmed') — COE 2026-08-21 is firm and no longer provisional. The filed copy (EX\\eta addition to escrow for featherpdf.pdf) is password-protected and cannot be opened by the briefing run, so the confirmation rests on Sara's word, not on a document read; request an unlocked copy for the file at some point, but it is not blocking the close. || SUPERSEDED 2026-08-19: the ACTUAL executed ETA No. 1 (C.A.R. Form ETA rev 12/25, Authentisign 9B754FE7-1198-F111-9B33-000D3A4FF82A) was filed to __Pending\\695 Feather\\EX\\eta_1.pdf on 2026-08-18 and IS readable (scanned; OCR). It reads: para 1 Close Of Escrow extended to 08/28/2026; para 2 contingency extended to 08/25/2026 with the 'Loan' box checked. Proposed and signed by buyer Ashley Robinson 08/12/26; ACCEPTED at para 6 by seller Christopher Jewett 08/14/26 — both blocks filled, within the 3-day acceptance window, so the document is FULLY EXECUTED. coe and closingDate therefore moved 2026-08-21 -> 2026-08-28 (Friday, a business day) by the 2026-08-19 run under Sara's 2026-08-16 auto-apply standing instruction (Step 1d Part D). The prior note recorded COE 8/21 from a password-protected copy that could not be read plus Sara's verbal confirmation on 8/17 — the readable executed document supersedes both. James confirmed in the CRM 8/18: 'the documents have all been filed with the appropriate people. the ETA is in effect.' LOAN CONTINGENCY RESOLVED 2026-08-20 BY SARA: the 'Loan' checkbox is CORRECT and is now recorded as contingencies.loan = 2026-08-25. Her correction, in substance: the buyer DID have a loan — a HOME EQUITY LINE OF CREDIT; Ashley Robinson's father signed for it Monday 2026-08-17 and the funds are due to arrive Friday 2026-08-21. The 2026-08-19 run withheld this value because the file described the purchase as all-cash (RPA written cash, 'Proof of funds Bert Andrews.pdf' in EX, milestone 'Price confirmed — $170,000 cash'); that description reflected the ORIGINAL funding source. Bert Andrews was removed by the addendum filed 2026-08-14 ('addendum removing Bert.pdf') and the HELOC replaced him, which is what para 2 of ETA No. 1 was extending. Consideration is still $170,000 and the price is unchanged — only the source of the buyer's funds changed. || CONTINGENCIES REMOVED 2026-08-22: Buyer Contingency Removal No. 2 (C.A.R. Form CR-B rev 6/24, Authentisign 50A96C77-489E-F111-9B33-000D3A4FF82A) filed to EX 2026-08-22 16:25 and read by the 2026-08-23 run. Paragraph 4 is checked - 'BUYER HEREBY REMOVES ANY AND ALL BUYER CONTINGENCIES' - signed by Ashley Robinson 08/22/2026, inside the 2026-08-25 loan deadline. contingencies.loan stays recorded as 2026-08-25 because that is the deadline of record that was met; the removal itself is the event, and it is carried in docs.contingencyRemoval2 and on the milestone. Applied by the 2026-08-23 run under Sara's 2026-08-16 auto-apply standing instruction (five-part executed test: on disk / read / only required signature block filled / inside deadline / nothing contradicts).",
         "contingencies": {
           "loan": "2026-08-25"
         }
