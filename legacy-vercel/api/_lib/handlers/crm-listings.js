@@ -124,8 +124,8 @@ export default async function handler(req, res) {
   try {
     const supa = adminClient();
     const BASE      = 'source_key, address, city, stage, side, agent, list_price, sale_price, coe_date, photo_url, video_url, matterport_url, escrow_officer, title_company, co_agent';
-    const COLS_ATTRS = BASE + ', mls_number, listing_meta, stage_override, photo_override, party_details, attributes';
-    const COLS_FULL = BASE + ', mls_number, listing_meta, stage_override, photo_override, party_details';
+    const COLS_ATTRS = BASE + ', mls_number, listing_meta, stage_override, photo_override, party_details, agent_overrides, attributes';
+    const COLS_FULL = BASE + ', mls_number, listing_meta, stage_override, photo_override, party_details, agent_overrides';
     const COLS_MLS  = BASE + ', mls_number, stage_override, photo_override';
     const COLS      = BASE;   // ultimate fallback — no stage_override/photo_override (pre-024/026)
     // Include buyer-side deals too — a purchase we represent is a live
@@ -211,17 +211,24 @@ export default async function handler(req, res) {
       // 'preparing', where the agent decides a listing WON'T go to market. Either
       // way it self-heals once Cowork advances the deal in deals.json; any other
       // time, the real `stage` wins.
-      const canOverride = d.stage === 'offer' || d.stage === 'preparing';
+      const canOverride = d.stage === 'offer' || d.stage === 'preparing' || d.stage === 'listing';
       const stage = (canOverride && d.stage_override) ? d.stage_override : d.stage;
+      // Agent field overrides (db/066) — a CRM-typed value wins over the synced
+      // (Cowork) column and survives the hourly sync; same overlay as crm-deals.js
+      // so a corrected list price shows in the Listings view too.
+      const ov = (d.agent_overrides && typeof d.agent_overrides === 'object' && !Array.isArray(d.agent_overrides)) ? d.agent_overrides : {};
+      const pick = (k, synced) => (ov[k] != null && ov[k] !== '') ? ov[k] : synced;
+      const listPrice = pick('list_price', d.list_price);
+      const salePrice = pick('sale_price', d.sale_price);
       const row = {
         source_key: d.source_key,
-        address:    d.address,
-        city:       d.city,
-        side:       d.side,
-        agent:      d.agent,
-        price:      d.sale_price || d.list_price || null,
-        list_price: d.list_price,
-        sale_price: d.sale_price,
+        address:    pick('address', d.address),
+        city:       pick('city', d.city),
+        side:       pick('side', d.side),
+        agent:      pick('agent', d.agent),
+        price:      salePrice || listPrice || null,
+        list_price: listPrice,
+        sale_price: salePrice,
         coe_date:   d.coe_date,
         mls:        d.mls_number || null,
         meta:       d.listing_meta || null,   // client, apn, beds/baths, sqft, dates, disclosure, video

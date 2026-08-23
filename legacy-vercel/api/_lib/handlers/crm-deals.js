@@ -108,7 +108,7 @@ export default async function handler(req, res) {
       // Effective stage — same rule as crm-listings.js: the agent's override
       // applies while deals.json still has the deal at 'offer' or 'preparing'
       // (accept → escrow, offer fell through, listing won't-list), else `stage`.
-      const canOverride = d.stage === 'offer' || d.stage === 'preparing';
+      const canOverride = d.stage === 'offer' || d.stage === 'preparing' || d.stage === 'listing';
       const stage = (canOverride && d.stage_override) ? d.stage_override : d.stage;
       const photo = d.photo_override || d.photo_url || youtubeThumb(d.video_url);
       const parties = resolveParties(d);

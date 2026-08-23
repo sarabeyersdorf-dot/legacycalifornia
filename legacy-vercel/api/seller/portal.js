@@ -195,6 +195,19 @@ export default async function handler(req, res) {
     if (!deal && previewMiss) return ok(res, { portal: notFoundPortal(previewKey) });
     if (!deal) return ok(res, { portal: emptyPortal(user) });
 
+    // ── Agent overrides (db/066): a value the agent typed in the CRM
+    // (deals.agent_overrides / stage_override) wins over the synced Cowork column
+    // and survives the hourly deals.json sync. Apply the SAME overlay the CRM
+    // uses so the portal never shows a stale stage or price — e.g. a listing the
+    // agent moved back to "Preparing to list", or a corrected list price. A stage
+    // override corrects an offer / preparing / listing deal (never a live escrow
+    // or closed one).
+    const _ov = (deal.agent_overrides && typeof deal.agent_overrides === 'object' && !Array.isArray(deal.agent_overrides)) ? deal.agent_overrides : {};
+    const _canStageOv = deal.stage === 'offer' || deal.stage === 'preparing' || deal.stage === 'listing';
+    const effStage = (_canStageOv && deal.stage_override) ? deal.stage_override : deal.stage;
+    const effListPrice = (_ov.list_price != null && _ov.list_price !== '') ? _ov.list_price : deal.list_price;
+    const effSalePrice = (_ov.sale_price != null && _ov.sale_price !== '') ? _ov.sale_price : deal.sale_price;
+
     // 1b. Agent-shared items (portal_items) --------------------------------
     // The single source of truth for what a client may see: the SECURITY
     // DEFINER portal_items(token) function returns only rows the agent flipped
@@ -344,7 +357,7 @@ export default async function handler(req, res) {
       // by isArchivedEscrowDoc + the escrow history, which we must not disturb.
       // Disclosures, the listing agreement, and inspections are never swept up; a
       // pending/closed deal keeps its live purchase file.
-      const notUnderContract = !activeEscrow && deal.stage !== 'pending' && deal.stage !== 'closed';
+      const notUnderContract = !activeEscrow && effStage !== 'pending' && effStage !== 'closed';
       if (notUnderContract && !doc.escrow_id) {
         const cat = docCategory(doc.doc_type, doc.name);
         if (cat === 'contract' || cat === 'title' || cat === 'money') return false;
@@ -385,7 +398,6 @@ export default async function handler(req, res) {
     // (deals.agent_overrides) wins over the deals.json value, so an agent can
     // attach listing media to a deal and the seller portal shows it immediately,
     // surviving the hourly sync — without waiting on Cowork.
-    const _ov = (deal.agent_overrides && typeof deal.agent_overrides === 'object' && !Array.isArray(deal.agent_overrides)) ? deal.agent_overrides : {};
     const effVideoUrl = (_ov.video_url != null && _ov.video_url !== '') ? _ov.video_url : deal.video_url;
     const effMatterportUrl = (_ov.matterport_url != null && _ov.matterport_url !== '') ? _ov.matterport_url : deal.matterport_url;
     // The listing's public marketing page (agent-set, survives sync via
@@ -425,10 +437,10 @@ export default async function handler(req, res) {
 
     // Stage model. ONLY a 'pending' deal is in escrow — a 'listing' is on the
     // market and must NEVER be described in escrow/closing terms.
-    const inEscrow   = deal.stage === 'pending';
-    const isListing  = deal.stage === 'listing';
-    const isPreparing= deal.stage === 'preparing';
-    const isClosed   = deal.stage === 'closed';
+    const inEscrow   = effStage === 'pending';
+    const isListing  = effStage === 'listing';
+    const isPreparing= effStage === 'preparing';
+    const isClosed   = effStage === 'closed';
     // Buyer-vs-seller FRAMING follows the viewer's role (audience), not just the
     // deal side — so a buyer-party on a both-sided in-house deal (side 'both')
     // gets the purchase view: no listing marketing, "Your purchase" framing, and
@@ -441,14 +453,14 @@ export default async function handler(req, res) {
     // on market, "Purchase price" for a buyer we represent in escrow, else
     // "Sale price". Never label a listing's number "Sale price".
     const price = (isListing || isPreparing)
-      ? (deal.list_price ?? deal.sale_price)
-      : (deal.sale_price ?? deal.list_price);
+      ? (effListPrice ?? effSalePrice)
+      : (effSalePrice ?? effListPrice);
     const priceLabel = (isListing || isPreparing) ? 'List price'
                      : inEscrow ? (isBuyerSide ? 'Purchase price' : 'Sale price')
                      : isClosed ? (isBuyerSide ? 'Purchase price' : 'Sale price')
                      : 'Price';
     const STAGE_LABEL = { pending: 'In escrow', listing: 'On the market', preparing: 'Preparing to list', closed: 'Sold' };
-    const stageLabel = STAGE_LABEL[deal.stage] || sanitize(deal.stage || '');
+    const stageLabel = STAGE_LABEL[effStage] || sanitize(effStage || '');
     // Documents KPI shows the ACTUAL number of documents in this deal's portal —
     // never a fixed "X / Y" (there's no predetermined checklist; every deal has a
     // different set). Omitted entirely when there are none, so a deal with no
@@ -744,7 +756,7 @@ export default async function handler(req, res) {
     // label: never show a buyer's-side agent on a deal with no live buyer
     // (Cowork flag 2026-08-16 — 324 Augusta cancelled but still listed James as
     // the buyer's agent). The escrow-history section carries any past record.
-    const hasCounterparty = inEscrow || deal.stage === 'offer';
+    const hasCounterparty = inEscrow || effStage === 'offer';
 
     const escrowRaw = ct.escrow || deal.escrow_officer;
     if (hasCounterparty && escrowRaw) {
