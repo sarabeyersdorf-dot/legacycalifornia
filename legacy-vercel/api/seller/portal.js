@@ -201,7 +201,7 @@ export default async function handler(req, res) {
     // to client-visible (tasks/events) plus client-safe documents, scoped to
     // this token. An internal row can never surface here even if this code has
     // a bug. Fail-soft — a portal_items hiccup must not blank the portal.
-    let sharedTasks = [], sharedEvents = [];
+    let sharedTasks = [], sharedEvents = [], showingsRaw = [];
     try {
       if (!portalToken && leadId) {
         const { data: l } = await supa.from('leads').select('portal_token').eq('id', leadId).maybeSingle();
@@ -214,19 +214,53 @@ export default async function handler(req, res) {
             sharedTasks.push({ label: sanitize(it.title || 'Update'), when: 'From your agent', status: 'shared' });
           } else if (it.item_type === 'event') {
             const d = it.when_at ? new Date(it.when_at) : null;
-            sharedEvents.push({
-              date: (d && !isNaN(d)) ? `${MONTHS[d.getMonth()]} ${d.getDate()}` : '',
-              label: sanitize(it.title || 'Scheduled'),
-              status: 'upcoming',
-              description: (d && !isNaN(d)) ? d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' }) : '',
-              _at: (d && !isNaN(d)) ? d.getTime() : 0
-            });
+            const at = (d && !isNaN(d)) ? d.getTime() : 0;
+            const meta = it.meta || {};
+            // A showing (portal_items already scopes these to the seller side) is
+            // pulled into its own list — who toured + an auto-count per agent —
+            // rather than the closing road.
+            if (meta.kind === 'showing') {
+              showingsRaw.push({
+                _at: at,
+                date: (d && !isNaN(d)) ? `${MONTHS[d.getMonth()]} ${d.getDate()}` : '',
+                time: (d && !isNaN(d)) ? d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' }) : '',
+                agent: sanitize(meta.showing_agent || '') || null
+              });
+            } else {
+              sharedEvents.push({
+                date: (d && !isNaN(d)) ? `${MONTHS[d.getMonth()]} ${d.getDate()}` : '',
+                label: sanitize(it.title || 'Scheduled'),
+                status: 'upcoming',
+                description: (d && !isNaN(d)) ? d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' }) : '',
+                _at: at
+              });
+            }
           }
           // documents from portal_items are already covered by the client-safe
           // deal_documents query below; skip to avoid duplicates.
         }
       }
     } catch (_) { /* stay soft */ }
+
+    // Showings for the seller: one row per agent with an auto-count ("how many
+    // times each agent has shown") + their most recent visit. Named outside
+    // agents rank first; our own team's showings roll up under "Legacy
+    // Properties". Front-end binds `agent` + `count_label`; empty ⇒ section hides.
+    let showings = [];
+    if (showingsRaw.length) {
+      showingsRaw.sort((a, b) => a._at - b._at);  // ascending, so last write = most recent
+      const counts = new Map(), lastDate = new Map();
+      for (const s of showingsRaw) {
+        const key = s.agent || 'Legacy Properties';
+        counts.set(key, (counts.get(key) || 0) + 1);
+        if (s.date) lastDate.set(key, s.date);
+      }
+      showings = [...counts.entries()].map(([agent, count]) => {
+        const label = (count === 1 ? '1 showing' : `${count} showings`)
+          + (lastDate.get(agent) ? ` · last ${lastDate.get(agent)}` : '');
+        return { agent, count, is_outside: agent !== 'Legacy Properties', count_label: label };
+      }).sort((a, b) => (b.is_outside - a.is_outside) || (b.count - a.count));
+    }
 
     // Escrow records for this property (Slice 2/3). Fetched once; used to scope
     // documents by escrow, to suppress the escrow road when back on market, and to
@@ -925,6 +959,9 @@ export default async function handler(req, res) {
       marketing,
       // Compact ListTrac headline stats card shown at the top, beside the tour.
       list_trac: listTrac,
+      // Showings for the seller: who toured the home + an auto-count per agent.
+      // Empty for a buyer (portal_items scopes showings to the seller side).
+      showings: isBuyerSide ? [] : showings,
       nav: { documents: docs.length ? String(docs.length) : '', tasks: String(tasks.length) },
       // Side-aware "What I need from you" copy (buyer vs seller seat).
       tasks_intro: tasksIntro,
