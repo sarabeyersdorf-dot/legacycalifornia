@@ -24,9 +24,19 @@ export default async function handler(req, res) {
     const supa = adminClient();
     const { data, error } = await supa
       .from('deals')
-      .select('id, source_key, address, city, stage, side, agent')
+      .select('id, source_key, address, city, stage, stage_override, side, agent')
       .order('address', { ascending: true });
     if (error) return fail(res, 500, error.message);
+
+    // Effective stage: an agent's stage_override (db/066) wins over the synced
+    // Cowork stage for an offer / preparing / listing deal — the same overlay
+    // the CRM and seller portal use — so a picker never shows a deal as
+    // on-market when the agent has moved it back to "Preparing to list"
+    // (e.g. 1143 Echo St). Never overrides a live escrow or a closed deal.
+    const effStage = (d) => {
+      const canOv = d.stage === 'offer' || d.stage === 'preparing' || d.stage === 'listing';
+      return (canOv && d.stage_override) ? d.stage_override : d.stage;
+    };
 
     // `address` is inconsistent at the source (deals.json) — some rows are
     // just the street ("1111 Dunbar Rd"), others already have city/state (and
@@ -45,7 +55,7 @@ export default async function handler(req, res) {
     const deals = (data || [])
       .slice()
       .sort((a, b) => {
-        const aClosed = a.stage === 'closed', bClosed = b.stage === 'closed';
+        const aClosed = effStage(a) === 'closed', bClosed = effStage(b) === 'closed';
         if (aClosed !== bClosed) return aClosed ? 1 : -1;
         return (a.address || '').localeCompare(b.address || '');
       })
@@ -54,7 +64,7 @@ export default async function handler(req, res) {
         source_key: d.source_key,
         address:    d.address,
         city:       d.city,
-        stage:      d.stage,
+        stage:      effStage(d),
         side:       d.side,
         agent:      d.agent,
         label:      labelFor(d.address, d.city)
