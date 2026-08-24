@@ -7,11 +7,13 @@
 import enroll from '../_lib/handlers/sequences-enroll.js';
 import cron   from '../_lib/handlers/sequences-cron.js';
 import importExpired from '../_lib/handlers/sequences-import-expired.js';
+import preview from '../_lib/handlers/sequences-preview.js';
 
 const TABLE = {
   'enroll':         enroll,
   'cron':           cron,
-  'import-expired': importExpired
+  'import-expired': importExpired,
+  'preview':        preview
 };
 
 export default async function handler(req, res) {

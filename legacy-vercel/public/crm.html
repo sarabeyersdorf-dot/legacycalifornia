@@ -1392,6 +1392,7 @@ body.lp-restyle {
         <div class="exp-import" style="margin:0 0 22px;border:1px solid var(--rule,#E4DAC6);border-radius:12px;padding:18px 20px;background:#fff;">
           <h3 style="margin:0 0 4px;font-family:var(--serif,Georgia,serif);font-size:20px;">Expired Listing outreach — import a skip-traced list</h3>
           <p style="margin:0 0 12px;font-size:13.5px;color:var(--ink-soft,#5b5347);line-height:1.5;">Paste the CSV export (Street Address, City, Emails, Phones). I create the leads, skip rows with no email, flag anyone already in your CRM (so an existing contact is never cold-mailed), and enroll the rest in the 4-email Expired sequence. Email 1 waits for your approval; 2–4 auto-send, stopping on any reply.</p>
+          <button class="ds-btn" data-exp-see-emails type="button" style="margin:0 0 12px;">✉ See the 4 emails this sequence sends →</button>
           <textarea data-exp-csv placeholder="Paste the full CSV here, including the header row…" style="width:100%;min-height:120px;font:12px/1.5 'JetBrains Mono',monospace;border:1px solid var(--rule-strong,#D9CFB7);border-radius:6px;padding:10px;box-sizing:border-box;"></textarea>
           <div style="display:flex;gap:10px;align-items:center;margin-top:10px;flex-wrap:wrap;">
             <button class="ds-btn" data-exp-preview type="button">Preview (no changes)</button>
@@ -1464,6 +1465,70 @@ body.lp-restyle {
               prevBtn.disabled = false; statusEl.textContent = '';
               renderResult(res, true);
             });
+          });
+
+          // "See the 4 emails" — render every step of the sequence exactly as the
+          // recipient sees it (branded HTML), with timing + approve/auto badges.
+          var seeBtn = root.querySelector('[data-exp-see-emails]');
+          function openEmailPreview(data) {
+            var ov = document.createElement('div');
+            ov.setAttribute('data-exp-emails-ov','');
+            ov.style.cssText = 'position:fixed;inset:0;z-index:100000;background:rgba(26,23,20,.55);display:flex;align-items:flex-start;justify-content:center;overflow:auto;padding:32px 16px;';
+            var panel = document.createElement('div');
+            panel.style.cssText = 'background:#FAF6EC;max-width:720px;width:100%;border-radius:10px;box-shadow:0 30px 80px -20px rgba(20,18,15,.6);overflow:hidden;';
+            var head = '<div style="display:flex;align-items:center;justify-content:space-between;gap:12px;padding:18px 22px;border-bottom:1px solid #E4DAC6;">'
+              + '<div><div style="font-family:Cormorant Garamond,Georgia,serif;font-size:22px;color:#1A1714;">The Expired sequence · 4 emails</div>'
+              + '<div style="font-size:12.5px;color:#7C6A4D;margin-top:2px;">Email 1 waits for your approval · Emails 2–4 auto-send on schedule, stopping the moment anyone replies.</div></div>'
+              + '<button type="button" data-close style="border:none;background:#EBE2CD;color:#5b5347;font-size:20px;line-height:1;width:34px;height:34px;border-radius:8px;cursor:pointer;">×</button></div>';
+            var cards = (data.steps || []).map(function (s) {
+              var badge = s.needs_approval
+                ? '<span style="background:#8A6F38;color:#fff;font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;font-weight:700;padding:4px 9px;border-radius:3px;">Needs your approval</span>'
+                : '<span style="background:#E7DEC8;color:#7C6A4D;font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;font-weight:700;padding:4px 9px;border-radius:3px;">Auto-sends</span>';
+              var subj = s.channel === 'email'
+                ? '<div style="font-size:15px;color:#1A1714;margin-top:6px;"><b>Subject:</b> ' + esc(s.subject) + '</div>' : '';
+              var frame = s.html
+                ? '<iframe data-email-frame style="width:100%;border:1px solid #E4DAC6;border-radius:6px;margin-top:10px;background:#fff;" scrolling="no"></iframe>'
+                : '<div style="margin-top:10px;font-size:14px;color:#5b5347;white-space:pre-wrap;">' + esc(s.subject) + '</div>';
+              return '<div style="padding:18px 22px;border-bottom:1px solid #EFE7D4;" data-step>'
+                + '<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">'
+                + '<span style="font-family:Cormorant Garamond,Georgia,serif;font-size:18px;color:#1A1714;">Email ' + s.step_number + '</span>'
+                + '<span style="font-size:12px;color:#7C6A4D;">' + esc(s.when) + '</span>' + badge + '</div>'
+                + subj
+                + '<div data-html="' + encodeURIComponent(s.html || '') + '">' + frame + '</div>'
+                + '</div>';
+            }).join('');
+            panel.innerHTML = head + cards;
+            ov.appendChild(panel);
+            document.body.appendChild(ov);
+            // Fill each iframe via srcdoc and auto-size to its content.
+            panel.querySelectorAll('[data-step]').forEach(function (step) {
+              var holder = step.querySelector('[data-html]');
+              var fr = step.querySelector('[data-email-frame]');
+              if (!holder || !fr) return;
+              var htmlStr = decodeURIComponent(holder.getAttribute('data-html') || '');
+              if (!htmlStr) return;
+              fr.addEventListener('load', function () {
+                try { fr.style.height = (fr.contentDocument.body.scrollHeight + 24) + 'px'; } catch (e) { fr.style.height = '640px'; }
+              });
+              fr.srcdoc = htmlStr;
+            });
+            function close(){ if (ov.parentNode) ov.parentNode.removeChild(ov); }
+            ov.addEventListener('click', function (e){ if (e.target === ov || e.target.closest('[data-close]')) close(); });
+            document.addEventListener('keydown', function esc2(e){ if (e.key === 'Escape'){ close(); document.removeEventListener('keydown', esc2); } });
+          }
+          if (seeBtn) seeBtn.addEventListener('click', function () {
+            seeBtn.disabled = true; var old = seeBtn.textContent; seeBtn.textContent = 'Loading emails…';
+            fetch('/api/sequences/preview?sequence_name=expired_listing', { credentials:'include', headers:{'Accept':'application/json'} })
+              .then(function (r){ return r.text().then(function(t){ var j=null; try{j=JSON.parse(t);}catch(e){} return {ok:r.ok,status:r.status,json:j,text:t}; }); })
+              .then(function (res){
+                seeBtn.disabled = false; seeBtn.textContent = old;
+                if (!res.ok || !res.json || res.json.success === false) {
+                  out.innerHTML = box('#9B2C2C','#FBEDED','<b>Couldn’t load the emails'+(res.status?' (HTTP '+res.status+')':'')+'.</b><br>'+esc((res.json&&res.json.error)|| (res.status===401?'You’re signed out — reload the CRM.':res.text.slice(0,200))));
+                  return;
+                }
+                openEmailPreview(res.json);
+              })
+              .catch(function(e){ seeBtn.disabled=false; seeBtn.textContent=old; out.innerHTML = box('#9B2C2C','#FBEDED','Network error: '+esc(String(e&&e.message||e))); });
           });
         })();
         </script>
