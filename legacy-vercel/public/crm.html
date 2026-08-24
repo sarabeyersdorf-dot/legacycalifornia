@@ -2102,6 +2102,18 @@ body.lp-restyle {
     .bc-prog { margin-top: 16px; font-size: 13.5px; color: var(--ink); display: none; }
     .bc-bar { height: 7px; background: var(--vellum); border-radius: 4px; overflow: hidden; margin-top: 8px; }
     .bc-bar > span { display: block; height: 100%; width: 0; background: #2E5C3D; transition: width .3s; }
+    .bc-opt { text-transform: none; letter-spacing: normal; color: var(--ink-mute); font-weight: normal; }
+    .bc-grid { display: flex; flex-wrap: wrap; gap: 0 14px; }
+    .bc-grid > .bc-field { flex: 1 1 220px; }
+    .bc-grid > .bc-field.bc-third { flex: 1 1 90px; }
+    .bc-design-hint { line-height: 1.5; margin-top: 6px; }
+    .bc-design-hint a { color: var(--brass, #8C6E3D); font-weight: 600; }
+    .bc-preview-modal { position: fixed; inset: 0; z-index: 9999; background: rgba(20,18,15,.55); display: flex; align-items: center; justify-content: center; padding: 24px; }
+    .bc-preview-modal[hidden] { display: none; }
+    .bc-preview-card { background: #fff; width: 640px; max-width: 100%; max-height: 90vh; border-radius: 10px; overflow: hidden; display: flex; flex-direction: column; box-shadow: 0 24px 70px rgba(20,18,15,.4); }
+    .bc-preview-head { display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; border-bottom: 1px solid var(--rule-soft, #E4DAC6); font-family: var(--mono); font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: var(--ink-mute); }
+    .bc-preview-head button { background: none; border: none; font-size: 16px; cursor: pointer; color: var(--ink-mute); }
+    .bc-preview-card iframe { border: 0; width: 100%; height: 70vh; background: #E7DFCB; }
     </style>
     <section class="crm-view" data-view="broadcast">
       <div class="ds"><div class="ds-screen"><div class="ds-corners"><i></i><i></i><i></i><i></i></div>
@@ -2123,17 +2135,53 @@ body.lp-restyle {
         </div>
 
         <div class="bc-field">
+          <label>Design</label>
+          <select data-bc-design>
+            <option value="letter">Plain letter — branded text (default)</option>
+            <option value="featured">Featured photo — hero image + headline + button</option>
+            <option value="listing">New listing — photo + price, beds/baths, and a button</option>
+          </select>
+          <p class="bc-count bc-design-hint" data-bc-design-hint style="display:none;">Photo must be a hosted image link (https). Tip: use a listing’s showcase photo, or any public image URL. Use <b>Preview</b> below to see exactly what recipients get.</p>
+        </div>
+
+        <div class="bc-field">
           <label>Subject</label>
           <input type="text" data-bc-subject placeholder="e.g. The Ledger — August in the foothills" maxlength="200">
         </div>
 
+        <!-- Template fields — shown only for a designed email (featured / listing). -->
+        <div data-bc-tpl hidden>
+          <div class="bc-field">
+            <label>Photo URL <span class="bc-opt">(https link to an image)</span></label>
+            <input type="url" data-bc-photo placeholder="https://legacycalifornia.com/showcase/433/img/hero.jpg">
+          </div>
+          <div class="bc-grid" data-bc-listing-only hidden>
+            <div class="bc-field"><label>Address</label><input type="text" data-bc-address placeholder="433 E Highway 4, Murphys"></div>
+            <div class="bc-field"><label>Price</label><input type="text" data-bc-price placeholder="$1,399,000"></div>
+            <div class="bc-field bc-third"><label>Beds</label><input type="text" data-bc-beds placeholder="4"></div>
+            <div class="bc-field bc-third"><label>Baths</label><input type="text" data-bc-baths placeholder="3"></div>
+            <div class="bc-field bc-third"><label>Sq ft</label><input type="text" data-bc-sqft placeholder="2,854"></div>
+          </div>
+          <div class="bc-field">
+            <label>Headline</label>
+            <input type="text" data-bc-headline placeholder="e.g. Just listed in Murphys wine country" maxlength="160">
+          </div>
+        </div>
+
         <div class="bc-field">
-          <label>Message</label>
+          <label data-bc-body-label>Message</label>
           <textarea data-bc-body placeholder="Write your update. Plain text — it's wrapped in the Legacy Properties letterhead automatically. A blank line starts a new paragraph."></textarea>
+        </div>
+
+        <!-- Button fields — shown only for a designed email. -->
+        <div class="bc-grid" data-bc-tpl-btn hidden>
+          <div class="bc-field"><label>Button label <span class="bc-opt">(optional)</span></label><input type="text" data-bc-btnlabel placeholder="See the listing" maxlength="40"></div>
+          <div class="bc-field"><label>Button link <span class="bc-opt">(optional)</span></label><input type="url" data-bc-btnurl placeholder="https://legacycalifornia.com/…"></div>
         </div>
 
         <div class="bc-row">
           <button class="btn btn-ghost btn-sm" data-bc-loadledger>Load the latest Ledger →</button>
+          <button class="btn btn-ghost btn-sm" data-bc-preview hidden>Preview email</button>
           <span style="flex:1;"></span>
           <button class="btn btn-ink" data-bc-send>Send</button>
         </div>
@@ -2146,6 +2194,15 @@ body.lp-restyle {
         <p class="bc-note">Emails send from your verified Legacy Properties address in batches. Large lists take a minute — keep this tab open until it finishes. Every send is logged to the contact's thread.</p>
       </div>
       </div></div>
+
+      <!-- Preview overlay — shows the rendered email (server-rendered, so it's
+           exactly what recipients get). -->
+      <div class="bc-preview-modal" data-bc-preview-modal hidden>
+        <div class="bc-preview-card">
+          <div class="bc-preview-head"><span>Email preview</span><button type="button" data-bc-preview-close aria-label="Close">✕</button></div>
+          <iframe data-bc-preview-frame title="Email preview"></iframe>
+        </div>
+      </div>
 
       <script>
       (function () {
@@ -2161,6 +2218,76 @@ body.lp-restyle {
         var progText= view.querySelector('[data-bc-prog-text]');
         var progBar = view.querySelector('[data-bc-prog-bar]');
         var currentIds = [];
+
+        // ── Designed-email (template) controls ──
+        var designSel  = view.querySelector('[data-bc-design]');
+        var designHint = view.querySelector('[data-bc-design-hint]');
+        var tplWrap    = view.querySelector('[data-bc-tpl]');
+        var tplListing = view.querySelector('[data-bc-listing-only]');
+        var tplBtnWrap = view.querySelector('[data-bc-tpl-btn]');
+        var bodyLabel  = view.querySelector('[data-bc-body-label]');
+        var previewBtn = view.querySelector('[data-bc-preview]');
+        var pvModal    = view.querySelector('[data-bc-preview-modal]');
+        var pvFrame    = view.querySelector('[data-bc-preview-frame]');
+        var pvClose    = view.querySelector('[data-bc-preview-close]');
+        var tf = function (sel) { return view.querySelector(sel); };
+        function isDesigned() { return designSel && designSel.value !== 'letter'; }
+
+        function applyDesign() {
+          var d = designSel ? designSel.value : 'letter';
+          var designed = d !== 'letter';
+          if (tplWrap)    tplWrap.hidden = !designed;
+          if (tplBtnWrap) tplBtnWrap.hidden = !designed;
+          if (tplListing) tplListing.hidden = (d !== 'listing');
+          if (previewBtn) previewBtn.hidden = !designed;
+          if (designHint) designHint.style.display = designed ? '' : 'none';
+          if (bodyLabel)  bodyLabel.textContent = designed ? 'Body text' : 'Message';
+          if (bodyEl) bodyEl.placeholder = designed
+            ? 'The words under the photo. A blank line starts a new paragraph. Optional — a photo + headline + button can stand alone.'
+            : "Write your update. Plain text — it's wrapped in the Legacy Properties letterhead automatically. A blank line starts a new paragraph.";
+        }
+        if (designSel) designSel.addEventListener('change', applyDesign);
+
+        // Build the template payload from the fields (null for a plain letter).
+        function buildTemplate() {
+          if (!isDesigned()) return null;
+          var val = function (s) { var el = tf(s); return el ? el.value.trim() : ''; };
+          var t = {
+            type: designSel.value,
+            photo: val('[data-bc-photo]'),
+            headline: val('[data-bc-headline]'),
+            body: (bodyEl.value || '').trim().replace(/\{first_name\}/g, 'there'),
+            button_label: val('[data-bc-btnlabel]'),
+            button_url: val('[data-bc-btnurl]')
+          };
+          if (designSel.value === 'listing') {
+            t.address = val('[data-bc-address]'); t.price = val('[data-bc-price]');
+            t.beds = val('[data-bc-beds]'); t.baths = val('[data-bc-baths]'); t.sqft = val('[data-bc-sqft]');
+          }
+          return t;
+        }
+        // A designed email needs at least a photo, headline, or body to be worth sending.
+        function designedHasContent(t) { return !!(t && (t.photo || t.headline || t.body)); }
+
+        function openPreview() {
+          var t = buildTemplate();
+          if (!designedHasContent(t)) { alert('Add a photo, a headline, or some body text first.'); return; }
+          if (previewBtn) { previewBtn.disabled = true; previewBtn.textContent = 'Rendering…'; }
+          post({ mode: 'preview', template: t }).then(function (j) {
+            if (previewBtn) { previewBtn.disabled = false; previewBtn.textContent = 'Preview email'; }
+            if (!j || !j.html) { alert('Could not render the preview.'); return; }
+            if (pvFrame) pvFrame.srcdoc = j.html;
+            if (pvModal) pvModal.hidden = false;
+          });
+        }
+        if (previewBtn) previewBtn.addEventListener('click', openPreview);
+        if (designHint) designHint.addEventListener('click', function (e) {
+          var a = e.target.closest('[data-bc-preview-link]'); if (a) { e.preventDefault(); openPreview(); }
+        });
+        function closePreview() { if (pvModal) pvModal.hidden = true; if (pvFrame) pvFrame.srcdoc = ''; }
+        if (pvClose) pvClose.addEventListener('click', closePreview);
+        if (pvModal) pvModal.addEventListener('click', function (e) { if (e.target === pvModal) closePreview(); });
+        applyDesign();
 
         function post(body) {
           return fetch('/api/crm/bulk-send', {
@@ -2204,8 +2331,11 @@ body.lp-restyle {
         sendBtn.addEventListener('click', async function () {
           var subject = (subjEl.value || '').trim();
           var body = (bodyEl.value || '').trim();
+          var template = buildTemplate();
           if (!subject) { subjEl.focus(); return; }
-          if (!body) { bodyEl.focus(); return; }
+          if (template) {
+            if (!designedHasContent(template)) { alert('Add a photo, a headline, or some body text to your design first.'); return; }
+          } else if (!body) { bodyEl.focus(); return; }
           if (!currentIds.length) { resolve(); return; }
           if (!window.confirm('Send this to ' + currentIds.length + ' contact' + (currentIds.length === 1 ? '' : 's') + '?')) return;
 
@@ -2218,7 +2348,9 @@ body.lp-restyle {
           var sendBody = body.replace(/\{first_name\}/g, 'there');
           for (var i = 0; i < ids.length; i += 40) {
             var batch = ids.slice(i, i + 40);
-            var j = await post({ mode: 'send', lead_ids: batch, subject: subject, body: sendBody });
+            var payload = { mode: 'send', lead_ids: batch, subject: subject, body: sendBody };
+            if (template) payload.template = template;
+            var j = await post(payload);
             if (j && j.success) { sent += j.sent || 0; failed += j.failed || 0; skipped += (j.skipped || []).length; }
             else { failed += batch.length; }
             done += batch.length;

@@ -17,7 +17,7 @@
 import { adminClient } from '../supabase.js';
 import { getCallerProfile, isAgent } from '../auth.js';
 import { handleOptions, readJson, ok, fail } from '../cors.js';
-import { pickEmailProvider, bodyToHtml, unsubscribeFooter } from '../email-html.js';
+import { pickEmailProvider, bodyToHtml, renderTemplate, unsubscribeFooter } from '../email-html.js';
 
 const MAX_BATCH = 40;
 const MAX_SUBJECT = 200;
@@ -51,7 +51,23 @@ export default async function handler(req, res) {
 
   const b = await readJson(req);
   const supa = adminClient();
-  const mode = b.mode === 'send' ? 'send' : 'resolve';
+  const mode = b.mode === 'send' ? 'send' : b.mode === 'preview' ? 'preview' : 'resolve';
+
+  const sentByRole = profile.role === 'agent_james' ? 'james' : 'sara';
+  const agentIdent = {
+    name: sentByRole === 'james' ? 'James Beyersdorf · Legacy Properties' : 'Sara Cooper · Legacy Properties'
+  };
+
+  // ---- preview: render the designed template to HTML (no send) ----
+  // Lets the composer show exactly what recipients will get. Uses a sample
+  // unsubscribe line so the footer is represented.
+  if (mode === 'preview') {
+    if (!b.template) return fail(res, 400, 'template required for preview');
+    const { html } = renderTemplate(b.template, agentIdent, {
+      footerHtml: unsubscribeFooter('sample-token')
+    });
+    return ok(res, { html });
+  }
 
   // ---- resolve: count + ids for a segment ----
   if (mode === 'resolve') {
@@ -70,18 +86,19 @@ export default async function handler(req, res) {
   }
 
   // ---- send: one batch ----
-  const subject = String(b.subject || '').trim().slice(0, MAX_SUBJECT);
-  const body    = String(b.body || '').trim().slice(0, MAX_BODY);
-  const ids     = Array.isArray(b.lead_ids) ? b.lead_ids.filter(Boolean).slice(0, MAX_BATCH) : [];
-  if (!subject)     return fail(res, 400, 'subject required');
-  if (!body)        return fail(res, 400, 'body required');
-  if (!ids.length)  return fail(res, 400, 'no recipients in this batch');
+  const subject  = String(b.subject || '').trim().slice(0, MAX_SUBJECT);
+  const body     = String(b.body || '').trim().slice(0, MAX_BODY);
+  const template = (b.template && typeof b.template === 'object' && !Array.isArray(b.template)) ? b.template : null;
+  const ids      = Array.isArray(b.lead_ids) ? b.lead_ids.filter(Boolean).slice(0, MAX_BATCH) : [];
+  if (!subject)             return fail(res, 400, 'subject required');
+  if (!template && !body)   return fail(res, 400, 'body required');
+  if (!ids.length)          return fail(res, 400, 'no recipients in this batch');
 
   const provider = pickEmailProvider();
   if (!provider) return fail(res, 500, 'no email provider configured — set RESEND_API_KEY');
 
-  const sentBy = profile.role === 'agent_james' ? 'james' : 'sara';
-  const agent  = { name: sentBy === 'james' ? 'James Beyersdorf · Legacy Properties' : 'Sara Cooper · Legacy Properties' };
+  const sentBy = sentByRole;
+  const agent  = agentIdent;
   const nowIso = new Date().toISOString();
 
   const { data: leads } = await supa.from('leads')
@@ -100,18 +117,25 @@ export default async function handler(req, res) {
       : null;
     if (reason) { results.skipped.push({ id: l.id, reason }); continue; }
     try {
+      const footerHtml = unsubscribeFooter(l.unsubscribe_token);
+      // A designed template renders its own email-safe HTML + a plain-text
+      // fallback; otherwise fall back to the branded plain-letter wrapper.
+      const rendered = template
+        ? renderTemplate(template, agent, { footerHtml })
+        : { html: bodyToHtml(body, agent, { footerHtml }), text: body };
+      const logBody = template ? rendered.text : body;
       const r = await provider.send({
         agent: sentBy,
         to: l.email,
         toName: [l.first_name, l.last_name].filter(Boolean).join(' ') || null,
         subject,
-        text: body,
-        html: bodyToHtml(body, agent, { footerHtml: unsubscribeFooter(l.unsubscribe_token) })
+        text: rendered.text,
+        html: rendered.html
       });
       if (r && r.skipped) { results.failed++; continue; }
       await supa.from('messages').insert({
         lead_id: l.id, direction: 'outbound', channel: 'email',
-        subject, body, status: 'sent', ai_generated: false,
+        subject, body: logBody, status: 'sent', ai_generated: false,
         approved_by: sentBy, approved_at: nowIso, mailerlite_id: (r && r.id) || null
       }).then(() => {}, () => {});
       await supa.from('leads').update({ last_contact_at: nowIso }).eq('id', l.id).then(() => {}, () => {});
