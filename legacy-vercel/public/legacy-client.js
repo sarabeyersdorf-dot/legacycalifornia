@@ -4731,12 +4731,31 @@ window.LGPortal = window.LGPortal || {
     document.addEventListener('keydown', onKey);
     ov.addEventListener('click', (e) => { if (e.target === ov || e.target.closest('[data-x]') || e.target.closest('[data-x2]')) close(); });
 
+    // Self-contained request helper (the shared `api()` lives in a different
+    // IIFE and isn't in scope here). Never throws — always resolves so the modal
+    // can't hang on "Loading…".
+    async function postApprove(payload) {
+      try {
+        const resp = await fetch('/api/crm/approve', {
+          method: 'POST', credentials: 'include',
+          headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload)
+        });
+        let json = null; try { json = await resp.json(); } catch (e) {}
+        return { ok: resp.ok, status: resp.status, json };
+      } catch (e) { return { ok: false, status: 0, json: null, err: String(e && e.message || e) }; }
+    }
+
     async function loadPreview(bodyOverride) {
       frameWrap.innerHTML = '<div style="color:#7C6A4D;font-size:14px;">Loading the email…</div>';
       const payload = { message_id: messageId, preview: true };
       if (bodyOverride != null) payload.edited_body = bodyOverride;
-      const r = await api('/api/crm/approve', { body: payload });
-      if (!r.ok || !r.json) { frameWrap.innerHTML = '<div style="color:#9B2C2C;font-size:14px;">Could not load the email preview.</div>'; return; }
+      const r = await postApprove(payload);
+      if (!r.ok || !r.json) {
+        frameWrap.innerHTML = '<div style="color:#9B2C2C;font-size:14px;">Couldn’t load the preview'
+          + (r.status ? ' (HTTP ' + r.status + ')' : '') + '. '
+          + escHtml((r.json && r.json.error) || r.err || '') + '</div>';
+        return;
+      }
       subjEl.innerHTML = r.json.subject ? '<b>Subject:</b> ' + escHtml(r.json.subject) : '';
       const fr = document.createElement('iframe');
       fr.setAttribute('scrolling', 'no');
@@ -4757,7 +4776,7 @@ window.LGPortal = window.LGPortal || {
       const btn = e.currentTarget; btn.disabled = true; btn.textContent = 'Sending…';
       const payload = { message_id: messageId };
       if (editWrap.style.display !== 'none' && editBody.value.trim()) payload.edited_body = editBody.value.trim();
-      const r = await api('/api/crm/approve', { body: payload });
+      const r = await postApprove(payload);
       if (r.ok && r.json && r.json.status === 'sent') {
         msgEl.style.color = '#2E5C3D';
         msgEl.textContent = '✓ Sent. Emails 2–4 will now auto-send on schedule and stop the moment they reply.';
@@ -4766,7 +4785,7 @@ window.LGPortal = window.LGPortal || {
       } else {
         btn.disabled = false; btn.textContent = 'Approve & send';
         msgEl.style.color = '#9B2C2C';
-        msgEl.textContent = (r.json && r.json.error) ? r.json.error : 'Send failed — try again.';
+        msgEl.textContent = (r.json && r.json.error) || r.err || ('Send failed' + (r.status ? ' (HTTP ' + r.status + ')' : '') + ' — try again.');
       }
     });
   }
