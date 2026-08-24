@@ -67,6 +67,7 @@ body.lp-restyle {
       <a href="#" onclick="showView(event,'pipe')">Pipeline</a>
       <a href="#" onclick="showView(event,'cal')">Calendar <span class="pill" data-roster-calendar>—</span></a>
       <a href="#" onclick="showView(event,'seq')">Sequences</a>
+      <a href="#" onclick="showView(event,'showcase')">Showcase</a>
       <a href="#" onclick="showView(event,'curate')">Curated</a>
     </nav>
 
@@ -132,6 +133,7 @@ body.lp-restyle {
               <a onclick="showView(event,'seq')">Sequences</a>
               <a onclick="showView(event,'curate')">Curated</a>
               <a onclick="showView(event,'broadcast')">Bulk email</a>
+              <a onclick="showView(event,'showcase')">Showcase</a>
               <span class="sep">Insight &amp; setup</span>
               <a onclick="showView(event,'rep')">Reports</a>
               <a href="#" data-open-importer>Import leads…</a>
@@ -1557,6 +1559,149 @@ body.lp-restyle {
         </div>
       </div></div></div>
     </section>
+
+    <!-- ============================================================
+         SHOWCASE VIEW — curate the public /showcase case-study gallery
+         ============================================================ -->
+    <section class="crm-view" data-view="showcase">
+      <style>
+        .sc-wrap { padding: 4px 2px 40px; }
+        .sc-toolbar { display:flex; gap:10px; flex-wrap:wrap; align-items:center; margin:14px 0 8px; }
+        .sc-btn { font:600 13px/1 var(--sans,"Barlow",sans-serif); letter-spacing:.04em; padding:10px 16px; border-radius:3px; border:1px solid #C9BC9C; background:#fff; color:#3A332B; cursor:pointer; text-decoration:none; display:inline-flex; align-items:center; gap:6px; }
+        .sc-btn:hover { border-color:#8A6F38; color:#1A1714; }
+        .sc-btn.primary { background:#8A6F38; border-color:#8A6F38; color:#fff; }
+        .sc-btn.primary:hover { background:#1A1714; border-color:#1A1714; color:#fff; }
+        .sc-status { font:500 13px/1.4 var(--sans,"Barlow",sans-serif); color:#7C6A4D; min-height:18px; margin:2px 0 12px; }
+        .sc-status.ok { color:#3f7a4f; } .sc-status.err { color:#8B3A3A; }
+        .sc-row { display:grid; grid-template-columns: 92px 1.6fr 64px 96px 60px 2fr 1.2fr; gap:12px; align-items:center; padding:12px 14px; border:1px solid #E7DEC8; border-radius:5px; background:#FFFDF7; margin-bottom:8px; }
+        .sc-row.off { opacity:.5; }
+        .sc-row .inc { display:flex; align-items:center; gap:7px; font:600 12px/1 var(--sans,"Barlow",sans-serif); color:#3A332B; }
+        .sc-info b { display:block; font:600 15px/1.2 var(--serif,"Cormorant Garamond",Georgia,serif); font-size:16px; color:#1A1714; }
+        .sc-info span { display:block; font:500 11.5px/1.3 var(--sans,"Barlow",sans-serif); letter-spacing:.02em; color:#7C6A4D; text-transform:uppercase; margin-top:2px; }
+        .sc-feat { display:flex; align-items:center; gap:6px; font:600 12px/1 var(--sans,"Barlow",sans-serif); color:#3A332B; }
+        .sc-row select, .sc-row input[type=number], .sc-row input[type=text] { font:500 13px/1 var(--sans,"Barlow",sans-serif); padding:8px 9px; border:1px solid #D9CFB7; border-radius:3px; background:#fff; color:#1A1714; width:100%; }
+        .sc-head-row { display:grid; grid-template-columns: 92px 1.6fr 64px 96px 60px 2fr 1.2fr; gap:12px; padding:0 14px 6px; font:600 10.5px/1 var(--sans,"Barlow",sans-serif); letter-spacing:.12em; text-transform:uppercase; color:#A08B63; }
+        .sc-empty { font:500 15px/1.5 var(--serif,"Cormorant Garamond",Georgia,serif); color:#7C6A4D; padding:30px 4px; }
+        @media (max-width:900px){ .sc-row,.sc-head-row{ grid-template-columns:1fr 1fr; } .sc-head-row{ display:none; } .sc-info{ grid-column:1 / -1; } }
+      </style>
+      <div class="ds"><div class="ds-screen"><div class="ds-corners"><i></i><i></i><i></i><i></i></div>
+        <div class="ds-title" style="align-items:flex-start;">
+          <div>
+            <h1 class="ds-h1">Showcase</h1>
+            <p class="ds-sub" style="max-width:640px;">Pick which of your listings appear on your public case-study page at <b>/showcase</b> — the link your cold outreach emails point to. Check the ones to include, mark one as the <b>Hero</b>, set the order, and add a one-line story. Listings with their own marketing page link to it; the rest send the reader to a sample seller portal.</p>
+          </div>
+          <div class="sc-toolbar">
+            <a class="sc-btn" href="/showcase" target="_blank" rel="noopener">View live page ↗</a>
+            <a class="sc-btn" href="/sample-portal" target="_blank" rel="noopener">Sample portal ↗</a>
+            <button class="sc-btn primary" type="button" data-sc-save>Save showcase</button>
+          </div>
+        </div>
+        <div class="sc-wrap">
+          <div class="sc-status" data-sc-status></div>
+          <div class="sc-head-row"><span>Show</span><span>Listing</span><span>Hero</span><span>Group</span><span>Order</span><span>One-line story</span><span>Own page (optional)</span></div>
+          <div id="sc-rows"><p class="sc-empty">Loading your listings…</p></div>
+        </div>
+      </div></div></div>
+    </section>
+    <script>
+    (function () {
+      var loaded = false, saving = false;
+      function q(sel, root) { return (root || document).querySelector(sel); }
+      function money(n) { if (n == null || isNaN(+n)) return ''; return '$' + Math.round(+n).toLocaleString('en-US'); }
+      function esc(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) { return { '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;' }[c]; }); }
+      function statusMsg(msg, kind) { var el = q('[data-sc-status]'); if (!el) return; el.textContent = msg || ''; el.className = 'sc-status' + (kind ? ' ' + kind : ''); }
+
+      function rowHtml(d) {
+        var priceBits = [];
+        if (d.list_price) priceBits.push(money(d.list_price));
+        if (d.sale_price && d.suggested_status === 'sold') priceBits.push('sold ' + money(d.sale_price));
+        var meta = [d.city, d.stage, priceBits.join(' · ')].filter(Boolean).join(' · ');
+        var status = (d.status === 'sold' || d.status === 'active') ? d.status : d.suggested_status;
+        return '<div class="sc-row' + (d.included ? '' : ' off') + '" data-deal="' + esc(d.deal_id) + '">' +
+          '<label class="inc"><input type="checkbox" data-inc' + (d.included ? ' checked' : '') + '> Show</label>' +
+          '<div class="sc-info"><b>' + esc(d.address || '(no address)') + '</b><span>' + esc(meta) + '</span></div>' +
+          '<label class="sc-feat"><input type="radio" name="sc-feat" data-feat' + (d.featured ? ' checked' : '') + '></label>' +
+          '<select data-status><option value="active"' + (status === 'active' ? ' selected' : '') + '>Active</option>' +
+            '<option value="sold"' + (status === 'sold' ? ' selected' : '') + '>Sold</option></select>' +
+          '<input type="number" data-order value="' + (Number.isFinite(+d.sort_order) ? +d.sort_order : 0) + '" min="0" step="1">' +
+          '<input type="text" data-blurb value="' + esc(d.blurb || '') + '" placeholder="e.g. Sold in 9 days, over asking">' +
+          '<input type="text" data-micro value="' + esc(d.microsite_path || '') + '" placeholder="/its-page">' +
+        '</div>';
+      }
+
+      function render(deals) {
+        var root = q('#sc-rows'); if (!root) return;
+        deals.sort(function (a, b) {
+          if (!!a.included !== !!b.included) return a.included ? -1 : 1;
+          if (a.included && b.included) return (a.sort_order || 0) - (b.sort_order || 0);
+          return (a.address || '').localeCompare(b.address || '');
+        });
+        root.innerHTML = deals.length ? deals.map(rowHtml).join('')
+          : '<p class="sc-empty">No deals found in the CRM yet.</p>';
+      }
+
+      function load() {
+        statusMsg('Loading…');
+        fetch('/api/crm/showcase', { credentials: 'include', headers: { 'Accept': 'application/json' } })
+          .then(function (r) { return r.ok ? r.json() : Promise.reject(new Error('HTTP ' + r.status)); })
+          .then(function (d) { render((d && d.deals) || []); statusMsg((d && d.count) ? (d.count + ' listing' + (d.count === 1 ? '' : 's') + ' currently on the showcase.') : 'Nothing on the showcase yet — check some listings and save.'); })
+          .catch(function (e) { statusMsg('Could not load listings: ' + e.message, 'err'); q('#sc-rows').innerHTML = ''; });
+      }
+
+      function collect() {
+        var entries = [], featuredDealId = null;
+        document.querySelectorAll('.crm-view[data-view="showcase"] .sc-row').forEach(function (row) {
+          var id = row.getAttribute('data-deal');
+          var included = q('[data-inc]', row).checked;
+          var featured = q('[data-feat]', row).checked;
+          if (featured) featuredDealId = id;
+          entries.push({
+            deal_id: id,
+            included: included,
+            featured: featured,
+            status: q('[data-status]', row).value,
+            sort_order: parseInt(q('[data-order]', row).value, 10) || 0,
+            blurb: q('[data-blurb]', row).value,
+            microsite_path: q('[data-micro]', row).value
+          });
+        });
+        // Only a featured deal that's actually included counts.
+        var featRow = entries.find(function (e) { return e.deal_id === featuredDealId; });
+        if (!featRow || !featRow.included) featuredDealId = null;
+        return { entries: entries, featured_deal_id: featuredDealId };
+      }
+
+      function save() {
+        if (saving) return; saving = true;
+        statusMsg('Saving…');
+        fetch('/api/crm/showcase', {
+          method: 'POST', credentials: 'include',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(collect())
+        })
+          .then(function (r) { return r.json().then(function (j) { return { ok: r.ok, j: j }; }); })
+          .then(function (res) {
+            saving = false;
+            if (!res.ok) { statusMsg('Save failed: ' + ((res.j && res.j.error) || 'unknown'), 'err'); return; }
+            statusMsg('Saved · ' + (res.j.saved || 0) + ' on the showcase' + (res.j.removed ? (', ' + res.j.removed + ' removed') : '') + '. Your live /showcase page is updated.', 'ok');
+            load();
+          })
+          .catch(function (e) { saving = false; statusMsg('Save failed: ' + e.message, 'err'); });
+      }
+
+      // Dim/undim a row when its Show checkbox toggles.
+      document.addEventListener('change', function (e) {
+        var inc = e.target.closest('.crm-view[data-view="showcase"] [data-inc]');
+        if (inc) { var row = inc.closest('.sc-row'); if (row) row.classList.toggle('off', !inc.checked); }
+      });
+      document.addEventListener('click', function (e) {
+        if (e.target.closest('.crm-view[data-view="showcase"] [data-sc-save]')) { e.preventDefault(); save(); }
+      });
+      document.addEventListener('crm:view', function (ev) {
+        if (ev && ev.detail && ev.detail.name === 'showcase' && !loaded) { loaded = true; load(); }
+      });
+    })();
+    </script>
 
     <!-- ============================================================
          REPORTS VIEW
@@ -3866,7 +4011,7 @@ body.lp-restyle {
 </div>
 
 <script>
-var VIEW_LABELS = { today:'Today', tasks:'Tasks', updates:'Notes', inbox:'Inbox', messages:'Inbox', pipe:'Pipeline', cal:'Calendar', seq:'Sequences', curate:'Curated', rep:'Reports', broker:'Broker', listings:'Deals', dealsall:'All deals', command:'Deal command center', people:'Roster', broadcast:'Bulk email' };
+var VIEW_LABELS = { today:'Today', tasks:'Tasks', updates:'Notes', inbox:'Inbox', messages:'Inbox', pipe:'Pipeline', cal:'Calendar', seq:'Sequences', curate:'Curated', rep:'Reports', broker:'Broker', listings:'Deals', dealsall:'All deals', command:'Deal command center', people:'Roster', broadcast:'Bulk email', showcase:'Showcase' };
 window.__viewStack = window.__viewStack || [];
 window.__crmHistIdx = window.__crmHistIdx || 0;
 function navBack() {

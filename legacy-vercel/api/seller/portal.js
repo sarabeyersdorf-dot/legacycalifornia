@@ -98,6 +98,14 @@ export default async function handler(req, res) {
   if (req.method !== 'GET') return fail(res, 405, 'method_not_allowed');
 
   try {
+    // Public sample portal: a fully fabricated, no-auth demonstration of the
+    // client experience (linked from /showcase). No DB read, no real data — so
+    // nothing about a real client can ever leak here.
+    if (req.query?.sample) {
+      res.setHeader('Cache-Control', 'public, max-age=300, s-maxage=600');
+      return ok(res, { portal: samplePortal() });
+    }
+
     const supa = adminClient();
     const token = req.query?.t ? String(req.query.t).trim() : null;
     // "View as seller" preview: an agent can render the PURE client view of a
@@ -1197,6 +1205,91 @@ function expiredPortal() {
       body: 'This private link has expired or been replaced. Please contact your agent for a current link to your portal.',
       sign: ''
     }
+  };
+}
+
+// A fully fabricated seller portal for the public /sample-portal demo. Shows the
+// client experience mid-transaction (a listing in escrow, on track to close) so a
+// prospect sees the portal working: live milestones, what's needed from them, and
+// their team — with zero real client data. The address and people are invented.
+function samplePortal() {
+  return {
+    security: {
+      banner: 'Sample portal — a live demonstration of the Legacy client experience. The property, dates, and names below are illustrative.'
+    },
+    back_on_market: [],
+    escrow_history: [],
+    seller: { first_name: 'Jordan', who: '1847 Vineyard Ridge Lane' },
+    status: {
+      label: 'In escrow',
+      badge: 'In escrow',
+      product_label: 'Seller portal',
+      address: '1847 Vineyard Ridge Lane',
+      city: 'Murphys',
+      type: 'Single-family home',
+      price: '$915,000',
+      price_label: 'Sale price',
+      headline: 'Your sale',
+      since: 'In escrow · Closing Sep 12, 2026',
+      tagline: 'On track to close.',
+      photo: '/showcase/433/img/facade.jpg'
+    },
+    tour: { video_url: null, video_id: null, matterport_url: null, video_views: null, showcase_url: null, reel_url: null },
+    marketing: null,
+    list_trac: null,
+    showings: [],
+    nav: { documents: '4', tasks: '2' },
+    tasks_intro: 'A short list of what I need from you to keep things moving — nothing more than what’s actually next.',
+    tasks_empty: 'You’re all caught up — there’s nothing needed from you right now.',
+    documents_empty: '',
+    kpis: [
+      { label: 'Days to close',   value: '19',       change: 'On schedule' },
+      { label: 'Sale price',      value: '$915K',    change: 'Accepted over asking' },
+      { label: 'Documents',       value: '4',         change: '' },
+      { label: 'Close of escrow', value: 'Sep 12',    change: '2026' }
+    ],
+    road: [
+      { date: 'Aug 8',  label: 'Listed on the market',   description: 'Professional photography, full MLS syndication, and the Legacy marketing push went live.', status: 'done',     badge: '', col: 'listing' },
+      { date: 'Aug 21', label: 'Offer accepted',          description: 'Accepted a strong offer at $915,000 — above the $899,000 list price.', status: 'done',     badge: 'Over asking', col: 'offer' },
+      { date: 'Aug 24', label: 'Escrow opened',           description: 'Earnest money deposited and the file opened with Calaveras Title.', status: 'done',     badge: '', col: 'escrow' },
+      { date: 'Sep 2',  label: 'Inspections & disclosures', description: 'Buyer inspections complete; disclosure packet delivered and signed.', status: 'next',     badge: 'This week', col: 'contingencies' },
+      { date: 'Sep 9',  label: 'Loan approval',            description: 'Buyer’s lender clears final underwriting and issues loan docs.', status: 'upcoming', badge: '', col: 'financing' },
+      { date: 'Sep 12', label: 'Close of escrow',          description: 'Deed records and your proceeds are released.', status: 'key',      badge: 'On track', col: 'closing' }
+    ],
+    documents: [
+      { name: 'Listing Agreement',         sub: 'Signed Aug 6',   status: 'Signed',  view_label: '', download_label: '' },
+      { name: 'Purchase Agreement',        sub: 'Fully executed', status: 'Signed',  view_label: '', download_label: '' },
+      { name: 'Seller Disclosures (TDS/SPQ)', sub: 'Delivered to buyer', status: 'Signed', view_label: '', download_label: '' },
+      { name: 'Estimated Seller Net Sheet', sub: 'Prepared by escrow', status: 'On file', view_label: '', download_label: '' }
+    ],
+    tasks: [
+      { label: 'Confirm the utilities transfer date for closing', when: 'By Sep 8',  status: 'open' },
+      { label: 'Schedule your final move-out walkthrough',        when: 'This week', status: 'open' }
+    ],
+    // A real client never sees the agent-only "Completed" list — keep the sample
+    // a pure client view so the demo matches what a prospect would actually get.
+    tasks_done: [],
+    team: [
+      { name: 'Sara Cooper', sub: 'Broker-Owner · Legacy', accent: '#4a7a55', initial: 'S', phone: '209-559-4966', email: 'SaraSellsCalifornia@gmail.com', phone_href: 'tel:2095594966', email_href: 'mailto:SaraSellsCalifornia@gmail.com', file_no: '' },
+      { name: 'Calaveras Title & Escrow', sub: 'Escrow & Title', accent: '#7C6A4D', initial: 'C', phone: '209-736-1100', email: '', phone_href: 'tel:2097361100', email_href: '', file_no: 'Escrow #CT-20486' },
+      { name: 'Buyer’s Agent', sub: 'Represents the buyer', accent: '#8B6F9E', initial: 'B', phone: '', email: '', phone_href: '', email_href: '', file_no: '' }
+    ],
+    good_to_know: [
+      { title: 'What “in escrow” means', body: 'A neutral third party (escrow) holds the funds and paperwork until every condition of the sale is met, then closes it all at once. You don’t have to coordinate the pieces — that’s my job.' },
+      { title: 'You’ll never be surprised', body: 'Every deadline on your road to closing is tracked here and I reach out before each one. If a date moves, you’ll see it update and hear from me why.' }
+    ],
+    viewer_is_agent: false,
+    is_buyer: false,
+    is_sample: true,
+    source_key: null,
+    seller_note: null,
+    activity: [],
+    note: {
+      head: 'A note from Sara · This week',
+      body: 'This is a sample of the private portal every one of my sellers gets — a single place to see exactly where your sale stands, what’s coming next, and what (if anything) I need from you. No logging into confusing systems, no wondering what’s happening behind the scenes. When we list your home, this becomes yours.',
+      sign: '— Sara · 209-559-4966'
+    },
+    contact: { name: 'Sara Cooper', first: 'Sara', phone: '209-559-4966', email: 'SaraSellsCalifornia@gmail.com' }
   };
 }
 

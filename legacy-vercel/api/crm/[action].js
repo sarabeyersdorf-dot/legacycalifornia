@@ -77,6 +77,7 @@ import emailAccounts      from '../_lib/handlers/crm-email-accounts.js';
 import idxStatus          from '../_lib/handlers/crm-idx-status.js';
 import logContact         from '../_lib/handlers/crm-log-contact.js';
 import followUps           from '../_lib/handlers/crm-follow-ups.js';
+import showcase            from '../_lib/handlers/crm-showcase.js';
 
 const TABLE = {
   'lead-hygiene':    leadHygiene,
@@ -132,7 +133,8 @@ const TABLE = {
   'email-accounts':       emailAccounts,
   'idx-status':           idxStatus,
   'log-contact':          logContact,
-  'follow-ups':           followUps
+  'follow-ups':           followUps,
+  'showcase':             showcase
 };
 
 export default async function handler(req, res) {

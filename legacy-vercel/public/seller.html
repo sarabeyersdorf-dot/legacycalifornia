@@ -551,7 +551,11 @@ setTimeout(function(){var p=document.getElementById('portal-loading');if(p&&p.pa
   // renders identically to the agent preview. Only meaningful on the ?deal=
   // preview path; a real client token (?t=) is already the client.
   var _as = /^(seller|client)$/i.test(_p.get('as') || '') ? '&as=seller' : '';
-  var _q = _t ? ('?t=' + encodeURIComponent(_t)) : (_deal ? ('?deal=' + encodeURIComponent(_deal) + _as) : '');
+  // Public sample portal: /sample-portal (or ?sample=1) renders a fabricated,
+  // no-auth demonstration of the client experience (linked from /showcase).
+  var _sample = _p.get('sample') || /^\/sample-portal\/?$/.test(location.pathname);
+  var _q = _sample ? '?sample=1'
+         : (_t ? ('?t=' + encodeURIComponent(_t)) : (_deal ? ('?deal=' + encodeURIComponent(_deal) + _as) : ''));
   fetch('/api/seller/portal' + _q, { credentials: 'include' })
     .then(function (r) { return r.ok ? r.json() : null; })
     .then(function (d) {
