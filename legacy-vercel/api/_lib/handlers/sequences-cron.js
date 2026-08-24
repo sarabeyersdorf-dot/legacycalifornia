@@ -28,7 +28,7 @@
 import { adminClient }            from '../supabase.js';
 import { anthropicJSON, anthropicMessage } from '../anthropic.js';
 import { sendEmail, resendConfigured }     from '../resend.js';
-import { bodyToHtml, coldOutreachFooter }  from '../email-html.js';
+import { coldEmailHtml }  from '../email-html.js';
 import { handleOptions, ok, fail } from '../cors.js';
 
 const SARA_VOICE = `You are drafting on behalf of Sara Cooper, Broker-Owner of Legacy Properties in Angels Camp, CA.
@@ -250,7 +250,7 @@ ${step.channel === 'sms'
             agent: 'sara', to: lead.email,
             toName: [lead.first_name, lead.last_name].filter(Boolean).join(' ') || undefined,
             subject, text: body,
-            html: bodyToHtml(body, { name: 'Sara Cooper · Legacy Properties' }, { footerHtml: coldOutreachFooter(lead.unsubscribe_token) })
+            html: coldEmailHtml(body, lead.unsubscribe_token)
           });
           sent = !(r && r.skipped); providerId = (r && r.id) || null;
         } catch (_) { sent = false; }

@@ -18,7 +18,7 @@ import { getCallerProfile, isAgent } from '../auth.js';
 import { sendSMS, twilioConfigured } from '../twilio.js';
 import { sendEmail as sendEmailResend,   resendConfigured }   from '../resend.js';
 import { sendEmail as sendEmailSendgrid, sendgridConfigured } from '../sendgrid.js';
-import { bodyToHtml as brandedBodyToHtml, coldOutreachFooter } from '../email-html.js';
+import { coldEmailHtml } from '../email-html.js';
 import { handleOptions, readJson, ok, fail } from '../cors.js';
 
 /**
@@ -40,7 +40,8 @@ export default async function handler(req, res) {
     const { profile } = await getCallerProfile(req, res);
     if (!isAgent(profile)) return fail(res, 401, 'agents only');
 
-    const { message_id, edited_body, edited_subject } = await readJson(req);
+    const b = await readJson(req);
+    const { message_id, edited_body, edited_subject } = b;
     if (!message_id) return fail(res, 400, 'message_id required');
 
     const supa = adminClient();
@@ -65,6 +66,19 @@ export default async function handler(req, res) {
       seq = data || null;
     }
     const isColdSeq = !!(seq && seq.send_mode === 'auto_after_first');
+
+    // Preview: render the email exactly as the recipient will see it (branded
+    // wrapper + any cold footer) WITHOUT approving or sending. Powers the
+    // lead-page "Preview email" button.
+    if (b.preview === true) {
+      const pv = (typeof edited_body === 'string' && edited_body.trim()) ? edited_body.trim() : (msg.body || '');
+      const html = (msg.channel === 'email')
+        ? (isColdSeq
+            ? coldEmailHtml(pv, lead.unsubscribe_token)
+            : bodyToHtml(pv))
+        : `<pre style="font:14px/1.6 -apple-system,sans-serif;white-space:pre-wrap;padding:22px;color:#1A1714;">${(pv || '').replace(/[&<>]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]))}</pre>`;
+      return ok(res, { preview: true, subject: msg.subject || null, html });
+    }
 
     // 2. Apply edits + flip to approved
     const patch = {
@@ -93,10 +107,10 @@ export default async function handler(req, res) {
         toName:  [lead.first_name, lead.last_name].filter(Boolean).join(' ') || null,
         subject: updated.subject || 'A note from Legacy Properties',
         text:    updated.body,
-        // Cold sequence → branded wrapper + CAN-SPAM cold footer (unsubscribe +
-        // physical address). Everything else keeps the plain branded wrapper.
+        // Cold sequence → cold wrapper (body's own signature + CAN-SPAM footer:
+        // unsubscribe + physical address). Everything else keeps the plain wrapper.
         html:    isColdSeq
-                   ? brandedBodyToHtml(updated.body, { name: 'Sara Cooper · Legacy Properties' }, { footerHtml: coldOutreachFooter(lead.unsubscribe_token) })
+                   ? coldEmailHtml(updated.body, lead.unsubscribe_token)
                    : bodyToHtml(updated.body)
       });
       r.via = provider.name;

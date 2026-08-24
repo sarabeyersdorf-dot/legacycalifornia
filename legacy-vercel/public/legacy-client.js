@@ -2855,7 +2855,10 @@ window.LGPortal = window.LGPortal || {
         </div>
       </div>`;
 
-    const pendingDraft = messages.find((m) => m.status === 'pending_approval' && m.ai_generated);
+    // Any outbound draft awaiting approval — AI-written OR verbatim (e.g. the
+    // Expired sequence, which is ai_generated=false). Previously this required
+    // ai_generated, so verbatim sequence drafts showed with no way to act.
+    const pendingDraft = messages.find((m) => m.status === 'pending_approval' && m.direction === 'outbound');
     const otherMessages = messages.filter((m) => m !== pendingDraft).sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
 
     const draftChannelLabel = pendingDraft && (pendingDraft.channel === 'sms' ? 'SMS' : pendingDraft.channel === 'portal' ? 'Portal' : 'Email');
@@ -2881,6 +2884,7 @@ window.LGPortal = window.LGPortal || {
           <div class="ai-foot-r">
             <button class="btn btn-ghost btn-sm" data-detail-action="discard" title="Delete this suggestion, write your own instead">Discard</button>
             <button class="btn btn-ghost btn-sm" data-detail-action="edit">Edit</button>
+            ${pendingDraft.channel === 'email' ? `<button class="btn btn-ghost btn-sm" data-detail-action="preview" title="See exactly how the recipient's email will look">Preview email</button>` : ''}
             <button class="btn btn-brass btn-sm" data-detail-action="approve">Send as ${escHtml(leadAgent.first)} →</button>
           </div>
         </div>
@@ -3745,6 +3749,17 @@ window.LGPortal = window.LGPortal || {
       editBtn.textContent = 'Done editing';
     });
 
+    const previewBtn = card.querySelector('[data-detail-action="preview"]');
+    if (previewBtn) previewBtn.addEventListener('click', async () => {
+      previewBtn.disabled = true; const t0 = previewBtn.textContent; previewBtn.textContent = 'Rendering…';
+      const r = await window.Legacy.api('/api/crm/approve', {
+        body: { message_id: message.id, preview: true, edited_body: editedTa ? editedTa.value : undefined }
+      });
+      previewBtn.disabled = false; previewBtn.textContent = t0;
+      if (r.ok && r.json && r.json.html) showEmailPreview(r.json.html, r.json.subject);
+      else { resultEl.style.color = '#9B2C2C'; resultEl.textContent = (r.json && r.json.error) || 'Could not render the preview.'; }
+    });
+
     if (approveBtn) approveBtn.addEventListener('click', async () => {
       approveBtn.disabled = true;
       approveBtn.textContent = 'Sending…';
@@ -3765,6 +3780,26 @@ window.LGPortal = window.LGPortal || {
         approveBtn.textContent = `Send as ${agentInfo(lead.assigned_agent).first} →`;
       }
     });
+  }
+
+  // Show the rendered email exactly as the recipient will see it (server-rendered
+  // HTML incl. the signature + any cold footer), in a lightweight overlay.
+  function showEmailPreview(html, subject) {
+    const prev = document.getElementById('lg-email-preview'); if (prev) prev.remove();
+    const m = document.createElement('div'); m.id = 'lg-email-preview';
+    m.style.cssText = 'position:fixed;inset:0;z-index:10000;background:rgba(20,18,15,.55);display:flex;align-items:center;justify-content:center;padding:24px;';
+    m.innerHTML =
+      '<div style="background:#fff;width:640px;max-width:100%;max-height:90vh;border-radius:10px;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 24px 70px rgba(20,18,15,.4);">'
+      + '<div style="display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-bottom:1px solid #E4DAC6;font-family:monospace;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:#7C6A4D;">'
+      +   '<span>Email preview' + (subject ? ' · ' + escHtml(subject) : '') + '</span>'
+      +   '<button type="button" data-close style="background:none;border:none;font-size:16px;cursor:pointer;color:#7C6A4D;">✕</button>'
+      + '</div>'
+      + '<iframe title="Email preview" style="border:0;width:100%;height:70vh;background:#E7DFCB;"></iframe></div>';
+    document.body.appendChild(m);
+    m.querySelector('iframe').srcdoc = html;
+    const close = () => m.remove();
+    m.querySelector('[data-close]').addEventListener('click', close);
+    m.addEventListener('click', (e) => { if (e.target === m) close(); });
   }
 
   // ---- Write helpers (PATCH /api/crm/lead) -------------------------------

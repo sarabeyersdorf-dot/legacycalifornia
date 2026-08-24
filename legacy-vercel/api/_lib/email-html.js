@@ -171,6 +171,22 @@ export function coldOutreachFooter(token) {
     </p>`;
 }
 
+// Wrapper for a COLD sequence email: branded container + the body verbatim
+// (the sequence copy already carries Sara's own signature) + the CAN-SPAM cold
+// footer. Deliberately does NOT add bodyToHtml's auto-signature, which would
+// duplicate the sign-off already in the copy.
+export function coldEmailHtml(text, token) {
+  const safe = esc(text);
+  const paragraphs = safe.split(/\n\s*\n/).map((p) =>
+    `<p style="font-size:15px;line-height:1.6;color:#3A332B;margin:0 0 16px;">${p.replace(/\n/g, '<br>')}</p>`
+  ).join('');
+  return `<div style="font-family:Georgia,'Cormorant Garamond',serif;color:#1A1714;max-width:560px;margin:0 auto;padding:32px 28px;background:#FAF6EC;">
+    <div style="font-family:'Courier New',monospace;font-size:10px;letter-spacing:.22em;text-transform:uppercase;color:#7C6A4D;margin-bottom:18px;">Legacy Properties</div>
+    ${paragraphs}
+    ${coldOutreachFooter(token)}
+  </div>`;
+}
+
 // CAN-SPAM: every bulk / newsletter email must carry a working opt-out. The
 // token is leads.unsubscribe_token; /api/unsubscribe flips leads.email_opt_out.
 export function unsubscribeFooter(token) {
