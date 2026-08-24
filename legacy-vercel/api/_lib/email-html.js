@@ -174,10 +174,14 @@ export function coldOutreachFooter(token) {
 // Premium branded wrapper for a COLD sequence email. Email-safe (table layout,
 // inline styles, hosted images). The logo header + headshot signature carry the
 // brand; the copy no longer needs its own text signature. Serif matches the site
-// (Cormorant Garamond, Georgia fallback for Gmail/Outlook which strip web fonts).
+// Web-SAFE fonts only. Gmail/Outlook/most apps strip custom web fonts from
+// email, so a fancy face (e.g. Cormorant) would show to only a minority and
+// look different from the in-app preview. Georgia (serif) + Arial (labels) are
+// present on virtually every device, so the email renders identically for every
+// recipient AND matches the CRM approval preview exactly.
 const SITE = 'https://legacycalifornia.com';
-const SERIF = "'Cormorant Garamond', Georgia, 'Times New Roman', serif";
-const SANS  = "'Barlow', 'Helvetica Neue', Arial, sans-serif";
+const SERIF = "Georgia, 'Times New Roman', serif";
+const SANS  = "'Helvetica Neue', Arial, sans-serif";
 export function coldEmailHtml(text, token) {
   const safe = esc(text);
   const paragraphs = safe.split(/\n\s*\n/).map((p) => {
@@ -186,7 +190,6 @@ export function coldEmailHtml(text, token) {
     return `<p style="margin:0 0 20px;font-family:${SERIF};font-size:18px;line-height:1.62;color:#2b2620;">${withLinks}</p>`;
   }).join('');
   return `<!--[if mso]><style>* { font-family: Georgia, serif !important; }</style><![endif]-->
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600&family=Barlow:wght@400;600&display=swap" rel="stylesheet">
 <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background:#E7DFCB;margin:0;padding:0;">
   <tr><td align="center" style="padding:26px 12px;">
     <table role="presentation" width="600" cellspacing="0" cellpadding="0" border="0" style="width:600px;max-width:600px;background:#FBF7EE;border:1px solid #E3D9C4;">
