@@ -1407,38 +1407,62 @@ body.lp-restyle {
           var ta = root.querySelector('[data-exp-csv]'), prevBtn = root.querySelector('[data-exp-preview]');
           var impBtn = root.querySelector('[data-exp-import]'), statusEl = root.querySelector('[data-exp-status]');
           var out = root.querySelector('[data-exp-result]');
+          // Always resolve to { ok, status, json, text } so nothing ever fails
+          // silently — a non-JSON body (e.g. an auth redirect) still surfaces.
           function post(body) {
             return fetch('/api/sequences/import-expired', { method:'POST', credentials:'include',
               headers:{'Content-Type':'application/json'}, body: JSON.stringify(body) })
-              .then(function (r){ return r.json().catch(function(){return null;}); });
+              .then(function (r){ return r.text().then(function (t){ var j=null; try{ j=JSON.parse(t); }catch(e){} return { ok:r.ok, status:r.status, json:j, text:t }; }); })
+              .catch(function (e){ return { ok:false, status:0, json:null, text:String(e&&e.message||e) }; });
           }
           function esc(s){ return (s==null?'':String(s)).replace(/[&<>]/g,function(c){return({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]);}); }
-          function renderSummary(j, done) {
-            if (!j || j.success === false) { out.innerHTML = '<span style="color:#9B2C2C;">'+esc((j&&j.error)||'Something went wrong.')+'</span>'; return; }
+          function box(color,bg,html){ return '<div style="border-left:3px solid '+color+';background:'+bg+';padding:9px 12px;border-radius:4px;margin-top:4px;">'+html+'</div>'; }
+          function renderResult(res, done) {
+            var j = res.json;
+            // Transport / server / auth error — show exactly what came back.
+            if (!res.ok || !j || j.success === false) {
+              var msg = (j && j.error) ? j.error
+                : res.status === 401 ? 'You’re signed out — reload the CRM and sign back in, then try again.'
+                : res.status === 0 ? 'Network error — check your connection and retry.'
+                : (res.text ? res.text.slice(0,300) : 'Something went wrong.');
+              out.innerHTML = box('#9B2C2C','#FBEDED','<b>Couldn’t read the list'+(res.status?' (HTTP '+res.status+')':'')+'.</b><br>'+esc(msg)); return;
+            }
             var lines = [];
-            if (done) lines.push('<b style="color:#2E5C3D;">✓ Imported.</b> Created '+j.created+' leads, enrolled '+j.enrolled_count+' in the Expired sequence.');
-            else lines.push('<b>Preview</b> — nothing changed yet.');
-            lines.push(j.parsed_rows+' rows · <b>'+j.to_enroll+'</b> new leads to enroll · '+j.emailable_unique+' emailable · '+j.no_email+' with no email · '+j.duplicates+' duplicate'+(j.duplicates===1?'':'s')+' · '+j.already_in_crm+' already in your CRM');
-            if (j.already_in_crm && j.already_in_crm_list) lines.push('<span style="color:#8A6B3F;">Already in CRM (not enrolled — review): '+j.already_in_crm_list.slice(0,8).map(function(x){return esc(x.email);}).join(', ')+(j.already_in_crm_list.length>8?'…':'')+'</span>');
-            if (j.no_email && j.no_email_list) lines.push('<span style="color:#8A7B60;">No email (call/mail only): '+j.no_email_list.slice(0,6).map(function(x){return esc(x.address);}).join('; ')+(j.no_email_list.length>6?'…':'')+'</span>');
-            out.innerHTML = lines.map(function(l){return '<div>'+l+'</div>';}).join('');
+            if (done) lines.push('<b style="color:#2E5C3D;">✓ Imported.</b> Created '+j.created+' lead'+(j.created===1?'':'s')+', enrolled '+j.enrolled_count+' in the Expired sequence. Email 1 is now waiting for your approval on the Today board.');
+            else      lines.push('<b>Preview</b> — nothing changed yet.');
+            lines.push(j.parsed_rows+' rows · <b>'+j.to_enroll+'</b> new to enroll · '+j.emailable_unique+' emailable · '+j.no_email+' no email · '+j.duplicates+' duplicate'+(j.duplicates===1?'':'s')+' · '+j.already_in_crm+' already in your CRM');
+            var body = lines.map(function(l){return '<div>'+l+'</div>';}).join('');
+            // Loud, actionable callout when there's nothing to enroll.
+            if (!done && j.to_enroll === 0) {
+              var why = j.already_in_crm ? 'Everyone on this list is <b>already in your CRM</b>, so they won’t be cold-emailed again.'
+                      : j.no_email && !j.emailable_unique ? 'None of these rows have an email address, so there’s nothing to email.'
+                      : 'There’s nothing new to enroll from this list.';
+              var tip = j.already_in_crm ? '<br><br><b>Testing?</b> Use an email that isn’t a lead yet — Gmail delivers every <code>+alias</code> to your inbox, e.g. <code>sarasellscalifornia+test2@gmail.com</code>, then <code>+test3</code>, and so on.' : '';
+              body += box('#B8862B','#FBF4E4', why + tip);
+            }
+            if (j.already_in_crm && j.already_in_crm_list && j.already_in_crm_list.length)
+              body += '<div style="color:#8A6B3F;margin-top:6px;">Already in CRM (skipped): '+j.already_in_crm_list.slice(0,8).map(function(x){return esc(x.email);}).join(', ')+(j.already_in_crm_list.length>8?'…':'')+'</div>';
+            if (j.no_email && j.no_email_list && j.no_email_list.length)
+              body += '<div style="color:#8A7B60;margin-top:2px;">No email (call/mail only): '+j.no_email_list.slice(0,6).map(function(x){return esc(x.address);}).join('; ')+(j.no_email_list.length>6?'…':'')+'</div>';
+            out.innerHTML = body;
           }
           prevBtn.addEventListener('click', function () {
-            var csv = (ta.value||'').trim(); if (!csv) { ta.focus(); return; }
+            var csv = (ta.value||'').trim();
+            if (!csv) { out.innerHTML = box('#B8862B','#FBF4E4','Paste your CSV (including the header row) into the box above first.'); ta.focus(); return; }
             prevBtn.disabled = true; statusEl.textContent = 'Reading…';
-            post({ csv: csv, dry_run: true }).then(function (j) {
+            post({ csv: csv, dry_run: true }).then(function (res) {
               prevBtn.disabled = false; statusEl.textContent = '';
-              renderSummary(j, false);
-              impBtn.disabled = !(j && j.to_enroll > 0);
+              renderResult(res, false);
+              impBtn.disabled = !(res.ok && res.json && res.json.to_enroll > 0);
             });
           });
           impBtn.addEventListener('click', function () {
             var csv = (ta.value||'').trim(); if (!csv) return;
             if (!window.confirm('Create and enroll the new leads in the Expired sequence? Email 1 will queue for your approval.')) return;
             impBtn.disabled = true; prevBtn.disabled = true; statusEl.textContent = 'Importing…';
-            post({ csv: csv }).then(function (j) {
+            post({ csv: csv }).then(function (res) {
               prevBtn.disabled = false; statusEl.textContent = '';
-              renderSummary(j, true);
+              renderResult(res, true);
             });
           });
         })();
