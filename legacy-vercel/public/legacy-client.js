@@ -33,10 +33,20 @@ window.LGPortal = window.LGPortal || {
       return m ? decodeURIComponent(m[1]) : null;
     } catch (e) { return null; }
   },
-  // True on the portal page in any of its URL shapes.
+  // Public sample portal: /sample-portal (or ?sample=1). A no-auth, fabricated
+  // demonstration of the client experience (linked from /showcase) — no token,
+  // no login, no real data.
+  isSample: function () {
+    try {
+      return new URLSearchParams(location.search).get('sample') != null
+          || /^\/sample-portal\/?$/.test(location.pathname);
+    } catch (e) { return false; }
+  },
+  // True on the portal page in any of its URL shapes (incl. the sample demo).
   isPath: function () {
     return /\/seller\.html$/.test(location.pathname)
-        || /^\/(?:buyer|seller|portal)\/[^\/?#]+\/?$/.test(location.pathname);
+        || /^\/(?:buyer|seller|portal)\/[^\/?#]+\/?$/.test(location.pathname)
+        || this.isSample();
   },
   // Build a client's shareable portal link, branded to their side.
   link: function (token, side) {
@@ -1769,9 +1779,10 @@ window.LGPortal = window.LGPortal || {
     if (/\/dashboard\.html$/.test(path)) await gate(['buyer','agent_sara','agent_james','admin']);
     if (window.LGPortal.isPath()) {
       // Private-link access (?t=<portal_token>, or /buyer|/seller/<token>) needs
-      // no login — the token is the credential. Only gate when there's no token.
+      // no login — the token is the credential. The public sample portal needs
+      // no login either. Only gate when there's neither a token nor sample mode.
       const hasToken = window.LGPortal.token();
-      if (!hasToken) await gate(['seller','agent_sara','agent_james','admin']);
+      if (!hasToken && !window.LGPortal.isSample()) await gate(['seller','agent_sara','agent_james','admin']);
     }
   });
 
@@ -2210,8 +2221,9 @@ window.LGPortal = window.LGPortal || {
     // (?t=) is already the client, so `as` only matters on the ?deal= path.
     const asClient = /^(seller|client)$/i.test(params.get('as') || '');
     let url = '/api/seller/portal';
-    if (token)     url += '?t=' + encodeURIComponent(token);
-    else if (deal) url += '?deal=' + encodeURIComponent(deal) + (asClient ? '&as=seller' : '');
+    if (window.LGPortal.isSample()) url += '?sample=1';
+    else if (token) url += '?t=' + encodeURIComponent(token);
+    else if (deal)  url += '?deal=' + encodeURIComponent(deal) + (asClient ? '&as=seller' : '');
     try {
       res = await fetch(url, {
         method: 'GET',

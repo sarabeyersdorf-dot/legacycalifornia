@@ -1,6 +1,14 @@
 {
   "rewrites": [
     {
+      "source": "/showcase",
+      "destination": "/showcase/index.html"
+    },
+    {
+      "source": "/sample-portal",
+      "destination": "/seller.html"
+    },
+    {
       "source": "/433-e-highway-4-murphys/investor-packet",
       "destination": "/showcase/433/investor-packet.html"
     },
