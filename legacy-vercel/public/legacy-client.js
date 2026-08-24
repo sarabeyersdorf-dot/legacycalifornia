@@ -4435,6 +4435,7 @@ window.LGPortal = window.LGPortal || {
   }
 
   let __dashLoading = false;
+  const _lgDraftBody = {};   // message_id -> raw draft body, for the approval modal's Edit box
   async function paintDashboardDS() {
     const root = document.querySelector('.ds-dash');
     if (!root || !window.Legacy || !window.Legacy.api || __dashLoading) return;
@@ -4560,7 +4561,7 @@ window.LGPortal = window.LGPortal || {
       // ---- Today list ----
       guard('today', () => {
         const items = []
-          .concat(drafts.map((d) => ({ kind: 'draft', lead_id: d.lead_id, name: fullName(d.leads || {}) || 'A lead', title: d.subject || 'Draft reply ready', ctx: `Draft ${d.channel || 'reply'} awaiting your approval`, due: 'Review', stg: 'nurture' })))
+          .concat(drafts.map((d) => { _lgDraftBody[d.id] = d.body || ''; return { kind: 'draft', lead_id: d.lead_id, message_id: d.id, name: fullName(d.leads || {}) || 'A lead', title: d.subject || 'Draft reply ready', ctx: `Draft ${d.channel || 'reply'} awaiting your approval`, due: 'Review', stg: 'nurture' }; }))
           .concat(tours.map((t) => ({ kind: 'tour', lead_id: (t.leads && t.leads.id) || null, name: fullName(t.leads || {}) || 'Client', title: `${t.tour_type === 'video' ? 'Video tour' : 'Showing'} · ${fullName(t.leads || {}) || 'client'}`, ctx: (t.properties && [t.properties.address, t.properties.city].filter(Boolean).join(', ')) || 'Location TBD', due: dashClock(t.scheduled_at), stg: 'on_market' })))
           .concat(appts.map((a) => { const addr = a.deals ? [a.deals.address, a.deals.city].filter(Boolean).join(', ') : ''; const lbl = apptLabel(a); const who = apptWho(a); const base = a.title ? `${lbl} · ${a.title}` : lbl; return { kind: 'appt', lead_id: null, name: a.title || lbl, title: who ? `${who} · ${base}` : base, ctx: addr || a.client_label || 'On your calendar', due: a.all_day ? 'All day' : dashClock(a.starts_at), stg: 'on_market' }; }));
         const todayHost = root.querySelector('[data-dash-today]');
@@ -4579,11 +4580,13 @@ window.LGPortal = window.LGPortal || {
               <div class="acts">
                 ${hero.kind === 'appt'
                   ? `<button class="ds-btn ds-btn--amber" data-dash-cal>Open calendar</button>`
-                  : `<button class="ds-btn ds-btn--amber" data-dash-open="${escHtml(hero.lead_id || '')}">Open ${escHtml(hero.kind === 'draft' ? 'draft' : 'showing')}</button><button class="ds-btn" data-dash-cal>See calendar</button>`}
+                  : hero.kind === 'draft'
+                    ? `<button class="ds-btn ds-btn--amber" data-dash-approve="${escHtml(hero.message_id || '')}">Review &amp; approve →</button><button class="ds-btn" data-dash-open="${escHtml(hero.lead_id || '')}">Open lead</button>`
+                    : `<button class="ds-btn ds-btn--amber" data-dash-open="${escHtml(hero.lead_id || '')}">Open showing</button><button class="ds-btn" data-dash-cal>See calendar</button>`}
               </div>
             </div>`;
             const rowsHtml = `<div class="ds-today-list">` + rest.map((it) => `
-            <div class="ds-today-row" data-stg="${escHtml(it.stg)}" ${it.kind === 'appt' ? 'data-dash-cal' : `data-dash-open="${escHtml(it.lead_id || '')}"`}>
+            <div class="ds-today-row" data-stg="${escHtml(it.stg)}" ${it.kind === 'appt' ? 'data-dash-cal' : it.kind === 'draft' ? `data-dash-approve="${escHtml(it.message_id || '')}"` : `data-dash-open="${escHtml(it.lead_id || '')}"`}>
               <span class="stripe"></span>
               <div class="tr-b"><div class="tt">${escHtml(it.title)}</div><div class="cx">${escHtml(it.ctx)}</div></div>
               <span class="due">${escHtml(it.due)}</span>
@@ -4689,8 +4692,89 @@ window.LGPortal = window.LGPortal || {
     }
   }
 
+  // One-click approval: a draft on the Today board opens a focused modal showing
+  // the email exactly as it will send (branded), with Approve & Send / Edit /
+  // Not now — so nothing has to be hunted for on the lead page. Raw draft bodies
+  // are stashed by message_id in _lgDraftBody (populated in the Today guard).
+  async function openApprovalModal(messageId) {
+    if (!messageId) return;
+    const ov = document.createElement('div');
+    ov.setAttribute('data-approve-ov', '');
+    ov.style.cssText = 'position:fixed;inset:0;z-index:100002;background:rgba(26,23,20,.55);display:flex;align-items:flex-start;justify-content:center;overflow:auto;padding:28px 16px;';
+    const panel = document.createElement('div');
+    panel.style.cssText = 'background:#FAF6EC;max-width:680px;width:100%;border-radius:12px;box-shadow:0 30px 80px -20px rgba(20,18,15,.6);overflow:hidden;';
+    panel.innerHTML =
+      '<div style="display:flex;justify-content:space-between;align-items:center;padding:16px 20px;border-bottom:1px solid #E4DAC6;">'
+        + '<div style="font-family:Cormorant Garamond,Georgia,serif;font-size:22px;color:#1A1714;">Review &amp; send</div>'
+        + '<button type="button" data-x style="border:none;background:#EBE2CD;color:#5b5347;font-size:20px;line-height:1;width:34px;height:34px;border-radius:8px;cursor:pointer;">×</button></div>'
+      + '<div data-subj style="padding:12px 20px 0;font-size:14px;color:#1A1714;"></div>'
+      + '<div data-frame-wrap style="padding:12px 20px;"><div style="color:#7C6A4D;font-size:14px;">Loading the email…</div></div>'
+      + '<div data-edit style="display:none;padding:0 20px 12px;"><textarea data-edit-body rows="10" style="width:100%;font:14px/1.6 Georgia,serif;padding:10px;border:1px solid #D9CFB7;border-radius:6px;box-sizing:border-box;"></textarea>'
+        + '<div style="margin-top:8px;"><button class="ds-btn" data-edit-apply type="button">Update preview</button></div></div>'
+      + '<div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:flex-end;align-items:center;padding:14px 20px;border-top:1px solid #E4DAC6;background:#F3EDDD;">'
+        + '<span data-msg style="margin-right:auto;font-size:13px;min-height:16px;"></span>'
+        + '<button class="ds-btn" data-edit-toggle type="button">Edit text</button>'
+        + '<button class="ds-btn" data-x2 type="button">Not now</button>'
+        + '<button class="ds-btn ds-btn--amber" data-approve type="button">Approve &amp; send</button></div>';
+    ov.appendChild(panel);
+    document.body.appendChild(ov);
+
+    const frameWrap = panel.querySelector('[data-frame-wrap]');
+    const subjEl    = panel.querySelector('[data-subj]');
+    const msgEl     = panel.querySelector('[data-msg]');
+    const editWrap  = panel.querySelector('[data-edit]');
+    const editBody  = panel.querySelector('[data-edit-body]');
+    editBody.value  = _lgDraftBody[messageId] || '';
+
+    function close() { if (ov.parentNode) ov.parentNode.removeChild(ov); document.removeEventListener('keydown', onKey); }
+    function onKey(e) { if (e.key === 'Escape') close(); }
+    document.addEventListener('keydown', onKey);
+    ov.addEventListener('click', (e) => { if (e.target === ov || e.target.closest('[data-x]') || e.target.closest('[data-x2]')) close(); });
+
+    async function loadPreview(bodyOverride) {
+      frameWrap.innerHTML = '<div style="color:#7C6A4D;font-size:14px;">Loading the email…</div>';
+      const payload = { message_id: messageId, preview: true };
+      if (bodyOverride != null) payload.edited_body = bodyOverride;
+      const r = await api('/api/crm/approve', { body: payload });
+      if (!r.ok || !r.json) { frameWrap.innerHTML = '<div style="color:#9B2C2C;font-size:14px;">Could not load the email preview.</div>'; return; }
+      subjEl.innerHTML = r.json.subject ? '<b>Subject:</b> ' + escHtml(r.json.subject) : '';
+      const fr = document.createElement('iframe');
+      fr.setAttribute('scrolling', 'no');
+      fr.style.cssText = 'width:100%;border:1px solid #E4DAC6;border-radius:8px;background:#fff;min-height:320px;';
+      frameWrap.innerHTML = '';
+      frameWrap.appendChild(fr);
+      fr.addEventListener('load', () => { try { fr.style.height = (fr.contentDocument.body.scrollHeight + 24) + 'px'; } catch (e) { fr.style.height = '640px'; } });
+      fr.srcdoc = r.json.html || '';
+    }
+    loadPreview();
+
+    panel.querySelector('[data-edit-toggle]').addEventListener('click', () => {
+      editWrap.style.display = editWrap.style.display === 'none' ? 'block' : 'none';
+    });
+    panel.querySelector('[data-edit-apply]').addEventListener('click', () => loadPreview(editBody.value));
+
+    panel.querySelector('[data-approve]').addEventListener('click', async (e) => {
+      const btn = e.currentTarget; btn.disabled = true; btn.textContent = 'Sending…';
+      const payload = { message_id: messageId };
+      if (editWrap.style.display !== 'none' && editBody.value.trim()) payload.edited_body = editBody.value.trim();
+      const r = await api('/api/crm/approve', { body: payload });
+      if (r.ok && r.json && r.json.status === 'sent') {
+        msgEl.style.color = '#2E5C3D';
+        msgEl.textContent = '✓ Sent. Emails 2–4 will now auto-send on schedule and stop the moment they reply.';
+        panel.querySelectorAll('button').forEach((b) => { b.disabled = true; });
+        setTimeout(() => { close(); try { paintDashboardDS(); } catch (_) {} }, 1500);
+      } else {
+        btn.disabled = false; btn.textContent = 'Approve & send';
+        msgEl.style.color = '#9B2C2C';
+        msgEl.textContent = (r.json && r.json.error) ? r.json.error : 'Send failed — try again.';
+      }
+    });
+  }
+
   // Dashboard interactions: open a lead detail from any row/button.
   document.addEventListener('click', (e) => {
+    const appr = e.target.closest('[data-dash-approve]');
+    if (appr) { const mid = appr.getAttribute('data-dash-approve'); if (mid) openApprovalModal(mid); return; }
     const open = e.target.closest('[data-dash-open]');
     if (open) {
       const id = open.getAttribute('data-dash-open');
