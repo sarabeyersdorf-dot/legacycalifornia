@@ -171,20 +171,49 @@ export function coldOutreachFooter(token) {
     </p>`;
 }
 
-// Wrapper for a COLD sequence email: branded container + the body verbatim
-// (the sequence copy already carries Sara's own signature) + the CAN-SPAM cold
-// footer. Deliberately does NOT add bodyToHtml's auto-signature, which would
-// duplicate the sign-off already in the copy.
+// Premium branded wrapper for a COLD sequence email. Email-safe (table layout,
+// inline styles, hosted images). The logo header + headshot signature carry the
+// brand; the copy no longer needs its own text signature. Serif matches the site
+// (Cormorant Garamond, Georgia fallback for Gmail/Outlook which strip web fonts).
+const SITE = 'https://legacycalifornia.com';
+const SERIF = "'Cormorant Garamond', Georgia, 'Times New Roman', serif";
+const SANS  = "'Barlow', 'Helvetica Neue', Arial, sans-serif";
 export function coldEmailHtml(text, token) {
   const safe = esc(text);
-  const paragraphs = safe.split(/\n\s*\n/).map((p) =>
-    `<p style="font-size:15px;line-height:1.6;color:#3A332B;margin:0 0 16px;">${p.replace(/\n/g, '<br>')}</p>`
-  ).join('');
-  return `<div style="font-family:Georgia,'Cormorant Garamond',serif;color:#1A1714;max-width:560px;margin:0 auto;padding:32px 28px;background:#FAF6EC;">
-    <div style="font-family:'Courier New',monospace;font-size:10px;letter-spacing:.22em;text-transform:uppercase;color:#7C6A4D;margin-bottom:18px;">Legacy Properties</div>
-    ${paragraphs}
-    ${coldOutreachFooter(token)}
-  </div>`;
+  const paragraphs = safe.split(/\n\s*\n/).map((p) => {
+    const withLinks = p.replace(/\n/g, '<br>')
+      .replace(/(https?:\/\/[^\s<]+)/g, '<a href="$1" style="color:#8C6E3D;font-weight:600;text-decoration:underline;">$1</a>');
+    return `<p style="margin:0 0 20px;font-family:${SERIF};font-size:18px;line-height:1.62;color:#2b2620;">${withLinks}</p>`;
+  }).join('');
+  return `<!--[if mso]><style>* { font-family: Georgia, serif !important; }</style><![endif]-->
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600&family=Barlow:wght@400;600&display=swap" rel="stylesheet">
+<table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background:#E7DFCB;margin:0;padding:0;">
+  <tr><td align="center" style="padding:26px 12px;">
+    <table role="presentation" width="600" cellspacing="0" cellpadding="0" border="0" style="width:600px;max-width:600px;background:#FBF7EE;border:1px solid #E3D9C4;">
+      <tr><td align="center" style="padding:30px 40px 18px;background:#ffffff;">
+        <img src="${SITE}/showcase/_brand/legacy-logo.png" width="330" alt="Legacy Properties" style="display:block;width:330px;max-width:82%;height:auto;border:0;">
+      </td></tr>
+      <tr><td style="padding:0;height:4px;line-height:4px;font-size:0;background:#8C6E3D;">&nbsp;</td></tr>
+      <tr><td style="padding:34px 44px 6px;">
+        ${paragraphs}
+      </td></tr>
+      <tr><td style="padding:10px 44px 30px;">
+        <table role="presentation" cellspacing="0" cellpadding="0" border="0"><tr>
+          <td width="66" valign="top">
+            <img src="${SITE}/art/sara-headshot.png" width="60" height="60" alt="Sara Cooper" style="display:block;width:60px;height:60px;border-radius:50%;border:2px solid #E3D9C4;object-fit:cover;">
+          </td>
+          <td valign="middle" style="padding-left:15px;">
+            <div style="font-family:${SERIF};font-size:21px;line-height:1.1;color:#1A1714;">Sara Cooper</div>
+            <div style="font-family:${SANS};font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:#8C6E3D;margin-top:3px;">Broker / Owner · Legacy Properties</div>
+            <div style="font-family:${SANS};font-size:13px;color:#5b5347;margin-top:5px;">(209) 559-4966 &nbsp;·&nbsp; <a href="mailto:sarasellscalifornia@gmail.com" style="color:#5b5347;">sarasellscalifornia@gmail.com</a></div>
+            <div style="font-family:${SANS};font-size:11px;color:#a2957c;margin-top:3px;">DRE 02141987 &nbsp;·&nbsp; Brokerage DRE 02554944</div>
+          </td>
+        </tr></table>
+      </td></tr>
+      <tr><td style="padding:0 44px 30px;">${coldOutreachFooter(token)}</td></tr>
+    </table>
+  </td></tr>
+</table>`;
 }
 
 // CAN-SPAM: every bulk / newsletter email must carry a working opt-out. The
