@@ -152,6 +152,25 @@ export function renderTemplate(tpl, agent, opts = {}) {
   return { html, text };
 }
 
+// COLD OUTREACH footer (CAN-SPAM baseline for a skip-traced list): a working
+// one-click opt-out, the sender's real business identity, and a PHYSICAL MAILING
+// ADDRESS — all three are legally required for unsolicited commercial email.
+// Used by the Expired Listing sequence and any other cold send. The address is
+// the brokerage's mailing address; update BUSINESS_ADDRESS if it changes.
+const BUSINESS_ADDRESS = '4149 Cedar Cir, Angels Camp, CA 95222';
+export function coldOutreachFooter(token) {
+  const url = token
+    ? `https://legacycalifornia.com/api/unsubscribe?token=${encodeURIComponent(token)}`
+    : 'https://legacycalifornia.com';
+  return `<hr style="border:none;border-top:1px solid #D9CFB7;margin:22px 0 12px;">
+    <p style="font-size:11px;line-height:1.55;color:#A89C8A;margin:0;">
+      Sara Cooper · Broker/Owner, Legacy Properties · ${esc(BUSINESS_ADDRESS)} · (209) 559-4966<br>
+      You're receiving this because your property recently came off the market and public
+      records list you as the owner. If you'd rather not hear from me,
+      <a href="${url}" style="color:#8C6E3D;">unsubscribe here</a> and I won't reach out again.
+    </p>`;
+}
+
 // CAN-SPAM: every bulk / newsletter email must carry a working opt-out. The
 // token is leads.unsubscribe_token; /api/unsubscribe flips leads.email_opt_out.
 export function unsubscribeFooter(token) {

@@ -18,6 +18,7 @@ import { getCallerProfile, isAgent } from '../auth.js';
 import { sendSMS, twilioConfigured } from '../twilio.js';
 import { sendEmail as sendEmailResend,   resendConfigured }   from '../resend.js';
 import { sendEmail as sendEmailSendgrid, sendgridConfigured } from '../sendgrid.js';
+import { bodyToHtml as brandedBodyToHtml, coldOutreachFooter } from '../email-html.js';
 import { handleOptions, readJson, ok, fail } from '../cors.js';
 
 /**
@@ -54,6 +55,17 @@ export default async function handler(req, res) {
     const lead = msg.leads;
     if (!lead) return fail(res, 404, 'lead not found for message');
 
+    // Cold-sequence context: a message tied to a sequence (messages.sequence_id)
+    // whose send_mode is auto_after_first is COLD outreach — it must carry the
+    // CAN-SPAM footer (unsubscribe + business + physical address), and approving
+    // step 1 ARMS the auto-send of the rest.
+    let seq = null;
+    if (msg.sequence_id) {
+      const { data } = await supa.from('sequences').select('id, steps, send_mode').eq('id', msg.sequence_id).maybeSingle();
+      seq = data || null;
+    }
+    const isColdSeq = !!(seq && seq.send_mode === 'auto_after_first');
+
     // 2. Apply edits + flip to approved
     const patch = {
       status:       'approved',
@@ -81,7 +93,11 @@ export default async function handler(req, res) {
         toName:  [lead.first_name, lead.last_name].filter(Boolean).join(' ') || null,
         subject: updated.subject || 'A note from Legacy Properties',
         text:    updated.body,
-        html:    bodyToHtml(updated.body)
+        // Cold sequence → branded wrapper + CAN-SPAM cold footer (unsubscribe +
+        // physical address). Everything else keeps the plain branded wrapper.
+        html:    isColdSeq
+                   ? brandedBodyToHtml(updated.body, { name: 'Sara Cooper · Legacy Properties' }, { footerHtml: coldOutreachFooter(lead.unsubscribe_token) })
+                   : bodyToHtml(updated.body)
       });
       r.via = provider.name;
       return r;
@@ -137,6 +153,22 @@ export default async function handler(req, res) {
         source:     usedChannel === 'sms' ? 'twilio' : usedChannel === 'portal' ? 'portal' : 'mailerlite',
         event_data: { message_id, channel: usedChannel, approved_by: patch.approved_by, fell_back_from: providerResult.fell_back_from || null }
       });
+
+      // Approving step 1 of an auto_after_first sequence ARMS the auto-send of
+      // the rest: advance to step 2 and schedule it (absolute from enrollment).
+      // The hourly cron then sends steps 2..n automatically, halting on reply.
+      if (isColdSeq && lead.sequence_id === msg.sequence_id && (lead.sequence_step || 0) === 0) {
+        const steps = Array.isArray(seq.steps) ? seq.steps : [];
+        if (steps.length >= 2) {
+          const base = lead.sequence_started_at ? new Date(lead.sequence_started_at).getTime() : Date.now();
+          const nextDue = new Date(base + (Number(steps[1].delay_hours) || 0) * 3600_000).toISOString();
+          await supa.from('leads').update({
+            sequence_autosend: true, sequence_step: 1, sequence_next_due_at: nextDue
+          }).eq('id', lead.id);
+        } else {
+          await supa.from('leads').update({ sequence_id: null, sequence_next_due_at: null }).eq('id', lead.id);
+        }
+      }
     }
 
     return ok(res, {

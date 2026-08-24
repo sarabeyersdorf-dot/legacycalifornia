@@ -28,6 +28,7 @@
 import { adminClient }            from '../supabase.js';
 import { anthropicJSON, anthropicMessage } from '../anthropic.js';
 import { sendEmail, resendConfigured }     from '../resend.js';
+import { bodyToHtml, coldOutreachFooter }  from '../email-html.js';
 import { handleOptions, ok, fail } from '../cors.js';
 
 const SARA_VOICE = `You are drafting on behalf of Sara Cooper, Broker-Owner of Legacy Properties in Angels Camp, CA.
@@ -39,13 +40,26 @@ Hard rules:
 3. If the recipient's first name is "Sara", open with "Hi," instead of "Hey Sara".
 4. Reference only real numbers from the context. Never invent showings/offers/visitors.`;
 
+// The stable case-study URL used by {{CASE_STUDY_URL}} in cold sequences. Points
+// at the swappable showcase page (Part 2), never a hardcoded listing page.
+const SHOWCASE_URL = (process.env.PUBLIC_SITE_URL || 'https://legacycalifornia.com')
+  .replace(/\/+$/, '') + '/showcase';
+
 const TEMPLATE_VARS = (lead, sequence) => ({
   first_name:      lead.first_name || 'there',
   last_name:       lead.last_name  || '',
   area:            (lead.areas && lead.areas[0]) || 'your area',
   price_min:       lead.price_min || '',
   price_max:       lead.price_max || '',
-  sequence_name:   sequence?.name || ''
+  sequence_name:   sequence?.name || '',
+  // Cold-sequence merge fields. `greeting` degrades gracefully to "Hi," when the
+  // lead has no first name (skip-traced lists often don't) so a verbatim email
+  // never opens with "Hi ,". property_address/city come from the subject-property
+  // columns (db/080); CASE_STUDY_URL is the stable showcase link.
+  greeting:         lead.first_name ? `Hi ${lead.first_name},` : 'Hi,',
+  property_address: lead.property_address || '',
+  city:             lead.property_city || '',
+  CASE_STUDY_URL:   SHOWCASE_URL
 });
 
 function fillTemplate(tpl, vars) {
@@ -63,7 +77,7 @@ async function tickSequences(supa) {
   // budget; the next cron tick picks up the remainder.
   const { data: dueLeads = [], error } = await supa
     .from('leads')
-    .select('id, first_name, last_name, email, phone, areas, price_min, price_max, journey_stage, lead_type, temperature, score, sequence_id, sequence_step, sequence_next_due_at, call_opt_out, sms_opt_out, email_opt_out, not_interested, pipeline_stage, sms_consent')
+    .select('id, first_name, last_name, email, phone, areas, price_min, price_max, journey_stage, lead_type, temperature, score, sequence_id, sequence_step, sequence_next_due_at, sequence_started_at, sequence_autosend, property_address, property_city, unsubscribe_token, call_opt_out, sms_opt_out, email_opt_out, not_interested, pipeline_stage, sms_consent')
     .eq('sequence_paused', false)
     .eq('status', 'active')
     .not('sequence_id', 'is', null)
@@ -77,7 +91,7 @@ async function tickSequences(supa) {
   // Cache sequences for this batch
   const seqIds = [...new Set(dueLeads.map((l) => l.sequence_id))];
   const { data: seqs = [] } = await supa
-    .from('sequences').select('id, name, steps').in('id', seqIds);
+    .from('sequences').select('id, name, steps, send_mode').in('id', seqIds);
   const seqMap = new Map(seqs.map((s) => [s.id, s]));
 
   const counters = { drafted: 0, paused: 0, completed: 0, skipped_consent: 0, errors: [] };
@@ -147,9 +161,37 @@ async function tickSequences(supa) {
         continue;
       }
 
+      const vars = TEMPLATE_VARS(lead, seq);
+      let subject, body, aiGenerated, reasoning;
+
+      // ---- Verbatim (literal) step ----------------------------------------
+      // The Expired Listing sequence (and any step with mode:"literal") sends
+      // Sara's exact copy with only merge fields filled — no AI rewrite. Blank
+      // merge guard: property_address is required (a gap would read "I noticed
+      //  came off the market"), so a lead missing it is paused + flagged for a
+      // manual send rather than mailed a broken sentence. first_name and city
+      // degrade gracefully (greeting → "Hi,"), so they don't block.
+      if (step.mode === 'literal') {
+        const required = ['property_address'];
+        const missing = required.filter((k) => !String(vars[k] || '').trim());
+        if (missing.length) {
+          await supa.from('leads').update({ sequence_paused: true }).eq('id', lead.id);
+          await supa.from('lead_events').insert({
+            lead_id: lead.id, event_type: 'score_change', source: 'manual',
+            event_data: { sequence_flag: 'missing_merge_field', fields: missing, sequence_id: lead.sequence_id, step: idx + 1 }
+          });
+          counters.paused++;
+          continue;
+        }
+        subject = step.channel === 'email' ? fillTemplate(step.subject_template || '', vars) : null;
+        body = fillTemplate(step.body_template || '', vars).trim();
+        if (!body) throw new Error('empty literal body');
+        aiGenerated = false;
+        reasoning = `Sequence "${seq.name}" step ${idx + 1}/${steps.length} (verbatim)`;
+      } else {
+
       // ---- Draft with Claude ----------------------------------------------
-      const vars     = TEMPLATE_VARS(lead, seq);
-      const subject  = step.channel === 'email' ? fillTemplate(step.subject_template || '', vars) : null;
+      subject  = step.channel === 'email' ? fillTemplate(step.subject_template || '', vars) : null;
       const guidance = fillTemplate(step.body_template || '', vars);
 
       const userPrompt = `Write step ${idx + 1} of the "${seq.name}" sequence for ${vars.first_name}.
@@ -181,9 +223,58 @@ ${step.channel === 'sms'
         temperature: 0.7
       });
 
-      const body = (step.channel === 'sms' ? draft.sms : draft.email_body || '').trim();
+      body = (step.channel === 'sms' ? draft.sms : draft.email_body || '').trim();
       if (!body) throw new Error('empty draft body');
+      aiGenerated = true;
+      reasoning = `Sequence "${seq.name}" step ${idx + 1}/${steps.length}. ${(draft.reasoning || '').trim()}`;
+      } // end AI-draft branch
 
+      // Absolute pacing: delays are hours from enrollment (sequence_started_at),
+      // so each step lands on its intended day instead of compounding.
+      const startBase = lead.sequence_started_at ? new Date(lead.sequence_started_at).getTime() : Date.now();
+      const dueAtIdx  = (i) => new Date(startBase + (Number(steps[i]?.delay_hours) || 0) * 3600_000).toISOString();
+      const sendMode  = seq.send_mode || 'draft';
+      const nextIdx   = idx + 1;
+      const isDone    = nextIdx >= steps.length;
+
+      // Approve-first-then-auto-send: steps 2..n of a cold sequence send
+      // automatically once step 1 has been approved (sequence_autosend armed by
+      // crm-approve). Email only; cold CAN-SPAM footer attached.
+      const autoSendThisStep = sendMode === 'auto_after_first'
+        && idx >= 1 && lead.sequence_autosend === true && step.channel === 'email';
+
+      if (autoSendThisStep) {
+        let sent = false, providerId = null;
+        try {
+          const r = await sendEmail({
+            agent: 'sara', to: lead.email,
+            toName: [lead.first_name, lead.last_name].filter(Boolean).join(' ') || undefined,
+            subject, text: body,
+            html: bodyToHtml(body, { name: 'Sara Cooper · Legacy Properties' }, { footerHtml: coldOutreachFooter(lead.unsubscribe_token) })
+          });
+          sent = !(r && r.skipped); providerId = (r && r.id) || null;
+        } catch (_) { sent = false; }
+        await supa.from('messages').insert({
+          lead_id: lead.id, direction: 'outbound', channel: 'email', body, subject,
+          status: sent ? 'sent' : 'failed', ai_generated: aiGenerated,
+          ai_draft_reasoning: reasoning, sequence_id: lead.sequence_id,
+          approved_by: 'sara', approved_at: new Date().toISOString(), mailerlite_id: providerId
+        }).then(() => {}, () => {});
+        if (sent) {
+          await supa.from('leads').update({ last_contact_at: new Date().toISOString() }).eq('id', lead.id).then(() => {}, () => {});
+          await supa.from('lead_events').insert({ lead_id: lead.id, event_type: 'message_sent', source: 'mailerlite', event_data: { sequence: seq.name, step: idx + 1, auto: true } }).then(() => {}, () => {});
+        }
+        await supa.from('leads').update({
+          sequence_step: nextIdx,
+          sequence_next_due_at: isDone ? null : dueAtIdx(nextIdx),
+          ...(isDone ? { sequence_id: null } : {})
+        }).eq('id', lead.id);
+        counters.drafted++;
+        if (isDone) counters.completed++;
+        continue;
+      }
+
+      // ---- Draft to pending_approval --------------------------------------
       const { error: insErr } = await supa.from('messages').insert({
         lead_id:            lead.id,
         direction:          'outbound',
@@ -191,26 +282,26 @@ ${step.channel === 'sms'
         body,
         subject,
         status:             'pending_approval',
-        ai_generated:       true,
-        ai_draft_reasoning: `Sequence "${seq.name}" step ${idx + 1}/${steps.length}. ${(draft.reasoning || '').trim()}`
+        ai_generated:       aiGenerated,
+        ai_draft_reasoning: reasoning,
+        sequence_id:        lead.sequence_id
       });
       if (insErr) throw new Error(`messages insert: ${insErr.message}`);
 
-      // ---- Advance the lead's pointer -------------------------------------
-      const nextIdx = idx + 1;
-      const isDone  = nextIdx >= steps.length;
-      const nextDue = isDone
-        ? null
-        : new Date(Date.now() + (Number(steps[nextIdx].delay_hours) || 0) * 3600_000).toISOString();
-
-      await supa.from('leads').update({
-        sequence_step:        nextIdx,
-        sequence_next_due_at: nextDue,
-        ...(isDone ? { sequence_id: null } : {})
-      }).eq('id', lead.id);
-
+      if (sendMode === 'auto_after_first' && idx === 0) {
+        // Step 1 of a cold sequence HOLDS for the agent's approval before the
+        // rest auto-send. Park the pointer; crm-approve arms auto-send + schedules
+        // step 2 (dueAtIdx(1)) when Sara approves this draft.
+        await supa.from('leads').update({ sequence_next_due_at: null }).eq('id', lead.id);
+      } else {
+        await supa.from('leads').update({
+          sequence_step:        nextIdx,
+          sequence_next_due_at: isDone ? null : dueAtIdx(nextIdx),
+          ...(isDone ? { sequence_id: null } : {})
+        }).eq('id', lead.id);
+        if (isDone) counters.completed++;
+      }
       counters.drafted++;
-      if (isDone) counters.completed++;
     } catch (e) {
       counters.errors.push({ lead_id: lead.id, error: e.message });
     }
