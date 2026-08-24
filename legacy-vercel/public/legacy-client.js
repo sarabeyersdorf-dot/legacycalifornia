@@ -782,7 +782,7 @@ window.LGPortal = window.LGPortal || {
         <div class="nc-body">
           <div class="nc-meta"><span class="nc-tag">Client · curated collection${ownerTag}</span></div>
           <h3>${escapeHtml(n.client_name || 'Your client')} hasn't reacted to “${escapeHtml(n.title)}”</h3>
-          <p>Pushed ${n.days_since_push} days ago${n.opens_since_push ? ` · opened ${n.opens_since_push}× since` : ' · not opened yet'}. Worth a nudge.</p>
+          <p>Pushed ${n.days_since_push} days ago · no reaction yet. Worth a nudge.</p>
           <div class="nc-foot"><div class="nc-foot-l"></div><div class="nc-foot-r">
             <button class="btn btn-ghost btn-sm" data-nudge-dismiss>Dismiss</button>
             <button class="btn btn-ghost btn-sm" data-open-curate>Open collection →</button>
