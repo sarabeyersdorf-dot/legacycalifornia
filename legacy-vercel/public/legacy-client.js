@@ -4456,17 +4456,25 @@ window.LGPortal = window.LGPortal || {
           const addr = String(d.address || d.lead_name || '').split(',')[0];
           const agent = d.agent || null;
           const cols = (d.at_a_glance && d.at_a_glance.columns) || [];
+          // The synthesized "Close of escrow" row (below) already represents the
+          // close date. Only when it will actually render, drop any closing
+          // milestone that lands on the SAME date — otherwise the day shows twice
+          // (e.g. a "Close of Escrow — 8/31" milestone + "Close of escrow"). A
+          // closing milestone on a different date (e.g. "Final walk-through") is
+          // kept, and if the COE row won't render the close is never dropped.
+          const coeWillShow = d.coe_date && d.days_to_coe != null && d.days_to_coe >= -3;
           cols.forEach((c) => {
             if (c.key !== 'contingencies' && c.key !== 'closing') return;
             (c.items || []).forEach((it) => {
               if (!it.date || it.status === 'done') return;
+              if (c.key === 'closing' && coeWillShow && it.date === d.coe_date) return;
               const n = dd(it.date);
               if (n == null || n < -3) return;           // small overdue grace
               rows.push({ date: it.date, days: n, label: it.label || (c.key === 'closing' ? 'Closing' : 'Contingency'), addr, agent, type: c.key });
             });
           });
           // COE straight off the deal (mirrors the deal card's countdown).
-          if (d.coe_date && d.days_to_coe != null && d.days_to_coe >= -3) {
+          if (coeWillShow) {
             rows.push({ date: d.coe_date, days: d.days_to_coe, label: 'Close of escrow', addr, agent, type: 'closing' });
           }
         });
