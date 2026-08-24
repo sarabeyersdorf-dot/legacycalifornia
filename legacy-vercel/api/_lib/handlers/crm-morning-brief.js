@@ -141,7 +141,7 @@ export default async function handler(req, res) {
           .order('scheduled_at'),
       // 90-day funnel
       supa.from('leads')      .select('id', { count: 'exact', head: true }).gte('created_at',  ninetyAgo),
-      supa.from('lead_events').select('lead_id', { count: 'exact', head: true }).gte('created_at',  ninetyAgo).in('event_type', ['email_opened','sms_replied','property_viewed','property_saved']),
+      supa.from('lead_events').select('lead_id', { count: 'exact', head: true }).gte('created_at',  ninetyAgo).in('event_type', ['email_opened','sms_replied','property_viewed','property_saved','collection_opened','reaction','valuation_interest']),
       supa.from('tours')      .select('lead_id', { count: 'exact', head: true }).gte('scheduled_at', ninetyAgo),
       supa.from('offers')     .select('buyer_lead_id', { count: 'exact', head: true }).gte('created_at', ninetyAgo),
       supa.from('leads')      .select('id', { count: 'exact', head: true }).in('pipeline_stage', ['closed','close']).gte('updated_at', ninetyAgo),

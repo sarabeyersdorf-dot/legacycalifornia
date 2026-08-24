@@ -37,6 +37,22 @@ async function loadCollection(supa, token) {
   return data;
 }
 
+// Mirror a client engagement onto the LEAD: a lead_events row (which feeds the
+// CRM timeline, the funnel and scoring) plus a last_engagement_at stamp.
+// Fire-and-forget, and only when the collection has a recipient lead. Agent
+// PREVIEWS never reach this file — they use /api/curate/preview, which does not
+// touch collection_events — so everything here is a genuine client signal.
+function noteEngagement(supa, coll, eventType, eventData) {
+  const leadId = coll?.client_lead_id;
+  if (!leadId) return;
+  supa.from('lead_events').insert({
+    lead_id: leadId, event_type: eventType, source: 'collection',
+    event_data: { collection_id: coll.id, ...(eventData || {}) }
+  }).then(() => {}, () => {});
+  supa.from('leads').update({ last_engagement_at: new Date().toISOString() })
+    .eq('id', leadId).then(() => {}, () => {});
+}
+
 export default async function handler(req, res) {
   if (handleOptions(req, res)) return;
   res.setHeader('Cache-Control', 'no-store');
@@ -72,8 +88,9 @@ export default async function handler(req, res) {
 async function view(supa, coll, res) {
   const payload = await buildClientPayload(supa, coll);
   delete payload._agent;   // never expose internal agent record to the client
-  // fire-and-forget open event
-  supa.from('collection_events').insert({ collection_id: coll.id, event_type: 'open', meta: {} }).then(() => {}, () => {});
+  // fire-and-forget open event, mirrored onto the lead's timeline + funnel
+  supa.from('collection_events').insert({ collection_id: coll.id, lead_id: coll.client_lead_id || null, event_type: 'open', meta: {} }).then(() => {}, () => {});
+  noteEngagement(supa, coll, 'collection_opened', {});
   return ok(res, payload);
 }
 
@@ -83,6 +100,7 @@ async function react(supa, coll, b, res) {
   if (!REACTIONS.includes(b?.reaction)) return fail(res, 400, `reaction must be one of ${REACTIONS.join(', ')}`);
   const row = {
     collection_id: coll.id,
+    lead_id: coll.client_lead_id || null,
     property_id: b?.property_id || null,
     reaction: b.reaction,
     comment: typeof b?.comment === 'string' ? b.comment.slice(0, 1000) : null,
@@ -91,9 +109,10 @@ async function react(supa, coll, b, res) {
   const { error } = await supa.from('collection_reactions').insert(row);
   if (error) return fail(res, 500, error.message);
   supa.from('collection_events').insert({
-    collection_id: coll.id, property_id: row.property_id,
+    collection_id: coll.id, lead_id: coll.client_lead_id || null, property_id: row.property_id,
     event_type: 'reaction', meta: { reaction: row.reaction }
   }).then(() => {}, () => {});
+  noteEngagement(supa, coll, 'reaction', { property_id: row.property_id, reaction: row.reaction });
 
   // Close the loop: a hot reaction becomes a task on the agent's list and a
   // text to their phone, instead of waiting silently for the collection to be
@@ -184,6 +203,7 @@ async function event(supa, coll, b, res) {
   if (!TYPES.includes(b?.event_type)) return fail(res, 400, `event_type must be one of ${TYPES.join(', ')}`);
   const row = {
     collection_id: coll.id,
+    lead_id: coll.client_lead_id || null,
     property_id: b?.property_id || null,
     event_type: b.event_type,
     dwell_ms: Number.isFinite(+b?.dwell_ms) ? Math.max(0, Math.min(+b.dwell_ms, 3_600_000)) : null,
@@ -191,6 +211,10 @@ async function event(supa, coll, b, res) {
   };
   const { error } = await supa.from('collection_events').insert(row);
   if (error) return fail(res, 500, error.message);
+  // Mirror the meaningful signals onto the lead (dwell is left out — too noisy
+  // for a timeline; it stays on collection_events for engagement scoring).
+  if (b.event_type === 'listing_view') noteEngagement(supa, coll, 'property_viewed', { property_id: row.property_id });
+  else if (b.event_type === 'valuation_open') noteEngagement(supa, coll, 'valuation_interest', {});
   return ok(res, { recorded: true });
 }
 
