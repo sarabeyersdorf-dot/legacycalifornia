@@ -1386,6 +1386,61 @@ body.lp-restyle {
           <button class="ds-btn ds-btn--primary" data-seq-new style="margin-left:auto;">+ New sequence</button>
         </div>
       <div class="seq">
+        <!-- Expired Listing outreach — batch import + enroll (real, wired). -->
+        <div class="exp-import" style="margin:0 0 22px;border:1px solid var(--rule,#E4DAC6);border-radius:12px;padding:18px 20px;background:#fff;">
+          <h3 style="margin:0 0 4px;font-family:var(--serif,Georgia,serif);font-size:20px;">Expired Listing outreach — import a skip-traced list</h3>
+          <p style="margin:0 0 12px;font-size:13.5px;color:var(--ink-soft,#5b5347);line-height:1.5;">Paste the CSV export (Street Address, City, Emails, Phones). I create the leads, skip rows with no email, flag anyone already in your CRM (so an existing contact is never cold-mailed), and enroll the rest in the 4-email Expired sequence. Email 1 waits for your approval; 2–4 auto-send, stopping on any reply.</p>
+          <textarea data-exp-csv placeholder="Paste the full CSV here, including the header row…" style="width:100%;min-height:120px;font:12px/1.5 'JetBrains Mono',monospace;border:1px solid var(--rule-strong,#D9CFB7);border-radius:6px;padding:10px;box-sizing:border-box;"></textarea>
+          <div style="display:flex;gap:10px;align-items:center;margin-top:10px;flex-wrap:wrap;">
+            <button class="ds-btn" data-exp-preview type="button">Preview (no changes)</button>
+            <button class="ds-btn ds-btn--primary" data-exp-import type="button" disabled>Import &amp; enroll</button>
+            <span data-exp-status style="font-size:13px;color:var(--ink-soft,#5b5347);"></span>
+          </div>
+          <div data-exp-result style="margin-top:12px;font-size:13px;line-height:1.6;"></div>
+        </div>
+        <script>
+        (function () {
+          var root = document.querySelector('.crm-view[data-view="seq"] .exp-import');
+          if (!root) return;
+          var ta = root.querySelector('[data-exp-csv]'), prevBtn = root.querySelector('[data-exp-preview]');
+          var impBtn = root.querySelector('[data-exp-import]'), statusEl = root.querySelector('[data-exp-status]');
+          var out = root.querySelector('[data-exp-result]');
+          function post(body) {
+            return fetch('/api/sequences/import-expired', { method:'POST', credentials:'include',
+              headers:{'Content-Type':'application/json'}, body: JSON.stringify(body) })
+              .then(function (r){ return r.json().catch(function(){return null;}); });
+          }
+          function esc(s){ return (s==null?'':String(s)).replace(/[&<>]/g,function(c){return({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]);}); }
+          function renderSummary(j, done) {
+            if (!j || j.success === false) { out.innerHTML = '<span style="color:#9B2C2C;">'+esc((j&&j.error)||'Something went wrong.')+'</span>'; return; }
+            var lines = [];
+            if (done) lines.push('<b style="color:#2E5C3D;">✓ Imported.</b> Created '+j.created+' leads, enrolled '+j.enrolled_count+' in the Expired sequence.');
+            else lines.push('<b>Preview</b> — nothing changed yet.');
+            lines.push(j.parsed_rows+' rows · <b>'+j.to_enroll+'</b> new leads to enroll · '+j.emailable_unique+' emailable · '+j.no_email+' with no email · '+j.duplicates+' duplicate'+(j.duplicates===1?'':'s')+' · '+j.already_in_crm+' already in your CRM');
+            if (j.already_in_crm && j.already_in_crm_list) lines.push('<span style="color:#8A6B3F;">Already in CRM (not enrolled — review): '+j.already_in_crm_list.slice(0,8).map(function(x){return esc(x.email);}).join(', ')+(j.already_in_crm_list.length>8?'…':'')+'</span>');
+            if (j.no_email && j.no_email_list) lines.push('<span style="color:#8A7B60;">No email (call/mail only): '+j.no_email_list.slice(0,6).map(function(x){return esc(x.address);}).join('; ')+(j.no_email_list.length>6?'…':'')+'</span>');
+            out.innerHTML = lines.map(function(l){return '<div>'+l+'</div>';}).join('');
+          }
+          prevBtn.addEventListener('click', function () {
+            var csv = (ta.value||'').trim(); if (!csv) { ta.focus(); return; }
+            prevBtn.disabled = true; statusEl.textContent = 'Reading…';
+            post({ csv: csv, dry_run: true }).then(function (j) {
+              prevBtn.disabled = false; statusEl.textContent = '';
+              renderSummary(j, false);
+              impBtn.disabled = !(j && j.to_enroll > 0);
+            });
+          });
+          impBtn.addEventListener('click', function () {
+            var csv = (ta.value||'').trim(); if (!csv) return;
+            if (!window.confirm('Create and enroll the new leads in the Expired sequence? Email 1 will queue for your approval.')) return;
+            impBtn.disabled = true; prevBtn.disabled = true; statusEl.textContent = 'Importing…';
+            post({ csv: csv }).then(function (j) {
+              prevBtn.disabled = false; statusEl.textContent = '';
+              renderSummary(j, true);
+            });
+          });
+        })();
+        </script>
         <div class="seq-grid">
           <!-- Sequences list -->
           <div class="seq-list-card" data-seq-list>
