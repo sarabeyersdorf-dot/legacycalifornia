@@ -30,6 +30,7 @@ import { anthropicJSON, anthropicMessage } from '../anthropic.js';
 import { sendEmail, resendConfigured }     from '../resend.js';
 import { coldEmailHtml }  from '../email-html.js';
 import { handleOptions, ok, fail } from '../cors.js';
+import { getCallerProfile, isAgent } from '../auth.js';
 
 const SARA_VOICE = `You are drafting on behalf of Sara Cooper, Broker-Owner of Legacy Properties in Angels Camp, CA.
 Sara's voice: warm, direct, never corporate, never salesy. Short sentences.
@@ -451,15 +452,26 @@ export default async function handler(req, res) {
   if (handleOptions(req, res)) return;
   if (req.method !== 'GET' && req.method !== 'POST') return fail(res, 405, 'method_not_allowed');
 
-  // Optional shared-secret gate (Vercel cron passes ?secret=… or Authorization Bearer)
+  // Auth: the scheduled Vercel cron passes the shared secret (?secret= / Bearer);
+  // a signed-in AGENT may also trigger a tick manually (the "Run sequences now"
+  // button) — same tick logic, but manual runs skip the Tuesday digest so a test
+  // click can't fire the weekly seller emails off-schedule.
   const expected = process.env.CRON_SECRET;
+  let manual = false;
   if (expected) {
     const url     = new URL(req.url, `http://${req.headers.host || 'x'}`);
     const querySecret = url.searchParams.get('secret');
     const header  = req.headers['authorization'] || '';
     const bearer  = header.startsWith('Bearer ') ? header.slice(7) : '';
-    if (querySecret !== expected && bearer !== expected) {
-      return fail(res, 401, 'cron secret invalid');
+    const secretOk = querySecret === expected || bearer === expected;
+    if (!secretOk) {
+      try {
+        const { profile } = await getCallerProfile(req, res);
+        if (isAgent(profile)) manual = true;
+        else return fail(res, 401, 'cron secret invalid');
+      } catch (_) {
+        return fail(res, 401, 'cron secret invalid');
+      }
     }
   }
 
@@ -472,8 +484,11 @@ export default async function handler(req, res) {
     const out = { sequences: null, digests: null, ran_at: new Date().toISOString() };
 
     out.sequences = await tickSequences(supa);
+    out.manual = manual;
 
-    if (isTuesdayDigestHour(new Date())) {
+    if (manual) {
+      out.digests = { skipped: 'manual_run' };
+    } else if (isTuesdayDigestHour(new Date())) {
       out.digests = await sendSellerDigests(supa);
     } else {
       out.digests = { skipped: 'not_tuesday_7am_pt' };
