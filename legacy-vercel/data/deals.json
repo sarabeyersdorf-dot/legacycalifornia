@@ -1,5 +1,5 @@
 {
- "version": 9.9,
+ "version": 10.1,
  "lastUpdated": "2026-08-24",
  "updatedBy": "cowork-morning-briefing 2026-08-24",
  "tasks": [
@@ -1920,7 +1920,7 @@
    "key": "fub-eva-mifsud",
    "title": "New FUB lead Eva Mifsud (925) 303-6013 eva.mifsud@graybar.com via Realtor.com — unworked",
    "due": "Today",
-   "done": false
+   "done": true
   },
   {
    "agent": "james",
@@ -2104,7 +2104,7 @@
    "key": "fub-agustin-rodriguez",
    "due": "Today",
    "done": false,
-   "title": "New lead Agustin Rodriguez (209) 405-4799 agustin.r6519@gmail.com — realtor.com 8/23 2:55 PM, wants a tour of 3558 Sheep Ranch Rd. Repeat inquiry, flagged hot. Unworked."
+   "title": "New lead Agustin Rodriguez (209) 405-4799 agustin.r6519@gmail.com — realtor.com 8/23 2:55 PM: \"I'm interested in scheduling a tour of 3558 Sheep Ranch Rd on Aug 23.\" One inquiry, flagged hot. Unworked."
   },
   {
    "agent": "sara",
@@ -2145,6 +2145,30 @@
    "due": "This week",
    "done": false,
    "title": "CRM security: deal_parties (party names + contact details), deal_stage_events and listing_alert_sends have row-level security switched OFF while publicly exposed. Claude Code, 10-minute fix — item 5 of the engagement prompt."
+  },
+  {
+   "agent": "sara",
+   "client": "1789 Love Creek",
+   "key": "lovecreek-vicky-teller-sept",
+   "due": "This week",
+   "done": false,
+   "title": "1789 Love Creek: Vicky Teller told you 8/13 she wants to list the first week of September — that is next week and there is still no RLA on disk. Book the listing appointment."
+  },
+  {
+   "agent": "james",
+   "client": "695 Feather",
+   "key": "feather-funds-escrow-vs-bank",
+   "due": "Today",
+   "done": false,
+   "title": "695 Feather: James recorded 8/21 that Ashley HAS received the funds and is ready to close. Confirm the separate question — have they reached Orange Coast Title, or are they still sitting in her bank? COE Friday."
+  },
+  {
+   "agent": "sara",
+   "client": "Admin",
+   "key": "crm-agent-updates-unread",
+   "due": "Today",
+   "done": false,
+   "title": "🔴 CRM: 17 notes you and James wrote in the CRM have never been read by the briefing — the channel died 7/31. Full list in CRM_Agent_Updates_Backlog_2026-08-24.md. Fix is in the CC prompt."
   }
  ],
  "deals": [
