@@ -4803,9 +4803,27 @@ function selectLead(el) {
 
   // ---- collections list ----------------------------------------------------
   function loadCollections() {
+    var box = el('[data-cur-colls]');
+    if (box) box.innerHTML = '<div class="cur-empty" style="font-size:13px;">Loading your collections…</div>';
     api('collections').then(function (r) {
-      state.collections = (r.j && r.j.collections) || [];
+      // A failed load must NEVER masquerade as "you have none" — that reads as
+      // lost data. Show the real error + a Retry, and reassure nothing is gone.
+      if (!r.ok || (r.j && r.j.success === false) || !r.j || !('collections' in r.j)) {
+        if (box) {
+          box.innerHTML = '<div style="font-size:13px;color:#9B2C2C;line-height:1.55;">⚠️ Couldn’t load your collections right now'
+            + (r.status ? ' (HTTP ' + r.status + ')' : '') + '. <b>Your collections are safe in the system</b> — this is a temporary load error, not lost data. '
+            + (r.j && r.j.error ? '<br><span style="color:#8A6B3F;">' + esc(String(r.j.error)) + '</span> ' : '')
+            + '<button type="button" data-cur-retry style="margin-left:2px;border:1px solid #C9BC9C;background:#fff;border-radius:6px;padding:4px 10px;cursor:pointer;">Retry</button></div>';
+          var rb = box.querySelector('[data-cur-retry]');
+          if (rb) rb.addEventListener('click', function () { loadCollections(); });
+        }
+        return;
+      }
+      state.collections = r.j.collections || [];
       renderColls();
+    }).catch(function () {
+      if (box) box.innerHTML = '<div style="font-size:13px;color:#9B2C2C;line-height:1.55;">⚠️ Network error loading collections. <b>Your data is safe</b> — check your connection and <button type="button" data-cur-retry style="margin-left:2px;border:1px solid #C9BC9C;background:#fff;border-radius:6px;padding:4px 10px;cursor:pointer;">Retry</button>.</div>';
+      var rb2 = box && box.querySelector('[data-cur-retry]'); if (rb2) rb2.addEventListener('click', function () { loadCollections(); });
     });
   }
   function renderColls() {
@@ -4822,7 +4840,15 @@ function selectLead(el) {
 
   // ---- saved searches ------------------------------------------------------
   function loadSaved() {
-    api('saved-searches').then(function (r) { state.saved = (r.j && r.j.searches) || []; renderSaved(); });
+    api('saved-searches').then(function (r) {
+      if (!r.ok || !r.j || !('searches' in r.j)) {
+        var box = el('[data-cur-saved]');
+        if (box) box.innerHTML = '<div style="font-size:12.5px;color:#9B2C2C;padding:8px 0;">Couldn’t load saved searches' + (r.status ? ' (HTTP ' + r.status + ')' : '') + '. Your data is safe — <button type="button" data-saved-retry style="border:1px solid #C9BC9C;background:#fff;border-radius:6px;padding:3px 9px;cursor:pointer;">Retry</button></div>';
+        var rb = box && box.querySelector('[data-saved-retry]'); if (rb) rb.addEventListener('click', function () { loadSaved(); });
+        return;
+      }
+      state.saved = r.j.searches || []; renderSaved();
+    }).catch(function () {});
   }
   function renderSaved() {
     var box = el('[data-cur-saved]');
@@ -6722,18 +6748,30 @@ function selectLead(el) {
     if (r === 'admin') return 'Admin';
     return r || '—';
   }
-  function load() {
-    if (loaded) return; loaded = true;
-    fetch('/api/crm/me', { credentials: 'include' }).then(function (r) { return r.json(); }).then(function (j) {
-      var a = (j && j.account) || {}, ag = (j && j.agent) || {};
-      set('[data-set-name]', ag.name || a.name);
-      set('[data-set-email]', a.email || ag.email);
-      set('[data-set-role]', roleLabel(a.role));
-      set('[data-set-dre]', ag.dre_number ? ('DRE #' + ag.dre_number) : '—');
-      set('[data-set-phone]', ag.phone);
-    }).catch(function () {});
+  function load(force) {
+    if (loaded && !force) return; loaded = true;
+    fetch('/api/crm/me', { credentials: 'include' })
+      .then(function (r) { return r.json().then(function (j) { return { ok: r.ok, status: r.status, j: j }; }).catch(function () { return { ok: r.ok, status: r.status, j: {} }; }); })
+      .then(function (res) {
+        if (!res.ok || !res.j) {
+          loaded = false;  // let a later navigation retry
+          set('[data-set-name]', 'Couldn’t load — retry');
+          return;
+        }
+        var j = res.j, a = (j && j.account) || {}, ag = (j && j.agent) || {};
+        set('[data-set-name]', ag.name || a.name);
+        set('[data-set-email]', a.email || ag.email);
+        set('[data-set-role]', roleLabel(a.role));
+        set('[data-set-dre]', ag.dre_number ? ('DRE #' + ag.dre_number) : '—');
+        set('[data-set-phone]', ag.phone);
+      })
+      .catch(function () { loaded = false; });
   }
+  // Load however Settings is reached — the canonical view event, plus the old
+  // click path as a belt-and-suspenders fallback.
+  document.addEventListener('crm:view', function (ev) { if (ev.detail && ev.detail.name === 'settings') load(); });
   document.addEventListener('click', function (e) { if (e.target.closest('[onclick*="\'settings\'"]')) setTimeout(load, 0); });
+  if (document.querySelector('.crm-view[data-view="settings"].on')) load();
 })();
 </script>
 <script>
@@ -6820,6 +6858,7 @@ function selectLead(el) {
     });
   }
 
+  document.addEventListener('crm:view', function (ev) { if (ev.detail && ev.detail.name === 'settings') load(); });
   document.addEventListener('click', function (e) {
     if (e.target.closest('[onclick*="\'settings\'"]')) setTimeout(load, 0);
     var btn = e.target.closest('[data-connect-email]');
