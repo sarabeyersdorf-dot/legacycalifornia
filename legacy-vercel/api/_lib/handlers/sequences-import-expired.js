@@ -20,6 +20,21 @@ import { adminClient } from '../supabase.js';
 import { getCallerProfile, isAgent } from '../auth.js';
 import { handleOptions, readJson, ok, fail } from '../cors.js';
 import { enrollLeads } from './sequences-enroll.js';
+import { isConfigured as mlsConfigured, onMarketListingsForCities } from '../../_metrolist.js';
+
+// Reduce a street address to a comparable core (drop suffix/directional words,
+// punctuation, and casing) so "123 Main St" == "123 Main Street". Keyed with the
+// city so a bare street number can't collide across towns. A slightly loose match
+// is intentional: the safe direction is to skip (never email a relisted owner).
+function coreAddr(s) {
+  return String(s || '')
+    .toLowerCase()
+    .replace(/[.,#]/g, ' ')
+    .replace(/\b(street|st|avenue|ave|road|rd|drive|dr|lane|ln|court|ct|circle|cir|boulevard|blvd|place|pl|way|terrace|ter|trail|trl|highway|hwy|route|rte|parkway|pkwy|loop|path|run|point|pt|square|sq|north|south|east|west|apt|unit|ste|suite)\b/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+const addrKey = (address, city) => coreAddr(address) + '|' + String(city || '').toLowerCase().trim();
 
 // Minimal RFC-4180-ish CSV parse (handles quoted fields + embedded commas).
 function parseCsv(text) {
@@ -98,29 +113,51 @@ export default async function handler(req, res) {
       });
     }
 
-    // 2. Which emails already exist in the CRM? (never auto-cold those.)
-    const emails = toCreate.map((x) => x.email.toLowerCase());
+    // 2. MLS auto-check: drop any candidate whose home is currently on the
+    //    market (relisted with another broker). Skipped safely if MLS isn't
+    //    configured or the lookup errors — it never blocks a send. Opt out with
+    //    { skip_mls_check:true }.
+    let relistedMls = [];
+    let mlsChecked = false;
+    if (toCreate.length && b.skip_mls_check !== true && mlsConfigured()) {
+      try {
+        const cities = [...new Set(toCreate.map((x) => x.city).filter(Boolean))].slice(0, 30);
+        const onMarket = await onMarketListingsForCities(cities);
+        const onSet = new Set(onMarket.map((r) => addrKey(r.address, r.city)));
+        mlsChecked = true;
+        relistedMls = toCreate
+          .filter((x) => onSet.has(addrKey(x.address, x.city)))
+          .map((x) => ({ address: x.address, city: x.city }));
+      } catch (_) { mlsChecked = false; relistedMls = []; }
+    }
+    const relistedMlsKeys = new Set(relistedMls.map((x) => addrKey(x.address, x.city)));
+    const emailable = toCreate.filter((x) => !relistedMlsKeys.has(addrKey(x.address, x.city)));
+
+    // 3. Which emails already exist in the CRM? (never auto-cold those.)
+    const emails = emailable.map((x) => x.email.toLowerCase());
     let existing = new Set();
     if (emails.length) {
       const { data: ex } = await adminClient().from('leads').select('email').in('email', emails);
       existing = new Set((ex || []).map((e) => (e.email || '').toLowerCase()));
     }
-    const fresh  = toCreate.filter((x) => !existing.has(x.email.toLowerCase()));
-    const review = toCreate.filter((x) =>  existing.has(x.email.toLowerCase())).map((x) => ({ email: x.email, address: x.address }));
+    const fresh  = emailable.filter((x) => !existing.has(x.email.toLowerCase()));
+    const review = emailable.filter((x) =>  existing.has(x.email.toLowerCase())).map((x) => ({ email: x.email, address: x.address }));
 
     const summary = {
       dry_run: dryRun,
       parsed_rows: rows.length - 1,
-      emailable_unique: toCreate.length,
+      emailable_unique: emailable.length,
       no_email: noEmail.length, no_email_list: noEmail,
       relisted: relisted.length, relisted_list: relisted,
+      mls_checked: mlsChecked,
+      relisted_mls: relistedMls.length, relisted_mls_list: relistedMls,
       duplicates: dupes.length,
       already_in_crm: review.length, already_in_crm_list: review,
       to_enroll: fresh.length
     };
     if (dryRun) return ok(res, summary);
 
-    // 3. Create the fresh leads + enroll them.
+    // 4. Create the fresh leads + enroll them.
     const supa = adminClient();
     const createdIds = [];
     for (const x of fresh) {
