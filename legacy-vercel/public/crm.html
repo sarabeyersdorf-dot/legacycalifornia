@@ -1432,9 +1432,14 @@ body.lp-restyle {
               out.innerHTML = box('#9B2C2C','#FBEDED','<b>Couldn’t read the list'+(res.status?' (HTTP '+res.status+')':'')+'.</b><br>'+esc(msg)); return;
             }
             var lines = [];
-            if (done) lines.push('<b style="color:#2E5C3D;">✓ Imported.</b> Created '+j.created+' lead'+(j.created===1?'':'s')+', enrolled '+j.enrolled_count+' in the Expired sequence. Email 1 is now waiting for your approval on the Today board.');
+            if (done) lines.push('<b style="color:#2E5C3D;">✓ Imported.</b> Email 1 is drafted for each and waiting on the Today board — use “Approve &amp; send all Email 1s” to send the batch.');
             else      lines.push('<b>Preview</b> — nothing changed yet.');
-            lines.push(j.parsed_rows+' rows · <b>'+j.to_enroll+'</b> new to enroll · '+j.emailable_unique+' emailable · '+j.no_email+' no email · '+j.duplicates+' duplicate'+(j.duplicates===1?'':'s')+' · '+j.already_in_crm+' already in your CRM');
+            // Prominent batch count — exactly how many will be emailed.
+            var bc = j.to_enroll > 0 ? '#2E5C3D' : '#8A6B3F';
+            lines.push('<div style="font-size:15px;margin-top:6px;">📤 <b style="font-size:18px;color:'+bc+';">'+j.to_enroll+'</b> '+(j.to_enroll===1?'new lead':'new leads')+' in this batch'+(done?' — enrolled &amp; drafted.':' — will be emailed.')+'</div>');
+            // Dedup reassurance — the failsafe that stops re-emailing anyone.
+            if (j.already_in_crm) lines.push('<div style="font-size:13.5px;color:#3f7a4f;margin-top:2px;">🛡️ <b>'+j.already_in_crm+'</b> already in your CRM (prior contacts or an earlier send) — <b>automatically skipped</b>, they won’t be emailed again.</div>');
+            lines.push('<div style="font-size:12.5px;color:#7C6A4D;margin-top:2px;">From '+j.parsed_rows+' rows · '+j.emailable_unique+' with an email · '+j.no_email+' with no email (call/mail only) · '+j.duplicates+' duplicate'+(j.duplicates===1?'':'s')+' in the file.</div>');
             var body = lines.map(function(l){return '<div>'+l+'</div>';}).join('');
             // Loud, actionable callout when there's nothing to enroll.
             if (!done && j.to_enroll === 0) {
