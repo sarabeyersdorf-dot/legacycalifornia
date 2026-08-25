@@ -38,6 +38,7 @@ import { adminClient } from '../_lib/supabase.js';
 import { handleOptions, ok, fail } from '../_lib/cors.js';
 import { detectLeadSource, parseLead } from '../_lib/lead-intake.js';
 import { alertAgents } from '../_lib/agent-alert.js';
+import { getCallerProfile, isAgent } from '../_lib/auth.js';
 
 const GMAIL_METADATA_HEADERS = ['From', 'Subject'];
 const MAX_MESSAGES_PER_MAILBOX = 50; // keep each 15-minute run bounded
@@ -328,7 +329,12 @@ export default async function handler(req, res) {
   if (handleOptions(req, res)) return;
   const cronSecret = process.env.CRON_SECRET;
   const bearer = String(req.headers['authorization'] || '').replace(/^Bearer\s+/i, '');
-  const okCron = !!req.headers['x-vercel-cron'] || (cronSecret ? bearer === cronSecret : true);
+  let okCron = !!req.headers['x-vercel-cron'] || (cronSecret ? bearer === cronSecret : true);
+  // A signed-in agent may also trigger a sync on demand (the "Sync email now"
+  // button) — same pull logic as the scheduled run.
+  if (!okCron) {
+    try { const { profile } = await getCallerProfile(req, res); if (isAgent(profile)) okCron = true; } catch (_) { /* fall through to 401 */ }
+  }
   if (!okCron) return fail(res, 401, 'cron secret invalid');
   res.setHeader('Cache-Control', 'no-store');
 
