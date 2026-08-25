@@ -1388,6 +1388,76 @@ body.lp-restyle {
           <button class="ds-btn ds-btn--primary" data-seq-new style="margin-left:auto;">+ New sequence</button>
         </div>
       <div class="seq">
+        <!-- Batch status — live read-out of where the Expired batch stands. -->
+        <div class="seq-status-card" style="margin:0 0 22px;border:1px solid var(--rule,#E4DAC6);border-radius:12px;padding:18px 20px;background:#fff;">
+          <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+            <h3 style="margin:0;font-family:var(--serif,Georgia,serif);font-size:20px;color:#1A1714;">Expired batch — where it stands</h3>
+            <span data-seqstat-when style="font-size:12px;color:#9a8e78;"></span>
+            <button class="ds-btn" data-seqstat-refresh type="button" style="margin-left:auto;">↻ Refresh</button>
+          </div>
+          <div data-seqstat-body style="margin-top:12px;font-size:13.5px;color:#7C6A4D;">Loading…</div>
+        </div>
+        <script>
+        (function(){
+          var root=document.querySelector('.crm-view[data-view="seq"] .seq-status-card');
+          if(!root) return;
+          var bodyEl=root.querySelector('[data-seqstat-body]');
+          var whenEl=root.querySelector('[data-seqstat-when]');
+          var refreshBtn=root.querySelector('[data-seqstat-refresh]');
+          var loaded=false, loading=false;
+          function esc(s){return (s==null?'':String(s)).replace(/[&<>]/g,function(c){return({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]);});}
+          function fmtWhen(iso){ if(!iso) return ''; var d=new Date(iso); if(isNaN(d)) return ''; var now=Date.now(), diff=d-now;
+            var day=86400000; var rel;
+            if(diff<0) rel='now'; else if(diff<3600000) rel='in '+Math.max(1,Math.round(diff/60000))+' min'; else if(diff<day) rel='in '+Math.round(diff/3600000)+' hr'; else rel='in '+Math.round(diff/day)+' days';
+            return d.toLocaleDateString(undefined,{month:'short',day:'numeric'})+' ('+rel+')';
+          }
+          function tile(num,label,color){ return '<div style="flex:1;min-width:96px;border:1px solid #ECE3CE;border-radius:10px;padding:12px 14px;background:#FCFAF4;">'
+            +'<div style="font:700 26px/1 var(--serif,Georgia,serif);color:'+(color||'#1A1714')+';">'+num+'</div>'
+            +'<div style="font-size:11.5px;letter-spacing:.04em;text-transform:uppercase;color:#8A7B60;margin-top:4px;">'+label+'</div></div>'; }
+          function render(j){
+            var tiles=''
+              +tile(j.enrolled_ever||0,'Enrolled','#1A1714')
+              +tile(j.awaiting_approval||0,'Awaiting approval', (j.awaiting_approval? '#8A6B3F':'#1A1714'))
+              +tile(j.active||0,'Auto-sending','#2E5C3D')
+              +tile((j.replied!=null?j.replied:j.paused)||0,(j.replied!=null?'Replied':'Paused'),'#2E5C3D')
+              +tile(j.finished||0,'Finished','#7C6A4D');
+            var html='<div style="display:flex;gap:10px;flex-wrap:wrap;">'+tiles+'</div>';
+            if(j.next_send && j.next_send.at){
+              html+='<div style="margin-top:12px;font-size:13.5px;color:#3A332B;">📤 Next up: <b>Email '+j.next_send.email_number+'</b> goes out <b>'+esc(fmtWhen(j.next_send.at))+'</b>.</div>';
+            } else if((j.active||0)===0 && (j.awaiting_approval||0)===0){
+              html+='<div style="margin-top:12px;font-size:13.5px;color:#7C6A4D;">Nothing scheduled to send right now.</div>';
+            }
+            if(j.breakdown && j.breakdown.length){
+              html+='<div style="margin-top:10px;font-size:12.5px;color:#7C6A4D;">Coming up: '
+                +j.breakdown.map(function(b){return '<b>'+b.count+'</b> waiting for Email '+b.email_number+(b.earliest_due?' ('+esc(fmtWhen(b.earliest_due))+')':'');}).join(' · ')+'</div>';
+            }
+            if(j.paused && j.replied!=null && j.paused>j.replied){
+              html+='<div style="margin-top:6px;font-size:12.5px;color:#8A6B3F;">'+(j.paused-j.replied)+' paused for another reason (missing address, or you stopped them).</div>';
+            }
+            html+='<div style="margin-top:10px;font-size:12px;color:#9a8e78;">Replies land in your inbox immediately; the CRM auto-pauses that lead on the next email sync.</div>';
+            bodyEl.innerHTML=html;
+          }
+          function load(force){
+            if(loading) return; if(loaded && !force) return; loading=true;
+            if(force) bodyEl.innerHTML='Refreshing…';
+            fetch('/api/sequences/status?sequence_name=expired_listing',{credentials:'include',headers:{'Accept':'application/json'}})
+              .then(function(r){return r.text().then(function(t){var j=null;try{j=JSON.parse(t);}catch(e){}return{ok:r.ok,status:r.status,json:j,text:t};});})
+              .then(function(res){
+                loading=false;
+                if(!res.ok||!res.json||res.json.success===false){
+                  bodyEl.innerHTML='<span style="color:#9B2C2C;">Couldn’t load status'+(res.status?' (HTTP '+res.status+')':'')+'. '+esc((res.json&&res.json.error)||(res.status===401?'You’re signed out — reload the CRM.':''))+'</span>';
+                  return;
+                }
+                loaded=true; whenEl.textContent='as of '+new Date().toLocaleTimeString(undefined,{hour:'numeric',minute:'2-digit'});
+                render(res.json);
+              })
+              .catch(function(e){ loading=false; bodyEl.innerHTML='<span style="color:#9B2C2C;">Network error: '+esc(String(e&&e.message||e))+'</span>'; });
+          }
+          refreshBtn.addEventListener('click',function(){ load(true); });
+          document.addEventListener('crm:view',function(ev){ if(ev.detail && ev.detail.name==='seq') load(); });
+          if(document.querySelector('.crm-view[data-view="seq"].on')) load();
+        })();
+        </script>
         <!-- Expired Listing outreach — batch import + enroll (real, wired). -->
         <div class="exp-import" style="margin:0 0 22px;border:1px solid var(--rule,#E4DAC6);border-radius:12px;padding:18px 20px;background:#fff;">
           <h3 style="margin:0 0 4px;font-family:var(--serif,Georgia,serif);font-size:20px;">Expired Listing outreach — import a skip-traced list</h3>
