@@ -187,6 +187,10 @@
       "memory": 256,
       "maxDuration": 60
     },
+    "api/crm/[action].js": {
+      "memory": 512,
+      "maxDuration": 60
+    },
     "api/cron/flag-matches.js": {
       "maxDuration": 60
     },
