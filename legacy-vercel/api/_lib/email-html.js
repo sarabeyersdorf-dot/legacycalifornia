@@ -190,7 +190,14 @@ export function coldEmailHtml(text, token) {
   const safe = esc(text);
   const paragraphs = safe.split(/\n\s*\n/).map((p) => {
     const withLinks = p.replace(/\n/g, '<br>')
-      .replace(/(https?:\/\/[^\s<]+)/g, '<a href="$1" style="color:#8C6E3D;font-weight:600;text-decoration:underline;">$1</a>');
+      // Linkify URLs, but never absorb trailing sentence punctuation (. , ; : ! ? ) ])
+      // into the href — otherwise "…/showcase." links to "/showcase." and 404s.
+      .replace(/(https?:\/\/[^\s<]+)/g, (m) => {
+        const mt = m.match(/^(.*?)([.,;:!?)\]]+)$/);
+        const url  = mt ? mt[1] : m;
+        const tail = mt ? mt[2] : '';
+        return `<a href="${url}" style="color:#8C6E3D;font-weight:600;text-decoration:underline;">${url}</a>${tail}`;
+      });
     return `<p style="margin:0 0 20px;font-family:${SERIF};font-size:18px;line-height:1.62;color:#2b2620;">${withLinks}</p>`;
   }).join('');
   // Preheader: the hidden line email clients show as the inbox preview snippet.
