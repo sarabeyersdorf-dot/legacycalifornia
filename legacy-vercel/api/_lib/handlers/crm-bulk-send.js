@@ -51,12 +51,16 @@ export default async function handler(req, res) {
 
   const b = await readJson(req);
   const supa = adminClient();
-  const mode = b.mode === 'send' ? 'send' : b.mode === 'preview' ? 'preview' : 'resolve';
+  const mode = b.mode === 'send' ? 'send' : b.mode === 'preview' ? 'preview' : b.mode === 'test' ? 'test' : 'resolve';
 
   const sentByRole = profile.role === 'agent_james' ? 'james' : 'sara';
-  const agentIdent = {
-    name: sentByRole === 'james' ? 'James Beyersdorf · Legacy Properties' : 'Sara Cooper · Legacy Properties'
+  // Full sender identity for the premium headshot signature (logo header +
+  // headshot the cold/expired emails use). email doubles as the test recipient.
+  const AGENT_IDENT = {
+    sara:  { name: 'Sara Cooper',      title: 'Broker / Owner · Legacy Properties', phone: '(209) 559-4966', email: 'sarasellscalifornia@gmail.com',  dre: 'DRE 02141987 · Brokerage DRE 02554944', headshot: '/art/sara-headshot.png' },
+    james: { name: 'James Beyersdorf', title: 'Agent · Legacy Properties',          phone: '(209) 559-4966', email: 'jamessellscalifornia@gmail.com', dre: 'Brokerage DRE 02554944',                headshot: '/art/james-headshot.png' }
   };
+  const agentIdent = AGENT_IDENT[sentByRole];
 
   // ---- preview: render the designed template to HTML (no send) ----
   // Lets the composer show exactly what recipients will get. Uses a sample
@@ -67,6 +71,35 @@ export default async function handler(req, res) {
       footerHtml: unsubscribeFooter('sample-token')
     });
     return ok(res, { html });
+  }
+
+  // ---- test: send ONE real copy of this email to the sending agent's own
+  // inbox, so they can see exactly what recipients get (branding, fonts, the
+  // designed template, links). Not logged to any lead; not a bulk send. ----
+  if (mode === 'test') {
+    const subject  = String(b.subject || '').trim().slice(0, MAX_SUBJECT) || 'Test — Legacy Properties';
+    const body     = String(b.body || '').trim().slice(0, MAX_BODY);
+    const template = (b.template && typeof b.template === 'object' && !Array.isArray(b.template)) ? b.template : null;
+    if (!template && !body) return fail(res, 400, 'add some content first');
+    const provider = pickEmailProvider();
+    if (!provider) return fail(res, 500, 'no email provider configured — set RESEND_API_KEY');
+    const to = agentIdent.email;
+    // {first_name} has no value in a test — render it as a friendly stand-in.
+    const previewBody = body.replace(/\{first_name\}/g, 'there');
+    const footerHtml = unsubscribeFooter('sample-token');
+    const rendered = template
+      ? renderTemplate(template, agentIdent, { footerHtml })
+      : { html: bodyToHtml(previewBody, agentIdent, { footerHtml }), text: previewBody };
+    try {
+      const r = await provider.send({
+        agent: sentByRole, to, toName: agentIdent.name,
+        subject: `[TEST] ${subject}`, text: rendered.text, html: rendered.html
+      });
+      if (r && r.skipped) return fail(res, 500, 'email provider skipped the send');
+      return ok(res, { sent: true, to });
+    } catch (e) {
+      return fail(res, 500, e.message || 'test send failed');
+    }
   }
 
   // ---- resolve: count + ids for a segment ----

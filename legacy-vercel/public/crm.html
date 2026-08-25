@@ -2700,9 +2700,11 @@ body.lp-restyle {
         <div class="bc-row">
           <button class="btn btn-ghost btn-sm" data-bc-loadledger>Load the latest Ledger →</button>
           <button class="btn btn-ghost btn-sm" data-bc-preview hidden>Preview email</button>
+          <button class="btn btn-ghost btn-sm" data-bc-test>Send test to me</button>
           <span style="flex:1;"></span>
           <button class="btn btn-ink" data-bc-send>Send</button>
         </div>
+        <p class="bc-count" data-bc-test-status style="min-height:16px;margin:2px 0 0;"></p>
 
         <div class="bc-prog" data-bc-prog>
           <span data-bc-prog-text>Sending…</span>
@@ -2855,6 +2857,25 @@ body.lp-restyle {
             setF('[data-bc-btnlabel]', 'Read The Ledger');
             setF('[data-bc-btnurl]', link);
           }).catch(function () { restore(); alert('Could not load the latest Ledger — check your connection and try again.'); });
+        });
+
+        // Send a single real copy to the signed-in agent's own inbox so they can
+        // see exactly what recipients get — branding, fonts, the designed layout.
+        var testBtn = view.querySelector('[data-bc-test]');
+        var testStatus = view.querySelector('[data-bc-test-status]');
+        if (testBtn) testBtn.addEventListener('click', function () {
+          var subject = (subjEl && subjEl.value || '').trim();
+          var tpl = buildTemplate();                       // null in plain-letter mode
+          var body = (bodyEl && bodyEl.value || '').trim();
+          if (!subject) { if (testStatus) testStatus.textContent = 'Add a subject first.'; return; }
+          if (!tpl && !body) { if (testStatus) testStatus.textContent = 'Add some content first.'; return; }
+          testBtn.disabled = true; var t = testBtn.textContent; testBtn.textContent = 'Sending test…';
+          if (testStatus) { testStatus.style.color = ''; testStatus.textContent = ''; }
+          post({ mode: 'test', subject: subject, template: tpl, body: body }).then(function (j) {
+            testBtn.disabled = false; testBtn.textContent = t;
+            if (j && j.sent) { if (testStatus) { testStatus.style.color = '#2E5C3D'; testStatus.textContent = '✓ Test sent to ' + (j.to || 'your inbox') + ' — check your email.'; } }
+            else { if (testStatus) { testStatus.style.color = '#9B2C2C'; testStatus.textContent = (j && j.error) ? ('Couldn’t send test: ' + j.error) : 'Couldn’t send the test email.'; } }
+          }).catch(function () { testBtn.disabled = false; testBtn.textContent = t; if (testStatus) { testStatus.style.color = '#9B2C2C'; testStatus.textContent = 'Network error sending the test.'; } });
         });
 
         sendBtn.addEventListener('click', async function () {
