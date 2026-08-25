@@ -35,6 +35,7 @@ function mergeVars(lead) {
   return {
     first_name:       lead.first_name || '',
     greeting:         lead.first_name ? `Hi ${lead.first_name},` : 'Hi,',
+    area:             (lead.areas && lead.areas[0]) || 'your area',
     property_address: lead.property_address || '',
     city:             lead.property_city || '',
     CASE_STUDY_URL:   SHOWCASE_URL
@@ -52,12 +53,17 @@ export async function enrollLeads(supa, { leadIds, sequence_name, trigger_type }
 
   const steps = Array.isArray(seq.steps) ? seq.steps : [];
   if (!steps.length) return { error: 'sequence has no steps' };
-  const isLiteral = steps.some((s) => s && s.mode === 'literal');
+  // Require a subject property only when a literal step's copy actually uses
+  // {{property_address}} (Expired does; buyer/seller/new-lead nurture don't, so
+  // those leads must NOT be skipped for lacking one).
+  const requiresPropertyAddress = steps.some(
+    (s) => s && s.mode === 'literal' && /\{\{\s*property_address\s*\}\}/.test(s.body_template || '')
+  );
   const firstDelayHours = Number(steps[0].delay_hours) || 0;
 
   const ids = [...new Set((leadIds || []).filter(Boolean))];
   const { data: leads = [] } = await supa
-    .from('leads').select('id, status, email, first_name, property_address, property_city').in('id', ids);
+    .from('leads').select('id, status, email, first_name, areas, property_address, property_city').in('id', ids);
   const byId = new Map(leads.map((l) => [l.id, l]));
 
   // First email (step 1) of a verbatim, send-now cold sequence is drafted
@@ -79,7 +85,7 @@ export async function enrollLeads(supa, { leadIds, sequence_name, trigger_type }
     if (!lead)                         { skipped.push({ id, reason: 'not found' }); continue; }
     if (lead.status !== 'active')      { skipped.push({ id, reason: 'not active' }); continue; }
     if (!lead.email)                   { skipped.push({ id, reason: 'no email' }); continue; }
-    if (isLiteral && !String(lead.property_address || '').trim()) {
+    if (requiresPropertyAddress && !String(lead.property_address || '').trim()) {
       skipped.push({ id, reason: 'missing property_address' }); continue;
     }
     const nowIso    = new Date().toISOString();
