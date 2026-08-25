@@ -1399,7 +1399,7 @@ body.lp-restyle {
           <textarea data-exp-csv placeholder="Paste the full CSV here, including the header row…" style="width:100%;min-height:120px;font:12px/1.5 'JetBrains Mono',monospace;border:1px solid var(--rule-strong,#D9CFB7);border-radius:6px;padding:10px;box-sizing:border-box;"></textarea>
           <div style="display:flex;gap:10px;align-items:center;margin-top:10px;flex-wrap:wrap;">
             <button class="ds-btn" data-exp-preview type="button">Preview (no changes)</button>
-            <button class="ds-btn ds-btn--primary" data-exp-import type="button" disabled>Import &amp; enroll</button>
+            <button class="ds-btn ds-btn--primary" data-exp-import type="button">Import &amp; enroll</button>
             <span data-exp-status style="font-size:13px;color:var(--ink-soft,#5b5347);"></span>
           </div>
           <div data-exp-result style="margin-top:12px;font-size:13px;line-height:1.6;"></div>
@@ -1462,15 +1462,15 @@ body.lp-restyle {
             post({ csv: csv, dry_run: true }).then(function (res) {
               prevBtn.disabled = false; statusEl.textContent = '';
               renderResult(res, false);
-              impBtn.disabled = !(res.ok && res.json && res.json.to_enroll > 0);
             });
           });
           impBtn.addEventListener('click', function () {
-            var csv = (ta.value||'').trim(); if (!csv) return;
-            if (!window.confirm('Create and enroll the new leads in the Expired sequence? Email 1 will queue for your approval.')) return;
+            var csv = (ta.value||'').trim();
+            if (!csv) { out.innerHTML = box('#B8862B','#FBF4E4','Paste your CSV (including the header row) into the box above first.'); ta.focus(); return; }
+            if (!window.confirm('Create and enroll the new leads in the Expired sequence? Email 1 will queue for your approval — anyone already in your CRM is skipped automatically.')) return;
             impBtn.disabled = true; prevBtn.disabled = true; statusEl.textContent = 'Importing…';
             post({ csv: csv }).then(function (res) {
-              prevBtn.disabled = false; statusEl.textContent = '';
+              impBtn.disabled = false; prevBtn.disabled = false; statusEl.textContent = '';
               renderResult(res, true);
             });
           });
