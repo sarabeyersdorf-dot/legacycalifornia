@@ -14,7 +14,7 @@ import { getCallerProfile, isAgent } from '../auth.js';
 import { anthropicJSON } from '../anthropic.js';
 import { handleOptions, readJson, ok, fail } from '../cors.js';
 
-const SYSTEM = `You are writing cold outreach emails on behalf of Sara Cooper, Broker-Owner of Legacy Properties in Angels Camp, California. The recipients are owners whose home listing recently EXPIRED — it was on the market with another agent and did not sell.
+const EXPIRED_SYSTEM = `You are writing cold outreach emails on behalf of Sara Cooper, Broker-Owner of Legacy Properties in Angels Camp, California. The recipients are owners whose home listing recently EXPIRED — it was on the market with another agent and did not sell.
 
 Voice: warm, direct, genuinely knowledgeable, human. A trusted local expert, never a form letter. Never corporate, salesy, or pushy. Never disparage the previous agent or the homeowner.
 Style: short sentences, short paragraphs. No exclamation points. No em-dashes. No hype words ("amazing", "incredible", "thrilled"). No pressure or false urgency.
@@ -29,12 +29,37 @@ HARD RULES:
 3. Plain text only. No HTML, no markdown, and no links other than the {{CASE_STUDY_URL}} token.
 4. Never invent facts, statistics, sale prices, timelines, or commitments.`;
 
-// What each step in the 4-email cadence is for (keeps the set varied and purposeful).
-const STEP_INTENT = {
+// What each step in the 4-email expired cadence is for (keeps the set varied).
+const EXPIRED_INTENT = {
   1: 'Email 1 — the opener. Very short. Acknowledge, without drama, that the listing expired, and that helping homes like theirs sell is what you do. No hard ask — just open the door to a conversation.',
   2: 'Email 2 — proof, a few days later. Briefly show HOW Legacy markets a home differently and why that gets results. Pointing to {{CASE_STUDY_URL}} works well here. Still low-pressure.',
   3: 'Email 3 — a concrete, free offer. Offer something specific and useful: an honest read on why {{property_address}} may not have sold, or a fresh marketing plan for it. One clear, easy next step.',
   4: 'Email 4 — the graceful last touch. Short, warm, no guilt. Leave the door open and make it effortless to reply whenever they are ready.'
+};
+
+// Speed-to-Lead: a SOLICITED, instant auto-reply to someone who JUST contacted
+// Legacy through the website. Warm acknowledgement, not cold outreach.
+const SPEED_SYSTEM = `You are writing the instant auto-reply that goes to someone who just contacted Legacy Properties (Sara Cooper, Broker-Owner, and James Beyersdorf) through legacycalifornia.com. They reached out first, so this is a warm, welcome acknowledgement — never cold outreach and never salesy.
+
+Voice: warm, human, brief, reassuring. Like a real person replying quickly, not a corporate autoresponder.
+Style: short sentences, short paragraphs. No exclamation points. No em-dashes. No hype. No pressure.
+
+HARD RULES:
+1. Merge tokens — use EXACTLY where a personalized value belongs, never invent one:
+   {{greeting}}    renders as "Hi Jane," or, when the name is unknown, "Hi,". ALWAYS begin with {{greeting}} on its own first line.
+   {{first_name}}  the lead's first name (usually you only need {{greeting}}).
+2. Make clear it is a quick automatic note confirming their message arrived, and that Sara or James will personally follow up shortly (usually within a few hours during the day). It is fine to give Sara's direct line, (209) 559-4966, for anything time sensitive.
+3. Do NOT write any signature, sign-off, letterhead, logo, or disclaimer — those are added automatically. End on the last sentence of your actual message.
+4. Plain text only. No HTML, no markdown, no links. Never invent facts, commitments, or timelines beyond "shortly / within a few hours."`;
+
+const SPEED_INTENT = {
+  1: 'The single instant acknowledgement email. Confirm warmly that their message came through, set the expectation that a real person (Sara or James) will follow up soon, and offer Sara\'s direct number for anything urgent. Keep it short and genuine.'
+};
+
+// Per-sequence prompt profiles. Unknown sequences fall back to the expired one.
+const PROFILES = {
+  expired_listing: { system: EXPIRED_SYSTEM, intent: EXPIRED_INTENT },
+  speed_to_lead:   { system: SPEED_SYSTEM,   intent: SPEED_INTENT }
 };
 
 export default async function handler(req, res) {
@@ -65,16 +90,17 @@ export default async function handler(req, res) {
       .map((s) => `Email ${s.step_number} subject: ${s.subject_template || '(none)'}\nEmail ${s.step_number} body:\n${(s.body_template || '').slice(0, 700)}`)
       .join('\n\n---\n\n');
 
-    const intent = STEP_INTENT[stepNum] || `Email ${stepNum} in the sequence.`;
-    const total  = steps.length || 4;
+    const prof   = PROFILES[name] || PROFILES.expired_listing;
+    const intent = prof.intent[stepNum] || `Email ${stepNum} in the sequence.`;
+    const total  = steps.length || (name === 'speed_to_lead' ? 1 : 4);
 
-    const userPrompt = `Write EMAIL ${stepNum} of a ${total}-email cold sequence to an expired-listing homeowner.
+    const userPrompt = `Write EMAIL ${stepNum} of a ${total}-email sequence.
 
 This email's job:
 ${intent}
 
 The other emails already in this sequence (do NOT repeat their angle or wording):
-${others || '(none yet — this is the first one being written)'}
+${others || '(none yet — this is the only one)'}
 
 ${instruction ? `Sara's specific request for this email: ${instruction}\n` : ''}Respond in JSON only, no markdown fences:
 {
@@ -84,7 +110,7 @@ ${instruction ? `Sara's specific request for this email: ${instruction}\n` : ''}
 }`;
 
     const { json } = await anthropicJSON({
-      system: SYSTEM,
+      system: prof.system,
       messages: [{ role: 'user', content: userPrompt }],
       max_tokens: 900,
       temperature: 0.7

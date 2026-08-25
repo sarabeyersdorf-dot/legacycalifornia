@@ -32,6 +32,7 @@ import { draftWelcome } from '../_lib/handlers/ai-welcome.js';
 import { scoreLead }    from '../_lib/handlers/ai-score-lead.js';
 import { syncLeadToFUB } from '../fub/sync.js';
 import { alertAgents, deskUrl } from '../_lib/agent-alert.js';
+import { sendSpeedToLead } from '../_lib/handlers/speed-to-lead.js';
 import { sendEmail as sendEmailResend, resendConfigured } from '../_lib/resend.js';
 import { sendEmail as sendEmailSendgrid, sendgridConfigured } from '../_lib/sendgrid.js';
 
@@ -328,6 +329,12 @@ export default async function handler(req, res) {
         + `\nOpen this lead in the CRM: ${desk}`;
       sideEffects.agent_alert = await alertAgents(supa, { subject: `New website lead — ${name}`, sms, text });
     } catch (e) { sideEffects.agent_alert_error = e.message; }
+
+    // Speed to Lead: instant, human-sounding auto-reply to the lead themselves so
+    // no inquiry sits unanswered while Sara or James follows up personally. Once
+    // per lead, never to a staff/opted-out address; fully fail-soft.
+    try { sideEffects.speed_to_lead = await sendSpeedToLead(supa, lead); }
+    catch (e) { sideEffects.speed_to_lead_error = e.message; }
 
     return ok(res, { lead_id: lead.id, is_new, side_effects: sideEffects });
   } catch (e) {
