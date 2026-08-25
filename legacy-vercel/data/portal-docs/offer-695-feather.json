@@ -128,6 +128,14 @@
     "rev": "016574e4d9b3d15000000029e854303"
   },
   {
+    "name": "Estimate Buyer HOA etc",
+    "url": "/docs/offer-695-feather/estimate-buyer-hoa-etc.pdf",
+    "scope": "property",
+    "visibility": "both",
+    "key": "offer-695-feather-estimate-buyer-hoa-etc",
+    "rev": "01659d51d423108000000029e854303"
+  },
+  {
     "name": "eta 1",
     "url": "/docs/offer-695-feather/eta-1.pdf",
     "scope": "transaction",
