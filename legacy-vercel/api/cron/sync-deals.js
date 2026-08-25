@@ -1290,8 +1290,25 @@ export default async function handler(req, res) {
         }
         if (toInsert.length) {
           const { error: te } = await supa.from('agent_tasks').insert(toInsert);
-          if (te) errors.push({ deal: 'agent_tasks', error: te.message });
-          else { tasksWritten = toInsert.length; taskStats.created = toInsert.length; }
+          if (te) {
+            // A single duplicate — e.g. a brief_key already present, which the
+            // source_key pre-filter above can't catch — makes the whole batch
+            // insert abort under agent_tasks_source_briefkey_uniq, so NOTHING is
+            // written and the run reports created:0 with the constraint in
+            // deal_errors (the seven-day bug). Fall back to row-by-row so every
+            // non-colliding task still lands; a per-row duplicate is a no-op, not
+            // a batch-killer. deal_errors only records agent_tasks if NOTHING wrote.
+            let inserted = 0;
+            for (const r of toInsert) {
+              const { error: re } = await supa.from('agent_tasks').insert(r);
+              if (!re) inserted++;
+              else taskStats.skipped_duplicates++;
+            }
+            tasksWritten = inserted; taskStats.created = inserted;
+            if (!inserted) errors.push({ deal: 'agent_tasks', error: te.message });
+          } else {
+            tasksWritten = toInsert.length; taskStats.created = toInsert.length;
+          }
         }
       }
     }

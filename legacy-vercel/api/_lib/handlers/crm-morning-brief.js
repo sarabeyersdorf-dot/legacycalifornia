@@ -232,40 +232,48 @@ export default async function handler(req, res) {
       // + a `mine` flag, so the UI shows hers by default with an "all" toggle.
       if (profile.role === 'agent_james') cq = cq.eq('agent', 'james');
       const { data: colls } = await cq;
-      for (const c of (colls || [])) {
+      // Evaluate every collection's nudge IN PARALLEL. The old sequential loop
+      // did up to ~36 dependent round-trips (12 collections × 3 queries each),
+      // which — with a slow Supabase — ran the whole function past its timeout
+      // and returned an EMPTY 200 to Cowork (the "zero-byte morning-brief" bug).
+      const nudges = await Promise.all((colls || []).map(async (c) => {
         const { data: pushRows } = await supa.from('messages')
           .select('created_at')
           .eq('lead_id', c.client_lead_id).eq('direction', 'outbound')
           .ilike('body', `%${c.share_token}%`)
           .order('created_at', { ascending: false }).limit(1);
         const pushedAt = pushRows && pushRows[0] ? pushRows[0].created_at : null;
-        if (!pushedAt) continue;
+        if (!pushedAt) return null;
         const days = Math.floor((Date.now() - new Date(pushedAt).getTime()) / 86400000);
-        if (days < 3) continue;
-        const { count: rx } = await supa.from('collection_reactions')
-          .select('id', { count: 'exact', head: true })
-          .eq('collection_id', c.id).gte('created_at', pushedAt);
-        if ((rx || 0) > 0) continue;
-        const { count: opensSince } = await supa.from('collection_events')
-          .select('id', { count: 'exact', head: true })
-          .eq('collection_id', c.id).eq('event_type', 'open').gte('created_at', pushedAt);
+        if (days < 3) return null;
+        const [{ count: rx }, { count: opensSince }] = await Promise.all([
+          supa.from('collection_reactions').select('id', { count: 'exact', head: true })
+            .eq('collection_id', c.id).gte('created_at', pushedAt),
+          supa.from('collection_events').select('id', { count: 'exact', head: true })
+            .eq('collection_id', c.id).eq('event_type', 'open').gte('created_at', pushedAt)
+        ]);
+        if ((rx || 0) > 0) return null;
         const clientName = c.leads ? [c.leads.first_name, c.leads.last_name].filter(Boolean).join(' ') : 'Your client';
         const nAgent = c.agent === 'james' ? 'james' : 'sara';
-        const mine = nAgent === callerAgent;
-        const nudge = {
+        return {
           collection_id: c.id, title: c.title || 'collection',
           client_name: clientName, days_since_push: days,
           opens_since_push: opensSince || 0, pushed_at: pushedAt,
-          agent: nAgent, mine
+          agent: nAgent, mine: nAgent === callerAgent,
+          client_lead_id: c.client_lead_id
         };
-        result.collection_nudges.push(nudge);
+      }));
+      for (const nudge of nudges) {
+        if (!nudge) continue;
+        const { client_lead_id, ...pub } = nudge;
+        result.collection_nudges.push(pub);
         // Only the caller's own nudges join their "What's happening" feed; the
         // other agent's live only in the decision queue behind the broker toggle.
-        if (mine) {
+        if (nudge.mine) {
           result.signals.unshift({
-            id: `nudge:${c.id}`, lead_id: c.client_lead_id,
-            time_iso: pushedAt, time: `${days}d ago`,
-            body: `${clientName} hasn't reacted to “${nudge.title}” — pushed ${days} days ago${(opensSince || 0) ? ` (opened ${opensSince}× since)` : ' (not opened yet)'} . Worth a nudge.`,
+            id: `nudge:${nudge.collection_id}`, lead_id: client_lead_id,
+            time_iso: nudge.pushed_at, time: `${nudge.days_since_push}d ago`,
+            body: `${nudge.client_name} hasn't reacted to “${nudge.title}” — pushed ${nudge.days_since_push} days ago${nudge.opens_since_push ? ` (opened ${nudge.opens_since_push}× since)` : ' (not opened yet)'} . Worth a nudge.`,
             tag: 'Follow up'
           });
         }
