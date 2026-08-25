@@ -163,6 +163,10 @@ export function coldOutreachFooter(token) {
     ? `https://legacycalifornia.com/api/unsubscribe?token=${encodeURIComponent(token)}`
     : 'https://legacycalifornia.com';
   return `<hr style="border:none;border-top:1px solid #D9CFB7;margin:22px 0 12px;">
+    <p style="font-size:11px;line-height:1.55;color:#A89C8A;margin:0 0 8px;font-style:italic;">
+      If your home is already listed with another real estate broker, please disregard this
+      message — it is not my intention to solicit the business of other brokerages.
+    </p>
     <p style="font-size:11px;line-height:1.55;color:#A89C8A;margin:0;">
       Sara Cooper · Broker/Owner, Legacy Properties · ${esc(BUSINESS_ADDRESS)} · (209) 559-4966<br>
       You're receiving this because your property recently came off the market and public
