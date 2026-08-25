@@ -46,15 +46,35 @@ export default async function handler(req, res) {
     if (error) { res.statusCode = 500; res.setHeader('Content-Type', 'application/json'); return res.end(JSON.stringify({ error: error.message })); }
 
     const cards = (rows || [])
-      .filter((r) => r.deals)               // skip orphaned rows (deal deleted)
+      // Keep deal-linked rows that still resolve, plus manual entries (deal_id
+      // NULL) that carry their own address. Drop only orphaned deal rows.
+      .filter((r) => r.deals || (!r.deal_id && (r.address || '').trim()))
       .map((r) => {
-        const d = r.deals;
+        const d = r.deals || null;
+        const href = (r.microsite_path && r.microsite_path.trim()) ? r.microsite_path.trim() : '/sample-portal';
+        const hasMicrosite = !!(r.microsite_path && r.microsite_path.trim());
+        const external = /^https?:\/\//i.test(href);
+
+        if (!d) {
+          // Manual / external case study — everything comes from the row itself.
+          const status = (r.status === 'sold') ? 'sold' : (r.status === 'active') ? 'active' : 'sold';
+          return {
+            id:        r.id,
+            address:   r.address || '',
+            city:      r.city || '',
+            status,
+            featured:  !!r.featured,
+            blurb:     r.blurb || '',
+            photo:     r.photo_override || '',
+            href, hasMicrosite, external,
+            price:     r.price_label ? { label: '', value: r.price_label } : null
+          };
+        }
+
         const status = (r.status === 'sold' || r.status === 'active')
           ? r.status
           : (String(d.stage || '').toLowerCase() === 'closed' ? 'sold' : 'active');
         const photo = r.photo_override || d.photo_override || d.photo_url || '';
-        const href = (r.microsite_path && r.microsite_path.trim()) ? r.microsite_path.trim() : '/sample-portal';
-        const hasMicrosite = !!(r.microsite_path && r.microsite_path.trim());
         return {
           id:        r.id,
           address:   d.address || '',
@@ -63,8 +83,7 @@ export default async function handler(req, res) {
           featured:  !!r.featured,
           blurb:     r.blurb || '',
           photo,
-          href,
-          hasMicrosite,
+          href, hasMicrosite, external,
           price:     priceLine(status, d.list_price, d.sale_price)
         };
       });
