@@ -33,6 +33,7 @@ import { scoreLead }    from '../_lib/handlers/ai-score-lead.js';
 import { syncLeadToFUB } from '../fub/sync.js';
 import { alertAgents, deskUrl } from '../_lib/agent-alert.js';
 import { sendSpeedToLead } from '../_lib/handlers/speed-to-lead.js';
+import { enrollLeads } from '../_lib/handlers/sequences-enroll.js';
 import { sendEmail as sendEmailResend, resendConfigured } from '../_lib/resend.js';
 import { sendEmail as sendEmailSendgrid, sendgridConfigured } from '../_lib/sendgrid.js';
 
@@ -335,6 +336,19 @@ export default async function handler(req, res) {
     // per lead, never to a staff/opted-out address; fully fail-soft.
     try { sideEffects.speed_to_lead = await sendSpeedToLead(supa, lead); }
     catch (e) { sideEffects.speed_to_lead_error = e.message; }
+
+    // Auto-enroll by type into the matching nurture drip. Only for a BRAND-NEW
+    // lead that isn't already in a sequence — so we never yank a lead out of the
+    // Expired drip (or an existing drip) or re-drip an existing contact. Email 1
+    // drafts and waits for approval; 2-4 auto-send and stop on any reply.
+    if (is_new && !lead.email_opt_out && !lead.sequence_id) {
+      try {
+        const seqName = fields.lead_type === 'buyer'  ? 'buyer_nurture'
+                      : fields.lead_type === 'seller' ? 'seller_nurture'
+                      : 'new_lead_nurture';   // both / land / relocation / unknown
+        sideEffects.nurture_enroll = await enrollLeads(supa, { leadIds: [lead.id], sequence_name: seqName });
+      } catch (e) { sideEffects.nurture_enroll_error = e.message; }
+    }
 
     return ok(res, { lead_id: lead.id, is_new, side_effects: sideEffects });
   } catch (e) {
