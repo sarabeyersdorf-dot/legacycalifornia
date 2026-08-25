@@ -76,6 +76,41 @@ export const ids = {
   office: OFFICE_ID,
 };
 
+// MLS statuses that mean "this home is back on the market" (so we must NOT
+// cold-email the owner — it would be soliciting a listing another broker holds).
+export const ON_MARKET_STATUSES = [
+  'Active', 'Active Under Contract', 'Pending', 'Coming Soon', 'Contingent',
+];
+
+/**
+ * Fetch currently-on-market listings across a set of cities. One query per
+ * city keeps the round-trips small (an expired batch spans a handful of towns).
+ * Returns { address, city, status } rows for on-market statuses only. A single
+ * city's query failing never sinks the batch — it just yields fewer matches.
+ */
+export async function onMarketListingsForCities(cities) {
+  if (!isConfigured() || !cities || !cities.length) return [];
+  const statusFilter =
+    '(' + ON_MARKET_STATUSES.map((s) => `MlsStatus eq '${s}'`).join(' or ') + ')';
+  const out = [];
+  for (const city of cities) {
+    const cf = String(city).replace(/'/g, "''");
+    try {
+      const data = await apiGet('/Property', {
+        '$filter': `${statusFilter} and City eq '${cf}'`,
+        '$top': 200,
+        '$select': 'ListingId,UnparsedAddress,StreetNumber,StreetName,StreetSuffix,City,MlsStatus',
+      });
+      for (const p of (data.value || [])) {
+        const addr = p.UnparsedAddress
+          || [p.StreetNumber, p.StreetName, p.StreetSuffix].filter(Boolean).join(' ');
+        if (addr) out.push({ address: addr, city: p.City || city, status: p.MlsStatus });
+      }
+    } catch (_) { /* one city failing shouldn't sink the batch */ }
+  }
+  return out;
+}
+
 /** Allow-origin guard. Loose in dev; strict when ALLOWED_ORIGINS is set. */
 export function setCors(req, res) {
   const origin  = req.headers.origin || '';
