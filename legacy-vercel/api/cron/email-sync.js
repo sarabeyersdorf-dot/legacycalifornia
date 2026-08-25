@@ -37,6 +37,7 @@
 import { adminClient } from '../_lib/supabase.js';
 import { handleOptions, ok, fail } from '../_lib/cors.js';
 import { detectLeadSource, parseLead } from '../_lib/lead-intake.js';
+import { alertAgents } from '../_lib/agent-alert.js';
 
 const GMAIL_METADATA_HEADERS = ['From', 'Subject'];
 const MAX_MESSAGES_PER_MAILBOX = 50; // keep each 15-minute run bounded
@@ -280,7 +281,27 @@ async function syncMailbox(supa, account, clientId, clientSecret) {
           raw_email_address:  senderEmail,
           status:              contactId ? 'active' : 'pending_review'
         });
-        if (!insErr) inserted += 1;
+        if (!insErr) {
+          inserted += 1;
+          // Text the agent the moment a lead in a cold sequence replies — that's
+          // a live conversation. (The sequence itself halts on the next tick.)
+          // SMS-only: passing just `sms` skips the email channel in alertAgents.
+          if (contactId) {
+            try {
+              const { data: ld } = await supa.from('leads')
+                .select('first_name, last_name, email, sequence_id, property_address')
+                .eq('id', contactId).maybeSingle();
+              if (ld && ld.sequence_id) {
+                const nm = [ld.first_name, ld.last_name].filter(Boolean).join(' ') || ld.email || 'A lead';
+                const where = ld.property_address ? ` (${ld.property_address})` : '';
+                const preview = String(snippet || '').replace(/\s+/g, ' ').trim().slice(0, 90);
+                await alertAgents(supa, {
+                  sms: `📩 ${nm}${where} just replied to your outreach${preview ? `: "${preview}"` : ''}. Their sequence is stopping — open the CRM to reply.`
+                });
+              }
+            } catch (_) { /* alert is best-effort — never break the sync */ }
+          }
+        }
       } catch (_) {
         // One bad message must never abort the whole mailbox sync.
         skipped += 1;
