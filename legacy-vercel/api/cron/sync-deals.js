@@ -1155,6 +1155,41 @@ export default async function handler(req, res) {
       errors.push({ deal: 'prune-orphans', error: e.message || String(e) });
     }
 
+    // Belt-and-suspenders: sweep orphaned deal_documents. The deals prune above
+    // relies on an ON DELETE CASCADE to remove a pruned deal's child docs, but a
+    // stranded doc (a stuck "pending" row that keeps surfacing after its deal is
+    // gone) is exactly the symptom of that cascade not firing — e.g. a doc row
+    // written under a deal_id that no longer exists in the table because the deal
+    // changed source_key/stage. writeDealDocs only ever deletes+reinserts docs
+    // for *current* deal_ids, so a doc under a vanished deal_id is never touched
+    // and lingers forever. Directly delete any deal_documents whose deal_id is
+    // not a live deal. Guarded the same way as the deals prune: never run when
+    // the deals table is empty, so a bad/empty deploy can't wipe every doc.
+    let docsOrphanPruned = 0;
+    try {
+      const { data: liveDeals, error: ldErr } = await supa.from('deals').select('id');
+      if (ldErr) throw new Error(ldErr.message);
+      const liveIds = new Set((liveDeals || []).map((r) => r.id).filter(Boolean));
+      if (liveIds.size > 0) {
+        const { data: docRows, error: ddErr } = await supa.from('deal_documents').select('deal_id');
+        if (ddErr) throw new Error(ddErr.message);
+        const orphanDocDeals = [...new Set((docRows || [])
+          .map((r) => r.deal_id)
+          .filter((id) => id && !liveIds.has(id)))];
+        if (orphanDocDeals.length) {
+          const { error: delErr } = await supa.from('deal_documents').delete().in('deal_id', orphanDocDeals);
+          if (delErr) throw new Error(delErr.message);
+          docsOrphanPruned = orphanDocDeals.length;
+          // Same orphan deal_ids can leave stale governance rows behind; clear
+          // them too so a re-created deal never inherits an old doc's visibility.
+          await supa.from('deal_document_governance').delete().in('deal_id', orphanDocDeals)
+            .then(() => {}, () => {});
+        }
+      }
+    } catch (e) {
+      errors.push({ deal: 'prune-orphan-docs', error: e.message || String(e) });
+    }
+
     // Per-agent tasks from the briefing (deals.json "tasks") → agent_tasks.
     // The briefing is the source of truth for content, but check-offs made in
     // the CRM are preserved across syncs (matched by agent|client|title).
@@ -1432,6 +1467,7 @@ export default async function handler(req, res) {
       deals_source: dealsSource,   // 'github' = read fresh (no deploy wait) · 'bundle' = fell back to the deployed copy
       deals_upserted: dealsUpserted,
       deals_pruned: dealsPruned,
+      docs_orphan_pruned: docsOrphanPruned,
       timeline_items_retired: timelineItemsRetired,
       documents_written: docStats.inserted,
       governance_seeded: govSeeded,
