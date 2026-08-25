@@ -1727,6 +1727,9 @@ body.lp-restyle {
             <select data-seqedit-pick style="font:600 15px/1.2 var(--serif,'Cormorant Garamond',Georgia,serif);color:#1A1714;border:1px solid #D9CFB7;border-radius:6px;padding:6px 10px;background:#fff;">
               <option value="expired_listing">Expired listing — 4 emails</option>
               <option value="speed_to_lead">Speed to Lead — instant new-lead reply</option>
+              <option value="new_lead_nurture">New lead nurture — 4 emails</option>
+              <option value="buyer_nurture">Buyer nurture — 4 emails</option>
+              <option value="seller_nurture">Seller nurture — 4 emails</option>
             </select>
             <span data-seqedit-status style="margin-left:auto;font-size:13px;color:#7C6A4D;"></span>
           </div>
@@ -1755,7 +1758,10 @@ body.lp-restyle {
           var stepMeta=[], sendMode='auto_after_first', loaded=false, loading=false;
           var INTROS={
             expired_listing:'These are the exact words your expired-listing leads receive. <b>Email 1 waits for your approval</b>; 2–4 auto-send, stopping the instant anyone replies. Click <b>✨ Suggest with AI</b> to draft any email in your voice, then edit it. Fields like <code>{{greeting}}</code>, <code>{{property_address}}</code>, <code>{{city}}</code> and <code>{{CASE_STUDY_URL}}</code> fill in automatically for each lead — leave those as they are.',
-            speed_to_lead:'This is the <b>instant auto-reply</b> every new website lead gets the moment they contact you, while you follow up personally. It sends by itself — no approval needed — once per lead, never to someone who opted out. Edit the words below or <b>✨ Suggest with AI</b>. <code>{{greeting}}</code> fills in their name automatically.'
+            speed_to_lead:'This is the <b>instant auto-reply</b> every new website lead gets the moment they contact you, while you follow up personally. It sends by itself — no approval needed — once per lead, never to someone who opted out. Edit the words below or <b>✨ Suggest with AI</b>. <code>{{greeting}}</code> fills in their name automatically.',
+            new_lead_nurture:'A gentle <b>4-email drip</b> for a brand-new lead when you don’t yet know if they’re buying or selling. <b>Email 1 waits for your approval</b>; 2–4 auto-send over ~12 days, stopping the instant anyone replies. <code>{{greeting}}</code> fills in their name. Enroll a lead from their card, or ask me to auto-enroll new leads. Edit below or <b>✨ Suggest with AI</b>.',
+            buyer_nurture:'A <b>4-email drip</b> for a new <b>buyer</b> lead, over ~10 days. <b>Email 1 waits for your approval</b>; 2–4 auto-send, stopping on any reply. <code>{{greeting}}</code> and <code>{{area}}</code> fill in automatically. Enroll a lead from their card, or ask me to auto-enroll new buyers. Edit below or <b>✨ Suggest with AI</b>.',
+            seller_nurture:'A <b>4-email drip</b> for a <b>seller / pre-listing</b> lead, over ~12 days. <b>Email 1 waits for your approval</b>; 2–4 auto-send, stopping on any reply. <code>{{greeting}}</code> and <code>{{CASE_STUDY_URL}}</code> fill in automatically. Enroll a lead from their card, or ask me to auto-enroll new sellers. Edit below or <b>✨ Suggest with AI</b>.'
           };
           function setIntro(){ if(introEl) introEl.innerHTML = INTROS[SEQ]||''; }
           function esc(s){return (s==null?'':String(s)).replace(/[&<>"]/g,function(c){return({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]);});}
