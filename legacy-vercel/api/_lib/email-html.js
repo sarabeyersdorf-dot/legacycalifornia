@@ -21,25 +21,61 @@ export function pickEmailProvider() {
 
 const esc = (s) => String(s == null ? '' : s).replace(/[&<>]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]));
 
+// ── Shared premium brand chrome (the same logo header + headshot signature the
+// cold/expired emails use), so bulk newsletters and plain letters carry the real
+// Legacy branding — not a text wordmark. Web-safe Georgia serif throughout so it
+// renders identically in Gmail/Outlook. Table-row helpers for the 600px shell.
+const BRAND_SITE = 'https://legacycalifornia.com';
+const BRAND_SERIF = "Georgia, 'Times New Roman', serif";
+const BRAND_SANS  = "'Helvetica Neue', Arial, sans-serif";
+function brandHeaderRows() {
+  return `<tr><td align="center" style="padding:28px 40px 16px;background:#ffffff;">
+        <img src="${BRAND_SITE}/showcase/_brand/legacy-logo.png" width="300" alt="Legacy Properties" style="display:block;width:300px;max-width:78%;height:auto;border:0;">
+      </td></tr>
+      <tr><td style="padding:0;height:4px;line-height:4px;font-size:0;background:#8C6E3D;">&nbsp;</td></tr>`;
+}
+function brandSignatureRows(agent) {
+  const a = agent || {};
+  const name  = esc(a.name || 'Legacy Properties');
+  const title = esc(a.title || 'Legacy Properties');
+  const phone = esc(a.phone || '(209) 559-4966');
+  const email = esc(a.email || 'sarasellscalifornia@gmail.com');
+  const dre   = esc(a.dre || 'DRE 02141987 · Brokerage DRE 02554944');
+  const hs    = String(a.headshot || '/art/sara-headshot.png');
+  const headshot = /^https?:\/\//i.test(hs) ? esc(hs) : BRAND_SITE + esc(hs);
+  return `<tr><td style="padding:12px 44px 26px;">
+        <table role="presentation" cellspacing="0" cellpadding="0" border="0"><tr>
+          <td width="66" valign="top">
+            <img src="${headshot}" width="60" height="60" alt="${name}" style="display:block;width:60px;height:60px;border-radius:50%;border:2px solid #E3D9C4;object-fit:cover;">
+          </td>
+          <td valign="middle" style="padding-left:15px;">
+            <div style="font-family:${BRAND_SERIF};font-size:20px;line-height:1.1;color:#1A1714;">${name}</div>
+            <div style="font-family:${BRAND_SANS};font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:#8C6E3D;margin-top:3px;">${title}</div>
+            <div style="font-family:${BRAND_SANS};font-size:13px;color:#5b5347;margin-top:5px;">${phone} &nbsp;·&nbsp; <a href="mailto:${email}" style="color:#5b5347;">${email}</a></div>
+            <div style="font-family:${BRAND_SANS};font-size:11px;color:#a2957c;margin-top:3px;">${dre}</div>
+          </td>
+        </tr></table>
+      </td></tr>`;
+}
+
 export function bodyToHtml(text, agent, opts = {}) {
   const safe = esc(text);
   const paragraphs = safe.split(/\n\s*\n/).map((p) =>
-    `<p style="font-size:15px;line-height:1.6;color:#3A332B;margin:0 0 16px;">${p.replace(/\n/g, '<br>')}</p>`
+    `<p style="margin:0 0 20px;font-family:${BRAND_SERIF};font-size:17px;line-height:1.62;color:#2b2620;">${p.replace(/\n/g, '<br>')}</p>`
   ).join('');
-  const a = agent || {};
-  const sig = [
-    esc(a.name || 'Legacy Properties'),
-    a.title ? esc(a.title) : null,
-    a.dre_number ? `DRE #${esc(a.dre_number)}` : null,
-    a.phone ? esc(a.phone) : null
-  ].filter(Boolean).join(' · ');
-  return `<div style="font-family:Georgia,'Cormorant Garamond',serif;color:#1A1714;max-width:560px;margin:0 auto;padding:32px 28px;background:#FAF6EC;">
-    <div style="font-family:'Courier New',monospace;font-size:10px;letter-spacing:.22em;text-transform:uppercase;color:#7C6A4D;margin-bottom:18px;">Legacy Properties</div>
-    ${paragraphs}
-    <hr style="border:none;border-top:1px solid #D9CFB7;margin:24px 0 16px;">
-    <p style="font-size:13px;line-height:1.55;color:#7C6A4D;margin:0;">${sig}<br><a href="https://legacycalifornia.com" style="color:#7C6A4D;">legacycalifornia.com</a></p>
-    ${opts.footerHtml || ''}
-  </div>`;
+  return `<!--[if mso]><style>* { font-family: Georgia, serif !important; }</style><![endif]-->
+<table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background:#E7DFCB;margin:0;padding:0;">
+  <tr><td align="center" style="padding:26px 12px;">
+    <table role="presentation" width="600" cellspacing="0" cellpadding="0" border="0" style="width:600px;max-width:600px;background:#FBF7EE;border:1px solid #E3D9C4;">
+      ${brandHeaderRows()}
+      <tr><td style="padding:32px 44px 6px;">
+        ${paragraphs}
+      </td></tr>
+      ${brandSignatureRows(agent)}
+      <tr><td style="padding:0 44px 28px;">${opts.footerHtml || ''}</td></tr>
+    </table>
+  </td></tr>
+</table>`;
 }
 
 // ── Designed templates (bulk sender "HTML design" option) ──────────────────
@@ -108,31 +144,18 @@ export function renderTemplate(tpl, agent, opts = {}) {
       </td></tr>`
     : '';
 
-  const a = agent || {};
-  const sig = [
-    esc(a.name || 'Legacy Properties'),
-    a.title ? esc(a.title) : null,
-    a.dre_number ? `DRE #${esc(a.dre_number)}` : null,
-    a.phone ? esc(a.phone) : null
-  ].filter(Boolean).join(' · ');
-
   const html =
 `<table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background:#E7DFCB;margin:0;padding:0;">
   <tr><td align="center" style="padding:24px 12px;">
-    <table role="presentation" width="600" cellspacing="0" cellpadding="0" border="0" style="width:600px;max-width:600px;background:#FAF6EC;">
-      <tr><td style="padding:24px 32px 6px;">
-        <div style="font-family:'Courier New',monospace;font-size:10px;letter-spacing:.22em;text-transform:uppercase;color:#7C6A4D;">Legacy Properties</div>
-      </td></tr>
+    <table role="presentation" width="600" cellspacing="0" cellpadding="0" border="0" style="width:600px;max-width:600px;background:#FBF7EE;border:1px solid #E3D9C4;">
+      ${brandHeaderRows()}
       ${hero}
       ${detailBar}
       ${headlineRow}
       ${bodyRow}
       ${button}
-      <tr><td style="padding:22px 32px 26px;">
-        <hr style="border:none;border-top:1px solid #D9CFB7;margin:8px 0 14px;">
-        <p style="font-size:13px;line-height:1.55;color:#7C6A4D;margin:0;">${sig}<br><a href="https://legacycalifornia.com" style="color:#7C6A4D;">legacycalifornia.com</a></p>
-        ${opts.footerHtml || ''}
-      </td></tr>
+      ${brandSignatureRows(agent)}
+      <tr><td style="padding:0 32px 26px;">${opts.footerHtml || ''}</td></tr>
     </table>
   </td></tr>
 </table>`;
