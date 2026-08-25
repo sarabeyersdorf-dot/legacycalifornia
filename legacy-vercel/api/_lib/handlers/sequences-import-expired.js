@@ -56,21 +56,27 @@ export default async function handler(req, res) {
     if (rows.length < 2) return fail(res, 400, 'csv had no data rows');
 
     const hdr = rows[0].map((h) => h.trim());
-    const col = (name) => hdr.findIndex((h) => h.toLowerCase() === name.toLowerCase());
+    // Match headers regardless of spaces vs underscores ("Street Address" == "Street_Address").
+    const norm = (s) => String(s).toLowerCase().replace(/[\s_]+/g, ' ').trim();
+    const col = (name) => hdr.findIndex((h) => norm(h) === norm(name));
     const iAddr = col('Street Address'), iCity = col('City'), iZip = col('Zip');
     if (iAddr < 0 || iCity < 0) return fail(res, 422, 'csv missing "Street Address" / "City" columns');
     const emailCols = ['Email 1', 'Email 2', 'Email 3', 'Email 4'].map(col).filter((i) => i >= 0);
     const phoneCols = [1, 2, 3, 4, 5].map((n) => ({ p: col(`Phone ${n}`), t: col(`Phone ${n} Type`), d: col(`Phone ${n} DNC`) }));
+    const iRelisted = col('Relisted');  // if present + truthy, skip the row (back on market)
 
     // 1. Parse + classify rows.
     const seen = new Set();
     const toCreate = [];                 // { email, address, city, phone, notes }
     const noEmail = [];                  // addresses we can't email
     const dupes = [];
+    const relisted = [];                 // back on market — never emailed
+    const isTruthy = (v) => { const s = String(v || '').trim().toLowerCase(); return s !== '' && s !== 'no' && s !== 'false' && s !== '0' && s !== 'n'; };
     for (const r of rows.slice(1)) {
       const address = (r[iAddr] || '').trim();
       const city    = (r[iCity] || '').trim();
       if (!address) continue;
+      if (iRelisted >= 0 && isTruthy(r[iRelisted])) { relisted.push({ address, city }); continue; }
       const email = emailCols.map((i) => (r[i] || '').trim()).find(Boolean) || '';
       if (!email) { noEmail.push({ address, city }); continue; }
       const key = email.toLowerCase();
@@ -107,6 +113,7 @@ export default async function handler(req, res) {
       parsed_rows: rows.length - 1,
       emailable_unique: toCreate.length,
       no_email: noEmail.length, no_email_list: noEmail,
+      relisted: relisted.length, relisted_list: relisted,
       duplicates: dupes.length,
       already_in_crm: review.length, already_in_crm_list: review,
       to_enroll: fresh.length
