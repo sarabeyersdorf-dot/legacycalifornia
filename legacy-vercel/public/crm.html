@@ -2833,17 +2833,28 @@ body.lp-restyle {
 
         ledgerBtn.addEventListener('click', function () {
           ledgerBtn.disabled = true; var t = ledgerBtn.textContent; ledgerBtn.textContent = 'Loading…';
+          var restore = function () { ledgerBtn.textContent = t; ledgerBtn.disabled = false; };
+          var setF = function (sel, v) { var el = view.querySelector(sel); if (el) el.value = v || ''; };
           fetch('/api/ledger', { credentials: 'include' }).then(function (r) { return r.json(); }).then(function (j) {
+            restore();
             var issue = (j && (j.current || (j.issues && j.issues[0]))) || null;
-            if (!issue) { ledgerBtn.textContent = 'No published issue'; return; }
+            if (!issue) { alert('No published Ledger issue found yet. Publish an issue first, or write your own update above.'); return; }
             var link = 'https://legacycalifornia.com/ledger.html?slug=' + encodeURIComponent(issue.slug || '');
+            // Load it as a DESIGNED "featured" email: hero image + headline + body
+            // + a Read button. This looks like The Ledger AND makes Preview work —
+            // the plain-letter mode had no preview, so loading the Ledger and then
+            // hitting Preview always failed the "add a photo/headline/body" check.
+            if (designSel) { designSel.value = 'featured'; applyDesign(); }
             subjEl.value = 'The Ledger — ' + (issue.title || '');
+            setF('[data-bc-photo]', issue.hero_image_url);
+            setF('[data-bc-headline]', issue.title || 'The Ledger');
             bodyEl.value = 'Hi {first_name},\n\nThe latest Ledger is out'
-              + (issue.title ? ' — "' + issue.title + '."' : '.') + '\n\n'
+              + (issue.title ? ' — “' + issue.title + '.”' : '.') + '\n\n'
               + (issue.dek ? issue.dek + '\n\n' : '')
-              + 'Read it here:\n' + link + '\n\n— Sara';
-            ledgerBtn.textContent = t; ledgerBtn.disabled = false;
-          }).catch(function () { ledgerBtn.textContent = t; ledgerBtn.disabled = false; });
+              + 'Take a read below.';
+            setF('[data-bc-btnlabel]', 'Read The Ledger');
+            setF('[data-bc-btnurl]', link);
+          }).catch(function () { restore(); alert('Could not load the latest Ledger — check your connection and try again.'); });
         });
 
         sendBtn.addEventListener('click', async function () {
