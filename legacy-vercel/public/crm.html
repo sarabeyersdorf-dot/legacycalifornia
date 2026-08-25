@@ -1394,6 +1394,7 @@ body.lp-restyle {
           <p style="margin:0 0 12px;font-size:13.5px;color:var(--ink-soft,#5b5347);line-height:1.5;">Paste the CSV export (Street Address, City, Emails, Phones). I create the leads, skip rows with no email, flag anyone already in your CRM (so an existing contact is never cold-mailed), and enroll the rest in the 4-email Expired sequence. Email 1 waits for your approval; 2–4 auto-send, stopping on any reply.</p>
           <button class="ds-btn" data-exp-see-emails type="button" style="margin:0 0 12px;">✉ See the 4 emails this sequence sends →</button>
           <button class="ds-btn" data-exp-run type="button" style="margin:0 0 12px 8px;" title="Advance any due sequence emails right now (for testing — normally this runs automatically every hour)">▶ Run sequences now</button>
+          <button class="ds-btn" data-exp-syncmail type="button" style="margin:0 0 12px 8px;" title="Pull your Gmail replies into the CRM right now (for testing — normally every 15 minutes)">✉ Sync email now</button>
           <textarea data-exp-csv placeholder="Paste the full CSV here, including the header row…" style="width:100%;min-height:120px;font:12px/1.5 'JetBrains Mono',monospace;border:1px solid var(--rule-strong,#D9CFB7);border-radius:6px;padding:10px;box-sizing:border-box;"></textarea>
           <div style="display:flex;gap:10px;align-items:center;margin-top:10px;flex-wrap:wrap;">
             <button class="ds-btn" data-exp-preview type="button">Preview (no changes)</button>
@@ -1549,6 +1550,29 @@ body.lp-restyle {
                 out.innerHTML = box('#3f7a4f','#EAF3EC','<b>Sequences ran.</b> '+(s.drafted||0)+' email'+((s.drafted===1)?'':'s')+' sent or queued · '+(s.paused||0)+' paused (they replied) · '+(s.completed||0)+' finished'+(s.skipped_consent?(' · '+s.skipped_consent+' skipped (opted out)'):'')+errs+'. Check your inbox in a moment.');
               })
               .catch(function(e){ runBtn.disabled=false; runBtn.textContent=old; out.innerHTML = box('#9B2C2C','#FBEDED','Network error: '+esc(String(e&&e.message||e))); });
+          });
+
+          // Pull Gmail replies into the CRM on demand (for testing — normally every 15 min).
+          var syncBtn = root.querySelector('[data-exp-syncmail]');
+          if (syncBtn) syncBtn.addEventListener('click', function () {
+            syncBtn.disabled = true; var old = syncBtn.textContent; syncBtn.textContent = 'Syncing…';
+            fetch('/api/cron/email-sync', { method:'POST', credentials:'include', headers:{'Accept':'application/json'} })
+              .then(function (r){ return r.text().then(function(t){ var j=null; try{j=JSON.parse(t);}catch(e){} return {ok:r.ok,status:r.status,json:j,text:t}; }); })
+              .then(function (res){
+                syncBtn.disabled = false; syncBtn.textContent = old;
+                if (!res.ok || !res.json || res.json.success === false) {
+                  out.innerHTML = box('#9B2C2C','#FBEDED','<b>Email sync failed'+(res.status?' (HTTP '+res.status+')':'')+'.</b> '+esc((res.json&&res.json.error)|| (res.status===401?'You’re signed out — reload the CRM.':res.text.slice(0,200))));
+                  return;
+                }
+                if (res.json.skipped) {
+                  out.innerHTML = box('#B8862B','#FBF4E4','Email sync isn’t set up on the server yet (Google keys missing). '+esc(res.json.reason||''));
+                  return;
+                }
+                var rs = res.json.results || [];
+                var parts = rs.map(function(x){ return x.ok ? (esc(x.mailbox)+': '+(x.inserted||0)+' new, '+(x.matched||0)+' matched a lead') : (esc(x.mailbox||'mailbox')+': needs reconnect ('+esc(x.error||'')+')'); });
+                out.innerHTML = box('#3f7a4f','#EAF3EC','<b>Email synced.</b> '+(parts.join(' · ')||'no mailboxes connected')+'.');
+              })
+              .catch(function(e){ syncBtn.disabled=false; syncBtn.textContent=old; out.innerHTML = box('#9B2C2C','#FBEDED','Network error: '+esc(String(e&&e.message||e))); });
           });
         })();
         </script>
