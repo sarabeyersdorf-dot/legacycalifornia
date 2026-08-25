@@ -70,12 +70,29 @@ export default async function handler(req, res) {
     const rows = parseCsv(b.csv);
     if (rows.length < 2) return fail(res, 400, 'csv had no data rows');
 
-    const hdr = rows[0].map((h) => h.trim());
-    // Match headers regardless of spaces vs underscores ("Street Address" == "Street_Address").
+    // Match headers tolerantly: spaces vs underscores are equal ("Street Address"
+    // == "Street_Address"), and the address/city columns may be named several ways.
+    // We deliberately prefer the PROPERTY/situs address and never fall back to a
+    // mailing or owner address (that would personalize the email with the wrong place).
     const norm = (s) => String(s).toLowerCase().replace(/[\s_]+/g, ' ').trim();
-    const col = (name) => hdr.findIndex((h) => norm(h) === norm(name));
-    const iAddr = col('Street Address'), iCity = col('City'), iZip = col('Zip');
-    if (iAddr < 0 || iCity < 0) return fail(res, 422, 'csv missing "Street Address" / "City" columns');
+    const ADDR_NAMES = ['Street Address','Property Address','Property Street Address','Site Address','Situs Address','Situs Street Address','Property Situs Address','Full Address','Address'];
+    const CITY_NAMES = ['City','Property City','Site City','Situs City','Property Town','Town','Municipality'];
+    const ZIP_NAMES  = ['Zip','Zip Code','Postal Code','Property Zip','Situs Zip'];
+    const findIn = (arr, names) => { for (const n of names) { const i = arr.findIndex((h) => norm(h) === norm(n)); if (i >= 0) return i; } return -1; };
+
+    // Find the header row. Some exports put a title/summary line above it, so scan
+    // the first few rows for the one that actually has an address column.
+    let headerRowIdx = 0, hdr = rows[0].map((h) => h.trim()), iAddr = -1, iCity = -1;
+    for (let h = 0; h < Math.min(rows.length, 6); h++) {
+      const cand = rows[h].map((c) => c.trim());
+      const a = findIn(cand, ADDR_NAMES);
+      if (a >= 0) { headerRowIdx = h; hdr = cand; iAddr = a; iCity = findIn(cand, CITY_NAMES); break; }
+    }
+    if (iAddr < 0) {
+      return fail(res, 422, `Couldn't find a property-address column. Columns I see: ${hdr.filter(Boolean).join(', ') || '(none)'}. Rename the address column to "Street Address" and the city to "City", or tell Claude what they're called.`);
+    }
+    const col = (name) => findIn(hdr, [name]);
+    const iZip = findIn(hdr, ZIP_NAMES);
     const emailCols = ['Email 1', 'Email 2', 'Email 3', 'Email 4'].map(col).filter((i) => i >= 0);
     const phoneCols = [1, 2, 3, 4, 5].map((n) => ({ p: col(`Phone ${n}`), t: col(`Phone ${n} Type`), d: col(`Phone ${n} DNC`) }));
     const iRelisted = col('Relisted');  // if present + truthy, skip the row (back on market)
@@ -87,9 +104,14 @@ export default async function handler(req, res) {
     const dupes = [];
     const relisted = [];                 // back on market — never emailed
     const isTruthy = (v) => { const s = String(v || '').trim().toLowerCase(); return s !== '' && s !== 'no' && s !== 'false' && s !== '0' && s !== 'n'; };
-    for (const r of rows.slice(1)) {
-      const address = (r[iAddr] || '').trim();
-      const city    = (r[iCity] || '').trim();
+    for (const r of rows.slice(headerRowIdx + 1)) {
+      let address = (r[iAddr] || '').trim();
+      let city    = iCity >= 0 ? (r[iCity] || '').trim() : '';
+      // No city column? Derive it from a combined address ("123 Main St, Murphys, CA 95247").
+      if (!city && address.includes(',')) {
+        const parts = address.split(',').map((s) => s.trim()).filter(Boolean);
+        if (parts.length >= 2) { city = parts[1]; address = parts[0]; }
+      }
       if (!address) continue;
       if (iRelisted >= 0 && isTruthy(r[iRelisted])) { relisted.push({ address, city }); continue; }
       const email = emailCols.map((i) => (r[i] || '').trim()).find(Boolean) || '';
