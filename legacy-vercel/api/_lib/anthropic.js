@@ -19,7 +19,7 @@ const API_VERSION       = '2023-06-01';
  * @param {number=}  opts.temperature   - Defaults to 0.7.
  * @returns {Promise<{ text: string, raw: any }>}
  */
-export async function anthropicMessage({ system, messages, model, max_tokens, temperature }) {
+export async function anthropicMessage({ system, messages, model, max_tokens, temperature, timeoutMs }) {
   if (!ANTHROPIC_API_KEY) {
     throw new Error('ANTHROPIC_API_KEY is not configured');
   }
@@ -32,15 +32,29 @@ export async function anthropicMessage({ system, messages, model, max_tokens, te
     messages
   };
 
-  const res = await fetch(API_URL, {
-    method: 'POST',
-    headers: {
-      'content-type':      'application/json',
-      'x-api-key':         ANTHROPIC_API_KEY,
-      'anthropic-version': API_VERSION
-    },
-    body: JSON.stringify(body)
-  });
+  // Optional hard timeout so a slow/hung upstream fails fast with a clear error
+  // instead of riding the serverless function to a platform 504.
+  const controller = timeoutMs ? new AbortController() : null;
+  const timer = controller ? setTimeout(() => controller.abort(), timeoutMs) : null;
+
+  let res;
+  try {
+    res = await fetch(API_URL, {
+      method: 'POST',
+      headers: {
+        'content-type':      'application/json',
+        'x-api-key':         ANTHROPIC_API_KEY,
+        'anthropic-version': API_VERSION
+      },
+      body: JSON.stringify(body),
+      signal: controller ? controller.signal : undefined
+    });
+  } catch (e) {
+    if (e && e.name === 'AbortError') throw new Error(`Anthropic timed out after ${timeoutMs}ms`);
+    throw e;
+  } finally {
+    if (timer) clearTimeout(timer);
+  }
 
   if (!res.ok) {
     const errText = await res.text();

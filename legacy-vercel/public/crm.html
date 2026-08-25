@@ -1813,7 +1813,9 @@ body.lp-restyle {
             return req('ai-suggest','POST',{sequence_name:SEQ,step_number:n}).then(function(res){
               if(btn){btn.disabled=false;btn.textContent=old;}
               if(!res.ok||!res.json||res.json.success===false){
-                if(reasonEl) reasonEl.innerHTML='<span style="color:#9B2C2C;">Couldn’t draft this one'+(res.status?' (HTTP '+res.status+')':'')+'. '+esc((res.json&&res.json.error)||(res.status===401?'You’re signed out — reload the CRM.':''))+'</span>';
+                var em=(res.json&&res.json.error); if(em&&typeof em==='object'){try{em=JSON.stringify(em);}catch(_){em=String(em);}}
+                em = em || (res.status===401?'You’re signed out — reload the CRM.' : (res.status===503||res.status===504||res.status===0)?'The writing assistant is busy. Wait a few seconds and try again.' : 'Try again.');
+                if(reasonEl) reasonEl.innerHTML='<span style="color:#9B2C2C;">Couldn’t draft this one'+(res.status?' (HTTP '+res.status+')':'')+'. '+esc(em)+'</span>';
                 return;
               }
               if(subEl && res.json.subject) subEl.value=res.json.subject;
