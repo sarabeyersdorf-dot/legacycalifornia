@@ -1654,10 +1654,13 @@ body.lp-restyle {
         <div class="seq-edit-card" style="border:1px solid var(--rule,#E4DAC6);border-radius:12px;padding:18px 20px;background:#fff;">
           <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
             <span style="font:600 11px/1 var(--sans,'Barlow',sans-serif);letter-spacing:.12em;text-transform:uppercase;color:#8A6F38;">Editing</span>
-            <h3 style="margin:0;font:600 19px/1.2 var(--serif,'Cormorant Garamond',Georgia,serif);color:#1A1714;">The Expired sequence — the 4 emails</h3>
+            <select data-seqedit-pick style="font:600 15px/1.2 var(--serif,'Cormorant Garamond',Georgia,serif);color:#1A1714;border:1px solid #D9CFB7;border-radius:6px;padding:6px 10px;background:#fff;">
+              <option value="expired_listing">Expired listing — 4 emails</option>
+              <option value="speed_to_lead">Speed to Lead — instant new-lead reply</option>
+            </select>
             <span data-seqedit-status style="margin-left:auto;font-size:13px;color:#7C6A4D;"></span>
           </div>
-          <p style="margin:8px 0 4px;font-size:13.5px;color:var(--ink-soft,#5b5347);line-height:1.55;">These are the exact words your expired-listing leads receive. <b>Email 1 waits for your approval</b>; 2–4 auto-send, stopping the instant anyone replies. Click <b>✨ Suggest with AI</b> to draft any email in your voice, then edit it. Fields like <code>{{greeting}}</code>, <code>{{property_address}}</code>, <code>{{city}}</code> and <code>{{CASE_STUDY_URL}}</code> fill in automatically for each lead — leave those as they are.</p>
+          <p data-seqedit-intro style="margin:8px 0 4px;font-size:13.5px;color:var(--ink-soft,#5b5347);line-height:1.55;"></p>
           <div data-seqedit-steps style="margin-top:6px;color:#7C6A4D;font-size:13px;">Loading the emails…</div>
           <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:16px;padding-top:14px;border-top:1px solid var(--rule,#E4DAC6);">
             <button class="ds-btn" data-seqedit-suggestall type="button">✨ Suggest all 4 with AI</button>
@@ -1670,7 +1673,9 @@ body.lp-restyle {
         (function(){
           var root = document.querySelector('.crm-view[data-view="seq"] .seq-edit-card');
           if(!root) return;
-          var SEQ='expired_listing';
+          var pick=root.querySelector('[data-seqedit-pick]');
+          var introEl=root.querySelector('[data-seqedit-intro]');
+          var SEQ=pick?pick.value:'expired_listing';
           var stepsEl=root.querySelector('[data-seqedit-steps]');
           var statusEl=root.querySelector('[data-seqedit-status]');
           var saveMsg=root.querySelector('[data-seqedit-savemsg]');
@@ -1678,6 +1683,11 @@ body.lp-restyle {
           var revertBtn=root.querySelector('[data-seqedit-revert]');
           var saveBtn=root.querySelector('[data-seqedit-save]');
           var stepMeta=[], sendMode='auto_after_first', loaded=false, loading=false;
+          var INTROS={
+            expired_listing:'These are the exact words your expired-listing leads receive. <b>Email 1 waits for your approval</b>; 2–4 auto-send, stopping the instant anyone replies. Click <b>✨ Suggest with AI</b> to draft any email in your voice, then edit it. Fields like <code>{{greeting}}</code>, <code>{{property_address}}</code>, <code>{{city}}</code> and <code>{{CASE_STUDY_URL}}</code> fill in automatically for each lead — leave those as they are.',
+            speed_to_lead:'This is the <b>instant auto-reply</b> every new website lead gets the moment they contact you, while you follow up personally. It sends by itself — no approval needed — once per lead, never to someone who opted out. Edit the words below or <b>✨ Suggest with AI</b>. <code>{{greeting}}</code> fills in their name automatically.'
+          };
+          function setIntro(){ if(introEl) introEl.innerHTML = INTROS[SEQ]||''; }
           function esc(s){return (s==null?'':String(s)).replace(/[&<>"]/g,function(c){return({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]);});}
           function whenLabel(h){h=Number(h)||0; if(h===0) return 'Sends as soon as you approve'; var d=Math.round(h/24*10)/10; return 'Day '+d+' · '+h+'h after enrollment';}
           function req(path,method,body){
@@ -1695,12 +1705,13 @@ body.lp-restyle {
             if(!stepMeta.length){ stepsEl.innerHTML='<div style="color:#8B3A3A;">No steps found for this sequence.</div>'; return; }
             stepsEl.innerHTML=stepMeta.map(function(s){
               var n=s.step_number, isEmail=(s.channel||'email')==='email', auto=(sendMode==='auto_after_first' ? Number(n)>1 : sendMode!=='draft');
+              var instant=(SEQ==='speed_to_lead');
               return '<div class="seqedit-step" data-num="'+n+'" style="border:1px solid #ECE3CE;border-radius:10px;padding:14px 16px;margin-top:12px;background:#FCFAF4;">'
                 +'<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">'
                 +'<span style="display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:50%;background:#8A6F38;color:#fff;font:600 13px/1 sans-serif;flex:none;">'+esc(n)+'</span>'
                 +'<b style="font-size:14.5px;color:#1A1714;">Email '+esc(n)+'</b>'
-                +'<span style="font-size:12.5px;color:#7C6A4D;">'+esc(whenLabel(s.delay_hours))+'</span>'
-                +pill(auto)
+                +'<span style="font-size:12.5px;color:#7C6A4D;">'+esc(instant?'Sends the moment a new lead comes in':whenLabel(s.delay_hours))+'</span>'
+                +(instant?'<span style="font:600 11px/1 sans-serif;color:#2E5C3D;background:#EAF3EC;padding:4px 8px;border-radius:20px;">Sends instantly</span>':pill(auto))
                 +'<button class="ds-btn" data-suggest="'+esc(n)+'" type="button" style="margin-left:auto;">✨ Suggest with AI</button>'
                 +'</div>'
                 +(isEmail?('<label style="display:block;margin:12px 0 4px;font:600 11px/1 sans-serif;letter-spacing:.08em;text-transform:uppercase;color:#8A7B60;">Subject</label>'
@@ -1744,6 +1755,9 @@ body.lp-restyle {
                 return;
               }
               loaded=true; sendMode=res.json.send_mode||sendMode; render(res.json.steps||[]);
+              var nSteps=(res.json.steps||[]).length;
+              suggestAllBtn.textContent = nSteps>1 ? ('✨ Suggest all '+nSteps+' with AI') : '✨ Suggest with AI';
+              suggestAllBtn.style.display = nSteps>1 ? '' : 'none'; // single-step: the per-email button is enough
             });
           }
           suggestAllBtn.addEventListener('click',function(){
@@ -1777,6 +1791,8 @@ body.lp-restyle {
               saveMsg.style.color='#3f7a4f'; saveMsg.textContent='✓ Saved — new leads get these words on the next send.';
             });
           });
+          if(pick) pick.addEventListener('change',function(){ SEQ=pick.value; loaded=false; saveMsg.textContent=''; statusEl.textContent=''; setIntro(); load(true); });
+          setIntro();
           document.addEventListener('crm:view',function(ev){ if(ev.detail && ev.detail.name==='seq') load(); });
           if(document.querySelector('.crm-view[data-view="seq"].on')) load();
         })();
