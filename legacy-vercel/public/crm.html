@@ -1398,6 +1398,7 @@ body.lp-restyle {
           <button class="ds-btn ds-btn--primary" data-exp-approveall type="button" style="margin:0 0 12px 8px;" title="Approve and send every Email 1 that's waiting — the whole imported batch at once">✅ Approve &amp; send all Email 1s</button>
           <textarea data-exp-csv placeholder="Paste the full CSV here, including the header row…" style="width:100%;min-height:120px;font:12px/1.5 'JetBrains Mono',monospace;border:1px solid var(--rule-strong,#D9CFB7);border-radius:6px;padding:10px;box-sizing:border-box;"></textarea>
           <div style="display:flex;gap:10px;align-items:center;margin-top:10px;flex-wrap:wrap;">
+            <button class="ds-btn" data-exp-upload type="button" title="Choose a .csv file instead of pasting">⬆ Upload CSV file</button>
             <button class="ds-btn" data-exp-preview type="button">Preview (no changes)</button>
             <button class="ds-btn ds-btn--primary" data-exp-import type="button">Import &amp; enroll</button>
             <span data-exp-status style="font-size:13px;color:var(--ink-soft,#5b5347);"></span>
@@ -1473,6 +1474,29 @@ body.lp-restyle {
               impBtn.disabled = false; prevBtn.disabled = false; statusEl.textContent = '';
               renderResult(res, true);
             });
+          });
+
+          // Upload a .csv file instead of pasting — fills the box, then previews.
+          var uploadBtn = root.querySelector('[data-exp-upload]');
+          if (uploadBtn) uploadBtn.addEventListener('click', function () {
+            var input = document.createElement('input');
+            input.type = 'file'; input.accept = '.csv,text/csv,text/plain';
+            input.style.cssText = 'position:fixed;left:-9999px;top:0;width:1px;height:1px;opacity:0;';
+            document.body.appendChild(input);
+            input.addEventListener('change', function () {
+              var file = input.files && input.files[0];
+              if (!file) { input.remove(); return; }
+              var rd = new FileReader();
+              rd.onload = function () {
+                ta.value = String(rd.result || '');
+                input.remove();
+                out.innerHTML = box('#7C6A4D','#FBF4E4','Loaded “' + esc(file.name) + '” — reading it…');
+                prevBtn.click();   // auto-preview so the batch count shows right away
+              };
+              rd.onerror = function () { input.remove(); out.innerHTML = box('#9B2C2C','#FBEDED','Couldn’t read that file — make sure it’s a .csv and try again.'); };
+              rd.readAsText(file);
+            });
+            input.click();
           });
 
           // "See the 4 emails" — render every step of the sequence exactly as the
