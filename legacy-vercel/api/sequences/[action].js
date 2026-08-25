@@ -11,6 +11,7 @@ import preview from '../_lib/handlers/sequences-preview.js';
 import pendingFirst from '../_lib/handlers/sequences-pending-first.js';
 import edit from '../_lib/handlers/sequences-edit.js';
 import aiSuggest from '../_lib/handlers/sequences-ai-suggest.js';
+import status from '../_lib/handlers/sequences-status.js';
 
 const TABLE = {
   'enroll':         enroll,
@@ -19,7 +20,8 @@ const TABLE = {
   'preview':        preview,
   'pending-first':  pendingFirst,
   'edit':           edit,
-  'ai-suggest':     aiSuggest
+  'ai-suggest':     aiSuggest,
+  'status':         status
 };
 
 export default async function handler(req, res) {
