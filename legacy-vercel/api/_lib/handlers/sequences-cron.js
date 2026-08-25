@@ -142,15 +142,18 @@ async function tickSequences(supa) {
         continue;
       }
 
-      // ---- Auto-pause check ------------------------------------------------
-      const { data: lastMsg } = await supa
-        .from('messages')
-        .select('direction, created_at')
-        .eq('lead_id', lead.id)
-        .order('created_at', { ascending: false })
-        .limit(1)
-        .maybeSingle();
-      if (lastMsg && lastMsg.direction === 'inbound') {
+      // ---- Auto-pause on reply --------------------------------------------
+      // A reply ANYWHERE halts the sequence. Matched inbound email from the
+      // Gmail sync lands in deal_messages (contact_id = lead.id); portal / other
+      // inbound lands in messages (lead_id). Any inbound since enrollment counts
+      // — checking both tables is what makes stop-on-reply work for real email
+      // replies (deal_messages), not just portal messages.
+      const repliedSince = lead.sequence_started_at || new Date(Date.now() - 120 * 86400000).toISOString();
+      const [mIn, dIn] = await Promise.all([
+        supa.from('messages').select('id').eq('lead_id', lead.id).eq('direction', 'inbound').gte('created_at', repliedSince).limit(1),
+        supa.from('deal_messages').select('id').eq('contact_id', lead.id).eq('direction', 'inbound').gte('created_at', repliedSince).limit(1)
+      ]);
+      if ((mIn.data && mIn.data.length) || (dIn.data && dIn.data.length)) {
         await supa.from('leads').update({ sequence_paused: true }).eq('id', lead.id);
         await supa.from('lead_events').insert({
           lead_id:    lead.id,
