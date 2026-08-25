@@ -106,8 +106,10 @@ export default async function handler(req, res) {
         if (upErr) return fail(res, 500, `save: ${upErr.message}`);
       }
 
-      // Remove any showcase rows for deals no longer included.
-      const { data: existing } = await supa.from('showcase_deals').select('deal_id');
+      // Remove any DEAL-LINKED showcase rows no longer included. Manual/external
+      // entries (deal_id NULL) are managed separately and never pruned here.
+      const { data: existing } = await supa
+        .from('showcase_deals').select('deal_id').not('deal_id', 'is', null);
       const toRemove = (existing || [])
         .map((r) => r.deal_id)
         .filter((id) => !includedIds.includes(id));

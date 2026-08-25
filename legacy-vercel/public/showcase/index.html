@@ -173,31 +173,32 @@
       if (!p || !p.value) return '';
       return '<p class="price">' + esc(p.label) + ' <b>' + esc(p.value) + '</b></p>';
     }
-    function linkLabel(c) { return c.hasMicrosite ? 'View the listing' : 'See the client portal'; }
+    function linkLabel(c) { return c.external ? 'View the case study' : c.hasMicrosite ? 'View the listing' : 'See the client portal'; }
+    function tgt(c) { return c.external ? ' target="_blank" rel="noopener"' : ''; }
 
     function featuredHtml(c) {
       return '<section class="sec"><div class="feat">' +
-        '<a class="ph" href="' + esc(c.href) + '" style="' + bg(c.photo) + '" aria-label="' + esc(c.address) + '">' +
+        '<a class="ph" href="' + esc(c.href) + '"' + tgt(c) + ' style="' + bg(c.photo) + '" aria-label="' + esc(c.address) + '">' +
           '<span class="badge">' + (c.status === 'sold' ? 'Sold' : 'Featured') + '</span></a>' +
         '<div class="body">' +
           (c.city ? '<p class="city">' + esc(c.city) + '</p>' : '') +
           '<h3 class="addr">' + esc(c.address) + '</h3>' +
           priceHtml(c.price) +
           (c.blurb ? '<p class="blurb">' + esc(c.blurb) + '</p>' : '') +
-          '<a class="link" href="' + esc(c.href) + '">' + linkLabel(c) + ' <span class="arw" aria-hidden="true">→</span></a>' +
+          '<a class="link" href="' + esc(c.href) + '"' + tgt(c) + '>' + linkLabel(c) + ' <span class="arw" aria-hidden="true">→</span></a>' +
         '</div></div></section>';
     }
 
     function cardHtml(c) {
       return '<article class="card">' +
-        '<a class="ph" href="' + esc(c.href) + '" style="' + bg(c.photo) + '" aria-label="' + esc(c.address) + '">' +
+        '<a class="ph" href="' + esc(c.href) + '"' + tgt(c) + ' style="' + bg(c.photo) + '" aria-label="' + esc(c.address) + '">' +
           '<span class="pill">' + (c.status === 'sold' ? 'Sold' : 'For sale') + '</span></a>' +
         '<div class="body">' +
           (c.city ? '<p class="city">' + esc(c.city) + '</p>' : '') +
           '<h3 class="addr">' + esc(c.address) + '</h3>' +
           priceHtml(c.price) +
           (c.blurb ? '<p class="blurb">' + esc(c.blurb) + '</p>' : '') +
-          '<a class="link" href="' + esc(c.href) + '">' + linkLabel(c) + ' <span class="arw" aria-hidden="true">→</span></a>' +
+          '<a class="link" href="' + esc(c.href) + '"' + tgt(c) + '>' + linkLabel(c) + ' <span class="arw" aria-hidden="true">→</span></a>' +
         '</div></article>';
     }
 
