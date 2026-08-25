@@ -38,7 +38,7 @@ select 'expired_listing',
     "mode": "literal",
     "subject_template": "Here's what you'd see as my seller",
     "preview_text": "A look at the seller portal I built myself — documents, timeline, and marketing stats in one place.",
-    "body_template": "{{greeting}}\n\nOne more thing I wanted you to see, because it's usually the biggest complaint I hear about the last agent: not knowing what's actually happening.\n\nI built my own seller portal — every document, the full closing timeline, exactly what's needed from you and when, and marketing performance across every platform, all in one place, updated in real time. No chasing emails, no wondering how many people have actually seen your listing.\n\nYou can see a sample preview here, inside the case study: {{CASE_STUDY_URL}} (scroll to \"The Seller Portal\")\n\nIf {{property_address}} didn't sell, part of it may have simply been not knowing where things stood. That's not how I work."
+    "body_template": "{{greeting}}\n\nOne more thing I wanted you to see, because it's usually the biggest complaint I hear about the last agent: not knowing what's actually happening.\n\nI built my own seller portal — every document, the full closing timeline, exactly what's needed from you and when, and marketing performance across every platform, all in one place, updated in real time. No chasing emails, no wondering how many people have actually seen your listing.\n\nYou can walk through a live sample here: {{CASE_STUDY_URL}} — scroll down and click \"Open a sample portal.\"\n\nIf {{property_address}} didn't sell, part of it may have simply been not knowing where things stood. That's not how I work."
   },
   {
     "step_number": 4,

@@ -189,7 +189,15 @@ export function coldEmailHtml(text, token) {
       .replace(/(https?:\/\/[^\s<]+)/g, '<a href="$1" style="color:#8C6E3D;font-weight:600;text-decoration:underline;">$1</a>');
     return `<p style="margin:0 0 20px;font-family:${SERIF};font-size:18px;line-height:1.62;color:#2b2620;">${withLinks}</p>`;
   }).join('');
+  // Preheader: the hidden line email clients show as the inbox preview snippet.
+  // Without it, Gmail grabs whatever it finds first — including the logo image's
+  // URL — so it reads as "<https://…/legacy-logo.png> Hi,". Seed it from the
+  // letter's opening so the snippet is the actual message, then a run of hidden
+  // whitespace so following markup can't bleed into the preview.
+  const preheader = esc(String(text || '').replace(/\s+/g, ' ').trim().slice(0, 140));
   return `<!--[if mso]><style>* { font-family: Georgia, serif !important; }</style><![endif]-->
+<div style="display:none;max-height:0;max-width:0;overflow:hidden;opacity:0;mso-hide:all;font-size:1px;line-height:1px;color:#FBF7EE;">${preheader}</div>
+<div style="display:none;max-height:0;max-width:0;overflow:hidden;">&zwnj;&nbsp;&#847;&#8199;&#65279;&zwnj;&nbsp;&#847;&#8199;&#65279;&zwnj;&nbsp;&#847;&#8199;&#65279;</div>
 <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background:#E7DFCB;margin:0;padding:0;">
   <tr><td align="center" style="padding:26px 12px;">
     <table role="presentation" width="600" cellspacing="0" cellpadding="0" border="0" style="width:600px;max-width:600px;background:#FBF7EE;border:1px solid #E3D9C4;">
