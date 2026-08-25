@@ -146,12 +146,29 @@ ${instruction ? `Sara's specific request for this email: ${instruction}\n` : ''}
   "reasoning": "one short sentence on the angle you chose"
 }`;
 
-    const { json } = await anthropicJSON({
+    // One email is small work, so lead with the fast model under a hard timeout
+    // to stay well inside the function budget (avoids the 504). If it's slow or
+    // unavailable, fall back once to the default model, then surface a friendly
+    // "busy, try again" rather than a raw gateway timeout.
+    const call = (model, timeoutMs) => anthropicJSON({
       system: prof.system,
       messages: [{ role: 'user', content: userPrompt }],
-      max_tokens: 900,
-      temperature: 0.7
+      max_tokens: 700,
+      temperature: 0.7,
+      model,
+      timeoutMs
     });
+
+    let json;
+    try {
+      ({ json } = await call('claude-haiku-4-5-20251001', 22000));
+    } catch (e1) {
+      try {
+        ({ json } = await call(undefined, 26000));   // default model fallback
+      } catch (e2) {
+        return fail(res, 503, 'The writing assistant is busy right now. Give it a few seconds and try again.');
+      }
+    }
 
     const subject = String(json.subject || '').trim();
     const body    = String(json.body || '').trim();
