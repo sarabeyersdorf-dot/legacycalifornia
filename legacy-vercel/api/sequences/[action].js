@@ -8,12 +8,14 @@ import enroll from '../_lib/handlers/sequences-enroll.js';
 import cron   from '../_lib/handlers/sequences-cron.js';
 import importExpired from '../_lib/handlers/sequences-import-expired.js';
 import preview from '../_lib/handlers/sequences-preview.js';
+import pendingFirst from '../_lib/handlers/sequences-pending-first.js';
 
 const TABLE = {
   'enroll':         enroll,
   'cron':           cron,
   'import-expired': importExpired,
-  'preview':        preview
+  'preview':        preview,
+  'pending-first':  pendingFirst
 };
 
 export default async function handler(req, res) {

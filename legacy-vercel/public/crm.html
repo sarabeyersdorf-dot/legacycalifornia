@@ -1395,6 +1395,7 @@ body.lp-restyle {
           <button class="ds-btn" data-exp-see-emails type="button" style="margin:0 0 12px;">✉ See the 4 emails this sequence sends →</button>
           <button class="ds-btn" data-exp-run type="button" style="margin:0 0 12px 8px;" title="Advance any due sequence emails right now (for testing — normally this runs automatically every hour)">▶ Run sequences now</button>
           <button class="ds-btn" data-exp-syncmail type="button" style="margin:0 0 12px 8px;" title="Pull your Gmail replies into the CRM right now (for testing — normally every 15 minutes)">✉ Sync email now</button>
+          <button class="ds-btn ds-btn--primary" data-exp-approveall type="button" style="margin:0 0 12px 8px;" title="Approve and send every Email 1 that's waiting — the whole imported batch at once">✅ Approve &amp; send all Email 1s</button>
           <textarea data-exp-csv placeholder="Paste the full CSV here, including the header row…" style="width:100%;min-height:120px;font:12px/1.5 'JetBrains Mono',monospace;border:1px solid var(--rule-strong,#D9CFB7);border-radius:6px;padding:10px;box-sizing:border-box;"></textarea>
           <div style="display:flex;gap:10px;align-items:center;margin-top:10px;flex-wrap:wrap;">
             <button class="ds-btn" data-exp-preview type="button">Preview (no changes)</button>
@@ -1573,6 +1574,47 @@ body.lp-restyle {
                 out.innerHTML = box('#3f7a4f','#EAF3EC','<b>Email synced.</b> '+(parts.join(' · ')||'no mailboxes connected')+'.');
               })
               .catch(function(e){ syncBtn.disabled=false; syncBtn.textContent=old; out.innerHTML = box('#9B2C2C','#FBEDED','Network error: '+esc(String(e&&e.message||e))); });
+          });
+
+          // Approve & send every pending Email 1 in one go (the whole batch).
+          // Loops the tested per-message approve so each send stays inside the
+          // function timeout; shows live progress.
+          var approveAllBtn = root.querySelector('[data-exp-approveall]');
+          if (approveAllBtn) approveAllBtn.addEventListener('click', function () {
+            approveAllBtn.disabled = true; var old = approveAllBtn.textContent;
+            out.innerHTML = box('#7C6A4D','#FBF4E4','Finding first emails awaiting approval…');
+            fetch('/api/sequences/pending-first', { credentials:'include', headers:{'Accept':'application/json'} })
+              .then(function (r){ return r.text().then(function(t){ var j=null; try{j=JSON.parse(t);}catch(e){} return {ok:r.ok,status:r.status,json:j,text:t}; }); })
+              .then(function (res){
+                if (!res.ok || !res.json || res.json.success === false) {
+                  approveAllBtn.disabled=false; approveAllBtn.textContent=old;
+                  out.innerHTML = box('#9B2C2C','#FBEDED','<b>Couldn’t load pending emails'+(res.status?' (HTTP '+res.status+')':'')+'.</b> '+esc((res.json&&res.json.error)|| (res.status===401?'You’re signed out — reload the CRM.':res.text.slice(0,150))));
+                  return;
+                }
+                var items = res.json.items || [];
+                if (!items.length) { approveAllBtn.disabled=false; approveAllBtn.textContent=old; out.innerHTML = box('#B8862B','#FBF4E4','No Email 1s are waiting for approval right now.'); return; }
+                if (!window.confirm('Approve and send Email 1 to all ' + items.length + ' lead' + (items.length===1?'':'s') + ' now? Each one’s follow-ups (2–4) will then auto-send on schedule, stopping on any reply.')) {
+                  approveAllBtn.disabled=false; approveAllBtn.textContent=old; out.innerHTML=''; return;
+                }
+                var sent=0, failed=0, i=0;
+                function step(){
+                  if (i >= items.length) {
+                    approveAllBtn.disabled=false; approveAllBtn.textContent=old;
+                    out.innerHTML = box(failed?'#B8862B':'#3f7a4f', failed?'#FBF4E4':'#EAF3EC', '<b>Done.</b> Sent ' + sent + ' of ' + items.length + ' first emails' + (failed?(' · ' + failed + ' didn’t send (they stay pending — click again to retry)'):'') + '. The follow-ups will auto-send on schedule.');
+                    return;
+                  }
+                  var it = items[i];
+                  approveAllBtn.textContent = 'Sending ' + (i+1) + ' of ' + items.length + '…';
+                  out.innerHTML = box('#7C6A4D','#FBF4E4','Sending ' + (i+1) + ' of ' + items.length + ' — ' + esc(it.name) + '…');
+                  fetch('/api/crm/approve', { method:'POST', credentials:'include', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ message_id: it.message_id }) })
+                    .then(function (r){ return r.json().catch(function(){return null;}).then(function(j){ return {ok:r.ok,j:j}; }); })
+                    .then(function (rr){ if (rr.ok && rr.j && rr.j.status === 'sent') sent++; else failed++; })
+                    .catch(function(){ failed++; })
+                    .then(function(){ i++; setTimeout(step, 250); });
+                }
+                step();
+              })
+              .catch(function(e){ approveAllBtn.disabled=false; approveAllBtn.textContent=old; out.innerHTML = box('#9B2C2C','#FBEDED','Network error: '+esc(String(e&&e.message||e))); });
           });
         })();
         </script>
