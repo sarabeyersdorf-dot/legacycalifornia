@@ -9,13 +9,17 @@ import cron   from '../_lib/handlers/sequences-cron.js';
 import importExpired from '../_lib/handlers/sequences-import-expired.js';
 import preview from '../_lib/handlers/sequences-preview.js';
 import pendingFirst from '../_lib/handlers/sequences-pending-first.js';
+import edit from '../_lib/handlers/sequences-edit.js';
+import aiSuggest from '../_lib/handlers/sequences-ai-suggest.js';
 
 const TABLE = {
   'enroll':         enroll,
   'cron':           cron,
   'import-expired': importExpired,
   'preview':        preview,
-  'pending-first':  pendingFirst
+  'pending-first':  pendingFirst,
+  'edit':           edit,
+  'ai-suggest':     aiSuggest
 };
 
 export default async function handler(req, res) {

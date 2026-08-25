@@ -1650,120 +1650,137 @@ body.lp-restyle {
           });
         })();
         </script>
-        <div class="seq-grid">
-          <!-- Sequences list -->
-          <div class="seq-list-card" data-seq-list>
-            <div class="seq-row on">
-              <div>
-                <div class="name">New buyer · slow drip</div>
-                <div class="meta">7 steps · 14 days · Email + SMS</div>
-              </div>
-              <div class="stat"><strong>62%</strong>Reply rate</div>
-              <div class="toggle on" onclick="this.classList.toggle('on')"></div>
-            </div>
-            <div class="seq-row">
-              <div>
-                <div class="name">Open house follow-up</div>
-                <div class="meta">4 steps · 5 days · Email</div>
-              </div>
-              <div class="stat"><strong>78%</strong>Reply rate</div>
-              <div class="toggle on" onclick="this.classList.toggle('on')"></div>
-            </div>
-            <div class="seq-row">
-              <div>
-                <div class="name">Past client · annual check-in</div>
-                <div class="meta">3 steps · 365 days · Email</div>
-              </div>
-              <div class="stat"><strong>41%</strong>Reply rate</div>
-              <div class="toggle on" onclick="this.classList.toggle('on')"></div>
-            </div>
-            <div class="seq-row">
-              <div>
-                <div class="name">Out-of-state buyer visit prep</div>
-                <div class="meta">5 steps · 21 days · Email + SMS</div>
-              </div>
-              <div class="stat"><strong>84%</strong>Reply rate</div>
-              <div class="toggle on" onclick="this.classList.toggle('on')"></div>
-            </div>
-            <div class="seq-row">
-              <div>
-                <div class="name">Seller pre-listing nurture</div>
-                <div class="meta">6 steps · 30 days · Email</div>
-              </div>
-              <div class="stat"><strong>56%</strong>Reply rate</div>
-              <div class="toggle on" onclick="this.classList.toggle('on')"></div>
-            </div>
-            <div class="seq-row">
-              <div>
-                <div class="name">Price-drop revival</div>
-                <div class="meta">2 steps · 1 day · SMS-first</div>
-              </div>
-              <div class="stat"><strong>71%</strong>Reply rate</div>
-              <div class="toggle on" onclick="this.classList.toggle('on')"></div>
-            </div>
-            <div class="seq-row">
-              <div>
-                <div class="name">Cold buyer · 90-day re-engage</div>
-                <div class="meta">3 steps · 14 days · Email</div>
-              </div>
-              <div class="stat"><strong>22%</strong>Reply rate</div>
-              <div class="toggle" onclick="this.classList.toggle('on')"></div>
-            </div>
+        <!-- Real, editable Expired-sequence editor (AI-assisted) -->
+        <div class="seq-edit-card" style="border:1px solid var(--rule,#E4DAC6);border-radius:12px;padding:18px 20px;background:#fff;">
+          <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+            <span style="font:600 11px/1 var(--sans,'Barlow',sans-serif);letter-spacing:.12em;text-transform:uppercase;color:#8A6F38;">Editing</span>
+            <h3 style="margin:0;font:600 19px/1.2 var(--serif,'Cormorant Garamond',Georgia,serif);color:#1A1714;">The Expired sequence — the 4 emails</h3>
+            <span data-seqedit-status style="margin-left:auto;font-size:13px;color:#7C6A4D;"></span>
           </div>
-
-          <!-- Sequence editor -->
-          <div class="seq-editor-card" data-seq-editor>
-            <span class="eyebrow">Editing</span>
-            <h3 style="margin-top: 6px;">New buyer · slow drip</h3>
-            <p class="sub">7 messages over 14 days. Pauses on reply. Drafts queued for Sara's approval each step. 62% reply rate (last 90 days).</p>
-
-            <div class="seq-step">
-              <div class="seq-step-num">1</div>
-              <div class="seq-step-body">
-                <div class="seq-step-when">Same day · within 5 min</div>
-                <p class="seq-step-snip">"Welcome to Legacy. A short note from me, not a robot — I've already started looking at your saved searches…"</p>
-              </div>
-              <span class="seq-step-ch">SMS</span>
-            </div>
-            <div class="seq-step">
-              <div class="seq-step-num">2</div>
-              <div class="seq-step-body">
-                <div class="seq-step-when">Day 1 · 8:00 AM</div>
-                <p class="seq-step-snip">"Three properties worth your attention this morning — and one I think will sell by Friday…"</p>
-              </div>
-              <span class="seq-step-ch">Email</span>
-            </div>
-            <div class="seq-step">
-              <div class="seq-step-num">3</div>
-              <div class="seq-step-body">
-                <div class="seq-step-when">Day 3 · 10:00 AM</div>
-                <p class="seq-step-snip">"Quick question while it's fresh — what would change in your life if you found the right home this summer?"</p>
-              </div>
-              <span class="seq-step-ch">Email</span>
-            </div>
-            <div class="seq-step">
-              <div class="seq-step-num">4</div>
-              <div class="seq-step-body">
-                <div class="seq-step-when">Day 5 · 11:00 AM</div>
-                <p class="seq-step-snip">"How Murphys actually lives, off-season — a small thing buyers often miss…"</p>
-              </div>
-              <span class="seq-step-ch">Email</span>
-            </div>
-            <div class="seq-step">
-              <div class="seq-step-num">5</div>
-              <div class="seq-step-body">
-                <div class="seq-step-when">Day 8 · trigger</div>
-                <p class="seq-step-snip">If 3+ saves on similar homes → "I'm spotting a pattern. Coffee this week?"</p>
-              </div>
-              <span class="seq-step-ch">SMS</span>
-            </div>
-
-            <div style="display: flex; gap: 8px; margin-top: 22px; padding-top: 18px; border-top: 1px solid var(--rule);">
-              <button class="btn btn-ghost btn-sm">View all 7 steps</button>
-              <button class="btn btn-ink btn-sm" style="flex: 1;">Edit sequence →</button>
-            </div>
+          <p style="margin:8px 0 4px;font-size:13.5px;color:var(--ink-soft,#5b5347);line-height:1.55;">These are the exact words your expired-listing leads receive. <b>Email 1 waits for your approval</b>; 2–4 auto-send, stopping the instant anyone replies. Click <b>✨ Suggest with AI</b> to draft any email in your voice, then edit it. Fields like <code>{{greeting}}</code>, <code>{{property_address}}</code>, <code>{{city}}</code> and <code>{{CASE_STUDY_URL}}</code> fill in automatically for each lead — leave those as they are.</p>
+          <div data-seqedit-steps style="margin-top:6px;color:#7C6A4D;font-size:13px;">Loading the emails…</div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:16px;padding-top:14px;border-top:1px solid var(--rule,#E4DAC6);">
+            <button class="ds-btn" data-seqedit-suggestall type="button">✨ Suggest all 4 with AI</button>
+            <button class="ds-btn" data-seqedit-revert type="button" title="Discard unsaved edits and reload what's saved">↺ Revert</button>
+            <span data-seqedit-savemsg style="font-size:13px;"></span>
+            <button class="ds-btn ds-btn--primary" data-seqedit-save type="button" style="margin-left:auto;">Save changes</button>
           </div>
         </div>
+        <script>
+        (function(){
+          var root = document.querySelector('.crm-view[data-view="seq"] .seq-edit-card');
+          if(!root) return;
+          var SEQ='expired_listing';
+          var stepsEl=root.querySelector('[data-seqedit-steps]');
+          var statusEl=root.querySelector('[data-seqedit-status]');
+          var saveMsg=root.querySelector('[data-seqedit-savemsg]');
+          var suggestAllBtn=root.querySelector('[data-seqedit-suggestall]');
+          var revertBtn=root.querySelector('[data-seqedit-revert]');
+          var saveBtn=root.querySelector('[data-seqedit-save]');
+          var stepMeta=[], sendMode='auto_after_first', loaded=false, loading=false;
+          function esc(s){return (s==null?'':String(s)).replace(/[&<>"]/g,function(c){return({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]);});}
+          function whenLabel(h){h=Number(h)||0; if(h===0) return 'Sends as soon as you approve'; var d=Math.round(h/24*10)/10; return 'Day '+d+' · '+h+'h after enrollment';}
+          function req(path,method,body){
+            var opts={method:method,credentials:'include',headers:{'Accept':'application/json'}};
+            if(body){opts.headers['Content-Type']='application/json';opts.body=JSON.stringify(body);}
+            return fetch('/api/sequences/'+path,opts)
+              .then(function(r){return r.text().then(function(t){var j=null;try{j=JSON.parse(t);}catch(e){}return{ok:r.ok,status:r.status,json:j,text:t};});})
+              .catch(function(e){return{ok:false,status:0,json:null,text:String(e&&e.message||e)};});
+          }
+          function pill(auto){ return auto
+            ? '<span style="font:600 11px/1 sans-serif;color:#2E5C3D;background:#EAF3EC;padding:4px 8px;border-radius:20px;">Auto-sends</span>'
+            : '<span style="font:600 11px/1 sans-serif;color:#8A6B3F;background:#FBF4E4;padding:4px 8px;border-radius:20px;">Waits for your approval</span>'; }
+          function render(steps){
+            stepMeta=steps||[];
+            if(!stepMeta.length){ stepsEl.innerHTML='<div style="color:#8B3A3A;">No steps found for this sequence.</div>'; return; }
+            stepsEl.innerHTML=stepMeta.map(function(s){
+              var n=s.step_number, isEmail=(s.channel||'email')==='email', auto=(sendMode==='auto_after_first' ? Number(n)>1 : sendMode!=='draft');
+              return '<div class="seqedit-step" data-num="'+n+'" style="border:1px solid #ECE3CE;border-radius:10px;padding:14px 16px;margin-top:12px;background:#FCFAF4;">'
+                +'<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">'
+                +'<span style="display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:50%;background:#8A6F38;color:#fff;font:600 13px/1 sans-serif;flex:none;">'+esc(n)+'</span>'
+                +'<b style="font-size:14.5px;color:#1A1714;">Email '+esc(n)+'</b>'
+                +'<span style="font-size:12.5px;color:#7C6A4D;">'+esc(whenLabel(s.delay_hours))+'</span>'
+                +pill(auto)
+                +'<button class="ds-btn" data-suggest="'+esc(n)+'" type="button" style="margin-left:auto;">✨ Suggest with AI</button>'
+                +'</div>'
+                +(isEmail?('<label style="display:block;margin:12px 0 4px;font:600 11px/1 sans-serif;letter-spacing:.08em;text-transform:uppercase;color:#8A7B60;">Subject</label>'
+                  +'<input data-subject="'+esc(n)+'" type="text" value="'+esc(s.subject_template)+'" style="width:100%;box-sizing:border-box;font:14px/1.4 Georgia,serif;border:1px solid #D9CFB7;border-radius:6px;padding:8px 10px;">'):'')
+                +'<label style="display:block;margin:12px 0 4px;font:600 11px/1 sans-serif;letter-spacing:.08em;text-transform:uppercase;color:#8A7B60;">Body</label>'
+                +'<textarea data-body="'+esc(n)+'" style="width:100%;box-sizing:border-box;min-height:150px;font:14px/1.6 Georgia,serif;border:1px solid #D9CFB7;border-radius:6px;padding:10px;">'+esc(s.body_template)+'</textarea>'
+                +'<div data-reason="'+esc(n)+'" style="margin-top:6px;font-size:12.5px;color:#3f7a4f;"></div>'
+                +'</div>';
+            }).join('');
+            Array.prototype.forEach.call(stepsEl.querySelectorAll('[data-suggest]'),function(btn){
+              btn.addEventListener('click',function(){ suggest(Number(btn.getAttribute('data-suggest')),btn,false); });
+            });
+          }
+          function suggest(n,btn,quiet){
+            var subEl=stepsEl.querySelector('[data-subject="'+n+'"]');
+            var bodyEl=stepsEl.querySelector('[data-body="'+n+'"]');
+            var reasonEl=stepsEl.querySelector('[data-reason="'+n+'"]');
+            if(!bodyEl) return Promise.resolve();
+            var hasContent=(bodyEl.value||'').trim().length>0;
+            if(!quiet && hasContent && !window.confirm('Replace Email '+n+' with a fresh AI draft? Your current wording will be overwritten (you can still Revert before saving).')) return Promise.resolve();
+            var old=btn?btn.textContent:''; if(btn){btn.disabled=true;btn.textContent='Writing…';}
+            if(reasonEl) reasonEl.textContent='';
+            return req('ai-suggest','POST',{sequence_name:SEQ,step_number:n}).then(function(res){
+              if(btn){btn.disabled=false;btn.textContent=old;}
+              if(!res.ok||!res.json||res.json.success===false){
+                if(reasonEl) reasonEl.innerHTML='<span style="color:#9B2C2C;">Couldn’t draft this one'+(res.status?' (HTTP '+res.status+')':'')+'. '+esc((res.json&&res.json.error)||(res.status===401?'You’re signed out — reload the CRM.':''))+'</span>';
+                return;
+              }
+              if(subEl && res.json.subject) subEl.value=res.json.subject;
+              if(res.json.body) bodyEl.value=res.json.body;
+              if(reasonEl && res.json.reasoning) reasonEl.textContent='✨ '+res.json.reasoning;
+            });
+          }
+          function load(force){
+            if(loading) return; if(loaded && !force) return; loading=true; saveMsg.textContent='';
+            statusEl.textContent='Loading…';
+            req('edit?sequence_name='+encodeURIComponent(SEQ),'GET').then(function(res){
+              loading=false; statusEl.textContent='';
+              if(!res.ok||!res.json||res.json.success===false){
+                stepsEl.innerHTML='<div style="color:#9B2C2C;">Couldn’t load the emails'+(res.status?' (HTTP '+res.status+')':'')+'. '+esc((res.json&&res.json.error)||(res.status===401?'You’re signed out — reload the CRM.':''))+'</div>';
+                return;
+              }
+              loaded=true; sendMode=res.json.send_mode||sendMode; render(res.json.steps||[]);
+            });
+          }
+          suggestAllBtn.addEventListener('click',function(){
+            if(!stepMeta.length){ load(); return; }
+            if(!window.confirm('Draft all '+stepMeta.length+' emails with AI? This overwrites what’s in the boxes now — you can still edit each one, or Revert, before saving.')) return;
+            var old=suggestAllBtn.textContent; suggestAllBtn.disabled=true; saveMsg.textContent='';
+            var nums=stepMeta.map(function(s){return s.step_number;}); var i=0;
+            (function next(){
+              if(i>=nums.length){ suggestAllBtn.disabled=false; suggestAllBtn.textContent=old; statusEl.textContent='Drafted all '+nums.length+' — review, then Save.'; return; }
+              suggestAllBtn.textContent='Writing '+(i+1)+' of '+nums.length+'…';
+              suggest(nums[i],null,true).then(function(){ i++; setTimeout(next,150); });
+            })();
+          });
+          revertBtn.addEventListener('click',function(){ if(window.confirm('Discard unsaved edits and reload the saved emails?')) load(true); });
+          saveBtn.addEventListener('click',function(){
+            if(!stepMeta.length) return;
+            var steps=stepMeta.map(function(s){
+              var subEl=stepsEl.querySelector('[data-subject="'+s.step_number+'"]');
+              var bodyEl=stepsEl.querySelector('[data-body="'+s.step_number+'"]');
+              var o={step_number:s.step_number, body_template:bodyEl?bodyEl.value:''};
+              if(subEl) o.subject_template=subEl.value;
+              return o;
+            });
+            var old=saveBtn.textContent; saveBtn.disabled=true; saveBtn.textContent='Saving…'; saveMsg.textContent='';
+            req('edit','POST',{sequence_name:SEQ,steps:steps}).then(function(res){
+              saveBtn.disabled=false; saveBtn.textContent=old;
+              if(!res.ok||!res.json||res.json.success===false){
+                saveMsg.style.color='#9B2C2C'; saveMsg.textContent='Save failed'+(res.status?' (HTTP '+res.status+')':'')+'. '+esc((res.json&&res.json.error)||(res.status===401?'You’re signed out — reload the CRM.':''));
+                return;
+              }
+              saveMsg.style.color='#3f7a4f'; saveMsg.textContent='✓ Saved — new leads get these words on the next send.';
+            });
+          });
+          document.addEventListener('crm:view',function(ev){ if(ev.detail && ev.detail.name==='seq') load(); });
+          if(document.querySelector('.crm-view[data-view="seq"].on')) load();
+        })();
+        </script>
       </div></div></div>
     </section>
 
