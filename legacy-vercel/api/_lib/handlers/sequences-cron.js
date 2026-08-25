@@ -176,7 +176,11 @@ async function tickSequences(supa) {
       // manual send rather than mailed a broken sentence. first_name and city
       // degrade gracefully (greeting → "Hi,"), so they don't block.
       if (step.mode === 'literal') {
-        const required = ['property_address'];
+        // Only require a merge field the copy actually uses. Expired's copy has
+        // {{property_address}} (a blank would read "I noticed  came off the
+        // market"), so it stays guarded; buyer/seller nurture copy has no
+        // subject property, so those leads must NOT be paused for lacking one.
+        const required = /\{\{\s*property_address\s*\}\}/.test(step.body_template || '') ? ['property_address'] : [];
         const missing = required.filter((k) => !String(vars[k] || '').trim());
         if (missing.length) {
           await supa.from('leads').update({ sequence_paused: true }).eq('id', lead.id);

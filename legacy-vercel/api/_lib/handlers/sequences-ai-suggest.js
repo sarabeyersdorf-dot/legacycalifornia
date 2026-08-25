@@ -56,10 +56,47 @@ const SPEED_INTENT = {
   1: 'The single instant acknowledgement email. Confirm warmly that their message came through, set the expectation that a real person (Sara or James) will follow up soon, and offer Sara\'s direct number for anything urgent. Keep it short and genuine.'
 };
 
+// Warm nurture drips to leads who reached out (buyer / seller / not-yet-known).
+// Not cold outreach: helpful, patient, human. Merge tokens: {{greeting}},
+// {{first_name}}, {{area}} (buyer), {{CASE_STUDY_URL}} (seller). No subject
+// property, so never use {{property_address}} or {{city}}.
+const NURTURE_RULES = `Voice: warm, direct, genuinely helpful, human. Sara Cooper, Broker-Owner of Legacy Properties (Angels Camp, CA), and James Beyersdorf. Never corporate, salesy, or pushy.
+Style: short sentences, short paragraphs. No exclamation points. No em-dashes. No hype. No pressure or false urgency.
+HARD RULES:
+1. Begin every email with {{greeting}} on its own first line ("Hi Jane," or "Hi," when the name is unknown). Other allowed tokens: {{first_name}}, {{area}} (the buyer's area), {{CASE_STUDY_URL}} (Legacy's case-study page). Never use {{property_address}} or {{city}} — these leads have no subject property. Never invent a name, place, or number.
+2. Do NOT write a signature, sign-off, letterhead, logo, or disclaimer — those are added automatically. End on the last sentence of your message.
+3. Plain text only. No HTML, no markdown, no links other than {{CASE_STUDY_URL}}. Never invent facts or commitments.`;
+
+const BUYER_SYSTEM = `You are writing a nurture email to someone who reached out about BUYING a home in the Calaveras/Tuolumne foothills. They contacted Legacy first, so this is a warm follow-up, not cold outreach.\n\n${NURTURE_RULES}`;
+const SELLER_SYSTEM = `You are writing a nurture email to someone who reached out about SELLING their home, served by Legacy Properties. They contacted first, so this is a warm follow-up, not cold outreach. Legacy's edge is real marketing (cinematic film, a dedicated site, an investor packet, buyer-specific briefs, a live seller portal) — point to {{CASE_STUDY_URL}} for proof.\n\n${NURTURE_RULES}`;
+const NEWLEAD_SYSTEM = `You are writing a nurture email to a brand-new lead whose intent (buying vs selling) is NOT yet known. They contacted Legacy first. Keep it useful either way and, early on, invite them to tell you whether they are buying, selling, or exploring.\n\n${NURTURE_RULES}`;
+
+const BUYER_INTENT = {
+  1: 'Email 1 — warm intro. Say who you are, how you actually help a buyer (listen first, send homes that fit, early access to quiet listings), and ask one open question about what they want.',
+  2: 'Email 2 — value. Explain that the best homes in {{area}} often sell quietly/early, and that you can flag those first once you know their criteria. Invite them to sharpen their search.',
+  3: 'Email 3 — make it easy. Demystify the first practical steps (real pre-approval, knowing the true monthly number, having an advocate who reads contracts). Offer to walk them through it, free.',
+  4: 'Email 4 — graceful check-in. Short, no pressure. Leave the door open and make it easy to reply later or say "not now".'
+};
+const SELLER_INTENT = {
+  1: 'Email 1 — warm intro. Introduce yourself and, instead of claiming to be different, point to a real Legacy campaign at {{CASE_STUDY_URL}}. Offer to tell them what you would build for their home.',
+  2: 'Email 2 — proof. Contrast a few-photos-and-a-sign listing with a full Legacy campaign (photography, film, dedicated page, targeted buyer marketing). Point again to {{CASE_STUDY_URL}}.',
+  3: 'Email 3 — transparency. Describe the live seller portal (documents, timeline, marketing numbers, real time) so they would always know where things stand. Link {{CASE_STUDY_URL}}.',
+  4: 'Email 4 — the free offer. Offer a no-obligation plan: an honest read on price and exactly how you would market it. Easy next step; graceful out.'
+};
+const NEWLEAD_INTENT = {
+  1: 'Email 1 — warm hello. Introduce yourself and ask one simple question: are they buying, selling, or just exploring, so you can actually help.',
+  2: 'Email 2 — who you are. Briefly: local, honest, in their corner, useful whether they buy or sell. Invite a question.',
+  3: 'Email 3 — invite a conversation. Offer a low-pressure call; give the direct number (209) 559-4966 or a reply.',
+  4: 'Email 4 — graceful check-in. Short, no pressure, door open, easy "not now".'
+};
+
 // Per-sequence prompt profiles. Unknown sequences fall back to the expired one.
 const PROFILES = {
-  expired_listing: { system: EXPIRED_SYSTEM, intent: EXPIRED_INTENT },
-  speed_to_lead:   { system: SPEED_SYSTEM,   intent: SPEED_INTENT }
+  expired_listing:  { system: EXPIRED_SYSTEM, intent: EXPIRED_INTENT },
+  speed_to_lead:    { system: SPEED_SYSTEM,   intent: SPEED_INTENT },
+  buyer_nurture:    { system: BUYER_SYSTEM,   intent: BUYER_INTENT },
+  seller_nurture:   { system: SELLER_SYSTEM,  intent: SELLER_INTENT },
+  new_lead_nurture: { system: NEWLEAD_SYSTEM, intent: NEWLEAD_INTENT }
 };
 
 export default async function handler(req, res) {
