@@ -994,6 +994,10 @@ export default async function handler(req, res) {
     // Deals that have LEFT escrow — their lingering timeline items get retired
     // after the loop so a dead escrow can't keep phantom deadlines on a portal.
     const nonEscrowDealIds = [];
+    // Subset that left escrow to a NON-closed stage (listing/preparing — the
+    // escrow fell through). These also lose their completed escrow milestones
+    // from the client portal; a genuinely CLOSED deal keeps that history.
+    const nonEscrowFellThroughIds = [];
     // Insert-only visibility grants authored in deals.json (a doc with an explicit
     // "visibility"). Applied after the loop; never overwrite an agent's CRM grant.
     const govSeeds = [];
@@ -1061,7 +1065,10 @@ export default async function handler(req, res) {
         // raw stage. A property left at stage 'listing' while carrying an active
         // escrow must NOT have its live timeline retired.
         const inEscrow = (Array.isArray(d.escrows) && d.escrows.length) ? !!activeEscrow(d) : ESCROW_STAGES.has(d.stage);
-        if (!inEscrow) nonEscrowDealIds.push(dealId);
+        if (!inEscrow) {
+          nonEscrowDealIds.push(dealId);
+          if (String(d.stage) !== 'closed') nonEscrowFellThroughIds.push(dealId);
+        }
 
         // Upsert this property's escrow history FIRST (Slice 2/3) so documents
         // can be linked to their escrow. No-op without escrows[]; returns
@@ -1104,6 +1111,18 @@ export default async function handler(req, res) {
           .update({ client_visible: false, due_date: null, updated_at: new Date().toISOString() })
           .in('deal_id', nonEscrowDealIds).eq('status', 'na').eq('client_visible', true)
           .then(() => {}, () => {});
+      }
+      // Deals that fell OUT of escrow (not closed) also stop showing their
+      // COMPLETED escrow milestones to the client — the 'done' rows like
+      // "Escrow opened" / "Contract accepted". 324 Augusta was still showing
+      // sellers an escrow that died 8/14. Status stays 'done' for agent history;
+      // only client_visible flips. (A CLOSED deal is excluded, so it keeps its
+      // real sale history.)
+      if (nonEscrowFellThroughIds.length) {
+        const { data: hiddenDone } = await supa.from('deal_timeline_items')
+          .update({ client_visible: false, updated_at: new Date().toISOString() })
+          .in('deal_id', nonEscrowFellThroughIds).eq('status', 'done').eq('client_visible', true).select('id');
+        timelineItemsRetired += (hiddenDone || []).length;
       }
     } catch (e) { errors.push({ deal: 'retire-timeline-items', error: e.message || String(e) }); }
 

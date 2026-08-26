@@ -34,6 +34,13 @@ Output plain prose only, 3-5 sentences, no markdown.`;
 
 export default async function handler(req, res) {
   if (handleOptions(req, res)) return;
+  // This feeds the morning-briefing agent and the Today board — it must ALWAYS
+  // reflect live data. Without these, Vercel's edge/CDN froze an ~8/24 payload
+  // (stale appointments, and a false email_reconnect_needed:["sara"] while both
+  // mailboxes were fine). Mirror briefing-calendar / briefing-feedback exactly.
+  res.setHeader('Cache-Control', 'private, no-store, no-cache, must-revalidate');
+  res.setHeader('CDN-Cache-Control', 'no-store');
+  res.setHeader('Vercel-CDN-Cache-Control', 'no-store');
   if (req.method !== 'GET') return fail(res, 405, 'method_not_allowed');
 
   try {
@@ -246,13 +253,15 @@ export default async function handler(req, res) {
         if (!pushedAt) return null;
         const days = Math.floor((Date.now() - new Date(pushedAt).getTime()) / 86400000);
         if (days < 3) return null;
-        const [{ count: rx }, { count: opensSince }] = await Promise.all([
-          supa.from('collection_reactions').select('id', { count: 'exact', head: true })
-            .eq('collection_id', c.id).gte('created_at', pushedAt),
-          supa.from('collection_events').select('id', { count: 'exact', head: true })
-            .eq('collection_id', c.id).eq('event_type', 'open').gte('created_at', pushedAt)
-        ]);
-        if ((rx || 0) > 0) return null;
+        // Attributed engagement ONLY: the client's own opens/views since the
+        // push, from lead_events. collection_events.meta carries no viewer and
+        // collection_reactions has been empty since 2026-07-21 — quoting either
+        // was unsafe ("opened 2×" by nobody, "hasn't reacted" always true).
+        const { count: opensSince } = await supa.from('lead_events')
+          .select('id', { count: 'exact', head: true })
+          .eq('lead_id', c.client_lead_id)
+          .in('event_type', ['collection_opened', 'property_viewed'])
+          .gte('created_at', pushedAt);
         const clientName = c.leads ? [c.leads.first_name, c.leads.last_name].filter(Boolean).join(' ') : 'Your client';
         const nAgent = c.agent === 'james' ? 'james' : 'sara';
         return {
@@ -273,7 +282,9 @@ export default async function handler(req, res) {
           result.signals.unshift({
             id: `nudge:${nudge.collection_id}`, lead_id: client_lead_id,
             time_iso: nudge.pushed_at, time: `${nudge.days_since_push}d ago`,
-            body: `${nudge.client_name} hasn't reacted to “${nudge.title}” — pushed ${nudge.days_since_push} days ago${nudge.opens_since_push ? ` (opened ${nudge.opens_since_push}× since)` : ' (not opened yet)'} . Worth a nudge.`,
+            body: `${nudge.opens_since_push
+              ? `${nudge.client_name} opened “${nudge.title}” ${nudge.opens_since_push}× since you sent it ${nudge.days_since_push} days ago — no reply yet`
+              : `${nudge.client_name} hasn't opened “${nudge.title}” yet — pushed ${nudge.days_since_push} days ago`}. Worth a nudge.`,
             tag: 'Follow up'
           });
         }
