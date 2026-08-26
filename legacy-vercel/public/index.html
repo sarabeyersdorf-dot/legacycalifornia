@@ -366,6 +366,14 @@
 .journey-step:last-child { border-right: none; }
 .journey-step.active { background: var(--ink); color: var(--shell); }
 .journey-step:hover:not(.active) { color: var(--brass); }
+/* Buy/sell pills: larger and rectangular (not oval) so the primary
+   "buying vs selling" choice reads as a clear pair of buttons. */
+.lg-chip.journey-side {
+  font-size: 13px; letter-spacing: .08em; padding: 15px 34px; border-radius: 8px; gap: 9px;
+}
+@media (max-width: 640px) {
+  .lg-chip.journey-side { font-size: 12px; padding: 13px 24px; }
+}
 .journey-link {
   font-family: var(--mono); font-size: 10px; letter-spacing: 0.18em;
   color: var(--brass); text-transform: uppercase; text-decoration: none;
@@ -873,7 +881,7 @@
 <section class="lg-sec" id="listings"><div class="lg-wrap">
   <div class="lg-kicker lg-rv"><span>On the market now &middot; Updated continuously from MLS</span><span class="lg-rule"></span></div>
   <h2 class="lg-display lg-h2 lg-rv lg-d1" style="margin:14px 0 12px">Legacy's listings.</h2>
-  <div class="lg-note lg-rv lg-d2" style="max-width:660px">Every home Legacy currently represents across Calaveras, Amador &amp; Tuolumne &mdash; live from the MLS, never a stale plate.</div>
+  <div class="lg-note lg-rv lg-d2" style="max-width:660px">Every home Legacy currently represents across Calaveras, Amador &amp; Tuolumne &mdash; live from the MLS.</div>
 
     <!-- Legacy's listings — iHomeFinder's own featured-listing widget, rendered
          INLINE (no iframe). Shows ALL of the office's listings across every
