@@ -78,6 +78,7 @@ import idxStatus          from '../_lib/handlers/crm-idx-status.js';
 import logContact         from '../_lib/handlers/crm-log-contact.js';
 import followUps           from '../_lib/handlers/crm-follow-ups.js';
 import showcase            from '../_lib/handlers/crm-showcase.js';
+import reconcile           from '../_lib/handlers/crm-reconcile.js';
 
 const TABLE = {
   'lead-hygiene':    leadHygiene,
@@ -134,7 +135,8 @@ const TABLE = {
   'idx-status':           idxStatus,
   'log-contact':          logContact,
   'follow-ups':           followUps,
-  'showcase':             showcase
+  'showcase':             showcase,
+  'reconcile':            reconcile
 };
 
 export default async function handler(req, res) {
