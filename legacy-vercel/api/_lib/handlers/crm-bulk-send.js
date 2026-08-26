@@ -51,7 +51,12 @@ export default async function handler(req, res) {
 
   const b = await readJson(req);
   const supa = adminClient();
-  const mode = b.mode === 'send' ? 'send' : b.mode === 'preview' ? 'preview' : b.mode === 'test' ? 'test' : 'resolve';
+  const mode = b.mode === 'send' ? 'send'
+    : b.mode === 'preview' ? 'preview'
+    : b.mode === 'test' ? 'test'
+    : b.mode === 'schedule' ? 'schedule'
+    : b.mode === 'campaign_status' ? 'campaign_status'
+    : 'resolve';
 
   const sentByRole = profile.role === 'agent_james' ? 'james' : 'sara';
   // Full sender identity for the premium headshot signature (logo header +
@@ -100,6 +105,64 @@ export default async function handler(req, res) {
     } catch (e) {
       return fail(res, 500, e.message || 'test send failed');
     }
+  }
+
+  // ---- schedule: enqueue a whole send into email_queue, drained paced by
+  // api/cron/email-queue so a big list never outruns Resend's rate limit /
+  // daily cap. Returns a campaign_id the composer can poll for progress. ----
+  if (mode === 'schedule') {
+    const subject  = String(b.subject || '').trim().slice(0, MAX_SUBJECT);
+    const body     = String(b.body || '').trim().slice(0, MAX_BODY);
+    const template = (b.template && typeof b.template === 'object' && !Array.isArray(b.template)) ? b.template : null;
+    const ids      = Array.isArray(b.lead_ids) ? [...new Set(b.lead_ids.filter(Boolean))].slice(0, 5000) : [];
+    if (!subject)            return fail(res, 400, 'subject required');
+    if (!template && !body)  return fail(res, 400, 'body required');
+    if (!ids.length)         return fail(res, 400, 'no recipients');
+
+    // Re-check the opt-out gates now (the same ones resolve used), and pull the
+    // address + name for each recipient.
+    let q = supa.from('leads').select('id, first_name, last_name, email');
+    q = contactable(q).in('id', ids);
+    const { data: leads, error } = await q;
+    if (error) return fail(res, 500, error.message);
+    const rows = (leads || []).filter((l) => l.email);
+    if (!rows.length) return ok(res, { campaign_id: null, queued: 0, skipped: ids.length });
+
+    const campaign_id = (globalThis.crypto && crypto.randomUUID) ? crypto.randomUUID() : undefined;
+    const payload = rows.map((l) => ({
+      campaign_id,
+      lead_id: l.id,
+      to_email: l.email,
+      to_name: [l.first_name, l.last_name].filter(Boolean).join(' ') || null,
+      subject,
+      body: template ? null : body,
+      template: template || null,
+      agent: sentByRole,
+      status: 'queued'
+    }));
+
+    // Insert in chunks; ignore-duplicate on (campaign_id, lead_id) so a retried
+    // Schedule call can't double-queue the same person.
+    let queued = 0;
+    for (let i = 0; i < payload.length; i += 500) {
+      const chunk = payload.slice(i, i + 500);
+      const { error: insErr } = await supa.from('email_queue').insert(chunk);
+      if (insErr) return fail(res, 500, insErr.message);
+      queued += chunk.length;
+    }
+    return ok(res, { campaign_id, queued, skipped: ids.length - queued });
+  }
+
+  // ---- campaign_status: progress rollup for a scheduled send ----
+  if (mode === 'campaign_status') {
+    const cid = String(b.campaign_id || '').trim();
+    if (!cid) return fail(res, 400, 'campaign_id required');
+    const { data, error } = await supa.from('email_queue').select('status').eq('campaign_id', cid);
+    if (error) return fail(res, 500, error.message);
+    const rows = data || [];
+    const by = { queued: 0, sent: 0, failed: 0, skipped: 0 };
+    for (const r of rows) if (by[r.status] != null) by[r.status]++;
+    return ok(res, { total: rows.length, ...by, done: by.queued === 0 });
   }
 
   // ---- resolve: count + ids for a segment ----
