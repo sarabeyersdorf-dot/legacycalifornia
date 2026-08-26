@@ -116,6 +116,12 @@ const STATUS_RULES = [
   ['to_sign',     ['to sign', 'to_sign']],
   ['with_seller', ['with seller', 'with_seller']],
   ['sent',        ['sent']],
+  // "not required" / "not applicable" / "n/a" is the OPPOSITE of an obligation,
+  // so it must be caught BEFORE the generic 'not ' → pending prefix below —
+  // otherwise a doc explicitly marked not-needed renders as a pending signature
+  // request. (324 Augusta's "NOT REQUIRED — separate agents…" AAA did exactly
+  // that, nagging Sara to sign an acknowledgment on a dead escrow. Cowork 8/26.)
+  ['on_file',     ['not required', 'not applicable', 'not needed', 'not necessary', 'n/a', 'none required']],
   ['pending',     ['drafted', 'pending', 'outstanding', 'missing', 'waiting', 'needs', 'not ']],
   ['on_file',     ['executed', 'fully executed', 'received', 'accepted', 'on file', 'filed', 'waived', 'partial', 'final', 'complete', 'offer ']]
 ];
@@ -130,6 +136,14 @@ function docStatus(val) {
   }
   return 'on_file';                                  // unknown prose → inert default
 }
+
+// "NOT REQUIRED / N/A / not needed" marks a doc that is explicitly not part of
+// this transaction. With no executed file attached it isn't a document at all,
+// so mapDocs skips it rather than emitting a phantom row (belt to docStatus's
+// suspenders above). Anchored to the start so it doesn't fire on prose that
+// merely contains the words (e.g. "signed — n/a fields left blank").
+const NOT_REQUIRED_RE = /^\s*(not\s+(required|applicable|needed|necessary)|n\/?a\b|none\s+required)/i;
+const isNotRequired = (v) => v != null && NOT_REQUIRED_RE.test(String(v));
 
 // Stages with a LIVE escrow clock. Only these carry a running contingency/COE
 // timeline; a deal that has left escrow (closed / listing after a cancellation /
@@ -437,6 +451,12 @@ function mapDocs(dealId, d, escrowIdByKey, manifest) {
     const isObj    = val && typeof val === 'object';
     const rawState = isObj ? (val.status ?? val.state ?? val.value) : val;
     const url      = isObj ? (val.url || val.link || val.href || val.file || null) : null;
+    // A doc explicitly marked "NOT REQUIRED / N/A / not needed" is not an
+    // obligation. With no executed file attached it isn't a document at all —
+    // skip it so it never surfaces as a phantom pending signature request (the
+    // way a missing doc on a closed deal is skipped below). If a file IS on hand,
+    // let it flow through as on_file. (324 Augusta AAA — Cowork 8/26.)
+    if (!url && isNotRequired(rawState)) continue;
     const status = docStatus(rawState);
     const base = token.split('_')[0];
     const label = DOC_LABELS[token] || DOC_LABELS[base];
@@ -968,6 +988,16 @@ export function buildChecklistRows(deals, defs) {
 
 export default async function handler(req, res) {
   if (handleOptions(req, res)) return;
+
+  // This endpoint reports the outcome of the last sync (ran_at, source_version,
+  // per-pool counts). Cowork's briefing reads it to verify the hourly cron
+  // actually ran — so the response must ALWAYS be live. Without these, Vercel's
+  // CDN froze a ~28h-old body (ran_at 8/25, source_version 10.1) and the briefing
+  // could never tell whether the sync worked (Cowork 8/26). Mirror the
+  // morning-brief / briefing-calendar no-store trio exactly.
+  res.setHeader('Cache-Control', 'private, no-store, no-cache, must-revalidate');
+  res.setHeader('CDN-Cache-Control', 'no-store');
+  res.setHeader('Vercel-CDN-Cache-Control', 'no-store');
 
   // Auth: allow two callers.
   //  1. Manual trigger — the bookmark URL with ?key=<SYNC_SECRET>.
