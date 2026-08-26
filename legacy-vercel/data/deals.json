@@ -1,7 +1,7 @@
 {
-  "version": 10.2,
-  "lastUpdated": "2026-08-25",
-  "updatedBy": "morning-briefing 2026-08-25",
+  "version": 10.4,
+  "lastUpdated": "2026-08-26",
+  "updatedBy": "morning-briefing 2026-08-26",
   "tasks": [
     {
       "agent": "sara",
@@ -2201,6 +2201,46 @@
       "done": false,
       "due": "Today",
       "title": "695 Feather: chase Tanya Salgado for BUYER-SIGNED copies of the estimated closing statement — asked 8/24 9:47am, still only the unsigned version."
+    },
+    {
+      "agent": "sara",
+      "client": "695 Feather",
+      "key": "feather-mh-holdback-agreement",
+      "title": "695 Feather: if you close Friday, get the HCD holdback in writing FIRST - Orange Coast Title will not administer it, so it has to be a private buyer/seller agreement",
+      "due": "2026-08-27",
+      "done": false
+    },
+    {
+      "agent": "sara",
+      "client": "1143 Echo",
+      "key": "echo-mot-crm-stage",
+      "title": "1143 Echo: CRM still shows stage 'preparing' while the master file says 'listing' - stale stage_override, flagged by drift-check 8/23 and client-visible",
+      "due": "this week",
+      "done": false
+    },
+    {
+      "agent": "sara",
+      "client": "324 Augusta",
+      "key": "augusta-relist-push",
+      "title": "324 Augusta: second-heaviest residential traffic in the book since the escrow cancelled - 1,477 views in 30 days, 4 inquiries, beat its zip. Push it while the interest is live",
+      "due": "this week",
+      "done": false
+    },
+    {
+      "agent": "sara",
+      "client": "Listing book",
+      "key": "land-syndication-check",
+      "title": "Check the MetroList feed on 2000 Gun Club, 590 S Main and 635 S Main - 5-6 views each in 30 days with Homes.com the only source. 1350 Love St and 701 Mark Twain are the same property type and do get Zillow/Realtor.com",
+      "due": "this week",
+      "done": false
+    },
+    {
+      "agent": "sara",
+      "client": "Roger & Kim Quillen",
+      "key": "quillen-collection-followup",
+      "title": "Roger AND Kim both opened 'Roger and Kim' Monday evening 8/25 and viewed properties - first real client engagement the CRM has ever recorded. Call while it is warm",
+      "due": "2026-08-26",
+      "done": false
     }
   ],
   "deals": [
@@ -3271,14 +3311,16 @@
         "seller_type": "standard"
       },
       "listTrac": {
-        "views": 198,
+        "views": 204,
         "shares": 4,
         "inquiries": 1,
-        "newPct": 87,
-        "last30": 18,
+        "newPct": 90,
+        "last30": 22,
         "since": "2026-02-02",
-        "reportDate": "2026-08-16",
-        "source": "ListTrac / MetroList weekly seller report"
+        "zipBeat": false,
+        "note": "COMMERCIAL listing - does not syndicate to Zillow/Realtor.com/Trulia and is not supposed to. Compare only against other commercial listings, never against the residential book. 22 views in the last 30 days, up from 18 a week ago.",
+        "reportDate": "2026-08-23",
+        "source": "ListTrac / MetroList agent report 'Online Activity Reports for your Listings'"
       },
       "marketing": {
         "period": "Feb 02 - Aug 23, 2026",
@@ -3624,15 +3666,16 @@
       "docFolder": "/_LEGACY/_Listings/433 E Highway 4",
       "client": "Jim & Yvonne Heryford",
       "listTrac": {
-        "views": 5673,
+        "views": 5837,
         "shares": 18,
         "inquiries": 0,
-        "newPct": 94,
-        "last30": 278,
+        "newPct": 92,
+        "last30": 329,
         "since": "2026-03-20",
-        "note": "Beat its zip code for views. A separate ListTrac report on the earlier MLS number covers 2025-12-05 onward: 4,015 views / 4 shares / 99% new / 68 in the last 30 days.",
-        "reportDate": "2026-08-16",
-        "source": "ListTrac / MetroList weekly seller report"
+        "zipBeat": true,
+        "note": "Mixed-use: syndicates to both commercial and residential portals, and correctly appears on Zillow (226) and Realtor.com (84). Beat its zip code. A second ListTrac report on the earlier MLS number covers 2025-12-05 onward and read 4,027 views / 6 shares / 97% new on 2026-08-23.",
+        "reportDate": "2026-08-23",
+        "source": "ListTrac / MetroList agent report 'Online Activity Reports for your Listings'"
       },
       "homesCom": {
         "shareUrl": "https://www.homes.com/t/h3kn9nsqsh4t5?s=6",
@@ -3847,15 +3890,16 @@
         "tenant_occupied": false
       },
       "listTrac": {
-        "views": 9838,
-        "shares": 30,
+        "views": 10670,
+        "shares": 31,
         "inquiries": 1,
-        "newPct": 25,
-        "last30": 3018,
+        "newPct": 80,
+        "last30": 3017,
         "since": "2026-06-04",
-        "note": "BEST PERFORMING LISTING IN THE BOOK. 3,018 views in the last 30 days — Zillow 1,947, Realtor.com 854. Beat its zip code. Unusually, 75% of visitors are RETURNING, not new: people are coming back to look again.",
-        "reportDate": "2026-08-16",
-        "source": "ListTrac / MetroList weekly seller report"
+        "zipBeat": true,
+        "note": "Best-performing residential listing in the book. 3,017 views in the last 30 days - Zillow 1,982, Realtor.com 805, Trulia 160. Beat its zip code.",
+        "reportDate": "2026-08-23",
+        "source": "ListTrac / MetroList agent report 'Online Activity Reports for your Listings'"
       },
       "homesCom": {
         "shareUrl": "https://www.homes.com/t/0nlntp2hg4hv0?s=6",
@@ -4021,15 +4065,16 @@
         "seller_type": "standard"
       },
       "listTrac": {
-        "views": 3165,
-        "shares": 87,
+        "views": 3373,
+        "shares": 91,
         "inquiries": 0,
-        "newPct": 93,
-        "last30": 728,
+        "newPct": 94,
+        "last30": 637,
         "since": "2026-04-08",
-        "note": "87 shares — the most-shared listing in the book. Beat its zip code. Still receiving ListTrac reports and 728 views in the last 30 days despite being marked 'cancelled' in deals.json — worth confirming which is right.",
-        "reportDate": "2026-08-16",
-        "source": "ListTrac / MetroList weekly seller report"
+        "zipBeat": true,
+        "note": "91 shares - still the most-shared listing in the book. Beat its zip code. Zillow 414, Realtor.com 177, Trulia 46 over the last 30 days.",
+        "reportDate": "2026-08-23",
+        "source": "ListTrac / MetroList agent report 'Online Activity Reports for your Listings'"
       },
       "timeline": {
         "note": "LISTING IS LIVE. An ESCROW on this listing cancelled — do not confuse the two. Purchase Agreement dated 2026-04-21 between buyer Kayla Priestley and seller Sean Cristian Moffatt. Cancellation of Contract, Disposition of Deposit and Cancellation of Escrow (C.A.R. Form CC rev 6/24) executed by BOTH parties; buyer cancelled under paragraph L(1) 8A; escrow #P-698773 at Placer Title Company cancelled with full mutual release; seller authorised release of the buyer's deposit back to the buyer in full, less buyer's fees and costs. Filed Duds\\9568 Sheep Ranch Rd\\Cancellation of Contract, Release of Deposit and Cancellation of Escrow - 624.pdf. Per Sara 2026-08-16: 'sheep ranch had an escrow cancel buyer Kayla Priestly but the listing is not canceled.' stage corrected 'cancelled' -> 'listing' and salePrice cleared to the RLA/MOT list price of $389,000 the same day. The listing is still marketing and still generating ListTrac traffic (3,165 views, 87 shares, 728 in the last 30 days)."
@@ -4171,15 +4216,16 @@
         "seller_type": "standard"
       },
       "listTrac": {
-        "views": 5368,
+        "views": 5547,
         "shares": 44,
         "inquiries": 5,
-        "newPct": 87,
-        "last30": 698,
+        "newPct": 83,
+        "last30": 672,
         "since": "2026-03-24",
-        "note": "5 inquiries — the most of any listing. Beat its zip code. Zillow drove 526 of the last 30 days' 698 views.",
-        "reportDate": "2026-08-16",
-        "source": "ListTrac / MetroList weekly seller report"
+        "zipBeat": true,
+        "note": "5 inquiries - the most of any listing. Beat its zip code. Zillow drove 522 of the last 30 days' 672 views.",
+        "reportDate": "2026-08-23",
+        "source": "ListTrac / MetroList agent report 'Online Activity Reports for your Listings'"
       },
       "marketing": {
         "period": "Mar 24 - Aug 23, 2026",
@@ -4320,7 +4366,7 @@
         "commission": {
           "pct": 3.5
         },
-        "commissionNote": "3.5% TOTAL, and 3.5% is the operative rate — do not 'correct' it back to 3.0%. The RLA (rev 6/26) dated 2026-07-12 sets 3.0%. A Modification of Terms then adds the 0.5% carried over from 7230 Latigo, per Sara 2026-08-16: 'Echo is 3.5 commission, we have a MOD to transfer the unpaid .5 from Latigo to Echo.' Origin of the 0.5%: the Latigo BRBC (C.A.R. form, 2024 rev) set buyer-side compensation at 3.000% of the acquisition price, but the seller paid only 2.5% — the Latigo commission demand (P-708659) shows Gross $15,375, Seller Paid 2.5%, Buyer Paid blank. The 0.5% shortfall on the $615,000 Latigo sale is $3,075, and that is what the MOD moves to this listing. On the $349,000 Echo list price, 3.5% = $12,215. DOCUMENT GAP as of 2026-08-16: the MOD is NOT on disk — _Listings\\1143 Echo\\Ex\\ holds only the RLA. File it.",
+        "commissionNote": "3.5% TOTAL, and 3.5% is the operative rate - do not 'correct' it back to 3.0%. The RLA (rev 6/26) dated 2026-07-12 sets 3.0%. Modification of Terms No. 1, executed via Authentisign 2026-08-26 and filed to _Listings\\1143 Echo\\Ex\\, changes COMPENSATION to 3.5% and states the reason on its face: '.5% unpaid from 7235 Latigo transferred to Echo'. Latigo's BRBC set buyer-side compensation at 3.000%; the seller paid only 2.5% (commission demand P-708659: Gross $15,375, Seller Paid 2.5%, Buyer Paid blank), and the 0.5% shortfall - $3,075 on the $615,000 sale - was moved here by that MOD. Verbally confirmed by Sara 2026-08-16; papered on disk 2026-08-26.",
         "dateListed": "2026-07-12",
         "agreementForm": "Residential Listing Agreement - Exclusive - 626"
       },
@@ -4328,7 +4374,8 @@
         "seller": "Adrianna & Guy Castle"
       },
       "docs": {
-        "listingAgreement": "EXECUTED 7/12 (Authentisign 'Residential Listing Agreement - Exclusive'); filed in _Listings/1143 Echo/Ex/"
+        "listingAgreement": "EXECUTED 7/12 (Authentisign 'Residential Listing Agreement - Exclusive'); filed in _Listings/1143 Echo/Ex/",
+        "MOT1": "EXECUTED - Modification of Terms - Listing Agreement (C.A.R. Form MT-LA rev 6/25), Authentisign ID C7321327-C78A-F111-B337-000D3A1FE58D, filed to disk 2026-08-26 09:19. COMPENSATION changed to 3.5%. OTHER: '.5% unpaid from 7235 Latigo transferred to Echo'. PRICE and EXPIRATION fields left blank - this MOT changes compensation only. Authentisign 'Signing complete' notice received 2026-08-26 09:19 PDT. Source: _Listings\\1143 Echo\\Ex\\Modification of Terms, Listing Agreement 1 - 625pdf.pdf"
       },
       "correspondence": [],
       "notes": "Preparing to list — Adrianna & Guy Castle's home (they are the 7230 Latigo buyers; Latigo recorded 7/28). Listing appointment Sat 7/11 10:00 AM (on CRM calendar). UPDATE 7/12: listing agreement signed via Authentisign; now an active listing. Sellers Adrianna & Guy Castle are also the 7230 Latigo buyers.",
@@ -4693,6 +4740,18 @@
             "views": 2
           }
         ]
+      },
+      "listTrac": {
+        "views": 3254,
+        "shares": 19,
+        "inquiries": 4,
+        "newPct": 87,
+        "last30": 1477,
+        "since": "2026-06-25",
+        "zipBeat": true,
+        "note": "Back on the market after the 8/14 escrow cancellation and drawing the second-heaviest residential traffic in the book - 1,477 views in the last 30 days (Zillow 916, Realtor.com 398, Trulia 45). Beat its zip code.",
+        "reportDate": "2026-08-23",
+        "source": "ListTrac / MetroList agent report 'Online Activity Reports for your Listings'"
       }
     },
     {
@@ -4768,15 +4827,16 @@
         }
       },
       "listTrac": {
-        "views": 564,
+        "views": 577,
         "shares": 4,
         "inquiries": 0,
-        "newPct": 94,
-        "last30": 58,
+        "newPct": 100,
+        "last30": 43,
         "since": "2025-01-17",
-        "note": "Beat its zip code. Zillow drove 39 of the last 30 days' 58 views.",
-        "reportDate": "2026-08-16",
-        "source": "ListTrac / MetroList weekly seller report"
+        "zipBeat": true,
+        "note": "Beat its zip code. Zillow 33, Realtor.com 5, Homes.com 5 over the last 30 days. 100% new visitors - nobody is returning for a second look.",
+        "reportDate": "2026-08-23",
+        "source": "ListTrac / MetroList agent report 'Online Activity Reports for your Listings'"
       },
       "marketing": {
         "period": "Jan 17, 2025 - Aug 23, 2026",
@@ -4881,14 +4941,16 @@
         }
       },
       "listTrac": {
-        "views": 252,
-        "shares": 10,
+        "views": 263,
+        "shares": 11,
         "inquiries": 0,
-        "newPct": 96,
-        "last30": 21,
+        "newPct": 94,
+        "last30": 5,
         "since": "2025-01-17",
-        "reportDate": "2026-08-16",
-        "source": "ListTrac / MetroList weekly seller report"
+        "zipBeat": false,
+        "note": "SYNDICATION GAP (within vacant land): 5 views in 30 days, Homes.com the only top-10 source. Same pattern as 2000 Gun Club and 590 S Main.",
+        "reportDate": "2026-08-23",
+        "source": "ListTrac / MetroList agent report 'Online Activity Reports for your Listings'"
       },
       "marketing": {
         "period": "Jan 17, 2025 - Aug 23, 2026",
@@ -4995,15 +5057,16 @@
         }
       },
       "listTrac": {
-        "views": 294,
+        "views": 301,
         "shares": 11,
         "inquiries": 0,
         "newPct": 100,
-        "last30": 17,
+        "last30": 5,
         "since": "2025-01-17",
-        "note": "100% new visitors — no one is coming back for a second look.",
-        "reportDate": "2026-08-16",
-        "source": "ListTrac / MetroList weekly seller report"
+        "zipBeat": false,
+        "note": "SYNDICATION GAP (within vacant land): 5 views in 30 days and Homes.com is the ONLY source in the top-10 - no Zillow, no Realtor.com, no Trulia. 1350 Love St and 701 Mark Twain are the same property type and both draw Zillow/Realtor.com traffic, so this is a fixable feed problem, not a property-type limitation.",
+        "reportDate": "2026-08-23",
+        "source": "ListTrac / MetroList agent report 'Online Activity Reports for your Listings'"
       },
       "marketing": {
         "period": "Jan 17, 2025 - Aug 23, 2026",
@@ -5111,15 +5174,16 @@
         }
       },
       "listTrac": {
-        "views": 214,
+        "views": 221,
         "shares": 3,
         "inquiries": 0,
-        "newPct": 93,
-        "last30": 14,
+        "newPct": 94,
+        "last30": 6,
         "since": "2025-01-17",
-        "note": "Quietest listing in the book — 14 views in the last 30 days.",
-        "reportDate": "2026-08-16",
-        "source": "ListTrac / MetroList weekly seller report"
+        "zipBeat": false,
+        "note": "SYNDICATION GAP (within vacant land): 6 views in 30 days, Homes.com the only top-10 source. Quietest listing in the book. Same pattern as 2000 Gun Club and 635 S Main.",
+        "reportDate": "2026-08-23",
+        "source": "ListTrac / MetroList agent report 'Online Activity Reports for your Listings'"
       },
       "marketing": {
         "period": "Jan 17, 2025 - Aug 23, 2026",
@@ -5212,15 +5276,16 @@
         }
       },
       "listTrac": {
-        "views": 1943,
+        "views": 1992,
         "shares": 17,
         "inquiries": 0,
-        "newPct": 98,
-        "last30": 158,
+        "newPct": 97,
+        "last30": 132,
         "since": "2025-06-20",
-        "note": "Beat its zip code. Zillow 79 and Realtor.com 32 of the last 30 days' 158 views.",
-        "reportDate": "2026-08-16",
-        "source": "ListTrac / MetroList weekly seller report"
+        "zipBeat": true,
+        "note": "Strongest of the vacant-land listings by a wide margin. Zillow 90, Realtor.com 30, Trulia 7, Homes.com 5 over the last 30 days. Beat its zip code.",
+        "reportDate": "2026-08-23",
+        "source": "ListTrac / MetroList agent report 'Online Activity Reports for your Listings'"
       },
       "marketing": {
         "period": "Jun 20, 2025 - Aug 23, 2026",
