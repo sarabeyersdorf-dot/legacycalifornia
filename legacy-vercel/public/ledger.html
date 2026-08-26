@@ -1214,7 +1214,7 @@ html:not(.js) .stat .v::after{width:46px;}
 
   /* ---------- animations ---------- */
   function observeReveals(root) {
-    const els = (root||document).querySelectorAll('.rv:not(.in)');
+    const els = [...(root||document).querySelectorAll('.rv:not(.in)')];
     if (REDUCED || !('IntersectionObserver' in window)) {
       els.forEach((el)=>el.classList.add('in')); return;
     }
@@ -1222,6 +1222,31 @@ html:not(.js) .stat .v::after{width:46px;}
       entries.forEach((en)=>{ if (en.isIntersecting){ en.target.classList.add('in'); io.unobserve(en.target); } });
     }, { rootMargin:'0px 0px -8% 0px', threshold:0.08 });
     els.forEach((el)=>io.observe(el));
+
+    // FAIL-SAFE. The reveal above is opacity:0 → .in, so any element the
+    // observer never reports stays permanently invisible while still taking up
+    // its full height — a big blank gap (the whole subscribe box + article body
+    // went missing this way on mobile). IntersectionObserver is known to drop
+    // callbacks during fast / inertial scrolling and across the mobile URL-bar
+    // resize, so never rely on it alone. A throttled scroll+resize sweep reveals
+    // anything whose top has reached the viewport, independent of the observer,
+    // so content can never be trapped hidden. Runs once immediately to catch
+    // whatever is already in view (or above it) on load.
+    const sweep = ()=>{
+      const vh = window.innerHeight || document.documentElement.clientHeight || 0;
+      let remaining = false;
+      for (const el of els) {
+        if (el.classList.contains('in')) continue;
+        if (el.getBoundingClientRect().top < vh * 0.94) { el.classList.add('in'); io.unobserve(el); }
+        else remaining = true;
+      }
+      if (!remaining) { window.removeEventListener('scroll', onScroll); window.removeEventListener('resize', onScroll); }
+    };
+    let queued = false;
+    const onScroll = ()=>{ if (queued) return; queued = true; requestAnimationFrame(()=>{ queued = false; sweep(); }); };
+    window.addEventListener('scroll', onScroll, { passive:true });
+    window.addEventListener('resize', onScroll);
+    sweep();
   }
 
   /* Stat tiles animate, but the DIGITS NEVER DO.
