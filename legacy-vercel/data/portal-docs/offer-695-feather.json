@@ -8,6 +8,14 @@
     "rev": "016588f3827a1c7000000029e854303"
   },
   {
+    "name": "20260825 Text Messages James and Dee Bradley",
+    "url": "/docs/offer-695-feather/20260825-text-messages-james-and-dee-bradley.pdf",
+    "scope": "transaction",
+    "visibility": "both",
+    "key": "offer-695-feather-20260825-text-messages-james-and-dee-bradley",
+    "rev": "01659e30e7f8af0000000029e854303"
+  },
+  {
     "name": "695 Feather BRBC executed",
     "url": "/docs/offer-695-feather/695-feather-brbc-executed.pdf",
     "scope": "transaction",
