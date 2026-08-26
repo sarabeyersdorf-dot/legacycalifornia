@@ -16,6 +16,7 @@
 import { adminClient } from '../_lib/supabase.js';
 import { pickEmailProvider, unsubscribeFooter } from '../_lib/email-html.js';
 import { derivePrefs, matchPct, fmtSpecs, reasonFor } from '../_lib/match.js';
+import { verifyCron } from '../_lib/cron-auth.js';
 
 const BATCH = 15;          // buyers processed per run
 const N = 4;               // homes per email
@@ -77,7 +78,7 @@ function renderText(agent, first, homes) {
 
 export default async function handler(req, res) {
   res.setHeader('Cache-Control', 'no-store'); // never serve a stale cron replay (Bug 8)
-  if (!process.env.PUBLISH_SECRET || req.query.key !== process.env.PUBLISH_SECRET) {
+  if (!verifyCron(req)) {
     return res.status(401).json({ success: false, error: 'unauthorized' });
   }
   if (process.env.BUYER_ALERTS_ENABLED !== 'true') {

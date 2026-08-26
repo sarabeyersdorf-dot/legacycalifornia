@@ -12,9 +12,10 @@
 
 import { adminClient } from '../_lib/supabase.js';
 import { extractYouTubeId, getVideoStats, youtubeConfigured } from '../_lib/youtube.js';
+import { verifyCron } from '../_lib/cron-auth.js';
 
 export default async function handler(req, res) {
-  if (!process.env.PUBLISH_SECRET || req.query.key !== process.env.PUBLISH_SECRET) {
+  if (!verifyCron(req)) {
     return res.status(401).json({ success: false, error: 'unauthorized' });
   }
   if (!youtubeConfigured()) {

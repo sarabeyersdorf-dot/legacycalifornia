@@ -25,6 +25,7 @@
 
 import { adminClient } from '../_lib/supabase.js';
 import { pickEmailProvider, bodyToHtml, renderTemplate, unsubscribeFooter } from '../_lib/email-html.js';
+import { verifyCron } from '../_lib/cron-auth.js';
 
 const PER_RUN     = Math.max(1, parseInt(process.env.EMAIL_PER_RUN  || '25', 10));
 const SEND_GAP    = Math.max(0, parseInt(process.env.EMAIL_SEND_GAP || '700', 10));
@@ -41,7 +42,7 @@ const isRateLimit = (msg) => /\b429\b|rate.?limit|too many|quota|daily.*limit|li
 
 export default async function handler(req, res) {
   res.setHeader('Cache-Control', 'no-store');
-  if (!process.env.PUBLISH_SECRET || req.query.key !== process.env.PUBLISH_SECRET) {
+  if (!verifyCron(req)) {
     return res.status(401).json({ success: false, error: 'unauthorized' });
   }
 
