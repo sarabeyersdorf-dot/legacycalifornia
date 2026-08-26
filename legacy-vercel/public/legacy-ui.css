@@ -499,6 +499,24 @@
 .lg-footer .lg-seal__mk   { color: var(--brass-bright); }
 .lg-footer .lg-mark:hover .lg-lock__sub { color: var(--brass-bright); }
 
+/* ── Site-wide HEADER brand: the real Legacy wordmark ──────────────────────
+   Replace the placeholder LP-seal + "Legacy Properties / Every Home Has A
+   Story" lockup with the brand wordmark image. Done once here, scoped to
+   .lg-header, so all ~45 pages that share this stylesheet update together and
+   the FOOTER keeps its dark-ground text lockup untouched. The link's
+   accessible name is preserved — the text is visually clipped, not removed —
+   so screen readers still announce "Legacy Properties". The transparent PNG
+   sits directly on the cream header (no white box). */
+.lg-header .lg-mark {
+  width: 164px; height: 40px; gap: 0;
+  background: url('/showcase/_brand/legacy-logo.png') left center / contain no-repeat;
+}
+.lg-header .lg-mark .lg-seal { display: none; }          /* decorative (aria-hidden) */
+.lg-header .lg-mark .lg-lock {                            /* keep a11y name, hide visually */
+  position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+  overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+}
+
 @media (prefers-reduced-motion: no-preference) {
   .lg-lock__word{ animation: lg-word-in .7s .08s cubic-bezier(.16,1,.3,1) backwards; }
   .lg-lock__sub { animation: lg-sub-in .85s .18s ease-out backwards; }
