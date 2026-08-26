@@ -445,6 +445,14 @@ function mapDocs(dealId, d, escrowIdByKey, manifest) {
     // it is NOT on file yet → surface it as 'missing' (was silently dropped),
     // internal-only, so the CRM shows the same file-gap the briefing does.
     const missing = !status;
+    // A CLOSED transaction's paperwork is complete by definition. If Cowork's
+    // compliance map still lists a doc as not-on-file (missing) after the deal
+    // closed, that's a stale gap — the deal closed, the file is moot — not a
+    // real outstanding task. Skipping it here stops closed deals from carrying
+    // perpetual "pending" document rows (23 such rows across 5 closed deals).
+    // Docs that ARE on file still emit, so the closed deal keeps its real
+    // paperwork; only the never-filed compliance stubs are retired.
+    if (missing && String(d.stage || '').toLowerCase() === 'closed') continue;
     const name = label[0];
     // Stable key: explicit `key` wins, else derived from the (stable) token.
     const doc_key = uniqueKey(String((isObj && (val.key || val.doc_key)) || `${prefix}-${token.toLowerCase()}`));
