@@ -93,6 +93,49 @@ export default async function handler(req, res) {
       }
     } catch (_) { /* migration 040 not run yet */ }
 
+    // Unread agent_updates (db/034): the free-text "notes to Claude" Sara & James
+    // log from the CRM (a text they got, a verbal update, anything the briefing has
+    // no other visibility into). These have their OWN read-back (?op=feed) that
+    // marks them read as it reads them — but that URL has to be called explicitly,
+    // and Cowork only ever calls THIS endpoint. So since 2026-07-31 nothing
+    // consumed them and they piled up unread (695 Feather's HELOC update, Eva
+    // Mifsud "not a lead", 1789 Love Creek "wants to list in Sept" — all lost for
+    // weeks). Fold the unread ones in here — the pull Cowork already makes every
+    // run — and mark them read in the same call, exactly like ?op=feed does.
+    // Crucially this is NOT deal-scoped, so a note with deal:null (which
+    // deal_portal_notes can never surface) finally reaches the briefing. This
+    // endpoint is key-gated and only Cowork calls it, so the read-flip only fires
+    // on a real briefing pull; nothing is deleted, so notes stay in the CRM log.
+    let agent_updates = [];
+    try {
+      const { data: uRows } = await supa.from('agent_updates')
+        .select('id, agent, deal, content, created_at, ' +
+          'tagged_deal:deals(source_key, address), tagged_lead:leads(first_name, last_name, email)')
+        .eq('read_by_briefing', false)
+        .order('created_at', { ascending: true })
+        .limit(100);
+      if (Array.isArray(uRows) && uRows.length) {
+        agent_updates = uRows.map((u) => ({
+          id:      u.id,
+          agent:   u.agent,
+          deal:    (u.tagged_deal && u.tagged_deal.source_key) || u.deal || null,
+          address: (u.tagged_deal && u.tagged_deal.address) || null,
+          lead:    u.tagged_lead
+                     ? ([u.tagged_lead.first_name, u.tagged_lead.last_name].filter(Boolean).join(' ') || u.tagged_lead.email || null)
+                     : null,
+          content: u.content,
+          at:      u.created_at
+        }));
+        const ids = uRows.map((u) => u.id);
+        // Mark read server-side — Cowork's environment can't UPDATE, so it can't
+        // do this itself; without it the same notes re-report every morning.
+        await supa.from('agent_updates')
+          .update({ read_by_briefing: true, read_by_briefing_at: new Date().toISOString() })
+          .in('id', ids)
+          .then(() => {}, () => {});
+      }
+    } catch (_) { /* agent_updates absent — never break the feedback pull over it */ }
+
     // Rejected timeline proposals (db/048): when the agent rejects a proposed
     // update, that's Cowork's cue it got a contract/scan wrong. Return the recent
     // rejections with the agent's correction note so Cowork fixes it (e.g. sets
@@ -165,8 +208,12 @@ export default async function handler(req, res) {
       cache_age_seconds: cacheAgeSeconds,
       stale,
       open_only: openOnly,   // done rows omitted unless ?all=1
-      counts,
+      counts: { ...counts, agent_updates: agent_updates.length },
       rejected_proposals,
+      // Unread free-text notes from Sara/James, now marked read as of this pull.
+      // High-value and small — placed before the big `tasks` array so a downstream
+      // fetch cap can never truncate it off the end.
+      agent_updates,
       // The list Cowork should act on first: flagged or annotated.
       needs_review: tasks.filter((t) => t.needs_attention || t.agent_note),
       deal_portal_notes,
