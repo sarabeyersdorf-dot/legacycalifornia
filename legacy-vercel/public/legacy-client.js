@@ -3673,7 +3673,6 @@ window.LGPortal = window.LGPortal || {
       </div>
       <div class="lp-section">
         <h3>Activity · ${events.length + notes.length} item${(events.length + notes.length) === 1 ? '' : 's'}</h3>
-        ${notesPanelHtml}
         ${activityHtml}
       </div>
       <div class="lp-section">
@@ -3690,6 +3689,19 @@ window.LGPortal = window.LGPortal || {
     const headEl = detailEl.querySelector('.ld-head');
     if (headEl) headEl.insertAdjacentHTML('afterend', railDetails);
     else detailEl.insertAdjacentHTML('beforeend', railDetails);
+
+    // Notes belong ABOVE the fold, not buried in the collapsed "Agent details"
+    // rail. A saved note that lived only in that rail read as "vanished" on
+    // reload — the composer's inline echo is gone after a full page load, and the
+    // agent won't think to expand a collapsed accordion to find it (Cowork 8/22:
+    // "saved ✓ then empty after reload"). The note was always in lead_notes; it
+    // was just hidden. Render the notes panel right under the composer so a saved
+    // note stays visible where the agent just typed it.
+    if (notesPanelHtml) {
+      const composerEl = detailEl.querySelector('[data-composer]');
+      if (composerEl) composerEl.insertAdjacentHTML('afterend', notesPanelHtml);
+      else if (headEl) headEl.insertAdjacentHTML('afterend', notesPanelHtml);
+    }
 
     // Right pane = LIVE client-portal preview (mirrors exactly what this client
     // sees at their private link; repaints as visibility toggles flip).
