@@ -209,6 +209,9 @@
     },
     "api/cron/drift-check.js": {
       "maxDuration": 60
+    },
+    "api/cron/email-queue.js": {
+      "maxDuration": 60
     }
   },
   "crons": [
@@ -258,6 +261,10 @@
     {
       "path": "/api/cron/agent-day-reminders?key=thisisasecret1234",
       "schedule": "0 14 * * *"
+    },
+    {
+      "path": "/api/cron/email-queue?key=thisisasecret1234",
+      "schedule": "* * * * *"
     }
   ]
 }

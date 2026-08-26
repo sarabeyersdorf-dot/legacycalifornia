@@ -2887,30 +2887,53 @@ body.lp-restyle {
             if (!designedHasContent(template)) { alert('Add a photo, a headline, or some body text to your design first.'); return; }
           } else if (!body) { bodyEl.focus(); return; }
           if (!currentIds.length) { resolve(); return; }
-          if (!window.confirm('Send this to ' + currentIds.length + ' contact' + (currentIds.length === 1 ? '' : 's') + '?')) return;
+          if (!window.confirm('Schedule this to ' + currentIds.length + ' contact' + (currentIds.length === 1 ? '' : 's') + '?\n\nThey send safely in the background so we never hit the email rate limit. Big lists spread across days if they exceed your provider’s daily limit. You can close this window — it keeps going.')) return;
 
           sendBtn.disabled = true; ledgerBtn.disabled = true; segSel.disabled = true;
           prog.style.display = 'block';
-          var ids = currentIds.slice();
-          var total = ids.length, done = 0, sent = 0, failed = 0, skipped = 0;
-          // Note: {first_name} isn't personalized server-side yet — strip the token
-          // so it doesn't ship literally. (Kept in the box as a future nicety.)
-          var sendBody = body.replace(/\{first_name\}/g, 'there');
-          for (var i = 0; i < ids.length; i += 40) {
-            var batch = ids.slice(i, i + 40);
-            var payload = { mode: 'send', lead_ids: batch, subject: subject, body: sendBody };
-            if (template) payload.template = template;
-            var j = await post(payload);
-            if (j && j.success) { sent += j.sent || 0; failed += j.failed || 0; skipped += (j.skipped || []).length; }
-            else { failed += batch.length; }
-            done += batch.length;
-            progBar.style.width = Math.round(done / total * 100) + '%';
-            progText.textContent = 'Sent ' + sent + ' of ' + total + (skipped ? ' · ' + skipped + ' skipped' : '') + (failed ? ' · ' + failed + ' failed' : '');
-          }
-          progText.textContent = '✓ Done — ' + sent + ' sent'
-            + (skipped ? ', ' + skipped + ' skipped (unsubscribed / no email)' : '')
-            + (failed ? ', ' + failed + ' failed' : '') + '.';
+          progBar.style.width = '0%';
+          progText.textContent = 'Scheduling…';
+
+          // Hand the whole list to the queue in one shot; api/cron/email-queue
+          // drains it paced (under Resend's rate limit) and stops at a daily cap.
+          var payload = { mode: 'schedule', lead_ids: currentIds.slice(), subject: subject, body: body };
+          if (template) payload.template = template;
+          var j = await post(payload);
           sendBtn.disabled = false; ledgerBtn.disabled = false; segSel.disabled = false;
+          if (!j || !j.success || !j.campaign_id) {
+            progText.textContent = (j && j.error) ? ('Couldn’t schedule: ' + j.error) : 'Couldn’t schedule the send.';
+            return;
+          }
+          var campaignId = j.campaign_id, queued = j.queued || 0;
+          progText.textContent = '✓ Scheduled ' + queued + ' email' + (queued === 1 ? '' : 's')
+            + ' — now sending in the background. You can close this; it keeps going.';
+
+          // Poll progress for a few minutes so she can watch it drain. The send
+          // continues on the server regardless of whether this stays open.
+          var polls = 0, MAX_POLLS = 90;   // ~7.5 min at 5s
+          var poll = setInterval(async function () {
+            polls++;
+            var s = await post({ mode: 'campaign_status', campaign_id: campaignId });
+            if (!s || !s.success) return;
+            var doneN = (s.sent || 0) + (s.failed || 0) + (s.skipped || 0);
+            progBar.style.width = (s.total ? Math.round(doneN / s.total * 100) : 0) + '%';
+            if (s.done) {
+              clearInterval(poll);
+              progText.textContent = '✓ Done — ' + (s.sent || 0) + ' sent'
+                + (s.skipped ? ', ' + s.skipped + ' skipped (unsubscribed / no email)' : '')
+                + (s.failed ? ', ' + s.failed + ' failed' : '') + '.';
+              return;
+            }
+            progText.textContent = 'Sending… ' + (s.sent || 0) + ' of ' + s.total + ' sent'
+              + (s.skipped ? ' · ' + s.skipped + ' skipped' : '')
+              + (s.failed ? ' · ' + s.failed + ' failed' : '')
+              + (s.queued ? ' · ' + s.queued + ' waiting' : '');
+            if (polls >= MAX_POLLS) {
+              clearInterval(poll);
+              progText.textContent = (s.sent || 0) + ' sent so far · ' + (s.queued || 0)
+                + ' still sending automatically in the background (spread across days to respect your provider’s daily limit).';
+            }
+          }, 5000);
         });
       })();
       </script>
