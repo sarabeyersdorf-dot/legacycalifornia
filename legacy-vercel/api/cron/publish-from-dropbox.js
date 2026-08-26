@@ -41,6 +41,8 @@ const GITHUB_BRANCH = "main";
 // of what Vercel's own "Root Directory" project setting is.
 const GITHUB_FILE_PATH = "legacy-vercel/data/deals.json";
 
+import { verifyCron } from '../_lib/cron-auth.js';
+
 export default async function handler(req, res) {
   res.setHeader('Cache-Control', 'no-store'); // never serve a stale cron replay (Bug 8)
   const {
@@ -54,7 +56,7 @@ export default async function handler(req, res) {
   } = process.env;
 
   // --- auth check ---
-  if (!PUBLISH_SECRET || req.query.key !== PUBLISH_SECRET) {
+  if (!verifyCron(req)) {
     res.status(401).json({ success: false, error: "unauthorized" });
     return;
   }

@@ -11,12 +11,13 @@
 
 import { adminClient } from '../_lib/supabase.js';
 import { pickEmailProvider, bodyToHtml, unsubscribeFooter } from '../_lib/email-html.js';
+import { verifyCron } from '../_lib/cron-auth.js';
 
 const BATCH = 20;
 
 export default async function handler(req, res) {
   res.setHeader('Cache-Control', 'no-store'); // never serve a stale cron replay (Bug 8)
-  if (!process.env.PUBLISH_SECRET || req.query.key !== process.env.PUBLISH_SECRET) {
+  if (!verifyCron(req)) {
     return res.status(401).json({ success: false, error: 'unauthorized' });
   }
   const supa = adminClient();

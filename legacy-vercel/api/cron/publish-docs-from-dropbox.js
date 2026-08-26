@@ -26,6 +26,7 @@
 //   PUBLISH_SECRET, GITHUB_TOKEN, DROPBOX_APP_KEY/SECRET/REFRESH_TOKEN, SYNC_SECRET
 
 import { createRequire } from 'module';
+import { verifyCron } from '../_lib/cron-auth.js';
 
 const GITHUB_OWNER = 'sarabeyersdorf-dot';
 const GITHUB_REPO = 'legacycalifornia';
@@ -174,7 +175,7 @@ async function ghGetJson(env, repoPath) {
 export default async function handler(req, res) {
   res.setHeader('Cache-Control', 'no-store'); // never serve a stale cron replay (Bug 8)
   const env = process.env;
-  if (!env.PUBLISH_SECRET || req.query.key !== env.PUBLISH_SECRET) {
+  if (!verifyCron(req)) {
     return res.status(401).json({ success: false, error: 'unauthorized' });
   }
   const onlyDeal = typeof req.query.deal === 'string' ? req.query.deal.trim() : '';

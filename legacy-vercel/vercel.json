@@ -240,10 +240,10 @@
       "schedule": "*/15 * * * *"
     },
     {
-      "path": "/api/cron/publish-from-dropbox?key=thisisasecret1234",
+      "path": "/api/cron/publish-from-dropbox",
 "schedule": "0 * * * *"    },
     {
-      "path": "/api/cron/publish-docs-from-dropbox?key=thisisasecret1234",
+      "path": "/api/cron/publish-docs-from-dropbox",
       "schedule": "40 6 * * *"
     },
     {
@@ -251,19 +251,19 @@
       "schedule": "20 * * * *"
     },
     {
-      "path": "/api/cron/buyer-matches?key=thisisasecret1234",
+      "path": "/api/cron/buyer-matches",
       "schedule": "12 15 * * *"
     },
     {
-      "path": "/api/cron/youtube-views?key=thisisasecret1234",
+      "path": "/api/cron/youtube-views",
       "schedule": "45 14 * * *"
     },
     {
-      "path": "/api/cron/agent-day-reminders?key=thisisasecret1234",
+      "path": "/api/cron/agent-day-reminders",
       "schedule": "0 14 * * *"
     },
     {
-      "path": "/api/cron/email-queue?key=thisisasecret1234",
+      "path": "/api/cron/email-queue",
       "schedule": "* * * * *"
     }
   ]

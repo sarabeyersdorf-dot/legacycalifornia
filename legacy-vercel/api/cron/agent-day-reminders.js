@@ -11,6 +11,7 @@
 
 import { adminClient } from '../_lib/supabase.js';
 import { sendSMS } from '../_lib/twilio.js';
+import { verifyCron } from '../_lib/cron-auth.js';
 
 const TZ = 'America/Los_Angeles';
 const dateFmt   = new Intl.DateTimeFormat('en-CA', { timeZone: TZ, year: 'numeric', month: '2-digit', day: '2-digit' });
@@ -22,7 +23,7 @@ const FALLBACK_PHONE = { sara: '209-559-4966', james: '209-770-7523' };
 const MAX_SMS = 600;   // a few segments — trimmed below if a day is very full
 
 export default async function handler(req, res) {
-  if (!process.env.PUBLISH_SECRET || req.query.key !== process.env.PUBLISH_SECRET) {
+  if (!verifyCron(req)) {
     return res.status(401).json({ success: false, error: 'unauthorized' });
   }
 
