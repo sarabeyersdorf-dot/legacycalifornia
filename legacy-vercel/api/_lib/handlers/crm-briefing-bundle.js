@@ -26,6 +26,7 @@ import calendar     from './crm-briefing-calendar.js';
 import morningBrief from './crm-morning-brief.js';
 import timeline     from './crm-timeline.js';
 import driftCheck   from './crm-drift-check.js';
+import { adminClient } from '../supabase.js';
 import { handleOptions, ok, fail } from '../cors.js';
 
 // Invoke a handler with a synthetic GET request and a res that captures the
@@ -54,6 +55,15 @@ export default async function handler(req, res) {
   if (secret && req.query?.key !== secret) return fail(res, 401, 'bad key');
 
   const key = req.query?.key;
+
+  // ── compact=1 — a small, self-contained per-deal export (~one row per deal
+  // with agent / stage / alerts[] / docs{}). The full bundle and the raw
+  // deals.json are both too large for James's Cowork fetch tool (dies ~128 KiB;
+  // deals.json is 266 KB, this bundle ~90 KB). This projection stays well under
+  // 100 KB and unblocks both. Read-only; no side effects.
+  if (['1', 'true', 'yes'].includes(String(req.query?.compact || '').toLowerCase())) {
+    return compactBundle(res, key);
+  }
   const days = req.query?.days || 7;
   const doReconcile = String(req.query?.reconcile || 'false') === 'true';
 
@@ -114,6 +124,55 @@ export default async function handler(req, res) {
     degraded: failed.length > 0,
     failed_sections: failed
   });
+}
+
+// compact=1 export — one small row per deal, sourced with lean direct queries
+// (never the heavy timeline). Shape per deal:
+//   { key, address, agent, stage, coe_date, alerts: [...], docs: { name: status } }
+// alerts[] are the drift-check findings for that deal (best-effort — a drift
+// failure just leaves alerts empty, never fails the export).
+async function compactBundle(res, key) {
+  const supa = adminClient();
+  const nowIso = new Date().toISOString();
+
+  const { data: deals, error: dErr } = await supa.from('deals')
+    .select('id, source_key, address, agent, stage, coe_date');
+  if (dErr) return fail(res, 500, `deals: ${dErr.message}`);
+
+  const byId = new Map();
+  const bySrc = new Map();
+  for (const d of (deals || [])) {
+    const row = {
+      key: d.source_key, address: d.address || null,
+      agent: d.agent || null, stage: d.stage || null,
+      coe_date: d.coe_date || null, alerts: [], docs: {}
+    };
+    byId.set(d.id, row);
+    if (d.source_key) bySrc.set(d.source_key, row);
+  }
+
+  // docs{} — one entry per document: name → status.
+  const { data: docs } = await supa.from('deal_documents').select('deal_id, name, status');
+  for (const doc of (docs || [])) {
+    const row = byId.get(doc.deal_id);
+    if (row && doc.name) row.docs[doc.name] = doc.status || 'unknown';
+  }
+
+  // alerts[] — group drift-check findings by deal source_key. Best-effort.
+  try {
+    const { status, body } = await invoke(driftCheck, { key, severity: 'all' });
+    if (status >= 200 && status < 300 && body && Array.isArray(body.findings)) {
+      for (const f of body.findings) {
+        const row = f.deal && bySrc.get(f.deal);
+        if (!row) continue;
+        const { deal, severity, check, ...extra } = f;
+        row.alerts.push({ sev: severity, check, ...extra });
+      }
+    }
+  } catch (_) { /* alerts stay empty rather than fail the export */ }
+
+  const out = [...byId.values()].sort((a, b) => String(a.key || '').localeCompare(String(b.key || '')));
+  return ok(res, { generated_at: nowIso, compact: true, deal_count: out.length, deals: out });
 }
 
 // Drop the success flag + the fields lifted to the section wrapper.
