@@ -690,33 +690,6 @@
   <button class="lg-navtoggle" data-lg-nav="#siteNav" aria-expanded="false">Menu</button>
 </div></header>
 
-<!-- ============ BRAND FILM — slim wordmark band, plays once then rests ============
-     Homepage-only brand moment. Muted + playsinline so it can autoplay on mobile;
-     NO loop, so it plays through once and holds on its final frame. Height-capped
-     so it stays a slim strip. Under reduced-motion it holds on the first frame
-     instead of playing. Background is a dark ink placeholder behind the video —
-     if the animation's own background isn't dark, set --brandfilm-bg to match. -->
-<div class="lg-brandfilm" aria-hidden="true">
-  <video class="lg-brandfilm__v" muted playsinline preload="auto">
-    <source src="/showcase/_brand/legacy-banner.mp4" type="video/mp4">
-  </video>
-</div>
-<style>
-  .lg-brandfilm{ --brandfilm-bg:#141110; background:var(--brandfilm-bg); line-height:0; text-align:center; overflow:hidden; }
-  .lg-brandfilm__v{ display:inline-block; width:auto; height:150px; max-width:100%; object-fit:contain; vertical-align:top; }
-  @media (max-width:640px){ .lg-brandfilm__v{ height:96px; } }
-</style>
-<script>
-  (function(){
-    var v = document.querySelector('.lg-brandfilm__v');
-    if(!v) return;
-    var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    if(reduce){ return; }                         // hold on first frame, don't autoplay
-    var go = function(){ var p = v.play && v.play(); if(p && p.catch){ p.catch(function(){}); } };
-    if(v.readyState >= 2) go(); else v.addEventListener('loadeddata', go, { once:true });
-  })();
-</script>
-
 <!-- ============ HERO (Legacy UI · Variant B — video hero) ============ -->
 <section class="lg-hero">
   <div class="lg-hero__art lg-hero__art--video">
