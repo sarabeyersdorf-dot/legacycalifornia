@@ -160,22 +160,55 @@ async function list(supa, profile, res) {
     const unanswered = [...latestByContact.values()].filter((m) => m.direction === 'inbound');
     const ids = unanswered.map((m) => m.contact_id);
     let leadsById = new Map();
+    // The agent's REPLIES live in `messages` (outbound), keyed by lead_id — the
+    // SAME leads.id as deal_messages.contact_id. deal_messages is inbound-only
+    // for email, so without merging these an email flag could NEVER clear: a
+    // reply lands in `messages`, which this lane never read (Cowork, 8/26). Pull
+    // each contact's latest outbound so a contact whose inbound predates a logged
+    // reply drops off — the merge is what makes the lane capable of clearing.
+    let latestOutByLead = new Map();
     if (ids.length) {
       let lq = supa.from('leads').select('id, first_name, last_name, email, phone, status, assigned_agent').in('id', ids).eq('status', 'active');
       if (!broker) lq = lq.eq('assigned_agent', me);
-      const { data: ls } = await lq;
+      const [{ data: ls }, { data: outs }] = await Promise.all([
+        lq,
+        supa.from('messages').select('lead_id, created_at')
+          .in('lead_id', ids).eq('direction', 'outbound')
+          .order('created_at', { ascending: false })
+      ]);
       leadsById = new Map((ls || []).map((l) => [l.id, l]));
+      for (const o of (outs || [])) {
+        if (o.lead_id && !latestOutByLead.has(o.lead_id)) latestOutByLead.set(o.lead_id, o.created_at);
+      }
     }
+    // The only true noise is agents testing their own system — exclude their own
+    // and test addresses. NOT bulk-send replies: a person on a 264-recipient
+    // newsletter hitting reply is a hand-raise, the highest-value inbound a
+    // listing agent gets (Cowork retraction, 8/26).
+    const isTestContact = (l) => {
+      const em = String(l.email || '').toLowerCase();
+      if (/^sarasellscalifornia(\+[^@]*)?@gmail\.com$/.test(em)) return true;
+      if (em === 'jlbeyersdorf@gmail.com') return true;
+      const nm = `${l.first_name || ''} ${l.last_name || ''}`.toLowerCase();
+      return /\btest\b/.test(nm) || nm.includes('cowork');
+    };
     for (const m of unanswered) {
       const l = leadsById.get(m.contact_id);
       if (!l) continue; // archived/converted or not this agent's
+      if (isTestContact(l)) continue; // agents testing their own system
+      // Answered? A logged outbound reply newer than their inbound clears it.
+      const outAt = latestOutByLead.get(m.contact_id);
+      if (outAt && new Date(outAt).getTime() > new Date(m.created_at).getTime()) continue;
       const ageDays = (Date.now() - new Date(m.created_at).getTime()) / DAY;
-      const ch = m.channel === 'email' ? 'Email' : m.channel === 'call' ? 'Missed call' : 'Text';
+      const ch   = m.channel === 'email' ? 'Email' : m.channel === 'call' ? 'Missed call' : 'Text';
+      const verb = m.channel === 'email' ? 'emailed' : m.channel === 'call' ? 'called' : 'texted';
+      const back = m.channel === 'call' ? "you haven't called back" : "you haven't replied";
+      const who  = fullName(l) || l.email || l.phone || 'They';
       add({
         key: `msg:${m.contact_id}`, kind: 'unanswered', lead_id: l.id, appointment_id: null,
         name: fullName(l) || l.email || l.phone || 'Contact',
-        subtitle: [`${ch} · unanswered`, m.subject ? String(m.subject).slice(0, 60) : (m.content ? String(m.content).slice(0, 60) : '')].filter(Boolean).join(' · '),
-        reasons: [`${ch} ${relTime(m.created_at)} — no reply yet`],
+        subtitle: [`${ch} · awaiting your reply`, m.subject ? String(m.subject).slice(0, 60) : (m.content ? String(m.content).slice(0, 60) : '')].filter(Boolean).join(' · '),
+        reasons: [`${who} ${verb} ${relTime(m.created_at)} — ${back} yet`],
         when: m.created_at,
         priority: ageDays < 1 ? 88 : ageDays < 3 ? 80 : 66,
         phone: l.phone || null, email: l.email || null,
