@@ -617,6 +617,32 @@ export default async function handler(req, res) {
         dealPhotoOverride = (data && data[0] && data[0].photo_override) || null;
       }
     } catch (_) { /* never break the portal over a photo */ }
+
+    // Marketing digest — Cowork reads the weekly ListTrac / Homes.com emails and
+    // writes the figures into the deal's marketing_stats (via deals.json). The
+    // seller portal's "Marketing activity" panel renders portal.marketing
+    // directly (views, shares, inquiries, top sites/cities, period). This is the
+    // real source — the old listing_stats table was an unused IDX-webhook stub
+    // that was never populated. Match the deal to this listing by MLS number,
+    // then exact address. Fail-soft; the frontend hides the panel when null.
+    let dealMarketing = null;
+    try {
+      let mrow = null;
+      if (listing.mls_number) {
+        const { data } = await supa.from('deals').select('marketing_stats')
+          .eq('mls_number', String(listing.mls_number)).not('marketing_stats', 'is', null).limit(1);
+        mrow = data && data[0];
+      }
+      if (!mrow && listing.address) {
+        const { data } = await supa.from('deals').select('marketing_stats')
+          .eq('address', listing.address).not('marketing_stats', 'is', null).limit(1);
+        mrow = data && data[0];
+      }
+      const ms = mrow && mrow.marketing_stats;
+      if (ms && typeof ms === 'object' && (ms.views != null || (Array.isArray(ms.top_sites) && ms.top_sites.length))) {
+        dealMarketing = ms;
+      }
+    } catch (_) { /* marketing panel is best-effort */ }
     // Uploaded deal photo first; then real MLS photo; then the YouTube tour's
     // thumbnail (4:3 hqdefault) so a listing with a video tour is never blank.
     const photo = dealPhotoOverride
@@ -705,7 +731,8 @@ export default async function handler(req, res) {
       documents,
       activity:  activityArr,
       sharing,
-      media
+      media,
+      marketing: dealMarketing
     };
 
     // 15. Escrow timeline — when this listing has a live deal, the portal grows
