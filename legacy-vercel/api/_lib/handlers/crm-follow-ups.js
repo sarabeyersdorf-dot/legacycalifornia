@@ -160,24 +160,58 @@ async function list(supa, profile, res) {
     const unanswered = [...latestByContact.values()].filter((m) => m.direction === 'inbound');
     const ids = unanswered.map((m) => m.contact_id);
     let leadsById = new Map();
-    // The agent's REPLIES live in `messages` (outbound), keyed by lead_id — the
-    // SAME leads.id as deal_messages.contact_id. deal_messages is inbound-only
-    // for email, so without merging these an email flag could NEVER clear: a
-    // reply lands in `messages`, which this lane never read (Cowork, 8/26). Pull
-    // each contact's latest outbound so a contact whose inbound predates a logged
-    // reply drops off — the merge is what makes the lane capable of clearing.
-    let latestOutByLead = new Map();
+    // The agent's EMAIL REPLIES live in `messages` (outbound), keyed by lead_id
+    // — the SAME leads.id as deal_messages.contact_id. deal_messages is
+    // inbound-only for email, so without merging these an email flag could NEVER
+    // clear: a reply lands in `messages`, which this lane never read (Cowork,
+    // 8/26). Pull each contact's latest EMAIL outbound so a contact whose inbound
+    // predates a logged reply drops off.
+    //
+    // BUT a bulk newsletter reaches these contacts too, and it is NOT a reply.
+    // Counting any newer outbound as a reply let a 200-recipient Ledger blast
+    // silently clear genuinely-open client threads (Cowork 4th pass, 8/26 —
+    // verified: 200 recipients, one subject, 01:50Z, sequence_id NULL). There is
+    // no thread-id or campaign column to key on and sequence_id is NULL on the
+    // blast, so we discriminate by FAN-OUT: an outbound whose (subject, ~2-min
+    // window) reached many recipients is a blast and never counts as a reply; a
+    // real 1:1 reply reaches one. Scope is email only — text/call flags still
+    // clear off deal_messages direction as before.
+    const BULK_MIN_RECIPIENTS = 6;                                   // >5, per Cowork
+    const bucketOf = (ts) => Math.floor(new Date(ts).getTime() / 120000); // 2-min bucket
+    let latestOutByLead = new Map();                                // email replies only
     if (ids.length) {
       let lq = supa.from('leads').select('id, first_name, last_name, email, phone, status, assigned_agent').in('id', ids).eq('status', 'active');
       if (!broker) lq = lq.eq('assigned_agent', me);
       const [{ data: ls }, { data: outs }] = await Promise.all([
         lq,
-        supa.from('messages').select('lead_id, created_at')
-          .in('lead_id', ids).eq('direction', 'outbound')
+        supa.from('messages').select('lead_id, created_at, subject')
+          .in('lead_id', ids).eq('direction', 'outbound').eq('channel', 'email')
           .order('created_at', { ascending: false })
       ]);
       leadsById = new Map((ls || []).map((l) => [l.id, l]));
+
+      // Which of these candidate outbounds are blasts? Count distinct recipients
+      // of each (subject, bucket) across the WHOLE table — a filtered-to-our-ids
+      // query would only see the recipients we already care about and miss the
+      // fan-out. A subject reused weeks apart is disambiguated by the time bucket.
+      const subjects = [...new Set((outs || []).map((o) => o.subject).filter(Boolean))];
+      const bulkKeys = new Set();                                   // `${subject}|${bucket}`
+      if (subjects.length) {
+        const { data: fan } = await supa.from('messages')
+          .select('subject, created_at, lead_id')
+          .eq('direction', 'outbound').eq('channel', 'email').in('subject', subjects);
+        const recipsByKey = new Map();
+        for (const r of (fan || [])) {
+          if (!r.subject) continue;
+          const k = `${r.subject}|${bucketOf(r.created_at)}`;
+          let s = recipsByKey.get(k); if (!s) { s = new Set(); recipsByKey.set(k, s); }
+          s.add(r.lead_id);
+        }
+        for (const [k, s] of recipsByKey) if (s.size >= BULK_MIN_RECIPIENTS) bulkKeys.add(k);
+      }
+      const isBlast = (o) => o.subject && bulkKeys.has(`${o.subject}|${bucketOf(o.created_at)}`);
       for (const o of (outs || [])) {
+        if (isBlast(o)) continue;                                   // newsletter, not a reply
         if (o.lead_id && !latestOutByLead.has(o.lead_id)) latestOutByLead.set(o.lead_id, o.created_at);
       }
     }
@@ -196,8 +230,10 @@ async function list(supa, profile, res) {
       const l = leadsById.get(m.contact_id);
       if (!l) continue; // archived/converted or not this agent's
       if (isTestContact(l)) continue; // agents testing their own system
-      // Answered? A logged outbound reply newer than their inbound clears it.
-      const outAt = latestOutByLead.get(m.contact_id);
+      // Answered? A logged individual EMAIL reply newer than their inbound clears
+      // an email flag. (latestOutByLead is email-only and blast-filtered; text /
+      // call flags clear off deal_messages direction, handled above.)
+      const outAt = m.channel === 'email' ? latestOutByLead.get(m.contact_id) : null;
       if (outAt && new Date(outAt).getTime() > new Date(m.created_at).getTime()) continue;
       const ageDays = (Date.now() - new Date(m.created_at).getTime()) / DAY;
       const ch   = m.channel === 'email' ? 'Email' : m.channel === 'call' ? 'Missed call' : 'Text';
