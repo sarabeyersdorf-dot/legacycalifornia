@@ -2,7 +2,7 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>https://legacycalifornia.com/</loc>
-    <lastmod>2026-07-29</lastmod>
+    <lastmod>2026-08-26</lastmod>
     <priority>1.0</priority>
   </url>
   <url>
@@ -22,37 +22,37 @@
   </url>
   <url>
     <loc>https://legacycalifornia.com/towns.html</loc>
-    <lastmod>2026-07-29</lastmod>
+    <lastmod>2026-08-26</lastmod>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://legacycalifornia.com/town-murphys.html</loc>
-    <lastmod>2026-07-29</lastmod>
+    <lastmod>2026-08-26</lastmod>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://legacycalifornia.com/town-arnold.html</loc>
-    <lastmod>2026-07-29</lastmod>
+    <lastmod>2026-08-26</lastmod>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://legacycalifornia.com/town-angels-camp.html</loc>
-    <lastmod>2026-07-29</lastmod>
+    <lastmod>2026-08-26</lastmod>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://legacycalifornia.com/town-copperopolis.html</loc>
-    <lastmod>2026-07-29</lastmod>
+    <lastmod>2026-08-26</lastmod>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://legacycalifornia.com/town-sutter-creek.html</loc>
-    <lastmod>2026-07-29</lastmod>
+    <lastmod>2026-08-26</lastmod>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://legacycalifornia.com/town-shenandoah-valley.html</loc>
-    <lastmod>2026-07-29</lastmod>
+    <lastmod>2026-08-26</lastmod>
     <priority>0.8</priority>
   </url>
   <url>
@@ -98,6 +98,11 @@
   <url>
     <loc>https://legacycalifornia.com/find-my-match.html</loc>
     <lastmod>2026-07-29</lastmod>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://legacycalifornia.com/contact.html</loc>
+    <lastmod>2026-08-26</lastmod>
     <priority>0.7</priority>
   </url>
   <url>
