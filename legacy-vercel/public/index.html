@@ -366,13 +366,28 @@
 .journey-step:last-child { border-right: none; }
 .journey-step.active { background: var(--ink); color: var(--shell); }
 .journey-step:hover:not(.active) { color: var(--brass); }
-/* Buy/sell pills: larger and rectangular (not oval) so the primary
-   "buying vs selling" choice reads as a clear pair of buttons. */
-.lg-chip.journey-side {
-  font-size: 13px; letter-spacing: .08em; padding: 15px 34px; border-radius: 8px; gap: 9px;
+/* Journey pills — buy/sell (primary) and the step chips — larger and
+   rectangular (not oval) so the choices read as clear buttons. */
+.lg-chip.journey-side, .lg-chip.journey-step {
+  letter-spacing: .08em; border-radius: 8px; gap: 9px;
+}
+.lg-chip.journey-side { font-size: 13px; padding: 15px 34px; }
+/* Full border + white fill overrides the legacy segmented-bar .journey-step
+   rules (border-right only, transparent bg) so every step chip is a clean
+   rounded rectangle matching the buy/sell pills. */
+.lg-chip.journey-step {
+  font-size: 12px; padding: 12px 22px;
+  background: var(--lg-white);
+  border: 1px solid color-mix(in srgb, var(--lg-a1) 30%, transparent);
+}
+/* Selected pill uses the season's brand accent (terracotta), not the flat
+   near-black ink, so the active choice reads on-brand instead of gray. */
+.lg-chip.journey-side.is-on, .lg-chip.journey-step.is-on {
+  background: var(--lg-c1-deep); color: var(--lg-white); border-color: var(--lg-c1-deep);
 }
 @media (max-width: 640px) {
   .lg-chip.journey-side { font-size: 12px; padding: 13px 24px; }
+  .lg-chip.journey-step { font-size: 11px; padding: 11px 16px; }
 }
 .journey-link {
   font-family: var(--mono); font-size: 10px; letter-spacing: 0.18em;
