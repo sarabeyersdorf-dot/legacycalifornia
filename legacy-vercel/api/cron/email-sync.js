@@ -40,7 +40,7 @@ import { detectLeadSource, parseLead } from '../_lib/lead-intake.js';
 import { alertAgents } from '../_lib/agent-alert.js';
 import { getCallerProfile, isAgent } from '../_lib/auth.js';
 
-const GMAIL_METADATA_HEADERS = ['From', 'Subject'];
+const GMAIL_METADATA_HEADERS = ['From', 'To', 'Subject'];
 const MAX_MESSAGES_PER_MAILBOX = 50; // keep each 15-minute run bounded
 
 const agentForMailbox = (addr) => /james/i.test(String(addr || '')) ? 'james' : 'sara';
@@ -198,6 +198,18 @@ export function extractEmailAddress(fromHeader) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmed) ? trimmed : null;
 }
 
+// Every address out of a To header (which may list several), lowercased. Used to
+// match a sent reply back to the lead it was sent to.
+export function extractRecipientEmails(toHeader) {
+  const out = [];
+  const matches = String(toHeader || '').match(/[^\s,<>"']+@[^\s,<>"']+\.[^\s,<>"']+/g) || [];
+  for (const m of matches) {
+    const e = m.trim().toLowerCase();
+    if (/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e)) out.push(e);
+  }
+  return out;
+}
+
 function headerValue(headers, name) {
   const h = (headers || []).find((x) => String(x.name || '').toLowerCase() === name.toLowerCase());
   return h ? h.value : null;
@@ -236,6 +248,19 @@ async function listMessageIds(accessToken, afterUnixSeconds) {
   return (json.messages || []).map((m) => m.id);
 }
 
+// The agent's OWN sent mail, since the last sync. This is what lets a reply typed
+// in Gmail reach the conversation store — see the outbound pass in syncMailbox.
+async function listSentMessageIds(accessToken, afterUnixSeconds) {
+  const q = `in:sent after:${afterUnixSeconds}`;
+  const url = `https://gmail.googleapis.com/gmail/v1/users/me/messages?${new URLSearchParams({
+    q, maxResults: String(MAX_MESSAGES_PER_MAILBOX)
+  })}`;
+  const r = await fetch(url, { headers: { Authorization: `Bearer ${accessToken}` } });
+  const json = await r.json().catch(() => ({}));
+  if (!r.ok) throw new Error(`list sent failed (${r.status}): ${json.error?.message || 'unknown'}`);
+  return (json.messages || []).map((m) => m.id);
+}
+
 async function getMessageMeta(accessToken, id) {
   const params = new URLSearchParams({ format: 'metadata' });
   GMAIL_METADATA_HEADERS.forEach((h) => params.append('metadataHeaders', h));
@@ -255,22 +280,29 @@ async function syncMailbox(supa, account, clientId, clientSecret) {
     ? Math.floor(new Date(account.last_synced_at).getTime() / 1000)
     : Math.floor((Date.now() - 24 * 3600 * 1000) / 1000);
 
-  const ids = await listMessageIds(accessToken, sinceUnix);
+  const ids     = await listMessageIds(accessToken, sinceUnix);
+  const sentIds = await listSentMessageIds(accessToken, sinceUnix);
 
-  let inserted = 0, matched = 0, skipped = 0, leadsCreated = 0;
+  let inserted = 0, matched = 0, skipped = 0, leadsCreated = 0, sentInserted = 0, sentSkipped = 0;
   const syncStartedAt = new Date().toISOString();
 
-  if (ids.length) {
-    // Pull every lead's email once per mailbox sync rather than per-message —
-    // mirrors the inbound.js pattern of loading `leads` once and matching
-    // in memory.
+  // Pull every lead's email once per mailbox sync (mirrors inbound.js) and share
+  // the index across both the inbound and the outbound/sent passes.
+  let leadByEmail = null;
+  const ensureLeadIndex = async () => {
+    if (leadByEmail) return leadByEmail;
     const { data: leads } = await supa
       .from('leads').select('id, email').not('email', 'is', null).limit(5000);
-    const leadByEmail = new Map();
+    leadByEmail = new Map();
     for (const l of (leads || [])) {
       const e = String(l.email || '').trim().toLowerCase();
       if (e) leadByEmail.set(e, l.id);
     }
+    return leadByEmail;
+  };
+
+  if (ids.length) {
+    await ensureLeadIndex();
 
     for (const id of ids) {
       try {
@@ -347,6 +379,46 @@ async function syncMailbox(supa, account, clientId, clientSecret) {
     }
   }
 
+  // ── OUTBOUND: ingest the agent's own SENT mail ────────────────────────────
+  // Both agents reply to clients from Gmail, not the CRM, so their replies never
+  // landed anywhere the system could see — deal_messages held only *received*
+  // email, and the "unanswered" follow-up lane could therefore never clear once a
+  // client emailed in (Cowork 5th pass). File each sent message to a known lead
+  // as an OUTBOUND deal_messages row — the same store, keyed the same way — so the
+  // detector's "latest message is inbound → still unanswered" logic clears the
+  // moment a reply goes out. Sent mail to non-leads is skipped (not a tracked
+  // thread). Bulk campaigns (the Ledger, prospecting blasts) go out through Resend
+  // and are logged in `messages`, NOT the agent's Gmail, so they don't reach here.
+  if (sentIds.length) {
+    await ensureLeadIndex();
+    for (const id of sentIds) {
+      try {
+        const msg = await getMessageMeta(accessToken, id);
+        const headers = msg?.payload?.headers || [];
+        const subject = headerValue(headers, 'Subject') || null;
+        const snippet = msg?.snippet || null;
+        let contactId = null, hitEmail = null;
+        for (const em of extractRecipientEmails(headerValue(headers, 'To'))) {
+          const cid = leadByEmail.get(em);
+          if (cid) { contactId = cid; hitEmail = em; break; }
+        }
+        if (!contactId) { sentSkipped += 1; continue; }   // outbound to a non-lead — not a tracked thread
+        const { error: insErr } = await supa.from('deal_messages').insert({
+          contact_id:        contactId,
+          direction:          'outbound',
+          channel:            'email',
+          content:             snippet,
+          subject,
+          raw_email_address:  hitEmail,
+          status:              'active'
+        });
+        if (!insErr) sentInserted += 1; else sentSkipped += 1;
+      } catch (_) {
+        sentSkipped += 1;   // one bad message never aborts the mailbox sync
+      }
+    }
+  }
+
   // Reaching here means refreshAccessToken() succeeded, so whatever token
   // problem (if any) previously flagged this mailbox is resolved — clear it
   // alongside the routine last_synced_at advance.
@@ -359,7 +431,8 @@ async function syncMailbox(supa, account, clientId, clientSecret) {
     })
     .eq('id', account.id);
 
-  return { mailbox: account.email_address, checked: ids.length, inserted, matched, skipped, leadsCreated };
+  return { mailbox: account.email_address, checked: ids.length, inserted, matched, skipped, leadsCreated,
+           sent_checked: sentIds.length, sent_inserted: sentInserted, sent_skipped: sentSkipped };
 }
 
 export default async function handler(req, res) {
