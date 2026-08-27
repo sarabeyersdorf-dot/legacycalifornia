@@ -118,13 +118,50 @@ async function upsertHotLead(supa, p, agent) {
     }
   }
 
-  // Always log the inquiry as an event so a re-inquiry from an existing lead
-  // still shows fresh activity (and the property/message is preserved).
+  // Log the inquiry as an event — but ONE event per inquiry. A single
+  // realtor.com inquiry reaches us as several relay emails (realtor.com direct +
+  // FUB + Zillow) within seconds, and each hop drops different fields: one copy
+  // carries the message, another the property, another neither. Inserting per
+  // email produced 5 rows for one action, none of them complete, and tripped a
+  // false "repeat inquiry" flag — which would also 5× this lead's score once
+  // engagement feeds scoring (Cowork 8/24). So within a short window, MERGE the
+  // relay copies into the first event (filling whichever field this copy adds)
+  // instead of stacking duplicates. A genuine re-inquiry (hours/days later, or a
+  // different known property) falls outside the window/key and logs fresh.
   if (leadId) {
-    await supa.from('lead_events').insert({
-      lead_id: leadId, event_type: 'form_submitted', source: 'portal',
-      event_data: { portal: p.portal, property: p.property || null, message: p.message || null }
-    }).then(() => {}, () => {});
+    const MERGE_WINDOW_MS = 10 * 60 * 1000;   // relay copies arrive within minutes; real re-inquiries don't
+    const normProp = (s) => String(s || '').toLowerCase().replace(/\s+/g, ' ').trim();
+    const since = new Date(Date.now() - MERGE_WINDOW_MS).toISOString();
+    const { data: recent } = await supa.from('lead_events')
+      .select('id, event_data, created_at')
+      .eq('lead_id', leadId).eq('event_type', 'form_submitted').eq('source', 'portal')
+      .gte('created_at', since)
+      .order('created_at', { ascending: false }).limit(10)
+      .then((r) => r, () => ({ data: [] }));
+    // Same portal, and same-or-unknown property → same inquiry, relay just split
+    // the fields. Two DIFFERENT known properties → distinct inquiries, don't merge.
+    const prior = (recent || []).find((e) => {
+      const ed = e.event_data || {};
+      if (ed.portal !== p.portal) return false;
+      return !(ed.property && p.property && normProp(ed.property) !== normProp(p.property));
+    });
+    if (prior) {
+      const ed = prior.event_data || {};
+      const merged = {
+        portal:   p.portal,
+        property: ed.property || p.property || null,   // keep whichever copy has it
+        message:  ed.message  || p.message  || null
+      };
+      // Only write if this copy actually filled a gap — else it's a pure dup, drop it.
+      if ((!ed.property && merged.property) || (!ed.message && merged.message)) {
+        await supa.from('lead_events').update({ event_data: merged }).eq('id', prior.id).then(() => {}, () => {});
+      }
+    } else {
+      await supa.from('lead_events').insert({
+        lead_id: leadId, event_type: 'form_submitted', source: 'portal',
+        event_data: { portal: p.portal, property: p.property || null, message: p.message || null }
+      }).then(() => {}, () => {});
+    }
   }
   return isNew;
 }
