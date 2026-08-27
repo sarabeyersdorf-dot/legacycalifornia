@@ -5947,7 +5947,7 @@ function selectLead(el) {
   var esc = function (s) { return (s == null ? '' : String(s)).replace(/[&<>"]/g, function (c) { return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]); }); };
   var state = { data: null, view: 'mine', broker: false }, loaded = false;
   function set(sel, v) { var el = root.querySelector(sel); if (el) el.textContent = String(v); }
-  function ensure() { if (loaded) return; loaded = true; load(); }
+  function ensure() { if (loaded) return; loaded = true; mountAddBtn(); load(); }
   document.addEventListener('click', function (e) { if (e.target.closest('[onclick*="\'cowork\'"]')) setTimeout(ensure, 0); });
   // Load on page start too — so the open-task pill in the nav is populated on
   // refresh, not just after the tab is first opened.
@@ -5984,6 +5984,8 @@ function selectLead(el) {
   }
   function item(t) {
     var who = state.broker ? '<span class="tsk-who">' + (t.agent === 'james' ? 'James' : t.agent === 'both' ? 'Both' : 'Me') + '</span>' : '';
+    // Client-visible agent tasks get a badge so internal vs client is obvious.
+    var visBadge = t.visibility === 'client' ? '<span class="tsk-who" style="background:#2E7D32;color:#fff;" title="Client-visible task">Client</span>' : '';
     var dm = dealMatch(t);
     var railStyle = dm ? ' style="border-left:4px solid ' + dm.color.border + ';"' : '';
     var sub = (t.sub || t.due_label) ? '<div style="font-size:13px;color:var(--ink-mute);margin-top:2px;">' + esc([t.sub, t.due_label].filter(Boolean).join(' · ')) + '</div>' : '';
@@ -5994,7 +5996,7 @@ function selectLead(el) {
     var fb = '<div class="tsk-feedback"><input class="tsk-note-in" data-tsk-note placeholder="Reply to Cowork…" value="' + esc(t.agent_note || '') + '">' + by + '</div>';
     return '<div class="tsk-item' + (t.done ? ' done' : '') + (t.attention ? ' flagged' : '') + '"' + railStyle + ' data-tid="' + esc(t.id) + '">' +
       '<input type="checkbox" data-tsk-check ' + (t.done ? 'checked' : '') + ' title="Mark done">' +
-      '<div class="tsk-body"><div class="tsk-line"><span class="tsk-title">' + esc(t.title) + '</span>' + who + flag + '</div>' + sub + note + fb + '</div></div>';
+      '<div class="tsk-body"><div class="tsk-line"><span class="tsk-title">' + esc(t.title) + '</span>' + who + visBadge + flag + '</div>' + sub + note + fb + '</div></div>';
   }
   // Save a reply or attention flag back to the briefing.
   function patchTask(id, body) {
@@ -6031,6 +6033,7 @@ function selectLead(el) {
     var f = e.target.closest('[data-tsk]');
     if (f) { state.view = f.getAttribute('data-tsk'); root.querySelectorAll('[data-tsk]').forEach(function (b) { b.classList.toggle('on', b === f); }); render(); return; }
     if (e.target.closest('[data-tsk-refresh]')) { load(); return; }
+    if (e.target.closest('[data-tsk-add]')) { openAddTask(); return; }
     var fl = e.target.closest('[data-tsk-flag]');
     if (fl) { var el = fl.closest('[data-tid]'); var id = el.getAttribute('data-tid'); var on = !fl.classList.contains('on'); fl.classList.toggle('on', on); el.classList.toggle('flagged', on); patchTask(id, { attention: on }); counts(); return; }
   });
@@ -6057,6 +6060,61 @@ function selectLead(el) {
         setTimeout(function () { counts(); render(); }, 360);
       }).catch(function () { el.style.opacity = '1'; el.classList.remove('done'); });
   });
+
+  // ---- Add a task (SPEC §4.1) — agent-authored, permanent (source='agent'). ----
+  function mountAddBtn() {
+    var list = root.querySelector('[data-tsk-list]');
+    if (!list || root.querySelector('[data-tsk-add]')) return;
+    var bar = document.createElement('div');
+    bar.style.cssText = 'margin:0 0 12px;display:flex;justify-content:flex-end;';
+    bar.innerHTML = '<button type="button" data-tsk-add class="ds-btn ds-btn--primary" style="font-size:13px;">+ Add a task</button>';
+    list.parentNode.insertBefore(bar, list);
+  }
+  function openAddTask() {
+    var m = document.createElement('div'); m.className = 'ds-editmodal ds';
+    m.innerHTML = '<div class="box" role="dialog" aria-modal="true" aria-label="Add a task">'
+      + '<div class="hd"><div class="k">New task</div><h3>Add a task</h3></div>'
+      + '<div class="bd">'
+      +   '<label class="full">Task<input type="text" data-nt-title maxlength="200" placeholder="e.g. Chase Tanya for the signed closing statement"></label>'
+      +   (state.broker ? '<label>Assign to<select data-nt-agent><option value="sara">Sara</option><option value="james">James</option><option value="both">Both</option></select></label>' : '')
+      +   '<label>Deal (optional)<select data-nt-deal><option value="">— none —</option></select></label>'
+      +   '<label>Due date (optional)<input type="date" data-nt-due></label>'
+      +   '<div class="full" style="margin-top:8px;border-top:1px dashed #E0D6C0;padding-top:10px;">'
+      +     '<div style="font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-mute);margin-bottom:6px;">Who sees this? — required</div>'
+      +     '<label style="display:inline-flex;align-items:center;gap:6px;font-weight:400;margin-right:18px;"><input type="radio" name="nt-vis" value="internal"> Internal only</label>'
+      +     '<label style="display:inline-flex;align-items:center;gap:6px;font-weight:400;"><input type="radio" name="nt-vis" value="client"> Client-visible</label>'
+      +     '<div class="hint">A client-visible task may appear on the client’s portal (that surface ships next). Internal tasks never reach a client. No default — pick one so internal chatter can’t slip onto a portal.</div>'
+      +   '</div>'
+      + '</div>'
+      + '<div class="ft"><span class="msg" data-nt-msg></span><button class="ds-btn" data-nt-cancel>Cancel</button><button class="ds-btn ds-btn--primary" data-nt-save>Add task</button></div>'
+      + '</div>';
+    document.body.appendChild(m);
+    var msg = m.querySelector('[data-nt-msg]');
+    fetch('/api/crm/deals-lite', { credentials: 'include' }).then(function (r) { return r.ok ? r.json() : null; }).then(function (j) {
+      var sel = m.querySelector('[data-nt-deal]'); if (!sel || !j || !j.deals) return;
+      j.deals.slice().sort(function (a, b) { return String(a.address || a.source_key || '').localeCompare(String(b.address || b.source_key || '')); }).forEach(function (d) {
+        var o = document.createElement('option'); o.value = d.source_key; o.textContent = (d.address || d.label || d.source_key) + (d.stage ? ' · ' + d.stage : ''); sel.appendChild(o);
+      });
+    }).catch(function () {});
+    function close() { if (m.parentNode) document.body.removeChild(m); document.removeEventListener('keydown', onKey); }
+    function onKey(ev) { if (ev.key === 'Escape') close(); }
+    document.addEventListener('keydown', onKey);
+    m.addEventListener('click', function (e) {
+      if (e.target === m || e.target.closest('[data-nt-cancel]')) { close(); return; }
+      var save = e.target.closest('[data-nt-save]'); if (!save) return;
+      var title = (m.querySelector('[data-nt-title]').value || '').trim();
+      var visEl = m.querySelector('input[name="nt-vis"]:checked');
+      if (!title) { msg.className = 'msg err'; msg.textContent = 'Enter a task.'; return; }
+      if (!visEl) { msg.className = 'msg err'; msg.textContent = 'Choose who sees this — Internal or Client-visible.'; return; }
+      var body = { title: title, client_visible: visEl.value === 'client', deal_source_key: (m.querySelector('[data-nt-deal]') || {}).value || '', due_date: (m.querySelector('[data-nt-due]') || {}).value || '' };
+      var ag = m.querySelector('[data-nt-agent]'); if (ag) body.agent = ag.value;
+      save.disabled = true; msg.className = 'msg'; msg.textContent = 'Adding…';
+      fetch('/api/crm/tasks?op=create', { method: 'POST', credentials: 'include', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) })
+        .then(function (r) { return r.json().then(function (j) { return { ok: r.ok, j: j }; }, function () { return { ok: r.ok, j: {} }; }); })
+        .then(function (res) { if (!res.ok) { msg.className = 'msg err'; msg.textContent = (res.j && res.j.error) || 'Could not add.'; save.disabled = false; return; } close(); load(); })
+        .catch(function () { msg.className = 'msg err'; msg.textContent = 'Network error — try again.'; save.disabled = false; });
+    });
+  }
 })();
 </script>
 <script>
