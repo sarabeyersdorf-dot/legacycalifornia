@@ -78,7 +78,8 @@ export default async function handler(req, res) {
       agent_updates: 'Read-back health for the notes-to-Claude log. unread should drain toward 0 and last_marked_read should be recent once briefing-feedback runs.',
       engagement: 'source_of_truth is lead_events (attributable, carries lead_id). collection_events is raw telemetry with no viewer — never quote its open counts as client behavior.',
       email: 'Per-mailbox connection health. needs_reconnect:false with a recent last_synced_at means email sync is fine — do NOT tell Sara to reconnect.',
-      timeline_drift: 'Deals whose escrow FELL THROUGH (back to listing/preparing) but still carry client-visible timeline items — a dead escrow showing a client live deadlines. Should be empty. CLOSED deals are excluded on purpose: a completed sale legitimately keeps its finished (done) closing history for the client.'
+      timeline_drift: 'Deals whose escrow FELL THROUGH (back to listing/preparing) but still carry client-visible timeline items — a dead escrow showing a client live deadlines. Should be empty. CLOSED deals are excluded on purpose: a completed sale legitimately keeps its finished (done) closing history for the client.',
+      expected_dates: 'Agent-believed dates (coe_date/acceptance_date) with no executed document yet (SPEC §3). These are AGENDA-ONLY — they NEVER reach a client portal. Quote them labelled with by/at/note ("COE 9/12 — expected, James 8/27, lender verbal"). state: pending = no confirmed value yet; discrepancy = a confirmed value exists and DISAGREES (put on the agenda, do not overwrite). A promoted expected (confirmed caught up) is cleared by sync-deals and drops off this list.'
     }
   };
 
@@ -204,6 +205,38 @@ export default async function handler(req, res) {
           : null;
       }).filter(Boolean);
       return { off_escrow_with_client_visible_timeline: offenders };
+    } catch (e) { return { _error: e.message }; }
+  })();
+
+  // 8. EXPECTED DATES (SPEC §3) — agent beliefs with no executed doc yet. Agenda
+  // only; never rendered to a client. Fail-soft: pre-089 schema returns _error.
+  out.expected_dates = await (async () => {
+    try {
+      const { data, error } = await supa.from('deals')
+        .select('source_key, address, agent_overrides, coe_date, acceptance_date, ' +
+          'coe_date_expected, coe_date_expected_by, coe_date_expected_at, coe_date_expected_note, ' +
+          'acceptance_date_expected, acceptance_date_expected_by, acceptance_date_expected_at, acceptance_date_expected_note');
+      if (error) throw error;
+      const confirmedOf = (row, f) => {
+        const ov = (row.agent_overrides && typeof row.agent_overrides === 'object') ? row.agent_overrides : {};
+        return ov[f] ?? row[f] ?? null;
+      };
+      const items = [];
+      for (const row of (data || [])) {
+        for (const f of ['coe_date', 'acceptance_date']) {
+          const exp = row[`${f}_expected`];
+          if (!exp) continue;
+          const confirmed = confirmedOf(row, f);
+          const state = confirmed ? (String(confirmed) === String(exp) ? 'promoted_pending_clear' : 'discrepancy') : 'pending';
+          items.push({
+            deal: row.source_key, address: row.address || null, field: f,
+            expected: exp, expected_by: row[`${f}_expected_by`] || null,
+            expected_at: iso(row[`${f}_expected_at`]), note: row[`${f}_expected_note`] || null,
+            confirmed, state
+          });
+        }
+      }
+      return { count: items.length, items };
     } catch (e) { return { _error: e.message }; }
   })();
 

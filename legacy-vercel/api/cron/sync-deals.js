@@ -1518,9 +1518,44 @@ export default async function handler(req, res) {
         .map((r) => ({ source_key: r.source_key, address: r.address, party_details: r.party_details }));
     } catch (_) { /* column not migrated yet — nothing to reconcile */ }
 
+    // EXPECTED-DATE PROMOTION (SPEC §3). An expected date is an agent belief with
+    // no executed doc. When the CONFIRMED value catches up to it — the doc landed
+    // and its date flowed into deals.coe_date, or an agent confirmed it via
+    // agent_overrides — the belief is now redundant: clear the _expected overlay
+    // (promotion) and log it to deal_audit. A DISAGREEMENT (confirmed != expected)
+    // is left intact for the agenda (surfaced by /api/crm/reconcile), never a
+    // silent overwrite. Fail-soft: pre-089 schema degrades to a no-op.
+    let datePromotions = [];
+    try {
+      const { data: exp } = await supa.from('deals')
+        .select('id, source_key, agent_overrides, coe_date, acceptance_date, coe_date_expected, acceptance_date_expected')
+        .or('coe_date_expected.not.is.null,acceptance_date_expected.not.is.null');
+      for (const row of (exp || [])) {
+        const ov = (row.agent_overrides && typeof row.agent_overrides === 'object') ? row.agent_overrides : {};
+        for (const f of ['coe_date', 'acceptance_date']) {
+          const expected = row[`${f}_expected`];
+          if (!expected) continue;
+          const confirmed = ov[f] ?? row[f] ?? null;
+          if (confirmed && String(confirmed) === String(expected)) {
+            await supa.from('deals').update({
+              [`${f}_expected`]: null, [`${f}_expected_by`]: null,
+              [`${f}_expected_at`]: null, [`${f}_expected_note`]: null
+            }).eq('id', row.id).then(() => {}, () => {});
+            await supa.from('deal_audit').insert({
+              deal_id: row.id, field: `${f}_expected`, old_value: String(expected), new_value: null,
+              changed_by: 'system', source: 'promotion',
+              note: `confirmed ${f} caught up to expected — promoted`
+            }).then(() => {}, () => {});
+            datePromotions.push({ deal: row.source_key, field: f, value: String(expected) });
+          }
+        }
+      }
+    } catch (_) { /* pre-089 schema or transient — non-fatal */ }
+
     return ok(res, {
       synced: true,
       source_version: data.version || null,
+      date_promotions: datePromotions,
       deals_source: dealsSource,   // 'github' = read fresh (no deploy wait) · 'bundle' = fell back to the deployed copy
       deals_upserted: dealsUpserted,
       deals_pruned: dealsPruned,
