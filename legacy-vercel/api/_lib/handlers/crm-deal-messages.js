@@ -20,30 +20,10 @@
 
 import { adminClient } from '../supabase.js';
 import { handleOptions, ok, fail } from '../cors.js';
+import { DENY_SENDERS, DENY_DOMAINS, isBulkSender } from '../email-bulk.js';
 
-// EXPLICIT bulk deny list — edit here, never guess. Returned in the payload.
-const DENY_SENDERS = new Set([
-  'news@car.org', 'consumer@e.mail.realtor.com', 'notifications-noreply@linkedin.com',
-  'thetechbuzz@mail.beehiiv.com', 'nar@mail.nar.realtor'
-]);
-const DENY_DOMAINS = new Set([
-  'car.org', 'e.mail.realtor.com', 'mail.realtor.com', 'linkedin.com',
-  'beehiiv.com', 'mail.beehiiv.com', 'nar.realtor', 'mail.nar.realtor',
-  'mail.zillow.com', 'e.mail.zillow.com', 'mailchimpapp.net', 'ml.homes.com'
-]);
 const STREET_TYPES = new Set(['st','street','dr','drive','ct','court','rd','road','ave','avenue','ln','lane','way','blvd','cir','circle','pl','place','ter','terrace','hwy','highway','pkwy','trail','trl','loop','run','path','pass']);
 const DIRECTIONALS = new Set(['e','w','n','s','ne','nw','se','sw','east','west','north','south']);
-
-const domainOf = (email) => String(email || '').toLowerCase().split('@')[1] || '';
-function isBulk(email) {
-  const e = String(email || '').toLowerCase();
-  if (DENY_SENDERS.has(e)) return true;
-  const dom = domainOf(e);
-  if (!dom) return false;
-  if (DENY_DOMAINS.has(dom)) return true;
-  for (const d of DENY_DOMAINS) if (dom.endsWith('.' + d)) return true;
-  return false;
-}
 
 // Distinctive street word(s) from an address: drop the house number, directionals
 // and the street-type suffix, keep words of length >= 4 ("695 Feather Dr" →
@@ -130,7 +110,7 @@ export default async function handler(req, res) {
     let dropped_bulk = 0;
 
     for (const m of (rows || [])) {
-      if (isBulk(m.raw_email_address)) { dropped_bulk += 1; continue; }
+      if (isBulkSender(m.raw_email_address)) { dropped_bulk += 1; continue; }
       const d = matchDeal(m, index);
       const item = {
         from:      m.raw_email_address || null,
