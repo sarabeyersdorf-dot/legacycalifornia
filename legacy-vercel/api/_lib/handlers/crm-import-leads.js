@@ -115,10 +115,73 @@ function parseCsv(text) {
 
 const truthy = (v) => /^(1|true|t|yes|y)$/i.test(String(v || '').trim());
 
-function shapeLead(r) {
+// ---------------------------------------------------------------------------
+// Header aliasing — accept BOTH shapes:
+//   • the pre-processed legacy_leads_import.csv (snake_case headers), and
+//   • Follow Up Boss's raw "Export People" CSV (human headers: "First Name",
+//     "Emails", "Phones", "Stage", "Assigned To", "Background", …).
+// Without this a raw FUB export lowercases to "first name"/"emails"/… which match
+// none of shapeLead's snake_case keys, so every row looks empty and errors out.
+//
+// Key: each header is normalized to lowercase-alphanumerics-only ("First Name" →
+// "firstname", "Email 1" → "email1"), then looked up here. Canonical snake_case
+// headers already pass through unchanged (first_name → "firstname" → first_name).
+const HEADER_ALIASES = {
+  firstname: 'first_name', first: 'first_name', fname: 'first_name', givenname: 'first_name',
+  lastname: 'last_name', last: 'last_name', lname: 'last_name', surname: 'last_name', familyname: 'last_name',
+  fullname: 'full_name', name: 'full_name',
+  email: 'email', emails: 'email', email1: 'email', emailaddress: 'email', emailaddresses: 'email', primaryemail: 'email',
+  phone: 'phone', phones: 'phone', phone1: 'phone', phonenumber: 'phone', mobile: 'phone', mobilephone: 'phone',
+  cell: 'phone', cellphone: 'phone', primaryphone: 'phone',
+  id: 'fub_id', fubid: 'fub_id', personid: 'fub_id', contactid: 'fub_id',
+  stage: 'fub_stage', fubstage: 'fub_stage', dealstage: 'fub_stage',
+  pipelinestage: 'pipeline_stage',
+  source: 'source', leadsource: 'source',
+  assignedto: 'assigned_agent', assigned: 'assigned_agent', assignedagent: 'assigned_agent', agent: 'assigned_agent', owner: 'assigned_agent',
+  background: 'notes', notes: 'notes', note: 'notes', comments: 'notes', description: 'notes',
+  leadtype: 'lead_type', type: 'lead_type', contacttype: 'lead_type',
+  temperature: 'temperature', temp: 'temperature',
+  pricemin: 'price_min', minprice: 'price_min', budgetmin: 'price_min',
+  pricemax: 'price_max', maxprice: 'price_max', budgetmax: 'price_max',
+  dealside: 'deal_side', side: 'deal_side',
+  status: 'status',
+  lastcontact: 'last_contact_at', lastcontactat: 'last_contact_at', lastactivity: 'last_contact_at', lastactivityat: 'last_contact_at'
+};
+
+const normHeader = (h) => String(h || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+
+// Rebuild a row object under canonical keys. First non-empty value wins for a
+// canonical field that several source columns alias to (e.g. Email 1 / Email 2).
+function aliasRow(r) {
+  const out = {};
+  for (const [rawKey, val] of Object.entries(r)) {
+    const canon = HEADER_ALIASES[normHeader(rawKey)];
+    if (!canon) continue;
+    const v = (val ?? '').toString().trim();
+    if (v && !out[canon]) out[canon] = v;
+  }
+  // Split a combined "Full Name" if we got no first/last from dedicated columns.
+  if (out.full_name && !out.first_name && !out.last_name) {
+    const parts = out.full_name.split(/\s+/);
+    out.first_name = parts.shift() || null;
+    out.last_name  = parts.join(' ') || null;
+  }
+  // A multi-value email/phone cell ("a@x.com, b@y.com") → keep the first.
+  if (out.email) out.email = out.email.split(/[,;]/)[0].trim();
+  if (out.phone) out.phone = out.phone.split(/[,;]/)[0].trim();
+  return out;
+}
+
+function shapeLead(rawRow) {
+  const r = aliasRow(rawRow);
   const fubStage = r.fub_stage || extractFubStage(r.notes);
   const stage = mapFubStage(fubStage, r.pipeline_stage);
-  const agent = ALLOWED_AGENTS.has(r.assigned_agent) ? r.assigned_agent : 'sara';
+  // FUB "Assigned To" is a full name ("Sara Beyersdorf", "James …"), not our
+  // 'sara'/'james' key — resolve by substring, defaulting to 'sara'.
+  const rawAgent = String(r.assigned_agent || '').toLowerCase();
+  const agent = ALLOWED_AGENTS.has(rawAgent) ? rawAgent
+              : /james/.test(rawAgent) ? 'james'
+              : 'sara';
   const lt    = ALLOWED_TYPES.has(r.lead_type)       ? r.lead_type      : null;
   const tmp   = ALLOWED_TEMPS.has(r.temperature)     ? r.temperature    : 'new';
   const priceMin = r.price_min ? Number(String(r.price_min).replace(/[^\d.]/g, '')) || null : null;
@@ -193,12 +256,21 @@ async function importLeads(supa, body) {
     }
   }
 
+  // If EVERY row errored as empty, the headers almost certainly didn't map —
+  // surface what we saw so it's diagnosable without a DB peek.
+  const allEmpty = errors.length === rows.length && rows.length > 0
+    && errors.every((e) => e.reason === 'all_fields_empty');
+  const mappedHeaders = headers.filter((h) => HEADER_ALIASES[normHeader(h)]);
+
   const summary = {
     kind:        'leads',
     parsed:      rows.length,
     dedupe_skip: skippedDup.length,
     errors:      errors.length,
     will_insert: toInsert.length,
+    headers_detected: headers,
+    headers_mapped:   mappedHeaders,
+    ...(allEmpty ? { hint: 'Every row parsed but no recognizable name/email/phone column mapped. headers_detected shows your file\'s columns; none aliased to first_name/last_name/email/phone. Check this really is the People export.' } : {}),
     preview:     toInsert.slice(0, 5).map((l) => ({ name: `${l.first_name || ''} ${l.last_name || ''}`.trim(), email: l.email, fub_id: l.fub_id, pipeline_stage: l.pipeline_stage }))
   };
   if (body.dry_run) return summary;
