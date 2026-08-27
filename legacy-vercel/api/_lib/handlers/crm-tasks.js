@@ -10,6 +10,7 @@
 import { adminClient } from '../supabase.js';
 import { getCallerProfile, isAgent } from '../auth.js';
 import { handleOptions, readJson, ok, fail } from '../cors.js';
+import { checkSyncKey } from '../sync-key.js';
 
 const agentKey  = (role) => (role === 'agent_james' ? 'james' : 'sara');
 const isBroker  = (p) => p?.role === 'agent_sara' || p?.role === 'admin';
@@ -34,8 +35,7 @@ export default async function handler(req, res) {
 // This makes agent_tasks the single task store: the HTML checklist and
 // deals.json task arrays become views, not sources.
 export async function bulkSync(req, res) {
-  const secret = process.env.SYNC_SECRET || process.env.BRIEFING_FEEDBACK_SECRET;
-  if (!secret || req.query?.key !== secret) return fail(res, 401, 'bad key');
+  if (!checkSyncKey(req.query?.key).ok) return fail(res, 401, 'bad key');
   const supa = adminClient();
   const b = await readJson(req);
   const rows = Array.isArray(b?.tasks) ? b.tasks.slice(0, 60) : [];
@@ -104,8 +104,7 @@ export async function closeKeys(req, res) {
   res.setHeader('Cache-Control', 'private, no-store, no-cache, must-revalidate');
   res.setHeader('CDN-Cache-Control', 'no-store');
   res.setHeader('Vercel-CDN-Cache-Control', 'no-store');
-  const secret = process.env.SYNC_SECRET || process.env.BRIEFING_FEEDBACK_SECRET;
-  if (!secret || req.query?.key !== secret) return fail(res, 401, 'bad key');
+  if (!checkSyncKey(req.query?.key).ok) return fail(res, 401, 'bad key');
 
   const raw = String(req.query?.keys || '').split(',').map((k) => k.trim()).filter(Boolean).slice(0, 200);
   if (!raw.length) return fail(res, 400, 'keys required (comma-separated brief_keys)');
@@ -213,8 +212,7 @@ async function toggle(req, res, profile) {
 // fixed GET URLs). Insert-only with stable source_keys, same dedupe contract
 // as bulkSync: a task Sara checked off stays checked, nothing duplicates.
 export async function autoSync(req, res) {
-  const secret = process.env.SYNC_SECRET || process.env.BRIEFING_FEEDBACK_SECRET;
-  if (!secret || req.query?.key !== secret) return fail(res, 401, 'bad key');
+  if (!checkSyncKey(req.query?.key).ok) return fail(res, 401, 'bad key');
   const supa = adminClient();
   const today = new Date().toISOString().slice(0, 10);
   const rows = [];

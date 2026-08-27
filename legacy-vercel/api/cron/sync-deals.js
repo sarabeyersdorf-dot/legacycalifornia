@@ -16,6 +16,7 @@ import { adminClient } from '../_lib/supabase.js';
 // readFileSync(process.cwd()+...) is NOT traced and 500s with ENOENT on Vercel.
 const require = createRequire(import.meta.url);
 import { handleOptions, ok, fail } from '../_lib/cors.js';
+import { checkSyncKey } from '../_lib/sync-key.js';
 
 // Read a JSON file FRESH from the repo (GitHub Contents API) so a just-published
 // deals.json / portal-docs manifest is picked up IMMEDIATELY, without waiting for
@@ -1003,10 +1004,9 @@ export default async function handler(req, res) {
   //  1. Manual trigger — the bookmark URL with ?key=<SYNC_SECRET>.
   //  2. Vercel Cron — scheduled runs carry an "x-vercel-cron" header, and
   //     (if set) an "Authorization: Bearer <CRON_SECRET>". Either is accepted.
-  const secret     = process.env.SYNC_SECRET;
   const cronSecret = process.env.CRON_SECRET;
   const bearer     = String(req.headers['authorization'] || '').replace(/^Bearer\s+/i, '');
-  const okManual   = !secret || req.query?.key === secret;
+  const okManual   = checkSyncKey(req.query?.key).ok;
   const okCron     = !!req.headers['x-vercel-cron'] || (cronSecret && bearer === cronSecret);
   if (!okManual && !okCron) return fail(res, 401, 'bad key');
 

@@ -16,6 +16,7 @@ import { adminClient } from '../supabase.js';
 import { getCallerProfile, isAgent } from '../auth.js';
 import { anthropicMessage } from '../anthropic.js';
 import { handleOptions, ok, fail } from '../cors.js';
+import { checkSyncKey } from '../sync-key.js';
 
 // Agent-aware brief voice — the narrative addresses whoever is signed in, in
 // their own second person, never a hardcoded name. James must never read a
@@ -49,8 +50,7 @@ export default async function handler(req, res) {
     // this returned 401 to Cowork — the "morning-brief has no usable body"
     // symptom (Bug 5) — so it never surfaced collection_nudges / timeline_
     // approvals. A key pull gets the broker (full) scope and the documented shape.
-    const secret = process.env.SYNC_SECRET || process.env.BRIEFING_FEEDBACK_SECRET;
-    const headless = !!(secret && req.query?.key === secret);   // Cowork's key pull
+    const headless = checkSyncKey(req.query?.key).ok;   // Cowork's key pull (either rotation key)
     let profile;
     if (headless) {
       profile = { role: 'admin' };

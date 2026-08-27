@@ -20,6 +20,7 @@
 import { adminClient } from '../supabase.js';
 import { getCallerProfile, isAgent } from '../auth.js';
 import { handleOptions, readJson, ok, fail } from '../cors.js';
+import { checkSyncKey } from '../sync-key.js';
 import { buildTimelineItems } from '../timeline-template.js';
 import { createRequire } from 'module';
 const requireJson = createRequire(import.meta.url);
@@ -63,8 +64,7 @@ export default async function handler(req, res) {
   // Read-only key access for the automated morning briefing (same SYNC_SECRET
   // convention as briefing-feedback / briefing-calendar): pending-proposals
   // list ONLY. Approve/reject/edit always require a signed-in agent session.
-  const syncSecret = process.env.SYNC_SECRET || process.env.BRIEFING_FEEDBACK_SECRET;
-  const hasKey = syncSecret && req.query?.key === syncSecret;
+  const hasKey = checkSyncKey(req.query?.key).ok;
   if (req.method === 'GET' && req.query?.proposals === 'all' && hasKey) {
     try {
       const supaK = adminClient();

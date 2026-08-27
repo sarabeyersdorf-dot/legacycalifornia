@@ -19,6 +19,7 @@
 import { adminClient } from '../supabase.js';
 import { handleOptions, ok, fail } from '../cors.js';
 import { timelineEvents } from '../deal-timeline.js';
+import { checkSyncKey } from '../sync-key.js';
 
 const TZ = 'America/Los_Angeles';
 const pad2 = (n) => String(n).padStart(2, '0');
@@ -67,8 +68,7 @@ export default async function handler(req, res) {
   res.setHeader('Vercel-CDN-Cache-Control', 'no-store');
   if (req.method !== 'GET') return fail(res, 405, 'method_not_allowed');
 
-  const secret = process.env.SYNC_SECRET || process.env.BRIEFING_FEEDBACK_SECRET;
-  if (secret && req.query?.key !== secret) return fail(res, 401, 'bad key');
+  if (!checkSyncKey(req.query?.key).ok) return fail(res, 401, 'bad key');
 
   try {
     const supa = adminClient();

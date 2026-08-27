@@ -28,6 +28,7 @@ import timeline     from './crm-timeline.js';
 import driftCheck   from './crm-drift-check.js';
 import { adminClient } from '../supabase.js';
 import { handleOptions, ok, fail } from '../cors.js';
+import { checkSyncKey } from '../sync-key.js';
 
 // Invoke a handler with a synthetic GET request and a res that captures the
 // response instead of writing it to the wire. Resolves { status, body }.
@@ -51,8 +52,7 @@ export default async function handler(req, res) {
   res.setHeader('Cache-Control', 'private, no-store, no-cache, must-revalidate');
   if (req.method !== 'GET') return fail(res, 405, 'method_not_allowed');
 
-  const secret = process.env.SYNC_SECRET || process.env.BRIEFING_FEEDBACK_SECRET;
-  if (secret && req.query?.key !== secret) return fail(res, 401, 'bad key');
+  if (!checkSyncKey(req.query?.key).ok) return fail(res, 401, 'bad key');
 
   const key = req.query?.key;
 

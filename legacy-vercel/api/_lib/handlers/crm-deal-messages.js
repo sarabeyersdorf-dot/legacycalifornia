@@ -21,6 +21,7 @@
 import { adminClient } from '../supabase.js';
 import { handleOptions, ok, fail } from '../cors.js';
 import { DENY_SENDERS, DENY_DOMAINS, isBulkSender } from '../email-bulk.js';
+import { checkSyncKey } from '../sync-key.js';
 
 const STREET_TYPES = new Set(['st','street','dr','drive','ct','court','rd','road','ave','avenue','ln','lane','way','blvd','cir','circle','pl','place','ter','terrace','hwy','highway','pkwy','trail','trl','loop','run','path','pass']);
 const DIRECTIONALS = new Set(['e','w','n','s','ne','nw','se','sw','east','west','north','south']);
@@ -87,8 +88,7 @@ export default async function handler(req, res) {
   res.setHeader('Vercel-CDN-Cache-Control', 'no-store');
   if (req.method !== 'GET') return fail(res, 405, 'method_not_allowed');
 
-  const secret = process.env.SYNC_SECRET || process.env.BRIEFING_FEEDBACK_SECRET;
-  if (secret && req.query?.key !== secret) return fail(res, 401, 'bad key');
+  if (!checkSyncKey(req.query?.key).ok) return fail(res, 401, 'bad key');
 
   try {
     const supa = adminClient();

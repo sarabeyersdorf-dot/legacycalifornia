@@ -17,6 +17,7 @@ import { adminClient } from '../_lib/supabase.js';
 import driftCheck from '../_lib/handlers/crm-drift-check.js';
 import { alertAgents, deskUrl } from '../_lib/agent-alert.js';
 import { ok, fail } from '../_lib/cors.js';
+import { checkSyncKey } from '../_lib/sync-key.js';
 
 // Invoke the drift-check handler with a capturing res (same pattern as the
 // briefing bundle) so there's no self-HTTP hop.
@@ -40,7 +41,7 @@ export default async function handler(req, res) {
   const secret     = process.env.SYNC_SECRET;
   const cronSecret = process.env.CRON_SECRET;
   const bearer     = String(req.headers['authorization'] || '').replace(/^Bearer\s+/i, '');
-  const okManual   = !secret || req.query?.key === secret;
+  const okManual   = checkSyncKey(req.query?.key).ok;
   const okCron     = !!req.headers['x-vercel-cron'] || (cronSecret && bearer === cronSecret);
   if (!okManual && !okCron) return fail(res, 401, 'bad key');
 
