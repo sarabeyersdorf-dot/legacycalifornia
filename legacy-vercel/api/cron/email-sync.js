@@ -40,7 +40,7 @@ import { detectLeadSource, parseLead } from '../_lib/lead-intake.js';
 import { alertAgents } from '../_lib/agent-alert.js';
 import { getCallerProfile, isAgent } from '../_lib/auth.js';
 
-const GMAIL_METADATA_HEADERS = ['From', 'To', 'Subject'];
+const GMAIL_METADATA_HEADERS = ['From', 'To', 'Subject', 'Date', 'Message-ID'];
 const MAX_MESSAGES_PER_MAILBOX = 50; // keep each 15-minute run bounded
 
 const agentForMailbox = (addr) => /james/i.test(String(addr || '')) ? 'james' : 'sara';
@@ -215,6 +215,47 @@ function headerValue(headers, name) {
   return h ? h.value : null;
 }
 
+// The RFC-2822 Date header → ISO. NULL when it can't be parsed — a wrong send
+// time is worse than a missing one, and the briefing can say "time unknown".
+function parseEmailDate(dateHeader) {
+  if (!dateHeader) return null;
+  const t = new Date(dateHeader);
+  return isNaN(t.getTime()) ? null : t.toISOString();
+}
+
+// Insert a deal_messages row, deduped on the RFC-5322 Message-ID. The same
+// message reaches BOTH mailboxes (Sara + James are on most threads) and can be
+// re-seen on a later sync; first sight inserts, a repeat only records the extra
+// mailbox in seen_by (never a 2nd row, never moves created_at, never re-alerts).
+// A message with no Message-ID header falls back to a plain insert (rare, and we
+// have no stable key for it). Returns { inserted } — true only on first sight.
+async function upsertDealMessage(supa, owner, messageId, base) {
+  const addOwner = async (id, seen) => {
+    const arr = Array.isArray(seen) ? seen : [];
+    if (owner && !arr.includes(owner)) {
+      await supa.from('deal_messages').update({ seen_by: [...arr, owner] }).eq('id', id).then(() => {}, () => {});
+    }
+  };
+  if (messageId) {
+    const { data: existing } = await supa.from('deal_messages')
+      .select('id, seen_by').eq('message_id', messageId).maybeSingle().then((r) => r, () => ({ data: null }));
+    if (existing) { await addOwner(existing.id, existing.seen_by); return { inserted: false }; }
+  }
+  const row = { ...base, message_id: messageId || null, seen_by: owner ? [owner] : [] };
+  const { error } = await supa.from('deal_messages').insert(row);
+  if (error) {
+    // A concurrent sync inserted it first (unique violation) → treat as dedupe.
+    if (messageId && /duplicate key|unique|23505/i.test(error.message || '')) {
+      const { data: ex2 } = await supa.from('deal_messages')
+        .select('id, seen_by').eq('message_id', messageId).maybeSingle().then((r) => r, () => ({ data: null }));
+      if (ex2) await addOwner(ex2.id, ex2.seen_by);
+      return { inserted: false };
+    }
+    return { inserted: false, error };
+  }
+  return { inserted: true };
+}
+
 async function refreshAccessToken(refreshToken, clientId, clientSecret) {
   const r = await fetch('https://oauth2.googleapis.com/token', {
     method: 'POST',
@@ -340,22 +381,26 @@ async function syncMailbox(supa, account, clientId, clientSecret) {
         }
 
         const contactId = leadByEmail.get(senderEmail) || null;
-        if (contactId) matched += 1;
+        const owner     = agentForMailbox(account.email_address);
+        const messageId = headerValue(headers, 'Message-ID') || headerValue(headers, 'Message-Id');
+        const sentAt    = parseEmailDate(headerValue(headers, 'Date'));
 
-        const { error: insErr } = await supa.from('deal_messages').insert({
+        const { inserted: wasNew, error: insErr } = await upsertDealMessage(supa, owner, messageId, {
           contact_id:        contactId,
           direction:          'inbound',
           channel:            'email',
           content:             snippet,
           subject,
           raw_email_address:  senderEmail,
-          status:              contactId ? 'active' : 'pending_review'
+          status:              contactId ? 'active' : 'pending_review',
+          sent_at:             sentAt
         });
-        if (!insErr) {
+        if (!insErr && wasNew) {
           inserted += 1;
+          if (contactId) matched += 1;
           // Text the agent the moment a lead in a cold sequence replies — that's
-          // a live conversation. (The sequence itself halts on the next tick.)
-          // SMS-only: passing just `sms` skips the email channel in alertAgents.
+          // a live conversation. Only on FIRST sight (not when the other mailbox's
+          // copy dedupes in), so a reply alerts once. SMS-only: passing just `sms`.
           if (contactId) {
             try {
               const { data: ld } = await supa.from('leads')
@@ -403,16 +448,20 @@ async function syncMailbox(supa, account, clientId, clientSecret) {
           if (cid) { contactId = cid; hitEmail = em; break; }
         }
         if (!contactId) { sentSkipped += 1; continue; }   // outbound to a non-lead — not a tracked thread
-        const { error: insErr } = await supa.from('deal_messages').insert({
+        const owner     = agentForMailbox(account.email_address);
+        const messageId = headerValue(headers, 'Message-ID') || headerValue(headers, 'Message-Id');
+        const sentAt    = parseEmailDate(headerValue(headers, 'Date'));
+        const { inserted: wasNew, error: insErr } = await upsertDealMessage(supa, owner, messageId, {
           contact_id:        contactId,
           direction:          'outbound',
           channel:            'email',
           content:             snippet,
           subject,
           raw_email_address:  hitEmail,
-          status:              'active'
+          status:              'active',
+          sent_at:             sentAt
         });
-        if (!insErr) sentInserted += 1; else sentSkipped += 1;
+        if (!insErr && wasNew) sentInserted += 1; else sentSkipped += 1;
       } catch (_) {
         sentSkipped += 1;   // one bad message never aborts the mailbox sync
       }
