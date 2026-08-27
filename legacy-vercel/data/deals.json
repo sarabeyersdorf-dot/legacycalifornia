@@ -1,7 +1,7 @@
 {
-  "version": 10.8,
+  "version": 10.9,
   "lastUpdated": "2026-08-27",
-  "updatedBy": "morning-briefing 2026-08-27 (align listTrac.last30 to report TOTAL)",
+  "updatedBy": "cowork-morning-briefing 2026-08-27",
   "tasks": [
     {
       "agent": "sara",
@@ -2053,6 +2053,30 @@
       "client": "179 Elams Ranch",
       "key": "elams-placer-title-guidance",
       "title": "179 Elams Ranch: chase Placer Title for what the McEvoy family must provide before listing — a deceased owner is on title. Nothing moves until this comes back.",
+      "due": "this week",
+      "done": false
+    },
+    {
+      "agent": "james",
+      "client": "695 Feather",
+      "key": "feather-eta2-verify",
+      "title": "🔴 695 Feather: Extension of Time Amendment No. 2 was signed complete 8/26 10:01 AM (Authentisign, Ashley Robinson) but is NOT in the EX folder and nobody has read it. It may move tomorrow's COE. Download it and open it before anything else.",
+      "due": "2026-08-27",
+      "done": false
+    },
+    {
+      "agent": "sara",
+      "client": "Follow Up Boss",
+      "key": "fub-facebook-reconnect",
+      "title": "Facebook has come unlinked from Follow Up Boss (FUB emailed 8/26 4:03 AM). Any Facebook lead forms are not arriving. Reconnect in FUB settings.",
+      "due": "this week",
+      "done": false
+    },
+    {
+      "agent": "sara",
+      "client": "Scot Greiner",
+      "key": "greiner-radio-silence",
+      "title": "Scot Greiner (925) 565-4090 is flagged HOT and has had no contact since 8/13 — 14 days. Longest silence on any hot lead.",
       "due": "this week",
       "done": false
     }
