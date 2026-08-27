@@ -117,23 +117,6 @@
   ],
   "headers": [
     {
-      "source": "/api/crm/briefing-(calendar|feedback)",
-      "headers": [
-        {
-          "key": "Cache-Control",
-          "value": "private, no-store, no-cache, must-revalidate"
-        },
-        {
-          "key": "CDN-Cache-Control",
-          "value": "no-store"
-        },
-        {
-          "key": "Vercel-CDN-Cache-Control",
-          "value": "no-store"
-        }
-      ]
-    },
-    {
       "source": "/api/photo",
       "headers": [
         {
@@ -204,7 +187,7 @@
       "maxDuration": 60
     },
     "api/cron/sync-deals.js": {
-      "maxDuration": 60,
+      "maxDuration": 300,
       "includeFiles": "data/portal-docs/**"
     },
     "api/cron/drift-check.js": {
