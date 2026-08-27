@@ -62,7 +62,7 @@ export default async function handler(req, res) {
       agent_updates: 'Read-back health for the notes-to-Claude log. unread should drain toward 0 and last_marked_read should be recent once briefing-feedback runs.',
       engagement: 'source_of_truth is lead_events (attributable, carries lead_id). collection_events is raw telemetry with no viewer — never quote its open counts as client behavior.',
       email: 'Per-mailbox connection health. needs_reconnect:false with a recent last_synced_at means email sync is fine — do NOT tell Sara to reconnect.',
-      timeline_drift: 'Deals that LEFT escrow but still carry client-visible timeline items — the retirement lag drift-check watches. Should be empty.'
+      timeline_drift: 'Deals whose escrow FELL THROUGH (back to listing/preparing) but still carry client-visible timeline items — a dead escrow showing a client live deadlines. Should be empty. CLOSED deals are excluded on purpose: a completed sale legitimately keeps its finished (done) closing history for the client.'
     }
   };
 
@@ -180,7 +180,10 @@ export default async function handler(req, res) {
       const offenders = Object.entries(visByDeal).map(([deal_id, n]) => {
         const d = dealsById.get(deal_id);
         const stage = d ? String(d.stage || '').toLowerCase() : null;
-        return (stage && !['offer', 'pending'].includes(stage))
+        // A CLOSED deal legitimately keeps its completed (done) closing timeline as
+        // history — that is not drift. Only a FELL-THROUGH escrow (back to
+        // listing/preparing) showing a client a live timeline is the defect.
+        return (stage && !['offer', 'pending', 'closed'].includes(stage))
           ? { deal: d?.source_key || deal_id, address: d?.address || null, stage, client_visible_items: n }
           : null;
       }).filter(Boolean);
