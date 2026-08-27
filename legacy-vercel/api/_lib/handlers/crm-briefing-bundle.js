@@ -120,19 +120,22 @@ export default async function handler(req, res) {
     // stays small. Full bodies live at the standalone /deal-messages path.
     section('deal_messages', dealMessages, { key, since: '48h' }, (b) => ({
       since:   b.since || null,
-      counts:  b.counts || { matched: 0, unmatched: 0, signature_events: 0, dropped_bulk: 0 },
+      counts:  b.counts || { matched: 0, unmatched: 0, unmatched_signature_notices: 0, dropped_bulk: 0 },
       deny_list_size: { senders: (b.deny_list?.senders || []).length, domains: (b.deny_list?.domains || []).length },
+      // sent_at is the REAL send time or null — never substitute `at` (ingest time),
+      // or the briefing would quote ingest times as send times. sent_at_known says
+      // which it is.
       recent:  (b.messages || []).slice(0, 15).map((m) => ({
-        sent_at: m.sent_at || m.at || null, owner: m.owner || null,
+        sent_at: m.sent_at || null, sent_at_known: !!m.sent_at, owner: m.owner || null,
         from: m.from || null, subject: m.subject || null, deal: m.deal || null, address: m.address || null
       })),
       unmatched_recent: (b.unmatched || []).slice(0, 10).map((m) => ({
-        sent_at: m.sent_at || m.at || null, owner: m.owner || null,
+        sent_at: m.sent_at || null, sent_at_known: !!m.sent_at, owner: m.owner || null,
         from: m.from || null, subject: m.subject || null
       })),
       // Signed/updated documents we couldn't tie to a deal — "go look", not noise.
-      signature_events: (b.signature_events || []).slice(0, 10).map((m) => ({
-        sent_at: m.sent_at || m.at || null, owner: m.owner || null,
+      unmatched_signature_notices: (b.unmatched_signature_notices || []).slice(0, 10).map((m) => ({
+        sent_at: m.sent_at || null, sent_at_known: !!m.sent_at, owner: m.owner || null,
         from: m.from || null, subject: m.subject || null
       }))
     }))
@@ -167,7 +170,7 @@ export default async function handler(req, res) {
         timeline:      'timeline deal=__all__: every active deal timeline.',
         drift:         'drift-check summary: counts by severity (full detail at /api/crm/drift-check).',
         db_truth:      'reconcile: live-DB ground truth Cowork cannot see from deals.json — sync freshness, escrow stages, dangerous pending docs, agent_updates read-back, email health, timeline drift, sync_key.',
-        deal_messages: 'deal-messages summary: deal correspondence in the last 48h — counts + recent subjects (no bodies; full bodies at /api/crm/deal-messages). Includes signature_events: signed/updated e-sign documents we could NOT match to a deal — treat as "go confirm which file", not noise.',
+        deal_messages: 'deal-messages summary: deal correspondence in the last 48h — counts + recent subjects (no bodies; full bodies at /api/crm/deal-messages). sent_at is the real send time or null (sent_at_known says which) — never ingest time. Includes unmatched_signature_notices: signed/updated e-sign documents we could NOT match to a deal — treat as "go confirm which file", not noise.',
         reconcile:     'timeline reconcile op (side-effecting) — only present when ?reconcile=true.'
       },
       // Reference only — do NOT fetch these; their data is inlined above.

@@ -19,9 +19,10 @@
 //      only when it uniquely identifies one deal, since we now store their full body
 //
 // Signature-service notices ("Signing complete: ETA2") that STILL don't match go
-// to a dedicated `signature_events[]` bucket, not `unmatched[]` — a signed
-// document is "go look", never silence (Sara, 2026-08-27). email-sync stores the
-// FULL body for these senders so rules 1 & 4 have real text to work with.
+// to a dedicated `unmatched_signature_notices[]` bucket, not `unmatched[]` — a
+// signed document is "go look", never silence (Sara/Cowork, 2026-08-27). Every
+// signature-service message is tagged `class:'signature_notice'` (matched or not).
+// email-sync stores the FULL body for these senders so rules 1 & 4 have real text.
 //
 // Cowork 2026-08-27 handoff, item 3. This is the payoff — it retires James's run.
 
@@ -122,7 +123,7 @@ export default async function handler(req, res) {
     ]);
 
     const index = buildDealIndex(deals);
-    const messages = [], unmatched = [], signature_events = [];
+    const messages = [], unmatched = [], unmatched_signature_notices = [];
     let dropped_bulk = 0;
 
     for (const m of (rows || [])) {
@@ -134,36 +135,45 @@ export default async function handler(req, res) {
         subject:   m.subject || null,
         body:      truncate(m.content, 1500),
         truncated: String(m.content || '').length > 1500,
-        sent_at:   m.sent_at || null,          // real send time; NULL if unparsed
-        at:        m.created_at,               // ingest time (fallback for ordering)
+        // Real send time parsed from the Date header, or NULL. sent_at_known lets
+        // the briefing tell a real send time from "unknown" — it must NEVER quote
+        // `at` (ingest time) as if it were the send time. Only 6 of ~688 legacy
+        // rows carry a parsed sent_at (pre-deploy rows had no headers to parse and
+        // are unrecoverable); everything else is sent_at:null / sent_at_known:false.
+        sent_at:       m.sent_at || null,
+        sent_at_known: !!m.sent_at,
+        at:            m.created_at,           // ingest time — ordering fallback ONLY, never a send time
         direction: m.direction,
         owner:     ownerOf(m.seen_by),         // sara | james | both | null
-        signature: isSig || undefined,         // flag: this is an e-sign/forms notice
+        // Signature/e-sign notice? Present on EVERY such message, matched or not,
+        // so the briefing can style them (Cowork's requested `class`).
+        class:     isSig ? 'signature_notice' : undefined,
         deal:      d ? d.source_key : null,
         address:   d ? d.address : null
       };
       // A signed/updated document we couldn't tie to a deal is NOT silent noise —
       // it goes to its own bucket so the briefing can say "a document was signed,
       // go look" rather than burying it in unmatched. A signature notice we DID
-      // match still rides in `messages` (with signature:true) so the deal thread
-      // stays whole.
+      // match still rides in `messages` (with class:'signature_notice') so the deal
+      // thread stays whole.
       if (d) messages.push(item);
-      else if (isSig) signature_events.push(item);
+      else if (isSig) unmatched_signature_notices.push(item);
       else unmatched.push(item);
     }
 
     return ok(res, {
       generated_at: new Date().toISOString(),
       since: sinceIso,
-      counts: { matched: messages.length, unmatched: unmatched.length, signature_events: signature_events.length, dropped_bulk },
+      counts: { matched: messages.length, unmatched: unmatched.length, unmatched_signature_notices: unmatched_signature_notices.length, dropped_bulk },
       // Auditable + editable — Cowork can see exactly what was filtered out.
       deny_list: { senders: [...DENY_SENDERS], domains: [...DENY_DOMAINS] },
       messages,
       unmatched,
       // Documents signed/updated via an e-sign service that we could NOT match to
       // a deal. Surface these as "something was signed — go confirm which file",
-      // never drop them. (Signature notices that DID match are in `messages`.)
-      signature_events
+      // never drop them. (Signature notices that DID match are in `messages`, each
+      // tagged class:'signature_notice'.)
+      unmatched_signature_notices
     });
   } catch (e) {
     return fail(res, 500, e.message);
