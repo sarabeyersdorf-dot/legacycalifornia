@@ -95,6 +95,501 @@
       "permanent": true
     },
     {
+      "source": "/",
+      "has": [
+        {
+          "type": "host",
+          "value": "search.legacy-properties.com"
+        }
+      ],
+      "destination": "https://legacycalifornia.com/property-search.html",
+      "permanent": true
+    },
+    {
+      "source": "/seller",
+      "has": [
+        {
+          "type": "host",
+          "value": "search.legacy-properties.com"
+        }
+      ],
+      "destination": "https://legacycalifornia.com/valuation.html",
+      "permanent": true
+    },
+    {
+      "source": "/:path*",
+      "has": [
+        {
+          "type": "host",
+          "value": "search.legacy-properties.com"
+        }
+      ],
+      "destination": "https://legacycalifornia.com/property-search.html",
+      "permanent": true
+    },
+    {
+      "source": "/",
+      "has": [
+        {
+          "type": "host",
+          "value": "legacy-properties.com"
+        }
+      ],
+      "destination": "https://legacycalifornia.com/",
+      "permanent": true
+    },
+    {
+      "source": "/contact",
+      "has": [
+        {
+          "type": "host",
+          "value": "legacy-properties.com"
+        }
+      ],
+      "destination": "https://legacycalifornia.com/contact.html",
+      "permanent": true
+    },
+    {
+      "source": "/communities/murphys-real-estate",
+      "has": [
+        {
+          "type": "host",
+          "value": "legacy-properties.com"
+        }
+      ],
+      "destination": "https://legacycalifornia.com/town-murphys.html",
+      "permanent": true
+    },
+    {
+      "source": "/communities/arnold-real-estate",
+      "has": [
+        {
+          "type": "host",
+          "value": "legacy-properties.com"
+        }
+      ],
+      "destination": "https://legacycalifornia.com/town-arnold.html",
+      "permanent": true
+    },
+    {
+      "source": "/team-page",
+      "has": [
+        {
+          "type": "host",
+          "value": "legacy-properties.com"
+        }
+      ],
+      "destination": "https://legacycalifornia.com/about.html",
+      "permanent": true
+    },
+    {
+      "source": "/communities/angels-camp-real-estate",
+      "has": [
+        {
+          "type": "host",
+          "value": "legacy-properties.com"
+        }
+      ],
+      "destination": "https://legacycalifornia.com/town-angels-camp.html",
+      "permanent": true
+    },
+    {
+      "source": "/communities/lake-tulloch-real-estate",
+      "has": [
+        {
+          "type": "host",
+          "value": "legacy-properties.com"
+        }
+      ],
+      "destination": "https://legacycalifornia.com/town-copperopolis.html",
+      "permanent": true
+    },
+    {
+      "source": "/testimonials",
+      "has": [
+        {
+          "type": "host",
+          "value": "legacy-properties.com"
+        }
+      ],
+      "destination": "https://legacycalifornia.com/how-we-work.html",
+      "permanent": true
+    },
+    {
+      "source": "/communities/camp-connell-real-estate",
+      "has": [
+        {
+          "type": "host",
+          "value": "legacy-properties.com"
+        }
+      ],
+      "destination": "https://legacycalifornia.com/town-arnold.html",
+      "permanent": true
+    },
+    {
+      "source": "/communities/copperopolis-real-estate",
+      "has": [
+        {
+          "type": "host",
+          "value": "legacy-properties.com"
+        }
+      ],
+      "destination": "https://legacycalifornia.com/town-copperopolis.html",
+      "permanent": true
+    },
+    {
+      "source": "/why-list-with-us",
+      "has": [
+        {
+          "type": "host",
+          "value": "legacy-properties.com"
+        }
+      ],
+      "destination": "https://legacycalifornia.com/how-we-work.html",
+      "permanent": true
+    },
+    {
+      "source": "/communities/san-andreas-real-estate",
+      "has": [
+        {
+          "type": "host",
+          "value": "legacy-properties.com"
+        }
+      ],
+      "destination": "https://legacycalifornia.com/towns.html",
+      "permanent": true
+    },
+    {
+      "source": "/communities/copper-valley-real-estate",
+      "has": [
+        {
+          "type": "host",
+          "value": "legacy-properties.com"
+        }
+      ],
+      "destination": "https://legacycalifornia.com/town-copperopolis.html",
+      "permanent": true
+    },
+    {
+      "source": "/communities/avery-real-estate",
+      "has": [
+        {
+          "type": "host",
+          "value": "legacy-properties.com"
+        }
+      ],
+      "destination": "https://legacycalifornia.com/town-arnold.html",
+      "permanent": true
+    },
+    {
+      "source": "/communities",
+      "has": [
+        {
+          "type": "host",
+          "value": "legacy-properties.com"
+        }
+      ],
+      "destination": "https://legacycalifornia.com/towns.html",
+      "permanent": true
+    },
+    {
+      "source": "/blog",
+      "has": [
+        {
+          "type": "host",
+          "value": "legacy-properties.com"
+        }
+      ],
+      "destination": "https://legacycalifornia.com/ledger.html",
+      "permanent": true
+    },
+    {
+      "source": "/communities/forest-meadows-real-estate",
+      "has": [
+        {
+          "type": "host",
+          "value": "legacy-properties.com"
+        }
+      ],
+      "destination": "https://legacycalifornia.com/town-murphys.html",
+      "permanent": true
+    },
+    {
+      "source": "/communities/blue-lake-springs-real-estate",
+      "has": [
+        {
+          "type": "host",
+          "value": "legacy-properties.com"
+        }
+      ],
+      "destination": "https://legacycalifornia.com/town-arnold.html",
+      "permanent": true
+    },
+    {
+      "source": "/communities/valley-springs-real-estate",
+      "has": [
+        {
+          "type": "host",
+          "value": "legacy-properties.com"
+        }
+      ],
+      "destination": "https://legacycalifornia.com/towns.html",
+      "permanent": true
+    },
+    {
+      "source": "/communities/:slug*",
+      "has": [
+        {
+          "type": "host",
+          "value": "legacy-properties.com"
+        }
+      ],
+      "destination": "https://legacycalifornia.com/towns.html",
+      "permanent": true
+    },
+    {
+      "source": "/:path*",
+      "has": [
+        {
+          "type": "host",
+          "value": "legacy-properties.com"
+        }
+      ],
+      "destination": "https://legacycalifornia.com/",
+      "permanent": true
+    },
+    {
+      "source": "/",
+      "has": [
+        {
+          "type": "host",
+          "value": "www.legacy-properties.com"
+        }
+      ],
+      "destination": "https://legacycalifornia.com/",
+      "permanent": true
+    },
+    {
+      "source": "/contact",
+      "has": [
+        {
+          "type": "host",
+          "value": "www.legacy-properties.com"
+        }
+      ],
+      "destination": "https://legacycalifornia.com/contact.html",
+      "permanent": true
+    },
+    {
+      "source": "/communities/murphys-real-estate",
+      "has": [
+        {
+          "type": "host",
+          "value": "www.legacy-properties.com"
+        }
+      ],
+      "destination": "https://legacycalifornia.com/town-murphys.html",
+      "permanent": true
+    },
+    {
+      "source": "/communities/arnold-real-estate",
+      "has": [
+        {
+          "type": "host",
+          "value": "www.legacy-properties.com"
+        }
+      ],
+      "destination": "https://legacycalifornia.com/town-arnold.html",
+      "permanent": true
+    },
+    {
+      "source": "/team-page",
+      "has": [
+        {
+          "type": "host",
+          "value": "www.legacy-properties.com"
+        }
+      ],
+      "destination": "https://legacycalifornia.com/about.html",
+      "permanent": true
+    },
+    {
+      "source": "/communities/angels-camp-real-estate",
+      "has": [
+        {
+          "type": "host",
+          "value": "www.legacy-properties.com"
+        }
+      ],
+      "destination": "https://legacycalifornia.com/town-angels-camp.html",
+      "permanent": true
+    },
+    {
+      "source": "/communities/lake-tulloch-real-estate",
+      "has": [
+        {
+          "type": "host",
+          "value": "www.legacy-properties.com"
+        }
+      ],
+      "destination": "https://legacycalifornia.com/town-copperopolis.html",
+      "permanent": true
+    },
+    {
+      "source": "/testimonials",
+      "has": [
+        {
+          "type": "host",
+          "value": "www.legacy-properties.com"
+        }
+      ],
+      "destination": "https://legacycalifornia.com/how-we-work.html",
+      "permanent": true
+    },
+    {
+      "source": "/communities/camp-connell-real-estate",
+      "has": [
+        {
+          "type": "host",
+          "value": "www.legacy-properties.com"
+        }
+      ],
+      "destination": "https://legacycalifornia.com/town-arnold.html",
+      "permanent": true
+    },
+    {
+      "source": "/communities/copperopolis-real-estate",
+      "has": [
+        {
+          "type": "host",
+          "value": "www.legacy-properties.com"
+        }
+      ],
+      "destination": "https://legacycalifornia.com/town-copperopolis.html",
+      "permanent": true
+    },
+    {
+      "source": "/why-list-with-us",
+      "has": [
+        {
+          "type": "host",
+          "value": "www.legacy-properties.com"
+        }
+      ],
+      "destination": "https://legacycalifornia.com/how-we-work.html",
+      "permanent": true
+    },
+    {
+      "source": "/communities/san-andreas-real-estate",
+      "has": [
+        {
+          "type": "host",
+          "value": "www.legacy-properties.com"
+        }
+      ],
+      "destination": "https://legacycalifornia.com/towns.html",
+      "permanent": true
+    },
+    {
+      "source": "/communities/copper-valley-real-estate",
+      "has": [
+        {
+          "type": "host",
+          "value": "www.legacy-properties.com"
+        }
+      ],
+      "destination": "https://legacycalifornia.com/town-copperopolis.html",
+      "permanent": true
+    },
+    {
+      "source": "/communities/avery-real-estate",
+      "has": [
+        {
+          "type": "host",
+          "value": "www.legacy-properties.com"
+        }
+      ],
+      "destination": "https://legacycalifornia.com/town-arnold.html",
+      "permanent": true
+    },
+    {
+      "source": "/communities",
+      "has": [
+        {
+          "type": "host",
+          "value": "www.legacy-properties.com"
+        }
+      ],
+      "destination": "https://legacycalifornia.com/towns.html",
+      "permanent": true
+    },
+    {
+      "source": "/blog",
+      "has": [
+        {
+          "type": "host",
+          "value": "www.legacy-properties.com"
+        }
+      ],
+      "destination": "https://legacycalifornia.com/ledger.html",
+      "permanent": true
+    },
+    {
+      "source": "/communities/forest-meadows-real-estate",
+      "has": [
+        {
+          "type": "host",
+          "value": "www.legacy-properties.com"
+        }
+      ],
+      "destination": "https://legacycalifornia.com/town-murphys.html",
+      "permanent": true
+    },
+    {
+      "source": "/communities/blue-lake-springs-real-estate",
+      "has": [
+        {
+          "type": "host",
+          "value": "www.legacy-properties.com"
+        }
+      ],
+      "destination": "https://legacycalifornia.com/town-arnold.html",
+      "permanent": true
+    },
+    {
+      "source": "/communities/valley-springs-real-estate",
+      "has": [
+        {
+          "type": "host",
+          "value": "www.legacy-properties.com"
+        }
+      ],
+      "destination": "https://legacycalifornia.com/towns.html",
+      "permanent": true
+    },
+    {
+      "source": "/communities/:slug*",
+      "has": [
+        {
+          "type": "host",
+          "value": "www.legacy-properties.com"
+        }
+      ],
+      "destination": "https://legacycalifornia.com/towns.html",
+      "permanent": true
+    },
+    {
+      "source": "/:path*",
+      "has": [
+        {
+          "type": "host",
+          "value": "www.legacy-properties.com"
+        }
+      ],
+      "destination": "https://legacycalifornia.com/",
+      "permanent": true
+    },
+    {
       "source": "/listings",
       "destination": "/property-search.html",
       "permanent": true
