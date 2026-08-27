@@ -1,7 +1,7 @@
 {
-  "version": 10.4,
-  "lastUpdated": "2026-08-26",
-  "updatedBy": "morning-briefing 2026-08-26",
+  "version": 10.8,
+  "lastUpdated": "2026-08-27",
+  "updatedBy": "morning-briefing 2026-08-27 (align listTrac.last30 to report TOTAL)",
   "tasks": [
     {
       "agent": "sara",
@@ -784,15 +784,6 @@
     },
     {
       "agent": "james",
-      "client": "Baldwin",
-      "title": "Baldwin: Schedule final walkthrough with Shomari Turner for Tuesday 7/29 (2 days)",
-      "note": "COE 8/3 = 7 days. Final walkthrough must happen ~7/29. Coordinate with listing agent. Added 2026-07-27.",
-      "done": false,
-      "key": "baldwin-walkthrough-schedule",
-      "due": "2026-08-14"
-    },
-    {
-      "agent": "james",
       "client": "Admin",
       "title": "Fix CRM email signature — James's CRM outgoing emails display Sara Cooper's name, not James's",
       "note": "James flagged in 7/24 email. Update in CRM settings. Added 2026-07-27.",
@@ -1120,15 +1111,6 @@
       "key": "433-stage-decision-8-7"
     },
     {
-      "agent": "james",
-      "client": "Shomari Turner",
-      "title": "⚠️ Baldwin LOAN CONTINGENCY DUE 8/12 — buyer must remove; coordinate with Kim Hesser + Chicago Title",
-      "note": "Buyer Shomari Turner must remove loan contingency by 8/12. Coordinate with Kim Hesser (khesser@primeres.com, 209-768-8277) and Chicago Title escrow (FSST-5312600364). COE is 8/17.",
-      "done": false,
-      "due": "2026-08-12",
-      "key": "baldwin-loan-cont-8-12"
-    },
-    {
       "agent": "sara",
       "client": "Heryford",
       "title": "433 E Hwy 4 — Joel Lawson pest inspection CONFIRMED 8/11 at 1PM",
@@ -1136,14 +1118,6 @@
       "done": false,
       "due": "2026-08-11",
       "key": "433-pest-appt-8-11"
-    },
-    {
-      "agent": "james",
-      "client": "695 Feather",
-      "key": "feather-coe-confirm",
-      "title": "695 Feather: confirm COE 8/14 in writing with Tanya Salgado (OC Title #2473532-TS) and get closing/wire instructions — deals.json says 8/14 confirmed, James's file says no COE on record",
-      "due": "Today 8/7",
-      "done": false
     },
     {
       "agent": "sara",
@@ -1239,14 +1213,6 @@
       "done": false
     },
     {
-      "agent": "james",
-      "client": "Baldwin",
-      "key": "baldwin-eta2-crm-mismatch",
-      "title": "Baldwin: CRM timeline still shows loan + appraisal contingencies due 7/4 — ETA #2 (accepted 8/3) moved loan to 8/12 and COE to 8/17. Fix the CRM timeline dates so the buyer page is right",
-      "due": "2026-08-11",
-      "done": false
-    },
-    {
       "agent": "sara",
       "client": "324 Augusta",
       "key": "augusta-prequal-ltv-check",
@@ -1260,14 +1226,6 @@
       "key": "baldwin-bid-not-received",
       "title": "🔴 Baldwin: Despina + Allyson say they NEVER received the contractor bid (8/10 5:15 PM) - re-send the David Anderson Construction proposal to both today; loan contingency due 8/12",
       "due": "Today 8/11",
-      "done": false
-    },
-    {
-      "agent": "james",
-      "client": "8235 Baldwin",
-      "key": "baldwin-appraisal-status",
-      "title": "🔴 Baldwin: confirm with Kim Hesser whether the appraisal is COMPLETE or still outstanding - James thought it was done last week, Kimberly is now requesting it. Loan contingency due 8/12",
-      "due": "By 8/12",
       "done": false
     },
     {
@@ -1321,14 +1279,6 @@
     {
       "agent": "james",
       "client": "8235 Baldwin",
-      "key": "baldwin-walkthrough-date-fix",
-      "title": "Baldwin: Shomari's client page still says 'plan for the final walk-through around July 29' - CRM says 8/12. Update clientTasks so the client sees the real date",
-      "due": "This week",
-      "done": false
-    },
-    {
-      "agent": "james",
-      "client": "8235 Baldwin",
       "key": "baldwin-agentnote-refresh",
       "title": "Baldwin: agent note is still the 7/19 draft, written before ETA No. 2 existed. Six days from closing it should say where the loan stands - rewrite for Sara to publish",
       "due": "This week",
@@ -1340,30 +1290,6 @@
       "key": "fub-donald-rester",
       "title": "Donald Rester (209) 482-5744 viewed 1330 Calaveritas 62, San Andreas SEVEN times (Ylopo alert 8/10, unread) - strongest buying signal this week. Call him",
       "due": "Today 8/11",
-      "done": false
-    },
-    {
-      "agent": "james",
-      "client": "8235 Baldwin",
-      "key": "baldwin-eta3-seller-sig",
-      "title": "🔴 Baldwin: get Allyson Overturf's signature on ETA #3 TODAY — Shomari signed 8/11 8:45 PM; until she signs, the loan contingency deadline standing is 8/12",
-      "due": "2026-08-12",
-      "done": false
-    },
-    {
-      "agent": "james",
-      "client": "8235 Baldwin",
-      "key": "baldwin-eta3-verify-date",
-      "title": "Baldwin: open ETA #3 and confirm the COE written inside says 8/31 — '- 12/25' in the filename is the C.A.R. form revision, not a deadline",
-      "due": "2026-08-12",
-      "done": false
-    },
-    {
-      "agent": "james",
-      "client": "8235 Baldwin",
-      "key": "baldwin-eta3-file",
-      "title": "Baldwin: download executed ETA #3 from Authentisign and file in EX — only ETA1 and ETA2 are on disk",
-      "due": "2026-08-16",
       "done": false
     },
     {
@@ -1456,26 +1382,10 @@
       "done": false
     },
     {
-      "agent": "sara",
-      "client": "8235 Baldwin",
-      "key": "baldwin-aea-read-terms",
-      "title": "🔴 Baldwin: READ the AEA amendment before anyone signs — seller already signed 8/13, terms only inside the PDF, James accepted before his buyer saw it",
-      "due": "2026-08-13",
-      "done": false
-    },
-    {
       "agent": "james",
       "client": "8235 Baldwin",
       "key": "baldwin-contingency-lapsed",
       "title": "🔴 Baldwin: loan contingency lapsed 8/12 and CR #2 never filed — buyer is outside contingency protection",
-      "due": "2026-08-13",
-      "done": false
-    },
-    {
-      "agent": "james",
-      "client": "695 Feather",
-      "key": "feather-eta1-seller-sig",
-      "title": "🔴 695 Feather: confirm Dee Bradley's seller signed ETA1 — buyer signed 8/11, no seller signature anywhere. COE is TOMORROW 8/14",
       "due": "2026-08-13",
       "done": false
     },
@@ -1497,25 +1407,9 @@
     },
     {
       "agent": "james",
-      "client": "8235 Baldwin",
-      "key": "baldwin-appraisal-in-writing",
-      "title": "Baldwin: get the appraisal outcome in writing — Kim Hesser's 8/12 email body is an image with no readable text",
-      "due": "2026-08-13",
-      "done": false
-    },
-    {
-      "agent": "james",
       "client": "695 Feather",
       "key": "feather-hoa-docs-check",
       "title": "695 Feather: confirm all three parts of the HOA document set arrived intact (Tanya split them 8/13 after size rejections)",
-      "due": "2026-08-16",
-      "done": false
-    },
-    {
-      "agent": "james",
-      "client": "695 Feather",
-      "key": "feather-eta1-file",
-      "title": "695 Feather: ETA1 signed 8/11 but not filed — EX holds only ADM 1pdf.pdf",
       "due": "2026-08-16",
       "done": false
     },
@@ -1595,14 +1489,6 @@
       "done": false
     },
     {
-      "agent": "james",
-      "client": "8235 Baldwin",
-      "key": "baldwin-aea-buyer-sig",
-      "title": "🔴 Baldwin: confirm Shomari actually signed the AEA — filed to EX seller-signed only; James said \"I think this will be fine\"; buyer out of town, death in the family. COE Monday 8/17.",
-      "due": "Today 8/14",
-      "done": false
-    },
-    {
       "agent": "sara",
       "client": "324 Augusta",
       "key": "aug-inspection-response",
@@ -1649,22 +1535,6 @@
       "key": "augusta-relist-decision",
       "title": "324 Augusta: relist decision, and how the roof/pest repair discrepancy gets disclosed to the next buyer",
       "due": "This week",
-      "done": false
-    },
-    {
-      "agent": "james",
-      "client": "8235 Baldwin",
-      "key": "baldwin-aea-expired",
-      "title": "🔴 Baldwin: settle whether AEA1 is actually executed — filed copy has Acceptance blank and expired 8/14 11 AM, but Authentisign reportedly showed Signing Complete 8/13. Open the envelope.",
-      "due": "Today",
-      "done": false
-    },
-    {
-      "agent": "james",
-      "client": "8235 Baldwin",
-      "key": "baldwin-eta-deadlock",
-      "title": "🔴 Baldwin: break the ETA deadlock with Allyson — she signs only after the amendment returns; 2 days to COE",
-      "due": "Today",
       "done": false
     },
     {
@@ -1811,22 +1681,6 @@
       "done": false
     },
     {
-      "agent": "james",
-      "client": "695 Feather",
-      "key": "feather-coe-conflict",
-      "title": "🔴 695 Feather: executed ETA filed 8/18 says COE 08/28 + contingency 08/25, but the file and Ashley's page say 8/21 — settle with Tanya Salgado TODAY",
-      "due": "2026-08-18",
-      "done": false
-    },
-    {
-      "agent": "james",
-      "client": "695 Feather",
-      "key": "feather-eta-contingency",
-      "title": "695 Feather: the ETA extends a contingency to 8/25 with the LOAN box checked on an all-cash purchase — confirm which contingency was actually extended",
-      "due": "2026-08-18",
-      "done": false
-    },
-    {
       "agent": "sara",
       "client": "324 Augusta",
       "key": "augusta-roof-report-file",
@@ -1868,22 +1722,6 @@
     },
     {
       "agent": "james",
-      "client": "695 Feather",
-      "key": "feather-coe-828-approve",
-      "title": "🔴 695 Feather COE is 8/28 not 8/21 per executed ETA No. 1 — approve the corrected note to Ashley Robinson",
-      "due": "Today",
-      "done": false
-    },
-    {
-      "agent": "james",
-      "client": "695 Feather",
-      "key": "feather-loan-box-query",
-      "title": "695 Feather: ETA No. 1 extends a 'Loan' contingency to 8/25 on an all-cash deal with no lender — confirm what it was meant to extend",
-      "due": "2026-08-25",
-      "done": false
-    },
-    {
-      "agent": "james",
       "client": "8235 Baldwin",
       "key": "baldwin-adm1-buyer-sig",
       "title": "Baldwin: confirm Shomari signed ADM No. 1 (filed 8/18) in Authentisign — seller signed 08/18, buyer date not on the document",
@@ -1921,14 +1759,6 @@
       "title": "New FUB lead Eva Mifsud (925) 303-6013 eva.mifsud@graybar.com via Realtor.com — unworked",
       "due": "Today",
       "done": true
-    },
-    {
-      "agent": "james",
-      "client": "695 Feather",
-      "key": "feather-heloc-funds-friday",
-      "title": "🔴 695 Feather: HELOC funds due at escrow Friday 8/21 — confirm with the bank and Tanya Salgado (OC Title #2473532-TS). Loan contingency 8/25, COE 8/28",
-      "due": "2026-08-21",
-      "done": false
     },
     {
       "agent": "james",
@@ -2051,14 +1881,6 @@
       "done": false
     },
     {
-      "agent": "james",
-      "client": "8235 Baldwin",
-      "key": "baldwin-appraisal-monday",
-      "title": "Baldwin: Kimberly Hesser says the appraisal cleared the AMC and is delivered first thing Mon 8/24 - get it in writing and confirm lender docs went to Chicago Title the same day",
-      "due": "2026-08-24",
-      "done": false
-    },
-    {
       "agent": "sara",
       "client": "Bev Woltjer",
       "key": "bev-lakefront-nudge",
@@ -2073,14 +1895,6 @@
       "title": "'Search for Brian' was pushed to Brian Duarte 26 days ago with 1 open and no reaction - he is flagged hot and has had no contact since 8/1",
       "due": "This week",
       "done": false
-    },
-    {
-      "agent": "james",
-      "client": "8235 Baldwin",
-      "key": "baldwin-appraisal-delivered-824",
-      "due": "Today",
-      "done": false,
-      "title": "🔴 Baldwin: Kimberly Hesser said the appraisal delivers to the lender first thing TODAY 8/24 — get it in writing and tell Allyson Overturf. Loan contingency has been past due since 8/21."
     },
     {
       "agent": "james",
@@ -2188,14 +2002,6 @@
     },
     {
       "agent": "james",
-      "client": "Legacy admin",
-      "key": "james-gmail-reconnect",
-      "done": false,
-      "due": "Today",
-      "title": "Reconnect James's Google account in CRM settings — the sign-in expired and the CRM has ingested none of James's email since Sun 8/23 10:45pm."
-    },
-    {
-      "agent": "james",
       "client": "695 Feather",
       "key": "feather-signed-closing-stmt",
       "done": false,
@@ -2240,6 +2046,14 @@
       "key": "quillen-collection-followup",
       "title": "Roger AND Kim both opened 'Roger and Kim' Monday evening 8/25 and viewed properties - first real client engagement the CRM has ever recorded. Call while it is warm",
       "due": "2026-08-26",
+      "done": false
+    },
+    {
+      "agent": "sara",
+      "client": "179 Elams Ranch",
+      "key": "elams-placer-title-guidance",
+      "title": "179 Elams Ranch: chase Placer Title for what the McEvoy family must provide before listing — a deceased owner is on title. Nothing moves until this comes back.",
+      "due": "this week",
       "done": false
     }
   ],
@@ -3670,12 +3484,13 @@
         "shares": 18,
         "inquiries": 0,
         "newPct": 92,
-        "last30": 329,
+        "last30": 384,
         "since": "2026-03-20",
         "zipBeat": true,
         "note": "Mixed-use: syndicates to both commercial and residential portals, and correctly appears on Zillow (226) and Realtor.com (84). Beat its zip code. A second ListTrac report on the earlier MLS number covers 2025-12-05 onward and read 4,027 views / 6 shares / 97% new on 2026-08-23.",
         "reportDate": "2026-08-23",
-        "source": "ListTrac / MetroList agent report 'Online Activity Reports for your Listings'"
+        "source": "ListTrac / MetroList agent report 'Online Activity Reports for your Listings'",
+        "last30Note": "30-day total 384 taken from the report's own TOTAL row (via the marketing block). A previous value of 329 was a sum of the top-10 websites only, which undercounts because the top-10 excludes smaller sources."
       },
       "homesCom": {
         "shareUrl": "https://www.homes.com/t/h3kn9nsqsh4t5?s=6",
@@ -4069,12 +3884,13 @@
         "shares": 91,
         "inquiries": 0,
         "newPct": 94,
-        "last30": 637,
+        "last30": 737,
         "since": "2026-04-08",
         "zipBeat": true,
         "note": "91 shares - still the most-shared listing in the book. Beat its zip code. Zillow 414, Realtor.com 177, Trulia 46 over the last 30 days.",
         "reportDate": "2026-08-23",
-        "source": "ListTrac / MetroList agent report 'Online Activity Reports for your Listings'"
+        "source": "ListTrac / MetroList agent report 'Online Activity Reports for your Listings'",
+        "last30Note": "30-day total 737 taken from the report's own TOTAL row (via the marketing block). A previous value of 637 was a sum of the top-10 websites only, which undercounts because the top-10 excludes smaller sources."
       },
       "timeline": {
         "note": "LISTING IS LIVE. An ESCROW on this listing cancelled — do not confuse the two. Purchase Agreement dated 2026-04-21 between buyer Kayla Priestley and seller Sean Cristian Moffatt. Cancellation of Contract, Disposition of Deposit and Cancellation of Escrow (C.A.R. Form CC rev 6/24) executed by BOTH parties; buyer cancelled under paragraph L(1) 8A; escrow #P-698773 at Placer Title Company cancelled with full mutual release; seller authorised release of the buyer's deposit back to the buyer in full, less buyer's fees and costs. Filed Duds\\9568 Sheep Ranch Rd\\Cancellation of Contract, Release of Deposit and Cancellation of Escrow - 624.pdf. Per Sara 2026-08-16: 'sheep ranch had an escrow cancel buyer Kayla Priestly but the listing is not canceled.' stage corrected 'cancelled' -> 'listing' and salePrice cleared to the RLA/MOT list price of $389,000 the same day. The listing is still marketing and still generating ListTrac traffic (3,165 views, 87 shares, 728 in the last 30 days)."
@@ -4831,12 +4647,13 @@
         "shares": 4,
         "inquiries": 0,
         "newPct": 100,
-        "last30": 43,
+        "last30": 55,
         "since": "2025-01-17",
         "zipBeat": true,
         "note": "Beat its zip code. Zillow 33, Realtor.com 5, Homes.com 5 over the last 30 days. 100% new visitors - nobody is returning for a second look.",
         "reportDate": "2026-08-23",
-        "source": "ListTrac / MetroList agent report 'Online Activity Reports for your Listings'"
+        "source": "ListTrac / MetroList agent report 'Online Activity Reports for your Listings'",
+        "last30Note": "30-day total 55 taken from the report's own TOTAL row (via the marketing block). A previous value of 43 was a sum of the top-10 websites only, which undercounts because the top-10 excludes smaller sources."
       },
       "marketing": {
         "period": "Jan 17, 2025 - Aug 23, 2026",
@@ -4945,12 +4762,13 @@
         "shares": 11,
         "inquiries": 0,
         "newPct": 94,
-        "last30": 5,
+        "last30": 27,
         "since": "2025-01-17",
         "zipBeat": false,
         "note": "SYNDICATION GAP (within vacant land): 5 views in 30 days, Homes.com the only top-10 source. Same pattern as 2000 Gun Club and 590 S Main.",
         "reportDate": "2026-08-23",
-        "source": "ListTrac / MetroList agent report 'Online Activity Reports for your Listings'"
+        "source": "ListTrac / MetroList agent report 'Online Activity Reports for your Listings'",
+        "last30Note": "30-day total 27 taken from the report's own TOTAL row (via the marketing block). A previous value of 5 was a sum of the top-10 websites only, which undercounts because the top-10 excludes smaller sources."
       },
       "marketing": {
         "period": "Jan 17, 2025 - Aug 23, 2026",
@@ -5061,12 +4879,13 @@
         "shares": 11,
         "inquiries": 0,
         "newPct": 100,
-        "last30": 5,
+        "last30": 20,
         "since": "2025-01-17",
         "zipBeat": false,
         "note": "SYNDICATION GAP (within vacant land): 5 views in 30 days and Homes.com is the ONLY source in the top-10 - no Zillow, no Realtor.com, no Trulia. 1350 Love St and 701 Mark Twain are the same property type and both draw Zillow/Realtor.com traffic, so this is a fixable feed problem, not a property-type limitation.",
         "reportDate": "2026-08-23",
-        "source": "ListTrac / MetroList agent report 'Online Activity Reports for your Listings'"
+        "source": "ListTrac / MetroList agent report 'Online Activity Reports for your Listings'",
+        "last30Note": "30-day total 20 taken from the report's own TOTAL row (via the marketing block). A previous value of 5 was a sum of the top-10 websites only, which undercounts because the top-10 excludes smaller sources."
       },
       "marketing": {
         "period": "Jan 17, 2025 - Aug 23, 2026",
@@ -5178,12 +4997,13 @@
         "shares": 3,
         "inquiries": 0,
         "newPct": 94,
-        "last30": 6,
+        "last30": 18,
         "since": "2025-01-17",
         "zipBeat": false,
         "note": "SYNDICATION GAP (within vacant land): 6 views in 30 days, Homes.com the only top-10 source. Quietest listing in the book. Same pattern as 2000 Gun Club and 635 S Main.",
         "reportDate": "2026-08-23",
-        "source": "ListTrac / MetroList agent report 'Online Activity Reports for your Listings'"
+        "source": "ListTrac / MetroList agent report 'Online Activity Reports for your Listings'",
+        "last30Note": "30-day total 18 taken from the report's own TOTAL row (via the marketing block). A previous value of 6 was a sum of the top-10 websites only, which undercounts because the top-10 excludes smaller sources."
       },
       "marketing": {
         "period": "Jan 17, 2025 - Aug 23, 2026",
@@ -5280,12 +5100,13 @@
         "shares": 17,
         "inquiries": 0,
         "newPct": 97,
-        "last30": 132,
+        "last30": 165,
         "since": "2025-06-20",
         "zipBeat": true,
         "note": "Strongest of the vacant-land listings by a wide margin. Zillow 90, Realtor.com 30, Trulia 7, Homes.com 5 over the last 30 days. Beat its zip code.",
         "reportDate": "2026-08-23",
-        "source": "ListTrac / MetroList agent report 'Online Activity Reports for your Listings'"
+        "source": "ListTrac / MetroList agent report 'Online Activity Reports for your Listings'",
+        "last30Note": "30-day total 165 taken from the report's own TOTAL row (via the marketing block). A previous value of 132 was a sum of the top-10 websites only, which undercounts because the top-10 excludes smaller sources."
       },
       "marketing": {
         "period": "Jun 20, 2025 - Aug 23, 2026",
@@ -5658,6 +5479,54 @@
       "clientTasks": [],
       "goodToKnow": [],
       "docs": {}
+    },
+    {
+      "id": "preparing-179-elams-ranch",
+      "stage": "preparing",
+      "side": "seller",
+      "agent": "sara",
+      "address": "179 Elams Ranch Rd",
+      "city": "Oroville, CA 95966",
+      "type": "residential",
+      "client": "Josh R McEvoy & Jennifer McEvoy",
+      "color": {
+        "name": "pine",
+        "border": "#2E5C3D",
+        "bg": "#E2EEE6"
+      },
+      "listPrice": 330000,
+      "salePrice": null,
+      "openEscrowDate": null,
+      "closingDate": null,
+      "listing": {
+        "client": "Josh R McEvoy & Jennifer McEvoy"
+      },
+      "contacts": {
+        "coAgent": null,
+        "seller": "Josh R McEvoy (son) and Jennifer McEvoy (mother)",
+        "title": "Placer Title — engaged to advise what the family must provide before the property can be listed/conveyed",
+        "escrow": null,
+        "lender": null,
+        "priorEscrow": "First American, Michelle Miller (micmiller@firstam.com), Escrow #7384902 — handled the April 2026 purchase. Reference only; Placer runs its own title search."
+      },
+      "timeline": {
+        "note": "Added 2026-08-27 at Sara's instruction. PREPARING TO LIST — ON HOLD pending title/probate guidance from Placer Title. Sellers are Josh R McEvoy and Jennifer McEvoy (son and mother). A THIRD PARTY IS ALSO ON TITLE — the father — who died unexpectedly. Placer Title is advising on what the family needs to provide before the property can be listed and conveyed; nothing proceeds until that comes back. PAST CLIENTS: Legacy sold them this same home this year — buy side, Sara Cooper. Purchase price $289,400, COE 2026-04-10, escrow #7384902 at First American (Michelle Miller). Gross commission $14,470 (5%, seller-paid), less a $100 buyer credit for the appraiser inspection = $14,370 net to Legacy. Closed file: _Sold\\Elam ranch\\. THE FATHER'S NAME IS INFERRED, NOT CONFIRMED: the April commission demand names three buyers — Joshua McEvoy, Jennifer McEvoy and Robert McEvoy. Sara's note says the father is the third person on title, so that is Robert McEvoy on the documents. Confirm with the family before any name is used on paperwork. NO RLA YET — commission, dateListed, expiration and agreementForm are UNKNOWN and deliberately omitted rather than guessed. listPrice 330000 is Sara's target price as given 2026-08-27, not a figure off an executed listing agreement. CORRECTED 2026-08-27 per Sara: an earlier version of this record said to request the vesting/deed from First American. That was wrong — brokers are not typically provided with deeds, and a title company pulls title itself. Placer will see the vesting without Sara supplying anything. The open question is what ESTATE documentation the family must provide, which is exactly what Placer is being asked."
+      },
+      "alerts": [
+        "ON HOLD — cannot list until Placer Title advises what the family must provide. A deceased owner is on title alongside Josh and Jennifer, so the estate side has to be resolved before the property can be conveyed. This is Placer's question to answer, not a marketing timing decision.",
+        "Handle with care — this is a recent bereavement, and the family bought the home only in April.",
+        "PAST CLIENTS: Legacy sold them this home 2026-04-10 for $289,400 (buy side, Sara). Reusable material already on file in _Sold\\Elam ranch\\: NHD report + signature pages, home inspection, well photos, MLS sheet.",
+        "Sara does not need to supply a deed — Placer runs its own title search and will see how title was vested in April. What the FAMILY may need to produce is estate paperwork, and precisely which documents is the question Placer is being asked. If a copy of the April vesting is ever wanted, the sellers hold it themselves via their owner's title policy from that purchase, and it is also public record at the Butte County Recorder.",
+        "OUTSIDE THE USUAL FOOTPRINT: Oroville is Butte County, not Calaveras/Amador. Confirm MLS coverage and syndication before listing — the rest of the book is MetroList.",
+        "No RLA executed yet — listPrice $330,000 is a target, and commission is not set."
+      ],
+      "milestones": [],
+      "clientTasks": [],
+      "goodToKnow": [],
+      "docs": {
+        "priorPurchaseFile": "Closed buy-side file at _Sold\\Elam ranch\\ — commission demand (PDF + DOCX), NHD PIDMAX report + signature pages + invoice, home inspection, well photos, client MLS sheet, house-number photo.",
+        "priorMLS": "179 Elams Ranch Rd Client MLS.pdf — also in _Showings\\meth and tony\\179 Elams Ranch Rd. shared folder with Meth and Tony"
+      }
     }
   ]
 }
