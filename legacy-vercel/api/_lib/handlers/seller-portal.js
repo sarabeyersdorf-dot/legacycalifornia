@@ -643,13 +643,26 @@ export default async function handler(req, res) {
         dealMarketing = ms;
       }
     } catch (_) { /* marketing panel is best-effort */ }
+
+    // The traffic figures the seller sees come from the marketing_stats Cowork
+    // writes (via deals.json) — the "Marketing activity" panel already renders
+    // views/shares/inquiries/top-sites from it. The OLD listing_stats stub was
+    // never populated, so pv7/uv7/sv7 above are 0. That zero still leaks into the
+    // traffic-AWARE COPY below (the headline and the AI seller note), making them
+    // assume a dead-quiet listing while the marketing panel shows thousands of
+    // views. Feed those copy paths the real count instead. (We do NOT add another
+    // stat card — that would just duplicate the marketing panel.)
+    const numOr = (v) => (Number.isFinite(+v) ? +v : null);
+    const mkViews = dealMarketing ? numOr(dealMarketing.views) : null;
+    const pvEff   = pv7 || mkViews || 0;                 // real weekly, else marketing total, else 0
+
     // Uploaded deal photo first; then real MLS photo; then the YouTube tour's
     // thumbnail (4:3 hqdefault) so a listing with a video tour is never blank.
     const photo = dealPhotoOverride
       || (listing.photos && listing.photos[0])
       || (ytThumbId ? `https://img.youtube.com/vi/${ytThumbId}/hqdefault.jpg` : null);
     const headline    = `${listing.address || 'Your home'}.`;
-    const headline_em = dayOnMarket > 0 && pv7 > 0
+    const headline_em = dayOnMarket > 0 && pvEff > 0
       ? 'Doing better than expected.'
       : dayOnMarket === 0 ? 'Live on the market.' : 'Holding steady.';
 
@@ -659,7 +672,7 @@ export default async function handler(req, res) {
       saraNote = await draftSellerNote(listing, {
         seller_first_name: lead.first_name,
         day_on_market:     dayOnMarket,
-        page_views:        pv7,
+        page_views:        pvEff,
         showings_total:    showingsTotal,
         showings_upcoming: showingsUpcoming,
         offers_count:      offerCount,
@@ -694,8 +707,8 @@ export default async function handler(req, res) {
         listed_since:   `Listed ${fmtDate(listing.created_at)} · ${(listing.price_history || []).length ? `${(listing.price_history || []).length} price update(s)` : 'No price drops yet'}`
       },
       kpi: {
-        page_views:            String(pv7),
-        page_views_change:     pctChange(pv7, pvPrev),
+        page_views:            String(pvEff),
+        page_views_change:     pctChange(pvEff, pvPrev),
         unique_viewers:        String(uv7),
         unique_viewers_change: pctChange(uv7, uvPrev),
         saves:                 String(sv7),
