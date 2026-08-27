@@ -4246,16 +4246,40 @@ body.lp-restyle {
           +   fld('Sale price','sale_price', d.sale_price, 'number')
           +   fld('Address','address', d.address, 'text', true)
           +   fld('City','city', d.city, 'text')
-          +   fld('Close date (COE)','coe_date', d.coe_date, 'date')
+          +   fld('Close date (COE) — confirmed','coe_date', d.coe_date, 'date')
           +   fld('MLS #','mls_number', d.mls, 'text')
           +   selFld('Side','side', d.side, [['seller','Seller'],['buyer','Buyer'],['both','Both']])
           +   selFld('Agent','agent', d.agent, [['sara','Sara'],['james','James'],['both','Both']])
           +   '<div class="hint">Saved as CRM overrides — they stick and win over the hourly Cowork sync. Clear a field to fall back to Cowork’s value.</div>'
+          +   '<div class="full" style="border-top:1px dashed #E0D6C0;margin-top:8px;padding-top:10px;">'
+          +     '<label class="full">Expected COE — <em>believed, not yet confirmed</em>'
+          +       '<input type="date" data-exp="coe_date" value="">'
+          +     '</label>'
+          +     '<label class="full">Why — who/what (e.g. “lender verbal, docs Friday”)'
+          +       '<input type="text" data-exp-note="coe_date" value="" maxlength="200" placeholder="lender verbal, docs Friday">'
+          +     '</label>'
+          +     '<div class="hint"><strong>Agenda only — an expected date is never shown to your client.</strong> It reaches your briefing labelled with your name and reason, and is promoted to the confirmed date automatically once the executed document lands. Leave blank if the confirmed date above is already right.</div>'
+          +   '</div>'
           + '</div>'
           + '<div class="ft"><span class="msg" data-edit-msg></span><button class="ds-btn" data-edit-cancel>Cancel</button><button class="ds-btn ds-btn--primary" data-edit-save>Save</button></div>'
           + '</div>';
         document.body.appendChild(m);
         var msg=m.querySelector('[data-edit-msg]');
+        // Prefill the "expected COE" belief (a separate, agent-owned overlay) from
+        // /api/crm/deal-dates. Fail-soft: the confirmed-field editor still works if
+        // this deal predates migration 089 or the fetch hiccups.
+        (function(){
+          var expEl=m.querySelector('[data-exp="coe_date"]'); var noteEl=m.querySelector('[data-exp-note="coe_date"]');
+          if(!expEl) return;
+          fetch('/api/crm/deal-dates?source_key='+encodeURIComponent(d.source_key),{credentials:'include'})
+            .then(function(r){ return r.ok?r.json():null; })
+            .then(function(j){
+              var exp=j&&j.expected&&j.expected.coe_date;
+              if(exp){ expEl.value=exp.value||''; if(noteEl) noteEl.value=exp.note||''; }
+              expEl._loaded=expEl.value; if(noteEl) noteEl._loaded=noteEl.value;
+            })
+            .catch(function(){ expEl._loaded=expEl.value; if(noteEl) noteEl._loaded=noteEl.value; });
+        })();
         function close(){ if(m.parentNode) document.body.removeChild(m); document.removeEventListener('keydown', onKey); }
         function onKey(ev){ if(ev.key==='Escape') close(); }
         document.addEventListener('keydown', onKey);
@@ -4265,11 +4289,23 @@ body.lp-restyle {
           var fields={};
           m.querySelectorAll('[data-f]').forEach(function(el){ fields[el.getAttribute('data-f')]=el.value; });
           save.disabled=true; msg.className='msg'; msg.textContent='Saving…';
+          // Save the CONFIRMED fields (deal-edit → agent_overrides), then the
+          // EXPECTED COE belief (deal-dates) if it changed. Two stores because they
+          // are two different truths: confirmed reaches the client, expected never does.
+          function saveExpected(){
+            var expEl=m.querySelector('[data-exp="coe_date"]'); var noteEl=m.querySelector('[data-exp-note="coe_date"]');
+            var changed = expEl && (expEl.value!==(expEl._loaded||'') || (noteEl && noteEl.value!==(noteEl._loaded||'')));
+            if(!changed){ close(); state.loading=false; load(); return; }
+            fetch('/api/crm/deal-dates',{method:'POST',credentials:'include',headers:{'Content-Type':'application/json'},body:JSON.stringify({source_key:d.source_key,field:'coe_date',expected:expEl.value,note:noteEl?noteEl.value:''})})
+              .then(function(r){ return r.ok; })
+              .then(function(okk){ if(!okk){ msg.className='msg err'; msg.textContent='Deal saved, but the expected COE did not — reopen to retry.'; save.disabled=false; return; } close(); state.loading=false; load(); })
+              .catch(function(){ msg.className='msg err'; msg.textContent='Deal saved, but the expected COE did not (network) — reopen to retry.'; save.disabled=false; });
+          }
           fetch('/api/crm/deal-edit',{method:'POST',credentials:'include',headers:{'Content-Type':'application/json'},body:JSON.stringify({source_key:d.source_key,fields:fields})})
             .then(function(r){ return r.json().then(function(j){ return {ok:r.ok,j:j}; },function(){ return {ok:r.ok,j:{}}; }); })
             .then(function(res){
               if(!res.ok){ msg.className='msg err'; msg.textContent=(res.j&&res.j.error)||'Could not save.'; save.disabled=false; return; }
-              close(); state.loading=false; load();
+              saveExpected();
             })
             .catch(function(){ msg.className='msg err'; msg.textContent='Network error — try again.'; save.disabled=false; });
         });
