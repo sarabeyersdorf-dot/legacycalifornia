@@ -39,6 +39,7 @@ import { handleOptions, ok, fail } from '../_lib/cors.js';
 import { detectLeadSource, parseLead } from '../_lib/lead-intake.js';
 import { alertAgents } from '../_lib/agent-alert.js';
 import { getCallerProfile, isAgent } from '../_lib/auth.js';
+import { isBulkSender } from '../_lib/email-bulk.js';
 
 const GMAIL_METADATA_HEADERS = ['From', 'To', 'Subject', 'Date', 'Message-ID'];
 const MAX_MESSAGES_PER_MAILBOX = 50; // keep each 15-minute run bounded
@@ -385,6 +386,13 @@ async function syncMailbox(supa, account, clientId, clientSecret) {
         const messageId = headerValue(headers, 'Message-ID') || headerValue(headers, 'Message-Id');
         const sentAt    = parseEmailDate(headerValue(headers, 'Date'));
 
+        // Bulk newsletters/marketing never enter the review queue — file them
+        // 'dismissed' at ingest so the queue stays genuine deal correspondence
+        // (Cowork item 4). The deny list is explicit and shared with the
+        // deal-messages reader; deal parties (title/escrow/lenders/co-agents) are
+        // deliberately NOT on it, so real client mail is never auto-dismissed.
+        const status = isBulkSender(senderEmail) ? 'dismissed'
+                     : contactId ? 'active' : 'pending_review';
         const { inserted: wasNew, error: insErr } = await upsertDealMessage(supa, owner, messageId, {
           contact_id:        contactId,
           direction:          'inbound',
@@ -392,7 +400,7 @@ async function syncMailbox(supa, account, clientId, clientSecret) {
           content:             snippet,
           subject,
           raw_email_address:  senderEmail,
-          status:              contactId ? 'active' : 'pending_review',
+          status,
           sent_at:             sentAt
         });
         if (!insErr && wasNew) {
