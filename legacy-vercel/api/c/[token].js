@@ -18,6 +18,7 @@ import { anthropicJSON } from '../_lib/anthropic.js';
 import { sendSMS } from '../_lib/twilio.js';
 import { handleOptions, readJson, ok, fail } from '../_lib/cors.js';
 import { buildClientPayload, disclaimer, agentIdentity } from '../_lib/collection-render.js';
+import { getCallerProfile, isAgent } from '../_lib/auth.js';
 
 const VAL_MODEL = 'claude-sonnet-4-6';           // matches api/_lib/anthropic.js default
 const RATE_PER_DAY = 3;
@@ -42,6 +43,18 @@ async function loadCollection(supa, token) {
 // Fire-and-forget, and only when the collection has a recipient lead. Agent
 // PREVIEWS never reach this file — they use /api/curate/preview, which does not
 // touch collection_events — so everything here is a genuine client signal.
+// A logged-in agent opening a client's /c/<token> link is PREVIEWING, not
+// engaging — historically every "open" in the DB was an agent checking their own
+// link (Cowork 8/24), which is why open counts couldn't be trusted as client
+// behavior. Detect an authenticated agent session; default to 'client' for the
+// anonymous client (fail-safe — a real client open is never mislabeled or lost).
+async function viewerOf(req, res) {
+  try {
+    const { profile } = await getCallerProfile(req, res);
+    return isAgent(profile) ? 'agent' : 'client';
+  } catch (_) { return 'client'; }
+}
+
 function noteEngagement(supa, coll, eventType, eventData) {
   const leadId = coll?.client_lead_id;
   if (!leadId) return;
@@ -67,13 +80,13 @@ export default async function handler(req, res) {
 
     if (req.method === 'GET') {
       if (req.query?.thread === '1') return thread(supa, coll, res);
-      return view(supa, coll, res);
+      return view(supa, coll, res, req);
     }
     if (req.method === 'POST') {
       const b = await readJson(req);
       const op = b?.op;
       if (op === 'react')     return react(supa, coll, b, res);
-      if (op === 'event')     return event(supa, coll, b, res);
+      if (op === 'event')     return event(supa, coll, b, res, req);
       if (op === 'message')   return clientMessage(supa, coll, b, res);
       if (op === 'valuation') return valuation(supa, coll, b, res);
       return fail(res, 400, `unknown op: ${op}`);
@@ -85,12 +98,15 @@ export default async function handler(req, res) {
 }
 
 // ---- GET: branded payload --------------------------------------------------
-async function view(supa, coll, res) {
+async function view(supa, coll, res, req) {
   const payload = await buildClientPayload(supa, coll);
   delete payload._agent;   // never expose internal agent record to the client
-  // fire-and-forget open event, mirrored onto the lead's timeline + funnel
-  supa.from('collection_events').insert({ collection_id: coll.id, lead_id: coll.client_lead_id || null, event_type: 'open', meta: {} }).then(() => {}, () => {});
-  noteEngagement(supa, coll, 'collection_opened', {});
+  // Tag the open with WHO viewed, and only mirror a CLIENT open onto lead_events
+  // so that stream stays a clean client signal (agent previews stay in
+  // collection_events as meta.viewer:'agent', for reference, never as engagement).
+  const viewer = await viewerOf(req, res);
+  supa.from('collection_events').insert({ collection_id: coll.id, lead_id: coll.client_lead_id || null, event_type: 'open', meta: { viewer } }).then(() => {}, () => {});
+  if (viewer === 'client') noteEngagement(supa, coll, 'collection_opened', {});
   return ok(res, payload);
 }
 
@@ -198,23 +214,27 @@ async function clientMessage(supa, coll, b, res) {
 }
 
 // ---- POST event (view / dwell) ---------------------------------------------
-async function event(supa, coll, b, res) {
+async function event(supa, coll, b, res, req) {
   const TYPES = ['listing_view', 'dwell', 'valuation_open'];
   if (!TYPES.includes(b?.event_type)) return fail(res, 400, `event_type must be one of ${TYPES.join(', ')}`);
+  const viewer = await viewerOf(req, res);
   const row = {
     collection_id: coll.id,
     lead_id: coll.client_lead_id || null,
     property_id: b?.property_id || null,
     event_type: b.event_type,
     dwell_ms: Number.isFinite(+b?.dwell_ms) ? Math.max(0, Math.min(+b.dwell_ms, 3_600_000)) : null,
-    meta: (b && typeof b.meta === 'object' && b.meta) ? b.meta : {}
+    meta: { ...((b && typeof b.meta === 'object' && b.meta) ? b.meta : {}), viewer }
   };
   const { error } = await supa.from('collection_events').insert(row);
   if (error) return fail(res, 500, error.message);
-  // Mirror the meaningful signals onto the lead (dwell is left out — too noisy
-  // for a timeline; it stays on collection_events for engagement scoring).
-  if (b.event_type === 'listing_view') noteEngagement(supa, coll, 'property_viewed', { property_id: row.property_id });
-  else if (b.event_type === 'valuation_open') noteEngagement(supa, coll, 'valuation_interest', {});
+  // Mirror the meaningful signals onto the lead — CLIENT actions only, so an
+  // agent previewing (scrolling their own link) never inflates the client's
+  // engagement. Dwell is left out — too noisy for a timeline.
+  if (viewer === 'client') {
+    if (b.event_type === 'listing_view') noteEngagement(supa, coll, 'property_viewed', { property_id: row.property_id });
+    else if (b.event_type === 'valuation_open') noteEngagement(supa, coll, 'valuation_interest', {});
+  }
   return ok(res, { recorded: true });
 }
 
