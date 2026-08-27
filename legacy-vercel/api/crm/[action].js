@@ -80,6 +80,7 @@ import followUps           from '../_lib/handlers/crm-follow-ups.js';
 import showcase            from '../_lib/handlers/crm-showcase.js';
 import reconcile           from '../_lib/handlers/crm-reconcile.js';
 import dealMessages        from '../_lib/handlers/crm-deal-messages.js';
+import dealDates           from '../_lib/handlers/crm-deal-dates.js';
 
 const TABLE = {
   'lead-hygiene':    leadHygiene,
@@ -138,7 +139,8 @@ const TABLE = {
   'follow-ups':           followUps,
   'showcase':             showcase,
   'reconcile':            reconcile,
-  'deal-messages':        dealMessages
+  'deal-messages':        dealMessages,
+  'deal-dates':           dealDates
 };
 
 export default async function handler(req, res) {
