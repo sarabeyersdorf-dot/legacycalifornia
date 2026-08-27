@@ -52,6 +52,24 @@ const byRecency = (a, b) => {
   return (b.created_at ? Date.parse(b.created_at) : 0) - (a.created_at ? Date.parse(a.created_at) : 0);
 };
 
+// Page through the ENTIRE leads book. Each page requests <= PostgREST max-rows so
+// the server never truncates a page; stop on a short page. Ordered by id for a
+// stable scan. 20-page (20k) runaway guard, far above a boutique book.
+async function fetchAllLeads(supa, cols) {
+  const PAGE = 1000;
+  const all = [];
+  for (let page = 0; page < 20; page++) {
+    const from = page * PAGE;
+    const { data, error } = await supa
+      .from('leads').select(cols)
+      .order('id', { ascending: true }).range(from, from + PAGE - 1);
+    if (error) return { data: null, error };
+    all.push(...(data || []));
+    if (!data || data.length < PAGE) break;
+  }
+  return { data: all, error: null };
+}
+
 export default async function handler(req, res) {
   if (handleOptions(req, res)) return;
   if (req.method !== 'GET') return fail(res, 405, 'method_not_allowed');
@@ -86,9 +104,12 @@ export default async function handler(req, res) {
     }
 
     // ---- browse buckets: classify the whole book in code ------------------
-    // Pull the roster once (cap generous for a boutique book) and bucket in JS
-    // so null contact_type / mixed stage values can't hide anyone.
-    const { data, error } = await supa.from('leads').select(COLS).limit(3000);
+    // Pull the roster once and bucket in JS so null contact_type / mixed stage
+    // values can't hide anyone. Page through EVERYTHING — a plain .select() is
+    // capped by PostgREST's max-rows (1000 default) and the old .limit(3000) still
+    // truncated a book past 3000, silently dropping the tail (newest contacts,
+    // manual adds) from every browse list.
+    const { data, error } = await fetchAllLeads(supa, COLS);
     if (error) return fail(res, 500, error.message);
 
     // Count every browse bucket in ONE pass over the full book, so the sidebar

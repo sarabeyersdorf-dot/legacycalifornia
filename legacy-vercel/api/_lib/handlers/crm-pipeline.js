@@ -28,11 +28,14 @@ export default async function handler(req, res) {
     // migration hasn't been run yet so the board still loads.
     const FULL = 'id, first_name, last_name, email, pipeline_stage, deal_side, buyer_stage, seller_stage, contact_type, score, temperature, price_min, price_max, journey_stage, lead_type, areas, updated_at';
     const BASE = 'id, first_name, last_name, email, pipeline_stage, deal_side, score, temperature, price_min, price_max, journey_stage, lead_type, areas, updated_at';
-    let { data: leads, error } = await supa
-      .from('leads').select(FULL).eq('status', 'active');
+
+    // Fetch EVERY active lead via range pagination. A plain .select() is capped by
+    // PostgREST's max-rows (1000 by default), which silently hid the tail of a
+    // growing book — after a bulk FUB import the newest contacts (and manual adds)
+    // vanished from the board. Paging by <= max-rows guarantees the whole book.
+    let { data: leads, error } = await fetchAllActive(supa, FULL);
     if (error && /column|schema cache/i.test(error.message || '')) {
-      ({ data: leads, error } = await supa
-        .from('leads').select(BASE).eq('status', 'active'));
+      ({ data: leads, error } = await fetchAllActive(supa, BASE));
     }
 
     if (error) return fail(res, 500, error.message);
@@ -79,4 +82,23 @@ export default async function handler(req, res) {
 function midPrice(min, max) {
   if (min && max) return (min + max) / 2;
   return min || max || 0;
+}
+
+// Page through ALL active leads. Each page requests <= the PostgREST max-rows so
+// the server never truncates a page; we stop when a short page comes back. Ordered
+// by id so paging is stable even as rows are added mid-scan. Caps at 20 pages
+// (20k leads) as a runaway guard — far above any boutique book.
+async function fetchAllActive(supa, cols) {
+  const PAGE = 1000;
+  const all = [];
+  for (let page = 0; page < 20; page++) {
+    const from = page * PAGE;
+    const { data, error } = await supa
+      .from('leads').select(cols).eq('status', 'active')
+      .order('id', { ascending: true }).range(from, from + PAGE - 1);
+    if (error) return { data: null, error };
+    all.push(...(data || []));
+    if (!data || data.length < PAGE) break;
+  }
+  return { data: all, error: null };
 }
