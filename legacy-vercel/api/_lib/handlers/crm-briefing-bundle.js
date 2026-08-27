@@ -26,6 +26,8 @@ import calendar     from './crm-briefing-calendar.js';
 import morningBrief from './crm-morning-brief.js';
 import timeline     from './crm-timeline.js';
 import driftCheck   from './crm-drift-check.js';
+import dbTruth      from './crm-reconcile.js';
+import dealMessages from './crm-deal-messages.js';
 import { adminClient } from '../supabase.js';
 import { handleOptions, ok, fail } from '../cors.js';
 import { checkSyncKey } from '../sync-key.js';
@@ -107,7 +109,28 @@ export default async function handler(req, res) {
     section('proposals', timeline,     { key, proposals: 'all' }, (b) => ({ proposals: b.proposals || [] })),
     section('timeline',  timeline,     { key, deal: '__all__' },  (b) => ({ deals: b.deals || [] })),
     // drift is a SUMMARY only — counts by severity (full detail at /drift-check).
-    section('drift',     driftCheck,   { key, severity: 'all' },  (b) => (b.counts || { critical: 0, warn: 0, info: 0 }))
+    section('drift',     driftCheck,   { key, severity: 'all' },  (b) => (b.counts || { critical: 0, warn: 0, info: 0 })),
+    // db_truth — the live-DB ground-truth feed (crm-reconcile): sync freshness,
+    // escrow stages, dangerous pending docs, agent_updates read-back, email
+    // health, timeline drift. Already compact by design; the verbose `about`
+    // prose is dropped (its meaning is summarised in this bundle's manifest).
+    section('db_truth',  dbTruth,      { key }, (b) => { const { about, generated_at, ...rest } = b; return rest; }),
+    // deal_messages — deal correspondence (item 3). Folded in as a bounded
+    // SUMMARY only: counts + the most recent subjects, no bodies, so the bundle
+    // stays small. Full bodies live at the standalone /deal-messages path.
+    section('deal_messages', dealMessages, { key, since: '48h' }, (b) => ({
+      since:   b.since || null,
+      counts:  b.counts || { matched: 0, unmatched: 0, dropped_bulk: 0 },
+      deny_list_size: { senders: (b.deny_list?.senders || []).length, domains: (b.deny_list?.domains || []).length },
+      recent:  (b.messages || []).slice(0, 15).map((m) => ({
+        sent_at: m.sent_at || m.at || null, owner: m.owner || null,
+        from: m.from || null, subject: m.subject || null, deal: m.deal || null, address: m.address || null
+      })),
+      unmatched_recent: (b.unmatched || []).slice(0, 10).map((m) => ({
+        sent_at: m.sent_at || m.at || null, owner: m.owner || null,
+        from: m.from || null, subject: m.subject || null
+      }))
+    }))
   ]);
 
   // reconcile has side effects (it files proposals) — opt-in only, so a read
@@ -120,6 +143,35 @@ export default async function handler(req, res) {
 
   return ok(res, {
     generated_at: nowIso,
+    // Self-describing surface — this is the "endpoint discovery" answer (item 6).
+    // A discovery endpoint that returned a LIST OF URLS is unworkable: Cowork can
+    // only fetch a URL that appears literally in its scheduled-task prompt, so a
+    // URL learned from a response body is not fetchable — the same wall that
+    // rejects SOP-listed URLs. So instead of URLs, this ONE endpoint returns the
+    // DATA of every Cowork-facing feed, aggregated server-side. New endpoints are
+    // folded in here as new `sections` — so a new capability never needs a prompt
+    // edit. Fetch THIS url each run; do not try to hop to the paths below.
+    manifest: {
+      is_stable_surface: true,
+      note: 'One URL, in your prompt permanently. Every Cowork-facing CRM feed is inlined below under `sections`. When Claude Code ships a new endpoint it appears here as a new section — you do NOT need Sara to add its URL to your prompt. The standalone_paths list is reference only; a path discovered here is not fetchable from your environment, and its data is already inlined, so never fetch them.',
+      sections: {
+        feedback:      'briefing-feedback: agent replies/attention on briefing tasks + unread agent_updates (marked read on read).',
+        calendar:      'briefing-calendar: appointments/tours window.',
+        nudges:        'morning-brief (lifted): collection_nudges, timeline_approvals, data_gaps, party_reconcile.',
+        proposals:     'timeline proposals=all: pending timeline proposals.',
+        timeline:      'timeline deal=__all__: every active deal timeline.',
+        drift:         'drift-check summary: counts by severity (full detail at /api/crm/drift-check).',
+        db_truth:      'reconcile: live-DB ground truth Cowork cannot see from deals.json — sync freshness, escrow stages, dangerous pending docs, agent_updates read-back, email health, timeline drift, sync_key.',
+        deal_messages: 'deal-messages summary: deal correspondence in the last 48h — counts + recent subjects (no bodies; full bodies at /api/crm/deal-messages).',
+        reconcile:     'timeline reconcile op (side-effecting) — only present when ?reconcile=true.'
+      },
+      // Reference only — do NOT fetch these; their data is inlined above.
+      standalone_paths: {
+        db_truth:      '/api/crm/reconcile?key=…',
+        deal_messages: '/api/crm/deal-messages?key=…&since=48h',
+        drift_full:    '/api/crm/drift-check?key=…&severity=all'
+      }
+    },
     sections,
     degraded: failed.length > 0,
     failed_sections: failed
