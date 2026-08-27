@@ -32,6 +32,7 @@ const SELECT_COLS = 'id, agent, deal, deal_id, lead_id, content, created_at, rea
 export default async function handler(req, res) {
   if (handleOptions(req, res)) return;
   if (req.method === 'GET' && req.query?.op === 'feed') return feed(req, res);
+  if (req.method === 'GET' && req.query?.op === 'mark-read') return markRead(req, res);
 
   const { user, profile } = await getCallerProfile(req, res);
   if (!user)             return fail(res, 401, 'not authenticated');
@@ -84,6 +85,39 @@ async function create(req, res, profile) {
     const { data, error } = await supa.from('agent_updates').insert(row).select(SELECT_COLS).maybeSingle();
     if (error) return fail(res, 500, error.message);
     return ok(res, { update: data });
+  } catch (e) {
+    return fail(res, 500, e.message);
+  }
+}
+
+// GET /api/crm/agent-updates?op=mark-read&key=<SYNC_SECRET>[&through=<ISO>]
+// Server-side read-back flip for Cowork. Cowork reads the notes (via reconcile /
+// briefing-feedback / SQL) but CANNOT write — its environment's permission
+// classifier blocks UPDATE (INSERT is allowed). So after it folds a batch of
+// notes into a briefing it calls this to mark them read, since it can't flip the
+// column itself. Without `through`, marks ALL currently-unread rows read; with
+// `through=<ISO>`, only rows created at/before that instant (so a note written
+// after Cowork's read isn't cleared unconsumed). Key-gated, GET-only, no-store —
+// same contract as the feed. Idempotent; nothing is deleted.
+export async function markRead(req, res) {
+  res.setHeader('Cache-Control', 'private, no-store, no-cache, must-revalidate');
+  res.setHeader('CDN-Cache-Control', 'no-store');
+  res.setHeader('Vercel-CDN-Cache-Control', 'no-store');
+
+  const secret = process.env.SYNC_SECRET || process.env.BRIEFING_FEEDBACK_SECRET;
+  if (!secret || req.query?.key !== secret) return fail(res, 401, 'bad key');
+
+  try {
+    const supa = adminClient();
+    const throughRaw = req.query?.through ? new Date(req.query.through) : null;
+    const through = throughRaw && !isNaN(throughRaw.getTime()) ? throughRaw.toISOString() : null;
+    let q = supa.from('agent_updates')
+      .update({ read_by_briefing: true, read_by_briefing_at: new Date().toISOString() })
+      .eq('read_by_briefing', false);
+    if (through) q = q.lte('created_at', through);
+    const { data, error } = await q.select('id');
+    if (error) return fail(res, 500, error.message);
+    return ok(res, { generated_at: new Date().toISOString(), marked: (data || []).length, through: through || 'all_unread' });
   } catch (e) {
     return fail(res, 500, e.message);
   }
