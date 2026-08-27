@@ -126,8 +126,38 @@ export async function closeKeys(req, res) {
     if (error) return fail(res, 500, error.message);
     const closedKeys = (data || []).map((r) => r.source_key);
     const closedBare = new Set(closedKeys.map((k) => k.replace(/^brief:/, '')));
-    const notFound = raw.map((k) => k.replace(/^brief:/, '')).filter((k) => !closedBare.has(k));
-    return ok(res, { generated_at: new Date().toISOString(), closed: closedKeys.length, closed_keys: closedKeys, not_found: notFound });
+    let notFound = raw.map((k) => k.replace(/^brief:/, '')).filter((k) => !closedBare.has(k));
+
+    // Split the misses: a key that exists as a Pool A briefing row (source_key
+    // NULL, keyed only by brief_key) is NOT a genuine not_found — it lives in the
+    // deals.json-owned pool this endpoint can't close (closing it in the DB is
+    // pointless; the next hourly sync rebuilds it from deals.json). Bucket those
+    // separately so Cowork knows to prune them from deals.json tasks[] instead of
+    // hunting a bug. Best-effort: on any error the keys just stay in not_found.
+    let pool_a_ignored = [];
+    if (notFound.length) {
+      try {
+        const { data: aRows } = await supa.from('agent_tasks')
+          .select('brief_key')
+          .eq('source', 'briefing').eq('done', false)
+          .is('source_key', null)
+          .in('brief_key', notFound);
+        const aSet = new Set((aRows || []).map((r) => r.brief_key));
+        if (aSet.size) {
+          pool_a_ignored = notFound.filter((k) => aSet.has(k));
+          notFound = notFound.filter((k) => !aSet.has(k));
+        }
+      } catch (_) { /* leave everything in not_found */ }
+    }
+
+    return ok(res, {
+      generated_at: new Date().toISOString(),
+      closed: closedKeys.length, closed_keys: closedKeys,
+      not_found: notFound,
+      // Exists, but in the deals.json-owned pool — prune from deals.json tasks[],
+      // not via this endpoint. (Only present when non-empty.)
+      ...(pool_a_ignored.length ? { pool_a_ignored, pool_a_note: 'These keys are Pool A (source_key NULL, owned by deals.json). This endpoint only closes Pool B (keyed) rows; remove Pool A tasks from deals.json tasks[] instead — the hourly sync would rebuild a DB-closed Pool A row anyway.' } : {})
+    });
   } catch (e) {
     return fail(res, 500, e.message);
   }
