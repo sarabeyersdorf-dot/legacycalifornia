@@ -24,20 +24,49 @@ export const DENY_DOMAINS = new Set([
   // associations / newsletters
   'car.org', 'nar.realtor', 'mail.nar.realtor', 'beehiiv.com', 'mail.beehiiv.com',
   'subscriptions.bls.gov', 'mail.vistaprint.com',
+  // Lone Wolf "Daily Relationships Pulse" marketing (lwolf.com). NOTE: this is the
+  // MARKETING domain only — the signature product sends from authentisign.com,
+  // which is a SIGNATURE_SERVICE domain below, NOT denied.
+  'lwolf.com',
   // bulk-send infrastructure
   'shared1.ccsend.com', 'ccsend.com', 'mailchimpapp.net', 'linkedin.com'
 ]);
 
+// E-signature / transaction-form services. NOT bulk — we WANT these — but they're
+// automated notices ("Signing complete: ETA2") that often name only a document,
+// with no address or escrow number to match on. deal-messages stores their FULL
+// body (not just the ~200-char snippet) so the matcher has something to work with,
+// and routes any that still don't match to a dedicated `signature_events` bucket
+// — so "a document was signed, go look" instead of silent unmatched noise.
+export const SIGNATURE_SERVICE_DOMAINS = new Set([
+  'authentisign.com', 'notifications.authentisign.com',
+  'docusign.net', 'docusign.com', 'mail.docusign.net',
+  'ziplogix.com', 'mail.ziplogix.com', 'zipformplus.com', 'ziplogixdigitalink.com',
+  'skyslope.com', 'forms.skyslope.com', 'digisign.skyslope.com',
+  'dotloop.com', 'mail.dotloop.com',
+  'transactiondesk.com', 'instanetforms.com', 'glide.com'
+]);
+
 const domainOf = (email) => String(email || '').toLowerCase().split('@')[1] || '';
+
+// Shared subdomain-aware membership test against a domain Set.
+function domainInSet(email, set) {
+  const dom = domainOf(email);
+  if (!dom) return false;
+  if (set.has(dom)) return true;
+  for (const d of set) if (dom.endsWith('.' + d)) return true;
+  return false;
+}
 
 // True iff this sender is on the explicit deny list (exact address or domain,
 // including subdomains of a denied domain).
 export function isBulkSender(email) {
   const e = String(email || '').toLowerCase();
   if (DENY_SENDERS.has(e)) return true;
-  const dom = domainOf(e);
-  if (!dom) return false;
-  if (DENY_DOMAINS.has(dom)) return true;
-  for (const d of DENY_DOMAINS) if (dom.endsWith('.' + d)) return true;
-  return false;
+  return domainInSet(e, DENY_DOMAINS);
+}
+
+// True iff this sender is an e-signature / transaction-form service.
+export function isSignatureService(email) {
+  return domainInSet(String(email || '').toLowerCase(), SIGNATURE_SERVICE_DOMAINS);
 }
