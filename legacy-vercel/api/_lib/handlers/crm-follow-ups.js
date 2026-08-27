@@ -167,16 +167,20 @@ async function list(supa, profile, res) {
     // 8/26). Pull each contact's latest EMAIL outbound so a contact whose inbound
     // predates a logged reply drops off.
     //
-    // BUT a bulk newsletter reaches these contacts too, and it is NOT a reply.
-    // Counting any newer outbound as a reply let a 200-recipient Ledger blast
-    // silently clear genuinely-open client threads (Cowork 4th pass, 8/26 —
-    // verified: 200 recipients, one subject, 01:50Z, sequence_id NULL). There is
-    // no thread-id or campaign column to key on and sequence_id is NULL on the
-    // blast, so we discriminate by FAN-OUT: an outbound whose (subject, ~2-min
-    // window) reached many recipients is a blast and never counts as a reply; a
-    // real 1:1 reply reaches one. Scope is email only — text/call flags still
-    // clear off deal_messages direction as before.
-    const BULK_MIN_RECIPIENTS = 6;                                   // >5, per Cowork
+    // BUT a bulk send reaches these contacts too, and it is NOT a reply. Counting
+    // any newer outbound as a reply let a 200-recipient Ledger blast silently
+    // clear genuinely-open threads (Cowork 4th pass). We discriminate by FAN-OUT
+    // on TIME: any ~2-min window that reached BULK_MIN_RECIPIENTS+ distinct
+    // recipients is a blast and never counts as a reply. Keyed on time, NOT
+    // subject — a mail-merge that personalises the subject per recipient evades a
+    // subject key but is the same blast (Cowork 5th pass: 27 sends / 27 subjects
+    // in 7s). The threshold is 3 because the largest GENUINE 1:1 reply burst in
+    // the data is 2; a false clear loses work, a stuck flag only annoys, so we err
+    // toward excluding. Scope is email only — text/call clear off deal_messages.
+    // (Belt to the real fix: agents' Gmail replies are now ingested into
+    // deal_messages as outbound, so a reply clears via latest-direction there;
+    // this messages-side merge only catches CRM-composed replies.)
+    const BULK_MIN_RECIPIENTS = 3;                                   // genuine 1:1 max is 2 (Cowork 5th pass)
     const bucketOf = (ts) => Math.floor(new Date(ts).getTime() / 120000); // 2-min bucket
     let latestOutByLead = new Map();                                // email replies only
     if (ids.length) {
@@ -190,26 +194,32 @@ async function list(supa, profile, res) {
       ]);
       leadsById = new Map((ls || []).map((l) => [l.id, l]));
 
-      // Which of these candidate outbounds are blasts? Count distinct recipients
-      // of each (subject, bucket) across the WHOLE table — a filtered-to-our-ids
-      // query would only see the recipients we already care about and miss the
-      // fan-out. A subject reused weeks apart is disambiguated by the time bucket.
-      const subjects = [...new Set((outs || []).map((o) => o.subject).filter(Boolean))];
-      const bulkKeys = new Set();                                   // `${subject}|${bucket}`
-      if (subjects.length) {
+      // Which of these candidate outbounds are blasts? Detect them by FAN-OUT on
+      // TIME ALONE, NOT subject. A mail-merge that personalises the subject per
+      // recipient ("What happened to <address>?" prospecting — 27 sends in 7s)
+      // lands every send in its own subject bucket and evades a subject-keyed
+      // rule, yet it's the same kind of blast as the Ledger (Cowork 5th pass).
+      // Any 2-min window that reached ≥N distinct recipients is bulk; a genuine
+      // 1:1 reply reaches one (the largest true reply group in the data is 2).
+      // The whole outbound-email table is tiny (a few hundred rows), so count
+      // across all of it within the lane's window, not just our candidates.
+      const bulkBuckets = new Set();                                // 2-min buckets that are blasts
+      {
         const { data: fan } = await supa.from('messages')
-          .select('subject, created_at, lead_id')
-          .eq('direction', 'outbound').eq('channel', 'email').in('subject', subjects);
-        const recipsByKey = new Map();
+          .select('lead_id, created_at')
+          .eq('direction', 'outbound').eq('channel', 'email')
+          .gte('created_at', sinceMsgs).limit(5000)
+          .then((r) => r, () => ({ data: [] }));
+        const recipsByBucket = new Map();
         for (const r of (fan || [])) {
-          if (!r.subject) continue;
-          const k = `${r.subject}|${bucketOf(r.created_at)}`;
-          let s = recipsByKey.get(k); if (!s) { s = new Set(); recipsByKey.set(k, s); }
+          if (!r.lead_id) continue;
+          const b = bucketOf(r.created_at);
+          let s = recipsByBucket.get(b); if (!s) { s = new Set(); recipsByBucket.set(b, s); }
           s.add(r.lead_id);
         }
-        for (const [k, s] of recipsByKey) if (s.size >= BULK_MIN_RECIPIENTS) bulkKeys.add(k);
+        for (const [b, s] of recipsByBucket) if (s.size >= BULK_MIN_RECIPIENTS) bulkBuckets.add(b);
       }
-      const isBlast = (o) => o.subject && bulkKeys.has(`${o.subject}|${bucketOf(o.created_at)}`);
+      const isBlast = (o) => bulkBuckets.has(bucketOf(o.created_at));
       for (const o of (outs || [])) {
         if (isBlast(o)) continue;                                   // newsletter, not a reply
         if (o.lead_id && !latestOutByLead.has(o.lead_id)) latestOutByLead.set(o.lead_id, o.created_at);
