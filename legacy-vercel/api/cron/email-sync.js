@@ -39,7 +39,7 @@ import { handleOptions, ok, fail } from '../_lib/cors.js';
 import { detectLeadSource, parseLead } from '../_lib/lead-intake.js';
 import { alertAgents } from '../_lib/agent-alert.js';
 import { getCallerProfile, isAgent } from '../_lib/auth.js';
-import { isBulkSender } from '../_lib/email-bulk.js';
+import { isBulkSender, isSignatureService } from '../_lib/email-bulk.js';
 
 const GMAIL_METADATA_HEADERS = ['From', 'To', 'Subject', 'Date', 'Message-ID'];
 const MAX_MESSAGES_PER_MAILBOX = 50; // keep each 15-minute run bounded
@@ -393,11 +393,25 @@ async function syncMailbox(supa, account, clientId, clientSecret) {
         // deliberately NOT on it, so real client mail is never auto-dismissed.
         const status = isBulkSender(senderEmail) ? 'dismissed'
                      : contactId ? 'active' : 'pending_review';
+
+        // Signature-service notices ("Signing complete: ETA2") arrive with only
+        // the ~200-char Gmail snippet — usually a document name, no address or
+        // escrow number to match a deal on. Fetch the FULL body for these (the
+        // same path detected leads use) so deal-messages can find the address /
+        // escrow the snippet omits. Best-effort: fall back to the snippet on any
+        // hiccup so a fetch failure never drops the message.
+        let content = snippet;
+        if (isSignatureService(senderEmail)) {
+          try {
+            const full = await getMessageBody(accessToken, id);
+            if (full) content = String(full).slice(0, 8000);
+          } catch (_) { /* keep snippet */ }
+        }
         const { inserted: wasNew, error: insErr } = await upsertDealMessage(supa, owner, messageId, {
           contact_id:        contactId,
           direction:          'inbound',
           channel:            'email',
-          content:             snippet,
+          content,
           subject,
           raw_email_address:  senderEmail,
           status,
