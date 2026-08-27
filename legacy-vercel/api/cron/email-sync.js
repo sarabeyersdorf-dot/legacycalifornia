@@ -224,6 +224,11 @@ function parseEmailDate(dateHeader) {
   return isNaN(t.getTime()) ? null : t.toISOString();
 }
 
+// Normalise a subject for the secondary dedupe key: lowercase + collapse
+// whitespace. Deliberately keeps Re:/Fw: prefixes, so a reply is never merged
+// with the message it replies to.
+const normSubject = (s) => String(s || '').toLowerCase().replace(/\s+/g, ' ').trim();
+
 // Insert a deal_messages row, deduped on the RFC-5322 Message-ID. The same
 // message reaches BOTH mailboxes (Sara + James are on most threads) and can be
 // re-seen on a later sync; first sight inserts, a repeat only records the extra
@@ -242,6 +247,30 @@ async function upsertDealMessage(supa, owner, messageId, base) {
       .select('id, seen_by').eq('message_id', messageId).maybeSingle().then((r) => r, () => ({ data: null }));
     if (existing) { await addOwner(existing.id, existing.seen_by); return { inserted: false }; }
   }
+
+  // Secondary identity — for bulk/list senders that mint a DIFFERENT Message-ID
+  // per recipient (SendGrid et al. stamp geopod-ismtpd-<N>), so the same blast to
+  // both mailboxes has two distinct message_ids and the message_id key alone can't
+  // collapse them (Cowork found lacey@calaverasrealtors: ismtpd-17 vs -18, same
+  // subject, sent_at 1s apart). Fall back to (sender + normalised subject + sent_at
+  // within ±120s): same message → append the mailbox to seen_by, no 2nd row.
+  // Guards against false merges: requires a real parsed sent_at (never collapses on
+  // ingest time), and is scoped to the same sender, same direction and an identical
+  // subject — Re:/Fw: kept distinct so a reply never merges with its original.
+  if (base.sent_at && base.raw_email_address) {
+    const lo = new Date(Date.parse(base.sent_at) - 120000).toISOString();
+    const hi = new Date(Date.parse(base.sent_at) + 120000).toISOString();
+    const nsubj = normSubject(base.subject);
+    const { data: near } = await supa.from('deal_messages')
+      .select('id, seen_by, subject')
+      .eq('raw_email_address', base.raw_email_address)
+      .eq('direction', base.direction)
+      .gte('sent_at', lo).lte('sent_at', hi)
+      .limit(20).then((r) => r, () => ({ data: null }));
+    const hit = (near || []).find((r) => normSubject(r.subject) === nsubj);
+    if (hit) { await addOwner(hit.id, hit.seen_by); return { inserted: false }; }
+  }
+
   const row = { ...base, message_id: messageId || null, seen_by: owner ? [owner] : [] };
   const { error } = await supa.from('deal_messages').insert(row);
   if (error) {
