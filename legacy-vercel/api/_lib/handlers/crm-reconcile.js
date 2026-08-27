@@ -18,6 +18,7 @@
 
 import { adminClient } from '../supabase.js';
 import { handleOptions, ok, fail } from '../cors.js';
+import { checkSyncKey } from '../sync-key.js';
 
 const iso    = (d) => (d ? new Date(d).toISOString() : null);
 const ageSec = (d) => (d ? Math.max(0, Math.floor((Date.now() - new Date(d).getTime()) / 1000)) : null);
@@ -32,8 +33,17 @@ export default async function handler(req, res) {
   if (req.method !== 'GET') return fail(res, 405, 'method_not_allowed');
 
   // Key-gated, headless — same contract as briefing-feedback / agent-updates feed.
-  const secret = process.env.SYNC_SECRET || process.env.BRIEFING_FEEDBACK_SECRET;
-  if (secret && req.query?.key !== secret) return fail(res, 401, 'bad key');
+  // During a SYNC_SECRET rotation both keys (SYNC_SECRET + SYNC_SECRET_NEXT) are
+  // accepted; `keyCheck.which` names which one served this request so the
+  // rotation is *observable to Cowork* (it can't read server logs). This is the
+  // confirmation channel: Cowork changes its stored key, then reads
+  // reconcile.sync_key.key_used here to confirm the new key is serving before
+  // Sara retires the old one.
+  const keyCheck = checkSyncKey(req.query?.key);
+  if (!keyCheck.ok) return fail(res, 401, 'bad key');
+  // Server-side breadcrumb (Vercel logs) — names which key served, so a rotation
+  // is observable in logs, not just in the payload below.
+  if (process.env.SYNC_SECRET_NEXT) console.log(`[reconcile] sync key served: ${keyCheck.which}`);
 
   const supa = adminClient();
 
@@ -54,8 +64,14 @@ export default async function handler(req, res) {
 
   const out = {
     generated_at: new Date().toISOString(),
+    // Which SYNC_SECRET served this request. During a rotation both keys are
+    // valid; key_used is 'primary' (SYNC_SECRET) or 'next' (SYNC_SECRET_NEXT).
+    // rotation_in_progress is true when both env vars are set — the window in
+    // which either key works. See about.sync_key.
+    sync_key: { key_used: keyCheck.which, rotation_in_progress: !!process.env.SYNC_SECRET_NEXT },
     about: {
       purpose: 'Live DB truth for Cowork on the things it cannot see from deals.json. Read-only. Newest wins over deals.json where they disagree on DB-backed state.',
+      sync_key: 'key_used names which key served this call (primary=SYNC_SECRET, next=SYNC_SECRET_NEXT). Confirmation channel for a key rotation: after Cowork switches to the new key, key_used should read the new key here before Sara retires the old one. rotation_in_progress:true means both keys are currently accepted.',
       sync: 'Freshness of the hourly sync-deals pipeline. last_deal_upsert should be < ~1h old when the cron is healthy.',
       escrow: 'What the DB considers live escrow (stage offer/pending) vs listing/closed. If deals.json says a deal is dead but it shows here as pending, the CRM stage_override or sync is behind.',
       documents: 'pending_client_safe is the dangerous class: a pending doc a client can see. Should be ~0. Anything here is a doc nagging a client (or Sara) to sign something not actually owed.',

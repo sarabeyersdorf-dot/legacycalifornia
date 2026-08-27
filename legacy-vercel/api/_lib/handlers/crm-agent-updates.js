@@ -23,6 +23,7 @@
 import { adminClient } from '../supabase.js';
 import { getCallerProfile, isAgent } from '../auth.js';
 import { handleOptions, readJson, ok, fail } from '../cors.js';
+import { checkSyncKey } from '../sync-key.js';
 
 const agentKey = (role) => (role === 'agent_james' ? 'james' : 'sara');
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -104,8 +105,7 @@ export async function markRead(req, res) {
   res.setHeader('CDN-Cache-Control', 'no-store');
   res.setHeader('Vercel-CDN-Cache-Control', 'no-store');
 
-  const secret = process.env.SYNC_SECRET || process.env.BRIEFING_FEEDBACK_SECRET;
-  if (!secret || req.query?.key !== secret) return fail(res, 401, 'bad key');
+  if (!checkSyncKey(req.query?.key).ok) return fail(res, 401, 'bad key');
 
   try {
     const supa = adminClient();
@@ -133,8 +133,7 @@ export async function feed(req, res) {
   res.setHeader('CDN-Cache-Control', 'no-store');
   res.setHeader('Vercel-CDN-Cache-Control', 'no-store');
 
-  const secret = process.env.SYNC_SECRET || process.env.BRIEFING_FEEDBACK_SECRET;
-  if (!secret || req.query?.key !== secret) return fail(res, 401, 'bad key');
+  if (!checkSyncKey(req.query?.key).ok) return fail(res, 401, 'bad key');
 
   try {
     const supa = adminClient();

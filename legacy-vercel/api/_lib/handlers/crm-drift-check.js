@@ -14,6 +14,7 @@
 import { adminClient } from '../supabase.js';
 import { handleOptions, ok, fail } from '../cors.js';
 import { timelineEvents } from '../deal-timeline.js';
+import { checkSyncKey } from '../sync-key.js';
 
 const GH_OWNER = 'sarabeyersdorf-dot';
 const GH_REPO  = 'legacycalifornia';
@@ -56,8 +57,7 @@ export default async function handler(req, res) {
   res.setHeader('Cache-Control', 'private, no-store');
   if (req.method !== 'GET') return fail(res, 405, 'method_not_allowed');
 
-  const secret = process.env.SYNC_SECRET || process.env.BRIEFING_FEEDBACK_SECRET;
-  if (secret && req.query?.key !== secret) return fail(res, 401, 'bad key');
+  if (!checkSyncKey(req.query?.key).ok) return fail(res, 401, 'bad key');
   const wantSeverity = String(req.query?.severity || 'all').toLowerCase();
 
   try {

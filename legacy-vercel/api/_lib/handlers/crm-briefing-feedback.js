@@ -11,6 +11,7 @@
 
 import { adminClient } from '../supabase.js';
 import { handleOptions, ok, fail } from '../cors.js';
+import { checkSyncKey } from '../sync-key.js';
 
 export default async function handler(req, res) {
   if (handleOptions(req, res)) return;
@@ -21,8 +22,7 @@ export default async function handler(req, res) {
   res.setHeader('Vercel-CDN-Cache-Control', 'no-store');
   if (req.method !== 'GET') return fail(res, 405, 'method_not_allowed');
 
-  const secret = process.env.SYNC_SECRET || process.env.BRIEFING_FEEDBACK_SECRET;
-  if (secret && req.query?.key !== secret) return fail(res, 401, 'bad key');
+  if (!checkSyncKey(req.query?.key).ok) return fail(res, 401, 'bad key');
 
   // Drop the DONE rows by default so the payload can't outgrow the consumer's
   // fetch limit. The whole file was serialising all ~240 tasks (most of them
