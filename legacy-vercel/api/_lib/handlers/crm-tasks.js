@@ -17,6 +17,7 @@ const isBroker  = (p) => p?.role === 'agent_sara' || p?.role === 'admin';
 
 export default async function handler(req, res) {
   if (handleOptions(req, res)) return;
+  if (req.method === 'POST' && req.query?.op === 'create') return createTask(req, res);
   if (req.method === 'POST') return bulkSync(req, res);
   if (req.method === 'GET' && req.query?.op === 'sync') return autoSync(req, res);
   if (req.method === 'GET' && req.query?.op === 'close') return closeKeys(req, res);
@@ -181,7 +182,7 @@ async function list(req, res, profile) {
       return q;
     };
     // Prefer the feedback columns; fall back if migration 017 hasn't run yet.
-    const COLS_FB   = 'id, agent, client, title, sub, note, due_label, done, source_key, created_at, agent_note, attention, agent_note_by, agent_note_at';
+    const COLS_FB   = 'id, agent, client, title, sub, note, due_label, due_date, visibility, source, done, source_key, created_at, agent_note, attention, agent_note_by, agent_note_at';
     const COLS_BASE = 'id, agent, client, title, sub, note, due_label, done, source_key, created_at';
     let { data, error } = await scoped(COLS_FB);
     if (error) ({ data, error } = await scoped(COLS_BASE));
@@ -231,6 +232,78 @@ async function toggle(req, res, profile) {
     const { error } = await supa.from('agent_tasks').update(patch).eq('id', id);
     if (error) return fail(res, 500, error.message);
     return ok(res, { id, ...patch });
+  } catch (e) {
+    return fail(res, 500, e.message);
+  }
+}
+
+// POST /api/crm/tasks?op=create  (agent session) — SPEC §4.1.
+// An agent authors a task straight from the CRM. It lands as source='agent',
+// which the hourly sync-deals Pool-A wipe (scoped to source='briefing') NEVER
+// touches — so an agent task, and a check-off on it, are authoritative and
+// permanent, unlike a briefing task that deals.json owns.
+//
+// client_visible is REQUIRED with no default: "Chase Tanya for the closing
+// statement" and "Sign the NHD" look identical, and only one belongs on a
+// client's page. Forcing the choice is what keeps internal chatter off a portal.
+// (The task is stored with visibility='client'|'internal'; actually rendering a
+// client-visible task ON the portal is §4.4 — this only captures the decision.)
+async function createTask(req, res) {
+  const { user, profile } = await getCallerProfile(req, res);
+  if (!user)             return fail(res, 401, 'not authenticated');
+  if (!isAgent(profile)) return fail(res, 403, 'agents only');
+  try {
+    const supa = adminClient();
+    const b = await readJson(req);
+
+    const title = (b?.title || '').toString().trim().slice(0, 200);
+    if (!title) return fail(res, 400, 'title required');
+
+    // Required, no default — reject an unset choice rather than guessing.
+    let visibility;
+    if (b?.client_visible === true  || b?.client_visible === 'client'   || b?.client_visible === 'true')  visibility = 'client';
+    else if (b?.client_visible === false || b?.client_visible === 'internal' || b?.client_visible === 'false') visibility = 'internal';
+    else return fail(res, 400, 'client_visible is required — choose Internal or Client-visible');
+
+    const agent  = ['sara', 'james', 'both'].includes(b?.agent) ? b.agent : agentKey(profile.role);
+    let   client = (b?.client || '').toString().trim().slice(0, 120) || null;
+
+    let dueDate = null;
+    if (b?.due_date) {
+      const s = String(b.due_date).trim().slice(0, 10);
+      if (!/^\d{4}-\d{2}-\d{2}$/.test(s)) return fail(res, 400, 'due_date must be a YYYY-MM-DD date');
+      dueDate = s;
+    }
+
+    // Optional deal link: caller passes the deal's source_key (what the pickers
+    // use); resolve it to the uuid FK. We store deal_id (a link that can't
+    // collide) and leave agent_tasks.source_key NULL — the partial unique index on
+    // source_key is only for keyed briefing/checklist rows.
+    let dealId = null;
+    const srcKey = (b?.deal_source_key || '').toString().trim();
+    if (srcKey) {
+      const { data: d } = await supa.from('deals').select('id, address, city').eq('source_key', srcKey).maybeSingle();
+      if (d) { dealId = d.id; if (!client) client = [d.address, d.city].filter(Boolean).join(', ').slice(0, 120) || null; }
+    }
+
+    const today = new Date().toISOString().slice(0, 10);
+    const dueLabel = dueDate ? (dueDate === today ? 'Today' : (dueDate < today ? 'Overdue' : dueDate)) : null;
+
+    const row = {
+      agent, title, client,
+      deal_id:    dealId,
+      due_date:   dueDate,
+      due_label:  dueLabel,
+      visibility,             // 'client' | 'internal'
+      source:     'agent',    // permanent lane — the briefing wipe never touches it
+      done:       false
+    };
+    const { data, error } = await supa.from('agent_tasks')
+      .insert(row)
+      .select('id, agent, title, client, due_date, due_label, visibility, source, done, created_at')
+      .single();
+    if (error) return fail(res, 500, error.message);
+    return ok(res, { task: data });
   } catch (e) {
     return fail(res, 500, e.message);
   }
