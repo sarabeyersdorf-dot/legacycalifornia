@@ -18,6 +18,7 @@ export default async function handler(req, res) {
   if (handleOptions(req, res)) return;
   if (req.method === 'POST') return bulkSync(req, res);
   if (req.method === 'GET' && req.query?.op === 'sync') return autoSync(req, res);
+  if (req.method === 'GET' && req.query?.op === 'close') return closeKeys(req, res);
   const { user, profile } = await getCallerProfile(req, res);
   if (!user)             return fail(res, 401, 'not authenticated');
   if (!isAgent(profile)) return fail(res, 403, 'agents only');
@@ -85,6 +86,52 @@ export async function bulkSync(req, res) {
     }
   }
   return ok(res, { created: fresh.length, already_present: have.size, pruned });
+}
+
+// GET /api/crm/tasks?op=close&keys=<comma brief_keys>&key=<SYNC_SECRET>
+// A Cowork-drivable prune for Pool B (source='briefing'). Pool B is insert-only
+// and prunes ONLY when the briefing POSTs the full open snapshot with prune:true
+// — but Cowork's environment is GET-only (can't POST) and can't UPDATE (blocked
+// by its classifier), so ~25 settled/superseded tasks piled up with no way to
+// close them (Cowork 6th pass; James: "telling me things that are already done").
+// Cowork reads the documents, decides which keyed tasks are settled, and names
+// them here; the server marks them done — kept as history, dropped from the open
+// board. The supersession judgement stays with the run that read the docs; this
+// endpoint only executes the list it's given (so a still-live item like
+// baldwin-contingency-lapsed is simply left off the list, not closed). Marks
+// done, never deletes. Key-gated, no-store.
+export async function closeKeys(req, res) {
+  res.setHeader('Cache-Control', 'private, no-store, no-cache, must-revalidate');
+  res.setHeader('CDN-Cache-Control', 'no-store');
+  res.setHeader('Vercel-CDN-Cache-Control', 'no-store');
+  const secret = process.env.SYNC_SECRET || process.env.BRIEFING_FEEDBACK_SECRET;
+  if (!secret || req.query?.key !== secret) return fail(res, 401, 'bad key');
+
+  const raw = String(req.query?.keys || '').split(',').map((k) => k.trim()).filter(Boolean).slice(0, 200);
+  if (!raw.length) return fail(res, 400, 'keys required (comma-separated brief_keys)');
+  // Accept either a bare key ("baldwin-eta3-file") or its stored "brief:<key>"
+  // source_key form — match both so the caller needn't know which we persisted.
+  const candidates = new Set();
+  for (const k of raw) {
+    const bare = k.replace(/^brief:/, '');
+    candidates.add(bare);
+    candidates.add(`brief:${bare}`);
+  }
+  try {
+    const supa = adminClient();
+    const { data, error } = await supa.from('agent_tasks')
+      .update({ done: true })
+      .eq('source', 'briefing').eq('done', false)
+      .in('source_key', [...candidates])
+      .select('source_key');
+    if (error) return fail(res, 500, error.message);
+    const closedKeys = (data || []).map((r) => r.source_key);
+    const closedBare = new Set(closedKeys.map((k) => k.replace(/^brief:/, '')));
+    const notFound = raw.map((k) => k.replace(/^brief:/, '')).filter((k) => !closedBare.has(k));
+    return ok(res, { generated_at: new Date().toISOString(), closed: closedKeys.length, closed_keys: closedKeys, not_found: notFound });
+  } catch (e) {
+    return fail(res, 500, e.message);
+  }
 }
 
 async function list(req, res, profile) {
