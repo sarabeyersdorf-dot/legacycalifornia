@@ -1,7 +1,7 @@
 {
-  "version": 10.9,
+  "version": 11.0,
   "lastUpdated": "2026-08-27",
-  "updatedBy": "cowork-morning-briefing 2026-08-27",
+  "updatedBy": "cowork-session 2026-08-27 — CRM done-state reconcile",
   "tasks": [
     {
       "agent": "sara",
@@ -676,10 +676,12 @@
       "agent": "sara",
       "client": "Latigo",
       "title": "COE DELAYED 7/24 — lender Kim (Prime Residential) waiting on rent appraisal on Castles' primary residence before funding; follow up with Kim for appraisal ETA and revised COE date; notify Ashley Cuslidge at Placer Title (209-736-9553) and Guy & Adrianna Castle",
-      "done": false,
+      "done": true,
       "dateAdded": "2026-07-24",
       "key": "latigo-coe-followup",
-      "due": "2026-08-14"
+      "due": "2026-08-14",
+      "doneDate": "2026-08-27",
+      "doneNote": "Closed in the CRM; reconciled into deals.json 2026-08-27 from agent_tasks (CRM done-state is authoritative per SOP Step 0)."
     },
     {
       "agent": "james",
@@ -796,9 +798,11 @@
       "client": "Lead",
       "title": "Roger & Kim Quillen — 7/22 second showing outcome unknown; check FUB or ShowingTime",
       "note": "Roger re-engaged 7/19, second showing scheduled 7/22. No Gmail follow-up visible. Added 2026-07-27.",
-      "done": false,
+      "done": true,
       "key": "quillen-showing-outcome",
-      "due": "2026-08-14"
+      "due": "2026-08-14",
+      "doneDate": "2026-08-27",
+      "doneNote": "Closed in the CRM; reconciled into deals.json 2026-08-27 from agent_tasks (CRM done-state is authoritative per SOP Step 0)."
     },
     {
       "agent": "james",
@@ -834,9 +838,11 @@
       "title": "433: Download + file Sara's Glide listing-agent AVID (Glide cert e47c5a62, completed ~7/19) in 433 Ex folder",
       "note": "Glide certificate e47c5a62. Sara's LA AVID completed ~7/19. Separate from the AVID already in Homeligh. File original in 433 EX. Added 2026-07-27.",
       "dateAdded": "2026-07-27",
-      "done": false,
+      "done": true,
       "key": "433-glide-avid-file",
-      "due": "2026-08-14"
+      "due": "2026-08-14",
+      "doneDate": "2026-08-27",
+      "doneNote": "Closed in the CRM; reconciled into deals.json 2026-08-27 from agent_tasks (CRM done-state is authoritative per SOP Step 0)."
     },
     {
       "agent": "sara",
@@ -871,9 +877,11 @@
       "title": "433: File Add3 + ETA3 in Ex folder — Authentisign 'Add3, ETA3' completion 7/27 9:20 PM. James R Heryford accepted 9:19 PM. Download from Authentisign and file in 433 E Hwy 4 Ex. Separate from ETA No. 3 executed 7/24 via Glide.",
       "note": "New Authentisign signing completed 7/27. Different from Glide ETA3. Added 2026-07-28.",
       "dateAdded": "2026-07-28",
-      "done": false,
+      "done": true,
       "key": "433-add3-eta3-file",
-      "due": "2026-08-14"
+      "due": "2026-08-14",
+      "doneDate": "2026-08-27",
+      "doneNote": "Closed in the CRM; reconciled into deals.json 2026-08-27 from agent_tasks (CRM done-state is authoritative per SOP Step 0)."
     },
     {
       "agent": "sara",
@@ -901,9 +909,11 @@
       "title": "695 Feather: File ADM2 (removes Bert Andrews) in Ex + get Ashley Robinson's Proof of Funds — Bert's POF in Ex is invalid (Bert removed by ADM2). Ashley Robinson needs to provide new POF.",
       "note": "Bert Andrews POF in Ex: 'Proof of funds Bert Andrews.pdf' — invalid post-ADM2. Added 2026-07-28.",
       "dateAdded": "2026-07-28",
-      "done": false,
+      "done": true,
       "key": "feather-adm2-not-on-disk",
-      "due": "2026-08-12"
+      "due": "2026-08-12",
+      "doneDate": "2026-08-27",
+      "doneNote": "Closed in the CRM; reconciled into deals.json 2026-08-27 from agent_tasks (CRM done-state is authoritative per SOP Step 0)."
     },
     {
       "agent": "james",
@@ -963,10 +973,12 @@
       "agent": "sara",
       "client": "Wendell",
       "title": "Review James's 'wendell commission' email re buyer-broker compensation discrepancy — James drafted message to David and Stacy about HUD shortfall; confirm approach and wording before James sends.",
-      "done": false,
+      "done": true,
       "dateAdded": "2026-08-02",
       "key": "wendell-commission-review",
-      "due": "2026-08-11"
+      "due": "2026-08-11",
+      "doneDate": "2026-08-27",
+      "doneNote": "Closed in the CRM; reconciled into deals.json 2026-08-27 from agent_tasks (CRM done-state is authoritative per SOP Step 0)."
     },
     {
       "agent": "james",
@@ -1115,9 +1127,11 @@
       "client": "Heryford",
       "title": "433 E Hwy 4 — Joel Lawson pest inspection CONFIRMED 8/11 at 1PM",
       "note": "Pest appointment with Joel Lawson at 433 E Hwy 4, 8/11 at 1PM is still on. Listing extended 3 months (MOT #3). Results inform re-listing strategy.",
-      "done": false,
+      "done": true,
       "due": "2026-08-11",
-      "key": "433-pest-appt-8-11"
+      "key": "433-pest-appt-8-11",
+      "doneDate": "2026-08-27",
+      "doneNote": "Closed in the CRM; reconciled into deals.json 2026-08-27 from agent_tasks (CRM done-state is authoritative per SOP Step 0)."
     },
     {
       "agent": "sara",
@@ -1125,7 +1139,9 @@
       "key": "listengourt-brbc-file",
       "title": "New buyer client Denis Listengourt — BRBC executed via Authentisign 8/7 9:41 AM. Download + file the BRBC and open a buyer-prospect record in deals.json",
       "due": "Today 8/7",
-      "done": false
+      "done": true,
+      "doneDate": "2026-08-27",
+      "doneNote": "Closed in the CRM; reconciled into deals.json 2026-08-27 from agent_tasks (CRM done-state is authoritative per SOP Step 0)."
     },
     {
       "agent": "james",
@@ -1186,7 +1202,9 @@
       "key": "james-lead-email-signature",
       "title": "Reply to James's 'Lead emails' (8/9) - add Legacy Properties branding, license numbers and a signature block to outgoing lead mail",
       "due": "2026-08-11",
-      "done": false
+      "done": true,
+      "doneDate": "2026-08-27",
+      "doneNote": "Closed in the CRM; reconciled into deals.json 2026-08-27 from agent_tasks (CRM done-state is authoritative per SOP Step 0)."
     },
     {
       "agent": "sara",
@@ -1194,7 +1212,9 @@
       "key": "ylopo-jason-hardin",
       "title": "Jason hardin (209) 768-0868 - Ylopo priority alert 8/7, back viewing listings after 18 days silent; alert still unread",
       "due": "2026-08-10",
-      "done": false
+      "done": true,
+      "doneDate": "2026-08-27",
+      "doneNote": "Closed in the CRM; reconciled into deals.json 2026-08-27 from agent_tasks (CRM done-state is authoritative per SOP Step 0)."
     },
     {
       "agent": "sara",
@@ -1202,7 +1222,9 @@
       "key": "augusta-offer-dealsjson",
       "title": "324 Augusta: record the offer in deals.json - buyer is Denis Listengourt (Sara buy-side, docs filed in _Offers/Buy Side/324 Augusta), offer $450K recd 8/9, SCO#1 buyer-signed. Deal still shows plain listing with no offer/buyer/price. Note: Sara is on BOTH sides.",
       "due": "2026-08-11",
-      "done": false
+      "done": true,
+      "doneDate": "2026-08-27",
+      "doneNote": "Closed in the CRM; reconciled into deals.json 2026-08-27 from agent_tasks (CRM done-state is authoritative per SOP Step 0)."
     },
     {
       "agent": "sara",
@@ -1210,7 +1232,9 @@
       "key": "433-lawson-access-confirm",
       "title": "433: Joel Lawson has not answered your 8/9 access question — pest Section 1 is TOMORROW 8/11 1PM and the property is tenant-occupied (Klann + Good Karma). Call 209-770-5980 today",
       "due": "2026-08-10",
-      "done": false
+      "done": true,
+      "doneDate": "2026-08-27",
+      "doneNote": "Closed in the CRM; reconciled into deals.json 2026-08-27 from agent_tasks (CRM done-state is authoritative per SOP Step 0)."
     },
     {
       "agent": "sara",
@@ -1218,7 +1242,9 @@
       "key": "augusta-prequal-ltv-check",
       "title": "324 Augusta: pre-qual vs offer figures do not line up - Denis's K Mortgage letter (filed 8/10) says $437,000 loan on a $450,000 offer (~97% LTV), but you told Brian and Trish 95% LTV / 5% down ($427,500). Reconcile before the sellers rely on it.",
       "due": "2026-08-10",
-      "done": false
+      "done": true,
+      "doneDate": "2026-08-27",
+      "doneNote": "Closed in the CRM; reconciled into deals.json 2026-08-27 from agent_tasks (CRM done-state is authoritative per SOP Step 0)."
     },
     {
       "agent": "james",
@@ -1234,7 +1260,9 @@
       "key": "augusta-escrow-open-record",
       "title": "🔴 324 Augusta: escrow OPENED 8/11 (Placer P-708410, COE 9/9, $460K) - record in deals.json: stage pending, salePrice 460000, closingDate 2026-09-09, buyer Denis Listengourt",
       "due": "Today 8/11",
-      "done": false
+      "done": true,
+      "doneDate": "2026-08-27",
+      "doneNote": "Closed in the CRM; reconciled into deals.json 2026-08-27 from agent_tasks (CRM done-state is authoritative per SOP Step 0)."
     },
     {
       "agent": "sara",
@@ -1242,7 +1270,9 @@
       "key": "augusta-aaa-missing",
       "title": "🔴 324 Augusta: AAA (Additional Agent Acknowledgment) not found in any of the four document trees - first compliance pass since escrow opened",
       "due": "This week",
-      "done": false
+      "done": true,
+      "doneDate": "2026-08-27",
+      "doneNote": "Closed in the CRM; reconciled into deals.json 2026-08-27 from agent_tasks (CRM done-state is authoritative per SOP Step 0)."
     },
     {
       "agent": "sara",
@@ -1250,7 +1280,9 @@
       "key": "augusta-avid-missing",
       "title": "🔴 324 Augusta: AVID missing for BOTH sides - not found in any of the four trees. Sara is on both sides, so both are hers to produce",
       "due": "This week",
-      "done": false
+      "done": true,
+      "doneDate": "2026-08-27",
+      "doneNote": "Closed in the CRM; reconciled into deals.json 2026-08-27 from agent_tasks (CRM done-state is authoritative per SOP Step 0)."
     },
     {
       "agent": "sara",
@@ -1258,7 +1290,9 @@
       "key": "augusta-nhd-missing",
       "title": "324 Augusta: NHD not found in any of the four trees. Placer's net sheet splits the NHD fee - confirm with Ashley Cuslidge it is ordered through escrow rather than chasing an agent",
       "due": "This week",
-      "done": false
+      "done": true,
+      "doneDate": "2026-08-27",
+      "doneNote": "Closed in the CRM; reconciled into deals.json 2026-08-27 from agent_tasks (CRM done-state is authoritative per SOP Step 0)."
     },
     {
       "agent": "sara",
@@ -1266,7 +1300,9 @@
       "key": "augusta-address-typo",
       "title": "324 Augusta: escrow-open email said '342 Augusta Ct'; Placer opened it correctly as 324 Augusta Court. Confirm the correction to Ashley so nothing downstream inherits the typo",
       "due": "Today 8/11",
-      "done": false
+      "done": true,
+      "doneDate": "2026-08-27",
+      "doneNote": "Closed in the CRM; reconciled into deals.json 2026-08-27 from agent_tasks (CRM done-state is authoritative per SOP Step 0)."
     },
     {
       "agent": "sara",
@@ -1274,7 +1310,9 @@
       "key": "augusta-escrow-vacation-cover",
       "title": "324 Augusta: Ashley Cuslidge out 8/26-9/4 and Placer closed 9/7 (Labor Day) against a 9/9 COE - name a backup escrow contact at Placer now",
       "due": "This week",
-      "done": false
+      "done": true,
+      "doneDate": "2026-08-27",
+      "doneNote": "Closed in the CRM; reconciled into deals.json 2026-08-27 from agent_tasks (CRM done-state is authoritative per SOP Step 0)."
     },
     {
       "agent": "james",
@@ -1290,7 +1328,9 @@
       "key": "fub-donald-rester",
       "title": "Donald Rester (209) 482-5744 viewed 1330 Calaveritas 62, San Andreas SEVEN times (Ylopo alert 8/10, unread) - strongest buying signal this week. Call him",
       "due": "Today 8/11",
-      "done": false
+      "done": true,
+      "doneDate": "2026-08-27",
+      "doneNote": "Closed in the CRM; reconciled into deals.json 2026-08-27 from agent_tasks (CRM done-state is authoritative per SOP Step 0)."
     },
     {
       "agent": "sara",
@@ -1298,7 +1338,9 @@
       "key": "augusta-hoa-package",
       "title": "🔴 324 Augusta: call Brian re the $605 HOA disclosure package — unpaid, up to 10 calendar days to process, against a 9/9 COE with Ashley out 8/26–9/4",
       "due": "2026-08-12",
-      "done": false
+      "done": true,
+      "doneDate": "2026-08-27",
+      "doneNote": "Closed in the CRM; reconciled into deals.json 2026-08-27 from agent_tasks (CRM done-state is authoritative per SOP Step 0)."
     },
     {
       "agent": "sara",
@@ -1306,7 +1348,9 @@
       "key": "augusta-duplicate-nhd",
       "title": "324 Augusta: two NHD orders (PID 4183603 on 8/11, 4183712 + WFDR on 8/12) — likely duplicate charge; net sheet splits the NHD fee. Confirm which stands",
       "due": "2026-08-16",
-      "done": false
+      "done": true,
+      "doneDate": "2026-08-27",
+      "doneNote": "Closed in the CRM; reconciled into deals.json 2026-08-27 from agent_tasks (CRM done-state is authoritative per SOP Step 0)."
     },
     {
       "agent": "sara",
@@ -1314,7 +1358,9 @@
       "key": "augusta-warranty-charge",
       "title": "324 Augusta: confirm the AHS warranty cancelled with no surviving charge — order confirmation AND escrow invoice both issued 8/11 before cancellation",
       "due": "2026-08-16",
-      "done": false
+      "done": true,
+      "doneDate": "2026-08-27",
+      "doneNote": "Closed in the CRM; reconciled into deals.json 2026-08-27 from agent_tasks (CRM done-state is authoritative per SOP Step 0)."
     },
     {
       "agent": "sara",
@@ -1331,7 +1377,9 @@
       "key": "castle-ac-seller-agent",
       "title": "Latigo post-close: forward Guy Castle's Airserv AC invoice to the Windleys; a full replacement quote is coming, so set the position first",
       "due": "2026-08-16",
-      "done": false
+      "done": true,
+      "doneDate": "2026-08-27",
+      "doneNote": "Closed in the CRM; reconciled into deals.json 2026-08-27 from agent_tasks (CRM done-state is authoritative per SOP Step 0)."
     },
     {
       "agent": "sara",
@@ -1339,7 +1387,9 @@
       "key": "433-dead-milestones",
       "title": "433: retire three milestones from the cancelled escrow still live in deals.json — loan contingency 8/5, walk-through 8/5, COE 8/10 (status 'key' is invalid)",
       "due": "2026-08-16",
-      "done": false
+      "done": true,
+      "doneDate": "2026-08-27",
+      "doneNote": "Closed in the CRM; reconciled into deals.json 2026-08-27 from agent_tasks (CRM done-state is authoritative per SOP Step 0)."
     },
     {
       "agent": "sara",
@@ -1347,7 +1397,9 @@
       "key": "feather-coe-dealsjson",
       "title": "695 Feather: closingDate 2026-08-14 must change once Tanya confirms the two-week extension — client page still promises August 14",
       "due": "2026-08-16",
-      "done": false
+      "done": true,
+      "doneDate": "2026-08-27",
+      "doneNote": "Closed in the CRM; reconciled into deals.json 2026-08-27 from agent_tasks (CRM done-state is authoritative per SOP Step 0)."
     },
     {
       "agent": "sara",
@@ -1355,7 +1407,9 @@
       "key": "baldwin-coe-dealsjson",
       "title": "Baldwin: closingDate 2026-08-17 → 2026-08-31 if ETA #3 executes; 8/17 is a Sunday so the floor is Monday 8/18 regardless",
       "due": "2026-08-16",
-      "done": false
+      "done": true,
+      "doneDate": "2026-08-27",
+      "doneNote": "Closed in the CRM; reconciled into deals.json 2026-08-27 from agent_tasks (CRM done-state is authoritative per SOP Step 0)."
     },
     {
       "agent": "sara",
@@ -1363,7 +1417,9 @@
       "key": "contacts-completeness",
       "title": "Contacts gaps: 324 Augusta lender has no named contact; 695 Feather title is null (lender N/A — all cash)",
       "due": "2026-08-16",
-      "done": false
+      "done": true,
+      "doneDate": "2026-08-27",
+      "doneNote": "Closed in the CRM; reconciled into deals.json 2026-08-27 from agent_tasks (CRM done-state is authoritative per SOP Step 0)."
     },
     {
       "agent": "sara",
@@ -1478,7 +1534,9 @@
       "key": "aug-roof-dispute",
       "title": "🔴 324 Augusta: roof dispute — buyer's inspector says repairs not completed ($1,700 scope); Brian says two roofers did the work, paid in full, and questions the inspector's motives. Send Denis the documentation, not the conflict-of-interest comment. Contingency ends 8/27 — consider a neutral third bid.",
       "due": "Today 8/14",
-      "done": false
+      "done": true,
+      "doneDate": "2026-08-27",
+      "doneNote": "Closed in the CRM; reconciled into deals.json 2026-08-27 from agent_tasks (CRM done-state is authoritative per SOP Step 0)."
     },
     {
       "agent": "sara",
@@ -1486,7 +1544,9 @@
       "key": "feather-agentnote-coe",
       "title": "🔴 695 Feather: the draft note to Ashley still says \"COE is confirmed for August 14, 2026\" — wrong as of today; it closes 8/21. Fix before she reads it.",
       "due": "Today 8/14",
-      "done": false
+      "done": true,
+      "doneDate": "2026-08-27",
+      "doneNote": "Closed in the CRM; reconciled into deals.json 2026-08-27 from agent_tasks (CRM done-state is authoritative per SOP Step 0)."
     },
     {
       "agent": "sara",
@@ -1494,7 +1554,9 @@
       "key": "aug-inspection-response",
       "title": "324 Augusta: Denis's inspections are all in — home + sewer landed 8/14, roof and pest 8/13. Expect a repair request; contingency ends 8/27.",
       "due": "This week",
-      "done": false
+      "done": true,
+      "doneDate": "2026-08-27",
+      "doneNote": "Closed in the CRM; reconciled into deals.json 2026-08-27 from agent_tasks (CRM done-state is authoritative per SOP Step 0)."
     },
     {
       "agent": "sara",
@@ -1502,7 +1564,9 @@
       "key": "feather-coe-821",
       "title": "695 Feather: set closingDate + timeline.coe + the COE milestone to 2026-08-21 once Dee executes the ETA. File still carries the 8/14 contract date.",
       "due": "When ETA executes",
-      "done": false
+      "done": true,
+      "doneDate": "2026-08-27",
+      "doneNote": "Closed in the CRM; reconciled into deals.json 2026-08-27 from agent_tasks (CRM done-state is authoritative per SOP Step 0)."
     },
     {
       "agent": "james",
@@ -1518,7 +1582,9 @@
       "key": "aug-homelight-listing",
       "title": "324 Augusta: HomeLight shows the property packet viewed AND downloaded 8/12 — the home is in escrow; check the listing is not still publicly soliciting.",
       "due": "This week",
-      "done": false
+      "done": true,
+      "doneDate": "2026-08-27",
+      "doneNote": "Closed in the CRM; reconciled into deals.json 2026-08-27 from agent_tasks (CRM done-state is authoritative per SOP Step 0)."
     },
     {
       "agent": "sara",
@@ -1535,7 +1601,9 @@
       "key": "augusta-relist-decision",
       "title": "324 Augusta: relist decision, and how the roof/pest repair discrepancy gets disclosed to the next buyer",
       "due": "This week",
-      "done": false
+      "done": true,
+      "doneDate": "2026-08-27",
+      "doneNote": "Closed in the CRM; reconciled into deals.json 2026-08-27 from agent_tasks (CRM done-state is authoritative per SOP Step 0)."
     },
     {
       "agent": "james",
@@ -1552,7 +1620,9 @@
       "key": "baldwin-seller-name",
       "title": "Baldwin: seller name mismatch — AEA says Rebecca Johnson, deals.json says Rebecca Turnage",
       "due": "This week",
-      "done": false
+      "done": true,
+      "doneDate": "2026-08-27",
+      "doneNote": "Closed in the CRM; reconciled into deals.json 2026-08-27 from agent_tasks (CRM done-state is authoritative per SOP Step 0)."
     },
     {
       "agent": "sara",
@@ -1560,7 +1630,9 @@
       "key": "433-lawson-followup",
       "title": "433: follow up with Joel Lawson — pest work done, relisted to ~11/18, no showing activity",
       "due": "This week",
-      "done": false
+      "done": true,
+      "doneDate": "2026-08-27",
+      "doneNote": "Closed in the CRM; reconciled into deals.json 2026-08-27 from agent_tasks (CRM done-state is authoritative per SOP Step 0)."
     },
     {
       "agent": "james",
@@ -1621,7 +1693,9 @@
       "key": "echo-mod-not-filed",
       "title": "1143 Echo: the MOD transferring the unpaid 0.5% ($3,075) from Latigo is not on disk — Ex holds only the RLA. File it; it is what makes the 3.5% collectable.",
       "due": "This week",
-      "done": false
+      "done": true,
+      "doneDate": "2026-08-27",
+      "doneNote": "Closed in the CRM; reconciled into deals.json 2026-08-27 from agent_tasks (CRM done-state is authoritative per SOP Step 0)."
     },
     {
       "agent": "sara",
@@ -1629,7 +1703,9 @@
       "key": "sheepranch-marketing-call",
       "title": "9568 Sheep Ranch: 87 shares / 728 views in 30 days, most-shared in the book, one escrow already cancelled. Price/marketing call with Sean Moffatt.",
       "due": "This week",
-      "done": false
+      "done": true,
+      "doneDate": "2026-08-27",
+      "doneNote": "Closed in the CRM; reconciled into deals.json 2026-08-27 from agent_tasks (CRM done-state is authoritative per SOP Step 0)."
     },
     {
       "agent": "sara",
@@ -1637,7 +1713,9 @@
       "key": "433-fub-expiration-wrong",
       "title": "🔴 FUB Hot Sheet says '433 HWY 4 listing expiration' TODAY 8/17 — MOT #3 extended it to 11/19/2026. FUB is carrying a stale date; fix it before someone pulls the listing.",
       "due": "Today 8/17",
-      "done": false
+      "done": true,
+      "doneDate": "2026-08-27",
+      "doneNote": "Closed in the CRM; reconciled into deals.json 2026-08-27 from agent_tasks (CRM done-state is authoritative per SOP Step 0)."
     },
     {
       "agent": "james",
@@ -1653,7 +1731,9 @@
       "key": "augusta-roof-recert",
       "title": "324 Augusta: get Victor Malagon's roof RE-CERTIFICATION in writing — he repaired 8/16. That document is what closes the disclosure question for the relist.",
       "due": "This week",
-      "done": false
+      "done": true,
+      "doneDate": "2026-08-27",
+      "doneNote": "Closed in the CRM; reconciled into deals.json 2026-08-27 from agent_tasks (CRM done-state is authoritative per SOP Step 0)."
     },
     {
       "agent": "sara",
@@ -1661,7 +1741,9 @@
       "key": "augusta-pest-recert",
       "title": "324 Augusta: Douglas Rushing (Rushing Termite) still has not responded on the pest discrepancy — you and Brian both wrote 8/14. Chase or get a second pest opinion.",
       "due": "This week",
-      "done": false
+      "done": true,
+      "doneDate": "2026-08-27",
+      "doneNote": "Closed in the CRM; reconciled into deals.json 2026-08-27 from agent_tasks (CRM done-state is authoritative per SOP Step 0)."
     },
     {
       "agent": "sara",
@@ -1678,7 +1760,9 @@
       "key": "sally-prequal-followup",
       "title": "Sally Thompson: follow up with Kim Hesser on the prequal so she can write. Shown Castlewood already.",
       "due": "This week",
-      "done": false
+      "done": true,
+      "doneDate": "2026-08-27",
+      "doneNote": "Closed in the CRM; reconciled into deals.json 2026-08-27 from agent_tasks (CRM done-state is authoritative per SOP Step 0)."
     },
     {
       "agent": "sara",
@@ -1686,7 +1770,9 @@
       "key": "augusta-roof-report-file",
       "title": "324 Augusta: file Victor Malagon's finalized roof report (v2.0, emailed 8/17 7:38 PM) into _Listings\\324 Augusta — only the 8/13–8/14 versions are on disk",
       "due": "2026-08-18",
-      "done": false
+      "done": true,
+      "doneDate": "2026-08-27",
+      "doneNote": "Closed in the CRM; reconciled into deals.json 2026-08-27 from agent_tasks (CRM done-state is authoritative per SOP Step 0)."
     },
     {
       "agent": "sara",
@@ -1694,7 +1780,9 @@
       "key": "lovest-loi-response",
       "title": "1350 Love St: LOI received 8/17 (Ebenezer Catering, PSA in 12 days) — forwarded to Judy; decide whether to ask for a real offer or decline",
       "due": "2026-08-21",
-      "done": false
+      "done": true,
+      "doneDate": "2026-08-27",
+      "doneNote": "Closed in the CRM; reconciled into deals.json 2026-08-27 from agent_tasks (CRM done-state is authoritative per SOP Step 0)."
     },
     {
       "agent": "sara",
@@ -1702,7 +1790,9 @@
       "key": "listings-commission-gaps",
       "title": "Listing book: 5 listings still have NO commission recorded (14281 Cobb, 2947 Murphys Grade, 7653 Cave City, Angels Camp land, 1789 Love Creek) — read them off the RLAs",
       "due": "2026-08-21",
-      "done": false
+      "done": true,
+      "doneDate": "2026-08-27",
+      "doneNote": "Closed in the CRM; reconciled into deals.json 2026-08-27 from agent_tasks (CRM done-state is authoritative per SOP Step 0)."
     },
     {
       "agent": "sara",
@@ -1710,7 +1800,9 @@
       "key": "dre-letter-deadline",
       "title": "🔴 DRE 426-0514-007: open the attached letter, read the response due date, and calendar it — nobody has read it yet",
       "due": "Today",
-      "done": false
+      "done": true,
+      "doneDate": "2026-08-27",
+      "doneNote": "Closed in the CRM; reconciled into deals.json 2026-08-27 from agent_tasks (CRM done-state is authoritative per SOP Step 0)."
     },
     {
       "agent": "sara",
@@ -1718,7 +1810,9 @@
       "key": "dre-confirm-receipt",
       "title": "🔴 DRE: call Shannon Mitra 916-737-4322 to confirm she received your reply — DRE blocks inbound mail by rule and your read receipt bounced",
       "due": "Today",
-      "done": false
+      "done": true,
+      "doneDate": "2026-08-27",
+      "doneNote": "Closed in the CRM; reconciled into deals.json 2026-08-27 from agent_tasks (CRM done-state is authoritative per SOP Step 0)."
     },
     {
       "agent": "james",
@@ -1734,7 +1828,9 @@
       "key": "skyline-inquiry-work",
       "title": "467 Skyline: work the ListTrac inquiry — 9,838 views, 30 shares, 1 inquiry and no record of it being worked",
       "due": "This week",
-      "done": false
+      "done": true,
+      "doneDate": "2026-08-27",
+      "doneNote": "Closed in the CRM; reconciled into deals.json 2026-08-27 from agent_tasks (CRM done-state is authoritative per SOP Step 0)."
     },
     {
       "agent": "sara",
@@ -1742,7 +1838,9 @@
       "key": "castlewood-offer-sally",
       "title": "2245 Castlewood: write Sally's offer this week as promised to Terri Watkins — none of the roof/septic/pest work was performed, seller motivated",
       "due": "This week",
-      "done": false
+      "done": true,
+      "doneDate": "2026-08-27",
+      "doneNote": "Closed in the CRM; reconciled into deals.json 2026-08-27 from agent_tasks (CRM done-state is authoritative per SOP Step 0)."
     },
     {
       "agent": "sara",
@@ -1750,7 +1848,9 @@
       "key": "bev-woltjer-nudge",
       "title": "Bev Woltjer: nudge on 'Lakefront for Bev' — pushed 3 days ago, opened twice, no reaction",
       "due": "This week",
-      "done": false
+      "done": true,
+      "doneDate": "2026-08-27",
+      "doneNote": "Closed in the CRM; reconciled into deals.json 2026-08-27 from agent_tasks (CRM done-state is authoritative per SOP Step 0)."
     },
     {
       "agent": "sara",
@@ -1774,7 +1874,9 @@
       "key": "forestmeadows-rla",
       "title": "517 Forest Meadows: get the RLA signed with Chitra Brahme — list price, commission, expiration and agreement form are all unset",
       "due": "This week",
-      "done": false
+      "done": true,
+      "doneDate": "2026-08-27",
+      "doneNote": "Closed in the CRM; reconciled into deals.json 2026-08-27 from agent_tasks (CRM done-state is authoritative per SOP Step 0)."
     },
     {
       "agent": "sara",
@@ -1782,7 +1884,9 @@
       "key": "forestmeadows-prior-file",
       "title": "517 Forest Meadows: pull the prior NHD, HOA bylaws and disclosures from _Sold\\517 Forest Meadows — Legacy sold her this home, the file is reusable",
       "due": "This week",
-      "done": false
+      "done": true,
+      "doneDate": "2026-08-27",
+      "doneNote": "Closed in the CRM; reconciled into deals.json 2026-08-27 from agent_tasks (CRM done-state is authoritative per SOP Step 0)."
     },
     {
       "agent": "james",
@@ -1804,9 +1908,11 @@
       "agent": "sara",
       "client": "9568 Sheep Ranch",
       "title": "9568 Sheep Ranch: seller net sheet received from Placer 8/20 at $369,000 (3% sell / 2.5% buy, split escrow+NHD, seller pays transfer tax) — confirm the offer terms and record it",
-      "done": false,
+      "done": true,
       "due": "This week",
-      "key": "sheepranch-net-sheet-confirm"
+      "key": "sheepranch-net-sheet-confirm",
+      "doneDate": "2026-08-27",
+      "doneNote": "Closed in the CRM; reconciled into deals.json 2026-08-27 from agent_tasks (CRM done-state is authoritative per SOP Step 0)."
     },
     {
       "agent": "james",
@@ -1886,7 +1992,9 @@
       "key": "bev-lakefront-nudge",
       "title": "Bev Woltjer has opened the 'Lakefront for Bev' collection twice since you pushed it 3 days ago but hasn't reacted - worth a nudge",
       "due": "This week",
-      "done": false
+      "done": true,
+      "doneDate": "2026-08-27",
+      "doneNote": "Closed in the CRM; reconciled into deals.json 2026-08-27 from agent_tasks (CRM done-state is authoritative per SOP Step 0)."
     },
     {
       "agent": "james",
@@ -1917,56 +2025,70 @@
       "client": "Follow Up Boss",
       "key": "fub-agustin-rodriguez",
       "due": "Today",
-      "done": false,
-      "title": "New lead Agustin Rodriguez (209) 405-4799 agustin.r6519@gmail.com — realtor.com 8/23 2:55 PM: \"I'm interested in scheduling a tour of 3558 Sheep Ranch Rd on Aug 23.\" One inquiry, flagged hot. Unworked."
+      "done": true,
+      "title": "New lead Agustin Rodriguez (209) 405-4799 agustin.r6519@gmail.com — realtor.com 8/23 2:55 PM: \"I'm interested in scheduling a tour of 3558 Sheep Ranch Rd on Aug 23.\" One inquiry, flagged hot. Unworked.",
+      "doneDate": "2026-08-27",
+      "doneNote": "Closed in the CRM; reconciled into deals.json 2026-08-27 from agent_tasks (CRM done-state is authoritative per SOP Step 0)."
     },
     {
       "agent": "sara",
       "client": "324 Augusta",
       "key": "augusta-second-showing-824",
       "due": "Today",
-      "done": false,
-      "title": "324 Augusta: second showing today 4:00 PM — 1,477 ListTrac views in 30 days and 18,427 on Homes.com; this is the strongest interest since the relist"
+      "done": true,
+      "title": "324 Augusta: second showing today 4:00 PM — 1,477 ListTrac views in 30 days and 18,427 on Homes.com; this is the strongest interest since the relist",
+      "doneDate": "2026-08-27",
+      "doneNote": "Closed in the CRM; reconciled into deals.json 2026-08-27 from agent_tasks (CRM done-state is authoritative per SOP Step 0)."
     },
     {
       "agent": "sara",
       "client": "324 Augusta",
       "key": "augusta-crm-escrow-rows-stale",
       "due": "This week",
-      "done": false,
-      "title": "324 Augusta: the CRM still shows the 'Sign Agent Acknowledgment' and 13 dead escrow timeline items on a listing-stage deal. deals.json is clean — these are server-side rows only Claude Code can clear. Written up in PROMPT_for_ClaudeCode_2026-08-24.md (item 5)."
+      "done": true,
+      "title": "324 Augusta: the CRM still shows the 'Sign Agent Acknowledgment' and 13 dead escrow timeline items on a listing-stage deal. deals.json is clean — these are server-side rows only Claude Code can clear. Written up in PROMPT_for_ClaudeCode_2026-08-24.md (item 5).",
+      "doneDate": "2026-08-27",
+      "doneNote": "Closed in the CRM; reconciled into deals.json 2026-08-27 from agent_tasks (CRM done-state is authoritative per SOP Step 0)."
     },
     {
       "agent": "sara",
       "client": "Admin",
       "key": "crm-gmail-reconnect",
       "due": "Today",
-      "done": false,
-      "title": "🔴 RECONNECT GOOGLE — both your and James's Gmail connections expired; the CRM has ingested no email since Sun night and realtor.com leads arrive by email. CRM settings, takes seconds. Only you can do it."
+      "done": true,
+      "title": "🔴 RECONNECT GOOGLE — both your and James's Gmail connections expired; the CRM has ingested no email since Sun night and realtor.com leads arrive by email. CRM settings, takes seconds. Only you can do it.",
+      "doneDate": "2026-08-27",
+      "doneNote": "Closed in the CRM; reconciled into deals.json 2026-08-27 from agent_tasks (CRM done-state is authoritative per SOP Step 0)."
     },
     {
       "agent": "sara",
       "client": "Admin",
       "key": "crm-engagement-capture-broken",
       "due": "This week",
-      "done": false,
-      "title": "CRM: no client can record engagement — website visits, collection opens and reactions are all blocked by an agent-only security rule. Every 'open' ever recorded was you or James previewing. Full brief in PROMPT_for_ClaudeCode_2026-08-24_CRM_ENGAGEMENT.md — hand to Claude Code."
+      "done": true,
+      "title": "CRM: no client can record engagement — website visits, collection opens and reactions are all blocked by an agent-only security rule. Every 'open' ever recorded was you or James previewing. Full brief in PROMPT_for_ClaudeCode_2026-08-24_CRM_ENGAGEMENT.md — hand to Claude Code.",
+      "doneDate": "2026-08-27",
+      "doneNote": "Closed in the CRM; reconciled into deals.json 2026-08-27 from agent_tasks (CRM done-state is authoritative per SOP Step 0)."
     },
     {
       "agent": "sara",
       "client": "Admin",
       "key": "crm-deal-parties-exposed",
       "due": "This week",
-      "done": false,
-      "title": "CRM security: deal_parties (party names + contact details), deal_stage_events and listing_alert_sends have row-level security switched OFF while publicly exposed. Claude Code, 10-minute fix — item 5 of the engagement prompt."
+      "done": true,
+      "title": "CRM security: deal_parties (party names + contact details), deal_stage_events and listing_alert_sends have row-level security switched OFF while publicly exposed. Claude Code, 10-minute fix — item 5 of the engagement prompt.",
+      "doneDate": "2026-08-27",
+      "doneNote": "Closed in the CRM; reconciled into deals.json 2026-08-27 from agent_tasks (CRM done-state is authoritative per SOP Step 0)."
     },
     {
       "agent": "sara",
       "client": "1789 Love Creek",
       "key": "lovecreek-vicky-teller-sept",
       "due": "This week",
-      "done": false,
-      "title": "1789 Love Creek: Vicky Teller told you 8/13 she wants to list the first week of September — that is next week and there is still no RLA on disk. Book the listing appointment."
+      "done": true,
+      "title": "1789 Love Creek: Vicky Teller told you 8/13 she wants to list the first week of September — that is next week and there is still no RLA on disk. Book the listing appointment.",
+      "doneDate": "2026-08-27",
+      "doneNote": "Closed in the CRM; reconciled into deals.json 2026-08-27 from agent_tasks (CRM done-state is authoritative per SOP Step 0)."
     },
     {
       "agent": "james",
@@ -1981,8 +2103,10 @@
       "client": "Admin",
       "key": "crm-agent-updates-unread",
       "due": "Today",
-      "done": false,
-      "title": "🔴 CRM: 17 notes you and James wrote in the CRM have never been read by the briefing — the channel died 7/31. Full list in CRM_Agent_Updates_Backlog_2026-08-24.md. Fix is in the CC prompt."
+      "done": true,
+      "title": "🔴 CRM: 17 notes you and James wrote in the CRM have never been read by the briefing — the channel died 7/31. Full list in CRM_Agent_Updates_Backlog_2026-08-24.md. Fix is in the CC prompt.",
+      "doneDate": "2026-08-27",
+      "doneNote": "Closed in the CRM; reconciled into deals.json 2026-08-27 from agent_tasks (CRM done-state is authoritative per SOP Step 0)."
     },
     {
       "agent": "james",
@@ -1996,9 +2120,11 @@
       "agent": "sara",
       "client": "695 Feather",
       "key": "feather-hcd-sara-reply",
-      "done": false,
+      "done": true,
       "due": "Today",
-      "title": "695 Feather: reply to James on the manufactured-home HCD delay (his 8/24 6:44pm email) — close 8/28 with a written holdback, or sign an ETA to push COE. Ashley's deposit is at risk either way."
+      "title": "695 Feather: reply to James on the manufactured-home HCD delay (his 8/24 6:44pm email) — close 8/28 with a written holdback, or sign an ETA to push COE. Ashley's deposit is at risk either way.",
+      "doneDate": "2026-08-27",
+      "doneNote": "Closed in the CRM; reconciled into deals.json 2026-08-27 from agent_tasks (CRM done-state is authoritative per SOP Step 0)."
     },
     {
       "agent": "james",
