@@ -682,17 +682,20 @@ export default async function handler(req, res) {
       when:   sanitize((t && t.when) || 'Open'),
       status: (t && t.status === 'done') ? 'done' : 'open'
     });
+    // Phase 2: an agent-authored overlay (agent_client_tasks / agent_buyer_tasks,
+    // edited in the CRM, db/094) WINS over Cowork's deals.json list when present
+    // and survives the hourly sync. Falls back to Cowork's value otherwise.
+    const effBuyerTasks  = Array.isArray(deal.agent_buyer_tasks)  ? deal.agent_buyer_tasks  : (Array.isArray(deal.buyer_tasks)  ? deal.buyer_tasks  : []);
+    const effClientTasks = Array.isArray(deal.agent_client_tasks) ? deal.agent_client_tasks : (Array.isArray(deal.client_tasks) ? deal.client_tasks : []);
     let tasks;
     if (isBuyerSide) {
-      // A BUYER never sees the seller's to-do list — deal.client_tasks are written
-      // from the seller's seat ("watch for the buyer's inspection", "review the
-      // seller net sheet"). Use Cowork's buyer-authored tasks (deal.buyer_tasks)
-      // when present; otherwise show nothing but the friendly empty state. We also
-      // skip the owed-docs derivation, since those are the seller's documents.
-      const bt = Array.isArray(deal.buyer_tasks) ? deal.buyer_tasks : [];
-      tasks = bt.map(mapTask).filter((t) => t.label).concat(sharedTasks);
-    } else if (Array.isArray(deal.client_tasks) && deal.client_tasks.length) {
-      tasks = deal.client_tasks.map(mapTask).filter((t) => t.label).concat(sharedTasks);
+      // A BUYER never sees the seller's to-do list — client_tasks are written from
+      // the seller's seat. Use the buyer-authored list (agent overlay, else Cowork's
+      // buyer_tasks); otherwise the friendly empty state. Skip the owed-docs
+      // derivation too, since those are the seller's documents.
+      tasks = effBuyerTasks.map(mapTask).filter((t) => t.label).concat(sharedTasks);
+    } else if (effClientTasks.length) {
+      tasks = effClientTasks.map(mapTask).filter((t) => t.label).concat(sharedTasks);
     } else {
       tasks = (timelineTasks || [])
         .concat(docs

@@ -3502,6 +3502,14 @@ body.lp-restyle {
         +     '<button class="cc-btn" data-cc-road-save type="button">Save</button>'
         +   '</div>'
         + '</div>'
+        + '<div class="cc-cnote" data-cc-ctk>'
+        +   '<div class="cc-inote-h">What I need from you <span>· the '+(deal.side==='buyer'?'buyer':'seller')+'’s to-do list on their portal. Individually-tracked tasks live in the Tasks tab.</span></div>'
+        +   '<div data-cc-ctk-rows><span class="cc-cnote-empty">Loading…</span></div>'
+        +   '<div class="cc-inote-foot" style="gap:8px;flex-wrap:wrap;"><span class="cc-cnote-status" data-cc-ctk-status></span>'
+        +     '<button class="cc-btn ghost" data-cc-ctk-add type="button">+ Add task</button>'
+        +     '<button class="cc-btn" data-cc-ctk-save type="button">Save</button>'
+        +   '</div>'
+        + '</div>'
         + '<div class="cc-body">'
         +   '<div class="cc-card">'
         +     '<div class="cc-photo" data-cc-photo>'+photoInner
@@ -3537,6 +3545,7 @@ body.lp-restyle {
         loadClientNote(deal);
         loadGoodToKnow(deal);
         loadRoad(deal);
+        loadClientTasks(deal);
         loadDealVisibility(deal);
         loadDealNotes(deal);
         loadDealExtras(deal);
@@ -3829,6 +3838,46 @@ body.lp-restyle {
           .catch(function(){ btn.disabled=false; btn.textContent=orig; if(st){ st.className='cc-cnote-status warn'; st.textContent='Network error saving.'; } });
       }
 
+      // ---- "What I need from you" — the client to-do list, editable (Phase 2). ----
+      function ctkRowHtml(it){
+        it = it || {};
+        return '<div class="ctk-row" style="display:flex;gap:8px;align-items:center;margin-bottom:8px;">'
+          + '<input type="text" data-ct-label placeholder="What you need from them (e.g. Sign the disclosures)" maxlength="160" value="'+esc(it.label||'')+'" style="flex:1;font:inherit;font-size:13px;padding:7px 9px;border:1px solid var(--rule);border-radius:7px;background:var(--shell);color:var(--ink);">'
+          + '<input type="text" data-ct-when placeholder="When (e.g. By Fri)" maxlength="60" value="'+esc(it.when||'')+'" style="width:130px;font:inherit;font-size:13px;padding:7px 9px;border:1px solid var(--rule);border-radius:7px;background:var(--shell);color:var(--ink);">'
+          + '<button class="cc-btn ghost" data-ct-del type="button" title="Remove" style="padding:4px 9px;">✕</button>'
+          + '</div>';
+      }
+      function renderCtkRows(items, source){
+        var box=root.querySelector('[data-cc-ctk-rows]'); var st=root.querySelector('[data-cc-ctk-status]');
+        if(!box) return;
+        var list=Array.isArray(items)?items:[];
+        box.innerHTML = list.length ? list.map(ctkRowHtml).join('') : '<span class="cc-cnote-empty">No to-dos yet — add one, or leave it to the daily brief.</span>';
+        if(st){ st.className='cc-cnote-status'; st.textContent = source==='agent' ? 'Edited in the CRM — shown on the portal.' : (list.length ? 'From the daily brief — edit to make it yours.' : ''); }
+      }
+      function loadClientTasks(deal){
+        var box=root.querySelector('[data-cc-ctk-rows]'); if(box) box.innerHTML='<span class="cc-cnote-empty">Loading…</span>';
+        fetch('/api/crm/deal-client-tasks?deal='+encodeURIComponent(deal.source_key)+'&side='+encodeURIComponent(deal.side==='buyer'?'buyer':'seller'),{credentials:'include'})
+          .then(function(r){ return r.ok?r.json():null; })
+          .then(function(j){ if(!current||current.source_key!==deal.source_key) return; renderCtkRows((j&&j.items)||[], (j&&j.source)||'cowork'); })
+          .catch(function(){ if(!current) return; renderCtkRows([], 'cowork'); });
+      }
+      function addCtkRow(){
+        var box=root.querySelector('[data-cc-ctk-rows]'); if(!box) return;
+        var empty=box.querySelector('.cc-cnote-empty'); if(empty) box.innerHTML='';
+        box.insertAdjacentHTML('beforeend', ctkRowHtml({}));
+      }
+      function saveCtk(btn){
+        if(!current) return;
+        var box=root.querySelector('[data-cc-ctk-rows]'); var st=root.querySelector('[data-cc-ctk-status]');
+        var items=[];
+        if(box) box.querySelectorAll('.ctk-row').forEach(function(r){ var l=(((r.querySelector('[data-ct-label]')||{}).value)||'').trim(); var w=(((r.querySelector('[data-ct-when]')||{}).value)||'').trim(); if(l) items.push({ label:l, when:w }); });
+        var orig=btn.textContent; btn.disabled=true; btn.textContent='Saving…';
+        fetch('/api/crm/deal-client-tasks',{method:'POST',credentials:'include',headers:{'Content-Type':'application/json'},body:JSON.stringify({ source_key:current.source_key, side:(current.side==='buyer'?'buyer':'seller'), items:items })})
+          .then(function(r){ return r.json().then(function(j){ return {ok:r.ok,j:j}; }); })
+          .then(function(res){ btn.disabled=false; btn.textContent=orig; if(res.ok&&res.j&&res.j.saved){ renderCtkRows(res.j.items, res.j.source); } else if(st){ st.className='cc-cnote-status warn'; st.textContent=(res.j&&res.j.error)||'Could not save.'; } })
+          .catch(function(){ btn.disabled=false; btn.textContent=orig; if(st){ st.className='cc-cnote-status warn'; st.textContent='Network error saving.'; } });
+      }
+
       // ---- photo drop / upload ------------------------------------------
       function wirePhoto(){
         var zone = root.querySelector('[data-cc-photo]');
@@ -3895,6 +3944,11 @@ body.lp-restyle {
         if(rdUp){ e.preventDefault(); var ru=rdUp.closest('.road-row'); if(ru&&ru.previousElementSibling) ru.parentNode.insertBefore(ru, ru.previousElementSibling); return; }
         var rdDown=e.target.closest('[data-rd-down]');
         if(rdDown){ e.preventDefault(); var rw=rdDown.closest('.road-row'); if(rw&&rw.nextElementSibling) rw.parentNode.insertBefore(rw.nextElementSibling, rw); return; }
+        if(e.target.closest('[data-cc-ctk-add]')){ e.preventDefault(); addCtkRow(); return; }
+        var ctkSave=e.target.closest('[data-cc-ctk-save]');
+        if(ctkSave && current){ e.preventDefault(); saveCtk(ctkSave); return; }
+        var ctDel=e.target.closest('[data-ct-del]');
+        if(ctDel){ e.preventDefault(); var cr=ctDel.closest('.ctk-row'); if(cr&&cr.parentNode) cr.parentNode.removeChild(cr); return; }
       });
 
       // ---- in-console messaging: the deal's linked client + thread -------

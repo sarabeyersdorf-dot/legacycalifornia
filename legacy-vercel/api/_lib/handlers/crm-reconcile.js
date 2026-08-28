@@ -80,7 +80,7 @@ export default async function handler(req, res) {
       email: 'Per-mailbox connection health. needs_reconnect:false with a recent last_synced_at means email sync is fine — do NOT tell Sara to reconnect.',
       timeline_drift: 'Deals whose escrow FELL THROUGH (back to listing/preparing) but still carry client-visible timeline items — a dead escrow showing a client live deadlines. Should be empty. CLOSED deals are excluded on purpose: a completed sale legitimately keeps its finished (done) closing history for the client.',
       expected_dates: 'Agent-believed dates (coe_date/acceptance_date) with no executed document yet (SPEC §3). These are AGENDA-ONLY — they NEVER reach a client portal. Quote them labelled with by/at/note ("COE 9/12 — expected, James 8/27, lender verbal"). state: pending = no confirmed value yet; discrepancy = a confirmed value exists and DISAGREES (put on the agenda, do not overwrite). A promoted expected (confirmed caught up) is cleared by sync-deals and drops off this list.',
-      agent_overlays: 'Which deal fields an agent has TAKEN OVER in the CRM (Phase 2). For each field listed, the DB overlay WINS and your deals.json value is ignored on the portal until the agent clears it — so STOP authoring that field for that deal. fields: good_to_know (agent_good_to_know), road (agent_milestones), client_note (agent_note origin:crm), stage (stage_override), created_in_crm (a CRM-authored deal, no deals.json entry), expected_dates. Keep authoring these fields for every deal NOT listed here.'
+      agent_overlays: 'Which deal fields an agent has TAKEN OVER in the CRM (Phase 2). For each field listed, the DB overlay WINS and your deals.json value is ignored on the portal until the agent clears it — so STOP authoring that field for that deal. fields: good_to_know (agent_good_to_know), road (agent_milestones), client_tasks (agent_client_tasks — the portal "What I need from you" list), client_note (agent_note origin:crm), stage (stage_override), created_in_crm (a CRM-authored deal, no deals.json entry), expected_dates. Keep authoring these fields for every deal NOT listed here.'
     }
   };
 
@@ -250,8 +250,8 @@ export default async function handler(req, res) {
     try {
       const { data, error } = await supa.from('deals')
         .select('source_key, address, agent_good_to_know, agent_buyer_good_to_know, ' +
-          'agent_milestones, agent_buyer_milestones, agent_note, stage_override, ' +
-          'created_in_crm, coe_date_expected, acceptance_date_expected');
+          'agent_milestones, agent_buyer_milestones, agent_client_tasks, agent_buyer_tasks, ' +
+          'agent_note, stage_override, created_in_crm, coe_date_expected, acceptance_date_expected');
       if (error) throw error;
       const isArr = (v) => Array.isArray(v) && v.length > 0;
       const deals = [];
@@ -259,6 +259,7 @@ export default async function handler(req, res) {
         const fields = [];
         if (isArr(d.agent_good_to_know) || isArr(d.agent_buyer_good_to_know)) fields.push('good_to_know');
         if (isArr(d.agent_milestones)   || isArr(d.agent_buyer_milestones))   fields.push('road');
+        if (isArr(d.agent_client_tasks) || isArr(d.agent_buyer_tasks))        fields.push('client_tasks');
         if (d.agent_note && typeof d.agent_note === 'object' && d.agent_note.origin === 'crm') fields.push('client_note');
         if (d.stage_override) fields.push('stage');
         if (d.created_in_crm) fields.push('created_in_crm');

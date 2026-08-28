@@ -84,6 +84,7 @@ import dealDates           from '../_lib/handlers/crm-deal-dates.js';
 import dealCreate          from '../_lib/handlers/crm-deal-create.js';
 import dealNoteSuggest     from '../_lib/handlers/crm-deal-note-suggest.js';
 import dealGoodToKnow      from '../_lib/handlers/crm-deal-good-to-know.js';
+import dealClientTasks     from '../_lib/handlers/crm-deal-client-tasks.js';
 import dealMilestones      from '../_lib/handlers/crm-deal-milestones.js';
 
 const TABLE = {
@@ -148,7 +149,8 @@ const TABLE = {
   'deal-create':          dealCreate,
   'deal-note-suggest':    dealNoteSuggest,
   'deal-good-to-know':    dealGoodToKnow,
-  'deal-milestones':      dealMilestones
+  'deal-milestones':      dealMilestones,
+  'deal-client-tasks':    dealClientTasks
 };
 
 export default async function handler(req, res) {
