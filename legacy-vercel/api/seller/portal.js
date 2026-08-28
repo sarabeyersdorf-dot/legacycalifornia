@@ -737,9 +737,14 @@ export default async function handler(req, res) {
     // a BUYER must never see them verbatim. A buyer reads Cowork's buyer-authored
     // buyer_good_to_know (db/072) when present; otherwise the section is simply
     // empty for the buyer — never the seller's bullets.
+    // Phase 2: an agent-authored overlay (agent_good_to_know / agent_buyer_good_to_know,
+    // edited in the CRM, db/092) WINS over Cowork's deals.json value when present,
+    // and survives the hourly sync. Falls back to Cowork's value otherwise.
     const gtkSource = isBuyerSide
-      ? (Array.isArray(deal.buyer_good_to_know) ? deal.buyer_good_to_know : [])
-      : (Array.isArray(deal.good_to_know) ? deal.good_to_know : []);
+      ? (Array.isArray(deal.agent_buyer_good_to_know) ? deal.agent_buyer_good_to_know
+         : Array.isArray(deal.buyer_good_to_know) ? deal.buyer_good_to_know : [])
+      : (Array.isArray(deal.agent_good_to_know) ? deal.agent_good_to_know
+         : Array.isArray(deal.good_to_know) ? deal.good_to_know : []);
     const goodToKnow = gtkSource
       .map((g) => ({ title: sanitize((g && g.title) || ''), body: sanitize((g && g.body) || '') }))
       .filter((g) => g.title || g.body);
