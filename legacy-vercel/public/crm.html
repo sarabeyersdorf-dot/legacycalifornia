@@ -3486,6 +3486,14 @@ body.lp-restyle {
         +     '<button class="cc-btn" data-cc-cnote-toggle disabled>Loading…</button>'
         +   '</div>'
         + '</div>'
+        + '<div class="cc-cnote" data-cc-gtk>'
+        +   '<div class="cc-inote-h">Good to know <span>· short context bullets the '+(deal.side==='buyer'?'buyer':'seller')+' sees on their portal</span></div>'
+        +   '<div data-cc-gtk-rows><span class="cc-cnote-empty">Loading…</span></div>'
+        +   '<div class="cc-inote-foot" style="gap:8px;flex-wrap:wrap;"><span class="cc-cnote-status" data-cc-gtk-status></span>'
+        +     '<button class="cc-btn ghost" data-cc-gtk-add type="button">+ Add bullet</button>'
+        +     '<button class="cc-btn" data-cc-gtk-save type="button">Save</button>'
+        +   '</div>'
+        + '</div>'
         + '<div class="cc-body">'
         +   '<div class="cc-card">'
         +     '<div class="cc-photo" data-cc-photo>'+photoInner
@@ -3519,6 +3527,7 @@ body.lp-restyle {
         wirePhoto();
         loadDealClient(deal);
         loadClientNote(deal);
+        loadGoodToKnow(deal);
         loadDealVisibility(deal);
         loadDealNotes(deal);
         loadDealExtras(deal);
@@ -3699,6 +3708,50 @@ body.lp-restyle {
         } else { doToggle(); }
       }
 
+      // ---- "Good to know" — client-facing context bullets, editable in the CRM ----
+      // (Phase 2). An agent overlay wins over the daily brief's version and survives
+      // the sync; empty saves clear it (back to Cowork). Side-aware per deal.
+      function gtkRowHtml(it){
+        it = it || {};
+        return '<div class="gtk-row" style="border:1px solid var(--rule);border-radius:9px;padding:8px 10px;margin-bottom:8px;background:var(--shell);">'
+          + '<div style="display:flex;gap:8px;align-items:center;">'
+          +   '<input type="text" data-gtk-title placeholder="Title (e.g. What “in escrow” means)" maxlength="120" value="'+esc(it.title||'')+'" style="flex:1;font:inherit;font-size:13px;padding:6px 8px;border:1px solid var(--rule);border-radius:7px;background:var(--vellum);color:var(--ink);">'
+          +   '<button class="cc-btn ghost" data-gtk-del type="button" title="Remove" style="padding:4px 9px;">✕</button>'
+          + '</div>'
+          + '<textarea data-gtk-body rows="2" placeholder="One or two plain sentences." maxlength="600" style="width:100%;box-sizing:border-box;margin-top:6px;font:inherit;font-size:13px;line-height:1.5;padding:7px 9px;border:1px solid var(--rule);border-radius:7px;background:var(--vellum);color:var(--ink);resize:vertical;">'+esc(it.body||'')+'</textarea>'
+          + '</div>';
+      }
+      function renderGtkRows(items, source){
+        var box=root.querySelector('[data-cc-gtk-rows]'); var st=root.querySelector('[data-cc-gtk-status]');
+        if(!box) return;
+        var list=Array.isArray(items)?items:[];
+        box.innerHTML = list.length ? list.map(gtkRowHtml).join('') : '<span class="cc-cnote-empty">No bullets yet — add one, or leave it to the daily brief.</span>';
+        if(st){ st.className='cc-cnote-status'; st.textContent = source==='agent' ? 'Edited in the CRM — shown on the portal.' : (list.length ? 'From the daily brief — edit to make it yours.' : ''); }
+      }
+      function loadGoodToKnow(deal){
+        var box=root.querySelector('[data-cc-gtk-rows]'); if(box) box.innerHTML='<span class="cc-cnote-empty">Loading…</span>';
+        fetch('/api/crm/deal-good-to-know?deal='+encodeURIComponent(deal.source_key)+'&side='+encodeURIComponent(deal.side==='buyer'?'buyer':'seller'),{credentials:'include'})
+          .then(function(r){ return r.ok?r.json():null; })
+          .then(function(j){ if(!current||current.source_key!==deal.source_key) return; renderGtkRows((j&&j.items)||[], (j&&j.source)||'cowork'); })
+          .catch(function(){ if(!current) return; renderGtkRows([], 'cowork'); });
+      }
+      function addGtkRow(){
+        var box=root.querySelector('[data-cc-gtk-rows]'); if(!box) return;
+        var empty=box.querySelector('.cc-cnote-empty'); if(empty) box.innerHTML='';
+        box.insertAdjacentHTML('beforeend', gtkRowHtml({}));
+      }
+      function saveGtk(btn){
+        if(!current) return;
+        var box=root.querySelector('[data-cc-gtk-rows]'); var st=root.querySelector('[data-cc-gtk-status]');
+        var items=[];
+        if(box) box.querySelectorAll('.gtk-row').forEach(function(r){ var t=((r.querySelector('[data-gtk-title]')||{}).value||''); var b=((r.querySelector('[data-gtk-body]')||{}).value||''); if(t.trim()||b.trim()) items.push({ title:t.trim(), body:b.trim() }); });
+        var orig=btn.textContent; btn.disabled=true; btn.textContent='Saving…';
+        fetch('/api/crm/deal-good-to-know',{method:'POST',credentials:'include',headers:{'Content-Type':'application/json'},body:JSON.stringify({ source_key:current.source_key, side:(current.side==='buyer'?'buyer':'seller'), items:items })})
+          .then(function(r){ return r.json().then(function(j){ return {ok:r.ok,j:j}; }); })
+          .then(function(res){ btn.disabled=false; btn.textContent=orig; if(res.ok&&res.j&&res.j.saved){ renderGtkRows(res.j.items, res.j.source); } else if(st){ st.className='cc-cnote-status warn'; st.textContent=(res.j&&res.j.error)||'Could not save.'; } })
+          .catch(function(){ btn.disabled=false; btn.textContent=orig; if(st){ st.className='cc-cnote-status warn'; st.textContent='Network error saving.'; } });
+      }
+
       // ---- photo drop / upload ------------------------------------------
       function wirePhoto(){
         var zone = root.querySelector('[data-cc-photo]');
@@ -3751,6 +3804,11 @@ body.lp-restyle {
         if(cnoteSave && current){ e.preventDefault(); saveClientNote(cnoteSave); return; }
         var cnoteToggle=e.target.closest('[data-cc-cnote-toggle]');
         if(cnoteToggle && current){ e.preventDefault(); toggleClientNote(cnoteToggle); return; }
+        if(e.target.closest('[data-cc-gtk-add]')){ e.preventDefault(); addGtkRow(); return; }
+        var gtkSave=e.target.closest('[data-cc-gtk-save]');
+        if(gtkSave && current){ e.preventDefault(); saveGtk(gtkSave); return; }
+        var gtkDel=e.target.closest('[data-gtk-del]');
+        if(gtkDel){ e.preventDefault(); var gr=gtkDel.closest('.gtk-row'); if(gr && gr.parentNode) gr.parentNode.removeChild(gr); return; }
       });
 
       // ---- in-console messaging: the deal's linked client + thread -------
