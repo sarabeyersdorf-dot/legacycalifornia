@@ -4129,7 +4129,8 @@ body.lp-restyle {
           <div class="ds-corners"><i></i><i></i><i></i><i></i></div>
           <div class="ds-title" style="align-items:center;">
             <div><div class="ds-kicker">Every deal, one place</div><h1 class="ds-headline">Deals</h1></div>
-            <a href="#" onclick="showView(event,'listings')" class="ds-btn" style="margin-left:auto;text-decoration:none;" title="Accept an offer, mark fell through, upload a listing photo">Offers &amp; escrow tools →</a>
+            <button type="button" data-dall-add class="ds-btn ds-btn--primary" style="margin-left:auto;" title="Add a deal directly, no waiting for the folder sync">+ Add a deal</button>
+            <a href="#" onclick="showView(event,'listings')" class="ds-btn" style="text-decoration:none;" title="Accept an offer, mark fell through, upload a listing photo">Offers &amp; escrow tools →</a>
           </div>
           <div class="ds-filter" data-dall-chips></div>
           <div style="padding:20px 22px;">
@@ -4310,7 +4311,45 @@ body.lp-restyle {
             .catch(function(){ msg.className='msg err'; msg.textContent='Network error — try again.'; save.disabled=false; });
         });
       }
+      // ---- Add a deal (SPEC §4.2) — a deal typed straight into the CRM. ----
+      function openAddDeal(){
+        var m=document.createElement('div'); m.className='ds-editmodal ds';
+        var stageOpts=[['preparing','Preparing'],['listing','On market (listing)'],['offer','Offer'],['pending','In escrow (pending)'],['closed','Closed'],['cancelled','Cancelled'],['inactive','Inactive'],['buyer-prospect','Buyer prospect'],['dispute','Dispute']];
+        m.innerHTML='<div class="box" role="dialog" aria-modal="true" aria-label="Add a deal">'
+          + '<div class="hd"><div class="k">New deal · created in the CRM</div><h3>Add a deal</h3></div>'
+          + '<div class="bd">'
+          +   '<label class="full">Address<input type="text" data-nd-address maxlength="200" placeholder="123 Main St"></label>'
+          +   '<label>City<input type="text" data-nd-city maxlength="120"></label>'
+          +   '<label>Client<input type="text" data-nd-client maxlength="120" placeholder="Seller / buyer name"></label>'
+          +   '<label>Type<select data-nd-type><option value="">—</option><option value="residential">Residential</option><option value="land">Land</option><option value="multi-family">Multi-family</option><option value="commercial">Commercial</option><option value="manufactured">Manufactured</option></select></label>'
+          +   '<label>Side<select data-nd-side><option value="seller">Seller</option><option value="buyer">Buyer</option><option value="both">Both</option></select></label>'
+          +   '<label>Agent<select data-nd-agent><option value="sara">Sara</option><option value="james">James</option><option value="both">Both</option></select></label>'
+          +   '<label>Stage<select data-nd-stage>'+stageOpts.map(function(o){ return '<option value="'+o[0]+'"'+(o[0]==='preparing'?' selected':'')+'>'+o[1]+'</option>'; }).join('')+'</select></label>'
+          +   '<div class="hint">Created straight in the CRM — no waiting for a Dropbox folder to appear, and it won’t be wiped by the hourly sync. A preparing deal has no signed listing agreement, so nothing here asks for a commission.</div>'
+          + '</div>'
+          + '<div class="ft"><span class="msg" data-nd-msg></span><button class="ds-btn" data-nd-cancel>Cancel</button><button class="ds-btn ds-btn--primary" data-nd-save>Add deal</button></div>'
+          + '</div>';
+        document.body.appendChild(m);
+        var msg=m.querySelector('[data-nd-msg]');
+        function close(){ if(m.parentNode) document.body.removeChild(m); document.removeEventListener('keydown', onKey); }
+        function onKey(ev){ if(ev.key==='Escape') close(); }
+        document.addEventListener('keydown', onKey);
+        m.addEventListener('click', function(e){
+          if(e.target===m || e.target.closest('[data-nd-cancel]')){ close(); return; }
+          var save=e.target.closest('[data-nd-save]'); if(!save) return;
+          var address=(m.querySelector('[data-nd-address]').value||'').trim();
+          if(!address){ msg.className='msg err'; msg.textContent='Enter an address.'; return; }
+          var body={ address:address, city:(m.querySelector('[data-nd-city]')||{}).value||'', client:(m.querySelector('[data-nd-client]')||{}).value||'', type:(m.querySelector('[data-nd-type]')||{}).value||'', side:(m.querySelector('[data-nd-side]')||{}).value||'seller', agent:(m.querySelector('[data-nd-agent]')||{}).value||'sara', stage:(m.querySelector('[data-nd-stage]')||{}).value||'preparing' };
+          save.disabled=true; msg.className='msg'; msg.textContent='Adding…';
+          fetch('/api/crm/deal-create',{method:'POST',credentials:'include',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)})
+            .then(function(r){ return r.json().then(function(j){ return {ok:r.ok,j:j}; },function(){ return {ok:r.ok,j:{}}; }); })
+            .then(function(res){ if(!res.ok){ msg.className='msg err'; msg.textContent=(res.j&&res.j.error)||'Could not add.'; save.disabled=false; return; } close(); state.loading=false; load(); })
+            .catch(function(){ msg.className='msg err'; msg.textContent='Network error — try again.'; save.disabled=false; });
+        });
+      }
       root.addEventListener('click', function(e){
+        var addb=e.target.closest('[data-dall-add]');
+        if(addb){ e.preventDefault(); openAddDeal(); return; }
         var chip=e.target.closest('[data-dall-f]');
         if(chip){ state.filter=chip.getAttribute('data-dall-f'); render(); return; }
         var ed=e.target.closest('[data-dall-edit]');

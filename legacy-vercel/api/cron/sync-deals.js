@@ -1197,9 +1197,14 @@ export default async function handler(req, res) {
     try {
       const activeKeys = new Set(active.map((d) => d.id).filter(Boolean));
       if (activeKeys.size > 0) {
-        const { data: existing, error: exErr } = await supa.from('deals').select('source_key');
+        // Include created_in_crm so a deal typed into the CRM (db/090) — which has
+        // no deals.json entry and would otherwise look like an orphan — is never
+        // pruned. If the column isn't migrated yet the select throws and the whole
+        // prune is skipped this run (caught below), which is the safe direction.
+        const { data: existing, error: exErr } = await supa.from('deals').select('source_key, created_in_crm');
         if (exErr) throw new Error(exErr.message);
         const orphans = [...new Set((existing || [])
+          .filter((r) => !r.created_in_crm)
           .map((r) => r.source_key)
           .filter((k) => k && !activeKeys.has(k)))];
         if (orphans.length) {
