@@ -3425,9 +3425,19 @@ body.lp-restyle {
       }
 
       var current = null; // the deal being shown (a live reference into listings state)
+      // Which side's portal content the good-to-know / road / tasks editors are
+      // editing. Fixed to the deal's own side for a one-sided deal; toggleable
+      // between seller and buyer for a both-sided (in-house) deal.
+      var ccSide = 'seller';
+      function ccContentSide(){
+        if(current && current.side==='buyer') return 'buyer';
+        if(current && current.side==='both')  return ccSide;
+        return 'seller';
+      }
 
       function render(deal){
         current = deal;
+        ccSide = (deal.side==='buyer') ? 'buyer' : 'seller';
         var meta = deal.meta || {};
         var isSell = deal.side!=='buyer';
         var isListingStage = deal.stage==='listing' || deal.stage==='preparing';
@@ -3486,6 +3496,14 @@ body.lp-restyle {
         +     '<button class="cc-btn" data-cc-cnote-toggle disabled>Loading…</button>'
         +   '</div>'
         + '</div>'
+        + (deal.side==='both'
+            ? '<div data-cc-side-toggle style="display:flex;align-items:center;gap:8px;margin:2px 0 10px;">'
+              + '<span style="font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-mute);">Editing portal content for:</span>'
+              + '<button class="cc-btn on" data-cc-side="seller" type="button">Seller</button>'
+              + '<button class="cc-btn ghost" data-cc-side="buyer" type="button">Buyer</button>'
+              + '<span style="font-size:12px;color:var(--ink-mute);">— this in-house deal has both a seller and a buyer portal.</span>'
+              + '</div>'
+            : '')
         + '<div class="cc-cnote" data-cc-gtk>'
         +   '<div class="cc-inote-h">Good to know <span>· short context bullets the '+(deal.side==='buyer'?'buyer':'seller')+' sees on their portal</span></div>'
         +   '<div data-cc-gtk-rows><span class="cc-cnote-empty">Loading…</span></div>'
@@ -3748,7 +3766,7 @@ body.lp-restyle {
       }
       function loadGoodToKnow(deal){
         var box=root.querySelector('[data-cc-gtk-rows]'); if(box) box.innerHTML='<span class="cc-cnote-empty">Loading…</span>';
-        fetch('/api/crm/deal-good-to-know?deal='+encodeURIComponent(deal.source_key)+'&side='+encodeURIComponent(deal.side==='buyer'?'buyer':'seller'),{credentials:'include'})
+        fetch('/api/crm/deal-good-to-know?deal='+encodeURIComponent(deal.source_key)+'&side='+encodeURIComponent(ccContentSide()),{credentials:'include'})
           .then(function(r){ return r.ok?r.json():null; })
           .then(function(j){ if(!current||current.source_key!==deal.source_key) return; renderGtkRows((j&&j.items)||[], (j&&j.source)||'cowork'); })
           .catch(function(){ if(!current) return; renderGtkRows([], 'cowork'); });
@@ -3764,7 +3782,7 @@ body.lp-restyle {
         var items=[];
         if(box) box.querySelectorAll('.gtk-row').forEach(function(r){ var t=((r.querySelector('[data-gtk-title]')||{}).value||''); var b=((r.querySelector('[data-gtk-body]')||{}).value||''); if(t.trim()||b.trim()) items.push({ title:t.trim(), body:b.trim() }); });
         var orig=btn.textContent; btn.disabled=true; btn.textContent='Saving…';
-        fetch('/api/crm/deal-good-to-know',{method:'POST',credentials:'include',headers:{'Content-Type':'application/json'},body:JSON.stringify({ source_key:current.source_key, side:(current.side==='buyer'?'buyer':'seller'), items:items })})
+        fetch('/api/crm/deal-good-to-know',{method:'POST',credentials:'include',headers:{'Content-Type':'application/json'},body:JSON.stringify({ source_key:current.source_key, side:ccContentSide(), items:items })})
           .then(function(r){ return r.json().then(function(j){ return {ok:r.ok,j:j}; }); })
           .then(function(res){ btn.disabled=false; btn.textContent=orig; if(res.ok&&res.j&&res.j.saved){ renderGtkRows(res.j.items, res.j.source); } else if(st){ st.className='cc-cnote-status warn'; st.textContent=(res.j&&res.j.error)||'Could not save.'; } })
           .catch(function(){ btn.disabled=false; btn.textContent=orig; if(st){ st.className='cc-cnote-status warn'; st.textContent='Network error saving.'; } });
@@ -3806,7 +3824,7 @@ body.lp-restyle {
       }
       function loadRoad(deal){
         var box=root.querySelector('[data-cc-road-rows]'); if(box) box.innerHTML='<span class="cc-cnote-empty">Loading…</span>';
-        fetch('/api/crm/deal-milestones?deal='+encodeURIComponent(deal.source_key)+'&side='+encodeURIComponent(deal.side==='buyer'?'buyer':'seller'),{credentials:'include'})
+        fetch('/api/crm/deal-milestones?deal='+encodeURIComponent(deal.source_key)+'&side='+encodeURIComponent(ccContentSide()),{credentials:'include'})
           .then(function(r){ return r.ok?r.json():null; })
           .then(function(j){ if(!current||current.source_key!==deal.source_key) return; renderRoadRows((j&&j.items)||[], (j&&j.source)||'cowork'); })
           .catch(function(){ if(!current) return; renderRoadRows([], 'cowork'); });
@@ -3832,7 +3850,7 @@ body.lp-restyle {
           });
         });
         var orig=btn.textContent; btn.disabled=true; btn.textContent='Saving…';
-        fetch('/api/crm/deal-milestones',{method:'POST',credentials:'include',headers:{'Content-Type':'application/json'},body:JSON.stringify({ source_key:current.source_key, side:(current.side==='buyer'?'buyer':'seller'), items:items })})
+        fetch('/api/crm/deal-milestones',{method:'POST',credentials:'include',headers:{'Content-Type':'application/json'},body:JSON.stringify({ source_key:current.source_key, side:ccContentSide(), items:items })})
           .then(function(r){ return r.json().then(function(j){ return {ok:r.ok,j:j}; }); })
           .then(function(res){ btn.disabled=false; btn.textContent=orig; if(res.ok&&res.j&&res.j.saved){ renderRoadRows(res.j.items, res.j.source); } else if(st){ st.className='cc-cnote-status warn'; st.textContent=(res.j&&res.j.error)||'Could not save.'; } })
           .catch(function(){ btn.disabled=false; btn.textContent=orig; if(st){ st.className='cc-cnote-status warn'; st.textContent='Network error saving.'; } });
@@ -3856,7 +3874,7 @@ body.lp-restyle {
       }
       function loadClientTasks(deal){
         var box=root.querySelector('[data-cc-ctk-rows]'); if(box) box.innerHTML='<span class="cc-cnote-empty">Loading…</span>';
-        fetch('/api/crm/deal-client-tasks?deal='+encodeURIComponent(deal.source_key)+'&side='+encodeURIComponent(deal.side==='buyer'?'buyer':'seller'),{credentials:'include'})
+        fetch('/api/crm/deal-client-tasks?deal='+encodeURIComponent(deal.source_key)+'&side='+encodeURIComponent(ccContentSide()),{credentials:'include'})
           .then(function(r){ return r.ok?r.json():null; })
           .then(function(j){ if(!current||current.source_key!==deal.source_key) return; renderCtkRows((j&&j.items)||[], (j&&j.source)||'cowork'); })
           .catch(function(){ if(!current) return; renderCtkRows([], 'cowork'); });
@@ -3872,7 +3890,7 @@ body.lp-restyle {
         var items=[];
         if(box) box.querySelectorAll('.ctk-row').forEach(function(r){ var l=(((r.querySelector('[data-ct-label]')||{}).value)||'').trim(); var w=(((r.querySelector('[data-ct-when]')||{}).value)||'').trim(); if(l) items.push({ label:l, when:w }); });
         var orig=btn.textContent; btn.disabled=true; btn.textContent='Saving…';
-        fetch('/api/crm/deal-client-tasks',{method:'POST',credentials:'include',headers:{'Content-Type':'application/json'},body:JSON.stringify({ source_key:current.source_key, side:(current.side==='buyer'?'buyer':'seller'), items:items })})
+        fetch('/api/crm/deal-client-tasks',{method:'POST',credentials:'include',headers:{'Content-Type':'application/json'},body:JSON.stringify({ source_key:current.source_key, side:ccContentSide(), items:items })})
           .then(function(r){ return r.json().then(function(j){ return {ok:r.ok,j:j}; }); })
           .then(function(res){ btn.disabled=false; btn.textContent=orig; if(res.ok&&res.j&&res.j.saved){ renderCtkRows(res.j.items, res.j.source); } else if(st){ st.className='cc-cnote-status warn'; st.textContent=(res.j&&res.j.error)||'Could not save.'; } })
           .catch(function(){ btn.disabled=false; btn.textContent=orig; if(st){ st.className='cc-cnote-status warn'; st.textContent='Network error saving.'; } });
@@ -3949,6 +3967,17 @@ body.lp-restyle {
         if(ctkSave && current){ e.preventDefault(); saveCtk(ctkSave); return; }
         var ctDel=e.target.closest('[data-ct-del]');
         if(ctDel){ e.preventDefault(); var cr=ctDel.closest('.ctk-row'); if(cr&&cr.parentNode) cr.parentNode.removeChild(cr); return; }
+        var sideBtn=e.target.closest('[data-cc-side]');
+        if(sideBtn && current){ e.preventDefault();
+          var s=sideBtn.getAttribute('data-cc-side');
+          if(s!==ccSide){
+            ccSide=s;
+            var tog=root.querySelector('[data-cc-side-toggle]');
+            if(tog) tog.querySelectorAll('[data-cc-side]').forEach(function(b){ b.className='cc-btn'+(b.getAttribute('data-cc-side')===s?' on':' ghost'); });
+            loadGoodToKnow(current); loadRoad(current); loadClientTasks(current);
+          }
+          return;
+        }
       });
 
       // ---- in-console messaging: the deal's linked client + thread -------
