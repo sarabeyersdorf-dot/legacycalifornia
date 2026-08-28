@@ -82,6 +82,7 @@ import reconcile           from '../_lib/handlers/crm-reconcile.js';
 import dealMessages        from '../_lib/handlers/crm-deal-messages.js';
 import dealDates           from '../_lib/handlers/crm-deal-dates.js';
 import dealCreate          from '../_lib/handlers/crm-deal-create.js';
+import dealNoteSuggest     from '../_lib/handlers/crm-deal-note-suggest.js';
 
 const TABLE = {
   'lead-hygiene':    leadHygiene,
@@ -142,7 +143,8 @@ const TABLE = {
   'reconcile':            reconcile,
   'deal-messages':        dealMessages,
   'deal-dates':           dealDates,
-  'deal-create':          dealCreate
+  'deal-create':          dealCreate,
+  'deal-note-suggest':    dealNoteSuggest
 };
 
 export default async function handler(req, res) {

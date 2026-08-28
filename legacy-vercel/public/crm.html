@@ -3479,8 +3479,12 @@ body.lp-restyle {
         + '</div>'
         + '<div class="cc-cnote" data-cc-cnote>'
         +   '<div class="cc-inote-h">Client note <span>· the '+(deal.side==='buyer'?'buyer':'seller')+' sees this on their portal only when you publish it</span></div>'
-        +   '<div class="cc-cnote-body" data-cc-cnote-body>Loading…</div>'
-        +   '<div class="cc-inote-foot"><span class="cc-cnote-status" data-cc-cnote-status></span><button class="cc-btn" data-cc-cnote-toggle disabled>Loading…</button></div>'
+        +   '<textarea data-cc-cnote-edit rows="4" placeholder="Write the note your client sees — or use Suggest for me. It stays a draft until you Publish." style="width:100%;box-sizing:border-box;font:inherit;font-size:13.5px;line-height:1.55;padding:11px 13px;border:1px solid var(--rule);border-radius:9px;background:var(--shell);color:var(--ink);resize:vertical;" disabled></textarea>'
+        +   '<div class="cc-inote-foot" style="gap:8px;flex-wrap:wrap;"><span class="cc-cnote-status" data-cc-cnote-status></span>'
+        +     '<button class="cc-btn ghost" data-cc-cnote-suggest type="button" title="Draft a note from this deal’s milestones and documents">✦ Suggest for me</button>'
+        +     '<button class="cc-btn" data-cc-cnote-save type="button">Save draft</button>'
+        +     '<button class="cc-btn" data-cc-cnote-toggle disabled>Loading…</button>'
+        +   '</div>'
         + '</div>'
         + '<div class="cc-body">'
         +   '<div class="cc-card">'
@@ -3628,36 +3632,71 @@ body.lp-restyle {
           }).catch(function(){ if(!current) return; renderClientNote(null, 'Could not load the client note.'); });
       }
       function renderClientNote(note, msg){
-        var body = root.querySelector('[data-cc-cnote-body]');
-        var st   = root.querySelector('[data-cc-cnote-status]');
-        var btn  = root.querySelector('[data-cc-cnote-toggle]');
-        if(!body || !btn) return;
-        if(msg){ body.innerHTML = '<span class="cc-cnote-empty">'+esc(msg)+'</span>'; btn.style.display='none'; if(st) st.textContent=''; return; }
-        if(!note || !note.body || !String(note.body).trim()){
-          body.innerHTML = '<span class="cc-cnote-empty">No client note yet — it appears here once the daily brief writes one for this deal.</span>';
-          btn.style.display='none'; if(st){ st.className='cc-cnote-status'; st.textContent=''; } return;
+        var ta  = root.querySelector('[data-cc-cnote-edit]');
+        var st  = root.querySelector('[data-cc-cnote-status]');
+        var btn = root.querySelector('[data-cc-cnote-toggle]');
+        if(!ta || !btn) return;
+        if(msg){ ta.value=''; ta.disabled=true; btn.style.display='none'; if(st){ st.className='cc-cnote-status warn'; st.textContent=esc(msg); } return; }
+        ta.disabled=false;
+        var hasNote = note && note.body && String(note.body).trim();
+        ta.value = hasNote ? String(note.body) : '';
+        var published = hasNote && note.status === 'published';
+        if(st){
+          st.className = 'cc-cnote-status '+(published?'live':'draft');
+          st.textContent = published ? '● Published — the client can see this'
+            : (hasNote ? 'Draft — the client can’t see this yet' : 'No note yet — write one or use Suggest for me.');
         }
-        var published = note.status === 'published';
-        var author = note.author === 'james' ? 'James' : 'Sara';
-        body.innerHTML = '<div class="cc-cnote-author">A note from '+author+'</div><p class="cc-cnote-text">'+esc(String(note.body))+'</p>';
-        if(st){ st.className = 'cc-cnote-status '+(published?'live':'draft'); st.textContent = published ? '● Published — the client can see this' : 'Draft — the client can’t see this yet'; }
-        btn.style.display=''; btn.disabled = false;
+        btn.style.display = hasNote ? '' : 'none';
+        btn.disabled = !hasNote;
         btn.className = 'cc-btn'+(published?' ghost':'');
         btn.textContent = published ? 'Unpublish' : 'Publish to client';
         btn.setAttribute('data-action', published ? 'unpublish' : 'publish');
+      }
+      // ✦ Suggest for me — draft note text from the deal's milestones/documents.
+      // Fills the box only; it stays a draft, and nothing is public until Publish.
+      function suggestClientNote(btn){
+        if(!current) return;
+        var ta = root.querySelector('[data-cc-cnote-edit]'); var st = root.querySelector('[data-cc-cnote-status]');
+        var orig = btn.textContent; btn.disabled=true; btn.textContent='Drafting…';
+        fetch('/api/crm/deal-note-suggest',{method:'POST',credentials:'include',headers:{'Content-Type':'application/json'},body:JSON.stringify({ source_key: current.source_key })})
+          .then(function(r){ return r.json().then(function(j){ return {ok:r.ok,j:j}; }); })
+          .then(function(res){ btn.disabled=false; btn.textContent=orig;
+            if(res.ok && res.j && res.j.draft){ if(ta){ ta.value=res.j.draft; ta.focus(); } if(st){ st.className='cc-cnote-status draft'; st.textContent='Draft suggestion — edit it, then Save draft. Nothing is public until you Publish.'; } }
+            else { if(st){ st.className='cc-cnote-status warn'; st.textContent=(res.j&&res.j.error)||'Could not draft a note.'; } }
+          }).catch(function(){ btn.disabled=false; btn.textContent=orig; if(st){ st.className='cc-cnote-status warn'; st.textContent='Network error drafting.'; } });
+      }
+      // Save the box as a DRAFT (origin:crm, sticks across syncs). Returns a promise
+      // resolving true on success, so Publish can save-then-publish.
+      function saveClientNote(btn){
+        if(!current) return Promise.resolve(false);
+        var ta = root.querySelector('[data-cc-cnote-edit]'); var st = root.querySelector('[data-cc-cnote-status]');
+        var orig = btn.textContent; btn.disabled=true; btn.textContent='Saving…';
+        return fetch('/api/crm/deal-note-publish',{method:'POST',credentials:'include',headers:{'Content-Type':'application/json'},body:JSON.stringify({ source_key: current.source_key, action:'save', body: ta?ta.value:'' })})
+          .then(function(r){ return r.json().then(function(j){ return {ok:r.ok,j:j}; }); })
+          .then(function(res){ btn.disabled=false; btn.textContent=orig;
+            if(res.ok && res.j && res.j.saved){ renderClientNote(res.j.note, null); return true; }
+            if(st){ st.className='cc-cnote-status warn'; st.textContent=(res.j&&res.j.error)||'Could not save.'; } return false;
+          }).catch(function(){ btn.disabled=false; btn.textContent=orig; if(st){ st.className='cc-cnote-status warn'; st.textContent='Network error saving.'; } return false; });
       }
       function toggleClientNote(btn){
         if(!current) return;
         var action = btn.getAttribute('data-action') || 'publish';
         var st = root.querySelector('[data-cc-cnote-status]');
-        var orig = btn.textContent; btn.disabled = true; btn.textContent = action==='publish' ? 'Publishing…' : 'Unpublishing…';
-        fetch('/api/crm/deal-note-publish',{method:'POST',credentials:'include',headers:{'Content-Type':'application/json'},body:JSON.stringify({ source_key: current.source_key, action: action })})
-          .then(function(r){ return r.json().then(function(j){ return {ok:r.ok,j:j}; }); })
-          .then(function(res){
-            if(!current) return;
-            if(res.ok && res.j && res.j.saved){ renderClientNote(res.j.note, null); }
-            else { btn.disabled=false; btn.textContent=orig; if(st){ st.className='cc-cnote-status warn'; st.textContent=(res.j && res.j.error) || 'Could not update.'; } }
-          }).catch(function(){ if(!current) return; btn.disabled=false; btn.textContent=orig; if(st){ st.className='cc-cnote-status warn'; st.textContent='Network error.'; } });
+        function doToggle(){
+          var orig = btn.textContent; btn.disabled = true; btn.textContent = action==='publish' ? 'Publishing…' : 'Unpublishing…';
+          fetch('/api/crm/deal-note-publish',{method:'POST',credentials:'include',headers:{'Content-Type':'application/json'},body:JSON.stringify({ source_key: current.source_key, action: action })})
+            .then(function(r){ return r.json().then(function(j){ return {ok:r.ok,j:j}; }); })
+            .then(function(res){
+              if(!current) return;
+              if(res.ok && res.j && res.j.saved){ renderClientNote(res.j.note, null); }
+              else { btn.disabled=false; btn.textContent=orig; if(st){ st.className='cc-cnote-status warn'; st.textContent=(res.j && res.j.error) || 'Could not update.'; } }
+            }).catch(function(){ if(!current) return; btn.disabled=false; btn.textContent=orig; if(st){ st.className='cc-cnote-status warn'; st.textContent='Network error.'; } });
+        }
+        if(action==='publish'){
+          // Publish exactly what's in the box: save the current text as a draft first.
+          var saveBtn = root.querySelector('[data-cc-cnote-save]') || btn;
+          Promise.resolve(saveClientNote(saveBtn)).then(function(okk){ if(okk!==false) doToggle(); });
+        } else { doToggle(); }
       }
 
       // ---- photo drop / upload ------------------------------------------
@@ -3706,6 +3745,10 @@ body.lp-restyle {
         if(sched){ e.preventDefault(); if(typeof window.showView==='function') window.showView(null,'cal'); return; }
         var inoteSave=e.target.closest('[data-cc-inote-save]');
         if(inoteSave && current){ e.preventDefault(); saveDealNotes(inoteSave); return; }
+        var cnoteSuggest=e.target.closest('[data-cc-cnote-suggest]');
+        if(cnoteSuggest && current){ e.preventDefault(); suggestClientNote(cnoteSuggest); return; }
+        var cnoteSave=e.target.closest('[data-cc-cnote-save]');
+        if(cnoteSave && current){ e.preventDefault(); saveClientNote(cnoteSave); return; }
         var cnoteToggle=e.target.closest('[data-cc-cnote-toggle]');
         if(cnoteToggle && current){ e.preventDefault(); toggleClientNote(cnoteToggle); return; }
       });
