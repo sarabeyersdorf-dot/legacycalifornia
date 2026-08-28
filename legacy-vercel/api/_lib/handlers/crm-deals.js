@@ -105,11 +105,11 @@ export default async function handler(req, res) {
     for (const d of (r.data || [])) {
       if (wantAgent && d.agent !== wantAgent && d.agent !== 'both') continue;
 
-      // Effective stage — same rule as crm-listings.js: the agent's override
-      // applies while deals.json still has the deal at 'offer' or 'preparing'
-      // (accept → escrow, offer fell through, listing won't-list), else `stage`.
-      const canOverride = d.stage === 'offer' || d.stage === 'preparing' || d.stage === 'listing';
-      const stage = (canOverride && d.stage_override) ? d.stage_override : d.stage;
+      // Effective stage (SPEC §4.2 pt2): an agent's stage_override is AUTHORITATIVE
+      // for any base stage — a stage set in the CRM wins over deals.json until
+      // sync clears it (when deals.json catches up). Same rule in crm-listings.js
+      // and the seller/buyer portal, so the client sees the agent's stage.
+      const stage = d.stage_override || d.stage;
       const photo = d.photo_override || d.photo_url || youtubeThumb(d.video_url);
       const parties = resolveParties(d);
 
@@ -178,12 +178,13 @@ export default async function handler(req, res) {
         party_summary: partySummary(parties)
       };
 
-      if (stage === 'dead')           buckets.archived.push(row);
+      if (stage === 'dead' || stage === 'cancelled' || stage === 'inactive' || stage === 'dispute') buckets.archived.push(row);
       else if (stage === 'offer')     buckets.offers.push(row);
       else if (stage === 'listing')   buckets.active.push(row);
       else if (stage === 'pending')   { buckets.pending.push(row); rowByDealId.set(d.id, row); }
       else if (stage === 'closed')    buckets.closed.push(row);
-      else if (stage === 'preparing') buckets.preparing.push(row);
+      else if (stage === 'preparing' || stage === 'buyer-prospect') buckets.preparing.push(row);
+      else                            buckets.archived.push(row);   // any unknown stage stays visible, never dropped
     }
 
     // Calendar events → escrow rows. Tours/appointments carry only a lead_id;

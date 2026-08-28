@@ -4294,7 +4294,12 @@ body.lp-restyle {
           +   fld('MLS #','mls_number', d.mls, 'text')
           +   selFld('Side','side', d.side, [['seller','Seller'],['buyer','Buyer'],['both','Both']])
           +   selFld('Agent','agent', d.agent, [['sara','Sara'],['james','James'],['both','Both']])
-          +   '<div class="hint">Saved as CRM overrides — they stick and win over the hourly Cowork sync. Clear a field to fall back to Cowork’s value.</div>'
+          +   (function(){
+                var opts=[['preparing','Preparing'],['listing','On market (listing)'],['offer','Offer'],['pending','In escrow (pending)'],['closed','Closed'],['cancelled','Cancelled'],['inactive','Inactive'],['buyer-prospect','Buyer prospect'],['dispute','Dispute']];
+                var cur=String(d.stage||'');
+                return '<label>Stage<select data-stage>'+opts.map(function(o){ return '<option value="'+o[0]+'"'+(cur===o[0]?' selected':'')+'>'+esc(o[1])+'</option>'; }).join('')+'</select></label>';
+              })()
+          +   '<div class="hint">Stage saves immediately and the client’s portal follows it — no waiting for the sync. Ending an escrow usually means back to <b>On market</b>, not Cancelled. A preparing deal has no signed listing agreement, so it’s never asked for a commission. Other fields are CRM overrides — clear one to fall back to Cowork’s value.</div>'
           +   '<div class="full" style="border-top:1px dashed #E0D6C0;margin-top:8px;padding-top:10px;">'
           +     '<label class="full">Expected COE — <em>believed, not yet confirmed</em>'
           +       '<input type="date" data-exp="coe_date" value="">'
@@ -4345,11 +4350,22 @@ body.lp-restyle {
               .then(function(okk){ if(!okk){ msg.className='msg err'; msg.textContent='Deal saved, but the expected COE did not — reopen to retry.'; save.disabled=false; return; } close(); state.loading=false; load(); })
               .catch(function(){ msg.className='msg err'; msg.textContent='Deal saved, but the expected COE did not (network) — reopen to retry.'; save.disabled=false; });
           }
+          // Stage is authoritative (its own endpoint, not an override blob). Save it
+          // only if it changed, then fall through to the expected-date save.
+          function saveStage(){
+            var sel=m.querySelector('[data-stage]');
+            var newStage=sel?sel.value:'';
+            if(!sel || newStage===(d.stage||'')){ saveExpected(); return; }
+            fetch('/api/crm/deal-stage',{method:'POST',credentials:'include',headers:{'Content-Type':'application/json'},body:JSON.stringify({ source_key:d.source_key, stage:newStage })})
+              .then(function(r){ return r.ok; })
+              .then(function(okk){ if(!okk){ msg.className='msg err'; msg.textContent='Deal saved, but the stage change did not — reopen to retry.'; save.disabled=false; return; } saveExpected(); })
+              .catch(function(){ msg.className='msg err'; msg.textContent='Deal saved, but the stage change did not (network) — reopen to retry.'; save.disabled=false; });
+          }
           fetch('/api/crm/deal-edit',{method:'POST',credentials:'include',headers:{'Content-Type':'application/json'},body:JSON.stringify({source_key:d.source_key,fields:fields})})
             .then(function(r){ return r.json().then(function(j){ return {ok:r.ok,j:j}; },function(){ return {ok:r.ok,j:{}}; }); })
             .then(function(res){
               if(!res.ok){ msg.className='msg err'; msg.textContent=(res.j&&res.j.error)||'Could not save.'; save.disabled=false; return; }
-              saveExpected();
+              saveStage();
             })
             .catch(function(){ msg.className='msg err'; msg.textContent='Network error — try again.'; save.disabled=false; });
         });

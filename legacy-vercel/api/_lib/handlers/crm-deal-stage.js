@@ -28,16 +28,50 @@ export default async function handler(req, res) {
     const body = req.body && typeof req.body === 'object' ? req.body : {};
     const sourceKey = String(body.source_key || '').trim();
     if (!sourceKey) return fail(res, 400, 'source_key required');
-    // 'dead' (fell through) takes precedence, then 'pending' (accepted);
-    // anything else clears the override (restore to the deals.json stage).
-    const override = body.fell_through ? 'dead' : body.accepted ? 'pending' : null;
 
     const supa = adminClient();
+
+    // The full §4.2 stage vocabulary. An agent's choice here is authoritative for
+    // ANY base stage (db/091) — the CRM Deals/Listings views and the seller/buyer
+    // portal all read coalesce(stage_override, stage).
+    const STAGES = new Set(['preparing', 'listing', 'offer', 'pending', 'closed', 'cancelled', 'inactive', 'buyer-prospect', 'dispute', 'dead']);
+    const who = profile.role === 'agent_james' ? 'james' : 'sara';
+
+    // Need the base stage first, to null the override when it equals deals.json (so
+    // it reads clean and can't linger once Cowork catches up).
+    const { data: cur, error: curErr } = await supa.from('deals').select('id, stage, stage_override').eq('source_key', sourceKey).maybeSingle();
+    if (curErr) return fail(res, 500, curErr.message);
+    if (!cur)   return fail(res, 404, `no deal with source_key ${sourceKey}`);
+
+    // A general `stage` wins; otherwise the legacy accepted/fell_through shortcuts.
+    let desired;
+    if (typeof body.stage === 'string' && body.stage.trim()) {
+      const s = body.stage.trim();
+      if (!STAGES.has(s)) return fail(res, 400, `stage must be one of: ${[...STAGES].join(', ')}`);
+      desired = s;
+    } else if (body.fell_through) desired = 'dead';
+    else if (body.accepted)       desired = 'pending';
+    else                          desired = null;   // clear → restore deals.json stage
+
+    // If the agent picked the stage deals.json already has, store null: no override
+    // needed, and nothing lingers. Otherwise store the override.
+    const override = (desired && desired === cur.stage) ? null : desired;
+
     const { data, error } = await supa
       .from('deals')
       .update({ stage_override: override })
       .eq('source_key', sourceKey)
       .select('source_key, stage, stage_override');
+
+    // Audit the stage change (SPEC §5.2) — fail-soft.
+    if (!error && String(cur.stage_override || '') !== String(override || '')) {
+      await supa.from('deal_audit').insert({
+        deal_id: cur.id, field: 'stage_override',
+        old_value: cur.stage_override || null, new_value: override || null,
+        changed_by: who, source: 'crm',
+        note: override ? `stage set to ${override}` : `stage override cleared (back to ${cur.stage})`
+      }).then(() => {}, () => {});
+    }
 
     if (error) {
       // Constraint too narrow for 'dead' — db/027 not run yet.
@@ -55,8 +89,8 @@ export default async function handler(req, res) {
     return ok(res, {
       updated:  data.length,
       deal:     data[0],
-      // Effective stage the Deals view will bucket by.
-      effective_stage: (data[0].stage === 'offer' && data[0].stage_override) ? data[0].stage_override : data[0].stage
+      // Effective stage the Deals view will bucket by (override authoritative).
+      effective_stage: data[0].stage_override || data[0].stage
     });
   } catch (e) {
     return fail(res, 500, e.message);
