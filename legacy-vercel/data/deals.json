@@ -1,7 +1,7 @@
 {
-  "version": 11.0,
-  "lastUpdated": "2026-08-27",
-  "updatedBy": "cowork-session 2026-08-27 — CRM done-state reconcile",
+  "version": 11.1,
+  "lastUpdated": "2026-08-28",
+  "updatedBy": "morning-briefing 2026-08-28",
   "tasks": [
     {
       "agent": "sara",
@@ -1866,7 +1866,9 @@
       "key": "feather-lender-contact",
       "title": "695 Feather: contacts.lender is still null — add the home equity line lender now that the deal is financed, not all-cash",
       "due": "This week",
-      "done": false
+      "done": true,
+      "doneDate": "2026-08-28",
+      "doneNote": "Closed from live CRM state — agent_tasks shows done=true (Step 0, 2026-08-28 rule)."
     },
     {
       "agent": "sara",
@@ -1920,7 +1922,9 @@
       "key": "baldwin-walkthrough-confirm",
       "title": "Baldwin: confirm the 8/26 final walk-through actually exists — the CRM timeline carries it, deals.json has no walk-through milestone at all, and nothing on disk shows it was scheduled with Shomari",
       "due": "2026-08-26",
-      "done": false
+      "done": true,
+      "doneDate": "2026-08-28",
+      "doneNote": "Closed from live CRM state — agent_tasks shows done=true (Step 0, 2026-08-28 rule)."
     },
     {
       "agent": "james",
@@ -1928,7 +1932,9 @@
       "key": "feather-docusign-confirm",
       "title": "695 Feather: confirm Ashley signed Tanya Salgado's 8/20 DocuSign (estimate of fees, escrow amendments, HOA forms) — and separately that Bert Andrews signed the escrow amendment removing himself",
       "due": "Today",
-      "done": false
+      "done": true,
+      "doneDate": "2026-08-28",
+      "doneNote": "Closed from live CRM state — agent_tasks shows done=true (Step 0, 2026-08-28 rule)."
     },
     {
       "agent": "james",
@@ -1936,7 +1942,9 @@
       "key": "feather-dee-spq-reply",
       "title": "695 Feather: reply to Dee Bradley on the SPQ Section 5 correction — open since Tue 8/19 5:43 PM, Sent folder confirms nothing went back. Fold the missing-SPQ chase into the same email",
       "due": "Today",
-      "done": false
+      "done": true,
+      "doneDate": "2026-08-28",
+      "doneNote": "Closed from live CRM state — agent_tasks shows done=true (Step 0, 2026-08-28 rule)."
     },
     {
       "agent": "sara",
@@ -1944,7 +1952,9 @@
       "key": "augusta-hoa-order-cancelled",
       "title": "324 Augusta: HomeWiseDocs says the HOA order Placer placed is 'partially complete' — but that escrow cancelled 8/14. Confirm nothing is still billing, and whether the package can be kept for the relist rather than re-ordered at $605",
       "due": "This week",
-      "done": false
+      "done": true,
+      "doneDate": "2026-08-28",
+      "doneNote": "Closed from live CRM state — agent_tasks shows done=true (Step 0, 2026-08-28 rule)."
     },
     {
       "agent": "sara",
@@ -1952,7 +1962,9 @@
       "key": "sheepranch-reduction-answer",
       "title": "9568 Sheep Ranch: chase Sean Moffatt on the price reduction — net sheet went out 8/20 at $369,000 with 'let me know if you want to go ahead', no answer. Ashley Cuslidge is out 8/26-9/4",
       "due": "This week",
-      "done": false
+      "done": true,
+      "doneDate": "2026-08-28",
+      "doneNote": "Closed from live CRM state — agent_tasks shows done=true (Step 0, 2026-08-28 rule)."
     },
     {
       "agent": "sara",
@@ -1960,7 +1972,9 @@
       "key": "433-fire-hardening-remove",
       "title": "433: remove the fire hardening item from the Heryfords' seller portal — their CRM note 8/21: 'remove the fire hardening I have sent this back to you many times'. Second time asking",
       "due": "Today",
-      "done": false
+      "done": true,
+      "doneDate": "2026-08-28",
+      "doneNote": "Closed from live CRM state — agent_tasks shows done=true (Step 0, 2026-08-28 rule)."
     },
     {
       "agent": "sara",
@@ -1968,7 +1982,9 @@
       "key": "fub-ryan-vega",
       "title": "New FUB lead Ryan Vega (408) 476-5618 ryan.vega08@gmail.com via Realtor.com, came in 8/21 3:32 AM — unworked",
       "due": "Today",
-      "done": false
+      "done": true,
+      "doneDate": "2026-08-28",
+      "doneNote": "Closed from live CRM state — agent_tasks shows done=true (Step 0, 2026-08-28 rule)."
     },
     {
       "agent": "sara",
@@ -1976,7 +1992,9 @@
       "key": "hovey-duchac-statement",
       "title": "Hovey: get Teri Duchac's account in writing while she is willing — she has now named Dimitri and Yulia as another pair who refused to sign Volkmar's RMA, alongside Caroline Selfridge and herself",
       "due": "This week",
-      "done": false
+      "done": true,
+      "doneDate": "2026-08-28",
+      "doneNote": "Closed from live CRM state — agent_tasks shows done=true (Step 0, 2026-08-28 rule)."
     },
     {
       "agent": "james",
@@ -2188,7 +2206,9 @@
       "key": "feather-eta2-verify",
       "title": "🔴 695 Feather: Extension of Time Amendment No. 2 was signed complete 8/26 10:01 AM (Authentisign, Ashley Robinson) but is NOT in the EX folder and nobody has read it. It may move tomorrow's COE. Download it and open it before anything else.",
       "due": "2026-08-27",
-      "done": false
+      "done": true,
+      "doneDate": "2026-08-28",
+      "doneNote": "Answered by James's 2026-08-28 note: Ashley signed ETA No. 2 but the seller never did. ETA No. 2 is ABANDONED. No Sept 9-11 COE exists. Superseded by ETA No. 3 (out for signature 8/28, COE 9/29)."
     },
     {
       "agent": "sara",
@@ -2203,6 +2223,78 @@
       "client": "Scot Greiner",
       "key": "greiner-radio-silence",
       "title": "Scot Greiner (925) 565-4090 is flagged HOT and has had no contact since 8/13 — 14 days. Longest silence on any hot lead.",
+      "due": "this week",
+      "done": false
+    },
+    {
+      "agent": "james",
+      "client": "8235 Baldwin",
+      "key": "baldwin-nbp-respond",
+      "title": "🔴 Baldwin: Allyson Overturf served a Notice to Buyer to Perform (NBP-1) 8/27 2:04 PM. Open the attached PDF, read the number of days on the form, and diary the cure date. COE is Monday 8/31.",
+      "due": "Today",
+      "done": false
+    },
+    {
+      "agent": "james",
+      "client": "8235 Baldwin",
+      "key": "baldwin-nbp-file",
+      "title": "Baldwin: download NBP-1_Notice_to_Buyer_to_Perform_-_CAR.pdf from Allyson’s 8/27 email and file it in __Pending\\8235 Baldwin St\\EX\\ — it is not on disk anywhere.",
+      "due": "Today",
+      "done": false
+    },
+    {
+      "agent": "james",
+      "client": "8235 Baldwin",
+      "key": "baldwin-updated-contractor-bid",
+      "title": "Baldwin: the appraiser called extra items not on the contractor bid. Kim Hesser is chasing an updated bid and says the file goes to the senior underwriter today for clear-to-close. Get her end-of-day update in writing and send it to Allyson.",
+      "due": "Today",
+      "done": false
+    },
+    {
+      "agent": "james",
+      "client": "695 Feather",
+      "key": "feather-eta3-execute",
+      "title": "🔴 695 Feather: COE is TODAY 8/28 and lapses today. ETA No. 3 (COE → 9/29) went out this morning to Ashley Robinson, then Dee Bradley for the seller. Chase both signatures today.",
+      "due": "Today",
+      "done": false
+    },
+    {
+      "agent": "james",
+      "client": "695 Feather",
+      "key": "feather-deposit-protection-addendum",
+      "title": "695 Feather: ETA No. 3 does NOT protect the deposit — its additional terms are a recital only. All contingencies came off 8/22, so Ashley’s $5,000 is exposed. Get the attorney-drafted cancel-with-full-refund addendum signed as a separate document.",
+      "due": "2026-09-02",
+      "done": false
+    },
+    {
+      "agent": "james",
+      "client": "695 Feather",
+      "key": "feather-expected-coe-in-crm",
+      "title": "695 Feather: enter 9/29 as the EXPECTED close date in the CRM date field (Deal → dates). It must not go in deals.json or on Ashley’s page until ETA No. 3 is executed.",
+      "due": "Today",
+      "done": false
+    },
+    {
+      "agent": "james",
+      "client": "179 Elams Ranch",
+      "key": "elams-deed-to-placer",
+      "title": "179 Elams Ranch: Amanda Boitano at Placer (aboitano@placertitle.com, 209.736.9553) replied 8/27 — Placer did not handle the purchase and needs a copy of the deed before she can advise. Send it or ask her to pull it from the county.",
+      "due": "Today",
+      "done": false
+    },
+    {
+      "agent": "james",
+      "client": "Josh McEvoy",
+      "key": "mcevoy-venue-confirm",
+      "title": "Josh McEvoy 3:00 PM today — two venues on record: your CRM note says Fosters Big Horn, Rio Vista; the calendar says Tower Water Front Grille, 14900 W Hwy 12, Lodi. Confirm with Josh before you drive. Listing agreement to sign.",
+      "due": "Today",
+      "done": false
+    },
+    {
+      "agent": "sara",
+      "client": "Listing book",
+      "key": "land-listing-fields",
+      "title": "Listing book: seller name missing on all five land listings (701 Mark Twain, 635 S Main, 590 S Main, 2000 Gun Club, 1350 Love St) and RLA expiration missing on the four Angels Camp parcels, 9568 Sheep Ranch and 2841 Fowler. Fill from the RLAs.",
       "due": "this week",
       "done": false
     }
@@ -2674,8 +2766,8 @@
       "agentNote": {
         "author": "james",
         "status": "draft",
-        "updated": "2026-07-19",
-        "body": "Shomari, here is where we stand. Your close of escrow is Monday, August 31 — that is the date in the fully executed Extension of Time (ETA No. 3), which the seller signed back on August 15, so it is firm. Your loan contingency runs to today, Friday August 21.\n\nThe one thing outstanding is your lender. Chicago Title has told us they have not yet received any loan document requests from Prime Residential, and we are still waiting on written confirmation that the appraisal has been delivered. I am chasing both today. Please keep answering Kimberly Hesser's requests the same day she sends them — that is the single thing that moves this to the closing table.\n\nYour inspection contingency came off on July 13. The appraisal, loan, title and insurance contingencies are still open, and I will have you sign the remaining removal as soon as the loan clears. Plan for your final walk-through on Tuesday, August 26.\n\n— James Beyersdorf, (209) 770-7523"
+        "updated": "2026-08-28",
+        "body": "Shomari — where we stand as of Friday, August 28.\n\nYour close of escrow is Monday, August 31. That is the date in the fully executed Extension of Time Amendment No. 3, which the seller signed on August 15.\n\nYesterday afternoon the seller's agent served a formal Notice to Buyer to Perform. That is a standard contract tool, not a cancellation — it is the seller saying they want the loan finished inside the time the notice allows. I have acknowledged receipt and I am on it.\n\nHere is the honest picture on the loan. Your lender's office had a computer failure earlier this week, which is why everyone went quiet. The appraisal has now come in. The appraiser called out a couple of repair items that were not on the contractor's original bid, so the contractor is putting together an updated bid — the lender expected that back today. Once it lands, the file goes to the senior underwriter for the clear to close. I have asked the lender for a written update by the end of today and I will call you as soon as I have it.\n\nOne housekeeping item I am chasing on your behalf: the seller has signed as 'Rebecca Johnson' on the disclosures, the amendment and the extension, while the party of record is 'Rebecca Turnage'. I want that settled before vesting on Monday so there is no hold-up at recording.\n\nCall me any time.\n\nJames Beyersdorf\n(209) 770-7523"
       },
       "clientTasks": [
         {
@@ -2819,7 +2911,8 @@
       "correspondence": [],
       "notes": "UNDER CONTRACT / ACCEPTED 6/17/2026. James Beyersdorf's deal (buyer-side). Buyer Shomari Turner; seller Rebecca Johnson (a.k.a. Rebecca Turnage); listing agent Allyson Overturf, PMZ Real Estate. Original offer $200k 6/12; SCO1 $205k 6/15 (escrow pre-opened Chicago Title - Veronica Barragan; fire disclosure in NHD); BCO1 $207,000 accepted by seller 6/17, seller to pay buyer-broker comp 3%. Financing: FHA 203(k) rehab loan (~$193k, 96.5% LTV), $4,500 down, $2,500 initial deposit. As-is; buyer waived home warranty. Key dates from acceptance 6/17: deposit $2,500 by 6/22; seller docs ~6/24; all buyer contingencies (17 days) roll to 7/6 (7/4 holiday/weekend); final walk ~7/29; COE 45 days = 8/1 (Sat) rolls to ~8/3. EMD receipt + escrow holder acknowledgement on file. FHA 203(k) rehab loan — lender milestones will drive the timeline. ESCROW/TITLE DISCREPANCY: executed SCO names Chicago Title (Veronica Barragan); a 6/22 amended prelim (reason 'Added Buyer') references Fidelity National Title Order #FSST-5312600364 (Veronica Barragan & Kim McCray) — confirm which company holds escrow. | 8/7: COE confirmed 8/17. Loan contingency due 8/12. ETA2 in Baldwin Ex. Lender Kim Hesser, Chicago Title FSST-5312600364.",
       "alerts": [
-        "ETA No. 3 fully executed — seller accepted 2026-08-15. COE 2026-08-31, loan contingency 2026-08-21. AEA No. 1 was NEVER ACCEPTED (paragraph 3 blank, expired unsigned 11:00 AM 2026-08-14) — its $1,000 buyer credit, full-deposit-release condition and $56.65/day per-diem do NOT apply.",
+        "🔴 NOTICE TO BUYER TO PERFORM served 2026-08-27 2:04 PM by listing agent Allyson Overturf (NBP-1, C.A.R. form, attached to her email; NOT yet filed to EX). James acknowledged receipt 8/27 3:22 PM. Read the days stated on the form and diary the cure date — COE is Monday 2026-08-31.",
+        "LENDER STATUS 2026-08-28 7:55 AM, Kim Hesser (Prime Residential): her computer crashed early in the week, which explains the silence. The appraisal HAS been received. The appraiser called additional items not on the contractor's bid; an updated bid was requested and expected back 8/28. File goes to the senior underwriter 8/28 for clear-to-close; she promised another update end of day.",
         "CORRECTION 7/19 (per James): CR#1 (7/13) only removed the INSPECTION contingency — appraisal, loan, title, and insurance contingencies are still OUTSTANDING. Prior 'contingencies removed' language was incomplete/incorrect. A follow-up Buyer Contingency Removal is needed once those clear.",
         "CR#1 NOT visible in the listing side's (Allyson Overturf) portal as of 7/19 (per James) — even though she acknowledged it 7/14, it isn't showing on her end. Needs to be resent/re-confirmed filed on the seller side.",
         "COE ~Aug 3 (45 days; 8/1 is Saturday)",
@@ -5417,10 +5510,10 @@
         {
           "date": "2026-08-21",
           "label": "Loan funds expected",
-          "status": "next",
+          "status": "done",
           "col": "contingencies",
-          "badge": "Key date",
-          "desc": "The home equity line of credit funding your purchase was signed Monday, August 17. The funds are expected to reach escrow Friday, August 21."
+          "badge": "Done",
+          "desc": "The home equity line of credit funding your purchase was drawn on August 21 and the money has been sitting in cash since then. Confirmed by James. There is no lender and no rate lock on this purchase — it closes as cash."
         },
         {
           "date": "2026-08-25",
@@ -5432,18 +5525,18 @@
         },
         {
           "date": "2026-08-28",
-          "label": "Close of Escrow — 8/28",
-          "status": "upcoming",
+          "label": "Close of Escrow — 8/28 (extension pending)",
+          "status": "next",
           "col": "closing",
-          "badge": "Closing 8/28",
-          "desc": "Close of escrow moves to Friday, August 28 under Extension of Time Amendment No. 1, signed by you August 12 and accepted by the seller August 14. The deed records and funds release that day."
+          "badge": "Watch",
+          "desc": "August 28 is the close-of-escrow date in the fully executed Extension of Time Amendment No. 1. The seller cannot deliver the manufactured home’s HCD Certificate of Title yet, so an Extension of Time Amendment No. 3 moving the close to September 29 went out for signature on August 28. Until both parties sign it, the contract date remains August 28."
         }
       ],
       "agentNote": {
         "author": "james",
         "status": "draft",
-        "updated": "2026-08-24",
-        "body": "Ashley - an update on 695 Feather. Your close of escrow is Friday, August 28, and that date is final: the extension was signed by you August 12 and by the seller August 14. Your price is unchanged at $170,000.\n\nOne important change since my last note. On Saturday, August 22 you signed Buyer Contingency Removal No. 2, which removed every remaining contingency - including the loan contingency that had been running to August 25. There is no longer any contingency cushion on this purchase. If it does not close, your deposit is at risk. That makes the funding the only thing standing between here and the closing table.\n\nOn funding: the home equity line your father signed on August 17 was expected to reach escrow Friday, August 21, and I do not yet have written confirmation that it arrived. I am chasing Orange Coast Title on it. If you have anything from the bank - a wire number, a transfer receipt, a confirmation email - send it to me the same day you get it.\n\nTwo things to take care of now if you have not already: complete Tanya Salgado's DocuSign package (your estimate of fees, the escrow amendments and the HOA demands, sent August 20), and complete your ClosingLock wire instructions. Verify any wire instructions by phone before you send funds - never wire from instructions you received only by email.\n\nThe HOA documents that held things up earlier are resolved; Orange Coast sent the full Copper Cove package through on August 13 and it is in your file.\n\n- James Beyersdorf, (209) 770-7523"
+        "updated": "2026-08-28",
+        "body": "Ashley — an important update on 695 Feather, and I want you to have it straight.\n\nToday, Friday August 28, is the close-of-escrow date in our signed extension, and we are not going to close today. The reason is entirely on the seller's side and it is not something either of us can speed up. The home is a manufactured home that was never permanently attached to the land, so it transfers on its own Certificate of Title from the state Department of Housing and Community Development rather than with the deed. The seller bought the property at a tax sale, which means HCD has to issue that title in his name before he can pass it to you. His application went in on July 24 and HCD assigned it for review on August 14. HCD quotes eight to ten weeks for this, and as of this morning it is with a named reviewer who can approve it at any time — but they mail the certificate and there is no digital copy, so I cannot give you a firm date.\n\nI sent Extension of Time Amendment No. 3 out this morning, to you first and then to the listing agent for the seller. It moves the close to September 29. Please sign it as soon as you see it. I want to be honest with you that September 29 is a placeholder rather than a promise — on HCD's own timeline we may well be filing another extension in late September.\n\nTwo things I do not want lost. First, your money is fine and ready: the line of credit against your father's home was drawn on August 21 and has been sitting in cash since. There is no lender problem here. Second, and this is the one that matters: when you signed Buyer Contingency Removal No. 2 on August 22 you removed every contingency, so your $5,000 deposit no longer has a contingency protecting it, and the extension I sent today does NOT change that — its wording is only an explanation of the delay. I am having an attorney draft a short separate addendum that lets you cancel and get the full deposit back if the seller cannot deliver the HCD title. I will send it to you to sign as soon as I have it, and I would like it signed before we go much further.\n\nCall me any time.\n\nJames Beyersdorf\n(209) 770-7523"
       },
       "clientTasks": [
         {
@@ -5551,13 +5644,11 @@
       ],
       "notes": "Pivot for Ashley Robinson (James's buyer) after the 992 Iroquois offer went dead 7/12. Offer sent to listing agent Dee 7/12 for 695 Feather Dr, Copperopolis. Docs in _Offers/Buy Side/Robinson 695 Feather Dr/. UPDATE 7/18 (from James's 7/18 Gmail review, cross-checked against Sara's Gmail): Offer accepted 7/15; escrow opened at Orange Coast Title Company of Southern California (Santa Ana), Escrow #2473532-TS, escrow officer Tanya Salgado (tanyas@octitle.com) — switched from Placer Title because the property was acquired via tax sale last year and Placer is restricted from insuring/escrowing such properties for 3-5 years. EMD confirmed received by escrow 7/16. ClosingLock wire instructions sent to both buyers 7/15-7/16; Ashley Robinson submitted proof of funds 7/16. NOT yet confirmed: final accepted purchase price/terms (a preliminary net sheet referenced a $170,000 cash-purchase figure sent 7/15 before escrow opened — not verified as final); what listing agent Dee Bradley committed to doing \"Monday\" (7/20) per her 7/17 email; and what the \"Page 17\" document escrow sent 7/17 actually is (likely the RPA escrow acknowledgment James requested, not confirmed). | 8/7: COE confirmed 8/14.",
       "alerts": [
-        "ALL BUYER CONTINGENCIES REMOVED 2026-08-22 - Ashley Robinson signed Buyer Contingency Removal No. 2 (para 4, all contingencies), filed to EX. Ashley's deposit is now at risk if this does not close. COE is Friday 2026-08-28 and the HELOC funds expected at Orange Coast Title on Friday 2026-08-21 are STILL UNCONFIRMED in the email record. Confirm funding in writing.",
-        "COE 2026-08-28 — executed ETA No. 1 (buyer signed 8/12, seller Christopher Jewett accepted 8/14) filed to EX\\eta_1.pdf on 8/18 and read this morning. This CORRECTS the 8/21 date the file, the client page and the CRM were all carrying. Closes Friday 8/28.",
-        "FUNDING: home equity line of credit — Ashley Robinson's father signed 2026-08-17, funds expected at escrow Friday 2026-08-21. Loan contingency 2026-08-25 per ETA No. 1. The earlier 'all cash' description reflects the original funding source (Bert Andrews, removed by addendum 2026-08-14); price is unchanged at $170,000. Per Sara 2026-08-20.",
-        "Offer ACCEPTED 7/15 — moved off \"offer\" stage 7/18; RPA/SCO1 fully executed via Authentisign, both buyers signed",
-        "Escrow OPEN at Orange Coast Title (Santa Ana), Escrow #2473532-TS, Tanya Salgado — switched from Placer (tax-sale restriction, 3-5yr)",
-        "EMD confirmed received by escrow 7/16",
-        "\"Page 17\" = RPA escrow acknowledgment (695 feather escrow acknowledgement.pdf) filed in EX — confirmed 7/23"
+        "🔴 COE 2026-08-28 IS TODAY AND LAPSES TODAY. ETA No. 3 (COE → 2026-09-29) went out for signature 8/28 and is NOT executed. ETA No. 2 was never signed by the seller and is abandoned — ignore any Sept 9-11 date. Do not record 9/29 as firm anywhere.",
+        "WHY: the manufactured home has no recorded HCD 433A, so it transfers on an HCD Certificate of Title the seller must obtain first. Seller Christopher Jewett bought at a tax sale; HCD application DTN 14068338 was submitted 7/24 and assigned for review 8/14, quoted at 8-10 weeks. Per James 8/28, HCD has now assigned a named agent who can approve at any time, but there is no public phone number and no digital copy — it is mailed. Realistic completion mid-to-late October; expect to extend again in September.",
+        "DEPOSIT IS UNPROTECTED. All buyer contingencies were removed 2026-08-22 by Buyer Contingency Removal No. 2. ETA No. 3's additional terms are a RECITAL ONLY — they do not protect the deposit. Ashley's $5,000 is exposed until a separate attorney-drafted 'cancel with full refund if HCD title is not deliverable' addendum is signed.",
+        "FUNDING IS CONFIRMED — do not run 'funds missing' or 'HELOC unconfirmed' language. The money is a HELOC against Bert Andrews' (Ashley's father's) home, drawn and sitting in cash since 2026-08-21. Effectively a cash close: no lender, no rate lock, nothing on the financing side tied to a closing date. Bert was removed from title by ADM No. 2 (filed 8/14); Ashley holds title alone and Bert is only the funding source.",
+        "BUYER POSTURE (James 8/28): Ashley will extend to 9/29 and hope the seller has the HCD paperwork by then. She firmly rejected closing now on a holdback — 'not paying until all the paperwork is secured'. No urgency to occupy; she has raised lining up a backup property."
       ],
       "attributes": {
         "seller_type": "standard",
@@ -5575,7 +5666,7 @@
       "timeline": {
         "acceptance": "2026-07-15",
         "coe": "2026-08-28",
-        "note": "Timeline block added 2026-08-11 by the morning briefing (Step 1d Part A). acceptance 2026-07-15 = RPA/SCO1 fully executed via Authentisign (milestone 'Offer accepted - RPA executed'). coe 2026-08-14 = closingDate, confirmed 8/7. All-cash purchase, so no loan or appraisal contingency; inspection/title/insurance not separately dated in the file, so the 17-day default from acceptance applies. Previously null, which rendered the buyer page with no dates. ETA No. 1 extends COE 2026-08-14 → 2026-08-21 (Friday): buyer Ashley Robinson signed 2026-08-11. EXECUTION CONFIRMED BY SARA 2026-08-17 ('confirmed') — COE 2026-08-21 is firm and no longer provisional. The filed copy (EX\\eta addition to escrow for featherpdf.pdf) is password-protected and cannot be opened by the briefing run, so the confirmation rests on Sara's word, not on a document read; request an unlocked copy for the file at some point, but it is not blocking the close. || SUPERSEDED 2026-08-19: the ACTUAL executed ETA No. 1 (C.A.R. Form ETA rev 12/25, Authentisign 9B754FE7-1198-F111-9B33-000D3A4FF82A) was filed to __Pending\\695 Feather\\EX\\eta_1.pdf on 2026-08-18 and IS readable (scanned; OCR). It reads: para 1 Close Of Escrow extended to 08/28/2026; para 2 contingency extended to 08/25/2026 with the 'Loan' box checked. Proposed and signed by buyer Ashley Robinson 08/12/26; ACCEPTED at para 6 by seller Christopher Jewett 08/14/26 — both blocks filled, within the 3-day acceptance window, so the document is FULLY EXECUTED. coe and closingDate therefore moved 2026-08-21 -> 2026-08-28 (Friday, a business day) by the 2026-08-19 run under Sara's 2026-08-16 auto-apply standing instruction (Step 1d Part D). The prior note recorded COE 8/21 from a password-protected copy that could not be read plus Sara's verbal confirmation on 8/17 — the readable executed document supersedes both. James confirmed in the CRM 8/18: 'the documents have all been filed with the appropriate people. the ETA is in effect.' LOAN CONTINGENCY RESOLVED 2026-08-20 BY SARA: the 'Loan' checkbox is CORRECT and is now recorded as contingencies.loan = 2026-08-25. Her correction, in substance: the buyer DID have a loan — a HOME EQUITY LINE OF CREDIT; Ashley Robinson's father signed for it Monday 2026-08-17 and the funds are due to arrive Friday 2026-08-21. The 2026-08-19 run withheld this value because the file described the purchase as all-cash (RPA written cash, 'Proof of funds Bert Andrews.pdf' in EX, milestone 'Price confirmed — $170,000 cash'); that description reflected the ORIGINAL funding source. Bert Andrews was removed by the addendum filed 2026-08-14 ('addendum removing Bert.pdf') and the HELOC replaced him, which is what para 2 of ETA No. 1 was extending. Consideration is still $170,000 and the price is unchanged — only the source of the buyer's funds changed. || CONTINGENCIES REMOVED 2026-08-22: Buyer Contingency Removal No. 2 (C.A.R. Form CR-B rev 6/24, Authentisign 50A96C77-489E-F111-9B33-000D3A4FF82A) filed to EX 2026-08-22 16:25 and read by the 2026-08-23 run. Paragraph 4 is checked - 'BUYER HEREBY REMOVES ANY AND ALL BUYER CONTINGENCIES' - signed by Ashley Robinson 08/22/2026, inside the 2026-08-25 loan deadline. contingencies.loan stays recorded as 2026-08-25 because that is the deadline of record that was met; the removal itself is the event, and it is carried in docs.contingencyRemoval2 and on the milestone. Applied by the 2026-08-23 run under Sara's 2026-08-16 auto-apply standing instruction (five-part executed test: on disk / read / only required signature block filled / inside deadline / nothing contradicts).",
+        "note": "Timeline block added 2026-08-11 by the morning briefing (Step 1d Part A). acceptance 2026-07-15 = RPA/SCO1 fully executed via Authentisign (milestone 'Offer accepted - RPA executed'). coe 2026-08-14 = closingDate, confirmed 8/7. All-cash purchase, so no loan or appraisal contingency; inspection/title/insurance not separately dated in the file, so the 17-day default from acceptance applies. Previously null, which rendered the buyer page with no dates. ETA No. 1 extends COE 2026-08-14 → 2026-08-21 (Friday): buyer Ashley Robinson signed 2026-08-11. EXECUTION CONFIRMED BY SARA 2026-08-17 ('confirmed') — COE 2026-08-21 is firm and no longer provisional. The filed copy (EX\\eta addition to escrow for featherpdf.pdf) is password-protected and cannot be opened by the briefing run, so the confirmation rests on Sara's word, not on a document read; request an unlocked copy for the file at some point, but it is not blocking the close. || SUPERSEDED 2026-08-19: the ACTUAL executed ETA No. 1 (C.A.R. Form ETA rev 12/25, Authentisign 9B754FE7-1198-F111-9B33-000D3A4FF82A) was filed to __Pending\\695 Feather\\EX\\eta_1.pdf on 2026-08-18 and IS readable (scanned; OCR). It reads: para 1 Close Of Escrow extended to 08/28/2026; para 2 contingency extended to 08/25/2026 with the 'Loan' box checked. Proposed and signed by buyer Ashley Robinson 08/12/26; ACCEPTED at para 6 by seller Christopher Jewett 08/14/26 — both blocks filled, within the 3-day acceptance window, so the document is FULLY EXECUTED. coe and closingDate therefore moved 2026-08-21 -> 2026-08-28 (Friday, a business day) by the 2026-08-19 run under Sara's 2026-08-16 auto-apply standing instruction (Step 1d Part D). The prior note recorded COE 8/21 from a password-protected copy that could not be read plus Sara's verbal confirmation on 8/17 — the readable executed document supersedes both. James confirmed in the CRM 8/18: 'the documents have all been filed with the appropriate people. the ETA is in effect.' LOAN CONTINGENCY RESOLVED 2026-08-20 BY SARA: the 'Loan' checkbox is CORRECT and is now recorded as contingencies.loan = 2026-08-25. Her correction, in substance: the buyer DID have a loan — a HOME EQUITY LINE OF CREDIT; Ashley Robinson's father signed for it Monday 2026-08-17 and the funds are due to arrive Friday 2026-08-21. The 2026-08-19 run withheld this value because the file described the purchase as all-cash (RPA written cash, 'Proof of funds Bert Andrews.pdf' in EX, milestone 'Price confirmed — $170,000 cash'); that description reflected the ORIGINAL funding source. Bert Andrews was removed by the addendum filed 2026-08-14 ('addendum removing Bert.pdf') and the HELOC replaced him, which is what para 2 of ETA No. 1 was extending. Consideration is still $170,000 and the price is unchanged — only the source of the buyer's funds changed. || CONTINGENCIES REMOVED 2026-08-22: Buyer Contingency Removal No. 2 (C.A.R. Form CR-B rev 6/24, Authentisign 50A96C77-489E-F111-9B33-000D3A4FF82A) filed to EX 2026-08-22 16:25 and read by the 2026-08-23 run. Paragraph 4 is checked - 'BUYER HEREBY REMOVES ANY AND ALL BUYER CONTINGENCIES' - signed by Ashley Robinson 08/22/2026, inside the 2026-08-25 loan deadline. contingencies.loan stays recorded as 2026-08-25 because that is the deadline of record that was met; the removal itself is the event, and it is carried in docs.contingencyRemoval2 and on the milestone. Applied by the 2026-08-23 run under Sara's 2026-08-16 auto-apply standing instruction (five-part executed test: on disk / read / only required signature block filled / inside deadline / nothing contradicts). | 2026-08-28, from James (first-hand): ETA No. 2 (a ~2-week version, COE ~Sept 9-11) was signed by Ashley Robinson 2026-08-26 but NEVER signed by the seller — it is ABANDONED and no Sept 9-11 COE exists. ETA No. 3 was sent 2026-08-28 to Ashley and then to listing agent Dee Bradley for seller Christopher Jewett; it extends COE to 2026-09-29 and is NOT YET EXECUTED. The contractual COE therefore remains 2026-08-28 and lapses today. Root cause of the delay: the home is a manufactured home with no recorded HCD 433A, the seller acquired it at a tax sale, and HCD application DTN 14068338 (submitted 7/24, assigned for review 8/14) is quoted at 8-10 weeks — a realistic mid-to-late-October finish, so 9/29 is a placeholder, not the finish line. 9/29 is NOT written to coe/closingDate and must be entered as an EXPECTED date in the CRM only.",
         "contingencies": {
           "loan": "2026-08-25"
         }
