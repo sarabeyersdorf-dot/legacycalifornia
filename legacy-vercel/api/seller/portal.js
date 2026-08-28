@@ -231,8 +231,11 @@ export default async function handler(req, res) {
     // override corrects an offer / preparing / listing deal (never a live escrow
     // or closed one).
     const _ov = (deal.agent_overrides && typeof deal.agent_overrides === 'object' && !Array.isArray(deal.agent_overrides)) ? deal.agent_overrides : {};
-    const _canStageOv = deal.stage === 'offer' || deal.stage === 'preparing' || deal.stage === 'listing';
-    const effStage = (_canStageOv && deal.stage_override) ? deal.stage_override : deal.stage;
+    // SPEC §4.2 pt2: an agent's stage_override is authoritative for ANY base stage,
+    // so a stage set in the CRM reflects on this portal with no Cowork run — e.g.
+    // ending an escrow drops the deal back to 'listing' and this stops showing the
+    // road-to-closing. Same coalesce the CRM Deals/Listings views use.
+    const effStage = deal.stage_override || deal.stage;
     const effListPrice = (_ov.list_price != null && _ov.list_price !== '') ? _ov.list_price : deal.list_price;
     const effSalePrice = (_ov.sale_price != null && _ov.sale_price !== '') ? _ov.sale_price : deal.sale_price;
 

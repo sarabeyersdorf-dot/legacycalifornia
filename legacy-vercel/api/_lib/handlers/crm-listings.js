@@ -211,8 +211,9 @@ export default async function handler(req, res) {
       // 'preparing', where the agent decides a listing WON'T go to market. Either
       // way it self-heals once Cowork advances the deal in deals.json; any other
       // time, the real `stage` wins.
-      const canOverride = d.stage === 'offer' || d.stage === 'preparing' || d.stage === 'listing';
-      const stage = (canOverride && d.stage_override) ? d.stage_override : d.stage;
+      // SPEC §4.2 pt2: stage_override is AUTHORITATIVE for any base stage (same as
+      // crm-deals.js and the portal). sync clears it once deals.json catches up.
+      const stage = d.stage_override || d.stage;
       // Agent field overrides (db/066) — a CRM-typed value wins over the synced
       // (Cowork) column and survives the hourly sync; same overlay as crm-deals.js
       // so a corrected list price shows in the Listings view too.
@@ -261,12 +262,13 @@ export default async function handler(req, res) {
       // Echo showed "on market" with no MLS#). Route those to Preparing so they
       // don't read as live.
       const onMarket = !!(d.mls_number || d.list_price);
-      if (stage === 'dead')           buckets.archived.push(row);
+      if (stage === 'dead' || stage === 'cancelled' || stage === 'inactive' || stage === 'dispute') buckets.archived.push(row);
       else if (stage === 'offer')     buckets.offers.push(row);
       else if (stage === 'listing')   (onMarket ? buckets.active : buckets.preparing).push(row);
       else if (stage === 'pending')   buckets.pending.push(row);
       else if (stage === 'closed')    buckets.closed.push(row);
-      else if (stage === 'preparing') buckets.preparing.push(row);
+      else if (stage === 'preparing' || stage === 'buyer-prospect') buckets.preparing.push(row);
+      else                            buckets.archived.push(row);   // any unknown stage stays visible
     }
 
     return ok(res, {

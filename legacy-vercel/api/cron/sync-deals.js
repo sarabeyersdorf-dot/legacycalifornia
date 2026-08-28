@@ -1528,6 +1528,22 @@ export default async function handler(req, res) {
         .map((r) => ({ source_key: r.source_key, address: r.address, party_details: r.party_details }));
     } catch (_) { /* column not migrated yet — nothing to reconcile */ }
 
+    // STAGE-OVERRIDE SELF-HEAL (SPEC §4.2 pt2). An agent's stage_override is
+    // authoritative, but once deals.json's base stage catches up to it the override
+    // is redundant — clear it so it can't linger and mask a later Cowork change.
+    // Fail-soft.
+    let stageOverridesCleared = 0;
+    try {
+      const { data: red } = await supa.from('deals')
+        .select('id, source_key, stage, stage_override').not('stage_override', 'is', null);
+      for (const r of (red || [])) {
+        if (r.stage_override === r.stage) {
+          await supa.from('deals').update({ stage_override: null }).eq('id', r.id).then(() => {}, () => {});
+          stageOverridesCleared += 1;
+        }
+      }
+    } catch (_) { /* non-fatal */ }
+
     // EXPECTED-DATE PROMOTION (SPEC §3). An expected date is an agent belief with
     // no executed doc. When the CONFIRMED value catches up to it — the doc landed
     // and its date flowed into deals.coe_date, or an agent confirmed it via
@@ -1566,6 +1582,7 @@ export default async function handler(req, res) {
       synced: true,
       source_version: data.version || null,
       date_promotions: datePromotions,
+      stage_overrides_cleared: stageOverridesCleared,
       deals_source: dealsSource,   // 'github' = read fresh (no deploy wait) · 'bundle' = fell back to the deployed copy
       deals_upserted: dealsUpserted,
       deals_pruned: dealsPruned,
