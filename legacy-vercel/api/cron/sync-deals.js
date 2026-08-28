@@ -1059,7 +1059,12 @@ export default async function handler(req, res) {
         // unchanged; if Cowork edited the note text, it reverts to draft and needs
         // re-publishing (so the client never sees an edit the agent didn't OK).
         const exNote = ex && ex.agent_note && typeof ex.agent_note === 'object' && !Array.isArray(ex.agent_note) ? ex.agent_note : null;
-        if (exNote && exNote.status === 'published' && mapped.agent_note &&
+        if (exNote && exNote.origin === 'crm') {
+          // A client note AUTHORED in the CRM (SPEC §4.3) is agent-owned: deals.json
+          // never wins over it. Keep the agent's note verbatim — draft or published —
+          // so a routine sync can't overwrite or un-publish what Sara/James wrote.
+          mapped.agent_note = exNote;
+        } else if (exNote && exNote.status === 'published' && mapped.agent_note &&
             String(exNote.body || '').trim() === String(mapped.agent_note.body || '').trim()) {
           mapped.agent_note = {
             ...mapped.agent_note,

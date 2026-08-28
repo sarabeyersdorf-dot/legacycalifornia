@@ -38,9 +38,34 @@ export default async function handler(req, res) {
     if (req.method === 'POST') {
       const body = await readJson(req);
       const sourceKey = typeof body?.source_key === 'string' ? body.source_key.trim() : '';
+      const who = profile.role === 'agent_james' ? 'james' : 'sara';
+
+      // SPEC §4.3 — author/edit the client note IN the CRM. It ALWAYS lands as a
+      // draft (never auto-published): a generated or edited note reaches a client
+      // only when a human hits Publish. origin:'crm' marks it agent-owned so
+      // sync-deals preserves it verbatim and deals.json can't overwrite the edit.
+      if (body?.action === 'save') {
+        const text = typeof body?.body === 'string' ? body.body.trim().slice(0, 2000) : '';
+        if (!sourceKey) return fail(res, 400, 'source_key required');
+        if (!text) {
+          // Empty body clears the note entirely (revert to whatever deals.json ships).
+          const { error: ce } = await supa.from('deals').update({ agent_note: null }).eq('source_key', sourceKey);
+          if (ce) return colMissing(ce.message) ? fail(res, 409, MIGRATE) : fail(res, 500, ce.message);
+          return ok(res, { saved: true, status: 'draft', note: null });
+        }
+        const draft = {
+          body: text, status: 'draft', origin: 'crm',
+          author: who, updated_at: new Date().toISOString(),
+          published_at: null, published_by: null
+        };
+        const { error: se } = await supa.from('deals').update({ agent_note: draft }).eq('source_key', sourceKey);
+        if (se) return colMissing(se.message) ? fail(res, 409, MIGRATE) : fail(res, 500, se.message);
+        return ok(res, { saved: true, status: 'draft', note: draft });
+      }
+
       const action = body?.action === 'unpublish' ? 'unpublish' : (body?.action === 'publish' ? 'publish' : null);
       if (!sourceKey) return fail(res, 400, 'source_key required');
-      if (!action)    return fail(res, 400, "action must be 'publish' or 'unpublish'");
+      if (!action)    return fail(res, 400, "action must be 'save', 'publish' or 'unpublish'");
 
       const { data: row, error: e1 } = await supa.from('deals').select('agent_note').eq('source_key', sourceKey).maybeSingle();
       if (e1)   return colMissing(e1.message) ? fail(res, 409, MIGRATE) : fail(res, 500, e1.message);
