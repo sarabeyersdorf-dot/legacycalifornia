@@ -3494,6 +3494,14 @@ body.lp-restyle {
         +     '<button class="cc-btn" data-cc-gtk-save type="button">Save</button>'
         +   '</div>'
         + '</div>'
+        + '<div class="cc-cnote" data-cc-road>'
+        +   '<div class="cc-inote-h">Road to closing <span>· the milestone timeline the '+(deal.side==='buyer'?'buyer':'seller')+' sees on their portal</span></div>'
+        +   '<div data-cc-road-rows><span class="cc-cnote-empty">Loading…</span></div>'
+        +   '<div class="cc-inote-foot" style="gap:8px;flex-wrap:wrap;"><span class="cc-cnote-status" data-cc-road-status></span>'
+        +     '<button class="cc-btn ghost" data-cc-road-add type="button">+ Add step</button>'
+        +     '<button class="cc-btn" data-cc-road-save type="button">Save</button>'
+        +   '</div>'
+        + '</div>'
         + '<div class="cc-body">'
         +   '<div class="cc-card">'
         +     '<div class="cc-photo" data-cc-photo>'+photoInner
@@ -3528,6 +3536,7 @@ body.lp-restyle {
         loadDealClient(deal);
         loadClientNote(deal);
         loadGoodToKnow(deal);
+        loadRoad(deal);
         loadDealVisibility(deal);
         loadDealNotes(deal);
         loadDealExtras(deal);
@@ -3752,6 +3761,74 @@ body.lp-restyle {
           .catch(function(){ btn.disabled=false; btn.textContent=orig; if(st){ st.className='cc-cnote-status warn'; st.textContent='Network error saving.'; } });
       }
 
+      // ---- Road to closing — the milestone timeline, editable in the CRM (Phase 2).
+      // An agent overlay wins over the daily brief's road and survives the sync;
+      // an empty save reverts to Cowork. Steps carry date/status/label/badge/desc.
+      function roadStatusSel(v){
+        var opts=[['upcoming','Upcoming'],['next','Up next'],['done','Done'],['key','Key date']];
+        return '<select data-rd-status style="font:inherit;font-size:12px;padding:4px 6px;border:1px solid var(--rule);border-radius:6px;background:var(--vellum);color:var(--ink);">'+opts.map(function(o){ return '<option value="'+o[0]+'"'+(String(v||'upcoming')===o[0]?' selected':'')+'>'+o[1]+'</option>'; }).join('')+'</select>';
+      }
+      function roadRowHtml(it){
+        it=it||{};
+        var inp='font:inherit;font-size:13px;padding:6px 8px;border:1px solid var(--rule);border-radius:7px;background:var(--vellum);color:var(--ink);';
+        return '<div class="road-row" style="border:1px solid var(--rule);border-radius:9px;padding:8px 10px;margin-bottom:8px;background:var(--shell);">'
+          + '<div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;">'
+          +   '<input type="date" data-rd-date value="'+esc(it.date||'')+'" style="'+inp+'">'
+          +   roadStatusSel(it.status)
+          +   '<input type="text" data-rd-label placeholder="Step (e.g. Inspections & disclosures)" maxlength="140" value="'+esc(it.label||'')+'" style="flex:1;min-width:160px;'+inp+'">'
+          +   '<span style="margin-left:auto;display:flex;gap:4px;">'
+          +     '<button class="cc-btn ghost" data-rd-up type="button" title="Move up" style="padding:4px 8px;">▲</button>'
+          +     '<button class="cc-btn ghost" data-rd-down type="button" title="Move down" style="padding:4px 8px;">▼</button>'
+          +     '<button class="cc-btn ghost" data-rd-del type="button" title="Remove" style="padding:4px 8px;">✕</button>'
+          +   '</span>'
+          + '</div>'
+          + '<div style="display:flex;gap:6px;margin-top:6px;flex-wrap:wrap;">'
+          +   '<input type="text" data-rd-badge placeholder="Badge (optional, e.g. On track)" maxlength="40" value="'+esc(it.badge||'')+'" style="width:190px;'+inp+'">'
+          +   '<textarea data-rd-desc rows="2" placeholder="Plain-English description of this step." maxlength="600" style="flex:1;min-width:200px;box-sizing:border-box;'+inp+'resize:vertical;">'+esc(it.desc||'')+'</textarea>'
+          + '</div>'
+          + '</div>';
+      }
+      function renderRoadRows(items, source){
+        var box=root.querySelector('[data-cc-road-rows]'); var st=root.querySelector('[data-cc-road-status]');
+        if(!box) return;
+        var list=Array.isArray(items)?items:[];
+        box.innerHTML = list.length ? list.map(roadRowHtml).join('') : '<span class="cc-cnote-empty">No custom road yet — add steps, or leave it to the daily brief.</span>';
+        if(st){ st.className='cc-cnote-status'; st.textContent = source==='agent' ? 'Edited in the CRM — this is the road on the portal.' : (list.length ? 'From the daily brief — edit to take it over.' : ''); }
+      }
+      function loadRoad(deal){
+        var box=root.querySelector('[data-cc-road-rows]'); if(box) box.innerHTML='<span class="cc-cnote-empty">Loading…</span>';
+        fetch('/api/crm/deal-milestones?deal='+encodeURIComponent(deal.source_key)+'&side='+encodeURIComponent(deal.side==='buyer'?'buyer':'seller'),{credentials:'include'})
+          .then(function(r){ return r.ok?r.json():null; })
+          .then(function(j){ if(!current||current.source_key!==deal.source_key) return; renderRoadRows((j&&j.items)||[], (j&&j.source)||'cowork'); })
+          .catch(function(){ if(!current) return; renderRoadRows([], 'cowork'); });
+      }
+      function addRoadRow(){
+        var box=root.querySelector('[data-cc-road-rows]'); if(!box) return;
+        var empty=box.querySelector('.cc-cnote-empty'); if(empty) box.innerHTML='';
+        box.insertAdjacentHTML('beforeend', roadRowHtml({}));
+      }
+      function saveRoad(btn){
+        if(!current) return;
+        var box=root.querySelector('[data-cc-road-rows]'); var st=root.querySelector('[data-cc-road-status]');
+        var items=[];
+        if(box) box.querySelectorAll('.road-row').forEach(function(r){
+          var label=((r.querySelector('[data-rd-label]')||{}).value||'').trim();
+          if(!label) return;
+          items.push({
+            date:  ((r.querySelector('[data-rd-date]')||{}).value||''),
+            status:((r.querySelector('[data-rd-status]')||{}).value||'upcoming'),
+            label: label,
+            badge: ((r.querySelector('[data-rd-badge]')||{}).value||'').trim(),
+            desc:  ((r.querySelector('[data-rd-desc]')||{}).value||'').trim()
+          });
+        });
+        var orig=btn.textContent; btn.disabled=true; btn.textContent='Saving…';
+        fetch('/api/crm/deal-milestones',{method:'POST',credentials:'include',headers:{'Content-Type':'application/json'},body:JSON.stringify({ source_key:current.source_key, side:(current.side==='buyer'?'buyer':'seller'), items:items })})
+          .then(function(r){ return r.json().then(function(j){ return {ok:r.ok,j:j}; }); })
+          .then(function(res){ btn.disabled=false; btn.textContent=orig; if(res.ok&&res.j&&res.j.saved){ renderRoadRows(res.j.items, res.j.source); } else if(st){ st.className='cc-cnote-status warn'; st.textContent=(res.j&&res.j.error)||'Could not save.'; } })
+          .catch(function(){ btn.disabled=false; btn.textContent=orig; if(st){ st.className='cc-cnote-status warn'; st.textContent='Network error saving.'; } });
+      }
+
       // ---- photo drop / upload ------------------------------------------
       function wirePhoto(){
         var zone = root.querySelector('[data-cc-photo]');
@@ -3809,6 +3886,15 @@ body.lp-restyle {
         if(gtkSave && current){ e.preventDefault(); saveGtk(gtkSave); return; }
         var gtkDel=e.target.closest('[data-gtk-del]');
         if(gtkDel){ e.preventDefault(); var gr=gtkDel.closest('.gtk-row'); if(gr && gr.parentNode) gr.parentNode.removeChild(gr); return; }
+        if(e.target.closest('[data-cc-road-add]')){ e.preventDefault(); addRoadRow(); return; }
+        var roadSave=e.target.closest('[data-cc-road-save]');
+        if(roadSave && current){ e.preventDefault(); saveRoad(roadSave); return; }
+        var rdDel=e.target.closest('[data-rd-del]');
+        if(rdDel){ e.preventDefault(); var rr=rdDel.closest('.road-row'); if(rr&&rr.parentNode) rr.parentNode.removeChild(rr); return; }
+        var rdUp=e.target.closest('[data-rd-up]');
+        if(rdUp){ e.preventDefault(); var ru=rdUp.closest('.road-row'); if(ru&&ru.previousElementSibling) ru.parentNode.insertBefore(ru, ru.previousElementSibling); return; }
+        var rdDown=e.target.closest('[data-rd-down]');
+        if(rdDown){ e.preventDefault(); var rw=rdDown.closest('.road-row'); if(rw&&rw.nextElementSibling) rw.parentNode.insertBefore(rw.nextElementSibling, rw); return; }
       });
 
       // ---- in-console messaging: the deal's linked client + thread -------

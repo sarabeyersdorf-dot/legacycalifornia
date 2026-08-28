@@ -526,16 +526,24 @@ export default async function handler(req, res) {
     // present; those are already written from the buyer's seat, so they skip the
     // heuristic buyerizeRoad() re-frame later. Otherwise fall back to the seller
     // milestones (which buyerizeRoad softens for a buyer).
+    // Phase 2: an agent-authored milestone overlay (edited in the CRM, db/093)
+    // WINS over the daily brief's milestones and survives the sync. Side-aware:
+    // a buyer viewer prefers agent_buyer_milestones, a seller agent_milestones.
+    const agentMs = isBuyerSide
+      ? (Array.isArray(deal.agent_buyer_milestones) && deal.agent_buyer_milestones.length ? deal.agent_buyer_milestones : null)
+      : (Array.isArray(deal.agent_milestones) && deal.agent_milestones.length ? deal.agent_milestones : null);
     const buyerMs = (isBuyerSide && Array.isArray(deal.buyer_milestones) && deal.buyer_milestones.length) ? deal.buyer_milestones : null;
     let usedBuyerMilestones = false;
-    const msSource = buyerMs || (Array.isArray(deal.milestones) ? deal.milestones : null);
+    const msSource = agentMs || buyerMs || (Array.isArray(deal.milestones) ? deal.milestones : null);
 
     // Preferred source: the deals.json milestones (v1.5 — each carries a full
     // `desc` paragraph, a `badge` chip, a status dot and an At-a-Glance `col`).
     // This is Cowork's maintained source of truth and matches the Today board.
     // Suppressed when back on market (no active escrow) — see noActiveEscrow.
     if (!noActiveEscrow && msSource && msSource.length) {
-      usedBuyerMilestones = !!buyerMs;
+      // A buyer-authored overlay/brief is already written from the buyer's seat, so
+      // it skips the buyerizeRoad() re-frame later.
+      usedBuyerMilestones = !!buyerMs || (isBuyerSide && !!agentMs);
       const msLabel = (d) => {
         const s = /^(\d{4}-\d{2}-\d{2})/.exec(String(d || ''));
         return s ? new Date(s[1] + 'T12:00:00Z').toLocaleDateString('en-US', { month: 'short', day: 'numeric', timeZone: 'UTC' }) : '';
