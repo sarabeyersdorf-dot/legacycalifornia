@@ -699,6 +699,25 @@ export default async function handler(req, res) {
     // mistaken tick can be undone; the client gets none.
     const doneSet = new Set(Array.isArray(deal.client_task_done) ? deal.client_task_done : []);
     tasks = tasks.map((t) => doneSet.has(t.label) ? { ...t, status: 'done' } : t);
+
+    // SPEC §4.4 — agent-authored, client-visible tasks (created in the CRM, §4.1)
+    // render right here on the portal. They live in agent_tasks (visibility='client',
+    // source='agent') linked to this deal; an internal task is never fetched, so a
+    // task can only reach a client when the agent explicitly chose 'Client-visible'.
+    // Completion is authoritative in the CRM: a checked-off task is done=true and is
+    // simply not fetched. Fail-soft — a query hiccup never blanks the portal.
+    try {
+      const { data: at } = await supa.from('agent_tasks')
+        .select('title, due_label, due_date, done')
+        .eq('deal_id', deal.id).eq('visibility', 'client').eq('source', 'agent').eq('done', false);
+      const agentClientTasks = (at || []).map((t) => ({
+        label:  sanitize(t.title || ''),
+        when:   sanitize(t.due_label || (t.due_date ? `Due ${fmtDate(t.due_date)}` : 'Open')),
+        status: 'open'
+      })).filter((t) => t.label && !doneSet.has(t.label));
+      if (agentClientTasks.length) tasks = tasks.concat(agentClientTasks);
+    } catch (_) { /* agent_tasks unavailable — portal still renders */ }
+
     const tasksDone = showAgent ? tasks.filter((t) => t.status === 'done') : [];
     tasks = tasks.filter((t) => t.status !== 'done');
 
