@@ -72,6 +72,14 @@
     "rev": "016574e4cf32107000000029e854303"
   },
   {
+    "name": "695 Feather Signed EOT 3 and Addendum 2",
+    "url": "/docs/offer-695-feather/695-feather-signed-eot-3-and-addendum-2.pdf",
+    "scope": "transaction",
+    "visibility": "both",
+    "key": "offer-695-feather-695-feather-signed-eot-3-and-addendum-2",
+    "rev": "0165a24d17a4557000000029e854303"
+  },
+  {
     "name": "addendum removing Bert",
     "url": "/docs/offer-695-feather/addendum-removing-bert.pdf",
     "scope": "transaction",
