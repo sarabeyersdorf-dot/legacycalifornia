@@ -169,7 +169,7 @@ export default async function handler(req, res) {
         proposals:     'timeline proposals=all: pending timeline proposals.',
         timeline:      'timeline deal=__all__: every active deal timeline.',
         drift:         'drift-check summary: counts by severity (full detail at /api/crm/drift-check).',
-        db_truth:      'reconcile: live-DB ground truth Cowork cannot see from deals.json — sync freshness, escrow stages, dangerous pending docs, agent_updates read-back, email health, timeline drift, sync_key.',
+        db_truth:      'reconcile: live-DB ground truth Cowork cannot see from deals.json — sync freshness, escrow stages, dangerous pending docs, agent_updates read-back, email health, timeline drift, sync_key. ALSO carries expected_dates (SPEC §3: agent-believed coe/acceptance dates with no executed doc yet — agenda-only, never client-facing; labelled by/at/note) and agent_overlays (Phase 2: per-deal list of fields an agent has TAKEN OVER in the CRM — good_to_know, road, client_tasks, client_note, stage, created_in_crm, expected_dates — where the DB overlay WINS and you should STOP authoring that field in deals.json). This is the reachable home for both; no separate URL needed.',
         deal_messages: 'deal-messages summary: deal correspondence in the last 48h — counts + recent subjects (no bodies; full bodies at /api/crm/deal-messages). sent_at is the real send time or null (sent_at_known says which) — never ingest time. Includes unmatched_signature_notices: signed/updated e-sign documents we could NOT match to a deal — treat as "go confirm which file", not noise.',
         reconcile:     'timeline reconcile op (side-effecting) — only present when ?reconcile=true.'
       },

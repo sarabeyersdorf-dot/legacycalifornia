@@ -171,7 +171,12 @@ export default async function handler(req, res) {
     for (const p of rejected_proposals) { if (p.rejected_at) stamps.push(p.rejected_at); }
     const dataGeneratedAt = stamps.length ? stamps.reduce((a, b) => (a > b ? a : b)) : null;
     const cacheAgeSeconds = dataGeneratedAt ? Math.max(0, Math.floor((Date.now() - new Date(dataGeneratedAt).getTime()) / 1000)) : null;
-    const stale = cacheAgeSeconds != null && cacheAgeSeconds > 3600;
+    // stale reflects how long since the NEWEST task/note/rejection stamp — not
+    // sync health. A quiet stretch (no agent activity for an hour, e.g. overnight)
+    // is normal, so a 1h threshold false-positived on every healthy run (Cowork
+    // saw cache_age ~3695s flagged stale). Raised to 1.5h, matching reconcile's
+    // sync_stale, so only a genuinely idle-too-long feed trips it.
+    const stale = cacheAgeSeconds != null && cacheAgeSeconds > 5400;
 
     // Counts over the FULL set, independent of the ?open filter (so `done`/`total`
     // stay meaningful even though `tasks` below is open-only by default). Cheap
