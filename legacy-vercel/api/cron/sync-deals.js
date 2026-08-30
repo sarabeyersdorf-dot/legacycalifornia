@@ -1623,20 +1623,15 @@ export default async function handler(req, res) {
       ran_at: ranAt
     };
 
-    // Persist a readable run record (db/095). The manual ?key= call's response
-    // body can be lost to a fetch-tool timeout (the sync finishes after the
-    // client gives up), so Cowork can't rely on THIS body to confirm the run.
-    // reconcile.sync.last_run reads the newest row back. Fail-soft: a missing
-    // table (pre-095) or a transient error must never fail an otherwise-good sync.
+    // Persist a readable run record into the generic job-run log (db/095). The
+    // manual ?key= call's response body can be lost to a fetch-tool timeout (the
+    // sync finishes after the client gives up), so Cowork can't rely on THIS body
+    // to confirm the run. reconcile.sync.last_run reads the newest job='sync-deals'
+    // row back. Fail-soft: a transient error must never fail an otherwise-good sync.
     await supa.from('sync_runs').insert({
-      ran_at: ranAt, ok: true,
-      source_version: summary.source_version, deals_source: dealsSource,
-      deals_upserted: dealsUpserted, deals_pruned: dealsPruned,
-      tasks_written: tasksWritten, documents_written: docStats.inserted,
-      timeline_items_retired: timelineItemsRetired,
-      stage_overrides_cleared: stageOverridesCleared,
-      date_promotions: datePromotions, error_count: (errors || []).length,
-      summary
+      job: 'sync-deals',
+      status: (errors || []).length ? 'partial' : 'ok',
+      detail: summary   // the full run summary, incl. counts + date_promotions
     }).then(() => {}, () => {});
 
     return ok(res, summary);

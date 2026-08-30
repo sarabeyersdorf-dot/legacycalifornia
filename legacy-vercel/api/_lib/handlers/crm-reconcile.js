@@ -101,10 +101,20 @@ export default async function handler(req, res) {
       let last_run = null;
       try {
         const { data: sr } = await supa.from('sync_runs')
-          .select('ran_at, ok, source_version, deals_upserted, deals_pruned, tasks_written, documents_written, timeline_items_retired, stage_overrides_cleared, date_promotions, error_count')
-          .order('ran_at', { ascending: false }).limit(1);
-        if (sr && sr[0]) last_run = { ...sr[0], age_sec: ageSec(sr[0].ran_at) };
-      } catch (_) { /* sync_runs not migrated yet */ }
+          .select('created_at, status, detail')
+          .eq('job', 'sync-deals').order('created_at', { ascending: false }).limit(1);
+        if (sr && sr[0]) {
+          const d = sr[0].detail || {};
+          last_run = {
+            ran_at: iso(sr[0].created_at), age_sec: ageSec(sr[0].created_at), status: sr[0].status,
+            deals_upserted: d.deals_upserted ?? null, deals_pruned: d.deals_pruned ?? null,
+            tasks_written: d.tasks_written ?? null, documents_written: d.documents_written ?? null,
+            timeline_items_retired: d.timeline_items_retired ?? null,
+            stage_overrides_cleared: d.stage_overrides_cleared ?? null,
+            date_promotions: d.date_promotions ?? [], source_version: d.source_version ?? null
+          };
+        }
+      } catch (_) { /* sync_runs unavailable — omit last_run */ }
       return {
         last_deal_upsert: iso(lastDealAt), last_deal_upsert_age_sec: ageSec(lastDealAt),
         last_briefing_task: iso(lastTaskAt), last_briefing_task_age_sec: ageSec(lastTaskAt),
