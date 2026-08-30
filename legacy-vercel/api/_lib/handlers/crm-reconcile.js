@@ -80,7 +80,8 @@ export default async function handler(req, res) {
       email: 'Per-mailbox connection health. needs_reconnect:false with a recent last_synced_at means email sync is fine — do NOT tell Sara to reconnect.',
       timeline_drift: 'Deals whose escrow FELL THROUGH (back to listing/preparing) but still carry client-visible timeline items — a dead escrow showing a client live deadlines. Should be empty. CLOSED deals are excluded on purpose: a completed sale legitimately keeps its finished (done) closing history for the client.',
       expected_dates: 'Agent-believed dates (coe_date/acceptance_date) with no executed document yet (SPEC §3). These are AGENDA-ONLY — they NEVER reach a client portal. Quote them labelled with by/at/note ("COE 9/12 — expected, James 8/27, lender verbal"). state: pending = no confirmed value yet; discrepancy = a confirmed value exists and DISAGREES (put on the agenda, do not overwrite). A promoted expected (confirmed caught up) is cleared by sync-deals and drops off this list.',
-      agent_overlays: 'Which deal fields an agent has TAKEN OVER in the CRM (Phase 2). For each field listed, the DB overlay WINS and your deals.json value is ignored on the portal until the agent clears it — so STOP authoring that field for that deal. fields: good_to_know (agent_good_to_know), road (agent_milestones), client_tasks (agent_client_tasks — the portal "What I need from you" list), client_note (agent_note origin:crm), stage (stage_override), created_in_crm (a CRM-authored deal, no deals.json entry), expected_dates. Keep authoring these fields for every deal NOT listed here.'
+      agent_overlays: 'Which deal fields an agent has TAKEN OVER in the CRM (Phase 2). For each field listed, the DB overlay WINS and your deals.json value is ignored on the portal until the agent clears it — so STOP authoring that field for that deal. fields: good_to_know (agent_good_to_know), road (agent_milestones), client_tasks (agent_client_tasks — the portal "What I need from you" list), client_note (agent_note origin:crm), stage (stage_override), created_in_crm (a CRM-authored deal, no deals.json entry), expected_dates. Keep authoring these fields for every deal NOT listed here.',
+      client_visible_agent_tasks: 'OPEN agent-authored tasks (agent_tasks source=agent, visibility=client) that a client SEES on the portal alongside their to-do list (§4.1) — individually tracked, separate from the client_tasks overlay list. Surfaced so the morning pass is aware of what clients are being shown before §4.4 renders them. done tasks drop off. Do NOT re-author these in deals.json; they are CRM-owned.'
     }
   };
 
@@ -94,11 +95,22 @@ export default async function handler(req, res) {
       ]);
       const lastDealAt = lastDeal.data?.[0]?.updated_at || null;
       const lastTaskAt = lastTask.data?.[0]?.created_at || null;
+      // The sync's own run record (db/095) — authoritative "did the cron run, and
+      // what did it do", independent of the sync response body (which a fetch-tool
+      // timeout can lose). Fail-soft: pre-095 schema just omits it.
+      let last_run = null;
+      try {
+        const { data: sr } = await supa.from('sync_runs')
+          .select('ran_at, ok, source_version, deals_upserted, deals_pruned, tasks_written, documents_written, timeline_items_retired, stage_overrides_cleared, date_promotions, error_count')
+          .order('ran_at', { ascending: false }).limit(1);
+        if (sr && sr[0]) last_run = { ...sr[0], age_sec: ageSec(sr[0].ran_at) };
+      } catch (_) { /* sync_runs not migrated yet */ }
       return {
         last_deal_upsert: iso(lastDealAt), last_deal_upsert_age_sec: ageSec(lastDealAt),
         last_briefing_task: iso(lastTaskAt), last_briefing_task_age_sec: ageSec(lastTaskAt),
         briefing_tasks_total: briefTot.count || 0,
-        sync_stale: ageSec(lastDealAt) != null && ageSec(lastDealAt) > 5400  // > 1.5h → something's wrong
+        sync_stale: ageSec(lastDealAt) != null && ageSec(lastDealAt) > 5400,  // > 1.5h → something's wrong
+        last_run   // the sync-deals run record — see db/095
       };
     } catch (e) { return { _error: e.message }; }
   })();
@@ -218,17 +230,22 @@ export default async function handler(req, res) {
           'coe_date_expected, coe_date_expected_by, coe_date_expected_at, coe_date_expected_note, ' +
           'acceptance_date_expected, acceptance_date_expected_by, acceptance_date_expected_at, acceptance_date_expected_note');
       if (error) throw error;
-      const confirmedOf = (row, f) => {
+      const candidatesOf = (row, f) => {
         const ov = (row.agent_overrides && typeof row.agent_overrides === 'object') ? row.agent_overrides : {};
-        return ov[f] ?? row[f] ?? null;
+        return [ov[f], row[f]].filter((v) => v != null).map(String);
       };
       const items = [];
       for (const row of (data || [])) {
         for (const f of ['coe_date', 'acceptance_date']) {
           const exp = row[`${f}_expected`];
           if (!exp) continue;
-          const confirmed = confirmedOf(row, f);
-          const state = confirmed ? (String(confirmed) === String(exp) ? 'promoted_pending_clear' : 'discrepancy') : 'pending';
+          // Confirmed if EITHER the base value or an agent override matches the
+          // expectation — so a stale override can't make a caught-up date read as a
+          // 'discrepancy' (mirrors sync-deals' promotion check). Report the value
+          // that actually matched, else the first known confirmed value.
+          const cands = candidatesOf(row, f);
+          const confirmed = cands.includes(String(exp)) ? String(exp) : (cands[0] ?? null);
+          const state = cands.includes(String(exp)) ? 'promoted_pending_clear' : (confirmed ? 'discrepancy' : 'pending');
           items.push({
             deal: row.source_key, address: row.address || null, field: f,
             expected: exp, expected_by: row[`${f}_expected_by`] || null,
@@ -267,6 +284,31 @@ export default async function handler(req, res) {
         if (fields.length) deals.push({ deal: d.source_key, address: d.address || null, fields });
       }
       return { count: deals.length, deals };
+    } catch (e) { return { _error: e.message }; }
+  })();
+
+  // 10. CLIENT-VISIBLE AGENT TASKS (§4.1) — OPEN agent-authored tasks a client
+  // sees on the portal, so the morning pass knows what's being shown to clients.
+  // Individually tracked (source='agent', visibility='client'), distinct from the
+  // client_tasks overlay list. done tasks drop off. Fail-soft: pre-visibility
+  // schema returns _error.
+  out.client_visible_agent_tasks = await (async () => {
+    try {
+      const { data, error } = await supa.from('agent_tasks')
+        .select('title, client, due_label, due_date, agent, source_key, created_at')
+        .eq('source', 'agent').eq('visibility', 'client').eq('done', false)
+        .order('created_at', { ascending: false }).limit(100);
+      if (error) throw error;
+      const items = (data || []).map((t) => ({
+        deal: t.source_key || null,
+        address: (t.source_key && dealRows.find((d) => d.source_key === t.source_key)?.address) || null,
+        title: t.title || null,
+        client: t.client || null,
+        due: t.due_label || (t.due_date ? String(t.due_date).slice(0, 10) : null),
+        agent: t.agent || null,
+        created_at: iso(t.created_at)
+      }));
+      return { count: items.length, items };
     } catch (e) { return { _error: e.message }; }
   })();
 

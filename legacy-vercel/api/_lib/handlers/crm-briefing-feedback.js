@@ -29,7 +29,11 @@ export default async function handler(req, res) {
   // done), which pushed the response past ~94K and truncated it mid-JSON —
   // silently dropping rejected_proposals off the end. `?all=1` restores the full
   // set for anyone who needs the history.
-  const openOnly = !/^(1|true|yes)$/i.test(String(req.query?.all || ''));
+  // `?all=1` and its alias `?include_done=1` restore the full set (done rows
+  // included). Cowork asked for include_done by name — it's the same switch.
+  const wantDone = /^(1|true|yes)$/i.test(String(req.query?.all || '')) ||
+                   /^(1|true|yes)$/i.test(String(req.query?.include_done || ''));
+  const openOnly = !wantDone;
 
   try {
     const supa = adminClient();
@@ -171,7 +175,12 @@ export default async function handler(req, res) {
     for (const p of rejected_proposals) { if (p.rejected_at) stamps.push(p.rejected_at); }
     const dataGeneratedAt = stamps.length ? stamps.reduce((a, b) => (a > b ? a : b)) : null;
     const cacheAgeSeconds = dataGeneratedAt ? Math.max(0, Math.floor((Date.now() - new Date(dataGeneratedAt).getTime()) / 1000)) : null;
-    const stale = cacheAgeSeconds != null && cacheAgeSeconds > 3600;
+    // stale reflects how long since the NEWEST task/note/rejection stamp — not
+    // sync health. A quiet stretch (no agent activity for an hour, e.g. overnight)
+    // is normal, so a 1h threshold false-positived on every healthy run (Cowork
+    // saw cache_age ~3695s flagged stale). Raised to 1.5h, matching reconcile's
+    // sync_stale, so only a genuinely idle-too-long feed trips it.
+    const stale = cacheAgeSeconds != null && cacheAgeSeconds > 5400;
 
     // Counts over the FULL set, independent of the ?open filter (so `done`/`total`
     // stay meaningful even though `tasks` below is open-only by default). Cheap
@@ -198,6 +207,23 @@ export default async function handler(req, res) {
       };
     } catch (_) { /* pre-feedback-cols schema — keep the returned-rows tally */ }
 
+    // done_keys — the brief_key of every DONE briefing task, ALWAYS returned
+    // regardless of ?open. Cowork's environment can't UPDATE and, with the
+    // open-only default, a done task simply vanishes from `tasks` — so "the agent
+    // ticked it done" was indistinguishable from "sync never inserted it," forcing
+    // Cowork into an out-of-band Supabase SELECT to tell them apart. This is the
+    // positive signal: a key present here is genuinely done; a key absent from
+    // BOTH tasks and done_keys was never created. Cheap (one column, keyed rows
+    // only) and small, so it rides ahead of the big `tasks` array. Fail-soft:
+    // pre-brief_key schema just returns []. (Full done ROWS remain available via
+    // ?all=1 / ?include_done=1 for anyone who needs the note/attention detail.)
+    let done_keys = [];
+    try {
+      const { data: dkRows } = await supa.from('agent_tasks')
+        .select('brief_key').eq('source', 'briefing').eq('done', true).not('brief_key', 'is', null);
+      done_keys = [...new Set((dkRows || []).map((r) => r.brief_key).filter(Boolean))];
+    } catch (_) { /* brief_key not migrated — leave done_keys empty */ }
+
     // Field order matters: counts, rejected_proposals and needs_review come
     // BEFORE the large `tasks` array so that if the payload is ever truncated by
     // a downstream fetch cap, the small high-value fields survive (the old order
@@ -207,8 +233,13 @@ export default async function handler(req, res) {
       data_generated_at: dataGeneratedAt,
       cache_age_seconds: cacheAgeSeconds,
       stale,
-      open_only: openOnly,   // done rows omitted unless ?all=1
+      open_only: openOnly,   // done rows omitted unless ?all=1 / ?include_done=1
       counts: { ...counts, agent_updates: agent_updates.length },
+      // Positive done signal — brief_keys of DONE tasks, always present even when
+      // open_only drops the done rows. A key here = genuinely done; a key in
+      // neither `done_keys` nor `tasks` = never synced. Removes the done-by-absence
+      // guess that forced a direct DB read.
+      done_keys,
       rejected_proposals,
       // Unread free-text notes from Sara/James, now marked read as of this pull.
       // High-value and small — placed before the big `tasks` array so a downstream

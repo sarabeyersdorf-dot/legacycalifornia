@@ -69,6 +69,21 @@ export default async function handler(req, res) {
   const days = req.query?.days || 7;
   const doReconcile = String(req.query?.reconcile || 'false') === 'true';
 
+  // ── Readability controls (Cowork's fetch tool dies on the ~60KB single-line
+  // bundle). Two composable escape hatches, either of which makes it readable:
+  //   ?sections=db_truth[,proposals,…]  — run/return ONLY the named sections, so
+  //       a run that just wants db_truth (expected_dates + agent_overlays +
+  //       client_visible_agent_tasks) fetches a few KB instead of 60. This is
+  //       what makes the item-6 "new capabilities show up as new db_truth fields"
+  //       promise actually reachable. `?only=` is an alias.
+  //   ?pretty=1 — indented JSON. The single-line payload defeats line-based
+  //       Read/Grep slicing; pretty-printing turns it into thousands of short
+  //       lines the consumer can page through. Fixes the whole size class.
+  const onlyRaw = String(req.query?.sections ?? req.query?.only ?? '').trim();
+  const wantSet = onlyRaw ? new Set(onlyRaw.split(',').map((s) => s.trim()).filter(Boolean)) : null;
+  const want = (name) => !wantSet || wantSet.has(name);
+  const isPretty = ['1', 'true', 'yes'].includes(String(req.query?.pretty || '').toLowerCase());
+
   const sections = {};
   const failed = [];
   const nowIso = new Date().toISOString();
@@ -96,29 +111,29 @@ export default async function handler(req, res) {
   }
 
   await Promise.all([
-    section('feedback',  feedback,     { key }),
-    section('calendar',  calendar,     { key, days }),
+    want('feedback') && section('feedback',  feedback,     { key }),
+    want('calendar') && section('calendar',  calendar,     { key, days }),
     // The heavy morning-brief carries the nudges/approvals the briefing needs —
     // lift just those, not the whole AI narrative + rosters.
-    section('nudges',    morningBrief, { key }, (b) => ({
+    want('nudges') && section('nudges',    morningBrief, { key }, (b) => ({
       collection_nudges:  b.collection_nudges  || [],
       timeline_approvals: b.timeline_approvals || [],
       data_gaps:          b.data_gaps          || [],
       party_reconcile:    b.party_reconcile    || []
     })),
-    section('proposals', timeline,     { key, proposals: 'all' }, (b) => ({ proposals: b.proposals || [] })),
-    section('timeline',  timeline,     { key, deal: '__all__' },  (b) => ({ deals: b.deals || [] })),
+    want('proposals') && section('proposals', timeline,     { key, proposals: 'all' }, (b) => ({ proposals: b.proposals || [] })),
+    want('timeline') && section('timeline',  timeline,     { key, deal: '__all__' },  (b) => ({ deals: b.deals || [] })),
     // drift is a SUMMARY only — counts by severity (full detail at /drift-check).
-    section('drift',     driftCheck,   { key, severity: 'all' },  (b) => (b.counts || { critical: 0, warn: 0, info: 0 })),
+    want('drift') && section('drift',     driftCheck,   { key, severity: 'all' },  (b) => (b.counts || { critical: 0, warn: 0, info: 0 })),
     // db_truth — the live-DB ground-truth feed (crm-reconcile): sync freshness,
     // escrow stages, dangerous pending docs, agent_updates read-back, email
     // health, timeline drift. Already compact by design; the verbose `about`
     // prose is dropped (its meaning is summarised in this bundle's manifest).
-    section('db_truth',  dbTruth,      { key }, (b) => { const { about, generated_at, ...rest } = b; return rest; }),
+    want('db_truth') && section('db_truth',  dbTruth,      { key }, (b) => { const { about, generated_at, ...rest } = b; return rest; }),
     // deal_messages — deal correspondence (item 3). Folded in as a bounded
     // SUMMARY only: counts + the most recent subjects, no bodies, so the bundle
     // stays small. Full bodies live at the standalone /deal-messages path.
-    section('deal_messages', dealMessages, { key, since: '48h' }, (b) => ({
+    want('deal_messages') && section('deal_messages', dealMessages, { key, since: '48h' }, (b) => ({
       since:   b.since || null,
       counts:  b.counts || { matched: 0, unmatched: 0, unmatched_signature_notices: 0, dropped_bulk: 0 },
       deny_list_size: { senders: (b.deny_list?.senders || []).length, domains: (b.deny_list?.domains || []).length },
@@ -139,17 +154,19 @@ export default async function handler(req, res) {
         from: m.from || null, subject: m.subject || null
       }))
     }))
-  ]);
+  ].filter(Boolean));   // `false` entries = sections not requested via ?sections=
 
   // reconcile has side effects (it files proposals) — opt-in only, so a read
-  // never surprises anyone.
-  if (doReconcile) {
-    await section('reconcile', timeline, { key, op: 'reconcile' });
-  } else {
-    sections.reconcile = { status: 'skipped', reason: 'reconcile=false', data: null };
+  // never surprises anyone. Skipped unless ?reconcile=true AND requested.
+  if (want('reconcile')) {
+    if (doReconcile) {
+      await section('reconcile', timeline, { key, op: 'reconcile' });
+    } else {
+      sections.reconcile = { status: 'skipped', reason: 'reconcile=false', data: null };
+    }
   }
 
-  return ok(res, {
+  const payload = {
     generated_at: nowIso,
     // Self-describing surface — this is the "endpoint discovery" answer (item 6).
     // A discovery endpoint that returned a LIST OF URLS is unworkable: Cowork can
@@ -162,6 +179,7 @@ export default async function handler(req, res) {
     manifest: {
       is_stable_surface: true,
       note: 'One URL, in your prompt permanently. Every Cowork-facing CRM feed is inlined below under `sections`. When Claude Code ships a new endpoint it appears here as a new section — you do NOT need Sara to add its URL to your prompt. The standalone_paths list is reference only; a path discovered here is not fetchable from your environment, and its data is already inlined, so never fetch them.',
+      readability: 'If the full bundle is too large for your fetch tool, add ?sections=db_truth (comma-separate for more, e.g. ?sections=db_truth,proposals) to return ONLY those sections, and/or ?pretty=1 for indented, line-sliceable JSON. ?sections=db_truth is the small read for expected_dates + agent_overlays + client_visible_agent_tasks.',
       sections: {
         feedback:      'briefing-feedback: agent replies/attention on briefing tasks + unread agent_updates (marked read on read).',
         calendar:      'briefing-calendar: appointments/tours window.',
@@ -169,7 +187,7 @@ export default async function handler(req, res) {
         proposals:     'timeline proposals=all: pending timeline proposals.',
         timeline:      'timeline deal=__all__: every active deal timeline.',
         drift:         'drift-check summary: counts by severity (full detail at /api/crm/drift-check).',
-        db_truth:      'reconcile: live-DB ground truth Cowork cannot see from deals.json — sync freshness, escrow stages, dangerous pending docs, agent_updates read-back, email health, timeline drift, sync_key.',
+        db_truth:      'reconcile: live-DB ground truth Cowork cannot see from deals.json — sync freshness, escrow stages, dangerous pending docs, agent_updates read-back, email health, timeline drift, sync_key. ALSO carries expected_dates (SPEC §3: agent-believed coe/acceptance dates with no executed doc yet — agenda-only, never client-facing; labelled by/at/note) and agent_overlays (Phase 2: per-deal list of fields an agent has TAKEN OVER in the CRM — good_to_know, road, client_tasks, client_note, stage, created_in_crm, expected_dates — where the DB overlay WINS and you should STOP authoring that field in deals.json) and client_visible_agent_tasks (§4.1: OPEN agent-authored tasks a client sees on the portal, individually tracked, CRM-owned — do not re-author in deals.json). This is the reachable home for all of them; no separate URL needed.',
         deal_messages: 'deal-messages summary: deal correspondence in the last 48h — counts + recent subjects (no bodies; full bodies at /api/crm/deal-messages). sent_at is the real send time or null (sent_at_known says which) — never ingest time. Includes unmatched_signature_notices: signed/updated e-sign documents we could NOT match to a deal — treat as "go confirm which file", not noise.',
         reconcile:     'timeline reconcile op (side-effecting) — only present when ?reconcile=true.'
       },
@@ -183,7 +201,18 @@ export default async function handler(req, res) {
     sections,
     degraded: failed.length > 0,
     failed_sections: failed
-  });
+  };
+
+  if (wantSet) payload.sections_returned = [...wantSet];   // echo the filter applied
+
+  // ?pretty=1 → indented JSON so a one-line-averse fetch tool can slice it.
+  // Same no-store contract as ok(); we just control the serialisation.
+  if (isPretty) {
+    res.setHeader('Content-Type', 'application/json');
+    res.setHeader('Cache-Control', 'private, no-store, no-cache, must-revalidate');
+    return res.status(200).send(JSON.stringify({ success: true, ...payload }, null, 2));
+  }
+  return ok(res, payload);
 }
 
 // compact=1 export — one small row per deal, sourced with lean direct queries
