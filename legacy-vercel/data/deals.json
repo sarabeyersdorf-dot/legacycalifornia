@@ -1,7 +1,7 @@
 {
-  "version": 11.2,
-  "lastUpdated": "2026-08-29",
-  "updatedBy": "morning-briefing 2026-08-28",
+  "version": 11.3,
+  "lastUpdated": "2026-08-30",
+  "updatedBy": "cowork-morning-briefing 2026-08-30",
   "tasks": [
     {
       "agent": "sara",
@@ -1158,8 +1158,10 @@
       "key": "feather-spq-missing",
       "title": "695 Feather: SPQ genuinely missing from the file — chase Dee Bradley (dee@caltel.com). EX/TDSpdf.pdf is a 3-page standalone TDS, not stacked",
       "due": "2026-08-12",
-      "done": false,
-      "dateAdded": "2026-08-08"
+      "done": true,
+      "dateAdded": "2026-08-08",
+      "doneDate": "2026-08-30",
+      "doneNote": "Verified by the 2026-08-30 briefing run. __Pending\\695 Feather\\EX\\SPQpdf.pdf IS a genuine California Seller Property Questionnaire (C.A.R. Form SPQ, Revised 6/26) for 695 Feather Dr, APN 61-028-001, Copperopolis, Calaveras County - 5 pages, flattened scan with no text layer, read by OCR. Seller Christopher Jewett signed 08/21/2026; buyer Ashley Robinson acknowledged 08/22/26. Fully executed and on file. Earlier runs concluded it was missing because they searched the PDF text layer, which this scan does not have. Nothing to chase from Dee Bradley on the SPQ."
     },
     {
       "agent": "james",
@@ -2349,6 +2351,30 @@
       "due": "Today",
       "title": "8235 Baldwin: COE is Monday 8/31 and there is still no clear-to-close. Kim Hesser promised an end-of-day 8/28 update and none arrived — get the senior underwriter's answer in writing today and send it straight to Allyson.",
       "done": false
+    },
+    {
+      "agent": "sara",
+      "client": "Michael Bustillos Jr",
+      "key": "butte-mountain-bustillos",
+      "title": "NEW LEAD: Michael Bustillos Jr (341) 262-3115, boomjr08@aol.com - realtor.com inquiry 8/29 9:34 PM on 2463 Butte Mountain Rd, Murphys. Not a Legacy listing, so this is a buyer to qualify.",
+      "due": "Today",
+      "done": false
+    },
+    {
+      "agent": "sara",
+      "client": "8235 Baldwin",
+      "key": "baldwin-monday-fallback",
+      "title": "Baldwin: agree the Monday fallback with James before the close. If no clear-to-close lands, the choices are a fourth extension (the seller has already served a Notice to Perform) or letting Shomari's deposit ride. Decide before 8/31, not on the day.",
+      "due": "2026-08-31",
+      "done": false
+    },
+    {
+      "agent": "james",
+      "client": "695 Feather",
+      "key": "feather-spq-tell-ashley",
+      "title": "695 Feather: the SPQ was on file all along (seller signed 8/21, Ashley acknowledged 8/22) - it is a scan, which is why it read as missing. Stop chasing Dee Bradley for it; the remaining seller-disclosure gaps are the NHD signature page and the listing-agent AVID.",
+      "due": "This week",
+      "done": false
     }
   ],
   "deals": [
@@ -3420,15 +3446,15 @@
         "seller_type": "standard"
       },
       "listTrac": {
-        "views": 204,
-        "shares": 4,
+        "views": 207,
+        "shares": 5,
         "inquiries": 1,
         "newPct": 90,
-        "last30": 22,
+        "last30": 24,
         "since": "2026-02-02",
         "zipBeat": false,
-        "note": "COMMERCIAL listing - does not syndicate to Zillow/Realtor.com/Trulia and is not supposed to. Compare only against other commercial listings, never against the residential book. 22 views in the last 30 days, up from 18 a week ago.",
-        "reportDate": "2026-08-23",
+        "note": "COMMERCIAL listing. 24 views in the last 30 days, led by searchrem.metrolist.net (6), legacycalifornia.com (4) and broker sites. Absence of Zillow/Realtor.com/Trulia is CORRECT and expected - commercial listings do not syndicate to the residential portals. Never compare this listing to the residential book and never flag its missing residential portals.",
+        "reportDate": "2026-08-30",
         "source": "ListTrac / MetroList agent report 'Online Activity Reports for your Listings'"
       },
       "marketing": {
@@ -3775,17 +3801,15 @@
       "docFolder": "/_LEGACY/_Listings/433 E Highway 4",
       "client": "Jim & Yvonne Heryford",
       "listTrac": {
-        "views": 5837,
+        "views": 6003,
         "shares": 18,
-        "inquiries": 0,
-        "newPct": 92,
-        "last30": 384,
+        "newPct": 86,
+        "last30": 513,
         "since": "2026-03-20",
         "zipBeat": true,
-        "note": "Mixed-use: syndicates to both commercial and residential portals, and correctly appears on Zillow (226) and Realtor.com (84). Beat its zip code. A second ListTrac report on the earlier MLS number covers 2025-12-05 onward and read 4,027 views / 6 shares / 97% new on 2026-08-23.",
-        "reportDate": "2026-08-23",
-        "source": "ListTrac / MetroList agent report 'Online Activity Reports for your Listings'",
-        "last30Note": "30-day total 384 taken from the report's own TOTAL row (via the marketing block). A previous value of 329 was a sum of the top-10 websites only, which undercounts because the top-10 excludes smaller sources."
+        "note": "Current MLS number (listed 03/20/26): 513 views in the last 30 days - Zillow 331, Realtor.com 103, Trulia 18. Beat its zip code. ListTrac also emails a SECOND report for the PRIOR MLS number (period from 2025-12-05, 4,035 views, 6 shares, 40 in 30 days) whose top-10 sources are MetroList-only with no Zillow/Realtor.com - that is a retired MLS number, not a syndication fault. Quote the 6,003 / 513 figures to the seller, never the 4,035.",
+        "reportDate": "2026-08-30",
+        "source": "ListTrac / MetroList agent report 'Online Activity Reports for your Listings'"
       },
       "homesCom": {
         "shareUrl": "https://www.homes.com/t/h3kn9nsqsh4t5?s=6",
@@ -4000,15 +4024,15 @@
         "tenant_occupied": false
       },
       "listTrac": {
-        "views": 10670,
-        "shares": 31,
+        "views": 11382,
+        "shares": 32,
         "inquiries": 1,
-        "newPct": 80,
-        "last30": 3017,
+        "newPct": 87,
+        "last30": 2849,
         "since": "2026-06-04",
         "zipBeat": true,
-        "note": "Best-performing residential listing in the book. 3,017 views in the last 30 days - Zillow 1,982, Realtor.com 805, Trulia 160. Beat its zip code.",
-        "reportDate": "2026-08-23",
+        "note": "Best-performing listing in the book, residential or otherwise. 2,849 views in the last 30 days - Zillow 1,936, Realtor.com 684, Trulia 161. Beat its zip code. Down from 3,017 last week but still 2x the next residential listing.",
+        "reportDate": "2026-08-30",
         "source": "ListTrac / MetroList agent report 'Online Activity Reports for your Listings'"
       },
       "homesCom": {
@@ -4175,17 +4199,16 @@
         "seller_type": "standard"
       },
       "listTrac": {
-        "views": 3373,
-        "shares": 91,
-        "inquiries": 0,
+        "views": 3516,
+        "shares": 93,
+        "favorites": 1,
         "newPct": 94,
-        "last30": 737,
+        "last30": 669,
         "since": "2026-04-08",
         "zipBeat": true,
-        "note": "91 shares - still the most-shared listing in the book. Beat its zip code. Zillow 414, Realtor.com 177, Trulia 46 over the last 30 days.",
-        "reportDate": "2026-08-23",
-        "source": "ListTrac / MetroList agent report 'Online Activity Reports for your Listings'",
-        "last30Note": "30-day total 737 taken from the report's own TOTAL row (via the marketing block). A previous value of 637 was a sum of the top-10 websites only, which undercounts because the top-10 excludes smaller sources."
+        "note": "669 views in the last 30 days - Zillow 378, Realtor.com 166. Beat its zip code. 93 shares is the most-shared listing in the book by a wide margin. Listing is live and marketing well; the Kayla Priestly ESCROW cancelled, the listing did not.",
+        "reportDate": "2026-08-30",
+        "source": "ListTrac / MetroList agent report 'Online Activity Reports for your Listings'"
       },
       "timeline": {
         "note": "LISTING IS LIVE. An ESCROW on this listing cancelled — do not confuse the two. Purchase Agreement dated 2026-04-21 between buyer Kayla Priestley and seller Sean Cristian Moffatt. Cancellation of Contract, Disposition of Deposit and Cancellation of Escrow (C.A.R. Form CC rev 6/24) executed by BOTH parties; buyer cancelled under paragraph L(1) 8A; escrow #P-698773 at Placer Title Company cancelled with full mutual release; seller authorised release of the buyer's deposit back to the buyer in full, less buyer's fees and costs. Filed Duds\\9568 Sheep Ranch Rd\\Cancellation of Contract, Release of Deposit and Cancellation of Escrow - 624.pdf. Per Sara 2026-08-16: 'sheep ranch had an escrow cancel buyer Kayla Priestly but the listing is not canceled.' stage corrected 'cancelled' -> 'listing' and salePrice cleared to the RLA/MOT list price of $389,000 the same day. The listing is still marketing and still generating ListTrac traffic (3,165 views, 87 shares, 728 in the last 30 days)."
@@ -4327,15 +4350,15 @@
         "seller_type": "standard"
       },
       "listTrac": {
-        "views": 5547,
-        "shares": 44,
+        "views": 5739,
+        "shares": 46,
         "inquiries": 5,
-        "newPct": 83,
-        "last30": 672,
+        "newPct": 84,
+        "last30": 701,
         "since": "2026-03-24",
         "zipBeat": true,
-        "note": "5 inquiries - the most of any listing. Beat its zip code. Zillow drove 522 of the last 30 days' 672 views.",
-        "reportDate": "2026-08-23",
+        "note": "701 views in the last 30 days - Zillow 538, Realtor.com 96, Trulia 28. Beat its zip code. 46 shares is the second-highest in the book.",
+        "reportDate": "2026-08-30",
         "source": "ListTrac / MetroList agent report 'Online Activity Reports for your Listings'"
       },
       "marketing": {
@@ -4853,15 +4876,15 @@
         ]
       },
       "listTrac": {
-        "views": 3254,
+        "views": 3595,
         "shares": 19,
         "inquiries": 4,
-        "newPct": 87,
-        "last30": 1477,
+        "newPct": 88,
+        "last30": 1547,
         "since": "2026-06-25",
         "zipBeat": true,
-        "note": "Back on the market after the 8/14 escrow cancellation and drawing the second-heaviest residential traffic in the book - 1,477 views in the last 30 days (Zillow 916, Realtor.com 398, Trulia 45). Beat its zip code.",
-        "reportDate": "2026-08-23",
+        "note": "1,547 views in the last 30 days - Zillow 975, Realtor.com 414, Trulia 40. Beat its zip code. Second-heaviest residential traffic in the book since the escrow cancelled 8/14; the listing has never been off the market.",
+        "reportDate": "2026-08-30",
         "source": "ListTrac / MetroList agent report 'Online Activity Reports for your Listings'"
       }
     },
@@ -4938,17 +4961,16 @@
         }
       },
       "listTrac": {
-        "views": 577,
+        "views": 583,
         "shares": 4,
-        "inquiries": 0,
+        "favorites": 1,
         "newPct": 100,
-        "last30": 55,
+        "last30": 44,
         "since": "2025-01-17",
         "zipBeat": true,
-        "note": "Beat its zip code. Zillow 33, Realtor.com 5, Homes.com 5 over the last 30 days. 100% new visitors - nobody is returning for a second look.",
-        "reportDate": "2026-08-23",
-        "source": "ListTrac / MetroList agent report 'Online Activity Reports for your Listings'",
-        "last30Note": "30-day total 55 taken from the report's own TOTAL row (via the marketing block). A previous value of 43 was a sum of the top-10 websites only, which undercounts because the top-10 excludes smaller sources."
+        "note": "LAND. 44 views in the last 30 days - Zillow 26, Homes.com 5, Realtor.com 3. Beat its zip code. Syndicating normally.",
+        "reportDate": "2026-08-30",
+        "source": "ListTrac / MetroList agent report 'Online Activity Reports for your Listings'"
       },
       "marketing": {
         "period": "Jan 17, 2025 - Aug 23, 2026",
@@ -5053,17 +5075,15 @@
         }
       },
       "listTrac": {
-        "views": 263,
+        "views": 270,
         "shares": 11,
-        "inquiries": 0,
-        "newPct": 94,
-        "last30": 27,
+        "newPct": 87,
+        "last30": 29,
         "since": "2025-01-17",
         "zipBeat": false,
-        "note": "SYNDICATION GAP (within vacant land): 5 views in 30 days, Homes.com the only top-10 source. Same pattern as 2000 Gun Club and 590 S Main.",
-        "reportDate": "2026-08-23",
-        "source": "ListTrac / MetroList agent report 'Online Activity Reports for your Listings'",
-        "last30Note": "30-day total 27 taken from the report's own TOTAL row (via the marketing block). A previous value of 5 was a sum of the top-10 websites only, which undercounts because the top-10 excludes smaller sources."
+        "note": "LAND. 29 views in the last 30 days - legacycalifornia.com 6, Homes.com 5, broker sites; ZERO Zillow, Realtor.com or Trulia traffic. Same MetroList syndication gap as 2000 Gun Club and 590 S Main. Unchanged from the 2026-08-23 report.",
+        "reportDate": "2026-08-30",
+        "source": "ListTrac / MetroList agent report 'Online Activity Reports for your Listings'"
       },
       "marketing": {
         "period": "Jan 17, 2025 - Aug 23, 2026",
@@ -5170,17 +5190,16 @@
         }
       },
       "listTrac": {
-        "views": 301,
-        "shares": 11,
-        "inquiries": 0,
-        "newPct": 100,
-        "last30": 20,
+        "views": 307,
+        "shares": 12,
+        "favorites": 1,
+        "newPct": 90,
+        "last30": 19,
         "since": "2025-01-17",
         "zipBeat": false,
-        "note": "SYNDICATION GAP (within vacant land): 5 views in 30 days and Homes.com is the ONLY source in the top-10 - no Zillow, no Realtor.com, no Trulia. 1350 Love St and 701 Mark Twain are the same property type and both draw Zillow/Realtor.com traffic, so this is a fixable feed problem, not a property-type limitation.",
-        "reportDate": "2026-08-23",
-        "source": "ListTrac / MetroList agent report 'Online Activity Reports for your Listings'",
-        "last30Note": "30-day total 20 taken from the report's own TOTAL row (via the marketing block). A previous value of 5 was a sum of the top-10 websites only, which undercounts because the top-10 excludes smaller sources."
+        "note": "LAND. 19 views in the last 30 days. Top source Homes.com (5); ZERO Zillow, Realtor.com or Trulia traffic. 701 Mark Twain and 1350 Love St are the same property type on the same MLS and DO get Zillow/Realtor.com - so this is a genuine syndication gap to raise with MetroList, not a property-type artefact. Unchanged from the 2026-08-23 report.",
+        "reportDate": "2026-08-30",
+        "source": "ListTrac / MetroList agent report 'Online Activity Reports for your Listings'"
       },
       "marketing": {
         "period": "Jan 17, 2025 - Aug 23, 2026",
@@ -5288,17 +5307,15 @@
         }
       },
       "listTrac": {
-        "views": 221,
+        "views": 223,
         "shares": 3,
-        "inquiries": 0,
-        "newPct": 94,
-        "last30": 18,
+        "newPct": 92,
+        "last30": 13,
         "since": "2025-01-17",
         "zipBeat": false,
-        "note": "SYNDICATION GAP (within vacant land): 6 views in 30 days, Homes.com the only top-10 source. Quietest listing in the book. Same pattern as 2000 Gun Club and 635 S Main.",
-        "reportDate": "2026-08-23",
-        "source": "ListTrac / MetroList agent report 'Online Activity Reports for your Listings'",
-        "last30Note": "30-day total 18 taken from the report's own TOTAL row (via the marketing block). A previous value of 6 was a sum of the top-10 websites only, which undercounts because the top-10 excludes smaller sources."
+        "note": "LAND. 13 views in the last 30 days. Top source Homes.com (6); ZERO Zillow, Realtor.com or Trulia traffic. Same MetroList syndication gap as 2000 Gun Club and 635 S Main. Unchanged from the 2026-08-23 report.",
+        "reportDate": "2026-08-30",
+        "source": "ListTrac / MetroList agent report 'Online Activity Reports for your Listings'"
       },
       "marketing": {
         "period": "Jan 17, 2025 - Aug 23, 2026",
@@ -5391,17 +5408,15 @@
         }
       },
       "listTrac": {
-        "views": 1992,
+        "views": 2031,
         "shares": 17,
-        "inquiries": 0,
-        "newPct": 97,
-        "last30": 165,
+        "newPct": 96,
+        "last30": 166,
         "since": "2025-06-20",
         "zipBeat": true,
-        "note": "Strongest of the vacant-land listings by a wide margin. Zillow 90, Realtor.com 30, Trulia 7, Homes.com 5 over the last 30 days. Beat its zip code.",
-        "reportDate": "2026-08-23",
-        "source": "ListTrac / MetroList agent report 'Online Activity Reports for your Listings'",
-        "last30Note": "30-day total 165 taken from the report's own TOTAL row (via the marketing block). A previous value of 132 was a sum of the top-10 websites only, which undercounts because the top-10 excludes smaller sources."
+        "note": "LAND. 166 views in the last 30 days - Zillow 91, Realtor.com 26, Trulia 9, Homes.com 5. Beat its zip code. Proves land CAN syndicate to the residential portals from this MLS, which is what makes the 2000 Gun Club / 590 Main / 635 Main pattern a real finding.",
+        "reportDate": "2026-08-30",
+        "source": "ListTrac / MetroList agent report 'Online Activity Reports for your Listings'"
       },
       "marketing": {
         "period": "Jun 20, 2025 - Aug 23, 2026",
