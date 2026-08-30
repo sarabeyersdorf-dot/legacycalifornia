@@ -95,11 +95,22 @@ export default async function handler(req, res) {
       ]);
       const lastDealAt = lastDeal.data?.[0]?.updated_at || null;
       const lastTaskAt = lastTask.data?.[0]?.created_at || null;
+      // The sync's own run record (db/095) — authoritative "did the cron run, and
+      // what did it do", independent of the sync response body (which a fetch-tool
+      // timeout can lose). Fail-soft: pre-095 schema just omits it.
+      let last_run = null;
+      try {
+        const { data: sr } = await supa.from('sync_runs')
+          .select('ran_at, ok, source_version, deals_upserted, deals_pruned, tasks_written, documents_written, timeline_items_retired, stage_overrides_cleared, date_promotions, error_count')
+          .order('ran_at', { ascending: false }).limit(1);
+        if (sr && sr[0]) last_run = { ...sr[0], age_sec: ageSec(sr[0].ran_at) };
+      } catch (_) { /* sync_runs not migrated yet */ }
       return {
         last_deal_upsert: iso(lastDealAt), last_deal_upsert_age_sec: ageSec(lastDealAt),
         last_briefing_task: iso(lastTaskAt), last_briefing_task_age_sec: ageSec(lastTaskAt),
         briefing_tasks_total: briefTot.count || 0,
-        sync_stale: ageSec(lastDealAt) != null && ageSec(lastDealAt) > 5400  // > 1.5h → something's wrong
+        sync_stale: ageSec(lastDealAt) != null && ageSec(lastDealAt) > 5400,  // > 1.5h → something's wrong
+        last_run   // the sync-deals run record — see db/095
       };
     } catch (e) { return { _error: e.message }; }
   })();
@@ -219,17 +230,22 @@ export default async function handler(req, res) {
           'coe_date_expected, coe_date_expected_by, coe_date_expected_at, coe_date_expected_note, ' +
           'acceptance_date_expected, acceptance_date_expected_by, acceptance_date_expected_at, acceptance_date_expected_note');
       if (error) throw error;
-      const confirmedOf = (row, f) => {
+      const candidatesOf = (row, f) => {
         const ov = (row.agent_overrides && typeof row.agent_overrides === 'object') ? row.agent_overrides : {};
-        return ov[f] ?? row[f] ?? null;
+        return [ov[f], row[f]].filter((v) => v != null).map(String);
       };
       const items = [];
       for (const row of (data || [])) {
         for (const f of ['coe_date', 'acceptance_date']) {
           const exp = row[`${f}_expected`];
           if (!exp) continue;
-          const confirmed = confirmedOf(row, f);
-          const state = confirmed ? (String(confirmed) === String(exp) ? 'promoted_pending_clear' : 'discrepancy') : 'pending';
+          // Confirmed if EITHER the base value or an agent override matches the
+          // expectation — so a stale override can't make a caught-up date read as a
+          // 'discrepancy' (mirrors sync-deals' promotion check). Report the value
+          // that actually matched, else the first known confirmed value.
+          const cands = candidatesOf(row, f);
+          const confirmed = cands.includes(String(exp)) ? String(exp) : (cands[0] ?? null);
+          const state = cands.includes(String(exp)) ? 'promoted_pending_clear' : (confirmed ? 'discrepancy' : 'pending');
           items.push({
             deal: row.source_key, address: row.address || null, field: f,
             expected: exp, expected_by: row[`${f}_expected_by`] || null,

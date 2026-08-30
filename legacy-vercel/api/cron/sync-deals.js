@@ -1137,9 +1137,13 @@ export default async function handler(req, res) {
         // 8/10" to sellers with no buyer (Bug 5). client_visible=false + null
         // date means the row survives for agent history but shows nothing client-
         // facing.
+        // Retire EVERY still-live item (any status that isn't already terminal),
+        // not just 'upcoming'/'action' — a fell-through escrow can carry items in
+        // other live states ('pending' etc.) that the old two-status filter left
+        // on the portal (324 Augusta, Cowork 8/30). done/waived/na are left alone.
         const { data: retired } = await supa.from('deal_timeline_items')
           .update({ status: 'na', client_visible: false, due_date: null, updated_at: new Date().toISOString() })
-          .in('deal_id', nonEscrowDealIds).in('status', ['upcoming', 'action']).select('id');
+          .in('deal_id', nonEscrowDealIds).not('status', 'in', '("done","waived","na")').select('id');
         timelineItemsRetired = (retired || []).length;
         // Also fix already-'na' rows from earlier runs that kept their dates/visibility.
         await supa.from('deal_timeline_items')
@@ -1561,8 +1565,15 @@ export default async function handler(req, res) {
         for (const f of ['coe_date', 'acceptance_date']) {
           const expected = row[`${f}_expected`];
           if (!expected) continue;
-          const confirmed = ov[f] ?? row[f] ?? null;
-          if (confirmed && String(confirmed) === String(expected)) {
+          // "Caught up" if EITHER the confirmed base value OR an agent override
+          // equals the expectation. The old code took ov[f] ?? row[f] — so a STALE
+          // override (e.g. 695 Feather's agent_overrides.coe_date '2026-08-28',
+          // left over from before the ETA extended it) masked the real base
+          // coe_date '2026-09-29' that had actually caught up, and the belief never
+          // promoted. Checking both values fixes that: a confirmed date matching
+          // the expectation promotes regardless of a lingering override.
+          const candidates = [ov[f], row[f]].filter((v) => v != null).map(String);
+          if (candidates.includes(String(expected))) {
             await supa.from('deals').update({
               [`${f}_expected`]: null, [`${f}_expected_by`]: null,
               [`${f}_expected_at`]: null, [`${f}_expected_note`]: null
@@ -1578,7 +1589,8 @@ export default async function handler(req, res) {
       }
     } catch (_) { /* pre-089 schema or transient — non-fatal */ }
 
-    return ok(res, {
+    const ranAt = new Date().toISOString();
+    const summary = {
       synced: true,
       source_version: data.version || null,
       date_promotions: datePromotions,
@@ -1608,8 +1620,26 @@ export default async function handler(req, res) {
       // and how many the sync auto-reconciled this run (deals.json now covers them).
       party_edits: partyEdits,
       party_reconciled: partyReconciled,
-      ran_at: new Date().toISOString()
-    });
+      ran_at: ranAt
+    };
+
+    // Persist a readable run record (db/095). The manual ?key= call's response
+    // body can be lost to a fetch-tool timeout (the sync finishes after the
+    // client gives up), so Cowork can't rely on THIS body to confirm the run.
+    // reconcile.sync.last_run reads the newest row back. Fail-soft: a missing
+    // table (pre-095) or a transient error must never fail an otherwise-good sync.
+    await supa.from('sync_runs').insert({
+      ran_at: ranAt, ok: true,
+      source_version: summary.source_version, deals_source: dealsSource,
+      deals_upserted: dealsUpserted, deals_pruned: dealsPruned,
+      tasks_written: tasksWritten, documents_written: docStats.inserted,
+      timeline_items_retired: timelineItemsRetired,
+      stage_overrides_cleared: stageOverridesCleared,
+      date_promotions: datePromotions, error_count: (errors || []).length,
+      summary
+    }).then(() => {}, () => {});
+
+    return ok(res, summary);
   } catch (e) {
     return fail(res, 500, e.message);
   }
