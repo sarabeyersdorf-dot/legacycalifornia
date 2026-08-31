@@ -51,9 +51,11 @@ export default async function handler(req, res) {
     const mRes = await mq;
     if (mRes.error) return fail(res, 500, `messages: ${mRes.error.message}`);
 
-    // 2. Inbound rows from `deal_messages` (texts / calls) ------------------
+    // 2. Inbound rows from `deal_messages` (texts / calls / inbound EMAIL) -----
+    // email-sync writes inbound email here too, with channel='email' — so this
+    // must NOT force every row to sms/call, or an email shows as "Text".
     let dq = supa.from('deal_messages')
-      .select('id, contact_id, direction, channel, content, raw_phone_number, status, call_duration_seconds, created_at')
+      .select('id, contact_id, direction, channel, content, subject, raw_phone_number, raw_email_address, status, call_duration_seconds, created_at')
       .eq('direction', 'inbound').neq('status', 'dismissed')
       .order('created_at', { ascending: false }).limit(limit);
     if (since) dq = dq.gt('created_at', since);
@@ -94,18 +96,25 @@ export default async function handler(req, res) {
 
     for (const d of dealRows) {
       const info = d.contact_id ? nameById.get(d.contact_id) : null;
-      const ch = d.channel === 'call' ? 'call' : 'sms';
+      // Respect the row's real channel: deal_messages holds texts, calls AND
+      // inbound email (channel='email'). Only call/email/sms are valid; anything
+      // else falls back to sms.
+      const ch = d.channel === 'call' ? 'call' : (d.channel === 'email' ? 'email' : 'sms');
+      const isEmail = ch === 'email';
+      // The sender's identifier: their email for an email, their number otherwise.
+      const rawId = isEmail ? d.raw_email_address : d.raw_phone_number;
       const body = ch === 'call'
         ? ('Inbound call' + (durLabel(d.call_duration_seconds) ? ' · ' + durLabel(d.call_duration_seconds) : ''))
-        : (d.content || '');
+        : (isEmail && d.subject ? `${d.subject} — ${d.content || ''}` : (d.content || ''));
       feed.push({
         key: 'd:' + d.id,
         source: 'deal_messages',
         channel: ch,
         channel_label: CHANNEL_LABEL[ch] || ch,
         lead_id: d.contact_id || null,
-        name: (info && info.name) || d.raw_phone_number || null,
-        phone: (info && info.phone) || d.raw_phone_number || null,
+        name: (info && info.name) || rawId || null,
+        phone: isEmail ? ((info && info.phone) || null) : ((info && info.phone) || d.raw_phone_number || null),
+        email: isEmail ? (d.raw_email_address || null) : null,
         agent: (info && info.agent) || null,   // whose client → who should handle it
         preview: preview(body, 160),
         created_at: d.created_at,
