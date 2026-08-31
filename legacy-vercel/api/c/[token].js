@@ -177,7 +177,7 @@ async function alertAgentOnReaction(supa, coll, row) {
     if (agent.phone) {
       const cmt = row.comment ? ` — “${row.comment.slice(0, 120)}”` : '';
       // Desk URL follows PUBLIC_SITE_URL (flips to the custom domain via one env var).
-      const desk = (process.env.PUBLIC_SITE_URL || 'https://legacycalifornia.vercel.app').replace(/^https?:\/\//, '').replace(/\/+$/, '') + '/crm.html';
+      const desk = (process.env.PUBLIC_SITE_URL || 'https://legacycalifornia.com').replace(/^https?:\/\//, '').replace(/\/+$/, '') + '/crm.html';
       await sendSMS({ to: agent.phone, body: `${title}${cmt}. Open desk: ${desk} — Legacy` });
     }
   }

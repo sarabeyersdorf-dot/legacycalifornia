@@ -16,7 +16,7 @@ export const BROKERAGE = { name: 'Legacy Properties', broker: 'Sara Cooper', bro
 // once legacycalifornia.com is added to the project and its DNS is pointing at
 // Vercel (and legacycalifornia.com is added to iHomeFinder's authorized domains
 // so the IDX widgets render there too).
-export const SITE = (process.env.PUBLIC_SITE_URL || 'https://legacycalifornia.vercel.app').replace(/\/+$/, '');
+export const SITE = (process.env.PUBLIC_SITE_URL || 'https://legacycalifornia.com').replace(/\/+$/, '');
 
 export function disclaimer(agentName, dre) {
   const who = dre ? `${agentName}, DRE #${dre}` : agentName;

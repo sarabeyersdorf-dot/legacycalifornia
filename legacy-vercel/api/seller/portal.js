@@ -21,6 +21,7 @@ import { getCallerProfile } from '../_lib/auth.js';
 import { anthropicMessage } from '../_lib/anthropic.js';
 import { handleOptions, ok, fail } from '../_lib/cors.js';
 import { extractYouTubeId } from '../_lib/youtube.js';
+import { maybeBrowsingAlert } from '../_lib/browsing-alert.js';
 
 // ---------------------------------------------------------------------------
 // Formatting helpers
@@ -140,6 +141,10 @@ export default async function handler(req, res) {
       pr.sort((a, b) => new Date(b.deals.updated_at || 0) - new Date(a.deals.updated_at || 0));
       deal = pr[0]?.deals || null;
       viewerRole = pr[0]?.role || null;
+      // High-intent: the client opened their own portal via the private link —
+      // greet them. Only this token branch is the real client (agent preview and
+      // the authed branches below are not). Debounced + fire-and-forget.
+      maybeBrowsingAlert(supa, { leadId, reason: 'opened their portal' }).then(() => {}, () => {});
     } else {
       const caller = await getCallerProfile(req, res);
       user = caller.user; profile = caller.profile;

@@ -348,6 +348,54 @@ body.lp-restyle {
         })();
         </script>
 
+        <!-- LIVE · who's on the site now (real-time engagement) -->
+        <section class="live-now" data-live-now style="display:none;margin:0 0 16px;padding:14px 16px;background:#eceaf3;border:1px solid #d9d3ea;border-radius:12px;">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
+            <span style="width:8px;height:8px;border-radius:50%;background:#5A4C7C;box-shadow:0 0 0 3px rgba(90,76,124,.18);"></span>
+            <span class="eyebrow" style="color:#5A4C7C;">Live · on your site now</span>
+            <span data-live-when style="font-size:11px;color:#7C6A4D;margin-left:auto;"></span>
+          </div>
+          <div data-live-list></div>
+        </section>
+        <script>
+        (function(){
+          var sec = document.querySelector('[data-live-now]');
+          var list = document.querySelector('[data-live-list]');
+          var whenEl = document.querySelector('[data-live-when]');
+          if(!sec || !list) return;
+          function ago(iso){ var t=Date.parse(iso); if(isNaN(t)) return ''; var s=Math.max(0,(Date.now()-t)/1000); if(s<60) return 'just now'; if(s<3600) return Math.floor(s/60)+'m ago'; return Math.floor(s/3600)+'h ago'; }
+          function esc(s){ return String(s==null?'':s).replace(/[&<>"]/g,function(c){return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]);}); }
+          function tel(p){ return 'tel:'+String(p||'').replace(/[^0-9+]/g,''); }
+          function render(people){
+            if(!people || !people.length){ sec.style.display='none'; list.innerHTML=''; return; }
+            sec.style.display='';
+            if(whenEl) whenEl.textContent = people.length + (people.length===1?' person':' people') + ' · last 60 min';
+            list.innerHTML = people.slice(0,8).map(function(p){
+              var call = p.phone ? '<a class="btn btn-ghost btn-sm" href="'+tel(p.phone)+'">Call</a>' : '';
+              var open = '<button class="btn btn-ink btn-sm" data-live-open="'+esc(p.lead_id)+'">Open →</button>';
+              return '<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;padding:8px 0;border-top:1px solid rgba(90,76,124,.14);">'
+                + '<div style="min-width:0;"><div style="font-weight:600;color:#1A1714;">'+esc(p.name)+(p.agent?' <span style="font-weight:400;color:#7C6A4D;font-size:12px;">('+esc(p.agent)+')</span>':'')+'</div>'
+                + '<div style="font-size:12.5px;color:#5A4C7C;">'+esc(p.last_action)+(p.last_detail?' — '+esc(p.last_detail):'')+' · '+esc(ago(p.last_at))+'</div></div>'
+                + '<span style="display:flex;gap:6px;flex:none;">'+call+open+'</span></div>';
+            }).join('');
+          }
+          function load(){
+            fetch('/api/crm/recently-active?minutes=60',{credentials:'include'})
+              .then(function(r){ return r.ok ? r.json() : null; })
+              .then(function(j){ if(j && Array.isArray(j.people)) render(j.people); })
+              .catch(function(){ /* never break Today */ });
+          }
+          document.addEventListener('click',function(e){
+            var b = e.target.closest('[data-live-open]'); if(!b) return;
+            var id = b.getAttribute('data-live-open');
+            if(id && window.Legacy && window.Legacy.openLead) window.Legacy.openLead(id);
+          });
+          load();
+          document.addEventListener('crm:view', function(ev){ if(ev.detail && ev.detail.name==='today') load(); });
+          setInterval(load, 60000);
+        })();
+        </script>
+
         <!-- HERO 3-COL -->
         <div class="today-grid">
 

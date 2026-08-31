@@ -34,6 +34,6 @@ export function feedAgent(token) {
 
 // The public feed URL (https) for an agent, given the request's own origin.
 export function feedUrl(agentKey, origin) {
-  const base = (origin || (process.env.PUBLIC_SITE_URL || 'https://legacycalifornia.vercel.app')).replace(/\/+$/, '');
+  const base = (origin || (process.env.PUBLIC_SITE_URL || 'https://legacycalifornia.com')).replace(/\/+$/, '');
   return `${base}/api/cal/${feedToken(agentKey)}.ics`;
 }
