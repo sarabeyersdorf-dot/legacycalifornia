@@ -1,7 +1,7 @@
 {
-  "version": 11.3,
-  "lastUpdated": "2026-08-30",
-  "updatedBy": "cowork-morning-briefing 2026-08-30",
+  "version": 11.8,
+  "lastUpdated": "2026-08-31",
+  "updatedBy": "cowork-morning-briefing 2026-08-31 (removed the elams-dre-number-wrong task - it was a false finding; 02254944 IS the correct Legacy Properties corporate DRE, confirmed by Sara 2026-08-31)",
   "tasks": [
     {
       "agent": "sara",
@@ -643,9 +643,11 @@
       "agent": "james",
       "client": "695 Feather",
       "title": "Download signed ADM #2 from Authentisign (completion email 7/24 1:28 AM — removes Bert Andrews, Ashley holds title alone) and file in 695 Feather Ex folder",
-      "done": false,
+      "done": true,
       "key": "feather-adm2-download",
-      "due": "2026-08-12"
+      "due": "2026-08-12",
+      "doneDate": "2026-08-31",
+      "doneNote": "Closed by the 2026-08-31 briefing run - superseded. The signed addendum removing Bert Andrews is on disk at EX\\addendum removing Bert.pdf (2026-08-14). Nothing left to download."
     },
     {
       "agent": "james",
@@ -659,9 +661,11 @@
       "agent": "james",
       "client": "695 Feather",
       "title": "CRITICAL FILE GAP: Chase Dee Bradley (dee@caltel.com) for seller disclosures — TDS, SPQ, NHD + sig page, and LA AVID all missing from 695 Feather Ex folder; also file James BA AVID; cash deal nearing close",
-      "done": false,
+      "done": true,
       "key": "feather-seller-disclosures",
-      "due": "2026-08-12"
+      "due": "2026-08-12",
+      "doneDate": "2026-08-31",
+      "doneNote": "Closed by the 2026-08-31 briefing run - every document this task chases is on disk and has been for over a week. TDS: __Pending\\695 Feather\\EX\\TDSpdf.pdf. SPQ: EX\\SPQpdf.pdf (seller signed 08/21, Ashley acknowledged 08/22; flattened scan, which is why earlier runs read it as absent). NHD report AND signature pages: __Pending\\695 Feather\\From Escrow\\NHD PIDMAXReport_4178560.pdf and NHD PIDMAXSignaturePages_4178560.pdf - filed one level out from EX, which is why the EX-only scans missed them. Listing-agent AVID: EX\\avid_listing_agent_fully_executed.pdf (8/23). Buyer-agent AVID: EX\\avid_buyers_agent_fully_executed1.pdf (8/23). STOP CHASING DEE BRADLEY."
     },
     {
       "agent": "sara",
@@ -810,9 +814,11 @@
       "title": "695 Feather: File fully executed MH Addendum — both Ashley Robinson AND Dee Bradley signed via Authentisign 7/25 8:59 PM; James forwarded completion notification 7/27; download and file in 695 Feather Ex folder",
       "note": "Authentisign completion 7/25 8:59 PM. Both buyer (Ashley Robinson) and seller (Dee Bradley) signed. This is prelim item #12 (OC Title escrow #2473532-TS). File PDF in EX. Added 2026-07-27. Merged with the 7/28 duplicate 2026-08-08: EX holds the buyer-signed copy only; download the full Authentisign certificate (both Ashley Robinson and Dee Bradley signed 7/25 8:59 PM).",
       "dateAdded": "2026-07-27",
-      "done": false,
+      "done": true,
       "key": "feather-mh-addendum-file",
-      "due": "2026-08-12"
+      "due": "2026-08-12",
+      "doneDate": "2026-08-31",
+      "doneNote": "Closed by the 2026-08-31 briefing run - the MH addendum is on disk twice: __Pending\\695 Feather\\EX\\MH Add from escrow buyer signed.pdf and EX\\Amend MH.pdf."
     },
     {
       "agent": "sara",
@@ -1469,7 +1475,9 @@
       "key": "feather-hoa-docs-check",
       "title": "695 Feather: confirm all three parts of the HOA document set arrived intact (Tanya split them 8/13 after size rejections)",
       "due": "2026-08-16",
-      "done": false
+      "done": true,
+      "doneDate": "2026-08-31",
+      "doneNote": "Closed by the 2026-08-31 briefing run - the HOA package arrived intact. __Pending\\695 Feather\\HOA docs from escrow\\ holds 29 files including the cover sheet, the DISCLOSURE Check LIST, the CC&Rs, the lot ledger, the reserve study, the 2025/2026 board minutes and all current policies. Tanya's three-part split all landed."
     },
     {
       "agent": "sara",
@@ -1576,7 +1584,9 @@
       "key": "feather-adm2-file",
       "title": "695 Feather: ADM #2 still not filed — EX holds only ADM 1pdf.pdf.",
       "due": "This week",
-      "done": false
+      "done": true,
+      "doneDate": "2026-08-31",
+      "doneNote": "Closed by the 2026-08-31 briefing run - the Bert Andrews title-removal addendum IS on disk: __Pending\\695 Feather\\EX\\addendum removing Bert.pdf, filed 2026-08-14. The task's premise ('EX holds only ADM 1pdf.pdf') is out of date."
     },
     {
       "agent": "sara",
@@ -2190,16 +2200,16 @@
       "agent": "sara",
       "client": "Roger & Kim Quillen",
       "key": "quillen-collection-followup",
-      "title": "Roger AND Kim both opened 'Roger and Kim' Monday evening 8/25 and viewed properties - first real client engagement the CRM has ever recorded. Call while it is warm",
-      "due": "2026-08-26",
+      "title": "Roger & Kim Quillen: Kim opened 'Roger and Kim' AGAIN Sunday 8/30 6:32 PM and viewed three properties - 7 opens since the 8/25 push and still no reply. This is real client browsing, not a preview. Call her.",
+      "due": "2026-08-31",
       "done": false
     },
     {
       "agent": "sara",
       "client": "179 Elams Ranch",
       "key": "elams-placer-title-guidance",
-      "title": "179 Elams Ranch: chase Placer Title for what the McEvoy family must provide before listing — a deceased owner is on title. Nothing moves until this comes back.",
-      "due": "this week",
+      "title": "🔴 179 Elams Ranch: the RLA is now SIGNED (8/30, $330,000) but title is still not cleared - a deceased owner is on title. Chase Amanda Boitano at Placer. Do not input to MetroList until she answers.",
+      "due": "2026-09-01",
       "done": false
     },
     {
@@ -2232,9 +2242,10 @@
       "agent": "james",
       "client": "8235 Baldwin",
       "key": "baldwin-nbp-respond",
-      "title": "🔴 Baldwin: Allyson Overturf served a Notice to Buyer to Perform (NBP-1) 8/27 2:04 PM. Open the attached PDF, read the number of days on the form, and diary the cure date. COE is Monday 8/31.",
-      "due": "Today",
-      "done": false
+      "title": "🔴 Baldwin: the NBP-1 cure window has LAPSED. The form gives 2 Days after delivery; served 8/27 2:04 PM, so it expired 8/29. The seller can cancel at any time and COE is today. Talk to Allyson before she does.",
+      "due": "2026-08-31",
+      "done": false,
+      "attention": true
     },
     {
       "agent": "james",
@@ -2242,7 +2253,9 @@
       "key": "baldwin-nbp-file",
       "title": "Baldwin: download NBP-1_Notice_to_Buyer_to_Perform_-_CAR.pdf from Allyson’s 8/27 email and file it in __Pending\\8235 Baldwin St\\EX\\ — it is not on disk anywhere.",
       "due": "Today",
-      "done": false
+      "done": true,
+      "doneDate": "2026-08-31",
+      "doneNote": "Closed by the 2026-08-31 briefing run: the document IS on disk. __Pending\\8235 Baldwin St\\EX\\NBP-1_Notice_to_Buyer_to_Perform_-_CAR.pdf, filed 2026-08-27, read this run. The task said it was 'not on disk anywhere' - that is no longer true."
     },
     {
       "agent": "james",
@@ -2294,7 +2307,9 @@
       "key": "mcevoy-venue-confirm",
       "title": "Josh McEvoy 3:00 PM today — two venues on record: your CRM note says Fosters Big Horn, Rio Vista; the calendar says Tower Water Front Grille, 14900 W Hwy 12, Lodi. Confirm with Josh before you drive. Listing agreement to sign.",
       "due": "Today",
-      "done": false
+      "done": true,
+      "doneDate": "2026-08-31",
+      "doneNote": "Closed by the 2026-08-31 briefing run: the meeting happened and produced the deliverable. The 179 Elams Ranch listing agreement was executed via Authentisign 2026-08-30 (RLA MCA SBSA DIA, signing complete 5:49 PM) and the package is on disk. The venue question is moot."
     },
     {
       "agent": "sara",
@@ -2340,17 +2355,20 @@
       "agent": "sara",
       "client": "1143 Echo",
       "key": "echo-listing-appt-sunday",
-      "due": "2026-08-30",
-      "title": "1143 Echo: listing appointment with Guy and Adrianna, Sunday 8/30 at 3:30 — James booked it from the CRM 8/28 8:44 PM. Confirm it is on your calendar and take the RLA.",
-      "done": false
+      "due": "2026-09-01",
+      "title": "1143 Echo: the Sunday 8/30 3:30 appointment with Guy and Adrianna produced NO Echo paperwork - nothing new is on disk for 1143 Echo. The only RLA filed this weekend is 179 Elams Ranch. Confirm whether the Castles signed anything.",
+      "done": true,
+      "doneDate": "2026-08-30",
+      "doneNote": "The listing appointment with Guy and Adrianna at 1143 Echo took place Sunday 2026-08-30 at 3:30 PM. Confirmed first-hand by Sara on 2026-08-31 ('echo was yesterday'). Agent knowledge outranks inference - closed on her word."
     },
     {
       "agent": "james",
       "client": "8235 Baldwin",
       "key": "baldwin-clear-to-close-writing",
-      "due": "Today",
-      "title": "8235 Baldwin: COE is Monday 8/31 and there is still no clear-to-close. Kim Hesser promised an end-of-day 8/28 update and none arrived — get the senior underwriter's answer in writing today and send it straight to Allyson.",
-      "done": false
+      "due": "2026-08-31",
+      "title": "🔴 8235 Baldwin: COE IS TODAY 8/31 and no clear-to-close has arrived. Kim Hesser's promised end-of-day 8/28 update never came - nothing since her 8/28 7:55 AM email. Call her, get the senior underwriter's answer in writing, send it to Allyson.",
+      "done": false,
+      "attention": true
     },
     {
       "agent": "sara",
@@ -2374,6 +2392,54 @@
       "key": "feather-spq-tell-ashley",
       "title": "695 Feather: the SPQ was on file all along (seller signed 8/21, Ashley acknowledged 8/22) - it is a scan, which is why it read as missing. Stop chasing Dee Bradley for it; the remaining seller-disclosure gaps are the NHD signature page and the listing-agent AVID.",
       "due": "This week",
+      "done": false
+    },
+    {
+      "agent": "sara",
+      "client": "179 Elams Ranch",
+      "key": "elams-rla-misfiled",
+      "due": "2026-08-31",
+      "title": "179 Elams Ranch: the entire executed RLA package (RLA, AAA1, MCA, SBSA, DIA) was filed into _Listings\\preparing to list\\1143 Echo St\\Ex\\. Wrong folder - move it to a 179 Elams Ranch folder and check nothing of Echo's was displaced.",
+      "done": false
+    },
+    {
+      "agent": "sara",
+      "client": "Ron Morris",
+      "key": "fub-ron-morris",
+      "due": "2026-08-31",
+      "title": "NEW LEAD: Ron Morris, ronmorr19@gmail.com, (209) 728-9888 - requested the 433 E Highway 4 INVESTOR PACKET from the buyer-briefs page on legacycalifornia.com, Sunday 8/30 11:01 PM. Your own listing, your own website, unworked. Auto-enrolled in buyer_nurture.",
+      "done": false
+    },
+    {
+      "agent": "sara",
+      "client": "179 Elams Ranch",
+      "key": "elams-mls-input-hold",
+      "due": "2026-09-02",
+      "title": "179 Elams Ranch: confirm MetroList actually covers Oroville / Butte County before input, and decide whether a co-op or referral is needed. It is well outside the Calaveras-Amador footprint.",
+      "done": false
+    },
+    {
+      "agent": "james",
+      "client": "8235 Baldwin",
+      "key": "baldwin-today-decision",
+      "due": "2026-08-31",
+      "title": "🔴 Baldwin: if no clear-to-close lands by midday, get on the phone with Allyson and agree what happens - a fourth extension, or the seller cancels on the lapsed NBP. Do not let 5 PM arrive with nothing said.",
+      "done": false
+    },
+    {
+      "agent": "sara",
+      "client": "9568 Sheep Ranch",
+      "key": "sheep-ranch-homescom-missing",
+      "title": "9568 Sheep Ranch: no Homes.com weekly performance email arrived 8/31, though eight other listings got one. Its stored figures are from 8/20 and are going stale - check the recurring report is still switched on for this listing.",
+      "due": "This week",
+      "done": false
+    },
+    {
+      "agent": "sara",
+      "client": "1143 Echo",
+      "key": "echo-appointment-outcome",
+      "title": "1143 Echo: the Sunday 3:30 appointment with Guy and Adrianna happened, but no Echo paperwork was filed - the package that came back Sunday evening was the McEvoys' Elams Ranch RLA. Record what came of the Echo meeting.",
+      "due": "Today",
       "done": false
     }
   ],
@@ -2989,7 +3055,7 @@
       "correspondence": [],
       "notes": "UNDER CONTRACT / ACCEPTED 6/17/2026. James Beyersdorf's deal (buyer-side). Buyer Shomari Turner; seller Rebecca Johnson (a.k.a. Rebecca Turnage); listing agent Allyson Overturf, PMZ Real Estate. Original offer $200k 6/12; SCO1 $205k 6/15 (escrow pre-opened Chicago Title - Veronica Barragan; fire disclosure in NHD); BCO1 $207,000 accepted by seller 6/17, seller to pay buyer-broker comp 3%. Financing: FHA 203(k) rehab loan (~$193k, 96.5% LTV), $4,500 down, $2,500 initial deposit. As-is; buyer waived home warranty. Key dates from acceptance 6/17: deposit $2,500 by 6/22; seller docs ~6/24; all buyer contingencies (17 days) roll to 7/6 (7/4 holiday/weekend); final walk ~7/29; COE 45 days = 8/1 (Sat) rolls to ~8/3. EMD receipt + escrow holder acknowledgement on file. FHA 203(k) rehab loan — lender milestones will drive the timeline. ESCROW/TITLE DISCREPANCY: executed SCO names Chicago Title (Veronica Barragan); a 6/22 amended prelim (reason 'Added Buyer') references Fidelity National Title Order #FSST-5312600364 (Veronica Barragan & Kim McCray) — confirm which company holds escrow. | 8/7: COE confirmed 8/17. Loan contingency due 8/12. ETA2 in Baldwin Ex. Lender Kim Hesser, Chicago Title FSST-5312600364.",
       "alerts": [
-        "🔴 NOTICE TO BUYER TO PERFORM served 2026-08-27 2:04 PM by listing agent Allyson Overturf (NBP-1, C.A.R. form, attached to her email; NOT yet filed to EX). James acknowledged receipt 8/27 3:22 PM. Read the days stated on the form and diary the cure date — COE is Monday 2026-08-31.",
+        "🔴 NOTICE TO BUYER TO PERFORM (NBP-1) - SERVED 2026-08-27 2:04 PM by listing agent Allyson Overturf and NOW ON DISK at __Pending\\8235 Baldwin St\\EX\\NBP-1_Notice_to_Buyer_to_Perform_-_CAR.pdf (filed 8/27; read by the 2026-08-31 run). Read off the form: it is signed by seller Rebecca Johnson 08/27/2026, it selects contingency A (Loan, RPA para 8A) AND contingency B (Appraisal, RPA para 8B), and it allows '2 Days after Delivery'. Delivered 8/27 2:04 PM, so the cure window EXPIRED 2026-08-29. As of today the buyer has not removed either contingency and the seller may cancel the Agreement at any time. COE is today, Monday 2026-08-31, and there is still no clear-to-close. James acknowledged receipt 8/27 3:22 PM.",
         "LENDER STATUS 2026-08-28 7:55 AM, Kim Hesser (Prime Residential): her computer crashed early in the week, which explains the silence. The appraisal HAS been received. The appraiser called additional items not on the contractor's bid; an updated bid was requested and expected back 8/28. File goes to the senior underwriter 8/28 for clear-to-close; she promised another update end of day.",
         "CORRECTION 7/19 (per James): CR#1 (7/13) only removed the INSPECTION contingency — appraisal, loan, title, and insurance contingencies are still OUTSTANDING. Prior 'contingencies removed' language was incomplete/incorrect. A follow-up Buyer Contingency Removal is needed once those clear.",
         "CR#1 NOT visible in the listing side's (Allyson Overturf) portal as of 7/19 (per James) — even though she acknowledged it 7/14, it isn't showing on her end. Needs to be resent/re-confirmed filed on the seller side.",
@@ -3812,25 +3878,36 @@
         "source": "ListTrac / MetroList agent report 'Online Activity Reports for your Listings'"
       },
       "homesCom": {
+        "addressShown": "433 E Highway 4",
+        "totalViews": 69016,
+        "detailPageViews": 875,
+        "favorites": 10,
         "shareUrl": "https://www.homes.com/t/h3kn9nsqsh4t5?s=6",
         "listingKey": "5myhkcnnb487k",
-        "addressShown": "433 E HIGHWAY 4",
-        "priceShown": 1399000,
-        "listedShown": "2026-03-20",
-        "daysOnMarket": 149,
-        "totalViews": 63789,
-        "displayAdViews": 17717,
-        "detailPageViews": 844,
-        "topOfSearchResults": 21658,
-        "favorites": 10,
-        "matterportViews": 44,
-        "shares": 2,
-        "agentViews": 866,
-        "consumerViews": 53609,
-        "combinedViews": 54475,
-        "reportDate": "2026-08-20",
-        "source": "Homes.com Listing Analytics",
-        "note": "Homes.com Listing Analytics (CoStar), agent tier Silver. Captured from the shareable /t/ report link, which is client-safe: it mints a fresh 180-day token on each open, so the link itself does not expire. These view counts are NOT comparable to listTrac's — different platform, different counting. Label both by source on the seller portal."
+        "reportDate": "2026-08-31",
+        "source": "Homes.com weekly performance email (homes@email.homes.com), 2026-08-31 15:17 UTC",
+        "note": "Captured from the Monday weekly performance email, which carries only these three figures. The fuller breakdown (display-ad vs detail-page split, top-of-search, agent vs consumer views, matterport, priceShown/listedShown/daysOnMarket) comes only from the /t/ share report and is preserved under lastFullCapture where one exists - those numbers are NOT current. Homes.com and ListTrac count differently and are never comparable: do not add, reconcile, or present one as correcting the other. On a seller portal they sit side by side, each labelled.",
+        "lastFullCapture": {
+          "shareUrl": "https://www.homes.com/t/h3kn9nsqsh4t5?s=6",
+          "listingKey": "5myhkcnnb487k",
+          "addressShown": "433 E HIGHWAY 4",
+          "priceShown": 1399000,
+          "listedShown": "2026-03-20",
+          "daysOnMarket": 149,
+          "totalViews": 63789,
+          "displayAdViews": 17717,
+          "detailPageViews": 844,
+          "topOfSearchResults": 21658,
+          "favorites": 10,
+          "matterportViews": 44,
+          "shares": 2,
+          "agentViews": 866,
+          "consumerViews": 53609,
+          "combinedViews": 54475,
+          "reportDate": "2026-08-20",
+          "source": "Homes.com Listing Analytics",
+          "note": "Homes.com Listing Analytics (CoStar), agent tier Silver. Captured from the shareable /t/ report link, which is client-safe: it mints a fresh 180-day token on each open, so the link itself does not expire. These view counts are NOT comparable to listTrac's — different platform, different counting. Label both by source on the seller portal."
+        }
       },
       "marketing": {
         "period": "Mar 20 - Aug 23, 2026",
@@ -4036,24 +4113,35 @@
         "source": "ListTrac / MetroList agent report 'Online Activity Reports for your Listings'"
       },
       "homesCom": {
+        "addressShown": "467 Skyline Dr",
+        "totalViews": 39838,
+        "detailPageViews": 669,
+        "favorites": 16,
         "shareUrl": "https://www.homes.com/t/0nlntp2hg4hv0?s=6",
         "listingKey": "c1d7q816m3enr",
-        "addressShown": "467 Skyline Drive",
-        "priceShown": 89500,
-        "listedShown": "2026-06-04",
-        "daysOnMarket": 78,
-        "totalViews": 36195,
-        "displayAdViews": 2695,
-        "detailPageViews": 601,
-        "topOfSearchResults": 3516,
-        "favorites": 16,
-        "shares": 7,
-        "agentViews": 538,
-        "consumerViews": 34864,
-        "combinedViews": 35402,
-        "reportDate": "2026-08-20",
-        "source": "Homes.com Listing Analytics",
-        "note": "Homes.com Listing Analytics (CoStar), agent tier Silver. Captured from the shareable /t/ report link, which is client-safe: it mints a fresh 180-day token on each open, so the link itself does not expire. These view counts are NOT comparable to listTrac's — different platform, different counting. Label both by source on the seller portal."
+        "reportDate": "2026-08-31",
+        "source": "Homes.com weekly performance email (homes@email.homes.com), 2026-08-31 15:17 UTC",
+        "note": "Captured from the Monday weekly performance email, which carries only these three figures. The fuller breakdown (display-ad vs detail-page split, top-of-search, agent vs consumer views, matterport, priceShown/listedShown/daysOnMarket) comes only from the /t/ share report and is preserved under lastFullCapture where one exists - those numbers are NOT current. Homes.com and ListTrac count differently and are never comparable: do not add, reconcile, or present one as correcting the other. On a seller portal they sit side by side, each labelled.",
+        "lastFullCapture": {
+          "shareUrl": "https://www.homes.com/t/0nlntp2hg4hv0?s=6",
+          "listingKey": "c1d7q816m3enr",
+          "addressShown": "467 Skyline Drive",
+          "priceShown": 89500,
+          "listedShown": "2026-06-04",
+          "daysOnMarket": 78,
+          "totalViews": 36195,
+          "displayAdViews": 2695,
+          "detailPageViews": 601,
+          "topOfSearchResults": 3516,
+          "favorites": 16,
+          "shares": 7,
+          "agentViews": 538,
+          "consumerViews": 34864,
+          "combinedViews": 35402,
+          "reportDate": "2026-08-20",
+          "source": "Homes.com Listing Analytics",
+          "note": "Homes.com Listing Analytics (CoStar), agent tier Silver. Captured from the shareable /t/ report link, which is client-safe: it mints a fresh 180-day token on each open, so the link itself does not expire. These view counts are NOT comparable to listTrac's — different platform, different counting. Label both by source on the seller portal."
+        }
       },
       "marketing": {
         "period": "Jun 04 - Aug 23, 2026",
@@ -4790,26 +4878,37 @@
       "buyerMilestones": [],
       "buyerTasks": [],
       "homesCom": {
+        "addressShown": "324 Augusta Ct",
+        "totalViews": 21285,
+        "detailPageViews": 283,
+        "favorites": 7,
         "shareUrl": "https://www.homes.com/t/tvm2nkc7ypd8g?s=6",
         "listingKey": "cybmwj41ds6er",
-        "addressShown": "324 Augusta Court #3",
-        "priceShown": 495000,
-        "listedShown": "2026-06-25",
-        "daysOnMarket": 57,
-        "totalViews": 18427,
-        "displayAdViews": 4655,
-        "detailPageViews": 252,
-        "topOfSearchResults": 7729,
-        "favorites": 6,
-        "matterportViews": 16,
-        "matterportViewTime": "5 h 3 min",
-        "shares": 5,
-        "agentViews": 787,
-        "consumerViews": 16972,
-        "combinedViews": 17759,
-        "reportDate": "2026-08-20",
-        "source": "Homes.com Listing Analytics",
-        "note": "Homes.com Listing Analytics (CoStar), agent tier Silver. Captured from the shareable /t/ report link, which is client-safe: it mints a fresh 180-day token on each open, so the link itself does not expire. These view counts are NOT comparable to listTrac's — different platform, different counting. Label both by source on the seller portal."
+        "reportDate": "2026-08-31",
+        "source": "Homes.com weekly performance email (homes@email.homes.com), 2026-08-31 15:17 UTC",
+        "note": "Captured from the Monday weekly performance email, which carries only these three figures. The fuller breakdown (display-ad vs detail-page split, top-of-search, agent vs consumer views, matterport, priceShown/listedShown/daysOnMarket) comes only from the /t/ share report and is preserved under lastFullCapture where one exists - those numbers are NOT current. Homes.com and ListTrac count differently and are never comparable: do not add, reconcile, or present one as correcting the other. On a seller portal they sit side by side, each labelled.",
+        "lastFullCapture": {
+          "shareUrl": "https://www.homes.com/t/tvm2nkc7ypd8g?s=6",
+          "listingKey": "cybmwj41ds6er",
+          "addressShown": "324 Augusta Court #3",
+          "priceShown": 495000,
+          "listedShown": "2026-06-25",
+          "daysOnMarket": 57,
+          "totalViews": 18427,
+          "displayAdViews": 4655,
+          "detailPageViews": 252,
+          "topOfSearchResults": 7729,
+          "favorites": 6,
+          "matterportViews": 16,
+          "matterportViewTime": "5 h 3 min",
+          "shares": 5,
+          "agentViews": 787,
+          "consumerViews": 16972,
+          "combinedViews": 17759,
+          "reportDate": "2026-08-20",
+          "source": "Homes.com Listing Analytics",
+          "note": "Homes.com Listing Analytics (CoStar), agent tier Silver. Captured from the shareable /t/ report link, which is client-safe: it mints a fresh 180-day token on each open, so the link itself does not expire. These view counts are NOT comparable to listTrac's — different platform, different counting. Label both by source on the seller portal."
+        }
       },
       "marketing": {
         "period": "Jun 25 - Aug 23, 2026",
@@ -5027,6 +5126,15 @@
             "views": 1
           }
         ]
+      },
+      "homesCom": {
+        "addressShown": "701 Mark Twain Rd",
+        "totalViews": 101089,
+        "detailPageViews": 515,
+        "favorites": 1,
+        "reportDate": "2026-08-31",
+        "source": "Homes.com weekly performance email (homes@email.homes.com), 2026-08-31 15:17 UTC",
+        "note": "Captured from the Monday weekly performance email, which carries only these three figures. The fuller breakdown (display-ad vs detail-page split, top-of-search, agent vs consumer views, matterport, priceShown/listedShown/daysOnMarket) comes only from the /t/ share report and is preserved under lastFullCapture where one exists - those numbers are NOT current. Homes.com and ListTrac count differently and are never comparable: do not add, reconcile, or present one as correcting the other. On a seller portal they sit side by side, each labelled."
       }
     },
     {
@@ -5141,6 +5249,15 @@
             "views": 1
           }
         ]
+      },
+      "homesCom": {
+        "addressShown": "635 S Main St",
+        "totalViews": 101452,
+        "detailPageViews": 600,
+        "favorites": 2,
+        "reportDate": "2026-08-31",
+        "source": "Homes.com weekly performance email (homes@email.homes.com), 2026-08-31 15:17 UTC",
+        "note": "Captured from the Monday weekly performance email, which carries only these three figures. The fuller breakdown (display-ad vs detail-page split, top-of-search, agent vs consumer views, matterport, priceShown/listedShown/daysOnMarket) comes only from the /t/ share report and is preserved under lastFullCapture where one exists - those numbers are NOT current. Homes.com and ListTrac count differently and are never comparable: do not add, reconcile, or present one as correcting the other. On a seller portal they sit side by side, each labelled."
       }
     },
     {
@@ -5259,6 +5376,15 @@
             "views": 1
           }
         ]
+      },
+      "homesCom": {
+        "addressShown": "2000 Gun Club Rd",
+        "totalViews": 75952,
+        "detailPageViews": 372,
+        "favorites": 2,
+        "reportDate": "2026-08-31",
+        "source": "Homes.com weekly performance email (homes@email.homes.com), 2026-08-31 15:17 UTC",
+        "note": "Captured from the Monday weekly performance email, which carries only these three figures. The fuller breakdown (display-ad vs detail-page split, top-of-search, agent vs consumer views, matterport, priceShown/listedShown/daysOnMarket) comes only from the /t/ share report and is preserved under lastFullCapture where one exists - those numbers are NOT current. Homes.com and ListTrac count differently and are never comparable: do not add, reconcile, or present one as correcting the other. On a seller portal they sit side by side, each labelled."
       }
     },
     {
@@ -5361,6 +5487,15 @@
             "views": 1
           }
         ]
+      },
+      "homesCom": {
+        "addressShown": "590 S Main St",
+        "totalViews": 108554,
+        "detailPageViews": 670,
+        "favorites": 1,
+        "reportDate": "2026-08-31",
+        "source": "Homes.com weekly performance email (homes@email.homes.com), 2026-08-31 15:17 UTC",
+        "note": "Captured from the Monday weekly performance email, which carries only these three figures. The fuller breakdown (display-ad vs detail-page split, top-of-search, agent vs consumer views, matterport, priceShown/listedShown/daysOnMarket) comes only from the /t/ share report and is preserved under lastFullCapture where one exists - those numbers are NOT current. Homes.com and ListTrac count differently and are never comparable: do not add, reconcile, or present one as correcting the other. On a seller portal they sit side by side, each labelled."
       }
     },
     {
@@ -5476,6 +5611,15 @@
             "views": 1
           }
         ]
+      },
+      "homesCom": {
+        "addressShown": "1350 Love St",
+        "totalViews": 170331,
+        "detailPageViews": 7654,
+        "favorites": 67,
+        "reportDate": "2026-08-31",
+        "source": "Homes.com weekly performance email (homes@email.homes.com), 2026-08-31 15:17 UTC",
+        "note": "Captured from the Monday weekly performance email, which carries only these three figures. The fuller breakdown (display-ad vs detail-page split, top-of-search, agent vs consumer views, matterport, priceShown/listedShown/daysOnMarket) comes only from the /t/ share report and is preserved under lastFullCapture where one exists - those numbers are NOT current. Homes.com and ListTrac count differently and are never comparable: do not add, reconcile, or present one as correcting the other. On a seller portal they sit side by side, each labelled."
       }
     },
     {
@@ -5619,7 +5763,7 @@
         },
         {
           "title": "Your price is $170,000 — funded by the home equity line",
-          "body": "Your purchase price is confirmed at $170,000 and has not changed. The funds are coming from the home equity line your father signed on August 17, which replaced the original all-cash source. Those funds were due at escrow Friday, August 21. On August 22 you signed Buyer Contingency Removal No. 2, which removed EVERY remaining contingency including the loan contingency - so there is no longer a contingency cushion and your deposit is at risk if the purchase does not close on August 28."
+          "body": "Your purchase price is confirmed at $170,000 and has not changed. The funds are coming from the home equity line your father signed on August 17; it was drawn on August 21 and the money has been sitting in cash since, so there is no lender and nothing on the financing side tied to a date. On August 22 you signed Buyer Contingency Removal No. 2, which removed EVERY remaining contingency including the loan contingency - so there is no longer a contingency cushion and your deposit is at risk if the purchase does not complete. Close of escrow is now September 29 under Extension of Time Amendment No. 3, signed by both parties on August 28."
         }
       ],
       "address": "695 Feather Dr",
@@ -5790,7 +5934,7 @@
     },
     {
       "id": "preparing-179-elams-ranch",
-      "stage": "preparing",
+      "stage": "listing",
       "side": "seller",
       "agent": "sara",
       "address": "179 Elams Ranch Rd",
@@ -5807,7 +5951,14 @@
       "openEscrowDate": null,
       "closingDate": null,
       "listing": {
-        "client": "Josh R McEvoy & Jennifer McEvoy"
+        "client": "Joshua McEvoy, Jennifer McEvoy",
+        "commission": {
+          "pct": 3
+        },
+        "commissionNote": "3.000% of the listing price to Legacy Properties (seller's side), read off C(1)/4B of the executed RLA rev 6/26 dated 2026-08-30. C(2)/4C sets an additional 3.000% of the purchase price if the buyer is unrepresented (box checked). Continuation Period 90 calendar days. No MOTs yet.",
+        "dateListed": "2026-08-30",
+        "expiration": "2027-02-28",
+        "agreementForm": "Residential Listing Agreement - Exclusive (C.A.R. Form RLA, Revised 6/26)"
       },
       "contacts": {
         "coAgent": null,
@@ -5818,23 +5969,28 @@
         "priorEscrow": "First American, Michelle Miller (micmiller@firstam.com), Escrow #7384902 — handled the April 2026 purchase. Reference only; Placer runs its own title search."
       },
       "timeline": {
-        "note": "Added 2026-08-27 at Sara's instruction. PREPARING TO LIST — ON HOLD pending title/probate guidance from Placer Title. Sellers are Josh R McEvoy and Jennifer McEvoy (son and mother). A THIRD PARTY IS ALSO ON TITLE — the father — who died unexpectedly. Placer Title is advising on what the family needs to provide before the property can be listed and conveyed; nothing proceeds until that comes back. PAST CLIENTS: Legacy sold them this same home this year — buy side, Sara Cooper. Purchase price $289,400, COE 2026-04-10, escrow #7384902 at First American (Michelle Miller). Gross commission $14,470 (5%, seller-paid), less a $100 buyer credit for the appraiser inspection = $14,370 net to Legacy. Closed file: _Sold\\Elam ranch\\. THE FATHER'S NAME IS INFERRED, NOT CONFIRMED: the April commission demand names three buyers — Joshua McEvoy, Jennifer McEvoy and Robert McEvoy. Sara's note says the father is the third person on title, so that is Robert McEvoy on the documents. Confirm with the family before any name is used on paperwork. NO RLA YET — commission, dateListed, expiration and agreementForm are UNKNOWN and deliberately omitted rather than guessed. listPrice 330000 is Sara's target price as given 2026-08-27, not a figure off an executed listing agreement. CORRECTED 2026-08-27 per Sara: an earlier version of this record said to request the vesting/deed from First American. That was wrong — brokers are not typically provided with deeds, and a title company pulls title itself. Placer will see the vesting without Sara supplying anything. The open question is what ESTATE documentation the family must provide, which is exactly what Placer is being asked."
+        "note": "Added 2026-08-27 at Sara's instruction. PREPARING TO LIST — ON HOLD pending title/probate guidance from Placer Title. Sellers are Josh R McEvoy and Jennifer McEvoy (son and mother). A THIRD PARTY IS ALSO ON TITLE — the father — who died unexpectedly. Placer Title is advising on what the family needs to provide before the property can be listed and conveyed; nothing proceeds until that comes back. PAST CLIENTS: Legacy sold them this same home this year — buy side, Sara Cooper. Purchase price $289,400, COE 2026-04-10, escrow #7384902 at First American (Michelle Miller). Gross commission $14,470 (5%, seller-paid), less a $100 buyer credit for the appraiser inspection = $14,370 net to Legacy. Closed file: _Sold\\Elam ranch\\. THE FATHER'S NAME IS INFERRED, NOT CONFIRMED: the April commission demand names three buyers — Joshua McEvoy, Jennifer McEvoy and Robert McEvoy. Sara's note says the father is the third person on title, so that is Robert McEvoy on the documents. Confirm with the family before any name is used on paperwork.  CORRECTED 2026-08-27 per Sara: an earlier version of this record said to request the vesting/deed from First American. That was wrong — brokers are not typically provided with deeds, and a title company pulls title itself. Placer will see the vesting without Sara supplying anything. The open question is what ESTATE documentation the family must provide, which is exactly what Placer is being asked. || RLA EXECUTED 2026-08-30 - read from disk 2026-08-31. C.A.R. Form RLA rev 6/26, Authentisign DF913EB0-B1A4-F111-9B33-000D3A4FF82A, signed by Joshua McEvoy and Jennifer McEvoy and by Sara Cooper for Legacy Properties. Listing period 08/30/2026-02/28/2027, listing price $330,000 (which CONFIRMS the 330000 previously recorded as Sara's target), C(1) compensation 3.000%, Continuation Period 90 days, MLS MetroList. Five-part executed test passed: on disk, read via pdftotext, every required signature block filled, no lapsed acceptance deadline, nothing contradicts it. Stage moved preparing -> listing by the 2026-08-31 run under the LISTING BOOK rule ('If Sara tells you an RLA has now been signed on a preparing deal, that is a stage change to listing'). THE TITLE HOLD IS UNCHANGED AND STILL GOVERNS: a deceased owner (Robert McEvoy, name inferred) remains on title and Placer Title has not yet said what estate documentation the family must provide. Amanda Boitano at Placer replied 2026-08-27 that Placer did not handle the April purchase and needs a copy of the deed before she can advise. An executed RLA is authority to market; it is not clearance to convey. Do not input to MetroList until Placer answers."
       },
       "alerts": [
-        "ON HOLD — cannot list until Placer Title advises what the family must provide. A deceased owner is on title alongside Josh and Jennifer, so the estate side has to be resolved before the property can be conveyed. This is Placer's question to answer, not a marketing timing decision.",
-        "Handle with care — this is a recent bereavement, and the family bought the home only in April.",
-        "PAST CLIENTS: Legacy sold them this home 2026-04-10 for $289,400 (buy side, Sara). Reusable material already on file in _Sold\\Elam ranch\\: NHD report + signature pages, home inspection, well photos, MLS sheet.",
-        "Sara does not need to supply a deed — Placer runs its own title search and will see how title was vested in April. What the FAMILY may need to produce is estate paperwork, and precisely which documents is the question Placer is being asked. If a copy of the April vesting is ever wanted, the sellers hold it themselves via their owner's title policy from that purchase, and it is also public record at the Butte County Recorder.",
-        "OUTSIDE THE USUAL FOOTPRINT: Oroville is Butte County, not Calaveras/Amador. Confirm MLS coverage and syndication before listing — the rest of the book is MetroList.",
-        "No RLA executed yet — listPrice $330,000 is a target, and commission is not set."
+        "RLA EXECUTED 2026-08-30 - Joshua and Jennifer McEvoy signed the listing agreement (Authentisign 'RLA MCA SBSA DIA', complete 8/30 5:49 PM). Listing period runs to 2027-02-28 at $330,000, 3.000% compensation. Stage is now 'listing'.",
+        "STILL ON HOLD FOR TITLE - do NOT input to MetroList yet. A deceased owner is on title alongside Josh and Jennifer. Placer Title (Amanda Boitano, aboitano@placertitle.com, 209.736.9553) asked on 8/27 for a copy of the deed before she can advise what estate documentation the family must provide. The RLA gives Legacy the right to market; the estate side still has to clear before the property can be conveyed.",
+        "PAPERWORK IS MISFILED - the entire executed RLA package (RLA, AAA1, MCA, SBSA, DIA) was filed 2026-08-31 09:27 into _Listings\\preparing to list\\1143 Echo St\\Ex\\. It belongs in a 179 Elams Ranch folder. Move it before the broker file is built, and check nothing of 1143 Echo's was displaced.",
+        "Handle with care - this is a recent bereavement. Josh's father died unexpectedly; James met Josh in Rio Linda on Friday 8/28 to collect keys and talk marketing, and emailed Carol at MS in Napa on 8/30.",
+        "OUT OF AREA - Oroville, Butte County, not Calaveras/Amador. Confirm MetroList coverage and any co-op arrangement before input."
       ],
       "milestones": [],
       "clientTasks": [],
       "goodToKnow": [],
       "docs": {
         "priorPurchaseFile": "Closed buy-side file at _Sold\\Elam ranch\\ — commission demand (PDF + DOCX), NHD PIDMAX report + signature pages + invoice, home inspection, well photos, client MLS sheet, house-number photo.",
-        "priorMLS": "179 Elams Ranch Rd Client MLS.pdf — also in _Showings\\meth and tony\\179 Elams Ranch Rd. shared folder with Meth and Tony"
-      }
+        "priorMLS": "179 Elams Ranch Rd Client MLS.pdf — also in _Showings\\meth and tony\\179 Elams Ranch Rd. shared folder with Meth and Tony",
+        "listingAgreement": "EXECUTED 2026-08-30 - C.A.R. Form RLA rev 6/26, Authentisign ID DF913EB0-B1A4-F111-9B33-000D3A4FF82A. Sellers Joshua McEvoy and Jennifer McEvoy; broker Legacy Properties, Sara Cooper DRE 02141987. Property 179 Elams Ranch Rd, Oroville, Butte County, CA 95966, APN 072-580-013-000. Listing period 08/30/2026 to 11:59 PM 02/28/2027. Listing price $330,000. C(1) compensation 3.000%. MLS: MetroList. Authentisign 'Signing complete: RLA MCA SBSA DIA' received 2026-08-30 17:49 PDT. MISFILED - the whole package is sitting in _Listings\\preparing to list\\1143 Echo St\\Ex\\, not in a 179 Elams Ranch folder.",
+        "AAA1": "EXECUTED - Additional Agent Acknowledgement 1 - 626, filed 2026-08-31 09:27 (same misfiled folder).",
+        "MCA": "EXECUTED - Market Conditions Advisory - 624, filed 2026-08-31 09:27 (same misfiled folder).",
+        "SBSA": "EXECUTED - Statewide Buyer and Seller Advisory - 626, filed 2026-08-31 09:27 (same misfiled folder).",
+        "DIA": "EXECUTED - Disclosure Information Advisory - 1225, filed 2026-08-31 09:27 (same misfiled folder)."
+      },
+      "listingExpiration": "2027-02-28"
     }
   ]
 }
