@@ -216,6 +216,23 @@ function headerValue(headers, name) {
   return h ? h.value : null;
 }
 
+// STRUCTURAL bulk / automated-mail detection — NOT a content or domain heuristic.
+// RFC-2369 List-Unsubscribe / List-Id, RFC-3834 Auto-Submitted, and Precedence:
+// bulk|list|junk are present on newsletters, marketing and machine-generated mail
+// and never on genuine person-to-person email — so a real client or an unsaved
+// deal party (title/escrow/lender) is never caught. A short list of unmistakable
+// machine local-parts (no-reply, mailer-daemon, postmaster, bounce) is included.
+// Callers apply this ONLY to unmatched senders; matched contacts are always kept.
+function looksAutomated(senderEmail, headers) {
+  const local = String(senderEmail || '').toLowerCase().split('@')[0];
+  if (/^(no-?reply|do-?not-?reply|do_?not_?reply|no_?reply|noreply|mailer-daemon|mailerdaemon|postmaster|bounce|bounces)$/.test(local)) return true;
+  if (headerValue(headers, 'List-Unsubscribe') || headerValue(headers, 'List-Id')) return true;
+  if (/\b(bulk|list|junk)\b/.test(String(headerValue(headers, 'Precedence') || '').toLowerCase())) return true;
+  const auto = String(headerValue(headers, 'Auto-Submitted') || '').toLowerCase();
+  if (auto && auto !== 'no') return true;
+  return false;
+}
+
 // The RFC-2822 Date header → ISO. NULL when it can't be parsed — a wrong send
 // time is worse than a missing one, and the briefing can say "time unknown".
 function parseEmailDate(dateHeader) {
@@ -415,13 +432,23 @@ async function syncMailbox(supa, account, clientId, clientSecret) {
         const messageId = headerValue(headers, 'Message-ID') || headerValue(headers, 'Message-Id');
         const sentAt    = parseEmailDate(headerValue(headers, 'Date'));
 
-        // Bulk newsletters/marketing never enter the review queue — file them
-        // 'dismissed' at ingest so the queue stays genuine deal correspondence
-        // (Cowork item 4). The deny list is explicit and shared with the
-        // deal-messages reader; deal parties (title/escrow/lenders/co-agents) are
-        // deliberately NOT on it, so real client mail is never auto-dismissed.
-        const status = isBulkSender(senderEmail) ? 'dismissed'
-                     : contactId ? 'active' : 'pending_review';
+        // Bulk newsletters/marketing/automated mail never enter the review queue —
+        // file them 'dismissed' at ingest so the queue stays genuine deal
+        // correspondence (Cowork item 4). Two gates, applied ONLY to UNMATCHED
+        // senders (a matched contact's mail is ALWAYS kept 'active', so a real
+        // client or deal party who's saved is never dismissed):
+        //   1. isBulkSender — the hand-maintained explicit domain deny list.
+        //   2. looksAutomated — STRUCTURAL bulk markers (RFC-2369 List-Unsubscribe
+        //      / List-Id, Precedence: bulk|list|junk, Auto-Submitted, and a few
+        //      unmistakable machine local-parts like no-reply / mailer-daemon).
+        //      These appear on newsletters, marketing and machine mail and NEVER
+        //      on genuine person-to-person email — so an unsaved title/escrow/
+        //      lender emailing a human still lands in triage, not the trash.
+        // Matched-first ordering also fixes a latent bug where a client who
+        // happened to be on a denied domain would have been dismissed.
+        const status = contactId ? 'active'
+                     : (isBulkSender(senderEmail) || looksAutomated(senderEmail, headers)) ? 'dismissed'
+                     : 'pending_review';
 
         // Signature-service notices ("Signing complete: ETA2") arrive with only
         // the ~200-char Gmail snippet — usually a document name, no address or
