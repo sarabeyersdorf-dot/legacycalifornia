@@ -690,6 +690,9 @@
     },
     "api/cron/email-queue.js": {
       "maxDuration": 60
+    },
+    "api/cron/engagement-digest.js": {
+      "maxDuration": 30
     }
   },
   "crons": [
@@ -743,6 +746,10 @@
     {
       "path": "/api/cron/email-queue",
       "schedule": "* * * * *"
+    },
+    {
+      "path": "/api/cron/engagement-digest",
+      "schedule": "25 15 * * *"
     }
   ]
 }
