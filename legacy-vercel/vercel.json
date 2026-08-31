@@ -83,15 +83,15 @@
   ],
   "redirects": [
     {
-      "source": "/:path*",
+      "source": "/((?!api/).*)",
       "has": [{ "type": "host", "value": "www.legacycalifornia.com" }],
-      "destination": "https://legacycalifornia.com/:path*",
+      "destination": "https://legacycalifornia.com/$1",
       "permanent": true
     },
     {
-      "source": "/:path*",
+      "source": "/((?!api/).*)",
       "has": [{ "type": "host", "value": "legacycalifornia.vercel.app" }],
-      "destination": "https://legacycalifornia.com/:path*",
+      "destination": "https://legacycalifornia.com/$1",
       "permanent": true
     },
     {
