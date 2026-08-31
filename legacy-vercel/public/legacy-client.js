@@ -2903,6 +2903,24 @@ window.LGPortal = window.LGPortal || {
         <div data-detail-result style="font-size:13px;margin-top:8px;min-height:18px;"></div>
       </div>` : '';
 
+    // A persistent send-confirmation chip on every OUTBOUND message, so a sent
+    // reply can always be told apart from an unsent draft or a failed send just
+    // by looking at the thread — no need to remember the moment you clicked send.
+    // sent/delivered/approved (or a logged past message with no status) → "✓ Sent";
+    // pending_approval → still a draft; anything else → didn't send.
+    const SENT_OK = ['sent', 'delivered', 'approved'];
+    const sendChip = (m) => {
+      if (m.direction === 'inbound') return '';
+      const s = String(m.status || '').toLowerCase();
+      if (!s || SENT_OK.indexOf(s) >= 0) {
+        const when = m.approved_at ? fmtRel(m.approved_at) : (m.created_at ? fmtRel(m.created_at) : '');
+        return `<span class="mb-sent" title="This message was sent${when ? ' ' + escHtml(when) : ''}" style="color:#2E5C3D;font-weight:600;font-size:11px;">✓ Sent</span>`;
+      }
+      if (s === 'pending_approval') {
+        return `<span class="mb-unsent" title="Still a draft — not sent yet" style="color:#9A7B2E;font-weight:600;font-size:11px;">◷ Draft · not sent</span>`;
+      }
+      return `<span class="mb-failed" title="This message did not send (${escHtml(s)})" style="color:#9B2C2C;font-weight:600;font-size:11px;">✗ Not sent</span>`;
+    };
     const threadHtml = otherMessages.length === 0
       ? `<div style="padding:16px;opacity:.55;font-style:italic;">No conversation yet.</div>`
       : otherMessages.map((m) => {
@@ -2920,6 +2938,7 @@ window.LGPortal = window.LGPortal || {
                   <span class="mb-name">${escHtml(who)}</span>
                   <span class="mb-when">${escHtml(fmtRel(m.created_at))}</span>
                   <span class="mb-ch">${m.channel === 'call' ? 'Call' : (m.channel === 'sms' ? 'SMS' : 'Email')}</span>
+                  ${sendChip(m)}
                   <button type="button" class="mb-del" data-msg-del aria-label="Delete message" title="Delete this message">&times;</button>
                 </div>
                 <p class="mb-text">${escHtml(m.body || '')}</p>

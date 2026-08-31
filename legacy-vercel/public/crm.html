@@ -3999,8 +3999,12 @@ body.lp-restyle {
         if(m.direction==='outbound' && m.status && !sentOk(m.status)) cls += ' failed';
         var subj = (m.channel==='email' && m.subject) ? '<span class="subj">'+esc(m.subject)+'</span>' : '';
         var when = fmtDateTime(m.created_at);
-        var meta = (m.channel||'').toUpperCase() + (when?' · '+when:'') + (m.direction==='outbound' && m.status && !sentOk(m.status) ? ' · '+esc(m.status) : '');
-        return '<div class="cc-bub '+cls+'">'+subj+esc(m.body||'')+'<span class="m">'+esc(meta)+'</span></div>';
+        // Persistent send confirmation on every outbound bubble — so a sent
+        // message is always distinguishable from one that didn't go out, just by
+        // looking. (Inbound messages get no marker.)
+        var mark = (m.direction==='outbound') ? (sentOk(m.status||'sent') ? ' · ✓ Sent' : ' · ✗ not sent ('+esc(m.status||'?')+')') : '';
+        var meta = (m.channel||'').toUpperCase() + (when?' · '+when:'') + mark;
+        return '<div class="cc-bub '+cls+'">'+subj+esc(m.body||'')+'<span class="m">'+meta+'</span></div>';
       }
 
       function loadDealClient(deal){
