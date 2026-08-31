@@ -151,7 +151,7 @@ export default async function handler(req, res) {
     }
 
     // --- 5. Trigger the existing Supabase sync ---
-    const syncUrl = `https://legacycalifornia.vercel.app/api/cron/sync-deals?key=${SYNC_SECRET}`;
+    const syncUrl = `${(process.env.PUBLIC_SITE_URL || 'https://legacycalifornia.com').replace(/\/+$/, '')}/api/cron/sync-deals?key=${SYNC_SECRET}`;
     const syncResp = await fetch(syncUrl);
     const syncJson = await syncResp.json().catch(() => ({}));
     steps.supabaseSync = syncResp.ok ? `ok ${JSON.stringify(syncJson)}` : `failed (${syncResp.status})`;

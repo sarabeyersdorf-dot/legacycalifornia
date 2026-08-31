@@ -87,6 +87,7 @@ import dealGoodToKnow      from '../_lib/handlers/crm-deal-good-to-know.js';
 import dealClientTasks     from '../_lib/handlers/crm-deal-client-tasks.js';
 import dealMilestones      from '../_lib/handlers/crm-deal-milestones.js';
 import dealsExport         from '../_lib/handlers/crm-deals-export.js';
+import recentlyActive      from '../_lib/handlers/crm-recently-active.js';
 
 const TABLE = {
   'lead-hygiene':    leadHygiene,
@@ -152,7 +153,8 @@ const TABLE = {
   'deal-good-to-know':    dealGoodToKnow,
   'deal-milestones':      dealMilestones,
   'deal-client-tasks':    dealClientTasks,
-  'deals-export':         dealsExport
+  'deals-export':         dealsExport,
+  'recently-active':      recentlyActive
 };
 
 export default async function handler(req, res) {

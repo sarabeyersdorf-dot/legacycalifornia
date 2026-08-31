@@ -269,7 +269,7 @@ export default async function handler(req, res) {
 
     // Nudge the sync so the new manifests land (best-effort; the hourly sync also picks them up post-deploy).
     try {
-      const s = await fetch(`https://legacycalifornia.vercel.app/api/cron/sync-deals?key=${env.SYNC_SECRET}`);
+      const s = await fetch(`${(process.env.PUBLIC_SITE_URL || 'https://legacycalifornia.com').replace(/\/+$/, '')}/api/cron/sync-deals?key=${env.SYNC_SECRET}`);
       result.sync = s.ok ? 'ok' : `failed (${s.status})`;
     } catch (e) { result.sync = `error: ${e.message}`; }
 
