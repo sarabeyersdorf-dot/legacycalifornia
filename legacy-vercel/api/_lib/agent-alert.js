@@ -27,6 +27,25 @@ export function deskUrl(leadId) {
   return leadId ? `${base}/crm.html?lead=${encodeURIComponent(leadId)}` : `${base}/crm.html`;
 }
 
+// alertAgent(supa, agentKey, { subject, sms, text, html }) — like alertAgents but
+// to ONE agent (e.g. a lead's assigned agent), so a per-lead ping doesn't hit both.
+export async function alertAgent(supa, agentKey, { subject, sms, text, html } = {}) {
+  const key = agentKey === 'james' ? 'james' : 'sara';
+  const emailProvider = resendConfigured() ? sendEmailResend : (sendgridConfigured() ? sendEmailSendgrid : null);
+  const out = [];
+  let a = {};
+  try { a = (await agentIdentity(supa, key)) || {}; } catch (_) { a = {}; }
+  if (sms && a.phone) {
+    try { const r = await sendSMS({ to: a.phone, body: sms }); out.push({ agent: key, channel: 'sms', ok: !r.skipped }); }
+    catch (e) { out.push({ agent: key, channel: 'sms', ok: false, error: e.message }); }
+  }
+  if (emailProvider && a.email && (subject || text || html)) {
+    try { const r = await emailProvider({ agent: key, to: a.email, toName: a.name || null, subject: subject || 'Legacy CRM alert', text: text || sms || '', html: html || undefined }); out.push({ agent: key, channel: 'email', ok: !r.skipped }); }
+    catch (e) { out.push({ agent: key, channel: 'email', ok: false, error: e.message }); }
+  }
+  return out;
+}
+
 // alertAgents(supa, { subject, sms, text, html })
 //   sms   → SMS body sent to each agent's phone
 //   subject/text/html → email sent to each agent's address (text used if no html)

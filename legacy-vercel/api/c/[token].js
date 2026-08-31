@@ -18,6 +18,7 @@ import { anthropicJSON } from '../_lib/anthropic.js';
 import { sendSMS } from '../_lib/twilio.js';
 import { handleOptions, readJson, ok, fail } from '../_lib/cors.js';
 import { buildClientPayload, disclaimer, agentIdentity } from '../_lib/collection-render.js';
+import { maybeBrowsingAlert } from '../_lib/browsing-alert.js';
 import { getCallerProfile, isAgent } from '../_lib/auth.js';
 
 const VAL_MODEL = 'claude-sonnet-4-6';           // matches api/_lib/anthropic.js default
@@ -106,7 +107,12 @@ async function view(supa, coll, res, req) {
   // collection_events as meta.viewer:'agent', for reference, never as engagement).
   const viewer = await viewerOf(req, res);
   supa.from('collection_events').insert({ collection_id: coll.id, lead_id: coll.client_lead_id || null, event_type: 'open', meta: { viewer } }).then(() => {}, () => {});
-  if (viewer === 'client') noteEngagement(supa, coll, 'collection_opened', {});
+  if (viewer === 'client') {
+    noteEngagement(supa, coll, 'collection_opened', {});
+    // High-intent: they opened the collection you sent — text/email the assigned
+    // agent to greet them now (debounced, fire-and-forget).
+    maybeBrowsingAlert(supa, { leadId: coll.client_lead_id, reason: 'opened their collection' }).then(() => {}, () => {});
+  }
   return ok(res, payload);
 }
 
@@ -232,7 +238,12 @@ async function event(supa, coll, b, res, req) {
   // agent previewing (scrolling their own link) never inflates the client's
   // engagement. Dwell is left out — too noisy for a timeline.
   if (viewer === 'client') {
-    if (b.event_type === 'listing_view') noteEngagement(supa, coll, 'property_viewed', { property_id: row.property_id });
+    if (b.event_type === 'listing_view') {
+      noteEngagement(supa, coll, 'property_viewed', { property_id: row.property_id });
+      // High-intent: a real browsing session (2+ listings viewed in 30 min) →
+      // greet them. gateOnViews enforces the 2+ threshold; debounced inside.
+      maybeBrowsingAlert(supa, { leadId: coll.client_lead_id, reason: 'viewing the listings you sent', gateOnViews: true }).then(() => {}, () => {});
+    }
     else if (b.event_type === 'valuation_open') noteEngagement(supa, coll, 'valuation_interest', {});
   }
   return ok(res, { recorded: true });
