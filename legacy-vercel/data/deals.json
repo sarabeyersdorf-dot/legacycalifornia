@@ -1,7 +1,7 @@
 {
-  "version": 11.8,
-  "lastUpdated": "2026-08-31",
-  "updatedBy": "cowork-morning-briefing 2026-08-31 (removed the elams-dre-number-wrong task - it was a false finding; 02254944 IS the correct Legacy Properties corporate DRE, confirmed by Sara 2026-08-31)",
+  "version": 11.9,
+  "lastUpdated": "2026-09-01",
+  "updatedBy": "cowork-morning-briefing 2026-09-01",
   "tasks": [
     {
       "agent": "sara",
@@ -2200,7 +2200,7 @@
       "agent": "sara",
       "client": "Roger & Kim Quillen",
       "key": "quillen-collection-followup",
-      "title": "Roger & Kim Quillen: Kim opened 'Roger and Kim' AGAIN Sunday 8/30 6:32 PM and viewed three properties - 7 opens since the 8/25 push and still no reply. This is real client browsing, not a preview. Call her.",
+      "title": "Roger & Kim Quillen: Kim opened 'Roger and Kim' AGAIN this morning at 8:58 AM and viewed three properties - the 8th open since the 8/25 push, now confirmed by the CRM as genuine client viewing, and still no reply from us. Call her today.",
       "due": "2026-08-31",
       "done": false
     },
@@ -2366,7 +2366,7 @@
       "client": "8235 Baldwin",
       "key": "baldwin-clear-to-close-writing",
       "due": "2026-08-31",
-      "title": "🔴 8235 Baldwin: COE IS TODAY 8/31 and no clear-to-close has arrived. Kim Hesser's promised end-of-day 8/28 update never came - nothing since her 8/28 7:55 AM email. Call her, get the senior underwriter's answer in writing, send it to Allyson.",
+      "title": "🔴 8235 Baldwin: COE WAS YESTERDAY 8/31 and nothing says it closed - no clear-to-close, no closing email, no new document on disk since the 8/27 Notice to Perform. Call Kim Hesser (209.768.8277) and Chicago Title (Veronica Barragan) and establish where this file actually stands.",
       "done": false,
       "attention": true
     },
@@ -2382,7 +2382,7 @@
       "agent": "sara",
       "client": "8235 Baldwin",
       "key": "baldwin-monday-fallback",
-      "title": "Baldwin: agree the Monday fallback with James before the close. If no clear-to-close lands, the choices are a fourth extension (the seller has already served a Notice to Perform) or letting Shomari's deposit ride. Decide before 8/31, not on the day.",
+      "title": "8235 Baldwin: the fallback conversation is now overdue - the close date passed yesterday. Agree with James today whether you are asking for a fourth extension or accepting the risk to Shomari's deposit.",
       "due": "2026-08-31",
       "done": false
     },
@@ -2400,7 +2400,9 @@
       "key": "elams-rla-misfiled",
       "due": "2026-08-31",
       "title": "179 Elams Ranch: the entire executed RLA package (RLA, AAA1, MCA, SBSA, DIA) was filed into _Listings\\preparing to list\\1143 Echo St\\Ex\\. Wrong folder - move it to a 179 Elams Ranch folder and check nothing of Echo's was displaced.",
-      "done": false
+      "done": true,
+      "doneDate": "2026-09-01",
+      "doneNote": "Verified on disk 2026-09-01: the RLA/AAA1/MCA/SBSA/DIA package is now in _Listings\\preparing to list\\179 Elams Ranch Rd listing\\Ex\\ and 1143 Echo St\\Ex\\ is empty. Nothing of Echo's was displaced."
     },
     {
       "agent": "sara",
@@ -2423,7 +2425,7 @@
       "client": "8235 Baldwin",
       "key": "baldwin-today-decision",
       "due": "2026-08-31",
-      "title": "🔴 Baldwin: if no clear-to-close lands by midday, get on the phone with Allyson and agree what happens - a fourth extension, or the seller cancels on the lapsed NBP. Do not let 5 PM arrive with nothing said.",
+      "title": "🔴 8235 Baldwin: the close date has now passed with the Notice to Perform already expired (8/29). Call Allyson Overturf (209.639.2559) today and settle it - a fourth extension, or the seller cancels. Every further day of silence favours the seller.",
       "done": false
     },
     {
@@ -2440,6 +2442,62 @@
       "key": "echo-appointment-outcome",
       "title": "1143 Echo: the Sunday 3:30 appointment with Guy and Adrianna happened, but no Echo paperwork was filed - the package that came back Sunday evening was the McEvoys' Elams Ranch RLA. Record what came of the Echo meeting.",
       "due": "Today",
+      "done": false
+    },
+    {
+      "agent": "sara",
+      "client": "Stevie Slaughter",
+      "key": "stevie-slaughter-call",
+      "title": "🔴 NEW HOT LEAD: Stevie Slaughter (669) 222-0159, stevie@paigefiduciary.com - realtor.com inquiry 8/31 10:49 AM on 1138 Heather Dr asking whether the HOA allows short-term rental, and saying 'in town till 3'. The only thing that went back was the generic 'caught your eye on Facebook?' auto-email, which names the wrong source and does not answer her question. Call her.",
+      "due": "2026-09-01",
+      "done": false
+    },
+    {
+      "agent": "sara",
+      "client": "Admin",
+      "key": "crm-gmail-reconnect-sara",
+      "title": "🔴 Your Google sign-in for the CRM expired again this morning (error logged 10:00 AM). While it is down the CRM ingests none of your email - which is how realtor.com and Follow Up Boss leads arrive. Reconnect Google in CRM settings; it takes seconds. James's connection is fine.",
+      "due": "2026-09-01",
+      "done": false
+    },
+    {
+      "agent": "sara",
+      "client": "695 Feather",
+      "key": "feather-coe-proposal-dismiss",
+      "title": "695 Feather: dismiss the timeline card asking you to confirm the 8/28 close of escrow 'happened'. It was generated off the superseded date - ETA No. 3 moved COE to 9/29 and is fully executed. Approving it would tell Ashley her purchase closed.",
+      "due": "2026-09-01",
+      "done": false
+    },
+    {
+      "agent": "sara",
+      "client": "Ron Morris",
+      "key": "ron-morris-send-discovery",
+      "title": "Ron Morris: he replied 8/31 3:09 PM asking for the 433 discovery info and what insurance would look like. You told him you would send the link once you were off the road - it has not gone yet.",
+      "due": "2026-09-01",
+      "done": false
+    },
+    {
+      "agent": "sara",
+      "client": "433 E Hwy 4",
+      "key": "433-signs-order-approve",
+      "title": "433 E Hwy 4: Walt at Gateway Press needs your approval on order 76907 (new signs + install), sent 8/31 11:41 AM and unanswered. He can install before the weekend if you confirm today - this is the marketing push already on your list.",
+      "due": "2026-09-01",
+      "done": false
+    },
+    {
+      "agent": "sara",
+      "client": "Admin",
+      "key": "metrolist-invoice-q",
+      "title": "MetroList quarterly invoice is out - $231.00 as of 9/1. Pay it before it affects the feed on eleven listings.",
+      "due": "this week",
+      "done": false
+    },
+    {
+      "agent": "james",
+      "client": "8235 Baldwin",
+      "key": "baldwin-coe-outcome-record",
+      "title": "8235 Baldwin: whatever happens today, put the outcome in writing and into the file - closed, extended, or cancelled. The master file still carries COE 8/31 and no document has arrived to change it, so nothing downstream can tell which it was.",
+      "due": "2026-09-01",
       "done": false
     }
   ],
