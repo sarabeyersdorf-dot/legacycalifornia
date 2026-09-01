@@ -1,7 +1,7 @@
 {
-  "version": 11.9,
+  "version": 12.1,
   "lastUpdated": "2026-09-01",
-  "updatedBy": "cowork-morning-briefing 2026-09-01",
+  "updatedBy": "cowork 2026-09-01 (179 Elams expiration confirmed 2/28/27 by Sara)",
   "tasks": [
     {
       "agent": "sara",
@@ -2208,7 +2208,7 @@
       "agent": "sara",
       "client": "179 Elams Ranch",
       "key": "elams-placer-title-guidance",
-      "title": "🔴 179 Elams Ranch: the RLA is now SIGNED (8/30, $330,000) but title is still not cleared - a deceased owner is on title. Chase Amanda Boitano at Placer. Do not input to MetroList until she answers.",
+      "title": "🔴 179 Elams Ranch: the listing is now LIVE on MetroList (226110167, $330,000) while title is still not cleared - the deceased father is on title and Amanda Boitano at Placer has not come back. It can take an offer any day now, so the title answer has gone from a pre-listing step to the thing that could hold up an escrow. Chase her: 209.736.9553 / aboitano@placertitle.com.",
       "due": "2026-09-01",
       "done": false
     },
@@ -2418,7 +2418,9 @@
       "key": "elams-mls-input-hold",
       "due": "2026-09-02",
       "title": "179 Elams Ranch: confirm MetroList actually covers Oroville / Butte County before input, and decide whether a co-op or referral is needed. It is well outside the Calaveras-Amador footprint.",
-      "done": false
+      "done": true,
+      "doneDate": "2026-09-01",
+      "doneNote": "Overtaken by events: Sara input the listing to MetroList 2026-09-01, MLS 226110167, $330,000. The Butte County coverage question is answered in practice - MetroList accepted the listing."
     },
     {
       "agent": "james",
@@ -2499,6 +2501,16 @@
       "title": "8235 Baldwin: whatever happens today, put the outcome in writing and into the file - closed, extended, or cancelled. The master file still carries COE 8/31 and no document has arrived to change it, so nothing downstream can tell which it was.",
       "due": "2026-09-01",
       "done": false
+    },
+    {
+      "agent": "sara",
+      "client": "179 Elams Ranch",
+      "key": "elams-expiration-reconcile",
+      "title": "179 Elams Ranch: the MLS expiration and the RLA do not agree. You told me MetroList shows 1/28/27; the executed RLA paragraph A(1) reads 'Ending at 11:59 P.M. on 02/28/2027'. One month apart, and it is a month of commission protection. Either correct the MLS entry to 2/28/27 or do an MOT to shorten the RLA. Price and the 3% both match exactly - this is the only field in dispute.",
+      "due": "2026-09-01",
+      "done": true,
+      "doneDate": "2026-09-01",
+      "doneNote": "No discrepancy. Sara confirmed 2026-09-01 that she meant 2/28/27; the MLS entry and the executed RLA agree. Raised and closed the same day - nothing to action."
     }
   ],
   "deals": [
@@ -6013,10 +6025,12 @@
         "commission": {
           "pct": 3
         },
-        "commissionNote": "3.000% of the listing price to Legacy Properties (seller's side), read off C(1)/4B of the executed RLA rev 6/26 dated 2026-08-30. C(2)/4C sets an additional 3.000% of the purchase price if the buyer is unrepresented (box checked). Continuation Period 90 calendar days. No MOTs yet.",
+        "commissionNote": "3.000% of the listing price to Legacy Properties (seller's side), read off C(1)/4B of the executed RLA rev 6/26 dated 2026-08-30 and CONFIRMED by Sara 2026-09-01 as the MLS sell-side rate. C(2)/4C sets an additional 3.000% of the purchase price if the buyer is unrepresented (box checked). Continuation Period 90 calendar days. No MOTs. On $330,000 the seller-side compensation is $9,900.",
         "dateListed": "2026-08-30",
         "expiration": "2027-02-28",
-        "agreementForm": "Residential Listing Agreement - Exclusive (C.A.R. Form RLA, Revised 6/26)"
+        "agreementForm": "Residential Listing Agreement - Exclusive (C.A.R. Form RLA, Revised 6/26)",
+        "file": "_Listings\\179 Elams Ranch Rd listing\\ - moved out of _Listings\\preparing to list\\ on 2026-09-01 when the listing went live on MetroList. Executed RLA package (RLA, AAA1, MCA, SBSA, DIA) in that folder's Ex\\.",
+        "listingPeriodNote": "RLA paragraph A(1): Listing Period begins 08/30/2026, ends at 11:59 P.M. on 02/28/2027. Live on MetroList as MLS 226110167 from 2026-09-01. Confirmed by Sara 2026-09-01: MLS and RLA expiration agree at 2/28/27."
       },
       "contacts": {
         "coAgent": null,
@@ -6048,7 +6062,8 @@
         "SBSA": "EXECUTED - Statewide Buyer and Seller Advisory - 626, filed 2026-08-31 09:27 (same misfiled folder).",
         "DIA": "EXECUTED - Disclosure Information Advisory - 1225, filed 2026-08-31 09:27 (same misfiled folder)."
       },
-      "listingExpiration": "2027-02-28"
+      "listingExpiration": "2027-02-28",
+      "mlsNumber": "226110167"
     }
   ]
 }
