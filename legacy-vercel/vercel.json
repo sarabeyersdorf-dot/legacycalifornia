@@ -21,6 +21,10 @@
       "destination": "/showcase/433/index.html"
     },
     {
+      "source": "/179-elams-ranch-rd",
+      "destination": "/showcase/179-elams/index.html"
+    },
+    {
       "source": "/c/:token",
       "destination": "/collection.html"
     },
