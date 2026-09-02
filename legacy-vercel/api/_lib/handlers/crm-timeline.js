@@ -27,6 +27,27 @@ const requireJson = createRequire(import.meta.url);
 
 const ITEM_FIELDS = ['title', 'plain', 'owner', 'due_date', 'status', 'done_at', 'detail', 'client_visible', 'sort_order', 'kind'];
 const pick = (obj, keys) => Object.fromEntries(Object.entries(obj || {}).filter(([k]) => keys.includes(k)));
+
+// A "date has passed" proposal captures the item's due_date into `reason` at
+// creation time (timeline-scan.js) and nothing re-checks it. When the date is
+// later extended, the card still says the old date has passed — and approving it
+// would mark the item done on a deal that has not reached it.
+//
+// Live example this was written for: 695 Feather Dr's close of escrow. The
+// proposal read "The scheduled date (2026-08-28) has passed", while Extension of
+// Time Amendment No. 3 had already moved due_date to 2026-09-29. Approving it
+// would have shown the buyer her purchase as closed, 28 days early.
+//
+// So: pull the date back out of `reason` and compare it to the item's CURRENT
+// due_date. A mismatch means the trigger no longer holds. Only applies to
+// proposals that embed a date; everything else is unaffected.
+const triggerDate = (reason) => (String(reason || '').match(/\((\d{4}-\d{2}-\d{2})\)/) || [])[1] || null;
+const isStaleProposal = (proposal, dueDateByItemId) => {
+  const t = triggerDate(proposal?.reason);
+  if (!t) return false;
+  const due = dueDateByItemId.get(proposal.item_id);
+  return !!due && due !== t;
+};
 // Order-independent signature of a change payload, so a re-proposed change is
 // recognised as the same one an agent already rejected regardless of key order.
 const canonChange = (c) => {
@@ -69,10 +90,19 @@ export default async function handler(req, res) {
     try {
       const supaK = adminClient();
       const { data, error } = await supaK.from('deal_timeline_proposals')
-        .select('id, deal_id, item_key, address, change, reason, source, created_at')
+        .select('id, deal_id, item_id, item_key, address, change, reason, source, created_at')
         .eq('status', 'pending').order('created_at', { ascending: true }).limit(50);
       if (error) return fail(res, 500, error.message);
-      return ok(res, { proposals: data || [] });
+      // Drop cards whose trigger date the item has since moved past (see
+      // isStaleProposal): the briefing should never read out a stale deadline.
+      const itemIds = [...new Set((data || []).map((p) => p.item_id).filter(Boolean))];
+      const dueById = new Map();
+      if (itemIds.length) {
+        const { data: its } = await supaK.from('deal_timeline_items').select('id, due_date').in('id', itemIds);
+        for (const it of its || []) dueById.set(it.id, it.due_date);
+      }
+      const fresh = (data || []).filter((p) => !isStaleProposal(p, dueById));
+      return ok(res, { proposals: fresh.map(({ item_id, ...p }) => p) });
     } catch (e) { return fail(res, 500, e.message); }
   }
   // Key-gated DIGEST — every active deal's timeline in ONE fixed-URL read.
@@ -88,10 +118,15 @@ export default async function handler(req, res) {
       for (const deal of deals || []) {
         const [{ data: items }, { data: proposals }, { data: docs }] = await Promise.all([
           supaK.from('deal_timeline_items').select('id, key, kind, title, owner, due_date, status, done_at').eq('deal_id', deal.id).order('sort_order'),
-          supaK.from('deal_timeline_proposals').select('id, item_key, change, reason, source, created_at').eq('deal_id', deal.id).eq('status', 'pending'),
+          supaK.from('deal_timeline_proposals').select('id, item_id, item_key, change, reason, source, created_at').eq('deal_id', deal.id).eq('status', 'pending'),
           supaK.from('deal_documents').select('name, doc_type, status').eq('deal_id', deal.id)
         ]);
-        out.push({ deal, items: items || [], pending_proposals: proposals || [], documents: docs || [] });
+        // Same stale-trigger filter as the proposals=all read above.
+        const dueById = new Map((items || []).map((it) => [it.id, it.due_date]));
+        const freshProps = (proposals || [])
+          .filter((p) => !isStaleProposal(p, dueById))
+          .map(({ item_id, ...p }) => p);
+        out.push({ deal, items: items || [], pending_proposals: freshProps, documents: docs || [] });
       }
       return ok(res, { deals: out });
     } catch (e) { return fail(res, 500, e.message); }
@@ -290,6 +325,21 @@ export default async function handler(req, res) {
       if (!p) return fail(res, 404, 'proposal not found');
       if (p.status !== 'pending') return fail(res, 409, `already ${p.status}`);
       if (op === 'approve') {
+        // Refuse a proposal whose trigger date no longer matches the item. The
+        // deadline moved after the card was filed, so the "this date has passed"
+        // premise is gone — applying it would mark the item done early. Retire
+        // the card rather than leave it in the queue to be clicked again.
+        const { data: liveItem } = await supa.from('deal_timeline_items')
+          .select('id, due_date, title').eq('id', p.item_id).maybeSingle();
+        const t = triggerDate(p.reason);
+        if (liveItem && t && liveItem.due_date && liveItem.due_date !== t) {
+          await supa.from('deal_timeline_proposals').update({
+            status: 'rejected', decided_by: 'system', decided_at: new Date().toISOString()
+          }).eq('id', p.id);
+          return fail(res, 409,
+            `This proposal is out of date: it was filed because ${t} had passed, ` +
+            `but that date has since moved to ${liveItem.due_date}. Dismissed instead of applied.`);
+        }
         const patch = pick(p.change, ITEM_FIELDS);
         if (patch.status === 'done' && !patch.done_at) patch.done_at = new Date().toISOString();
         patch.updated_at = new Date().toISOString();
