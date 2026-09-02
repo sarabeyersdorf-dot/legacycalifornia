@@ -79,7 +79,9 @@ export default async function handler(req, res) {
         ...inherit,
         notes:          `Added as ${relationship} of contact ${leadId}.`
       }).select('id, first_name, last_name, email, phone').single();
-      if (insErr) return fail(res, 500, `contact create: ${insErr.message}`);
+      // Name the offending value: a bare "violates check constraint" tells the
+      // agent (and whoever they report it to) nothing they can act on.
+      if (insErr) return fail(res, 500, `contact create (source='related_contact'): ${insErr.message}`);
       related = created; createdNew = true;
     }
 
