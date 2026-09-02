@@ -1,7 +1,7 @@
 {
-  "version": 12.1,
+  "version": 12.3,
   "lastUpdated": "2026-09-01",
-  "updatedBy": "cowork 2026-09-01 (179 Elams expiration confirmed 2/28/27 by Sara)",
+  "updatedBy": "cowork 2026-09-01 (179 Elams seller page built)",
   "tasks": [
     {
       "agent": "sara",
@@ -6044,15 +6044,102 @@
         "note": "Added 2026-08-27 at Sara's instruction. PREPARING TO LIST — ON HOLD pending title/probate guidance from Placer Title. Sellers are Josh R McEvoy and Jennifer McEvoy (son and mother). A THIRD PARTY IS ALSO ON TITLE — the father — who died unexpectedly. Placer Title is advising on what the family needs to provide before the property can be listed and conveyed; nothing proceeds until that comes back. PAST CLIENTS: Legacy sold them this same home this year — buy side, Sara Cooper. Purchase price $289,400, COE 2026-04-10, escrow #7384902 at First American (Michelle Miller). Gross commission $14,470 (5%, seller-paid), less a $100 buyer credit for the appraiser inspection = $14,370 net to Legacy. Closed file: _Sold\\Elam ranch\\. THE FATHER'S NAME IS INFERRED, NOT CONFIRMED: the April commission demand names three buyers — Joshua McEvoy, Jennifer McEvoy and Robert McEvoy. Sara's note says the father is the third person on title, so that is Robert McEvoy on the documents. Confirm with the family before any name is used on paperwork.  CORRECTED 2026-08-27 per Sara: an earlier version of this record said to request the vesting/deed from First American. That was wrong — brokers are not typically provided with deeds, and a title company pulls title itself. Placer will see the vesting without Sara supplying anything. The open question is what ESTATE documentation the family must provide, which is exactly what Placer is being asked. || RLA EXECUTED 2026-08-30 - read from disk 2026-08-31. C.A.R. Form RLA rev 6/26, Authentisign DF913EB0-B1A4-F111-9B33-000D3A4FF82A, signed by Joshua McEvoy and Jennifer McEvoy and by Sara Cooper for Legacy Properties. Listing period 08/30/2026-02/28/2027, listing price $330,000 (which CONFIRMS the 330000 previously recorded as Sara's target), C(1) compensation 3.000%, Continuation Period 90 days, MLS MetroList. Five-part executed test passed: on disk, read via pdftotext, every required signature block filled, no lapsed acceptance deadline, nothing contradicts it. Stage moved preparing -> listing by the 2026-08-31 run under the LISTING BOOK rule ('If Sara tells you an RLA has now been signed on a preparing deal, that is a stage change to listing'). THE TITLE HOLD IS UNCHANGED AND STILL GOVERNS: a deceased owner (Robert McEvoy, name inferred) remains on title and Placer Title has not yet said what estate documentation the family must provide. Amanda Boitano at Placer replied 2026-08-27 that Placer did not handle the April purchase and needs a copy of the deed before she can advise. An executed RLA is authority to market; it is not clearance to convey. Do not input to MetroList until Placer answers."
       },
       "alerts": [
+        "LIVE ON METROLIST 2026-09-01 - MLS 226110167, $330,000, 3.000% seller's side ($9,900). Listing period 08/30/2026 to 02/28/2027 per RLA A(1). Matterport 3D tour and YouTube video both attached (per Sara 9/1).",
         "RLA EXECUTED 2026-08-30 - Joshua and Jennifer McEvoy signed the listing agreement (Authentisign 'RLA MCA SBSA DIA', complete 8/30 5:49 PM). Listing period runs to 2027-02-28 at $330,000, 3.000% compensation. Stage is now 'listing'.",
-        "STILL ON HOLD FOR TITLE - do NOT input to MetroList yet. A deceased owner is on title alongside Josh and Jennifer. Placer Title (Amanda Boitano, aboitano@placertitle.com, 209.736.9553) asked on 8/27 for a copy of the deed before she can advise what estate documentation the family must provide. The RLA gives Legacy the right to market; the estate side still has to clear before the property can be conveyed.",
-        "PAPERWORK IS MISFILED - the entire executed RLA package (RLA, AAA1, MCA, SBSA, DIA) was filed 2026-08-31 09:27 into _Listings\\preparing to list\\1143 Echo St\\Ex\\. It belongs in a 179 Elams Ranch folder. Move it before the broker file is built, and check nothing of 1143 Echo's was displaced.",
+        "TITLE IS STILL NOT CLEARED, AND THE LISTING IS NOW LIVE - a deceased owner (Josh's father) is on title alongside Josh and Jennifer. Placer Title (Amanda Boitano, aboitano@placertitle.com, 209.736.9553) asked on 8/27 for a copy of the deed before she can advise what estate documentation the family must provide, and has not come back. As of 2026-09-01 the property is publicly marketed on MetroList (226110167), so this is no longer a pre-listing step - it is the thing that could stall an escrow if an offer lands first. The RLA gives Legacy the right to market; the estate side still has to clear before the property can be conveyed.",
         "Handle with care - this is a recent bereavement. Josh's father died unexpectedly; James met Josh in Rio Linda on Friday 8/28 to collect keys and talk marketing, and emailed Carol at MS in Napa on 8/30.",
-        "OUT OF AREA - Oroville, Butte County, not Calaveras/Amador. Confirm MetroList coverage and any co-op arrangement before input."
+        "OUT OF AREA - Oroville, Butte County, not Calaveras/Amador. MetroList accepted the listing on 2026-09-01 (226110167), so coverage is answered in practice. Any co-op or referral arrangement is still an open question."
       ],
-      "milestones": [],
-      "clientTasks": [],
-      "goodToKnow": [],
+      "milestones": [
+        {
+          "date": "2026-08-30",
+          "label": "Listing agreement signed",
+          "status": "done",
+          "col": "complete",
+          "badge": "Done",
+          "desc": "You signed the listing agreement with Legacy Properties on August 30, at $330,000. The listing period runs to February 28, 2027."
+        },
+        {
+          "date": "2026-09-01",
+          "label": "Live on MetroList — MLS 226110167",
+          "status": "done",
+          "col": "complete",
+          "badge": "Good news",
+          "desc": "179 Elams Ranch Rd is now published on MetroList and syndicating out to the major search sites. Buyers and their agents can find it, book showings and send offers."
+        },
+        {
+          "date": "2026-09-01",
+          "label": "Photography, drone and 3D tour complete",
+          "status": "done",
+          "col": "complete",
+          "badge": "Done",
+          "desc": "The full media package is finished and attached to the listing: interior and exterior photography, twenty aerial clips covering the meadow, shop, shooting range, well house and gated entry, a Matterport 3D walkthrough, and a property video."
+        },
+        {
+          "date": null,
+          "label": "Clearing title",
+          "status": "next",
+          "col": "week",
+          "badge": "Action",
+          "desc": "Because your husband and father is on title alongside you, the county will need estate documentation before the property can transfer. Amanda Boitano at Placer Title is handling this and has asked us for a copy of the recorded deed to start. This runs alongside the marketing — it does not hold up showings or offers, but it does need to be settled before a sale can close, so we are starting it now rather than later."
+        },
+        {
+          "date": null,
+          "label": "Showings and buyer interest",
+          "status": "upcoming",
+          "col": "week",
+          "badge": "",
+          "desc": "We will keep you posted on showing activity and on how the listing is performing online. You will get a weekly report showing views, saves and shares."
+        },
+        {
+          "date": null,
+          "label": "Offer and escrow",
+          "status": "upcoming",
+          "col": "closing",
+          "badge": "",
+          "desc": "When an offer arrives we will go through it with you together — price, terms, financing and timeline — before you decide anything."
+        }
+      ],
+      "clientTasks": [
+        {
+          "label": "Send us a copy of the recorded deed for the property — Placer Title needs it before they can advise on the estate paperwork. If you cannot find it, tell us and we will have Placer pull it from the county.",
+          "when": "This week",
+          "status": "open"
+        },
+        {
+          "label": "Let us know who is handling the estate — an attorney, an executor, or nobody yet. That decides what Placer asks for next, and there is no wrong answer.",
+          "when": "This week",
+          "status": "open"
+        },
+        {
+          "label": "Confirm how you would like showings handled — lockbox and go, or appointment only with notice. The property is gated, so buyers' agents need to know the access arrangement.",
+          "when": "Now",
+          "status": "open"
+        },
+        {
+          "label": "Tell us about anything on the 30 acres a buyer should know — the well, the septic, the outbuildings, the shooting range backstop. Small details often answer questions before they become objections.",
+          "when": "When you can",
+          "status": "open"
+        }
+      ],
+      "goodToKnow": [
+        {
+          "title": "Your 3D tour and video are live",
+          "body": "Buyers can now walk 179 Elams Ranch Rd from their phone. The Matterport 3D tour lets them move through the house and shop room by room, and the video walks the property itself — the meadow, the shop, the shooting range, the well house and the gated entry. Both are attached to the MLS listing and to this page, and both are yours to forward to anyone you like."
+        },
+        {
+          "title": "What happens in the first two weeks",
+          "body": "New listings get their heaviest online traffic in the first fortnight, so the photography, drone footage and 3D tour all going live on day one matters. We watch the view counts closely in that window — if the numbers are strong but showings are not following, that usually points at price; if the views themselves are low, it points at reach, and we adjust."
+        },
+        {
+          "title": "Oroville is outside our usual patch, and that is deliberate",
+          "body": "Legacy is based in Calaveras and Amador. We took this listing because we know the property and we know you — we sold you this home in April. MetroList has accepted the listing, so it carries the same reach as any other. If a co-operating agent in Butte County would help on the ground, we will tell you and talk it through first."
+        },
+        {
+          "title": "Your documents are here whenever you want them",
+          "body": "Everything you have signed is on this page to read or download at any time. Your listing agreement and advisories are yours and are visible only to you — they are never shared with a buyer or a buyer's agent."
+        }
+      ],
       "docs": {
         "priorPurchaseFile": "Closed buy-side file at _Sold\\Elam ranch\\ — commission demand (PDF + DOCX), NHD PIDMAX report + signature pages + invoice, home inspection, well photos, client MLS sheet, house-number photo.",
         "priorMLS": "179 Elams Ranch Rd Client MLS.pdf — also in _Showings\\meth and tony\\179 Elams Ranch Rd. shared folder with Meth and Tony",
@@ -6063,7 +6150,52 @@
         "DIA": "EXECUTED - Disclosure Information Advisory - 1225, filed 2026-08-31 09:27 (same misfiled folder)."
       },
       "listingExpiration": "2027-02-28",
-      "mlsNumber": "226110167"
+      "mlsNumber": "226110167",
+      "video": "https://youtu.be/RSNyFxqgIZk",
+      "matterport": "https://my.matterport.com/show/?m=nUakGKw7gVE",
+      "agentNote": {
+        "author": "sara",
+        "status": "draft",
+        "updated": "2026-09-01",
+        "body": "Josh and Jennifer — 179 Elams Ranch Rd went live on MetroList this morning at $330,000, MLS 226110167.\n\nEverything is on it: the photography, the drone footage over the meadow and the shooting range, the 3D walkthrough, and the video. Buyers can walk the house and the shop from their phone before they ever drive out, which matters on a rural property thirty acres up a gravel road.\n\nOne thing running in the background. Because your father is on title with you, Placer Title needs some estate paperwork before the property can transfer. Amanda Boitano is handling it and has asked us for a copy of the recorded deed to get started. It does not slow down showings or offers at all — but it does need to be sorted before a sale can close, so we would rather start it now than run into it later. If you would like, we can deal with Placer directly and keep you out of it.\n\nI know this is not the reason anyone wants to be selling a house, and there is no rush on our side. Call me any time.\n\nSara Cooper · Legacy Properties · (209) 559-4966"
+      },
+      "clientDocuments": [
+        {
+          "name": "Residential Listing Agreement",
+          "url": "https://legacycalifornia.com/docs/preparing-179-elams-ranch/residential-listing-agreement.pdf",
+          "scope": "property",
+          "visibility": "seller",
+          "note": "Signed at listing 8/30. Seller only — never released to a buyer or a buyer's agent."
+        },
+        {
+          "name": "Additional Agent Acknowledgement",
+          "url": "https://legacycalifornia.com/docs/preparing-179-elams-ranch/additional-agent-acknowledgement.pdf",
+          "scope": "property",
+          "visibility": "seller",
+          "note": "Signed at listing 8/30."
+        },
+        {
+          "name": "Market Conditions Advisory",
+          "url": "https://legacycalifornia.com/docs/preparing-179-elams-ranch/market-conditions-advisory.pdf",
+          "scope": "property",
+          "visibility": "seller",
+          "note": "Signed at listing 8/30."
+        },
+        {
+          "name": "Statewide Buyer and Seller Advisory",
+          "url": "https://legacycalifornia.com/docs/preparing-179-elams-ranch/statewide-buyer-seller-advisory.pdf",
+          "scope": "property",
+          "visibility": "seller",
+          "note": "Signed at listing 8/30. The seller's executed copy stays seller-only; a buyer signs their own SBSA at offer."
+        },
+        {
+          "name": "Disclosure Information Advisory",
+          "url": "https://legacycalifornia.com/docs/preparing-179-elams-ranch/disclosure-information-advisory.pdf",
+          "scope": "property",
+          "visibility": "seller",
+          "note": "Signed at listing 8/30."
+        }
+      ]
     }
   ]
 }
