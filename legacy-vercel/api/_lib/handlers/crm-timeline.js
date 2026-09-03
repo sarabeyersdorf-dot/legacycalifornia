@@ -42,6 +42,15 @@ const pick = (obj, keys) => Object.fromEntries(Object.entries(obj || {}).filter(
 // due_date. A mismatch means the trigger no longer holds. Only applies to
 // proposals that embed a date; everything else is unaffected.
 const triggerDate = (reason) => (String(reason || '').match(/\((\d{4}-\d{2}-\d{2})\)/) || [])[1] || null;
+// Look up the CURRENT due_date of every item a batch of proposals points at.
+const dueDatesFor = async (supa, proposals) => {
+  const ids = [...new Set((proposals || []).map((p) => p.item_id).filter(Boolean))];
+  const map = new Map();
+  if (!ids.length) return map;
+  const { data } = await supa.from('deal_timeline_items').select('id, due_date').in('id', ids);
+  for (const it of data || []) map.set(it.id, it.due_date);
+  return map;
+};
 const isStaleProposal = (proposal, dueDateByItemId) => {
   const t = triggerDate(proposal?.reason);
   if (!t) return false;
@@ -105,12 +114,7 @@ export default async function handler(req, res) {
       if (error) return fail(res, 500, error.message);
       // Drop cards whose trigger date the item has since moved past (see
       // isStaleProposal): the briefing should never read out a stale deadline.
-      const itemIds = [...new Set((data || []).map((p) => p.item_id).filter(Boolean))];
-      const dueById = new Map();
-      if (itemIds.length) {
-        const { data: its } = await supaK.from('deal_timeline_items').select('id, due_date').in('id', itemIds);
-        for (const it of its || []) dueById.set(it.id, it.due_date);
-      }
+      const dueById = await dueDatesFor(supaK, data);
       const fresh = (data || []).filter((p) => !isStaleProposal(p, dueById));
       return ok(res, { proposals: fresh.map(({ item_id, ...p }) => p) });
     } catch (e) { return fail(res, 500, e.message); }
@@ -214,16 +218,26 @@ export default async function handler(req, res) {
         const { data, error } = await supa.from('deal_timeline_proposals')
           .select('*').eq('status', 'pending').order('created_at', { ascending: true }).limit(50);
         if (error) return fail(res, 500, error.message);
-        return ok(res, { proposals: data || [] });
+        // Same stale-trigger filter as the key-gated reads. This is Sara's
+        // decision queue: a card whose deadline has since moved is a dead card
+        // she cannot resolve, and those are what train her to click Approve to
+        // clear the list.
+        const dueById = await dueDatesFor(supa, data);
+        return ok(res, { proposals: (data || []).filter((p) => !isStaleProposal(p, dueById)) });
       }
       const deal = await loadDeal(supa, req.query || {});
       if (!deal) return fail(res, 404, 'deal not found');
-      const [{ data: items }, { data: proposals }] = await Promise.all([
+      let [{ data: items }, { data: proposals }] = await Promise.all([
         supa.from('deal_timeline_items').select('*').eq('deal_id', deal.id)
           .order('sort_order').order('due_date', { ascending: true, nullsFirst: false }),
         supa.from('deal_timeline_proposals').select('*').eq('deal_id', deal.id)
           .eq('status', 'pending').order('created_at')
       ]);
+      // The deal-page console shows the same cards; filter it the same way.
+      {
+        const dueById = new Map((items || []).map((it) => [it.id, it.due_date]));
+        proposals = (proposals || []).filter((p) => !isStaleProposal(p, dueById));
+      }
 
       // Command-center extras (fail-soft, each optional): documents on file,
       // tasks that reference this deal, upcoming calendar items for its parties.
