@@ -5324,10 +5324,60 @@ function selectLead(el) {
     box.innerHTML = state.saved.map(function (s) {
       var sub = [];
       if (s.client_name) sub.push(esc(s.client_name));
-      if (s.auto_push) sub.push('⚡ auto-emails');
-      var label = '<span>' + esc(s.name) + (sub.length ? '<br><span style="font-size:11px;color:var(--ink-mute);">' + sub.join(' · ') + '</span>' : '') + '</span>';
-      return '<button data-apply-saved="' + esc(s.id) + '">' + label + (s.new_match_count ? '<span class="c">' + s.new_match_count + ' new</span>' : '') + '</button>';
+      else sub.push('<span style="color:#9B2C2C;">no client attached</span>');
+      if (s.last_auto_push_at) sub.push('last sent ' + esc(shortDate(s.last_auto_push_at)));
+      var label = '<span>' + esc(s.name) + '<br><span style="font-size:11px;color:var(--ink-mute);">' + sub.join(' · ') + '</span></span>';
+      // The auto-email switch lives on the row, not just in the create form —
+      // it was previously settable only at creation, so turning alerts on for an
+      // existing search meant deleting and rebuilding it.
+      var on = !!s.auto_push;
+      var canAuto = !!s.client_lead_id;
+      var toggle = '<button type="button" data-auto-saved="' + esc(s.id) + '" data-auto-on="' + (on ? '1' : '0') + '"'
+        + (canAuto ? '' : ' disabled')
+        + ' title="' + (canAuto
+            ? (on ? 'Auto-emailing new matches to this client — click to stop' : 'Click to auto-email new matches to this client')
+            : 'Attach a client to this search to auto-email matches') + '"'
+        + ' style="border:1px solid ' + (on ? '#2E5C3D' : 'var(--rule)') + ';background:' + (on ? '#2E5C3D' : 'transparent')
+        + ';color:' + (on ? '#fff' : 'var(--ink-mute)') + ';border-radius:11px;padding:3px 9px;cursor:' + (canAuto ? 'pointer' : 'not-allowed')
+        + ';font-family:var(--mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;white-space:nowrap;'
+        + (canAuto ? '' : 'opacity:.45;') + '">' + (on ? '⚡ auto-email on' : 'auto-email off') + '</button>';
+      var del = '<button type="button" data-del-saved="' + esc(s.id) + '" title="Delete this saved search" style="border:none;background:none;cursor:pointer;color:var(--ink-mute);font-size:15px;line-height:1;padding:0 4px;">×</button>';
+      return '<div style="display:flex;align-items:center;gap:8px;padding:4px 0;">'
+        + '<button data-apply-saved="' + esc(s.id) + '" style="flex:1;min-width:0;text-align:left;">' + label
+        + (s.new_match_count ? '<span class="c">' + s.new_match_count + ' new</span>' : '') + '</button>'
+        + toggle + del + '</div>';
     }).join('');
+
+    box.querySelectorAll('[data-auto-saved]').forEach(function (btn) {
+      btn.addEventListener('click', function (e) {
+        e.preventDefault(); e.stopPropagation();
+        if (btn.disabled) return;
+        var id = btn.getAttribute('data-auto-saved');
+        var next = btn.getAttribute('data-auto-on') !== '1';
+        btn.disabled = true;
+        api('saved-searches', { method: 'POST', body: { op: 'set-auto-push', id: id, auto_push: next } }).then(function (r) {
+          btn.disabled = false;
+          if (r.ok) loadSaved();
+          else alert((r.j && r.j.error) || 'Could not change auto-email.');
+        });
+      });
+    });
+    box.querySelectorAll('[data-del-saved]').forEach(function (btn) {
+      btn.addEventListener('click', function (e) {
+        e.preventDefault(); e.stopPropagation();
+        var id = btn.getAttribute('data-del-saved');
+        var s = state.saved.filter(function (x) { return x.id === id; })[0];
+        if (!confirm('Delete the saved search “' + ((s && s.name) || '') + '”? Any collection it already created is kept.')) return;
+        api('saved-searches?id=' + encodeURIComponent(id), { method: 'DELETE' }).then(function (r) {
+          if (r.ok) loadSaved(); else alert((r.j && r.j.error) || 'Could not delete.');
+        });
+      });
+    });
+  }
+
+  function shortDate(iso) {
+    if (!iso) return '';
+    try { return new Date(iso).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }); } catch (e) { return ''; }
   }
 
   // ---- pick-from-IDX capture ----------------------------------------------
@@ -5862,11 +5912,50 @@ function selectLead(el) {
     search('');
   }
 
+  // Criteria for a standing search. These fields USED to live in an in-CRM
+  // search panel; that panel was replaced by the MLS tab, but gatherFilters()
+  // was left reading its inputs — so every saved search was created with
+  // filters:{} and silently matched EVERY listing. The criteria now live here,
+  // on the form that actually defines the ongoing search.
+  var SS_FIELDS = [
+    ['price_min',     'Price from',  'number', '400000'],
+    ['price_max',     'Price to',    'number', '750000'],
+    ['beds_min',      'Beds min',    'number', '3'],
+    ['baths_min',     'Baths min',   'number', '2'],
+    ['sqft_min',      'Sq ft min',   'number', '1500'],
+    ['lot_acres_min', 'Acres min',   'number', '1'],
+    ['city',          'City',        'text',   'Murphys'],
+    ['keyword',       'Keyword',     'text',   'lake view']
+  ];
+  function ssFieldsHtml(f) {
+    f = f || {};
+    return '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px 10px;margin-top:6px;">' +
+      SS_FIELDS.map(function (x) {
+        return '<label style="display:flex;flex-direction:column;gap:3px;font-size:11px;color:var(--ink-mute);">' + esc(x[1]) +
+          '<input data-ssf="' + x[0] + '" type="' + x[2] + '" placeholder="' + esc(x[3]) + '" value="' + esc(f[x[0]] == null ? '' : String(f[x[0]])) + '"></label>';
+      }).join('') + '</div>';
+  }
+  function ssGatherFields(m) {
+    var f = {};
+    m.querySelectorAll('[data-ssf]').forEach(function (i) {
+      var v = (i.value || '').trim();
+      if (v !== '') f[i.getAttribute('data-ssf')] = v;
+    });
+    var st = [];
+    m.querySelectorAll('[data-ssstatus]:checked').forEach(function (c) { st.push(c.getAttribute('data-ssstatus')); });
+    if (st.length) f.status = st;
+    return f;
+  }
+
   function saveSearchModal() {
-    var filters = gatherFilters();
     var picked = null;   // { id, name } client this search is for
-    var m = modal('<h3>Save this search.</h3><p class="sub">Store these filters to reuse for a client. New MLS matches get flagged after each sync.</p>' +
+    var m = modal('<h3>Set up an ongoing search.</h3><p class="sub">Homes matching these criteria are picked up after every MLS sync. Attach a client and switch on auto-email and they go out automatically — homes the client has already turned down are never re-sent.</p>' +
       '<label>Name</label><input id="ssName" placeholder="Karen — single story, under 700k" autofocus>' +
+      '<label style="margin-top:12px;">Criteria</label>' + ssFieldsHtml({}) +
+      '<div style="display:flex;gap:14px;margin-top:9px;font-size:12.5px;">' +
+        '<label style="display:flex;gap:6px;align-items:center;cursor:pointer;"><input type="checkbox" data-ssstatus="active" checked> Active</label>' +
+        '<label style="display:flex;gap:6px;align-items:center;cursor:pointer;"><input type="checkbox" data-ssstatus="pending"> Pending</label>' +
+      '</div>' +
       '<label style="margin-top:12px;">For client</label>' +
       '<div style="display:flex;align-items:center;gap:10px;"><button class="btn-link" id="ssClient" style="padding:0;">+ Attach a client</button><span id="ssClientName" style="font-size:13px;color:var(--ink);"></span></div>' +
       '<label class="ss-auto" style="display:flex;align-items:flex-start;gap:9px;margin-top:14px;cursor:pointer;opacity:.5;">' +
@@ -5891,18 +5980,36 @@ function selectLead(el) {
       var name = m.querySelector('#ssName').value.trim();
       if (!name) { m.querySelector('#ssR').textContent = 'Give it a name.'; return; }
       if (autoBox.checked && !picked) { m.querySelector('#ssR').textContent = 'Attach a client to auto-email matches.'; return; }
+      var filters = ssGatherFields(m);
+      // An empty criteria set matches the whole MLS. Harmless as a manual list,
+      // but as an auto-email it mails the client every new listing in the county.
+      if (autoBox.checked && !Object.keys(filters).filter(function (k) { return k !== 'status'; }).length) {
+        m.querySelector('#ssR').textContent = 'Add at least one criterion — an auto-email with no filters would send every new listing.';
+        return;
+      }
       api('saved-searches', { method: 'POST', body: { name: name, filters: filters, client_lead_id: picked ? picked.id : null, auto_push: !!autoBox.checked } }).then(function (r) {
         if (r.ok) { m._close(); loadSaved(); } else m.querySelector('#ssR').textContent = (r.j && r.j.error) || 'Failed.';
       });
     };
   }
 
+  // Clicking a saved search opens the collection its matches land in. It used to
+  // re-run the filters into an in-CRM results panel that no longer exists, so it
+  // threw a TypeError and did nothing visible. The collection IS the search's
+  // output now — that's what the cron fills and what the client sees.
   function applySaved(id) {
     var s = state.saved.filter(function (x) { return x.id === id; })[0];
     if (!s) return;
-    if (!state.active) { alert('Open a collection first, then apply a saved search to add listings to it.'); return; }
-    state.sub = 'search'; renderSub(); root.querySelectorAll('[data-sub]').forEach(function (b) { b.classList.toggle('on', b.getAttribute('data-sub') === 'search'); });
-    state.lastFilters = s.filters || {}; hydrateFilters(); doSearch();
+    if (s.collection_id) { openCollection(s.collection_id); return; }
+    if (!s.client_lead_id) {
+      alert('“' + s.name + '” has no client attached yet.\n\nAttach one and switch on auto-email, and its matches will collect here after the next MLS sync.');
+      return;
+    }
+    if (!s.auto_push) {
+      alert('“' + s.name + '” isn\'t collecting matches yet.\n\nTurn on auto-email on this search and new matches will be gathered into a collection for ' + (s.client_name || 'your client') + ' after the next MLS sync.');
+      return;
+    }
+    alert('No matches yet for “' + s.name + '”.\n\nThe search runs after each MLS sync (every few hours) — the collection appears as soon as something matches.');
   }
 
   // ---- push (always shows the exact message before sending) ----------------

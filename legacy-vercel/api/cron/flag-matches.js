@@ -24,6 +24,22 @@ import { sendEmail as sendEmailSendgrid, sendgridConfigured } from '../_lib/send
 // the new ones. Best-effort — the durable part (adding to the collection) still
 // happens even if email isn't configured. Returns a small summary for the log.
 export async function autoDeliver(supa, s, freshIds) {
+  // 0. Never re-send a home this client has already turned down. A 'not_for_me'
+  //    is about the home, not the collection it arrived in, so it's honoured
+  //    across all of theirs — otherwise the nightly run would cheerfully mail
+  //    back the same rejects every time they re-matched the filters.
+  if (s.client_lead_id && freshIds.length) {
+    const { data: rejected } = await supa.from('collection_reactions')
+      .select('property_id')
+      .eq('lead_id', s.client_lead_id).eq('reaction', 'not_for_me')
+      .in('property_id', freshIds)
+      .then((r) => r, () => ({ data: [] }));
+    const skip = new Set((rejected || []).map((r) => r.property_id).filter(Boolean));
+    if (skip.size) freshIds = freshIds.filter((id) => !skip.has(id));
+    // Everything fresh was already rejected — nothing to add, nothing to send.
+    if (!freshIds.length) return { added: 0, emailed: false, reason: 'all new matches were previously rejected' };
+  }
+
   // 1. Ensure a dedicated collection exists for this search.
   let collId = s.collection_id;
   if (collId) {

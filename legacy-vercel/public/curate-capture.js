@@ -46,6 +46,8 @@
     (isDetailPage
       ? '<button type="button" id="lgcCaptureThis" style="background:#B08D57;color:#1A1714;border:none;border-radius:8px;padding:8px 15px;font-size:12px;font-weight:600;cursor:pointer;">＋ Add this listing</button>'
       : '<span style="color:#C9BEA8;font-size:12px;">Click “＋ Add to collection” on any listing</span>') +
+    '<label id="lgcHideWrap" style="display:none;align-items:center;gap:6px;font-size:12px;color:#C9BEA8;cursor:pointer;">' +
+      '<input type="checkbox" id="lgcHideRejected" style="cursor:pointer;"> Hide rejected &amp; already sent</label>' +
     '<span id="lgcCaptureCount" style="font-size:12px;font-weight:700;color:#8FCF9F;">0 added</span>' +
     '<button type="button" id="lgcCaptureStop" style="background:#2E5C3D;color:#FAF6EC;border:none;border-radius:8px;padding:8px 15px;font-size:12px;font-weight:600;cursor:pointer;">Done — back to collection</button>';
   document.body.insertBefore(bar, document.body.firstChild);
@@ -144,11 +146,19 @@
     return null;
   }
 
-  function scrapeCard(card) {
+  // Just the MLS number off a result card. Split out of scrapeCard because the
+  // history badges re-read every visible card on each widget re-render, and
+  // scrapeCard also runs pickPhoto, which walks every descendant of the card —
+  // far too heavy to repeat across a whole grid several times a minute.
+  function cardMls(card) {
     var a = card.querySelector('a[href*="listing"]');
     var idm = a ? (a.getAttribute('href') || '').match(/[?&]id=([A-Za-z0-9]+)/) : null;
-    var mls = idm ? idm[1].split('_')[0]
-                  : ((txt(card, '.ihf-listing-result-number') || '').replace(/[^A-Za-z0-9-]/g, '') || null);
+    return idm ? idm[1].split('_')[0]
+               : ((txt(card, '.ihf-listing-result-number') || '').replace(/[^A-Za-z0-9-]/g, '') || null);
+  }
+
+  function scrapeCard(card) {
+    var mls = cardMls(card);
     var streets = card.querySelectorAll('.ihf-gallery-street-name');
     var cityLine = streets[1] ? (streets[1].textContent || '').trim() : '';
     var cm = cityLine.match(/^(.*?),\s*([A-Z]{2})\s+(\d{5})/);
@@ -244,9 +254,101 @@
   }
 
   // ---- decorate results cards -------------------------------------------------
+  // ---- client history on the result cards -----------------------------------
+  // Mark a card the client has already turned down (red ✕) or already been sent
+  // (muted tag), so the agent doesn't re-pick it. Flags are fetched in one batch
+  // per set of newly-seen MLS numbers and cached for the life of the page.
+  var flagCache = {};        // mls -> {rejected, rejected_at, already_sent}
+  var flagPending = {};      // mls -> true while in flight
+  var hideRejected = false;
+
+  function fmtDate(iso) {
+    if (!iso) return '';
+    try {
+      return new Date(iso).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    } catch (e) { return ''; }
+  }
+
+  function paintCard(card) {
+    var mls = card.getAttribute('data-lgc-mls');
+    var f = mls ? flagCache[mls] : null;
+    var wrap = bar.querySelector('#lgcHideWrap');
+    if (!f || (!f.rejected && !f.already_sent)) {
+      var old = card.querySelector('[data-lgc-flag]');
+      if (old) old.remove();
+      card.style.opacity = '';
+      card.style.display = '';
+      return;
+    }
+    if (wrap) wrap.style.display = 'flex';   // there IS history worth filtering
+    if (!card.querySelector('[data-lgc-flag]')) {
+      var tag = document.createElement('div');
+      tag.setAttribute('data-lgc-flag', '1');
+      var rejected = !!f.rejected;
+      var when = fmtDate(f.rejected_at);
+      tag.textContent = rejected
+        ? ('\u2715 Rejected' + (when ? ' \u00b7 ' + when : ''))
+        : 'Already sent';
+      tag.title = rejected
+        ? 'This client marked this home "Not for me"' + (when ? ' on ' + when : '')
+        : 'This home has already gone out to this client in another collection';
+      tag.style.cssText = 'position:absolute;top:8px;right:8px;z-index:9999;border-radius:8px;padding:6px 10px;'
+        + 'font-family:monospace;font-size:11px;letter-spacing:.05em;text-transform:uppercase;'
+        + 'box-shadow:0 2px 10px rgba(0,0,0,.35);'
+        + (rejected ? 'background:#9B2C2C;color:#fff;' : 'background:#EDE9E1;color:#6B6459;');
+      card.appendChild(tag);
+    }
+    // Rejected cards are dimmed so they read as "seen and turned down" even with
+    // the filter off; already-sent stays full strength (it's re-sendable).
+    card.style.opacity = f.rejected ? '.55' : '';
+    card.style.display = (hideRejected && (f.rejected || f.already_sent)) ? 'none' : '';
+  }
+
+  function repaintAll() {
+    widgetRoots().forEach(function (root) {
+      root.querySelectorAll('.ihf-listing-result-cell[data-lgc-mls]').forEach(paintCard);
+    });
+  }
+
+  function fetchFlags(mlsList) {
+    var want = mlsList.filter(function (m) { return m && !(m in flagCache) && !flagPending[m]; });
+    if (!want.length) return;
+    want.forEach(function (m) { flagPending[m] = true; });
+    fetch('/api/curate/collections', {
+      method: 'POST', credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ op: 'listing-flags', collection_id: target.id, mls_numbers: want })
+    })
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (j) {
+        var flags = (j && j.flags) || {};
+        // Cache a miss as "clean" too, so a home with no history isn't re-asked
+        // on every widget re-render.
+        want.forEach(function (m) { flagCache[m] = flags[m] || { rejected: false, rejected_at: null, already_sent: false }; delete flagPending[m]; });
+        repaintAll();
+      })
+      .catch(function () { want.forEach(function (m) { delete flagPending[m]; }); });
+  }
+
+  var hideBox = bar.querySelector('#lgcHideRejected');
+  if (hideBox) hideBox.addEventListener('change', function () { hideRejected = !!hideBox.checked; repaintAll(); });
+
   function decorate() {
+    var newMls = [];
     widgetRoots().forEach(function (root) {
       root.querySelectorAll('.ihf-listing-result-cell').forEach(function (card) {
+        // Re-read the MLS number on every pass: Kestrel recycles card elements
+        // between renders, so a card already decorated can now hold a different
+        // listing and would otherwise keep the previous home's badge.
+        var mls = null;
+        try { mls = cardMls(card); } catch (e) {}
+        if (mls && card.getAttribute('data-lgc-mls') !== mls) {
+          card.setAttribute('data-lgc-mls', mls);
+          var stale = card.querySelector('[data-lgc-flag]');
+          if (stale) stale.remove();
+        }
+        if (mls) { newMls.push(mls); paintCard(card); }
+
         if (card.getAttribute('data-lgc-dec')) return;
         card.setAttribute('data-lgc-dec', '1');
         try { if (getComputedStyle(card).position === 'static') card.style.position = 'relative'; } catch (e) {}
@@ -258,6 +360,7 @@
         card.appendChild(btn);
       });
     });
+    if (newMls.length) fetchFlags(newMls);
   }
 
   // Kestrel builds its shadow DOM asynchronously and re-renders on every
