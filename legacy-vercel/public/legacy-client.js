@@ -2798,6 +2798,30 @@ window.LGPortal = window.LGPortal || {
         ${lead.phone ? `<span>📞 ${escHtml(lead.phone)}</span>` : ''}
         ${lead.email ? `<span>✉ ${escHtml(lead.email)}</span>` : ''}
         <button class="btn-link lp-editlink" data-detail-action="edit-consent" style="font-size:12px;background:none;border:none;cursor:pointer;padding:0;color:var(--brass);">Update contact</button>
+        ${lead.ihf_lead_id
+          ? `<span title="Pushed to iHomefinder${lead.ihf_synced_at ? ' on ' + escHtml(new Date(lead.ihf_synced_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })) : ''}" style="font-family:var(--mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:#2E5C3D;border:1px solid #2E5C3D;border-radius:11px;padding:2px 8px;">in iHomefinder</span>`
+          : `<button type="button" class="btn-link" data-detail-action="push-idx" style="font-size:12px;background:none;border:none;cursor:pointer;padding:0;color:var(--brass);">Send to iHomefinder alerts</button>`}
+      </div>
+      <div data-idx-push style="display:none;margin-top:10px;padding:14px 16px;background:var(--shell);border:1px solid var(--rule);font-size:13px;max-width:540px;">
+        <div style="font-family:var(--mono);font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-mute);margin-bottom:8px;">Send to iHomefinder alerts</div>
+        <p style="margin:0 0 10px;font-size:12.5px;color:var(--ink-soft);line-height:1.5;">
+          iHomefinder watches the whole MLS and emails new matches — this CRM can't, because they provide no listing feed.
+          This creates ${escHtml(lead.first_name || 'this contact')} as a lead over there. You still set their search criteria in iHomefinder afterwards.
+        </p>
+        <label style="display:flex;flex-direction:column;gap:3px;font-size:11px;color:var(--ink-mute);max-width:280px;">Also subscribe to a market report (optional)
+          <select data-idx-market style="${fld}">
+            <option value="">None</option>
+            <option value="3019792">Murphys</option>
+            <option value="3019793">Arnold</option>
+            <option value="3019794">Copperopolis</option>
+            <option value="3019795">Angels Camp</option>
+          </select>
+        </label>
+        <div style="display:flex;gap:10px;align-items:center;margin-top:12px;">
+          <button class="btn btn-ink btn-sm" data-detail-action="push-idx-go">Send</button>
+          <button class="btn-link" data-detail-action="push-idx-cancel" style="font-size:12px;background:none;border:none;cursor:pointer;color:var(--ink-mute);">Cancel</button>
+          <span data-idx-result style="font-size:12.5px;margin-left:auto;"></span>
+        </div>
       </div>
       ${dealsHtml}
       ${related.length ? `<div style="margin-top:10px;display:flex;flex-wrap:wrap;gap:8px;align-items:center;max-width:540px;">
@@ -3439,6 +3463,41 @@ window.LGPortal = window.LGPortal || {
         selectLeadId(lead.id, true); // force refresh so header pills reflect the change
       });
     }
+
+    // "Send to iHomefinder alerts" — creates this contact as a lead on their
+    // side, which is the only way their whole-MLS Listing Alerts can reach the
+    // person. Their API has no read endpoint, so the button disappears once the
+    // contact carries an ihf_lead_id rather than offering a second push.
+    (function () {
+      const panel = detailEl.querySelector('[data-idx-push]');
+      if (!panel) return;
+      const resEl = panel.querySelector('[data-idx-result]');
+      const open  = detailEl.querySelector('[data-detail-action="push-idx"]');
+      const cancel = panel.querySelector('[data-detail-action="push-idx-cancel"]');
+      const go    = panel.querySelector('[data-detail-action="push-idx-go"]');
+      if (open)   open.addEventListener('click', () => { panel.style.display = 'block'; });
+      if (cancel) cancel.addEventListener('click', () => { panel.style.display = 'none'; });
+      if (go) go.addEventListener('click', async () => {
+        const market = (panel.querySelector('[data-idx-market]') || {}).value || '';
+        go.disabled = true; go.textContent = 'Sending…'; resEl.style.color = ''; resEl.textContent = '';
+        const r = await window.Legacy.api('/api/crm/push-to-idx', {
+          method: 'POST', body: { lead_id: lead.id, market_id: market || undefined }
+        });
+        go.disabled = false; go.textContent = 'Send';
+        if (r.ok && r.json && (r.json.pushed || r.json.already)) {
+          resEl.style.color = '#2E5C3D';
+          const m = r.json.market;
+          resEl.textContent = (r.json.message || 'Sent ✓') + (m && m.subscribed === false ? ' (market not subscribed)' : '');
+          setTimeout(() => { loadLead(lead.id); }, 900);
+        } else {
+          // Show iHomefinder's own words — a 503 here names the missing setting,
+          // and a 502 carries their status and body, which is what tells us their
+          // actual contract the first time this runs against live credentials.
+          resEl.style.color = '#9B2C2C';
+          resEl.textContent = (r.json && r.json.error) || 'Could not send.';
+        }
+      });
+    })();
 
     // Related-contact editor — toggle, save (creates their own card + links
     // both ways), and clicking a related chip opens that contact.
