@@ -5335,8 +5335,9 @@ function selectLead(el) {
       return;
     }
     box.innerHTML = '<div style="border-left:3px solid #996515;background:rgba(153,101,21,.07);padding:10px 12px;margin:4px 0 10px;font-size:12.5px;line-height:1.5;color:var(--ink);">'
-      + '<b style="font-weight:600;">Standing searches can only match ' + (f.properties_total || 0) + ' homes right now.</b><br>'
-      + '<span style="color:var(--ink-mute);">Those are the ones added by hand from the MLS tab. The listing feed — the server-side import a saved search runs against — has never brought in a listing, so alerts will be thin until it is connected. The IDX search on your website is separate and unaffected.</span></div>';
+      + '<b style="font-weight:600;">These searches watch the ' + (f.properties_total || 0) + ' homes you have added by hand — not the whole MLS.</b><br>'
+      + '<span style="color:var(--ink-mute);">iHomefinder confirmed in writing (case 00896993) that they do not provide an MLS listing feed, so nothing can import the full market here. '
+      + 'For “everything new that matches”, use iHomefinder’s own Listing Alerts. Use these for the homes you have picked out and want to watch for a client.</span></div>';
   }
 
   function loadFeedStatus() {
@@ -5978,7 +5979,7 @@ function selectLead(el) {
 
   function saveSearchModal() {
     var picked = null;   // { id, name } client this search is for
-    var m = modal('<h3>Set up an ongoing search.</h3><p class="sub">Homes matching these criteria are picked up after every MLS sync. Attach a client and switch on auto-email and they go out automatically — homes the client has already turned down are never re-sent.</p>' +
+    var m = modal('<h3>Set up an ongoing search.</h3><p class="sub">Watches the homes in your database — the ones you have added from the MLS tab — and collects new matches for a client. Switch on auto-email and they go out automatically; homes the client has turned down are never re-sent. For alerts across the whole MLS, use iHomefinder’s own Listing Alerts — they have no listing feed we can import.</p>' +
       '<label>Name</label><input id="ssName" placeholder="Karen — single story, under 700k" autofocus>' +
       '<label style="margin-top:12px;">Criteria</label>' + ssFieldsHtml({}) +
       '<div style="display:flex;gap:14px;margin-top:9px;font-size:12.5px;">' +
