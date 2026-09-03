@@ -792,7 +792,15 @@ async function autoLinkPartiesByName(supa, dealsJson) {
           contact_type:   'client',
           notes:          `Auto-created from deal ${d.id} (${role}).`
         }).select('id').single();
-        if (insErr || !ins) continue;
+        // Don't swallow the reason: this silently failed for months on a
+        // source-constraint rejection, and the only symptom was deals whose
+        // client never showed up as a contact.
+        if (insErr || !ins) {
+          console.error('[sync-deals] auto-create contact failed', {
+            deal: d.id, role, reason: insErr ? insErr.message : 'no row returned'
+          });
+          continue;
+        }
         leadId = ins.id;
         created++;
         nameIx.set(key, [leadId]);                      // so a later deal reuses this contact
