@@ -7629,7 +7629,7 @@ function selectLead(el) {
   if (!widget) return;
   var listEl  = widget.querySelector('[data-fu-list]');
   var titleEl = widget.querySelector('[data-fu-title]');
-  var TAG = { new_lead: { t: 'New lead', c: '#2E5C3D' }, reminder: { t: 'Reminder', c: '#B08D57' }, unanswered: { t: 'Unanswered', c: '#8A3B2B' } };
+  var TAG = { new_lead: { t: 'New lead', c: '#2E5C3D' }, reminder: { t: 'Reminder', c: '#B08D57' }, unanswered: { t: 'Unanswered', c: '#8A3B2B' }, never_worked: { t: 'Never worked', c: '#7A6F60' } };
   function esc(s) { return (s == null ? '' : String(s)).replace(/[&<>"]/g, function (c) { return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]); }); }
   function toast(m, g) { if (window.Legacy && window.Legacy.toast) window.Legacy.toast(m, !!g); }
   function post(body) { return fetch('/api/crm/follow-ups', { method: 'POST', credentials: 'include', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) }); }
@@ -7641,7 +7641,7 @@ function selectLead(el) {
     if (it.lead_id)                                       b.push('<button class="fu-btn" data-fu-act="open"' + lead + '>Open</button>');
     if (it.kind === 'reminder') { b.push('<button class="fu-btn" data-fu-act="done" data-fu-appt="' + esc(it.appointment_id) + '">✓ Done</button>'); b.push('<button class="fu-btn fu-ghost" data-fu-act="snooze" data-fu-appt="' + esc(it.appointment_id) + '">Snooze</button>'); }
     else if (it.kind === 'unanswered') b.push('<button class="fu-btn fu-ghost" data-fu-act="dismiss"' + lead + '>Dismiss</button>');
-    else if (it.kind === 'new_lead')   b.push('<button class="fu-btn" data-fu-act="contacted"' + lead + '>✓ Reached out</button>');
+    else if (it.kind === 'new_lead' || it.kind === 'never_worked') b.push('<button class="fu-btn" data-fu-act="contacted"' + lead + '>✓ Reached out</button>');
     return b.join('');
   }
   function itemHtml(it) {

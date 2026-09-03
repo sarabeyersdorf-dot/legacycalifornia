@@ -25,7 +25,7 @@ export function sendgridConfigured() {
  * Send a single transactional email via SendGrid.
  * Returns { skipped, id, raw } where `id` is the SendGrid X-Message-Id header.
  */
-export async function sendEmail({ to, toName, subject, html, text }) {
+export async function sendEmail({ to, toName, subject, html, text, cc }) {
   if (!sendgridConfigured()) return { skipped: true, reason: 'SENDGRID_API_KEY not set' };
   if (!to)      throw new Error('sendEmail: `to` required');
   if (!subject) throw new Error('sendEmail: `subject` required');
@@ -34,6 +34,9 @@ export async function sendEmail({ to, toName, subject, html, text }) {
   const body = {
     personalizations: [{
       to: [{ email: to, name: toName || undefined }],
+      // cc rides in the same personalization so it's a true cc on one message,
+      // not a separate send. SendGrid rejects an empty cc array, so omit it.
+      ...(Array.isArray(cc) && cc.length ? { cc: cc.map((e) => ({ email: e })) } : {}),
       subject
     }],
     from:     { email: FROM_EMAIL, name: FROM_NAME },

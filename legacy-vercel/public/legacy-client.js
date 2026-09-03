@@ -3183,6 +3183,9 @@ window.LGPortal = window.LGPortal || {
           <span class="composer-tab" data-composer-tab="portal" title="Shows in the message drawer on their portal / collection pages">Portal</span>
           <span class="composer-tab" data-composer-tab="note" title="A note on this contact · agents only">Note</span>
         </div>
+        <div data-composer-cc style="display:none;flex-wrap:wrap;gap:6px;align-items:center;margin-bottom:7px;font-size:12.5px;">
+          <span style="font-family:var(--mono);font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-mute);">Also to</span>
+        </div>
         <input data-composer-subject placeholder="Subject" style="width:100%;border:1px solid #D9CFB7;padding:8px 10px;background:#fff;font:inherit;font-size:14px;margin-bottom:6px;">
         <textarea data-composer-body placeholder="Write to ${escHtml(fullName(lead))}…"></textarea>
         <div class="composer-foot">
@@ -3575,7 +3578,10 @@ window.LGPortal = window.LGPortal || {
     })();
 
     // Wire the composer (channel toggle, Note/Internal placeholders, Send).
-    wireComposer(detailEl, lead);
+    // `related` is passed in because the composer offers this contact's spouse /
+    // co-buyer as an "Also to" chip; it lives in paintLeadDetail's scope, not
+    // wireComposer's.
+    wireComposer(detailEl, lead, related);
 
     // Per-message delete on each conversation bubble. Two-tap confirm; the row
     // fades and the card reloads so the thread reflects the removal.
@@ -4076,7 +4082,7 @@ window.LGPortal = window.LGPortal || {
   }
 
   // ---- Composer (manual outbound via POST /api/crm/message, or notes via POST /api/crm/note) --
-  function wireComposer(detailEl, lead) {
+  function wireComposer(detailEl, lead, related) {
     const composer  = detailEl.querySelector('[data-composer]');
     if (!composer) return;
     const subjectEl = composer.querySelector('[data-composer-subject]');
@@ -4087,6 +4093,52 @@ window.LGPortal = window.LGPortal || {
     const tabs      = Array.from(composer.querySelectorAll('[data-composer-tab]'));
 
     let channel = 'email';
+
+    // ---- "Also to" — the related contacts marked cc on this card ----------
+    // Pre-ticked from include_on_comms so a couple is reached as a couple by
+    // default; each chip is clickable so the one send you don't want them on is
+    // one click, not a settings change. Re-evaluated per channel because being
+    // reachable differs: email needs an address, SMS a number, and each side of
+    // the pairing has its own opt-out.
+    const ccRow = composer.querySelector('[data-composer-cc]');
+    const ccCandidates = (related || []).filter((r) => r.include_on_comms !== false);
+    const ccOff = new Set();                    // ids unticked for THIS message only
+
+    function ccReachable(ch) {
+      if (ch === 'sms')   return ccCandidates.filter((r) => r.phone);
+      if (ch === 'email') return ccCandidates.filter((r) => r.email);
+      return [];                                // notes and portal messages have no cc
+    }
+    function ccSelectedIds() {
+      return ccReachable(channel).filter((r) => !ccOff.has(r.id)).map((r) => r.id);
+    }
+    function paintCc() {
+      if (!ccRow) return;
+      const people = ccReachable(channel);
+      if (!people.length) { ccRow.style.display = 'none'; return; }
+      ccRow.style.display = 'flex';
+      const label = ccRow.firstElementChild;
+      while (ccRow.children.length > 1) ccRow.removeChild(ccRow.lastElementChild);
+      if (label) label.textContent = channel === 'sms' ? 'Also text' : 'Also to';
+      people.forEach((r) => {
+        const on = !ccOff.has(r.id);
+        const chip = document.createElement('button');
+        chip.type = 'button';
+        chip.setAttribute('data-cc-chip', r.id);
+        chip.setAttribute('aria-pressed', on ? 'true' : 'false');
+        chip.title = on ? 'Click to leave them off this message' : 'Click to include them';
+        chip.textContent = ([r.first_name, r.last_name].filter(Boolean).join(' ') || r.email || r.phone) + (on ? '' : '  (off)');
+        chip.style.cssText = 'border:1px solid ' + (on ? '#2E5C3D' : 'var(--rule)')
+          + ';background:' + (on ? 'rgba(46,92,61,.10)' : 'transparent')
+          + ';color:' + (on ? '#2E5C3D' : 'var(--ink-mute)')
+          + ';border-radius:13px;padding:3px 10px;cursor:pointer;font:inherit;font-size:12.5px;';
+        chip.addEventListener('click', () => {
+          if (ccOff.has(r.id)) ccOff.delete(r.id); else ccOff.add(r.id);
+          paintCc();
+        });
+        ccRow.appendChild(chip);
+      });
+    }
 
     function setChannel(next) {
       channel = next;
@@ -4118,6 +4170,7 @@ window.LGPortal = window.LGPortal || {
         else if (lead.email_opt_out){ sendBtn.disabled = true; statusEl.style.color = '#9B2C2C'; statusEl.textContent = `${fullName(lead)} has opted out of email — sending is blocked`; bodyEl.placeholder = 'Channel opted out.'; }
         else                        { statusEl.textContent = '';                                          bodyEl.placeholder = `Email ${fullName(lead)}…`; }
       }
+      paintCc();
     }
     tabs.forEach((t) => t.addEventListener('click', () => setChannel(t.getAttribute('data-composer-tab'))));
     setChannel('email');
@@ -4141,12 +4194,14 @@ window.LGPortal = window.LGPortal || {
           body: { lead_id: lead.id, body: text, is_internal: !!(internalCb && internalCb.checked) }
         });
       } else {
+        const ccIds = ccSelectedIds();
         r = await window.Legacy.api('/api/crm/message', {
           body: {
             lead_id: lead.id,
             channel,
             body:    text,
-            subject: channel === 'email' ? subject : undefined
+            subject: channel === 'email' ? subject : undefined,
+            cc_lead_ids: ccIds.length ? ccIds : undefined
           }
         });
       }
@@ -4157,9 +4212,13 @@ window.LGPortal = window.LGPortal || {
 
       if (success) {
         statusEl.style.color = '#2E5C3D';
+        const ccGot = (r.json && r.json.cc) || [];
+        const ccNote = ccGot.length
+          ? ` · also ${ccGot[0].via === 'text' ? 'texted' : 'copied'} ${ccGot.map((c) => String(c.name || '').split(/\s+/)[0]).join(' & ')}`
+          : '';
         statusEl.textContent = isNote
           ? `Saved to this contact’s Notes ✓`
-          : `Sent via ${(r.json.provider && r.json.provider.via) || channel}`;
+          : `Sent via ${(r.json.provider && r.json.provider.via) || channel}${ccNote}`;
         const savedText = (isNote && r.json.note && r.json.note.body) || text;
         bodyEl.value = '';
         if (subjectEl) subjectEl.value = '';

@@ -2,26 +2,56 @@
 // /api/crm/follow-ups   (agent-only)
 //
 //   GET  → the daily "Work the day" action list: a ranked, deduped set of items
-//          that need a touch, drawn from three sources —
+//          that need a touch, drawn from four sources —
 //            1. new inbound leads not yet worked (portal / website form),
 //            2. follow-up reminders due or overdue (the Set-a-reminder ones),
-//            3. contacts whose last message is theirs (unanswered).
+//            3. contacts whose last message is theirs (unanswered),
+//            4. a small daily slice of contacts in the book nobody has ever
+//               worked, whatever source they came in through.
 //   POST { op } → act on one item without leaving the page:
 //            { op:'reminder-done',   appointment_id }
 //            { op:'reminder-snooze', appointment_id, days? }
 //            { op:'dismiss-message', contact_id }
 //          (a lead's "I reached out" reuses POST /api/crm/log-contact.)
 //
-// Deliberately EXCLUDES the cold sphere: the leads lane only pulls real inbound
-// leads (source inbound_email/website_form/ihomefinder_idx) with no logged
-// contact — never the thousands of imported 'manual' contacts, which would bury
-// the list. Everything is capped so this stays a workable day, not a wall.
+// Lane 1 stays scoped to real inbound leads (source inbound_email/website_form/
+// ihomefinder_idx) so a portal enquiry always outranks prospecting.
+//
+// Lane 4 is what stops the rest of the book being invisible. Sara adds nearly
+// everyone by hand — 2,180 of 2,279 contacts are source='manual', including
+// every person met at an open house or sent over as a referral — and lane 1's
+// source whitelist meant none of them ever appeared. 466 contacts have no logged
+// contact at all and 464 of those are reachable.
+//
+// Two things this lane deliberately does NOT do, both learned from the data:
+//
+//   • It does not sort on engagement. The obvious rule — "surface contacts who
+//     ENGAGED but were never worked" — is no rule at all here: of those 466,
+//     exactly zero have an engagement timestamp or a single inbound message,
+//     because nothing populates one for a hand-added contact.
+//
+//   • It does not dredge the back catalogue. 463 of the 466 landed on ONE DAY,
+//     2026-06-24, in a bulk import of Sara's phone contacts — title reps, other
+//     agents, escrow officers ("Amanda/Placer Title", "Angel Transfer", "Amy
+//     Agent"). They are not unworked leads and putting them in a call queue
+//     would recreate the exact wall the original source filter was guarding
+//     against. That import needs tagging, not calling.
+//
+// So lane 4 uses the SAME 45-day window as lane 1: it un-hides the contacts Sara
+// adds by hand from here on, and cannot reach back into the June import. It
+// hands over a small fixed slice (NEVER_WORKED_PER_DAY) at a priority below
+// every other lane, sorted newest-first — while you still remember meeting them.
+// Opt-outs and do-not-contact are excluded, and it never fires without a
+// reachable email or phone.
 
 import { adminClient } from '../supabase.js';
 import { getCallerProfile, isAgent } from '../auth.js';
 import { handleOptions, readJson, ok, fail } from '../cors.js';
 
 const DAY = 24 * 3600 * 1000;
+// A day's worth of prospecting, not the whole backlog. Ten is roughly what fits
+// under the genuinely-urgent lanes without pushing them off the visible list.
+const NEVER_WORKED_PER_DAY = 10;
 const agentKey = (profile) => (profile.role === 'agent_james' ? 'james' : 'sara');
 const fullName = (l) => [l?.first_name, l?.last_name].filter(Boolean).join(' ').trim();
 const digits = (p) => String(p || '').replace(/[^\d]/g, '');
@@ -293,6 +323,44 @@ async function list(supa, profile, res) {
     }
   }
 
+  // ── 4. Never worked — in the book, no contact ever logged ──────────────────
+  // Runs LAST so `add`'s dedupe folds anyone already surfaced above into their
+  // existing item rather than listing them twice.
+  {
+    let q = supa.from('leads')
+      .select('id, first_name, last_name, email, phone, source, created_at, assigned_agent, contact_type, email_opt_out, sms_opt_out, not_interested')
+      .eq('status', 'active')
+      .is('last_contact_at', null)
+      .gte('created_at', sinceLeads)            // same window as lane 1 — see the header note
+      .order('created_at', { ascending: false })
+      .limit(120);                              // headroom to filter down to the slice
+    if (!broker) q = q.eq('assigned_agent', me);
+    const { data } = await q;
+    let slice = (data || []).filter((l) => {
+      if (l.email_opt_out || l.sms_opt_out || l.not_interested) return false;
+      if (l.contact_type === 'do_not_call' || l.contact_type === 'do_not_contact') return false;
+      return !!(l.email || l.phone);            // no way to reach them = not an action
+    });
+    // Don't re-list anyone the urgent lanes already surfaced, then take the slice.
+    slice = slice.filter((l) => !byLead.has(l.id)).slice(0, NEVER_WORKED_PER_DAY);
+    for (const l of slice) {
+      const ageDays = (Date.now() - new Date(l.created_at).getTime()) / DAY;
+      add({
+        key: `new:${l.id}`, kind: 'never_worked', lead_id: l.id, appointment_id: null,
+        name: fullName(l) || l.email || l.phone || 'Contact',
+        subtitle: ['In your book · never worked', l.email || (l.phone ? digits(l.phone) : '')].filter(Boolean).join(' · '),
+        reasons: [`Added ${relTime(l.created_at)} — no call, text or email logged yet`],
+        when: l.created_at,
+        // Below every other lane by design: a real reminder or an unanswered text
+        // always outranks prospecting. Fresher additions rank first — you still
+        // remember meeting them.
+        priority: ageDays < 14 ? 46 : 38,
+        phone: l.phone || null, email: l.email || null,
+        actions: ['draft', 'call', 'text', 'email', 'open', 'contacted']
+      });
+    }
+  }
+
   items.sort((a, b) => b.priority - a.priority || new Date(a.when) - new Date(b.when));
   const top = items.slice(0, 30).map((it) => ({ ...it, reason: it.reasons[0], sub_reasons: it.reasons.slice(1) }));
 
@@ -300,6 +368,7 @@ async function list(supa, profile, res) {
     new_leads:  items.filter((i) => i.kind === 'new_lead').length,
     reminders:  items.filter((i) => i.kind === 'reminder').length,
     unanswered: items.filter((i) => i.kind === 'unanswered').length,
+    never_worked: items.filter((i) => i.kind === 'never_worked').length,
     total: items.length
   };
   return ok(res, { items: top, counts, generated_at: new Date().toISOString() });
