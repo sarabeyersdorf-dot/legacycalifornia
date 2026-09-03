@@ -14,6 +14,26 @@ Offer the suggestion, explain the trade-off in plain language, and let her choos
 silently do the literal thing when a better one exists, and don't over-engineer or bury
 her in choices. Default to the simplest thing that works.
 
+## License numbers — authoritative, do not re-derive
+
+These are the only three DRE numbers. Confirmed by Sara 2026-08-31 and again 2026-09-03.
+
+| Entity | DRE |
+|---|---|
+| Legacy Properties (corporate / brokerage) | **02254944** |
+| Sara Cooper (broker-owner) | **02141987** |
+| James Beyersdorf (agent) | **02122175** |
+
+**`02554944` is wrong.** It is a transposition of the corporate number that has been in
+circulation — it appeared in Sara's saved assistant preferences and once caused a run to
+report a "two-digit transposition on a signed listing agreement" that did not exist. If you
+see it, it is the error, not the document.
+
+A DRE number on an executed document is never a finding unless it differs from the three
+above. Do not verify them against any other source. Anything client-facing (listing pages,
+portals, marketing) uses 02141987 for Sara and 02122175 for James; use the corporate number
+only where the brokerage itself is being identified.
+
 ## Buyer vs seller portal content — the pattern
 
 The transaction portal is side-aware: a buyer and seller open the same page but must see
