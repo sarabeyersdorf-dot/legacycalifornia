@@ -230,6 +230,75 @@ async function postAction(supa, agent, req, res) {
   // Capture a listing the agent picked from the embedded IDX search (scraped
   // from the card in the browser — no MLS API needed) into the collection.
   // Upserts a properties row from the scraped fields, then includes it.
+  // Which of these MLS numbers has this collection's client already turned down,
+  // or already been sent? Powers the red ✕ and "already sent" markers the MLS
+  // capture overlay paints on the iHomefinder result cards, so the agent can see
+  // it before adding a home the client has seen or rejected.
+  //
+  // Keyed on MLS number because that is the only id the IDX widget exposes on a
+  // result card — our properties.id doesn't exist there. A home the feed has
+  // never captured simply isn't in `properties` yet, so it has no history and is
+  // reported clean, which is correct.
+  if (op === 'listing-flags') {
+    if (!b?.collection_id) return fail(res, 400, 'collection_id required');
+    const owned = await ownsCollection(supa, agent, b.collection_id);
+    if (!owned) return fail(res, 404, 'collection not found');
+
+    const mlsNumbers = Array.isArray(b?.mls_numbers)
+      ? [...new Set(b.mls_numbers.filter((m) => typeof m === 'string' && m.trim()).map((m) => m.trim()))].slice(0, 200)
+      : [];
+    if (!mlsNumbers.length) return ok(res, { flags: {} });
+
+    const { data: coll } = await supa.from('curated_collections')
+      .select('id, client_lead_id').eq('id', b.collection_id).maybeSingle();
+    const clientLeadId = coll?.client_lead_id || null;
+    if (!clientLeadId) return ok(res, { flags: {}, reason: 'no client attached to this collection' });
+
+    const { data: props } = await supa.from('properties')
+      .select('id, mls_number').in('mls_number', mlsNumbers)
+      .then((r) => r, () => ({ data: [] }));
+    if (!props || !props.length) return ok(res, { flags: {} });
+    const mlsById = new Map(props.map((p) => [p.id, p.mls_number]));
+    const propIds = props.map((p) => p.id);
+
+    // A reject is about the HOME, not the collection it happened to arrive in,
+    // so it counts across every collection of this client's.
+    const [{ data: rejects }, { data: colls }] = await Promise.all([
+      supa.from('collection_reactions')
+        .select('property_id, created_at')
+        .eq('lead_id', clientLeadId).eq('reaction', 'not_for_me').in('property_id', propIds)
+        .then((r) => r, () => ({ data: [] })),
+      supa.from('curated_collections').select('id').eq('client_lead_id', clientLeadId)
+        .then((r) => r, () => ({ data: [] }))
+    ]);
+
+    const flags = {};
+    const mark = (pid, key, val) => {
+      const mls = mlsById.get(pid); if (!mls) return;
+      flags[mls] = flags[mls] || { rejected: false, rejected_at: null, already_sent: false };
+      flags[mls][key] = val;
+    };
+    for (const r of (rejects || [])) {
+      if (!r.property_id) continue;
+      mark(r.property_id, 'rejected', true);
+      const mls = mlsById.get(r.property_id);
+      if (mls && (!flags[mls].rejected_at || new Date(r.created_at) > new Date(flags[mls].rejected_at))) {
+        flags[mls].rejected_at = r.created_at;
+      }
+    }
+    // "Already sent" excludes the collection being built right now — those are
+    // this session's picks, not history.
+    const otherCollIds = (colls || []).map((c) => c.id).filter((id) => id !== b.collection_id);
+    if (otherCollIds.length) {
+      const { data: rows } = await supa.from('collection_listings')
+        .select('property_id').in('collection_id', otherCollIds).in('property_id', propIds)
+        .then((r) => r, () => ({ data: [] }));
+      for (const r of (rows || [])) if (r.property_id) mark(r.property_id, 'already_sent', true);
+    }
+
+    return ok(res, { flags });
+  }
+
   if (op === 'capture-listing') {
     if (!b?.collection_id) return fail(res, 400, 'collection_id required');
     const owned = await ownsCollection(supa, agent, b.collection_id);

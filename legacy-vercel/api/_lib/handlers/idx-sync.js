@@ -153,6 +153,24 @@ async function upsertProperties(supa, normalised) {
   return { inserted, updated, errors };
 }
 
+// Record every run in sync_runs, the same generic job log sync-deals uses
+// ({job, status, detail}). Without this the job was completely silent: with no
+// credentials configured fetchListings() returns {skipped:true}, the handler
+// returned 200, and nothing was written anywhere — so a cron that had never
+// once imported a listing looked exactly like a healthy one. The only visible
+// symptom was `properties` staying tiny, which read as "a quiet market"
+// rather than "this has never run". Fail-soft: the log must never break the sync.
+async function logRun(status, detail) {
+  try {
+    const supa = adminClient();
+    await supa.from('sync_runs').insert({
+      job: 'idx-sync',
+      status,
+      detail: { ...detail, ran_at: new Date().toISOString() }
+    });
+  } catch (_) { /* the heartbeat is diagnostics, never the job */ }
+}
+
 export default async function handler(req, res) {
   if (handleOptions(req, res)) return;
   if (req.method !== 'GET' && req.method !== 'POST') return fail(res, 405, 'method_not_allowed');
@@ -171,13 +189,26 @@ export default async function handler(req, res) {
 
   try {
     const feed = await fetchListings();
-    if (feed.skipped) return ok(res, { skipped: true, reason: feed.reason });
+    if (feed.skipped) {
+      await logRun('skipped', { reason: feed.reason, fetched: 0, inserted: 0, updated: 0 });
+      return ok(res, { skipped: true, reason: feed.reason });
+    }
 
     const normalised = (feed.listings || []).map(normaliseListing).filter(Boolean);
-    if (!normalised.length) return ok(res, { fetched: 0, inserted: 0, updated: 0 });
+    if (!normalised.length) {
+      // The feed answered but had nothing we could map — a real condition worth
+      // seeing (wrong path, wrong scope, or a shape normaliseListing misses),
+      // and distinct from "not configured".
+      await logRun('empty', { fetched: (feed.listings || []).length, mapped: 0, inserted: 0, updated: 0 });
+      return ok(res, { fetched: 0, inserted: 0, updated: 0 });
+    }
 
     const supa = adminClient();
     const result = await upsertProperties(supa, normalised);
+
+    await logRun((result.errors && result.errors.length) ? 'partial' : 'ok', {
+      fetched: feed.listings.length, mapped: normalised.length, ...result
+    });
 
     return ok(res, {
       fetched:  feed.listings.length,
@@ -186,6 +217,7 @@ export default async function handler(req, res) {
       ran_at:   new Date().toISOString()
     });
   } catch (e) {
+    await logRun('error', { error: String(e.message || e).slice(0, 500) });
     return fail(res, 500, e.message);
   }
 }

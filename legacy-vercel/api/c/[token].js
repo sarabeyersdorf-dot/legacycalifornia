@@ -130,6 +130,20 @@ async function react(supa, coll, b, res) {
   };
   const { error } = await supa.from('collection_reactions').insert(row);
   if (error) return fail(res, 500, error.message);
+
+  // "Not for me" means it: drop it out of their collection so the next visit
+  // doesn't show them a home they've already turned down. Until now the
+  // reaction was recorded and nothing acted on it — the client kept scrolling
+  // past their own rejects, and the agent kept seeing them in search.
+  // included=false rather than a delete: the row (and the reaction on it) is
+  // the record of what was shown and what came back, which the agent's search
+  // now reads to mark a home rejected.
+  if (row.reaction === 'not_for_me' && row.property_id) {
+    await supa.from('collection_listings')
+      .update({ included: false })
+      .eq('collection_id', coll.id).eq('property_id', row.property_id)
+      .then(() => {}, () => {});   // fail-soft: the client's tap must still succeed
+  }
   supa.from('collection_events').insert({
     collection_id: coll.id, lead_id: coll.client_lead_id || null, property_id: row.property_id,
     event_type: 'reaction', meta: { reaction: row.reaction }
