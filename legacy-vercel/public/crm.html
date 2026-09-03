@@ -2341,6 +2341,7 @@ body.lp-restyle {
             <div class="cur-side-h">Your collections</div>
             <div class="cur-colls" data-cur-colls><div class="cur-empty">Loading…</div></div>
             <div class="cur-side-h" style="margin-top:22px;">Saved searches</div>
+            <div data-cur-feed></div>
             <div class="cur-saved" data-cur-saved></div>
           </aside>
           <div class="cur-main" data-cur-main>
@@ -5257,7 +5258,7 @@ function selectLead(el) {
   var PTYPE_OPTS = [['single_family', 'Single Family'], ['condo', 'Condo/Town'], ['manufactured', 'Manufactured'], ['land', 'Land/Lots'], ['ranch', 'Farm/Ranch']];
   var NOTE_STYLES = [['sticky', 'Sticky note'], ['highlight', 'Gold highlight'], ['banner', 'Ribbon banner']];
 
-  var state = { loaded: false, collections: [], saved: [], active: null, listings: [], inSet: {}, sub: 'listings', lastFilters: {}, gaps: [] };
+  var state = { loaded: false, collections: [], saved: [], active: null, listings: [], inSet: {}, sub: 'listings', lastFilters: {}, gaps: [], feed: null };
 
   // ---- lazy init on tab activation ----------------------------------------
   function ensureLoaded() { if (state.loaded) return; state.loaded = true; loadCollections(); loadSaved(); }
@@ -5316,11 +5317,39 @@ function selectLead(el) {
         return;
       }
       state.saved = r.j.searches || []; renderSaved();
+      if (!state.feed) loadFeedStatus();
     }).catch(function () {});
   }
+  // A standing search matches only what the LISTING feed has imported — the
+  // website's IDX widget renders in the visitor's browser and never reaches this
+  // database. Say so here, where the searches are, so a search that can't
+  // possibly match isn't set up in good faith.
+  function renderFeedBanner() {
+    var box = el('[data-cur-feed]');
+    if (!box) return;
+    var f = state.feed;
+    if (!f) { box.innerHTML = ''; return; }
+    if (f.live) {
+      box.innerHTML = '<div style="font-size:12px;color:var(--ink-mute);padding:4px 0 8px;">Listing feed live · '
+        + f.properties_from_feed + ' of ' + f.properties_total + ' homes imported</div>';
+      return;
+    }
+    box.innerHTML = '<div style="border-left:3px solid #996515;background:rgba(153,101,21,.07);padding:10px 12px;margin:4px 0 10px;font-size:12.5px;line-height:1.5;color:var(--ink);">'
+      + '<b style="font-weight:600;">Standing searches can only match ' + (f.properties_total || 0) + ' homes right now.</b><br>'
+      + '<span style="color:var(--ink-mute);">Those are the ones added by hand from the MLS tab. The listing feed — the server-side import a saved search runs against — has never brought in a listing, so alerts will be thin until it is connected. The IDX search on your website is separate and unaffected.</span></div>';
+  }
+
+  function loadFeedStatus() {
+    fetch('/api/crm/idx-status', { credentials: 'include' })
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (j) { if (j && j.listings) { state.feed = j.listings; renderFeedBanner(); } })
+      .catch(function () {});
+  }
+
   function renderSaved() {
+    renderFeedBanner();
     var box = el('[data-cur-saved]');
-    if (!state.saved.length) { box.innerHTML = '<div class="cur-empty" style="font-size:13px;padding:8px 0;">None yet — run a search and save it.</div>'; return; }
+    if (!state.saved.length) { box.innerHTML = '<div class="cur-empty" style="font-size:13px;padding:8px 0;">None yet — set up an ongoing search to have new matches collected for a client.</div>'; return; }
     box.innerHTML = state.saved.map(function (s) {
       var sub = [];
       if (s.client_name) sub.push(esc(s.client_name));
