@@ -82,6 +82,16 @@ export async function seedDeal(supa, deal) {
 export default async function handler(req, res) {
   if (handleOptions(req, res)) return;
 
+  // Never cache a timeline read. This is live CRM decision state — a stale
+  // proposals list can show Sara an Approve card for a deadline that has since
+  // moved. The other briefing endpoints (briefing-feedback, briefing-calendar,
+  // morning-brief, agent-updates) all set these three; this handler was the only
+  // one that didn't, which left "is this stale response ours or the caller's
+  // cache?" ambiguous when a stale card was reported on 2026-09-03.
+  res.setHeader('Cache-Control', 'private, no-store, no-cache, must-revalidate');
+  res.setHeader('CDN-Cache-Control', 'no-store');
+  res.setHeader('Vercel-CDN-Cache-Control', 'no-store');
+
   // Read-only key access for the automated morning briefing (same SYNC_SECRET
   // convention as briefing-feedback / briefing-calendar): pending-proposals
   // list ONLY. Approve/reject/edit always require a signed-in agent session.
