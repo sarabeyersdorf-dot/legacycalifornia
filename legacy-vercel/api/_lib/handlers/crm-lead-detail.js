@@ -125,8 +125,13 @@ async function readLead(req, res) {
         .eq('lead_id', id).then((r) => r, () => ({ data: [] })),
       // Related contacts (spouse, etc.) — shown on the card, each linking to
       // their own record. Degrades to empty until db/044 runs.
-      supa.from('lead_relationships').select('relationship, related:related_lead_id(id, first_name, last_name, email, phone, contact_type)')
-        .eq('lead_id', id).then((r) => r, () => ({ data: [] }))
+      // include_on_comms drives the "cc them" toggle on the card. Selected with a
+      // fallback so a card still renders on a deploy that precedes db/097.
+      supa.from('lead_relationships').select('relationship, include_on_comms, related:related_lead_id(id, first_name, last_name, email, phone, contact_type)')
+        .eq('lead_id', id)
+        .then((r) => (r.error ? supa.from('lead_relationships')
+          .select('relationship, related:related_lead_id(id, first_name, last_name, email, phone, contact_type)')
+          .eq('lead_id', id).then((r2) => r2, () => ({ data: [] })) : r), () => ({ data: [] }))
     ]);
 
     if (lead.error || !lead.data) return fail(res, 404, 'lead not found');
@@ -163,7 +168,7 @@ async function readLead(req, res) {
       // Deals this contact belongs to (deduped by source_key), newest-first.
       deals:            dedupeDeals((dealParties && dealParties.data) || []),
       // Related contacts (spouse, etc.) — flattened for the card.
-      related:          ((related && related.data) || []).filter((r) => r.related).map((r) => ({ ...r.related, relationship: r.relationship })),
+      related:          ((related && related.data) || []).filter((r) => r.related).map((r) => ({ ...r.related, relationship: r.relationship, include_on_comms: r.include_on_comms !== false })),
       collections:      await curatedForLead(supa, id, events.data || []).catch(() => [])
     });
   } catch (e) {

@@ -44,7 +44,7 @@ export function resendConfigured() {
  * Send a single transactional email via Resend.
  * @returns {{ skipped?: boolean, id?: string, via: 'resend' }}
  */
-export async function sendEmail({ to, toName, subject, html, text, attachments, agent }) {
+export async function sendEmail({ to, toName, subject, html, text, attachments, agent, cc }) {
   const sender = senderFor(agent);
   if (!resendConfigured()) return { skipped: true, reason: 'RESEND_API_KEY not set', via: 'resend' };
   if (!to)      throw new Error('sendEmail: `to` required');
@@ -59,6 +59,9 @@ export async function sendEmail({ to, toName, subject, html, text, attachments, 
     html:      html || `<pre style="font-family:Georgia,serif;font-size:15px;line-height:1.55;white-space:pre-wrap;">${escapeHtml(text || '')}</pre>`,
     text:      text || stripHtml(html)
   };
+  // Optional cc (a spouse or co-buyer riding along on the same thread). Real cc,
+  // not a second send, so a reply-all keeps the household in one conversation.
+  if (Array.isArray(cc) && cc.length) body.cc = cc;
   // Optional attachments (e.g. a calendar invite): [{ filename, content(base64) }]
   if (Array.isArray(attachments) && attachments.length) body.attachments = attachments;
 

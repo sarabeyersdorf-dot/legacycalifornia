@@ -15,7 +15,22 @@
 //               from their OWN phone/email (Command Center "text from my phone"
 //               bridge). No provider dispatch; the row lands 'sent' so the deal
 //               thread keeps the record even while the Twilio line is pending.
+//     cc_lead_ids: uuid[]    optional — related contacts (a spouse, a co-buyer)
+//               to bring along on this message. The composer fills these from
+//               lead_relationships.include_on_comms, so a couple is reached as a
+//               couple by default instead of the agent remembering every send.
 //   }
+//
+// How cc behaves differs by channel because the channels differ:
+//   • EMAIL — a real cc on one message, so a reply-all keeps the household in a
+//     single thread.
+//   • SMS  — there is no cc in SMS. Each cc'd person gets their OWN text and
+//     their OWN messages row, which is also what an agent does by hand. Without
+//     the separate row the spouse's card would show no record of being told.
+// Either way each cc'd person is re-checked against the channel they're being
+// reached on: their own opt-out and a missing address/number drop them from the
+// send silently rather than failing the whole message. The response lists who
+// actually received it (`cc`) so the composer can say so.
 //
 // Auth: server-side. Only Sara/James/admin can send.
 
@@ -77,6 +92,9 @@ export default async function handler(req, res) {
     const text    = typeof body?.body    === 'string' ? body.body.trim()    : '';
     const subject = typeof body?.subject === 'string' ? body.subject.trim() : '';
     const logOnly = body?.log_only === true;
+    const ccLeadIds = Array.isArray(body?.cc_lead_ids)
+      ? [...new Set(body.cc_lead_ids.filter((x) => typeof x === 'string' && x))].slice(0, 5)
+      : [];
 
     // ---- Validation ----------------------------------------------------
     if (!lead_id) return fail(res, 400, 'lead_id required');
@@ -97,6 +115,32 @@ export default async function handler(req, res) {
     if (lead.status !== 'active') return fail(res, 409, 'lead is not active');
     if (channel === 'sms'   && !lead.phone) return fail(res, 422, 'lead has no phone number');
     if (channel === 'email' && !lead.email) return fail(res, 422, 'lead has no email address');
+
+    // ---- Resolve the cc'd related contacts ----------------------------
+    // Only people actually linked to this contact can be cc'd — the ids come
+    // from the browser, so trusting them blind would let any lead be added as a
+    // recipient on any other lead's mail.
+    let ccContacts = [];
+    if (ccLeadIds.length && channel !== 'portal') {
+      const { data: links } = await supa.from('lead_relationships')
+        .select('related_lead_id').eq('lead_id', lead_id).in('related_lead_id', ccLeadIds)
+        .then((r) => r, () => ({ data: [] }));
+      const allowed = new Set((links || []).map((r) => r.related_lead_id));
+      if (allowed.size) {
+        const { data: people } = await supa.from('leads')
+          .select('id, first_name, last_name, email, phone, status, email_opt_out, sms_opt_out')
+          .in('id', [...allowed])
+          .then((r) => r, () => ({ data: [] }));
+        ccContacts = (people || []).filter((c) => {
+          if (c.status !== 'active') return false;
+          if (c.id === lead_id) return false;
+          // Their own opt-out governs their own copy, independent of the primary's.
+          return channel === 'sms'
+            ? (!!c.phone && !c.sms_opt_out)
+            : (!!c.email && !c.email_opt_out);
+        });
+      }
+    }
 
     const sentBy = profile.role === 'agent_james' ? 'james' : 'sara';
     const nowIso = new Date().toISOString();
@@ -157,6 +201,7 @@ export default async function handler(req, res) {
         agent: sentBy,
           to:      lead.email,
           toName:  [lead.first_name, lead.last_name].filter(Boolean).join(' ') || null,
+          cc:      ccContacts.map((c) => c.email),
           subject,
           text,
           html:    bodyToHtml(text, senderAgent)
@@ -176,6 +221,46 @@ export default async function handler(req, res) {
     // ---- Stamp status + update lead.last_contact_at -------------------
     await supa.from('messages').update(sentPatch).eq('id', row.id);
 
+    // ---- SMS has no cc: give each related contact their own text ------
+    // Their own message, their own row, so their card shows they were told.
+    // Best-effort per person: one failure must not fail the primary send, which
+    // has already gone out by this point.
+    const ccDelivered = [];
+    if (sentPatch.status === 'sent' && ccContacts.length) {
+      if (channel === 'sms') {
+        for (const c of ccContacts) {
+          try {
+            const { data: ccRow } = await supa.from('messages').insert({
+              lead_id: c.id, direction: 'outbound', channel: 'sms', body: text,
+              subject: null, status: 'draft', ai_generated: false,
+              approved_by: sentBy, approved_at: nowIso
+            }).select('id').single();
+            let ccStatus = 'sent', ccSid = null;
+            if (!logOnly) {
+              const r2 = await sendSMS({ to: c.phone, body: text, signAs: sentBy });
+              ccStatus = r2.skipped ? 'failed' : 'sent';
+              ccSid = r2.sid || null;
+            }
+            if (ccRow) await supa.from('messages').update({ status: ccStatus, twilio_sid: ccSid }).eq('id', ccRow.id);
+            if (ccStatus === 'sent') {
+              ccDelivered.push(c);
+              await supa.from('leads').update({ last_contact_at: nowIso }).eq('id', c.id);
+            }
+          } catch { /* one spouse's text failing must not fail the primary send */ }
+        }
+      } else {
+        // Email: they were cc'd on the ONE message that already went out, so
+        // there is nothing more to send. Deliberately no row and no
+        // last_contact_at stamp for them: a cc is a copy on someone else's
+        // thread, not a conversation we've had with them, and the message is
+        // already visible on the primary's thread where it belongs. (A text is
+        // different — that one really is addressed to them, hence the row above.)
+        // Not stamping also keeps a couple's emails out of the bulk-send
+        // detector, which counts distinct recipients per two-minute window.
+        ccDelivered.push(...ccContacts);
+      }
+    }
+
     if (sentPatch.status === 'sent') {
       await supa.from('leads')
         .update({ last_contact_at: nowIso })
@@ -193,7 +278,14 @@ export default async function handler(req, res) {
       message_id: row.id,
       status:     sentPatch.status,
       provider:   providerResult,
-      logged:     logOnly
+      logged:     logOnly,
+      // Who actually got it besides the primary, so the composer can say so
+      // rather than the agent having to trust that the toggle did something.
+      cc: ccDelivered.map((c) => ({
+        id: c.id,
+        name: [c.first_name, c.last_name].filter(Boolean).join(' ') || c.email || c.phone,
+        via: channel === 'sms' ? 'text' : 'cc'
+      }))
     });
   } catch (e) {
     return fail(res, 500, e.message);

@@ -2,26 +2,56 @@
 // /api/crm/follow-ups   (agent-only)
 //
 //   GET  → the daily "Work the day" action list: a ranked, deduped set of items
-//          that need a touch, drawn from three sources —
+//          that need a touch, drawn from four sources —
 //            1. new inbound leads not yet worked (portal / website form),
 //            2. follow-up reminders due or overdue (the Set-a-reminder ones),
-//            3. contacts whose last message is theirs (unanswered).
+//            3. contacts whose last message is theirs (unanswered),
+//            4. a small daily slice of contacts in the book nobody has ever
+//               worked, whatever source they came in through.
 //   POST { op } → act on one item without leaving the page:
 //            { op:'reminder-done',   appointment_id }
 //            { op:'reminder-snooze', appointment_id, days? }
 //            { op:'dismiss-message', contact_id }
 //          (a lead's "I reached out" reuses POST /api/crm/log-contact.)
 //
-// Deliberately EXCLUDES the cold sphere: the leads lane only pulls real inbound
-// leads (source inbound_email/website_form/ihomefinder_idx) with no logged
-// contact — never the thousands of imported 'manual' contacts, which would bury
-// the list. Everything is capped so this stays a workable day, not a wall.
+// Lane 1 stays scoped to real inbound leads (source inbound_email/website_form/
+// ihomefinder_idx) so a portal enquiry always outranks prospecting.
+//
+// Lane 4 is what stops the rest of the book being invisible. Sara adds nearly
+// everyone by hand — 2,180 of 2,279 contacts are source='manual', including
+// every person met at an open house or sent over as a referral — and lane 1's
+// source whitelist meant none of them ever appeared. 466 contacts have no logged
+// contact at all and 464 of those are reachable.
+//
+// Two things this lane deliberately does NOT do, both learned from the data:
+//
+//   • It does not sort on engagement. The obvious rule — "surface contacts who
+//     ENGAGED but were never worked" — is no rule at all here: of those 466,
+//     exactly zero have an engagement timestamp or a single inbound message,
+//     because nothing populates one for a hand-added contact.
+//
+//   • It does not dredge the back catalogue. 463 of the 466 landed on ONE DAY,
+//     2026-06-24, in a bulk import of Sara's phone contacts — title reps, other
+//     agents, escrow officers ("Amanda/Placer Title", "Angel Transfer", "Amy
+//     Agent"). They are not unworked leads and putting them in a call queue
+//     would recreate the exact wall the original source filter was guarding
+//     against. That import needs tagging, not calling.
+//
+// So lane 4 uses the SAME 45-day window as lane 1: it un-hides the contacts Sara
+// adds by hand from here on, and cannot reach back into the June import. It
+// hands over a small fixed slice (NEVER_WORKED_PER_DAY) at a priority below
+// every other lane, sorted newest-first — while you still remember meeting them.
+// Opt-outs and do-not-contact are excluded, and it never fires without a
+// reachable email or phone.
 
 import { adminClient } from '../supabase.js';
 import { getCallerProfile, isAgent } from '../auth.js';
 import { handleOptions, readJson, ok, fail } from '../cors.js';
 
 const DAY = 24 * 3600 * 1000;
+// A day's worth of prospecting, not the whole backlog. Ten is roughly what fits
+// under the genuinely-urgent lanes without pushing them off the visible list.
+const NEVER_WORKED_PER_DAY = 10;
 const agentKey = (profile) => (profile.role === 'agent_james' ? 'james' : 'sara');
 const fullName = (l) => [l?.first_name, l?.last_name].filter(Boolean).join(' ').trim();
 const digits = (p) => String(p || '').replace(/[^\d]/g, '');
@@ -160,12 +190,23 @@ async function list(supa, profile, res) {
     const unanswered = [...latestByContact.values()].filter((m) => m.direction === 'inbound');
     const ids = unanswered.map((m) => m.contact_id);
     let leadsById = new Map();
-    // The agent's EMAIL REPLIES live in `messages` (outbound), keyed by lead_id
-    // — the SAME leads.id as deal_messages.contact_id. deal_messages is
-    // inbound-only for email, so without merging these an email flag could NEVER
-    // clear: a reply lands in `messages`, which this lane never read (Cowork,
-    // 8/26). Pull each contact's latest EMAIL outbound so a contact whose inbound
-    // predates a logged reply drops off.
+    // The agent's REPLIES are split across TWO tables, and which one a reply
+    // lands in depends only on WHERE she typed it:
+    //   • lead-card composer  → `messages`      (crm-message-send.js)
+    //   • deal/contact thread → `deal_messages` (crm-deal-messages.js)
+    // Inbound texts and emails always land in `deal_messages`. So a reply typed
+    // in the lead card is invisible to a latest-direction read of deal_messages
+    // alone, and the contact stays flagged "you haven't replied" forever.
+    //
+    // This merge used to cover EMAIL ONLY (`.eq('channel','email')`), on the
+    // assumption that "text/call clear off deal_messages". They don't: 21 of the
+    // outbound SMS in the book sit in `messages`, and every one of them was a
+    // real reply that could never clear its flag. Bev Woltjer, 9/3: she texted in
+    // at 17:29, Sara texted back at 17:32 from the lead card, and the lane still
+    // said "you haven't replied yet". Fixed by merging EVERY channel, and by
+    // letting ANY newer non-blast outbound clear the flag regardless of channel —
+    // texting back an emailer is a reply, and this lane's only question is
+    // whether the ball is still in Sara's court.
     //
     // BUT a bulk send reaches these contacts too, and it is NOT a reply. Counting
     // any newer outbound as a reply let a 200-recipient Ledger blast silently
@@ -176,20 +217,18 @@ async function list(supa, profile, res) {
     // subject key but is the same blast (Cowork 5th pass: 27 sends / 27 subjects
     // in 7s). The threshold is 3 because the largest GENUINE 1:1 reply burst in
     // the data is 2; a false clear loses work, a stuck flag only annoys, so we err
-    // toward excluding. Scope is email only — text/call clear off deal_messages.
-    // (Belt to the real fix: agents' Gmail replies are now ingested into
-    // deal_messages as outbound, so a reply clears via latest-direction there;
-    // this messages-side merge only catches CRM-composed replies.)
+    // toward excluding. Fan-out is counted PER CHANNEL so a text burst and an
+    // email blast can't pool into one bucket.
     const BULK_MIN_RECIPIENTS = 3;                                   // genuine 1:1 max is 2 (Cowork 5th pass)
     const bucketOf = (ts) => Math.floor(new Date(ts).getTime() / 120000); // 2-min bucket
-    let latestOutByLead = new Map();                                // email replies only
+    let latestOutByLead = new Map();                                // newest non-blast outbound touch, any channel
     if (ids.length) {
       let lq = supa.from('leads').select('id, first_name, last_name, email, phone, status, assigned_agent').in('id', ids).eq('status', 'active');
       if (!broker) lq = lq.eq('assigned_agent', me);
       const [{ data: ls }, { data: outs }] = await Promise.all([
         lq,
-        supa.from('messages').select('lead_id, created_at, subject')
-          .in('lead_id', ids).eq('direction', 'outbound').eq('channel', 'email')
+        supa.from('messages').select('lead_id, created_at, channel')
+          .in('lead_id', ids).eq('direction', 'outbound')
           .order('created_at', { ascending: false })
       ]);
       leadsById = new Map((ls || []).map((l) => [l.id, l]));
@@ -199,30 +238,49 @@ async function list(supa, profile, res) {
       // recipient ("What happened to <address>?" prospecting — 27 sends in 7s)
       // lands every send in its own subject bucket and evades a subject-keyed
       // rule, yet it's the same kind of blast as the Ledger (Cowork 5th pass).
-      // Any 2-min window that reached ≥N distinct recipients is bulk; a genuine
-      // 1:1 reply reaches one (the largest true reply group in the data is 2).
-      // The whole outbound-email table is tiny (a few hundred rows), so count
-      // across all of it within the lane's window, not just our candidates.
-      const bulkBuckets = new Set();                                // 2-min buckets that are blasts
+      // Any 2-min window that reached >=N distinct recipients ON ONE CHANNEL is
+      // bulk; a genuine 1:1 reply reaches one (largest true reply group is 2).
+      // The outbound tables are small (a few thousand rows in the lane's window),
+      // so count across all of them, not just our candidates.
+      const bulkBuckets = new Set();                                // "<channel>|<bucket>" keys that are blasts
+      const fanKey = (channel, ts) => `${channel || ''}|${bucketOf(ts)}`;
       {
-        const { data: fan } = await supa.from('messages')
-          .select('lead_id, created_at')
-          .eq('direction', 'outbound').eq('channel', 'email')
-          .gte('created_at', sinceMsgs).limit(5000)
-          .then((r) => r, () => ({ data: [] }));
+        const safe = (p) => p.then((r) => r, () => ({ data: [] }));
+        const [{ data: fanA }, { data: fanB }] = await Promise.all([
+          safe(supa.from('messages').select('lead_id, created_at, channel')
+            .eq('direction', 'outbound').gte('created_at', sinceMsgs).limit(5000)),
+          safe(supa.from('deal_messages').select('contact_id, created_at, channel')
+            .eq('direction', 'outbound').gte('created_at', sinceMsgs).limit(5000))
+        ]);
         const recipsByBucket = new Map();
-        for (const r of (fan || [])) {
-          if (!r.lead_id) continue;
-          const b = bucketOf(r.created_at);
-          let s = recipsByBucket.get(b); if (!s) { s = new Set(); recipsByBucket.set(b, s); }
-          s.add(r.lead_id);
-        }
-        for (const [b, s] of recipsByBucket) if (s.size >= BULK_MIN_RECIPIENTS) bulkBuckets.add(b);
+        const tally = (who, ts, channel) => {
+          if (!who) return;
+          const k = fanKey(channel, ts);
+          let set = recipsByBucket.get(k); if (!set) { set = new Set(); recipsByBucket.set(k, set); }
+          set.add(who);
+        };
+        for (const r of (fanA || [])) tally(r.lead_id, r.created_at, r.channel);
+        for (const r of (fanB || [])) tally(r.contact_id, r.created_at, r.channel);
+        for (const [k, set] of recipsByBucket) if (set.size >= BULK_MIN_RECIPIENTS) bulkBuckets.add(k);
       }
-      const isBlast = (o) => bulkBuckets.has(bucketOf(o.created_at));
-      for (const o of (outs || [])) {
-        if (isBlast(o)) continue;                                   // newsletter, not a reply
-        if (o.lead_id && !latestOutByLead.has(o.lead_id)) latestOutByLead.set(o.lead_id, o.created_at);
+      const isBlast = (ts, channel) => bulkBuckets.has(fanKey(channel, ts));
+      // Newest non-blast outbound per contact, across BOTH tables and ALL
+      // channels. `outs` is already newest-first; the deal_messages side is
+      // fetched here because a lead can have an outbound there that is newer
+      // than its own newest inbound only in the merged view.
+      const noteOut = (who, ts, channel) => {
+        if (!who || isBlast(ts, channel)) return;                   // newsletter, not a reply
+        const prev = latestOutByLead.get(who);
+        if (!prev || new Date(ts).getTime() > new Date(prev).getTime()) latestOutByLead.set(who, ts);
+      };
+      for (const o of (outs || [])) noteOut(o.lead_id, o.created_at, o.channel);
+      {
+        const { data: dOuts } = await supa.from('deal_messages')
+          .select('contact_id, created_at, channel')
+          .in('contact_id', ids).eq('direction', 'outbound').neq('status', 'dismissed')
+          .order('created_at', { ascending: false })
+          .then((r) => r, () => ({ data: [] }));
+        for (const o of (dOuts || [])) noteOut(o.contact_id, o.created_at, o.channel);
       }
     }
     // The only true noise is agents testing their own system — exclude their own
@@ -240,10 +298,12 @@ async function list(supa, profile, res) {
       const l = leadsById.get(m.contact_id);
       if (!l) continue; // archived/converted or not this agent's
       if (isTestContact(l)) continue; // agents testing their own system
-      // Answered? A logged individual EMAIL reply newer than their inbound clears
-      // an email flag. (latestOutByLead is email-only and blast-filtered; text /
-      // call flags clear off deal_messages direction, handled above.)
-      const outAt = m.channel === 'email' ? latestOutByLead.get(m.contact_id) : null;
+      // Answered? ANY individual (non-blast) outbound newer than their inbound
+      // clears the flag, whatever channel it went out on and whichever table it
+      // landed in. Cross-channel counts on purpose: texting back someone who
+      // emailed is a reply, and the lane's only question is whether the ball is
+      // still in Sara's court.
+      const outAt = latestOutByLead.get(m.contact_id);
       if (outAt && new Date(outAt).getTime() > new Date(m.created_at).getTime()) continue;
       const ageDays = (Date.now() - new Date(m.created_at).getTime()) / DAY;
       const ch   = m.channel === 'email' ? 'Email' : m.channel === 'call' ? 'Missed call' : 'Text';
@@ -263,6 +323,44 @@ async function list(supa, profile, res) {
     }
   }
 
+  // ── 4. Never worked — in the book, no contact ever logged ──────────────────
+  // Runs LAST so `add`'s dedupe folds anyone already surfaced above into their
+  // existing item rather than listing them twice.
+  {
+    let q = supa.from('leads')
+      .select('id, first_name, last_name, email, phone, source, created_at, assigned_agent, contact_type, email_opt_out, sms_opt_out, not_interested')
+      .eq('status', 'active')
+      .is('last_contact_at', null)
+      .gte('created_at', sinceLeads)            // same window as lane 1 — see the header note
+      .order('created_at', { ascending: false })
+      .limit(120);                              // headroom to filter down to the slice
+    if (!broker) q = q.eq('assigned_agent', me);
+    const { data } = await q;
+    let slice = (data || []).filter((l) => {
+      if (l.email_opt_out || l.sms_opt_out || l.not_interested) return false;
+      if (l.contact_type === 'do_not_call' || l.contact_type === 'do_not_contact') return false;
+      return !!(l.email || l.phone);            // no way to reach them = not an action
+    });
+    // Don't re-list anyone the urgent lanes already surfaced, then take the slice.
+    slice = slice.filter((l) => !byLead.has(l.id)).slice(0, NEVER_WORKED_PER_DAY);
+    for (const l of slice) {
+      const ageDays = (Date.now() - new Date(l.created_at).getTime()) / DAY;
+      add({
+        key: `new:${l.id}`, kind: 'never_worked', lead_id: l.id, appointment_id: null,
+        name: fullName(l) || l.email || l.phone || 'Contact',
+        subtitle: ['In your book · never worked', l.email || (l.phone ? digits(l.phone) : '')].filter(Boolean).join(' · '),
+        reasons: [`Added ${relTime(l.created_at)} — no call, text or email logged yet`],
+        when: l.created_at,
+        // Below every other lane by design: a real reminder or an unanswered text
+        // always outranks prospecting. Fresher additions rank first — you still
+        // remember meeting them.
+        priority: ageDays < 14 ? 46 : 38,
+        phone: l.phone || null, email: l.email || null,
+        actions: ['draft', 'call', 'text', 'email', 'open', 'contacted']
+      });
+    }
+  }
+
   items.sort((a, b) => b.priority - a.priority || new Date(a.when) - new Date(b.when));
   const top = items.slice(0, 30).map((it) => ({ ...it, reason: it.reasons[0], sub_reasons: it.reasons.slice(1) }));
 
@@ -270,6 +368,7 @@ async function list(supa, profile, res) {
     new_leads:  items.filter((i) => i.kind === 'new_lead').length,
     reminders:  items.filter((i) => i.kind === 'reminder').length,
     unanswered: items.filter((i) => i.kind === 'unanswered').length,
+    never_worked: items.filter((i) => i.kind === 'never_worked').length,
     total: items.length
   };
   return ok(res, { items: top, counts, generated_at: new Date().toISOString() });
