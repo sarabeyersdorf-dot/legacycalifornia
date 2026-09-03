@@ -1,6 +1,6 @@
 {
-  "version": 12.3,
-  "lastUpdated": "2026-09-01",
+  "version": 12.4,
+  "lastUpdated": "2026-09-03",
   "updatedBy": "cowork 2026-09-01 (179 Elams seller page built)",
   "tasks": [
     {
@@ -2969,12 +2969,12 @@
           "desc": "Your loan contingency now runs to August 21 under Extension of Time Amendment No. 3, accepted by the seller August 15, 2026."
         },
         {
-          "date": "2026-08-31",
-          "label": "Close of Escrow — 8/31",
+          "date": "2026-09-09",
+          "label": "Close of Escrow — 9/9",
           "status": "next",
           "col": "closing",
-          "badge": "Closing 8/31",
-          "desc": "Close of escrow moves to Monday, August 31, 2026 under Extension of Time Amendment No. 3, accepted by the seller August 15, 2026."
+          "badge": "Closing 9/9",
+          "desc": "Close of escrow moves to Wednesday, September 9, 2026 under Extension of Time Amendment No. 4, accepted by the seller September 1, 2026."
         }
       ],
       "agentNote": {
@@ -3025,14 +3025,14 @@
       "listPrice": null,
       "salePrice": 207000,
       "openEscrowDate": null,
-      "closingDate": "2026-08-31",
+      "closingDate": "2026-09-09",
       "timeline": {
         "acceptance": "2026-06-17",
-        "coe": "2026-08-31",
+        "coe": "2026-09-09",
         "contingencies": {
           "loan": "2026-08-21"
         },
-        "note": "ETA No. 2 (C.A.R. Form ETA rev 12/25) executed — proposed by buyer Shomari Turner, accepted by seller Rebecca Turnage 2026-08-03: COE extended to 2026-08-17 and the loan contingency to 2026-08-12. Supersedes ETA No. 1 (executed, filed in EX 7/11, covering the original 7/6 buyer-contingency date). Source: __Pending\\8235 Baldwin St\\EX\\ETA2.pdf. Appraisal contingency omitted deliberately — ETA No. 2 checked Loan only, so the 17-day default from acceptance stands; per Sara 2026-08-10. ETA No. 3 (C.A.R. Form ETA rev 12/25, Authentisign 6DC613D9-F495-F111-9B33-000D3A4FF82A) executed — proposed by buyer Shomari Turner, ACCEPTED by seller (signed 'Rebecca Johnson', party of record Rebecca Turnage) 2026-08-15: COE extended to 2026-08-31 and the loan contingency to 2026-08-21. Source: __Pending\\8235 Baldwin St\\EX\\ETA3.pdf. Loan contingency auto-corrected to 2026-08-21 by the 2026-08-16 briefing (Step 1d Part A). coe and closingDate moved 2026-08-17 -> 2026-08-31 by the 2026-08-16 run under Sara's 2026-08-16 standing instruction to auto-apply fully-executed documents (ETA No. 3 is signed by both parties, no blank signature block, no lapsed acceptance deadline). NOTE: AEA No. 1 (seller-proposed 2026-08-12, $1,000 buyer credit + $56.65/day per-diem + full-deposit-release condition for any extension past 8/31) was NEVER ACCEPTED — paragraph 3 is blank and it expired unsigned at 11:00 AM 2026-08-14; ETA No. 3 carries none of those terms."
+        "note": "ETA No. 2 (C.A.R. Form ETA rev 12/25) executed — proposed by buyer Shomari Turner, accepted by seller Rebecca Turnage 2026-08-03: COE extended to 2026-08-17 and the loan contingency to 2026-08-12. Supersedes ETA No. 1 (executed, filed in EX 7/11, covering the original 7/6 buyer-contingency date). Source: __Pending\\8235 Baldwin St\\EX\\ETA2.pdf. Appraisal contingency omitted deliberately — ETA No. 2 checked Loan only, so the 17-day default from acceptance stands; per Sara 2026-08-10. ETA No. 3 (C.A.R. Form ETA rev 12/25, Authentisign 6DC613D9-F495-F111-9B33-000D3A4FF82A) executed — proposed by buyer Shomari Turner, ACCEPTED by seller (signed 'Rebecca Johnson', party of record Rebecca Turnage) 2026-08-15: COE extended to 2026-08-31 and the loan contingency to 2026-08-21. Source: __Pending\\8235 Baldwin St\\EX\\ETA3.pdf. Loan contingency auto-corrected to 2026-08-21 by the 2026-08-16 briefing (Step 1d Part A). coe and closingDate moved 2026-08-17 -> 2026-08-31 by the 2026-08-16 run under Sara's 2026-08-16 standing instruction to auto-apply fully-executed documents (ETA No. 3 is signed by both parties, no blank signature block, no lapsed acceptance deadline). NOTE: AEA No. 1 (seller-proposed 2026-08-12, $1,000 buyer credit + $56.65/day per-diem + full-deposit-release condition for any extension past 8/31) was NEVER ACCEPTED — paragraph 3 is blank and it expired unsigned at 11:00 AM 2026-08-14; ETA No. 3 carries none of those terms. || ETA No. 4 (C.A.R. Form ETA rev 12/25, Authentisign A61A1BD5-1AA6-F111-9B33-000D3A4FF82A) executed — proposed by buyer Shomari Turner (signed via Authentisign 2026-09-01, ~3:48 PM per James), ACCEPTED at para 6 by seller (signed 'Rebecca Johnson', party of record Rebecca Turnage) 2026-09-01: paragraph 1 extends Close Of Escrow to 09/09/2026. Paragraph 2 (contingency extension) is BLANK/unchecked — no contingency date was extended by this document. Source: __Pending\\8235 Baldwin St\\EX\\Extension_of_Time_Amendment_4_-_1225pdf_528.pdf (filed 2026-09-01 17:05). FIVE-PART EXECUTED TEST PASSED: on disk; read by text layer; para 6 acceptance block filled (seller signature + date 09/01/2026), buyer proposal block signed; no lapsed acceptance deadline (same-day signature, within the 3-day window); nothing found this run contradicts it. coe and closingDate moved 2026-08-31 -> 2026-09-09 (Wednesday, business day, no weekend roll needed) by the 2026-09-03 catch-up run under Sara's 2026-08-16 standing auto-apply instruction (Step 1d Part D). IMPORTANT — UNCHANGED BY THIS DOCUMENT: the loan/appraisal contingency deadline stays recorded as 2026-08-21 (already lapsed) because ETA No. 4 did not check or date-extend any contingency box. Buyer Contingency Removal #2 has still not been filed anywhere on disk. The 8/27 NBP-1 cure window (expired 8/29) is not superseded or withdrawn by any document found — ETA No. 4 is only an escrow-date extension. This is a genuine open question, not resolved by this write: report it to Sara/James rather than assuming the seller has waived the NBP."
       },
       "contacts": {
         "coAgent": "Allyson Overturf (PMZ Real Estate) - listing/seller side",
