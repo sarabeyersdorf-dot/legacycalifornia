@@ -2802,12 +2802,28 @@ window.LGPortal = window.LGPortal || {
       ${dealsHtml}
       ${related.length ? `<div style="margin-top:10px;display:flex;flex-wrap:wrap;gap:8px;align-items:center;max-width:540px;">
         <span style="font-family:var(--mono);font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-mute);">Related</span>
-        ${related.map((r) => `<button type="button" class="lp-related-chip" data-open-related="${escHtml(r.id)}" style="background:var(--shell);border:1px solid var(--rule);border-radius:14px;padding:4px 11px;cursor:pointer;font-size:12.5px;color:var(--ink);display:inline-flex;gap:6px;align-items:center;">${escHtml([r.first_name, r.last_name].filter(Boolean).join(' ') || 'Contact')}<span style="color:var(--ink-mute);font-size:11px;">${escHtml(r.relationship || 'related')}</span></button>`).join('')}
+        ${related.map((r) => {
+          const on = r.include_on_comms !== false;
+          const nm = escHtml([r.first_name, r.last_name].filter(Boolean).join(' ') || 'Contact');
+          // Two controls in one chip: the name opens their card, the trailing
+          // pill flips whether they ride along on outreach to this contact.
+          return `<span class="lp-related-chip" style="background:var(--shell);border:1px solid var(--rule);border-radius:14px;padding:2px 3px 2px 11px;font-size:12.5px;color:var(--ink);display:inline-flex;gap:6px;align-items:center;">
+            <button type="button" data-open-related="${escHtml(r.id)}" style="background:none;border:none;padding:0;cursor:pointer;font:inherit;color:inherit;display:inline-flex;gap:6px;align-items:center;">${nm}<span style="color:var(--ink-mute);font-size:11px;">${escHtml(r.relationship || 'related')}</span></button>
+            <button type="button" data-rel-include="${escHtml(r.id)}" data-rel-on="${on ? '1' : '0'}" title="${on ? 'Included on outreach — click to exclude' : 'Not included on outreach — click to include'}" aria-pressed="${on ? 'true' : 'false'}" style="border:1px solid ${on ? '#2E5C3D' : 'var(--rule)'};background:${on ? '#2E5C3D' : 'transparent'};color:${on ? '#fff' : 'var(--ink-mute)'};border-radius:11px;padding:2px 8px;cursor:pointer;font-family:var(--mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;line-height:1.5;">${on ? 'cc ✓' : 'cc off'}</button>
+          </span>`;
+        }).join('')}
         <button type="button" class="btn-link" data-detail-action="add-related" style="font-size:12px;background:none;border:none;cursor:pointer;padding:0;color:var(--brass);">+ Add</button>
       </div>` : `<div style="margin-top:8px;"><button type="button" class="btn-link" data-detail-action="add-related" style="font-size:12px;background:none;border:none;cursor:pointer;padding:0;color:var(--brass);">+ Add spouse / related contact</button></div>`}
       <div data-related-editor style="display:none;margin-top:10px;padding:14px 16px;background:var(--shell);border:1px solid var(--rule);font-size:13px;max-width:540px;">
-        <div style="font-family:var(--mono);font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-mute);margin-bottom:10px;">Add a related contact — creates their own card</div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px 10px;margin-bottom:10px;">
+        <div style="font-family:var(--mono);font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-mute);margin-bottom:10px;">Add a related contact</div>
+        <div style="position:relative;margin-bottom:10px;">
+          <label style="display:flex;flex-direction:column;gap:3px;font-size:11px;color:var(--ink-mute);">Search your contacts
+            <input data-rel-search placeholder="Start typing a name, email or phone…" autocomplete="off" style="${fld}"></label>
+          <div data-rel-results style="position:relative;"></div>
+          <div data-rel-picked style="display:none;margin-top:7px;font-size:12.5px;color:var(--ink);"></div>
+          <div style="margin-top:6px;font-size:11.5px;color:var(--ink-mute);">Already in your database? Pick them above — no duplicate card. Otherwise fill in the fields below.</div>
+        </div>
+        <div data-rel-newfields style="display:grid;grid-template-columns:1fr 1fr;gap:8px 10px;margin-bottom:10px;">
           <label style="display:flex;flex-direction:column;gap:3px;font-size:11px;color:var(--ink-mute);">First name<input data-rel-first style="${fld}"></label>
           <label style="display:flex;flex-direction:column;gap:3px;font-size:11px;color:var(--ink-mute);">Last name<input data-rel-last value="${escHtml(lead.last_name || '')}" style="${fld}"></label>
           <label style="display:flex;flex-direction:column;gap:3px;font-size:11px;color:var(--ink-mute);">Email<input data-rel-email type="email" style="${fld}"></label>
@@ -2821,6 +2837,10 @@ window.LGPortal = window.LGPortal || {
             </select>
           </label>
         </div>
+        <label style="display:flex;gap:8px;align-items:flex-start;margin:2px 0 10px;font-size:12.5px;color:var(--ink);line-height:1.5;cursor:pointer;">
+          <input type="checkbox" data-rel-include-new checked style="margin-top:2px;">
+          <span>Include them on outreach to ${escHtml(lead.first_name || 'this contact')} — emails and texts offer both names</span>
+        </label>
         <div style="display:flex;gap:10px;align-items:center;">
           <button class="btn btn-ink btn-sm" data-detail-action="save-related">Add contact</button>
           <button class="btn-link" data-detail-action="cancel-related" style="font-size:12px;background:none;border:none;cursor:pointer;color:var(--ink-mute);">Cancel</button>
@@ -3429,16 +3449,81 @@ window.LGPortal = window.LGPortal || {
         if (cancel) cancel.addEventListener('click', () => { panel.style.display = 'none'; });
         const save = panel.querySelector('[data-detail-action="save-related"]');
         const result = panel.querySelector('[data-rel-result]');
+
+        // ---- Typeahead over the whole book ---------------------------------
+        // Most spouses Sara "adds" already have a card among 1,600+ contacts.
+        // Typing them in again minted a duplicate whenever the email differed or
+        // was blank, so search comes FIRST and the blank fields are the fallback.
+        const searchIn  = panel.querySelector('[data-rel-search]');
+        const resultsEl = panel.querySelector('[data-rel-results]');
+        const pickedEl  = panel.querySelector('[data-rel-picked]');
+        const newFields = panel.querySelector('[data-rel-newfields]');
+        let pickedId = null;
+
+        const clearPick = () => {
+          pickedId = null;
+          if (pickedEl) { pickedEl.style.display = 'none'; pickedEl.innerHTML = ''; }
+          if (newFields) newFields.style.display = 'grid';
+        };
+        const applyPick = (id, name, sub) => {
+          pickedId = id;
+          if (searchIn) { searchIn.value = ''; }
+          if (resultsEl) resultsEl.innerHTML = '';
+          // Picking someone existing makes the create fields meaningless — hide
+          // them so it's unambiguous which of the two paths is about to run.
+          if (newFields) newFields.style.display = 'none';
+          if (pickedEl) {
+            pickedEl.style.display = 'block';
+            pickedEl.innerHTML = `<span style="display:inline-flex;gap:8px;align-items:center;background:#fff;border:1px solid var(--rule);border-radius:14px;padding:4px 6px 4px 11px;">
+              <strong style="font-weight:600;">${escHtml(name)}</strong>
+              <span style="color:var(--ink-mute);font-size:11.5px;">${escHtml(sub || '')}</span>
+              <button type="button" data-rel-clearpick style="border:none;background:none;cursor:pointer;color:var(--ink-mute);font-size:15px;line-height:1;padding:0 5px;" title="Clear">×</button>
+            </span>`;
+          }
+        };
+        if (pickedEl) pickedEl.addEventListener('click', (e) => {
+          if (e.target.closest('[data-rel-clearpick]')) clearPick();
+        });
+
+        let relT;
+        if (searchIn) searchIn.addEventListener('input', () => {
+          clearTimeout(relT);
+          const q = searchIn.value.trim();
+          if (q.length < 2) { if (resultsEl) resultsEl.innerHTML = ''; return; }
+          relT = setTimeout(async () => {
+            const r = await window.Legacy.api('/api/crm/roster?bucket=all&q=' + encodeURIComponent(q) + '&limit=8', { method: 'GET' });
+            let people = (r.ok && r.json && r.json.people) || [];
+            // Never offer this contact as their own relation, nor anyone already linked.
+            const linked = new Set((related || []).map((x) => x.id));
+            people = people.filter((pp) => pp.id !== lead.id && !linked.has(pp.id));
+            if (!resultsEl) return;
+            resultsEl.innerHTML = people.length
+              ? `<div style="position:absolute;z-index:50;left:0;right:0;background:#fff;border:1px solid #D9CFB7;max-height:220px;overflow:auto;">${people.map((pp) => `<div data-rel-pick="${escHtml(pp.id)}" data-rel-name="${escHtml(pp.name)}" data-rel-sub="${escHtml(pp.email || pp.phone || '')}" style="padding:8px 12px;cursor:pointer;font-size:13.5px;border-bottom:1px solid #EFE7D6;">${escHtml(pp.name)} <span style="color:#7A6F60;font-size:12px;">${escHtml(pp.email || pp.phone || 'no email or phone')}</span></div>`).join('')}</div>`
+              : `<div style="position:absolute;z-index:50;left:0;right:0;background:#fff;border:1px solid #D9CFB7;padding:8px 12px;font-size:12.5px;color:#7A6F60;">No match — fill in the fields below to create them.</div>`;
+          }, 250);
+        });
+        if (resultsEl) resultsEl.addEventListener('click', (e) => {
+          const pick = e.target.closest('[data-rel-pick]');
+          if (pick) applyPick(pick.getAttribute('data-rel-pick'), pick.getAttribute('data-rel-name'), pick.getAttribute('data-rel-sub'));
+        });
+
         if (save) save.addEventListener('click', async () => {
-          const first = (panel.querySelector('[data-rel-first]').value || '').trim();
-          if (!first) { result.style.color = '#9B2C2C'; result.textContent = 'First name required.'; return; }
+          const incEl = panel.querySelector('[data-rel-include-new]');
           const body = {
-            lead_id: lead.id, first_name: first,
-            last_name: (panel.querySelector('[data-rel-last]').value || '').trim(),
-            email:     (panel.querySelector('[data-rel-email]').value || '').trim(),
-            phone:     (panel.querySelector('[data-rel-phone]').value || '').trim(),
-            relationship: panel.querySelector('[data-rel-type]').value
+            lead_id: lead.id,
+            relationship: panel.querySelector('[data-rel-type]').value,
+            include_on_comms: incEl ? !!incEl.checked : true
           };
+          if (pickedId) {
+            body.related_lead_id = pickedId;
+          } else {
+            const first = (panel.querySelector('[data-rel-first]').value || '').trim();
+            if (!first) { result.style.color = '#9B2C2C'; result.textContent = 'Search for them above, or enter a first name.'; return; }
+            body.first_name = first;
+            body.last_name = (panel.querySelector('[data-rel-last]').value || '').trim();
+            body.email     = (panel.querySelector('[data-rel-email]').value || '').trim();
+            body.phone     = (panel.querySelector('[data-rel-phone]').value || '').trim();
+          }
           save.disabled = true; save.textContent = 'Adding…'; result.style.color = '';
           const r = await window.Legacy.api('/api/crm/related-contact', { method: 'POST', body });
           save.disabled = false; save.textContent = 'Add contact';
@@ -3450,6 +3535,36 @@ window.LGPortal = window.LGPortal || {
           }
         });
       }
+      // The cc pill on each related chip — flips include_on_comms for THIS
+      // direction only (cc Larry when writing Bev is a separate answer from cc
+      // Bev when writing Larry). Optimistic: the pill repaints immediately.
+      detailEl.querySelectorAll('[data-rel-include]').forEach((pill) => {
+        pill.addEventListener('click', async (ev) => {
+          ev.stopPropagation();
+          const rid = pill.getAttribute('data-rel-include');
+          const next = pill.getAttribute('data-rel-on') !== '1';
+          const paint = (on) => {
+            pill.setAttribute('data-rel-on', on ? '1' : '0');
+            pill.setAttribute('aria-pressed', on ? 'true' : 'false');
+            pill.textContent = on ? 'cc ✓' : 'cc off';
+            pill.title = on ? 'Included on outreach — click to exclude' : 'Not included on outreach — click to include';
+            pill.style.borderColor = on ? '#2E5C3D' : 'var(--rule)';
+            pill.style.background  = on ? '#2E5C3D' : 'transparent';
+            pill.style.color       = on ? '#fff' : 'var(--ink-mute)';
+          };
+          paint(next);
+          pill.disabled = true;
+          const r = await window.Legacy.api('/api/crm/related-contact', {
+            method: 'POST',
+            body: { op: 'set-include', lead_id: lead.id, related_lead_id: rid, include_on_comms: next }
+          });
+          pill.disabled = false;
+          if (!(r.ok && r.json && r.json.updated)) {
+            paint(!next);   // server refused — put the pill back so it can't lie
+            pill.title = (r.json && r.json.error) || 'Could not save — try again.';
+          }
+        });
+      });
       detailEl.querySelectorAll('[data-open-related]').forEach((chip) => {
         chip.addEventListener('click', () => {
           const rid = chip.getAttribute('data-open-related');

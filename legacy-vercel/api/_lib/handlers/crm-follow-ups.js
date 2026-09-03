@@ -160,12 +160,23 @@ async function list(supa, profile, res) {
     const unanswered = [...latestByContact.values()].filter((m) => m.direction === 'inbound');
     const ids = unanswered.map((m) => m.contact_id);
     let leadsById = new Map();
-    // The agent's EMAIL REPLIES live in `messages` (outbound), keyed by lead_id
-    // — the SAME leads.id as deal_messages.contact_id. deal_messages is
-    // inbound-only for email, so without merging these an email flag could NEVER
-    // clear: a reply lands in `messages`, which this lane never read (Cowork,
-    // 8/26). Pull each contact's latest EMAIL outbound so a contact whose inbound
-    // predates a logged reply drops off.
+    // The agent's REPLIES are split across TWO tables, and which one a reply
+    // lands in depends only on WHERE she typed it:
+    //   • lead-card composer  → `messages`      (crm-message-send.js)
+    //   • deal/contact thread → `deal_messages` (crm-deal-messages.js)
+    // Inbound texts and emails always land in `deal_messages`. So a reply typed
+    // in the lead card is invisible to a latest-direction read of deal_messages
+    // alone, and the contact stays flagged "you haven't replied" forever.
+    //
+    // This merge used to cover EMAIL ONLY (`.eq('channel','email')`), on the
+    // assumption that "text/call clear off deal_messages". They don't: 21 of the
+    // outbound SMS in the book sit in `messages`, and every one of them was a
+    // real reply that could never clear its flag. Bev Woltjer, 9/3: she texted in
+    // at 17:29, Sara texted back at 17:32 from the lead card, and the lane still
+    // said "you haven't replied yet". Fixed by merging EVERY channel, and by
+    // letting ANY newer non-blast outbound clear the flag regardless of channel —
+    // texting back an emailer is a reply, and this lane's only question is
+    // whether the ball is still in Sara's court.
     //
     // BUT a bulk send reaches these contacts too, and it is NOT a reply. Counting
     // any newer outbound as a reply let a 200-recipient Ledger blast silently
@@ -176,20 +187,18 @@ async function list(supa, profile, res) {
     // subject key but is the same blast (Cowork 5th pass: 27 sends / 27 subjects
     // in 7s). The threshold is 3 because the largest GENUINE 1:1 reply burst in
     // the data is 2; a false clear loses work, a stuck flag only annoys, so we err
-    // toward excluding. Scope is email only — text/call clear off deal_messages.
-    // (Belt to the real fix: agents' Gmail replies are now ingested into
-    // deal_messages as outbound, so a reply clears via latest-direction there;
-    // this messages-side merge only catches CRM-composed replies.)
+    // toward excluding. Fan-out is counted PER CHANNEL so a text burst and an
+    // email blast can't pool into one bucket.
     const BULK_MIN_RECIPIENTS = 3;                                   // genuine 1:1 max is 2 (Cowork 5th pass)
     const bucketOf = (ts) => Math.floor(new Date(ts).getTime() / 120000); // 2-min bucket
-    let latestOutByLead = new Map();                                // email replies only
+    let latestOutByLead = new Map();                                // newest non-blast outbound touch, any channel
     if (ids.length) {
       let lq = supa.from('leads').select('id, first_name, last_name, email, phone, status, assigned_agent').in('id', ids).eq('status', 'active');
       if (!broker) lq = lq.eq('assigned_agent', me);
       const [{ data: ls }, { data: outs }] = await Promise.all([
         lq,
-        supa.from('messages').select('lead_id, created_at, subject')
-          .in('lead_id', ids).eq('direction', 'outbound').eq('channel', 'email')
+        supa.from('messages').select('lead_id, created_at, channel')
+          .in('lead_id', ids).eq('direction', 'outbound')
           .order('created_at', { ascending: false })
       ]);
       leadsById = new Map((ls || []).map((l) => [l.id, l]));
@@ -199,30 +208,49 @@ async function list(supa, profile, res) {
       // recipient ("What happened to <address>?" prospecting — 27 sends in 7s)
       // lands every send in its own subject bucket and evades a subject-keyed
       // rule, yet it's the same kind of blast as the Ledger (Cowork 5th pass).
-      // Any 2-min window that reached ≥N distinct recipients is bulk; a genuine
-      // 1:1 reply reaches one (the largest true reply group in the data is 2).
-      // The whole outbound-email table is tiny (a few hundred rows), so count
-      // across all of it within the lane's window, not just our candidates.
-      const bulkBuckets = new Set();                                // 2-min buckets that are blasts
+      // Any 2-min window that reached >=N distinct recipients ON ONE CHANNEL is
+      // bulk; a genuine 1:1 reply reaches one (largest true reply group is 2).
+      // The outbound tables are small (a few thousand rows in the lane's window),
+      // so count across all of them, not just our candidates.
+      const bulkBuckets = new Set();                                // "<channel>|<bucket>" keys that are blasts
+      const fanKey = (channel, ts) => `${channel || ''}|${bucketOf(ts)}`;
       {
-        const { data: fan } = await supa.from('messages')
-          .select('lead_id, created_at')
-          .eq('direction', 'outbound').eq('channel', 'email')
-          .gte('created_at', sinceMsgs).limit(5000)
-          .then((r) => r, () => ({ data: [] }));
+        const safe = (p) => p.then((r) => r, () => ({ data: [] }));
+        const [{ data: fanA }, { data: fanB }] = await Promise.all([
+          safe(supa.from('messages').select('lead_id, created_at, channel')
+            .eq('direction', 'outbound').gte('created_at', sinceMsgs).limit(5000)),
+          safe(supa.from('deal_messages').select('contact_id, created_at, channel')
+            .eq('direction', 'outbound').gte('created_at', sinceMsgs).limit(5000))
+        ]);
         const recipsByBucket = new Map();
-        for (const r of (fan || [])) {
-          if (!r.lead_id) continue;
-          const b = bucketOf(r.created_at);
-          let s = recipsByBucket.get(b); if (!s) { s = new Set(); recipsByBucket.set(b, s); }
-          s.add(r.lead_id);
-        }
-        for (const [b, s] of recipsByBucket) if (s.size >= BULK_MIN_RECIPIENTS) bulkBuckets.add(b);
+        const tally = (who, ts, channel) => {
+          if (!who) return;
+          const k = fanKey(channel, ts);
+          let set = recipsByBucket.get(k); if (!set) { set = new Set(); recipsByBucket.set(k, set); }
+          set.add(who);
+        };
+        for (const r of (fanA || [])) tally(r.lead_id, r.created_at, r.channel);
+        for (const r of (fanB || [])) tally(r.contact_id, r.created_at, r.channel);
+        for (const [k, set] of recipsByBucket) if (set.size >= BULK_MIN_RECIPIENTS) bulkBuckets.add(k);
       }
-      const isBlast = (o) => bulkBuckets.has(bucketOf(o.created_at));
-      for (const o of (outs || [])) {
-        if (isBlast(o)) continue;                                   // newsletter, not a reply
-        if (o.lead_id && !latestOutByLead.has(o.lead_id)) latestOutByLead.set(o.lead_id, o.created_at);
+      const isBlast = (ts, channel) => bulkBuckets.has(fanKey(channel, ts));
+      // Newest non-blast outbound per contact, across BOTH tables and ALL
+      // channels. `outs` is already newest-first; the deal_messages side is
+      // fetched here because a lead can have an outbound there that is newer
+      // than its own newest inbound only in the merged view.
+      const noteOut = (who, ts, channel) => {
+        if (!who || isBlast(ts, channel)) return;                   // newsletter, not a reply
+        const prev = latestOutByLead.get(who);
+        if (!prev || new Date(ts).getTime() > new Date(prev).getTime()) latestOutByLead.set(who, ts);
+      };
+      for (const o of (outs || [])) noteOut(o.lead_id, o.created_at, o.channel);
+      {
+        const { data: dOuts } = await supa.from('deal_messages')
+          .select('contact_id, created_at, channel')
+          .in('contact_id', ids).eq('direction', 'outbound').neq('status', 'dismissed')
+          .order('created_at', { ascending: false })
+          .then((r) => r, () => ({ data: [] }));
+        for (const o of (dOuts || [])) noteOut(o.contact_id, o.created_at, o.channel);
       }
     }
     // The only true noise is agents testing their own system — exclude their own
@@ -240,10 +268,12 @@ async function list(supa, profile, res) {
       const l = leadsById.get(m.contact_id);
       if (!l) continue; // archived/converted or not this agent's
       if (isTestContact(l)) continue; // agents testing their own system
-      // Answered? A logged individual EMAIL reply newer than their inbound clears
-      // an email flag. (latestOutByLead is email-only and blast-filtered; text /
-      // call flags clear off deal_messages direction, handled above.)
-      const outAt = m.channel === 'email' ? latestOutByLead.get(m.contact_id) : null;
+      // Answered? ANY individual (non-blast) outbound newer than their inbound
+      // clears the flag, whatever channel it went out on and whichever table it
+      // landed in. Cross-channel counts on purpose: texting back someone who
+      // emailed is a reply, and the lane's only question is whether the ball is
+      // still in Sara's court.
+      const outAt = latestOutByLead.get(m.contact_id);
       if (outAt && new Date(outAt).getTime() > new Date(m.created_at).getTime()) continue;
       const ageDays = (Date.now() - new Date(m.created_at).getTime()) / DAY;
       const ch   = m.channel === 'email' ? 'Email' : m.channel === 'call' ? 'Missed call' : 'Text';
