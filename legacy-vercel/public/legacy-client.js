@@ -642,9 +642,9 @@ window.LGPortal = window.LGPortal || {
       if (!bb || !bb.count) return '';
       const sample = (bb.sample || []).map((l) => escapeHtml(l.name)).slice(0, 3).join(', ');
       return `<div style="flex:1 1 260px;border:1px solid var(--rule);background:#fff;padding:12px 14px;">
-        <div style="font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-mute);">${label}</div>
+        <div style="font-family:var(--mono);font-size:12.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-mute);">${label}</div>
         <div style="font-size:26px;font-family:var(--serif);margin:4px 0 2px;">${bb.count}${bb.capped ? '+' : ''}</div>
-        <div style="font-size:11.5px;color:var(--ink-soft);">${sample ? 'e.g. ' + sample : ''}</div>
+        <div style="font-size:13px;color:var(--ink-soft);">${sample ? 'e.g. ' + sample : ''}</div>
         <button class="btn btn-ghost btn-sm" data-hyg-archive="${key}" style="margin-top:10px;">Archive these ${bb.count}${bb.capped ? '+' : ''}</button>
       </div>`;
     };
@@ -1161,7 +1161,7 @@ window.LGPortal = window.LGPortal || {
             <span class="deal-amt" style="font-size:13px;">${escapeHtml(fmtRelative(g.last_at))}</span>
           </div>
           <h4>${escapeHtml(g.name)}</h4>
-          <p class="deal-buyer">${escapeHtml(summary || 'Activity')} <span class="label-cap" style="font-size:9px;opacity:.6;">${escapeHtml(commsTag(g))}</span></p>
+          <p class="deal-buyer">${escapeHtml(summary || 'Activity')} <span class="label-cap" style="font-size:12px;opacity:.6;">${escapeHtml(commsTag(g))}</span></p>
         </article>`;
     }).join('');
 
@@ -1282,7 +1282,7 @@ window.LGPortal = window.LGPortal || {
       if (!evs.length && !d.is_today) return;   // skip empty future days, keep today
       const head = document.createElement('div');
       head.className = 'hr-day';
-      head.style.cssText = 'font-family:var(--sans);font-size:10.5px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:' + (d.is_today ? 'var(--brass)' : 'var(--ink-mute)') + ';padding:10px 2px 2px;';
+      head.style.cssText = 'font-family:var(--sans);font-size:12.5px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:' + (d.is_today ? 'var(--brass)' : 'var(--ink-mute)') + ';padding:10px 2px 2px;';
       head.textContent = (d.is_today ? 'Today · ' : '') + d.dow + ' ' + d.num;
       body.appendChild(head);
       if (!evs.length) {
@@ -1522,7 +1522,7 @@ window.LGPortal = window.LGPortal || {
       <div class="income-row">
         <span class="name">${escapeHtml(r.date)}</span>
         <span class="home">${escapeHtml(r.address)}</span>
-        <span class="v" style="font-family: var(--mono); font-size: 11px; font-style: normal; letter-spacing: 0.12em; color: var(--ink-mute); text-transform: uppercase;">${escapeHtml(r.side)}</span>
+        <span class="v" style="font-family: var(--mono); font-size: 13px; font-style: normal; letter-spacing: 0.12em; color: var(--ink-mute); text-transform: uppercase;">${escapeHtml(r.side)}</span>
         <span class="v brass">${escapeHtml(fmtUSDshort(r.price))}</span>
       </div>`).join('');
     if (sub) sub.textContent = `Last ${rows.length} transaction${rows.length === 1 ? '' : 's'}`;
@@ -1609,7 +1609,7 @@ window.LGPortal = window.LGPortal || {
           ${nextRow || '<div class="tb-pulse-row"><span>Nothing in escrow right now.</span><span class="v"></span></div>'}
           <div class="tb-pulse-row" style="border-top:1px solid var(--rule);margin-top:8px;padding-top:8px;font-weight:600;"><span>Expected this month</span><span class="v">${money(totalMonth)}</span></div>
           <div class="tb-pulse-row" style="font-weight:600;"><span>Next 60 days</span><span class="v">${money(total60)}</span></div>
-          <div class="tb-pulse-row" style="opacity:.6;font-size:11.5px;"><span>Every deadline &amp; contingency is in the deals table below ↓</span><span class="v"></span></div>
+          <div class="tb-pulse-row" style="opacity:.6;font-size:13px;"><span>Every deadline &amp; contingency is in the deals table below ↓</span><span class="v"></span></div>
         </div>`;
     }
 
@@ -1793,10 +1793,6 @@ window.LGPortal = window.LGPortal || {
   // archived/closed clients, because selectLeadId→loadLead fetches by id.
   window.Legacy = {
     api, openModal, submitLead, toast,
-    // Exported so the Contacts screen in crm.html — a separate IIFE — can open
-    // the sorting tool. That screen is where the untyped contacts are actually
-    // looked at; the roster sidebar this file renders is a different surface.
-    openTagging: function () { openTagging(); },
     openLead: function (id) {
       if (!id) return;
       if (typeof window.showView === 'function') window.showView(null, 'inbox');
@@ -2613,6 +2609,13 @@ window.LGPortal = window.LGPortal || {
     ['archive',        'Not a contact', 'Archives it — junk rows from the import']
   ];
 
+  // Exported from inside THIS IIFE, which is the one that declares openTagging.
+  // The window.Legacy literal is built in an earlier IIFE that has already
+  // closed by here, so naming openTagging there resolved to nothing and the
+  // button threw a ReferenceError on click — it rendered, and did nothing.
+  window.Legacy = window.Legacy || {};
+  window.Legacy.openTagging = function () { openTagging(); };
+
   function openTagging() {
     let el = document.querySelector('[data-tagging-overlay]');
     if (el) el.remove();
@@ -2622,7 +2625,7 @@ window.LGPortal = window.LGPortal || {
     el.innerHTML = `<div style="background:var(--paper,#FAF6EC);border:1px solid var(--rule);max-width:760px;width:100%;padding:22px 24px 24px;">
       <div style="display:flex;align-items:baseline;gap:12px;">
         <h3 style="margin:0;font-family:var(--serif);font-size:22px;">Sort contacts</h3>
-        <span data-tag-remaining style="font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-mute);"></span>
+        <span data-tag-remaining style="font-family:var(--mono);font-size:12.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-mute);"></span>
         <button type="button" data-tag-close style="margin-left:auto;border:none;background:none;cursor:pointer;font-size:22px;line-height:1;color:var(--ink-mute);">&times;</button>
       </div>
       <p style="margin:9px 0 0;font-size:13.5px;color:var(--ink-soft);line-height:1.55;max-width:64ch;">
@@ -2686,7 +2689,7 @@ window.LGPortal = window.LGPortal || {
           <div style="display:flex;gap:10px;align-items:baseline;flex-wrap:wrap;">
             <b style="font-weight:600;font-size:14.5px;">${escHtml(p.name)}</b>
             <span style="font-size:12px;color:var(--ink-mute);">${escHtml(reach || 'no email or phone')}</span>
-            ${sig.length ? `<span style="font-size:11.5px;">${sig.join(' · ')}</span>` : ''}
+            ${sig.length ? `<span style="font-size:13px;">${sig.join(' · ')}</span>` : ''}
           </div>
           <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:7px;">
             ${TAG_BUTTONS.map(([v, label, hint]) => `<button type="button" data-tag-set="${v}" title="${escHtml(hint)}" style="border:1px solid ${v === p.suggestion ? 'var(--brass)' : 'var(--rule)'};background:${v === p.suggestion ? 'rgba(140,110,61,.10)' : 'transparent'};color:var(--ink);border-radius:12px;padding:3px 10px;cursor:pointer;font:inherit;font-size:12px;">${escHtml(label)}</button>`).join('')}
@@ -2725,7 +2728,7 @@ window.LGPortal = window.LGPortal || {
       <div class="lead-seg">
         <input type="text" class="lead-seg-input" data-roster-search placeholder="Search ${escHtml(segName)} by name, email, area…" value="${escHtml(state.rosterSearch || '')}" autocomplete="off">
         <div class="lead-seg-hint">${segLeads.length} ${escHtml(segName)} · type a name to open one</div>
-        <button type="button" data-open-tagging style="display:none;margin-top:9px;width:100%;border:1px solid var(--brass);background:transparent;color:var(--brass);border-radius:6px;padding:7px 10px;cursor:pointer;font-family:var(--mono);font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;"></button>
+        <button type="button" data-open-tagging style="display:none;margin-top:9px;width:100%;border:1px solid var(--brass);background:transparent;color:var(--brass);border-radius:6px;padding:7px 10px;cursor:pointer;font-family:var(--mono);font-size:12px;letter-spacing:.12em;text-transform:uppercase;"></button>
       </div>
       <div class="lead-seg-results" data-roster-results></div>`;
     wireLeadList(container);
@@ -2903,7 +2906,7 @@ window.LGPortal = window.LGPortal || {
     const showBuy  = (side === 'buyer' || side === 'both');
     const showSell = (side === 'seller' || side === 'both');
     const fld = 'font:inherit;font-size:13px;padding:6px 8px;border:1px solid var(--rule);background:#fff;color:var(--ink);';
-    const cap = 'font-family:var(--mono);font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-mute);min-width:72px;';
+    const cap = 'font-family:var(--mono);font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-mute);min-width:72px;';
     // The deal(s) this contact is a party to. A live deal shows its stage + COE;
     // a closed one flips to "Closed · <date>" with a green rail. Links to the
     // deal page. This is what tells the agent "this contact is in the Baldwin
@@ -2925,9 +2928,9 @@ window.LGPortal = window.LGPortal || {
             <span aria-hidden="true" style="font-size:15px;">🏡</span>
             <span style="flex:1;min-width:0;">
               <span style="font-weight:600;font-size:13.5px;">${escHtml(dl.address || dl.source_key)}</span>
-              ${meta ? `<span style="display:block;font-size:11.5px;color:var(--ink-mute);">${meta}</span>` : ''}
+              ${meta ? `<span style="display:block;font-size:13px;color:var(--ink-mute);">${meta}</span>` : ''}
             </span>
-            <span style="font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--brass);white-space:nowrap;">Deal ↗</span>
+            <span style="font-family:var(--mono);font-size:12.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--brass);white-space:nowrap;">Deal ↗</span>
           </a>`;
         }).join('')}
       </div>` : '';
@@ -2938,16 +2941,16 @@ window.LGPortal = window.LGPortal || {
         ${lead.email ? `<span>✉ ${escHtml(lead.email)}</span>` : ''}
         <button class="btn-link lp-editlink" data-detail-action="edit-consent" style="font-size:12px;background:none;border:none;cursor:pointer;padding:0;color:var(--brass);">Update contact</button>
         ${lead.ihf_lead_id
-          ? `<span title="Pushed to iHomefinder${lead.ihf_synced_at ? ' on ' + escHtml(new Date(lead.ihf_synced_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })) : ''}" style="font-family:var(--mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:#2E5C3D;border:1px solid #2E5C3D;border-radius:11px;padding:2px 8px;">in iHomefinder</span>`
+          ? `<span title="Pushed to iHomefinder${lead.ihf_synced_at ? ' on ' + escHtml(new Date(lead.ihf_synced_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })) : ''}" style="font-family:var(--mono);font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:#2E5C3D;border:1px solid #2E5C3D;border-radius:11px;padding:2px 8px;">in iHomefinder</span>`
           : `<button type="button" class="btn-link" data-detail-action="push-idx" style="font-size:12px;background:none;border:none;cursor:pointer;padding:0;color:var(--brass);">Send to iHomefinder alerts</button>`}
       </div>
       <div data-idx-push style="display:none;margin-top:10px;padding:14px 16px;background:var(--shell);border:1px solid var(--rule);font-size:13px;max-width:540px;">
-        <div style="font-family:var(--mono);font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-mute);margin-bottom:8px;">Send to iHomefinder alerts</div>
+        <div style="font-family:var(--mono);font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-mute);margin-bottom:8px;">Send to iHomefinder alerts</div>
         <p style="margin:0 0 10px;font-size:12.5px;color:var(--ink-soft);line-height:1.5;">
           iHomefinder watches the whole MLS and emails new matches — this CRM can't, because they provide no listing feed.
           This creates ${escHtml(lead.first_name || 'this contact')} as a lead over there. You still set their search criteria in iHomefinder afterwards.
         </p>
-        <label style="display:flex;flex-direction:column;gap:3px;font-size:11px;color:var(--ink-mute);max-width:280px;">Also subscribe to a market report (optional)
+        <label style="display:flex;flex-direction:column;gap:3px;font-size:13px;color:var(--ink-mute);max-width:280px;">Also subscribe to a market report (optional)
           <select data-idx-market style="${fld}">
             <option value="">None</option>
             <option value="3019792">Murphys</option>
@@ -2964,34 +2967,34 @@ window.LGPortal = window.LGPortal || {
       </div>
       ${dealsHtml}
       ${related.length ? `<div style="margin-top:10px;display:flex;flex-wrap:wrap;gap:8px;align-items:center;max-width:540px;">
-        <span style="font-family:var(--mono);font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-mute);">Related</span>
+        <span style="font-family:var(--mono);font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-mute);">Related</span>
         ${related.map((r) => {
           const on = r.include_on_comms !== false;
           const nm = escHtml([r.first_name, r.last_name].filter(Boolean).join(' ') || 'Contact');
           // Two controls in one chip: the name opens their card, the trailing
           // pill flips whether they ride along on outreach to this contact.
           return `<span class="lp-related-chip" style="background:var(--shell);border:1px solid var(--rule);border-radius:14px;padding:2px 3px 2px 11px;font-size:12.5px;color:var(--ink);display:inline-flex;gap:6px;align-items:center;">
-            <button type="button" data-open-related="${escHtml(r.id)}" style="background:none;border:none;padding:0;cursor:pointer;font:inherit;color:inherit;display:inline-flex;gap:6px;align-items:center;">${nm}<span style="color:var(--ink-mute);font-size:11px;">${escHtml(r.relationship || 'related')}</span></button>
-            <button type="button" data-rel-include="${escHtml(r.id)}" data-rel-on="${on ? '1' : '0'}" title="${on ? 'Included on outreach — click to exclude' : 'Not included on outreach — click to include'}" aria-pressed="${on ? 'true' : 'false'}" style="border:1px solid ${on ? '#2E5C3D' : 'var(--rule)'};background:${on ? '#2E5C3D' : 'transparent'};color:${on ? '#fff' : 'var(--ink-mute)'};border-radius:11px;padding:2px 8px;cursor:pointer;font-family:var(--mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;line-height:1.5;">${on ? 'cc ✓' : 'cc off'}</button>
+            <button type="button" data-open-related="${escHtml(r.id)}" style="background:none;border:none;padding:0;cursor:pointer;font:inherit;color:inherit;display:inline-flex;gap:6px;align-items:center;">${nm}<span style="color:var(--ink-mute);font-size:13px;">${escHtml(r.relationship || 'related')}</span></button>
+            <button type="button" data-rel-include="${escHtml(r.id)}" data-rel-on="${on ? '1' : '0'}" title="${on ? 'Included on outreach — click to exclude' : 'Not included on outreach — click to include'}" aria-pressed="${on ? 'true' : 'false'}" style="border:1px solid ${on ? '#2E5C3D' : 'var(--rule)'};background:${on ? '#2E5C3D' : 'transparent'};color:${on ? '#fff' : 'var(--ink-mute)'};border-radius:11px;padding:2px 8px;cursor:pointer;font-family:var(--mono);font-size:12px;letter-spacing:.1em;text-transform:uppercase;line-height:1.5;">${on ? 'cc ✓' : 'cc off'}</button>
           </span>`;
         }).join('')}
         <button type="button" class="btn-link" data-detail-action="add-related" style="font-size:12px;background:none;border:none;cursor:pointer;padding:0;color:var(--brass);">+ Add</button>
       </div>` : `<div style="margin-top:8px;"><button type="button" class="btn-link" data-detail-action="add-related" style="font-size:12px;background:none;border:none;cursor:pointer;padding:0;color:var(--brass);">+ Add spouse / related contact</button></div>`}
       <div data-related-editor style="display:none;margin-top:10px;padding:14px 16px;background:var(--shell);border:1px solid var(--rule);font-size:13px;max-width:540px;">
-        <div style="font-family:var(--mono);font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-mute);margin-bottom:10px;">Add a related contact</div>
+        <div style="font-family:var(--mono);font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-mute);margin-bottom:10px;">Add a related contact</div>
         <div style="position:relative;margin-bottom:10px;">
-          <label style="display:flex;flex-direction:column;gap:3px;font-size:11px;color:var(--ink-mute);">Search your contacts
+          <label style="display:flex;flex-direction:column;gap:3px;font-size:13px;color:var(--ink-mute);">Search your contacts
             <input data-rel-search placeholder="Start typing a name, email or phone…" autocomplete="off" style="${fld}"></label>
           <div data-rel-results style="position:relative;"></div>
           <div data-rel-picked style="display:none;margin-top:7px;font-size:12.5px;color:var(--ink);"></div>
-          <div style="margin-top:6px;font-size:11.5px;color:var(--ink-mute);">Already in your database? Pick them above — no duplicate card. Otherwise fill in the fields below.</div>
+          <div style="margin-top:6px;font-size:13px;color:var(--ink-mute);">Already in your database? Pick them above — no duplicate card. Otherwise fill in the fields below.</div>
         </div>
         <div data-rel-newfields style="display:grid;grid-template-columns:1fr 1fr;gap:8px 10px;margin-bottom:10px;">
-          <label style="display:flex;flex-direction:column;gap:3px;font-size:11px;color:var(--ink-mute);">First name<input data-rel-first style="${fld}"></label>
-          <label style="display:flex;flex-direction:column;gap:3px;font-size:11px;color:var(--ink-mute);">Last name<input data-rel-last value="${escHtml(lead.last_name || '')}" style="${fld}"></label>
-          <label style="display:flex;flex-direction:column;gap:3px;font-size:11px;color:var(--ink-mute);">Email<input data-rel-email type="email" style="${fld}"></label>
-          <label style="display:flex;flex-direction:column;gap:3px;font-size:11px;color:var(--ink-mute);">Phone<input data-rel-phone style="${fld}"></label>
-          <label style="display:flex;flex-direction:column;gap:3px;font-size:11px;color:var(--ink-mute);">Relationship
+          <label style="display:flex;flex-direction:column;gap:3px;font-size:13px;color:var(--ink-mute);">First name<input data-rel-first style="${fld}"></label>
+          <label style="display:flex;flex-direction:column;gap:3px;font-size:13px;color:var(--ink-mute);">Last name<input data-rel-last value="${escHtml(lead.last_name || '')}" style="${fld}"></label>
+          <label style="display:flex;flex-direction:column;gap:3px;font-size:13px;color:var(--ink-mute);">Email<input data-rel-email type="email" style="${fld}"></label>
+          <label style="display:flex;flex-direction:column;gap:3px;font-size:13px;color:var(--ink-mute);">Phone<input data-rel-phone style="${fld}"></label>
+          <label style="display:flex;flex-direction:column;gap:3px;font-size:13px;color:var(--ink-mute);">Relationship
             <select data-rel-type style="${fld}">
               <option value="spouse">Spouse</option><option value="partner">Partner</option>
               <option value="co-buyer">Co-buyer</option><option value="co-seller">Co-seller</option>
@@ -3011,12 +3014,12 @@ window.LGPortal = window.LGPortal || {
         </div>
       </div>
       <div data-consent-editor style="display:none;margin-top:10px;padding:14px 16px;background:var(--shell);border:1px solid var(--rule);font-size:13px;max-width:540px;">
-        <div style="font-family:var(--mono);font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-mute);margin-bottom:10px;">Update contact</div>
+        <div style="font-family:var(--mono);font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-mute);margin-bottom:10px;">Update contact</div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px 10px;margin-bottom:12px;">
-          <label style="display:flex;flex-direction:column;gap:3px;font-size:11px;color:var(--ink-mute);">First name<input data-lead-first value="${escHtml(lead.first_name || '')}" style="${fld}"></label>
-          <label style="display:flex;flex-direction:column;gap:3px;font-size:11px;color:var(--ink-mute);">Last name<input data-lead-last value="${escHtml(lead.last_name || '')}" style="${fld}"></label>
-          <label style="display:flex;flex-direction:column;gap:3px;font-size:11px;color:var(--ink-mute);">Phone<input data-lead-phone value="${escHtml(lead.phone || '')}" style="${fld}"></label>
-          <label style="display:flex;flex-direction:column;gap:3px;font-size:11px;color:var(--ink-mute);">Email<input data-lead-email value="${escHtml(lead.email || '')}" style="${fld}"></label>
+          <label style="display:flex;flex-direction:column;gap:3px;font-size:13px;color:var(--ink-mute);">First name<input data-lead-first value="${escHtml(lead.first_name || '')}" style="${fld}"></label>
+          <label style="display:flex;flex-direction:column;gap:3px;font-size:13px;color:var(--ink-mute);">Last name<input data-lead-last value="${escHtml(lead.last_name || '')}" style="${fld}"></label>
+          <label style="display:flex;flex-direction:column;gap:3px;font-size:13px;color:var(--ink-mute);">Phone<input data-lead-phone value="${escHtml(lead.phone || '')}" style="${fld}"></label>
+          <label style="display:flex;flex-direction:column;gap:3px;font-size:13px;color:var(--ink-mute);">Email<input data-lead-email value="${escHtml(lead.email || '')}" style="${fld}"></label>
         </div>
         <label style="display:flex;gap:8px;align-items:flex-start;margin:2px 0 10px;font-size:12.5px;color:var(--ink);line-height:1.5;cursor:pointer;">
           <input type="checkbox" data-lead-sms-consent ${lead.sms_consent ? 'checked' : ''} style="margin-top:2px;">
@@ -3097,12 +3100,12 @@ window.LGPortal = window.LGPortal || {
       const s = String(m.status || '').toLowerCase();
       if (!s || SENT_OK.indexOf(s) >= 0) {
         const when = m.approved_at ? fmtRel(m.approved_at) : (m.created_at ? fmtRel(m.created_at) : '');
-        return `<span class="mb-sent" title="This message was sent${when ? ' ' + escHtml(when) : ''}" style="color:#2E5C3D;font-weight:600;font-size:11px;">✓ Sent</span>`;
+        return `<span class="mb-sent" title="This message was sent${when ? ' ' + escHtml(when) : ''}" style="color:#2E5C3D;font-weight:600;font-size:13px;">✓ Sent</span>`;
       }
       if (s === 'pending_approval') {
-        return `<span class="mb-unsent" title="Still a draft — not sent yet" style="color:#9A7B2E;font-weight:600;font-size:11px;">◷ Draft · not sent</span>`;
+        return `<span class="mb-unsent" title="Still a draft — not sent yet" style="color:#9A7B2E;font-weight:600;font-size:13px;">◷ Draft · not sent</span>`;
       }
-      return `<span class="mb-failed" title="This message did not send (${escHtml(s)})" style="color:#9B2C2C;font-weight:600;font-size:11px;">✗ Not sent</span>`;
+      return `<span class="mb-failed" title="This message did not send (${escHtml(s)})" style="color:#9B2C2C;font-weight:600;font-size:13px;">✗ Not sent</span>`;
     };
     const threadHtml = otherMessages.length === 0
       ? `<div style="padding:16px;opacity:.55;font-style:italic;">No conversation yet.</div>`
@@ -3315,7 +3318,7 @@ window.LGPortal = window.LGPortal || {
             <div class="ld-head-meta">${escHtml(metaBits.join(' · '))}</div>
             ${contactEditorHtml}
             ${lead.notes ? `<div class="lp-leadnote" style="margin-top:12px;padding:11px 14px;background:var(--shell);border:1px solid var(--rule);border-left:3px solid var(--brass);border-radius:8px;max-width:600px;">
-              <div style="font-family:var(--mono);font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-mute);margin-bottom:5px;">Lead notes</div>
+              <div style="font-family:var(--mono);font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-mute);margin-bottom:5px;">Lead notes</div>
               <div style="font-size:13.5px;line-height:1.5;color:var(--ink);white-space:pre-wrap;">${escHtml(lead.notes)}</div>
             </div>` : ''}
           </div>
@@ -3347,12 +3350,12 @@ window.LGPortal = window.LGPortal || {
           <span class="composer-tab" data-composer-tab="note" title="A note on this contact · agents only">Note</span>
         </div>
         <div data-composer-cc style="display:none;flex-wrap:wrap;gap:6px;align-items:center;margin-bottom:7px;font-size:12.5px;">
-          <span style="font-family:var(--mono);font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-mute);">Also to</span>
+          <span style="font-family:var(--mono);font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-mute);">Also to</span>
         </div>
         <input data-composer-subject placeholder="Subject" style="width:100%;border:1px solid #D9CFB7;padding:8px 10px;background:#fff;font:inherit;font-size:14px;margin-bottom:6px;">
         <textarea data-composer-body placeholder="Write to ${escHtml(fullName(lead))}…"></textarea>
         <div class="composer-foot">
-          <div class="composer-tools"><span data-composer-status style="font-size:11px;opacity:.7;font-family:var(--mono);letter-spacing:.12em;text-transform:uppercase;"></span></div>
+          <div class="composer-tools"><span data-composer-status style="font-size:13px;opacity:.7;font-family:var(--mono);letter-spacing:.12em;text-transform:uppercase;"></span></div>
           <div style="display: flex; gap: 6px;">
             <button class="btn btn-ghost btn-sm" data-detail-action="suggest-reply" title="Let AI draft a reply based on this conversation">✦ Suggest a reply</button>
             <button class="btn btn-ink btn-sm" data-detail-action="send">Send</button>
@@ -3677,7 +3680,7 @@ window.LGPortal = window.LGPortal || {
             pickedEl.style.display = 'block';
             pickedEl.innerHTML = `<span style="display:inline-flex;gap:8px;align-items:center;background:#fff;border:1px solid var(--rule);border-radius:14px;padding:4px 6px 4px 11px;">
               <strong style="font-weight:600;">${escHtml(name)}</strong>
-              <span style="color:var(--ink-mute);font-size:11.5px;">${escHtml(sub || '')}</span>
+              <span style="color:var(--ink-mute);font-size:13px;">${escHtml(sub || '')}</span>
               <button type="button" data-rel-clearpick style="border:none;background:none;cursor:pointer;color:var(--ink-mute);font-size:15px;line-height:1;padding:0 5px;" title="Clear">×</button>
             </span>`;
           }
@@ -3892,11 +3895,11 @@ window.LGPortal = window.LGPortal || {
     const notes  = payload.notes || [];
     const notesPanelHtml = notes.length ? `
       <div class="lp-notes-panel" style="background:var(--shell);border:1px solid var(--rule);border-left:3px solid var(--brass);padding:14px 16px;margin-bottom:16px;">
-        <div style="font-family:var(--sans);font-size:11px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-mute);margin-bottom:8px;">Notes · ${notes.length}</div>
+        <div style="font-family:var(--sans);font-size:13px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-mute);margin-bottom:8px;">Notes · ${notes.length}</div>
         ${notes.slice(0, 6).map((n) => `
           <div style="padding:8px 0;border-bottom:1px dashed var(--rule);">
             <div style="font-family:var(--sans);font-size:14px;line-height:1.55;color:var(--ink);white-space:pre-wrap;">${escHtml((n.body || '').length > 400 ? n.body.slice(0, 400) + '…' : (n.body || ''))}</div>
-            <div style="font-family:var(--sans);font-size:11px;color:var(--ink-mute);margin-top:3px;">${n.is_internal ? 'Internal · agents only' : 'Note'} · ${escHtml(fmtRel(n.created_at))}</div>
+            <div style="font-family:var(--sans);font-size:13px;color:var(--ink-mute);margin-top:3px;">${n.is_internal ? 'Internal · agents only' : 'Note'} · ${escHtml(fmtRel(n.created_at))}</div>
           </div>`).join('')}
         ${notes.length > 6 ? `<div style="font-family:var(--sans);font-size:12px;color:var(--ink-mute);padding-top:6px;">+${notes.length - 6} older in the activity stream</div>` : ''}
       </div>` : '';
@@ -4152,7 +4155,7 @@ window.LGPortal = window.LGPortal || {
     m.style.cssText = 'position:fixed;inset:0;z-index:10000;background:rgba(20,18,15,.55);display:flex;align-items:center;justify-content:center;padding:24px;';
     m.innerHTML =
       '<div style="background:#fff;width:640px;max-width:100%;max-height:90vh;border-radius:10px;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 24px 70px rgba(20,18,15,.4);">'
-      + '<div style="display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-bottom:1px solid #E4DAC6;font-family:monospace;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:#7C6A4D;">'
+      + '<div style="display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-bottom:1px solid #E4DAC6;font-family:monospace;font-size:13px;letter-spacing:.12em;text-transform:uppercase;color:#7C6A4D;">'
       +   '<span>Email preview' + (subject ? ' · ' + escHtml(subject) : '') + '</span>'
       +   '<button type="button" data-close style="background:none;border:none;font-size:16px;cursor:pointer;color:#7C6A4D;">✕</button>'
       + '</div>'
@@ -4434,7 +4437,7 @@ window.LGPortal = window.LGPortal || {
             echo.style.cssText = 'margin-top:10px;border-left:3px solid var(--brass,#8C6E3D);background:rgba(140,110,61,.07);padding:9px 12px;border-radius:4px;';
             composer.appendChild(echo);
           }
-          echo.innerHTML = '<div style="font:600 11px/1.2 var(--sans,sans-serif);letter-spacing:.1em;text-transform:uppercase;color:var(--ink-mute,#7C6A4D);margin-bottom:4px;">Saved to Notes · just now</div>'
+          echo.innerHTML = '<div style="font:600 13px/1.2 var(--sans,sans-serif);letter-spacing:.1em;text-transform:uppercase;color:var(--ink-mute,#7C6A4D);margin-bottom:4px;">Saved to Notes · just now</div>'
             + '<div style="font:14px/1.55 var(--sans,sans-serif);white-space:pre-wrap;color:var(--ink,#1A1714);">' + esc(savedText.length > 500 ? savedText.slice(0, 500) + '…' : savedText) + '</div>';
           try { echo.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); } catch (_) {}
           if (typeof refreshLeadListPreview === 'function') refreshLeadListPreview(lead.id);
@@ -5394,14 +5397,14 @@ window.LGPortal = window.LGPortal || {
     m.style.cssText = 'position:fixed;inset:0;z-index:99997;background:rgba(20,18,15,0.6);display:flex;align-items:center;justify-content:center;padding:24px;font-family:Manrope,system-ui,sans-serif;';
     m.innerHTML = `
       <div style="background:#FAF6EC;max-width:640px;width:100%;padding:28px 32px;color:#1A1714;max-height:88vh;overflow:auto;">
-        <div style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.22em;text-transform:uppercase;color:#7C6A4D;margin-bottom:8px;">Import</div>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:12.5px;letter-spacing:.22em;text-transform:uppercase;color:#7C6A4D;margin-bottom:8px;">Import</div>
         <h2 style="font-family:'Cormorant Garamond',serif;font-style:italic;font-weight:500;font-size:28px;margin:0 0 14px;">Import leads from CSV.</h2>
         <p style="font-size:14px;line-height:1.55;color:#3A332B;margin:0 0 18px;">Dedupes by <code>fub_id</code>, falls back to <code>email</code>. Existing rows are never touched. Preview before commit.</p>
 
         <details style="margin-bottom:18px;border:1px solid #D9CFB7;padding:10px 14px;background:#fff;">
           <summary style="cursor:pointer;font-weight:600;font-size:14px;">One-time legacy import (2,016 leads + 694 consent records)</summary>
           <p style="font-size:13px;color:#3A332B;margin:10px 0;">Runs the full historical import in 3 steps: delete the 2 test rows, import every lead by <code>fub_id</code>, then apply every consent flag.</p>
-          <button id="leg-run-legacy" style="background:#1A1714;color:#FAF6EC;border:none;padding:10px 18px;font-family:JetBrains Mono,monospace;font-size:11px;letter-spacing:.22em;text-transform:uppercase;cursor:pointer;">Run legacy import</button>
+          <button id="leg-run-legacy" style="background:#1A1714;color:#FAF6EC;border:none;padding:10px 18px;font-family:JetBrains Mono,monospace;font-size:13px;letter-spacing:.22em;text-transform:uppercase;cursor:pointer;">Run legacy import</button>
         </details>
 
         <div style="font-weight:600;font-size:13px;margin-bottom:6px;text-transform:uppercase;letter-spacing:.14em;color:#7C6A4D;">Upload your own</div>
@@ -5411,8 +5414,8 @@ window.LGPortal = window.LGPortal || {
           <label><input type="radio" name="leg-kind" value="consent"> Consent flags</label>
         </div>
         <div style="display:flex;gap:10px;">
-          <button id="leg-preview" style="background:#fff;color:#1A1714;border:1px solid #1A1714;padding:10px 18px;font-family:JetBrains Mono,monospace;font-size:11px;letter-spacing:.22em;text-transform:uppercase;cursor:pointer;">Preview</button>
-          <button id="leg-commit" style="background:#1A1714;color:#FAF6EC;border:none;padding:10px 18px;font-family:JetBrains Mono,monospace;font-size:11px;letter-spacing:.22em;text-transform:uppercase;cursor:pointer;" disabled>Commit</button>
+          <button id="leg-preview" style="background:#fff;color:#1A1714;border:1px solid #1A1714;padding:10px 18px;font-family:JetBrains Mono,monospace;font-size:13px;letter-spacing:.22em;text-transform:uppercase;cursor:pointer;">Preview</button>
+          <button id="leg-commit" style="background:#1A1714;color:#FAF6EC;border:none;padding:10px 18px;font-family:JetBrains Mono,monospace;font-size:13px;letter-spacing:.22em;text-transform:uppercase;cursor:pointer;" disabled>Commit</button>
           <button id="leg-import-close" style="margin-left:auto;background:transparent;border:none;color:#7C6A4D;cursor:pointer;font-size:13px;">Close</button>
         </div>
         <pre id="leg-import-log" style="margin-top:14px;background:#1A1714;color:#FAF6EC;padding:14px;font-family:'JetBrains Mono',monospace;font-size:12px;line-height:1.5;max-height:280px;overflow:auto;white-space:pre-wrap;">Awaiting action…</pre>
@@ -5556,8 +5559,8 @@ window.LGPortal = window.LGPortal || {
 
   // Inline modal styling (matches the importer / link-deal modals).
   const M_INPUT = 'font:inherit;font-size:14px;color:#1A1714;background:#fff;border:1px solid #D9CFB7;padding:8px 10px;width:100%;box-sizing:border-box;';
-  const M_LAB   = 'font-family:"JetBrains Mono",monospace;font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:#7C6A4D;display:block;margin-bottom:4px;';
-  const M_INK   = 'background:#1A1714;color:#FAF6EC;border:none;padding:11px 20px;font-family:"JetBrains Mono",monospace;font-size:11px;letter-spacing:.2em;text-transform:uppercase;cursor:pointer;';
+  const M_LAB   = 'font-family:"JetBrains Mono",monospace;font-size:12.5px;letter-spacing:.14em;text-transform:uppercase;color:#7C6A4D;display:block;margin-bottom:4px;';
+  const M_INK   = 'background:#1A1714;color:#FAF6EC;border:none;padding:11px 20px;font-family:"JetBrains Mono",monospace;font-size:13px;letter-spacing:.2em;text-transform:uppercase;cursor:pointer;';
   const M_GHOST = 'background:transparent;border:none;color:#7C6A4D;cursor:pointer;font-size:13px;';
   const M_MINI  = 'background:#F3EEDF;border:1px solid #D9CFB7;color:#3A332B;padding:7px 14px;font-size:12.5px;cursor:pointer;';
 
@@ -5567,7 +5570,7 @@ window.LGPortal = window.LGPortal || {
     overlay.style.cssText = 'position:fixed;inset:0;z-index:99997;background:rgba(20,18,15,0.6);display:flex;align-items:center;justify-content:center;padding:24px;font-family:Manrope,system-ui,sans-serif;';
     const box = document.createElement('div');
     box.style.cssText = 'background:#FAF6EC;max-width:600px;width:100%;padding:26px 30px;color:#1A1714;max-height:92vh;overflow:auto;';
-    box.innerHTML = `<div style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.22em;text-transform:uppercase;color:#7C6A4D;margin-bottom:8px;">Legacy CRM</div>
+    box.innerHTML = `<div style="font-family:'JetBrains Mono',monospace;font-size:12.5px;letter-spacing:.22em;text-transform:uppercase;color:#7C6A4D;margin-bottom:8px;">Legacy CRM</div>
       <h2 style="font-family:'Cormorant Garamond',serif;font-style:italic;font-weight:500;font-size:26px;margin:0 0 6px;">${esc(title)}</h2>
       ${intro ? `<p style="font-size:13px;line-height:1.5;color:#3A332B;margin:0 0 16px;">${esc(intro)}</p>` : ''}
       <div data-modal-body></div>
@@ -5941,7 +5944,7 @@ window.LGPortal = window.LGPortal || {
           <label style="display:flex;align-items:center;gap:6px;font-size:13px;color:#3A332B;padding-bottom:9px;"><input data-f-active type="checkbox"${!seq || seq.active ? ' checked' : ''}> Active</label>
         </div>
         <div style="margin-top:4px;"><label style="${M_LAB}">Steps</label><div data-steps></div>
-          <button type="button" data-add-step style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:#1A1714;background:transparent;border:1px dashed #B89A5C;padding:9px;width:100%;cursor:pointer;">+ Add step</button>
+          <button type="button" data-add-step style="font-family:'JetBrains Mono',monospace;font-size:12.5px;letter-spacing:.16em;text-transform:uppercase;color:#1A1714;background:transparent;border:1px dashed #B89A5C;padding:9px;width:100%;cursor:pointer;">+ Add step</button>
         </div>
         <div style="display:flex;gap:10px;margin-top:8px;align-items:center;">
           <button type="button" data-save style="${M_INK}">${isEdit ? 'Save changes' : 'Create sequence'}</button>
@@ -6507,8 +6510,8 @@ window.LGPortal = window.LGPortal || {
         <div data-detail-result style="font-size:13px;min-height:18px;"></div>
         <div style="display:flex;gap:10px;margin-top:6px;flex-wrap:wrap;align-items:center;">
           <button type="button" data-act="edit" style="${M_INK}">Edit</button>
-          ${e.client_email ? `<button type="button" data-act="invite" style="background:#7C6A4D;color:#FAF6EC;border:none;padding:11px 18px;font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.2em;text-transform:uppercase;cursor:pointer;">Send invite</button>` : ''}
-          <button type="button" data-act="cancel" style="background:none;border:1px solid #E8B0AA;color:#9B2C2C;padding:10px 16px;font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.16em;text-transform:uppercase;cursor:pointer;">Cancel event</button>
+          ${e.client_email ? `<button type="button" data-act="invite" style="background:#7C6A4D;color:#FAF6EC;border:none;padding:11px 18px;font-family:'JetBrains Mono',monospace;font-size:13px;letter-spacing:.2em;text-transform:uppercase;cursor:pointer;">Send invite</button>` : ''}
+          <button type="button" data-act="cancel" style="background:none;border:1px solid #E8B0AA;color:#9B2C2C;padding:10px 16px;font-family:'JetBrains Mono',monospace;font-size:13px;letter-spacing:.16em;text-transform:uppercase;cursor:pointer;">Cancel event</button>
           <button type="button" data-act="close" style="${M_GHOST};margin-left:auto;">Close</button>
         </div>
       </div>`;

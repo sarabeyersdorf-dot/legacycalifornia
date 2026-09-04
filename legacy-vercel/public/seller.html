@@ -57,7 +57,7 @@ body.lp-restyle {
 }
 .wire-warn::before {
   content: 'Protect your money'; display: block;
-  font-family: var(--mono); font-size: 9.5px; letter-spacing: 0.16em;
+  font-family: var(--mono); font-size: 12px; letter-spacing: 0.16em;
   text-transform: uppercase; color: #B05A3C; margin-bottom: 5px; font-weight: 600;
 }
 @media (max-width: 720px) { .wire-warn { margin: 14px 18px 0; } }
@@ -75,42 +75,42 @@ body.lp-restyle {
 .sell-photo .badge {
   position: absolute; top: 12px; left: 12px;
   background: var(--brass); color: var(--shell);
-  font-family: var(--mono); font-size: 9px; letter-spacing: 0.18em;
+  font-family: var(--mono); font-size: 12px; letter-spacing: 0.18em;
   padding: 5px 10px; text-transform: uppercase;
 }
 .sell-h-info .eyebrow { display: block; margin-bottom: 12px; }
 .sell-h-info h1 {
-  font-family: var(--serif); font-style: italic; font-weight: 300;
+  font-family: var(--serif); font-weight: 500;
   font-size: clamp(36px, 4.4vw, 56px); line-height: 1.0;
   color: var(--ink); letter-spacing: -0.005em; margin-bottom: 12px;
 }
 .sell-h-info h1 em { color: var(--brass); }
 .sell-h-info .addr {
-  font-family: var(--serif); font-style: italic; font-size: 18px; color: var(--ink-soft);
+  font-family: var(--serif); font-size: 18px; color: var(--ink-soft);
 }
 .sell-h-info .specs {
   display: flex; gap: 22px; margin-top: 18px;
-  font-family: var(--mono); font-size: 11px; letter-spacing: 0.14em;
+  font-family: var(--mono); font-size: 13px; letter-spacing: 0.14em;
   text-transform: uppercase; color: var(--ink-mute);
 }
-.sell-h-info .specs strong { color: var(--ink); font-family: var(--serif); font-style: italic; font-size: 16px; font-weight: 400; letter-spacing: 0; text-transform: none; margin-right: 4px; }
+.sell-h-info .specs strong { color: var(--ink); font-family: var(--serif); font-size: 16px; font-weight: 400; letter-spacing: 0; text-transform: none; margin-right: 4px; }
 .sell-status {
   background: var(--ink); color: var(--shell);
   padding: 22px 24px;
   min-width: 260px;
 }
-.sell-status .l { font-family: var(--mono); font-size: 9.5px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--brass-bright); margin-bottom: 4px; }
-.sell-status .v { font-family: var(--serif); font-style: italic; font-weight: 300; font-size: 42px; line-height: 1; color: var(--shell); }
-.sell-status .since { font-family: var(--mono); font-size: 10px; letter-spacing: 0.14em; color: rgba(250,246,236,0.5); text-transform: uppercase; margin-top: 14px; padding-top: 12px; border-top: 1px solid rgba(250,246,236,0.15); }
+.sell-status .l { font-family: var(--mono); font-size: 12px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--brass-bright); margin-bottom: 4px; }
+.sell-status .v { font-family: var(--serif); font-weight: 500; font-size: 42px; line-height: 1; color: var(--shell); }
+.sell-status .since { font-family: var(--mono); font-size: 12.5px; letter-spacing: 0.14em; color: rgba(250,246,236,0.5); text-transform: uppercase; margin-top: 14px; padding-top: 12px; border-top: 1px solid rgba(250,246,236,0.15); }
 
 /* Your team — in the hero, below the address; every member reachable by tap */
 .sell-team { margin-top: 26px; padding-top: 20px; border-top: 1px solid var(--rule); max-width: 480px; }
-.sell-team-h { font-family: var(--mono); font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--brass); margin-bottom: 12px; }
+.sell-team-h { font-family: var(--mono); font-size: 12.5px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--brass); margin-bottom: 12px; }
 .sell-team-card { padding: 11px 0; border-bottom: 1px solid var(--rule); }
 .sell-team-card:last-child { border-bottom: none; padding-bottom: 0; }
 .sell-team-id { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
-.sell-team-name { font-family: var(--serif); font-style: italic; font-size: 19px; color: var(--ink); }
-.sell-team-role { font-family: var(--mono); font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-mute); }
+.sell-team-name { font-family: var(--serif); font-size: 19px; color: var(--ink); }
+.sell-team-role { font-family: var(--mono); font-size: 12.5px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-mute); }
 .sell-team-contact { display: flex; flex-wrap: wrap; gap: 8px 10px; margin-top: 8px; }
 .sell-team-link { display: inline-flex; align-items: center; gap: 6px; font-size: 13.5px; font-weight: 600; text-decoration: none; padding: 6px 12px; border: 1px solid var(--rule); border-radius: 20px; background: #fff; color: var(--ink); white-space: nowrap; }
 .sell-team-link.tel { color: var(--lg-a1); }
@@ -129,10 +129,10 @@ body.lp-restyle {
   background: var(--shell); padding: 22px 24px;
   display: flex; flex-direction: column; gap: 4px;
 }
-.sell-kpi .l { font-family: var(--mono); font-size: 9px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--ink-mute); }
-.sell-kpi .v { font-family: var(--serif); font-style: italic; font-weight: 300; font-size: 40px; color: var(--ink); line-height: 1; }
+.sell-kpi .l { font-family: var(--mono); font-size: 12px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--ink-mute); }
+.sell-kpi .v { font-family: var(--serif); font-weight: 500; font-size: 40px; color: var(--ink); line-height: 1; }
 .sell-kpi .v.brass { color: var(--brass); }
-.sell-kpi .ch { font-family: var(--mono); font-size: 10px; letter-spacing: 0.04em; color: var(--ink-mute); }
+.sell-kpi .ch { font-family: var(--mono); font-size: 12.5px; letter-spacing: 0.04em; color: var(--ink-mute); }
 
 /* GRID */
 .sell-grid {
@@ -143,8 +143,8 @@ body.lp-restyle {
 
 .s-card { background: var(--shell); border: 1px solid var(--rule); padding: 26px 28px; }
 .s-card-h { display: flex; justify-content: space-between; align-items: baseline; padding-bottom: 16px; border-bottom: 1px solid var(--rule); margin-bottom: 22px; flex-wrap: wrap; gap: 12px; }
-.s-card-h h2 { font-family: var(--serif); font-style: italic; font-weight: 400; font-size: 26px; color: var(--ink); }
-.s-card-h .meta { font-family: var(--mono); font-size: 10px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--ink-mute); }
+.s-card-h h2 { font-family: var(--serif); font-weight: 400; font-size: 26px; color: var(--ink); }
+.s-card-h .meta { font-family: var(--mono); font-size: 12.5px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--ink-mute); }
 
 /* Road to closing — timeline */
 .road-item {
@@ -159,13 +159,13 @@ body.lp-restyle {
 .road-dot.done { background: var(--brass); border-color: var(--brass); }
 .road-dot.next { background: var(--ink); border-color: var(--ink); }
 .road-dot.key  { background: var(--brass); border-color: var(--brass); box-shadow: 0 0 0 4px var(--linen); }
-.road-date { font-family: var(--mono); font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-mute); padding-top: 4px; }
+.road-date { font-family: var(--mono); font-size: 12.5px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-mute); padding-top: 4px; }
 .road-label-row { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
-.road-body .road-label { font-family: var(--serif); font-style: italic; font-size: 19px; color: var(--ink); line-height: 1.15; }
+.road-body .road-label { font-family: var(--serif); font-size: 19px; color: var(--ink); line-height: 1.15; }
 .road-body .road-desc { font-size: 13px; color: var(--ink-soft); margin-top: 4px; line-height: 1.5; }
 /* Status chip on a road step (v1.5 milestone.badge) */
 .road-badge {
-  font-family: var(--mono); font-size: 9px; letter-spacing: 0.1em; text-transform: uppercase;
+  font-family: var(--mono); font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase;
   padding: 3px 8px; border-radius: 100px; white-space: nowrap;
   background: var(--rule-soft); color: var(--ink-mute); border: 1px solid var(--rule);
 }
@@ -175,26 +175,26 @@ body.lp-restyle {
 
 /* Back on market (Slice 2) — a plainly worded state when no active escrow */
 .back-on-market { border-left: 3px solid var(--brass); }
-.bom-head { font-family: var(--serif); font-style: italic; font-size: 22px; color: var(--ink); line-height: 1.15; }
+.bom-head { font-family: var(--serif); font-size: 22px; color: var(--ink); line-height: 1.15; }
 .bom-body { font-size: 14px; color: var(--ink-soft); margin-top: 8px; line-height: 1.6; }
 
 /* Escrow history (Slice 2) — collapsed record of prior escrows */
 .esc-item { padding: 10px 0; border-bottom: 1px solid var(--rule-soft); }
 .esc-item:last-child { border-bottom: none; }
 .esc-head { display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; }
-.esc-label { font-family: var(--serif); font-style: italic; font-size: 16px; color: var(--ink); }
-.esc-status { font-family: var(--mono); font-size: 9px; letter-spacing: 0.1em; text-transform: uppercase; padding: 3px 8px; border-radius: 100px; background: var(--rule-soft); color: var(--ink-mute); border: 1px solid var(--rule); }
+.esc-label { font-family: var(--serif); font-size: 16px; color: var(--ink); }
+.esc-status { font-family: var(--mono); font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase; padding: 3px 8px; border-radius: 100px; background: var(--rule-soft); color: var(--ink-mute); border: 1px solid var(--rule); }
 .esc-status.cancelled { color: var(--lg-a2); border-color: rgba(140,110,61,0.30); }
-.esc-when { font-family: var(--mono); font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-mute); margin-left: auto; }
+.esc-when { font-family: var(--mono); font-size: 12.5px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-mute); margin-left: auto; }
 .esc-docs { margin: 8px 0 2px; padding-left: 4px; }
 .esc-doc { display: flex; align-items: baseline; gap: 10px; padding: 3px 0; }
 .esc-doc-name { font-size: 13px; color: var(--ink-soft); }
-.esc-doc-view { font-family: var(--mono); font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--brass-bright); text-decoration: none; }
+.esc-doc-view { font-family: var(--mono); font-size: 12.5px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--brass-bright); text-decoration: none; }
 
 /* Good to know (v1.5) */
 .gtk-item { padding: 12px 0; border-bottom: 1px solid var(--rule-soft); }
 .gtk-item:last-child { border-bottom: none; }
-.gtk-title { font-family: var(--serif); font-style: italic; font-size: 17px; color: var(--ink); line-height: 1.2; }
+.gtk-title { font-family: var(--serif); font-size: 17px; color: var(--ink); line-height: 1.2; }
 .gtk-body { font-size: 13px; color: var(--ink-soft); margin-top: 4px; line-height: 1.55; }
 
 /* Sara note */
@@ -203,13 +203,13 @@ body.lp-restyle {
   display: grid; grid-template-columns: 48px 1fr; gap: 16px; align-items: start;
 }
 .sara-note .avatar { background: var(--brass); color: var(--shell); }
-.sara-note-head { font-family: var(--mono); font-size: 10.5px; letter-spacing: 0.16em; color: var(--brass-bright); margin-bottom: 8px; text-transform: uppercase; }
-.sara-note-text { font-family: var(--serif); font-style: italic; font-size: 17px; line-height: 1.5; color: rgba(250,246,236,0.92); }
-.sara-note-sign { font-family: var(--mono); font-size: 10px; letter-spacing: 0.16em; color: rgba(250,246,236,0.5); margin-top: 14px; text-transform: uppercase; }
+.sara-note-head { font-family: var(--mono); font-size: 12.5px; letter-spacing: 0.16em; color: var(--brass-bright); margin-bottom: 8px; text-transform: uppercase; }
+.sara-note-text { font-family: var(--serif); font-size: 17px; line-height: 1.5; color: rgba(250,246,236,0.92); }
+.sara-note-sign { font-family: var(--mono); font-size: 12.5px; letter-spacing: 0.16em; color: rgba(250,246,236,0.5); margin-top: 14px; text-transform: uppercase; }
 
 /* Sidebar cards */
 .s-mini { background: var(--shell); border: 1px solid var(--rule); padding: 24px; }
-.s-mini h3 { font-family: var(--mono); font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--brass); margin-bottom: 14px; font-weight: 600; }
+.s-mini h3 { font-family: var(--mono); font-size: 12.5px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--brass); margin-bottom: 14px; font-weight: 600; }
 
 /* Documents */
 .doc-row {
@@ -217,10 +217,10 @@ body.lp-restyle {
   padding: 12px 0; border-bottom: 1px solid var(--rule-soft); font-size: 13px;
 }
 .doc-row:last-child { border-bottom: none; }
-.doc-row .icn { font-family: var(--mono); font-size: 9.5px; letter-spacing: 0.08em; color: var(--brass); min-width: 42px; }
+.doc-row .icn { font-family: var(--mono); font-size: 12px; letter-spacing: 0.08em; color: var(--brass); min-width: 42px; }
 .doc-row .name { color: var(--ink); }
-.doc-row .name .sub { display: block; font-family: var(--mono); font-size: 9.5px; letter-spacing: 0.12em; color: var(--ink-faint); margin-top: 2px; text-transform: uppercase; }
-.doc-row .d-status { font-family: var(--mono); font-size: 9.5px; letter-spacing: 0.12em; color: var(--ink-mute); text-transform: uppercase; white-space: nowrap; }
+.doc-row .name .sub { display: block; font-family: var(--mono); font-size: 12px; letter-spacing: 0.12em; color: var(--ink-faint); margin-top: 2px; text-transform: uppercase; }
+.doc-row .d-status { font-family: var(--mono); font-size: 12px; letter-spacing: 0.12em; color: var(--ink-mute); text-transform: uppercase; white-space: nowrap; }
 .doc-actions { grid-column: 2 / -1; display: flex; gap: 18px; margin-top: 7px; }
 .doc-link { font-size: 12px; font-weight: 600; color: var(--lg-a1); text-decoration: none; }
 .doc-link:hover { text-decoration: underline; }
@@ -237,26 +237,26 @@ body.lp-restyle {
 }
 .share-row:last-child { border-bottom: none; }
 .share-row .who { font-size: 13px; color: var(--ink); font-weight: 500; }
-.share-row .who .sub { display: block; font-family: var(--mono); font-size: 9.5px; letter-spacing: 0.12em; color: var(--ink-mute); margin-top: 2px; text-transform: uppercase; }
-.share-row .access { font-family: var(--mono); font-size: 10px; letter-spacing: 0.14em; color: var(--ink-mute); text-transform: uppercase; }
+.share-row .who .sub { display: block; font-family: var(--mono); font-size: 12px; letter-spacing: 0.12em; color: var(--ink-mute); margin-top: 2px; text-transform: uppercase; }
+.share-row .access { font-family: var(--mono); font-size: 12.5px; letter-spacing: 0.14em; color: var(--ink-mute); text-transform: uppercase; }
 
 /* Listing reel — portrait embed, centred, phone-sized on the portal. */
 .sell-reel-wrap { margin-top: 22px; }
 .sell-reel-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin-bottom: 12px; }
-.sell-reel-head .ss-k { font-family: var(--mono); font-size: 11px; letter-spacing: .16em; text-transform: uppercase; color: var(--ink); }
-.sell-reel-open { font-family: var(--mono); font-size: 10px; letter-spacing: .14em; text-transform: uppercase; color: var(--brass); text-decoration: none; border-bottom: 1px solid var(--brass); padding-bottom: 2px; }
+.sell-reel-head .ss-k { font-family: var(--mono); font-size: 13px; letter-spacing: .16em; text-transform: uppercase; color: var(--ink); }
+.sell-reel-open { font-family: var(--mono); font-size: 12.5px; letter-spacing: .14em; text-transform: uppercase; color: var(--brass); text-decoration: none; border-bottom: 1px solid var(--brass); padding-bottom: 2px; }
 .sell-reel-open:hover { color: var(--ink); border-color: var(--ink); }
 .sell-reel-frame { position: relative; width: 100%; max-width: 340px; margin: 0 auto; aspect-ratio: 9 / 16; background: #201e1d; border-radius: 16px; overflow: hidden; box-shadow: 0 14px 38px rgba(20,18,15,.28); }
 .sell-reel-frame iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; display: block; }
 .sell-tour { display: flex; gap: 16px; margin-top: 16px; flex-wrap: wrap; }
-.sell-tour a { font-family: var(--mono); font-size: 10px; letter-spacing: .14em; text-transform: uppercase; color: var(--brass); text-decoration: none; border-bottom: 1px solid var(--brass); padding-bottom: 3px; }
+.sell-tour a { font-family: var(--mono); font-size: 12.5px; letter-spacing: .14em; text-transform: uppercase; color: var(--brass); text-decoration: none; border-bottom: 1px solid var(--brass); padding-bottom: 3px; }
 .sell-tour a:hover { color: var(--ink); border-color: var(--ink); }
 
 /* "Your listing online" — the public marketing-page card in the tour row */
 .sell-showcase { border: 1px solid var(--brass, #b08d57); background: var(--band, #f4eede); }
 .sell-showcase a { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 7px; text-align: center; padding: 18px; border: 0; width: 100%; height: 100%; }
 .sell-showcase:hover { background: #efe7d4; }
-.sell-showcase .ss-k { font-family: var(--mono, monospace); font-size: 10px; letter-spacing: .18em; text-transform: uppercase; color: var(--muted, #8a7b60); }
+.sell-showcase .ss-k { font-family: var(--mono, monospace); font-size: 12.5px; letter-spacing: .18em; text-transform: uppercase; color: var(--muted, #8a7b60); }
 .sell-showcase .ss-t { font-family: var(--serif, 'Cormorant Garamond', serif); font-size: 20px; line-height: 1.2; color: var(--ink, #1a1714); }
 
 /* ListTrac stats card — sits in the tour grid beside the 3D walkthrough, so a
@@ -264,20 +264,20 @@ body.lp-restyle {
    to the tour cell's height. */
 .lt-cell { display: flex; flex-direction: column; }
 .lt-card { flex: 1; box-sizing: border-box; display: flex; flex-direction: column; justify-content: center; gap: 11px; padding: 18px 20px; border: 1px solid var(--rule, #e4dcc9); background: var(--band, #f4eede); min-height: 190px; }
-.lt-kick { font-family: var(--mono, monospace); font-size: 10px; letter-spacing: .16em; text-transform: uppercase; color: var(--muted, #8a7b60); }
+.lt-kick { font-family: var(--mono, monospace); font-size: 12.5px; letter-spacing: .16em; text-transform: uppercase; color: var(--muted, #8a7b60); }
 .lt-big b { display: block; font-family: var(--serif, 'Cormorant Garamond', serif); font-size: 40px; line-height: .98; color: var(--ink, #1a1714); }
 .lt-big span { display: block; font-size: 12.5px; color: var(--muted, #8a7b60); margin-top: 3px; }
 .lt-grid { display: grid; grid-template-columns: repeat(2, max-content); gap: 9px 28px; }
 .lt-stat b { font-size: 18px; color: var(--ink, #1a1714); }
-.lt-stat span { display: block; font-size: 10px; letter-spacing: .06em; text-transform: uppercase; color: var(--muted, #8a7b60); margin-top: 1px; }
-.lt-note { font-family: var(--serif, 'Cormorant Garamond', serif); font-style: italic; font-size: 14px; line-height: 1.4; color: var(--ink-soft, #5b5347); }
+.lt-stat span { display: block; font-size: 12.5px; letter-spacing: .06em; text-transform: uppercase; color: var(--muted, #8a7b60); margin-top: 1px; }
+.lt-note { font-family: var(--serif, 'Cormorant Garamond', serif); font-size: 14px; line-height: 1.4; color: var(--ink-soft, #5b5347); }
 /* Insights band under the tour: Buyer interest + Showings, roomy + coloured. */
 .sell-insights { margin: 16px 0 4px; }
 .ins-grid { display: flex; gap: 14px; flex-wrap: wrap; align-items: stretch; }
 .ins-card { flex: 1 1 320px; box-sizing: border-box; border: 1px solid var(--rule, #e4dcc9); border-radius: 4px; padding: 18px 20px; display: flex; flex-direction: column; gap: 11px; overflow: visible; }
 .ins-card--interest { background: #e9f2ec; }
 .ins-card--showings { background: #eef2f7; }
-.ins-src { font-family: var(--mono, monospace); font-size: 10.5px; letter-spacing: .06em; color: var(--muted, #8a7b60); text-transform: uppercase; margin-top: auto; }
+.ins-src { font-family: var(--mono, monospace); font-size: 12.5px; letter-spacing: .06em; color: var(--muted, #8a7b60); text-transform: uppercase; margin-top: auto; }
 .sh-total b { font-family: var(--serif, 'Cormorant Garamond', serif); font-size: 34px; line-height: 1; color: var(--ink, #1a1714); }
 .sh-total span { font-size: 12.5px; color: var(--muted, #8a7b60); margin-left: 8px; }
 .sh-list { display: flex; flex-direction: column; gap: 8px; }
@@ -300,7 +300,7 @@ body.lp-restyle {
 .ins-card--interest .lt-stat { display: flex; align-items: center; gap: 9px; }
 .ins-card--interest .lt-stat b { all: unset; }
 .ins-card--interest .lt-stat > span { display: block; font-family: var(--lt-sans);
-  font-size: 10.5px; letter-spacing: .07em; text-transform: uppercase; color: var(--muted, #8a7b60); margin: 0; }
+  font-size: 12.5px; letter-spacing: .07em; text-transform: uppercase; color: var(--muted, #8a7b60); margin: 0; }
 .lt-c-views  { background: #dbe8fb; color: #1d4ed8; }   /* views  — blue  */
 .lt-c-new    { background: #d6f0dc; color: #15803d; }   /* new    — green */
 .lt-c-shares { background: #e7e0fb; color: #6d28d9; }   /* shares — purple*/
@@ -824,12 +824,20 @@ setTimeout(function(){var p=document.getElementById('portal-loading');if(p&&p.pa
 .s-card-h h2, .sell-hero h1, .s-mini h3 { font-family: var(--serif-doc); font-style: normal; font-weight: 400; }
 .road-label { font-family: var(--serif-doc); font-style: normal; font-size: 17px; }
 .road-desc { font-family: var(--sans-doc); font-size: 14.5px; line-height: 1.6; color: var(--ink-soft); }
-.road-date { font-family: var(--sans-doc); font-size: 11px; letter-spacing: .14em; text-transform: uppercase; font-weight: 600; }
-.s-card-h .meta, .task-when, .d-status { font-family: var(--sans-doc); font-size: 11px; letter-spacing: .1em; font-weight: 600; }
+.road-date { font-family: var(--sans-doc); font-size: 13px; letter-spacing: .14em; text-transform: uppercase; font-weight: 600; }
+.s-card-h .meta, .task-when, .d-status { font-family: var(--sans-doc); font-size: 13px; letter-spacing: .1em; font-weight: 600; }
 .task-label, .doc-row .name, .share-row .who { font-family: var(--sans-doc); font-size: 14.5px; }
 .sara-note-text { font-family: var(--sans-doc); font-size: 15.5px; line-height: 1.65; font-style: normal; }
 .sell-kpi .v { font-family: var(--serif-doc); font-style: normal; }
-.sell-kpi .l { font-family: var(--sans-doc); font-size: 10.5px; letter-spacing: .14em; font-weight: 600; }
+.sell-kpi .l { font-family: var(--sans-doc); font-size: 12.5px; letter-spacing: .14em; font-weight: 600; }
+
+/* Legibility pass (2026-09-04, at Sara's request): no italic or cursive anywhere
+   on the seller portal, and no type below 12px. Sellers read this on a phone,
+   often older eyes, and Cormorant Garamond italic at 9-11px was not readable.
+   Emphasis is carried by weight and colour instead of a slant. Empty rules left
+   behind by the italic removal are harmless and deliberately not swept up — the
+   regex that did that also matched an empty catch block in this file's script. */
+.sell-h-info h1 em, em, i { font-style: normal; font-weight: 600; }
 </style>
 </body>
 </html>
