@@ -3025,6 +3025,23 @@ body.lp-restyle {
       var st = { bucket:'leads', q:'', byId:{} };
       var STG = { new:'new', nurture:'nurture', consult:'preparing', signed:'preparing', preparing:'preparing', active:'on_market', on_market:'on_market', showing_homes:'on_market', writing_offers:'reviewing_offers', reviewing_offers:'reviewing_offers', under_contract:'in_escrow', in_escrow:'in_escrow', closed:'closed', sphere:'new' };
       var STAGE_LABEL = { new:'New lead', nurture:'Nurturing', consult:'Consult', signed:'Signed', preparing:'Listing prep', active:'Active', on_market:'On market', writing_offers:'Writing offers', reviewing_offers:'Reviewing offers', under_contract:'In escrow', in_escrow:'In escrow', closed:'Closed', sphere:'Sphere' };
+      // One pill per side the contact actually holds, not one collapsed summary.
+      // The summary pill is what showed "In escrow" for Denis Listengourt (the
+      // buyer on OUR listing) and for the Castles after their purchase closed —
+      // it can only ever tell one side's story. Falls back to the summary for a
+      // contact with no side, which is most of the sphere.
+      var BUYER_LBL  = { new:'New', nurture:'Nurturing', showing_homes:'Touring', writing_offers:'Writing offers', in_escrow:'In escrow', closed:'Closed' };
+      var SELLER_LBL = { new:'New', nurture:'Nurturing', preparing:'Listing prep', on_market:'On market', reviewing_offers:'Reviewing offers', in_escrow:'In escrow', closed:'Closed' };
+      function onePill(stg, text){
+        return '<span class="ds-stagepill" data-stg="'+esc(stg)+'" style="margin-right:5px;"><i></i>'+esc(text)+'</span>';
+      }
+      function sidePills(pp){
+        var out = '';
+        if (pp.buyer_stage)  out += onePill(STG[pp.buyer_stage]  || 'new', 'Buyer · '  + (BUYER_LBL[pp.buyer_stage]   || pp.buyer_stage));
+        if (pp.seller_stage) out += onePill(STG[pp.seller_stage] || 'new', 'Seller · ' + (SELLER_LBL[pp.seller_stage] || pp.seller_stage));
+        if (out) return out;
+        return onePill(stgFor(pp), stageLabel(pp));
+      }
       function stgFor(pp){ var s=pp.stage||''; if(STG[s]) return STG[s]; if(pp.side==='past_client') return 'closed'; return 'new'; }
       function stageLabel(pp){ var s=pp.stage||''; if(STAGE_LABEL[s]) return STAGE_LABEL[s]; if(pp.side){ return String(pp.side).replace(/_/g,' ').replace(/^./,function(c){return c.toUpperCase();}); } return '—'; }
       function fmtLast(iso){ if(!iso) return {t:'—',bad:false}; var days=Math.floor((Date.now()-new Date(iso).getTime())/86400000); var d=new Date(iso).toLocaleDateString('en-US',{month:'short',day:'numeric'}); return {t:d,bad:days>30}; }
@@ -3071,7 +3088,7 @@ body.lp-restyle {
               var lt=fmtLast(pp.last_contact_at);
               return '<div class="ds-ctbl-r" data-stg="'+esc(stgFor(pp))+'" data-ppl-open="'+esc(pp.id)+'" role="link" tabindex="0">'
                 + '<div><div class="nm">'+esc(pp.name)+'</div><div class="cx">'+esc(pp.email||pp.phone||'')+'</div></div>'
-                + '<div><span class="ds-stagepill" data-stg="'+esc(stgFor(pp))+'"><i></i>'+esc(stageLabel(pp))+'</span></div>'
+                + '<div>'+sidePills(pp)+'</div>'
                 + '<div class="lt'+(lt.bad?' bad':'')+'">'+esc(lt.t)+'</div>'
                 + '<div class="ow">'+esc(String(pp.source||'—').replace(/_/g,' '))+'</div>'
                 + '</div>';

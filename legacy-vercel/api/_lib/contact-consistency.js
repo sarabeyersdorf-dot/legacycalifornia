@@ -129,9 +129,9 @@ export async function computeContactFixes(supa) {
     if (w.buyer  && l.buyer_stage  !== w.buyer)  patch.buyer_stage  = w.buyer;
     if (w.seller && l.seller_stage !== w.seller) patch.seller_stage = w.seller;
 
-    // deal_side and contact_type follow from which sides they actually hold —
-    // but never overwrite a protected type, and never demote a type that is
-    // already at least as specific as what the deal implies.
+    // contact_type follows from which sides they actually hold — but never
+    // overwrite a protected type, and never demote a type that is already at
+    // least as specific as what the deal implies.
     // Coarse stage follows the LIVE side, not the most advanced one. Guy and
     // Adrianna Castle bought 7230 Latigo (closed) and are now selling 1143 Echo
     // (preparing). Taking the furthest-along stage would file them 'closed' and
@@ -148,7 +148,10 @@ export async function computeContactFixes(supa) {
 
     const sides = [w.buyer ? 'buyer' : null, w.seller ? 'seller' : null].filter(Boolean);
     const impliedSide = sides.length === 2 ? 'both' : sides[0] || null;
-    if (impliedSide && l.deal_side !== impliedSide) patch.deal_side = impliedSide;
+    // deal_side and roles are NOT written here any more: db/100 derives both in a
+    // BEFORE trigger from contact_type + the side stages, so writing them from
+    // here would be a second opinion on a settled question — exactly the pattern
+    // that produced the drift in the first place.
     if (impliedSide && !PROTECTED_TYPES.has(l.contact_type)) {
       // 'client' and 'closed' are already transaction-grade; leave them be.
       // 'sphere' / 'past_client' / null on someone with a live deal is the bug.
