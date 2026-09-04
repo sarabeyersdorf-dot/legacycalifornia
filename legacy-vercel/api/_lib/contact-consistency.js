@@ -55,6 +55,19 @@ const DEAL_STAGE_TO_SIDE = {
 // furthest-along one. Matches crm-lead-detail's STAGE_RANK.
 const RANK = { new: 0, nurture: 1, showing_homes: 2, preparing: 2, on_market: 3, writing_offers: 3, reviewing_offers: 3, in_escrow: 4, closed: 5 };
 
+// The coarse pipeline_stage the kanban and the Contacts list read. Must be
+// recomputed here too: the first cut of this file wrote the side stages and left
+// pipeline_stage alone, which just moved the drift one field along — Guy and
+// Adrianna Castle came out buyer_stage 'closed' + seller_stage 'preparing' while
+// pipeline_stage still said 'under_contract', so the list showed "In escrow" for
+// a sale that had closed. Same mapping as crm-lead-detail's STAGE_TO_PIPELINE.
+const STAGE_TO_PIPELINE = {
+  new: 'new', nurture: 'nurture',
+  showing_homes: 'active', preparing: 'active', on_market: 'active',
+  writing_offers: 'active', reviewing_offers: 'active',
+  in_escrow: 'under_contract', closed: 'closed'
+};
+
 // Types that describe the relationship rather than a transaction. A deal never
 // overwrites these — see the note above.
 const PROTECTED_TYPES = new Set(['do_not_contact', 'do_not_call', 'vendor', 'counterparty']);
@@ -119,6 +132,20 @@ export async function computeContactFixes(supa) {
     // deal_side and contact_type follow from which sides they actually hold —
     // but never overwrite a protected type, and never demote a type that is
     // already at least as specific as what the deal implies.
+    // Coarse stage follows the LIVE side, not the most advanced one. Guy and
+    // Adrianna Castle bought 7230 Latigo (closed) and are now selling 1143 Echo
+    // (preparing). Taking the furthest-along stage would file them 'closed' and
+    // bury a live listing; what Sara needs to see is the work in front of her.
+    // So: pick the most advanced stage among the UNFINISHED sides, and only fall
+    // back to closed when every side they hold is finished.
+    const held = [w.buyer || l.buyer_stage, w.seller || l.seller_stage].filter((x) => x && RANK[x] != null);
+    const live = held.filter((x) => x !== 'closed');
+    if (held.length) {
+      const best = (live.length ? live : held).reduce((a, b) => ((RANK[b] > RANK[a]) ? b : a));
+      const wantPipeline = STAGE_TO_PIPELINE[best] || null;
+      if (wantPipeline && l.pipeline_stage !== wantPipeline) patch.pipeline_stage = wantPipeline;
+    }
+
     const sides = [w.buyer ? 'buyer' : null, w.seller ? 'seller' : null].filter(Boolean);
     const impliedSide = sides.length === 2 ? 'both' : sides[0] || null;
     if (impliedSide && l.deal_side !== impliedSide) patch.deal_side = impliedSide;
