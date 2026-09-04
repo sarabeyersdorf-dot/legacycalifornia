@@ -11,6 +11,7 @@
 //   first_name?, last_name?, email (required), phone?,
 //   source?:        'website_form' | 'open_house' | 'referral' | 'ihomefinder_idx' | 'manual',
 //   journey_stage?: 'discovering' | 'narrowing' | 'touring' | 'ready_to_offer',
+//                   (wire only — translated to buyer_stage, never stored)
 //   lead_type?:     'buyer' | 'seller' | 'both' | 'land' | 'relocation',
 //   areas?:         string[],
 //   price_min?:     number,
@@ -34,6 +35,7 @@ import { syncLeadToFUB } from '../fub/sync.js';
 import { alertAgents, deskUrl } from '../_lib/agent-alert.js';
 import { sendSpeedToLead } from '../_lib/handlers/speed-to-lead.js';
 import { enrollLeads } from '../_lib/handlers/sequences-enroll.js';
+import { sidesFromIntake, mergeSidesInto, describeStage } from '../_lib/lead-stage.js';
 import { sendEmail as sendEmailResend, resendConfigured } from '../_lib/resend.js';
 import { sendEmail as sendEmailSendgrid, sendgridConfigured } from '../_lib/sendgrid.js';
 
@@ -101,8 +103,14 @@ function sanitize(body) {
     out.sms_consent_source = ((body.source || 'website') + ' form').slice(0, 120);
   }
   out.source        = ALLOWED_SOURCE.has(body.source)         ? body.source        : 'website_form';
-  out.journey_stage = ALLOWED_JOURNEY.has(body.journey_stage) ? body.journey_stage : null;
   out.lead_type     = ALLOWED_TYPE.has(body.lead_type)        ? body.lead_type     : null;
+  // journey_stage is a WIRE field only. The forms on the site still send it and
+  // their JavaScript is cached in visitors' browsers, so the name has to keep
+  // working — but nothing stores it any more. It is translated into buyer_stage
+  // (and contact_type) here, which is where the CRM actually looks. See
+  // _lib/lead-stage.js and db/101.
+  out._journey      = ALLOWED_JOURNEY.has(body.journey_stage) ? body.journey_stage : null;
+  Object.assign(out, sidesFromIntake({ journey_stage: out._journey, lead_type: out.lead_type }));
   out.areas         = Array.isArray(body.areas) ? body.areas.filter(s => typeof s === 'string').slice(0, 20) : null;
   out.price_min     = Number.isFinite(+body.price_min) ? Math.max(0, +body.price_min) : null;
   out.price_max     = Number.isFinite(+body.price_max) ? Math.max(0, +body.price_max) : null;
@@ -123,6 +131,9 @@ export default async function handler(req, res) {
     }
 
     const fields = sanitize(body);
+    // Everything below writes `fields` straight into `leads`, so the wire-only
+    // key travels separately and never reaches a column.
+    const journeyIn = fields._journey; delete fields._journey;
 
     if (!fields.email || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(fields.email)) {
       return fail(res, 400, 'valid email required');
@@ -156,16 +167,25 @@ export default async function handler(req, res) {
       // dropped. (Use an explicit blank test rather than !existing[k], so a
       // legitimate stored 0 / false is treated as present, not blank.)
       const isBlank = (x) => x === null || x === undefined || x === '';
+      // The side columns are NOT filled by this generic rule — mergeSidesInto
+      // below is their only path in, because it is the one that knows a
+      // counterparty or a do-not-contact must never be given a stage no matter
+      // how blank their record looks.
+      const SIDE_COLS = new Set(['buyer_stage', 'seller_stage', 'contact_type']);
       const patch = {};
       for (const [k, v] of Object.entries(fields)) {
+        if (SIDE_COLS.has(k)) continue;
         if (v != null && v !== '' && isBlank(existing[k])) patch[k] = v;
       }
-      // Journey stage / lead type are the ONE intentional exception: a returning
-      // lead may have genuinely progressed (discovering → ready_to_offer), so a
-      // freshly stated value updates. These are pipeline signals, not the curated
-      // identity/contact fields the rule above protects.
-      if (fields.journey_stage)   patch.journey_stage   = fields.journey_stage;
-      if (fields.lead_type)       patch.lead_type       = fields.lead_type;
+      // Sides and stages are the ONE intentional exception: a returning lead may
+      // have genuinely progressed (just looking → ready to write an offer), so a
+      // freshly stated position updates. mergeSidesInto enforces the three rules
+      // that keeps that safe — a protected type (do-not-contact, vendor, the
+      // counterparty on our own listing) is left alone, a stage only ever moves
+      // FORWARD so a form can't demote someone the CRM advanced, and
+      // contact_type is only filled in when it currently says nothing specific.
+      Object.assign(patch, mergeSidesInto(existing, { journey_stage: journeyIn, lead_type: fields.lead_type }));
+      if (fields.lead_type && !existing.lead_type) patch.lead_type = fields.lead_type;
       patch.last_contact_at = new Date().toISOString();
 
       const { data, error } = await supa
@@ -191,7 +211,7 @@ export default async function handler(req, res) {
       source:     'website',
       event_data: {
         is_new,
-        journey_stage: fields.journey_stage,
+        stated_stage:  journeyIn,
         property_mls:  body.property_mls || null,
         property_id:   body.property_id  || null,
         message:       fields.notes
@@ -310,7 +330,7 @@ export default async function handler(req, res) {
       const name = [lead.first_name, lead.last_name].filter(Boolean).join(' ') || fields.email;
       const action = (body.tour && body.tour.scheduled_at) ? 'requested a tour'
         : fields.notes ? 'sent a message'
-        : (fields.journey_stage === 'ready_to_offer') ? 'is ready to make an offer'
+        : (journeyIn === 'ready_to_offer') ? 'is ready to make an offer'
         : 'submitted a form / set up a search';
       const bits = [];
       if (fields.lead_type) bits.push(fields.lead_type);
@@ -328,7 +348,7 @@ export default async function handler(req, res) {
       const sms = `New ${is_new ? '' : 'returning '}lead: ${name} ${action}${bits.length ? ' — ' + bits.join(' · ') : ''}. Open lead: ${desk}`;
       const text = `${name} ${action} on legacycalifornia.com.\n\n`
         + `Email: ${fields.email}\nPhone: ${fields.phone || '(none)'}\n`
-        + `Type: ${fields.lead_type || '—'}\nJourney: ${fields.journey_stage || '—'}\n`
+        + `Type: ${fields.lead_type || '—'}\nStage: ${describeStage(fields)}\n`
         + `Areas: ${(fields.areas || []).join(', ') || '—'}\nBudget: ${fields.price_min || '?'}–${fields.price_max || '?'}\n`
         + (fields.notes ? `Message: ${fields.notes}\n` : '')
         + `\nOpen this lead in the CRM: ${desk}`;

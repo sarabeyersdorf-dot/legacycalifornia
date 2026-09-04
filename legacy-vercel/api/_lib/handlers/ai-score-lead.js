@@ -1,5 +1,6 @@
 // api/ai/score-lead.js
 // Recalculates a lead's score 0–100 from their event history and journey stage,
+import { STAGE_RANK, bestLiveStage } from '../lead-stage.js';
 // then updates `leads.score` and `leads.temperature`.
 //
 // Usage:
@@ -8,7 +9,9 @@
 //
 // Score weights (per spec Phase 1C):
 //   form_submitted: +10
-//   journey_stage ready_to_offer +30 / touring +20 / narrowing +10
+//   buyer/seller stage: writing or reviewing offers +30 / touring or listing prep
+//     +20 / nurturing +10  (was journey_stage, which was set on 2 leads in 2,281
+//     — see _lib/lead-stage.js)
 //   property_saved +5 each (max +25)
 //   property_viewed ≥3x: +10
 //   sms_replied +15
@@ -41,10 +44,16 @@ export async function scoreLead(lead_id) {
   let score = 0;
   const breakdown = [];
 
-  // Journey stage
-  if (lead.journey_stage === 'ready_to_offer') { score += 30; breakdown.push('+30 ready_to_offer'); }
-  else if (lead.journey_stage === 'touring')   { score += 20; breakdown.push('+20 touring'); }
-  else if (lead.journey_stage === 'narrowing') { score += 10; breakdown.push('+10 narrowing'); }
+  // Where they are, on the side that still has work in it. Someone who closed a
+  // purchase and is now preparing a listing scores on the listing, not the
+  // finished sale — and a contact whose every side is closed scores nothing
+  // here, because a past client is a referral source, not a hot lead.
+  const live = bestLiveStage([lead.buyer_stage, lead.seller_stage]);
+  const rank = live === 'closed' ? -1 : (STAGE_RANK[live] ?? -1);
+  if (rank >= 4)       { score += 30; breakdown.push('+30 in escrow'); }
+  else if (rank === 3) { score += 30; breakdown.push('+30 offer stage'); }
+  else if (rank === 2) { score += 20; breakdown.push('+20 touring / listing prep'); }
+  else if (rank === 1) { score += 10; breakdown.push('+10 nurturing'); }
 
   // Aggregate events
   let savedCount = 0;

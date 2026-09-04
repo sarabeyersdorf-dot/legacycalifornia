@@ -114,7 +114,7 @@ export default async function handler(req, res) {
           .order('last_contact_at')
           .limit(10),
       supa.from('leads')
-          .select('id, first_name, last_name, email, source, journey_stage, score, temperature, created_at')
+          .select('id, first_name, last_name, email, source, buyer_stage, seller_stage, score, temperature, created_at')
           .gte('created_at', dayAgo)
           .order('created_at', { ascending: false }),
       supa.from('offers')

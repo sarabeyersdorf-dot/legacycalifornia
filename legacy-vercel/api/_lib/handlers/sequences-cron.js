@@ -31,6 +31,7 @@ import { sendEmail, resendConfigured }     from '../resend.js';
 import { coldEmailHtml }  from '../email-html.js';
 import { handleOptions, ok, fail } from '../cors.js';
 import { getCallerProfile, isAgent } from '../auth.js';
+import { describeStage } from '../lead-stage.js';
 
 const SARA_VOICE = `You are drafting on behalf of Sara Cooper, Broker-Owner of Legacy Properties in Angels Camp, CA.
 Sara's voice: warm, direct, never corporate, never salesy. Short sentences.
@@ -78,7 +79,7 @@ async function tickSequences(supa) {
   // budget; the next cron tick picks up the remainder.
   const { data: dueLeads = [], error } = await supa
     .from('leads')
-    .select('id, first_name, last_name, email, phone, areas, price_min, price_max, journey_stage, lead_type, temperature, score, sequence_id, sequence_step, sequence_next_due_at, sequence_started_at, sequence_autosend, property_address, property_city, unsubscribe_token, call_opt_out, sms_opt_out, email_opt_out, not_interested, pipeline_stage, sms_consent')
+    .select('id, first_name, last_name, email, phone, areas, price_min, price_max, buyer_stage, seller_stage, lead_type, temperature, score, sequence_id, sequence_step, sequence_next_due_at, sequence_started_at, sequence_autosend, property_address, property_city, unsubscribe_token, call_opt_out, sms_opt_out, email_opt_out, not_interested, pipeline_stage, sms_consent')
     .eq('sequence_paused', false)
     .eq('status', 'active')
     .not('sequence_id', 'is', null)
@@ -207,7 +208,7 @@ async function tickSequences(supa) {
 Lead context:
   email:         ${lead.email || '(no email)'}
   phone:         ${lead.phone || '(no phone)'}
-  journey_stage: ${lead.journey_stage || 'unknown'}
+  stage: ${describeStage(lead)}
   lead_type:     ${lead.lead_type     || 'unknown'}
   area:          ${vars.area}
   price_range:   ${vars.price_min || '?'} - ${vars.price_max || '?'}

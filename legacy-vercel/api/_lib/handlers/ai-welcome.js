@@ -3,7 +3,7 @@
 // Saves both drafts to the messages table as status: 'pending_approval'.
 // Does NOT send — Sara approves from the CRM.
 //
-// Exception: if journey_stage === 'ready_to_offer', send an SMS alert to Sara
+// Exception: a buyer at the offer stage sends an SMS alert to Sara
 // immediately at 209-559-4966. The lead's drafts still wait for approval.
 //
 // Usage:
@@ -14,6 +14,7 @@ import { adminClient } from '../supabase.js';
 import { anthropicJSON } from '../anthropic.js';
 import { alertSara } from '../twilio.js';
 import { handleOptions, readJson, ok, fail } from '../cors.js';
+import { describeStage } from '../lead-stage.js';
 
 const SARA_SYSTEM = `You are drafting messages on behalf of Sara Cooper, Broker-Owner of Legacy Properties in Angels Camp, CA.
 Sara's voice is: warm, direct, knowledgeable, never corporate, never salesy.
@@ -35,7 +36,7 @@ function buildUserPrompt(lead) {
   return `Draft a welcome SMS (under 160 characters, no greeting fluff) and a welcome email (3-4 short paragraphs).
 Lead:
   name:           ${[lead.first_name, lead.last_name].filter(Boolean).join(' ') || 'unknown'}
-  journey_stage:  ${lead.journey_stage || 'unknown'}
+  stage:          ${describeStage(lead)}
   lead_type:      ${lead.lead_type     || 'unknown'}
   source:         ${lead.source        || 'website_form'}
   areas:          ${areas}
@@ -94,7 +95,7 @@ export async function draftWelcome(lead_id) {
 
   // 2. Alert Sara directly for ready_to_offer leads
   let alert = null;
-  if (lead.journey_stage === 'ready_to_offer') {
+  if (lead.buyer_stage === 'writing_offers') {
     const name  = [lead.first_name, lead.last_name].filter(Boolean).join(' ') || 'A new lead';
     const phone = lead.phone || '(no phone)';
     const msg   = `New hot lead: ${name} is ready to make an offer. ${phone}. Open desk: legacycalifornia.com/crm`;

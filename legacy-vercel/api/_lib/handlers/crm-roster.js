@@ -17,7 +17,7 @@ import { adminClient } from '../supabase.js';
 import { getCallerProfile, isAgent } from '../auth.js';
 import { handleOptions, ok, fail } from '../cors.js';
 
-const COLS = 'id, first_name, last_name, email, phone, temperature, score, lead_type, contact_type, pipeline_stage, journey_stage, buyer_stage, seller_stage, status, last_contact_at, created_at, source';
+const COLS = 'id, first_name, last_name, email, phone, temperature, score, lead_type, contact_type, pipeline_stage, buyer_stage, seller_stage, status, last_contact_at, created_at, source';
 
 // A contact is a CLIENT once they're under contract or have closed — read from
 // the coarse pipeline_stage OR either side stage (in case one wasn't rolled up).

@@ -12,6 +12,7 @@
 import { adminClient } from '../supabase.js';
 import { anthropicJSON } from '../anthropic.js';
 import { handleOptions, readJson, ok, fail } from '../cors.js';
+import { describeStage } from '../lead-stage.js';
 
 const SARA_SYSTEM = `You are drafting messages on behalf of Sara Cooper, Broker-Owner of Legacy Properties in Angels Camp, CA.
 Sara's voice is: warm, direct, knowledgeable, never corporate, never salesy.
@@ -71,7 +72,7 @@ export default async function handler(req, res) {
 
 Lead profile:
   name:          ${[lead.first_name, lead.last_name].filter(Boolean).join(' ') || 'unknown'}
-  journey_stage: ${lead.journey_stage || 'unknown'}
+  stage: ${describeStage(lead)}
   lead_type:     ${lead.lead_type || 'unknown'}
   areas:         ${(lead.areas || []).join(', ') || 'unspecified'}
   price_range:   ${lead.price_min || '?'} - ${lead.price_max || '?'}

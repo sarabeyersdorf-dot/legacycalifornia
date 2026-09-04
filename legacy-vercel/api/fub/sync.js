@@ -46,7 +46,8 @@ function leadToFUBContact(lead) {
     customScore: lead.score,
     tags: [
       lead.lead_type        ? `type:${lead.lead_type}`            : null,
-      lead.journey_stage    ? `journey:${lead.journey_stage}`     : null,
+      lead.buyer_stage      ? `buyer:${lead.buyer_stage}`         : null,
+      lead.seller_stage     ? `seller:${lead.seller_stage}`       : null,
       lead.temperature      ? `temp:${lead.temperature}`          : null
     ].filter(Boolean)
   };

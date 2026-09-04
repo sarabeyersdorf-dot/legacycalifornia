@@ -38,6 +38,8 @@
 //   • Anyone with no deal_parties row. Their record is all we have.
 //   • Identity and consent fields. This only ever writes side/stage columns.
 
+import { PROTECTED_TYPES, bestLiveStage } from './lead-stage.js';
+
 // Deal stage (effective) → the side stage a party of that deal should carry.
 // 'dead', 'cancelled' and 'inactive' deliberately map to null rather than a
 // stage: a fallen-through escrow means the person is no longer in one, and the
@@ -69,8 +71,8 @@ const STAGE_TO_PIPELINE = {
 };
 
 // Types that describe the relationship rather than a transaction. A deal never
-// overwrites these — see the note above.
-const PROTECTED_TYPES = new Set(['do_not_contact', 'do_not_call', 'vendor', 'counterparty']);
+// overwrites these — see the note above. Defined once in lead-stage.js so the
+// intake path and this one cannot disagree about who is protected.
 
 const isSellerRole = (role) => /seller/i.test(String(role || ''));
 const isBuyerRole  = (role) => /buyer/i.test(String(role || ''));
@@ -138,10 +140,8 @@ export async function computeContactFixes(supa) {
     // bury a live listing; what Sara needs to see is the work in front of her.
     // So: pick the most advanced stage among the UNFINISHED sides, and only fall
     // back to closed when every side they hold is finished.
-    const held = [w.buyer || l.buyer_stage, w.seller || l.seller_stage].filter((x) => x && RANK[x] != null);
-    const live = held.filter((x) => x !== 'closed');
-    if (held.length) {
-      const best = (live.length ? live : held).reduce((a, b) => ((RANK[b] > RANK[a]) ? b : a));
+    const best = bestLiveStage([w.buyer || l.buyer_stage, w.seller || l.seller_stage]);
+    if (best) {
       const wantPipeline = STAGE_TO_PIPELINE[best] || null;
       if (wantPipeline && l.pipeline_stage !== wantPipeline) patch.pipeline_stage = wantPipeline;
     }
