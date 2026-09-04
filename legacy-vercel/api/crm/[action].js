@@ -37,6 +37,7 @@ import testEmail     from '../_lib/handlers/crm-test-email.js';
 import linkDealParty from '../_lib/handlers/crm-link-deal-party.js';
 import relatedContact from '../_lib/handlers/crm-related-contact.js';
 import pushToIdx from '../_lib/handlers/crm-push-to-idx.js';
+import tagging from '../_lib/handlers/crm-tagging.js';
 import sequences     from '../_lib/handlers/crm-sequences.js';
 import calendar      from '../_lib/handlers/crm-calendar.js';
 import broker        from '../_lib/handlers/crm-broker.js';
@@ -108,6 +109,7 @@ const TABLE = {
   'link-deal-party': linkDealParty,
   'related-contact': relatedContact,
   'push-to-idx':     pushToIdx,
+  'tagging':         tagging,
   'sequences':       sequences,
   'calendar':        calendar,
   'broker':          broker,

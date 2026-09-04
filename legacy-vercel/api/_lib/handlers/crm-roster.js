@@ -28,6 +28,10 @@ const CLIENT_SIDE   = new Set(['in_escrow', 'closed']);
 function classify(l) {
   const ct = l.contact_type, ps = l.pipeline_stage, status = l.status;
   if (status === 'do_not_contact' || ct === 'do_not_call' || ct === 'do_not_contact') return '';
+  // A title rep or another agent is a working contact, not a lead and not
+  // sphere — before 'vendor' existed they could only be filed as sphere, which
+  // put them in marketing lists. Shown in none of the four browse buckets.
+  if (ct === 'vendor') return '';
   if (ct === 'past_client') return 'past';
   if (ct === 'sphere' || ps === 'sphere') return 'sphere';
   if (ct === 'closed' || CLIENT_STAGES.has(ps) || CLIENT_SIDE.has(l.buyer_stage) || CLIENT_SIDE.has(l.seller_stage)) return 'clients';

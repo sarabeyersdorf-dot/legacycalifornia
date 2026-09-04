@@ -339,6 +339,7 @@ async function list(supa, profile, res) {
     let slice = (data || []).filter((l) => {
       if (l.email_opt_out || l.sms_opt_out || l.not_interested) return false;
       if (l.contact_type === 'do_not_call' || l.contact_type === 'do_not_contact') return false;
+      if (l.contact_type === 'vendor') return false;   // a title rep is not a prospect
       return !!(l.email || l.phone);            // no way to reach them = not an action
     });
     // Don't re-list anyone the urgent lanes already surfaced, then take the slice.
