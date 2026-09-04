@@ -1,7 +1,7 @@
 {
-  "version": 12.5,
+  "version": 12.6,
   "lastUpdated": "2026-09-04",
-  "updatedBy": "morning-briefing-2026-09-04",
+  "updatedBy": "morning-briefing-2026-09-04-listtrac-homescom",
   "tasks": [
     {
       "agent": "sara",
@@ -3596,14 +3596,14 @@
         "expiration": "2026-11-18",
         "agreementForm": "Commercial and Residential Income Listing Agreement - 1225",
         "listTrac": {
-          "last30": 22,
-          "views": 204,
+          "last30": 24,
+          "views": 207,
           "newPct": 90,
-          "shares": 4,
+          "shares": 5,
           "inquiries": 1,
           "since": "Since going live Feb 2, 2026",
           "note": "Commercial listing (Commercial and Residential Income Listing Agreement) - it does not syndicate to Zillow, Realtor.com or Trulia by design, so its traffic is not comparable to the residential book. Views come from MetroList and broker sites, which is the correct channel for this property type.",
-          "reportDate": "2026-08-23",
+          "reportDate": "2026-08-30",
           "source": "ListTrac - MetroList weekly report"
         }
       },
@@ -3828,17 +3828,24 @@
         "clientLegalNames": "James R Heryford and Yvonne Heryford (Gold Electric) — LEGAL names as they appear on the RLA, MOTs and all executed documents. USE 'Jim' in anything the clients read; use the legal names only on contracts and vesting.",
         "commissionNote": "2.5% per the RLA (rev 6/25), agreement dated 2025-11-19. Listing price chain: RLA $1,850,000 -> MOT #1 (2026-03-14) $1,399,000 -> MOT #2 (6/30) expiration 8/14 only -> MOT #3 (8/5) expiration 11/19/2026 only.",
         "listTrac": {
-          "last30": 384,
-          "views": 5837,
-          "newPct": 92,
+          "last30": 513,
+          "views": 6003,
+          "newPct": 86,
           "shares": 18,
           "inquiries": 0,
           "since": "Since the current MLS number went live Mar 20, 2026",
-          "note": "Mixed-use, so it carries on BOTH the commercial channels and the residential portals - Zillow leads at 226 views in 30 days. Beating its zip code for views. A separate ListTrac report on the earlier MLS number covers 2025-12-05 onward: 4,027 views / 6 shares / 97% new / 54 in the last 30 days.",
-          "reportDate": "2026-08-23",
+          "note": "Mixed-use, so it carries on BOTH the commercial channels and the residential portals - Zillow leads at 331 views in 30 days. Beating its zip code for views. A separate ListTrac report on the earlier MLS number covers 2025-12-05 onward: 4,035 views / 6 shares / 96% new / 40 in the last 30 days.",
+          "reportDate": "2026-08-30",
           "source": "ListTrac - MetroList weekly report"
         },
-        "agreementForm": "Residential Listing Agreement - Exclusive - 625"
+        "agreementForm": "Residential Listing Agreement - Exclusive - 625",
+        "homesCom": {
+          "totalViews": 69016,
+          "detailPageViews": 875,
+          "favorites": 10,
+          "reportDate": "2026-08-31",
+          "source": "Homes.com weekly performance-update email"
+        }
       },
       "timeline": {
         "acceptance": "2026-06-19",
@@ -4140,15 +4147,22 @@
         "commissionNote": "3.0% per the RLA (rev 12/25) dated 2026-06-04. RLA listing price $98,500 -> MOT #1 $89,000.",
         "agreementForm": "Residential Listing Agreement - Exclusive - 1225",
         "listTrac": {
-          "last30": 3017,
-          "views": 10670,
-          "newPct": 80,
-          "shares": 31,
+          "last30": 2849,
+          "views": 11382,
+          "newPct": 87,
+          "shares": 32,
           "inquiries": 1,
           "since": "Since going live Jun 4, 2026",
           "note": "Beating its zip code for views. Highest total views in the book.",
-          "reportDate": "2026-08-23",
+          "reportDate": "2026-08-30",
           "source": "ListTrac - MetroList weekly report"
+        },
+        "homesCom": {
+          "totalViews": 39838,
+          "detailPageViews": 669,
+          "favorites": 16,
+          "reportDate": "2026-08-31",
+          "source": "Homes.com weekly performance-update email"
         }
       },
       "salePrice": null,
@@ -4370,14 +4384,14 @@
         "dateListed": "2026-03-10",
         "agreementForm": "Residential Listing Agreement - Exclusive - 1225",
         "listTrac": {
-          "last30": 737,
-          "views": 3373,
+          "last30": 669,
+          "views": 3516,
           "newPct": 94,
-          "shares": 91,
+          "shares": 93,
           "inquiries": 0,
           "since": "Since going live Apr 8, 2026",
           "note": "Most-shared listing in the book at 91 shares, and beating its zip code for views. The listing is live and marketing well - the Kayla Priestly ESCROW cancelled, the listing did not.",
-          "reportDate": "2026-08-23",
+          "reportDate": "2026-08-30",
           "source": "ListTrac - MetroList weekly report",
           "favorites": 1
         }
@@ -4549,14 +4563,14 @@
         "dateListed": "2026-03-19",
         "agreementForm": "Residential Listing Agreement - Exclusive - 1225",
         "listTrac": {
-          "last30": 672,
-          "views": 5547,
-          "newPct": 83,
-          "shares": 44,
+          "last30": 701,
+          "views": 5739,
+          "newPct": 84,
+          "shares": 46,
           "inquiries": 5,
           "since": "Since going live Mar 24, 2026",
           "note": "Beating its zip code for views - the busiest listing in the book by 30-day traffic. NOTE ON INQUIRIES: ListTrac 'inquiries' are portal contact-link clicks routed to lead-buying agents in this zip, not to the listing agent.",
-          "reportDate": "2026-08-23",
+          "reportDate": "2026-08-30",
           "source": "ListTrac - MetroList weekly report"
         }
       },
@@ -4868,17 +4882,24 @@
         "disclosurePackage": "https://app.disclosures.io/link/324-Augusta-Court-y0xz96n1",
         "commissionNote": "3.0% per the RLA (rev 6/26) dated 2026-06-18 — this is the LISTING-side rate and it is what applies now. deals.json carried 4% until 2026-08-16; that 4% was 3% listing side + 1% buyer side per Sara's escrow-opening instructions to Placer Title 2026-08-10, which was correct only for the Denis Listengourt dual transaction. That escrow cancelled 2026-08-14, so the buyer-side 1% is gone and the RLA rate of 3% stands. Listing price chain: RLA $545,000 -> MOT #1 (2026-07-24) $529,000 -> MOT #2 (2026-08-01) $495,000.",
         "listTrac": {
-          "last30": 1477,
-          "views": 3254,
-          "newPct": 87,
+          "last30": 1547,
+          "views": 3595,
+          "newPct": 88,
           "shares": 19,
           "inquiries": 4,
           "since": "Since going live Jun 25, 2026",
           "note": "Beating its zip code for views. NOTE ON INQUIRIES: ListTrac 'inquiries' are clicks on a portal contact link and route to agents who buy leads in this zip code - they do NOT reach Sara. Treat as an interest signal only, never as a lead to work.",
-          "reportDate": "2026-08-23",
+          "reportDate": "2026-08-30",
           "source": "ListTrac - MetroList weekly report"
         },
-        "agreementForm": "Residential Listing Agreement - Exclusive - 626"
+        "agreementForm": "Residential Listing Agreement - Exclusive - 626",
+        "homesCom": {
+          "totalViews": 21285,
+          "detailPageViews": 283,
+          "favorites": 7,
+          "reportDate": "2026-08-31",
+          "source": "Homes.com weekly performance-update email"
+        }
       },
       "listPrice": 495000,
       "salePrice": null,
@@ -5197,16 +5218,23 @@
         "dateListed": "2025-01-10",
         "agreementForm": "Vacant Land Listing Agreement - 1224",
         "listTrac": {
-          "last30": 55,
-          "views": 577,
+          "last30": 44,
+          "views": 583,
           "newPct": 100,
           "shares": 4,
           "inquiries": 0,
           "since": "Since going live Jan 17, 2025",
           "note": "Vacant-land listing - not comparable to the residential book; land traffic runs an order of magnitude lower by nature. Beating its zip code for views; 100% new visitors.",
-          "reportDate": "2026-08-23",
+          "reportDate": "2026-08-30",
           "source": "ListTrac - MetroList weekly report",
           "favorites": 1
+        },
+        "homesCom": {
+          "totalViews": 101089,
+          "detailPageViews": 515,
+          "favorites": 1,
+          "reportDate": "2026-08-31",
+          "source": "Homes.com weekly performance-update email"
         }
       },
       "listTrac": {
@@ -5321,15 +5349,22 @@
         "dateListed": "2025-01-10",
         "agreementForm": "Vacant Land Listing Agreement - 1224",
         "listTrac": {
-          "last30": 27,
-          "views": 263,
-          "newPct": 94,
+          "last30": 29,
+          "views": 270,
+          "newPct": 87,
           "shares": 11,
           "inquiries": 0,
           "since": "Since going live Jan 17, 2025",
           "note": "Vacant-land listing - not comparable to the residential book; land traffic runs an order of magnitude lower by nature. legacycalifornia.com is the top traffic source on this one.",
-          "reportDate": "2026-08-23",
+          "reportDate": "2026-08-30",
           "source": "ListTrac - MetroList weekly report"
+        },
+        "homesCom": {
+          "totalViews": 101452,
+          "detailPageViews": 600,
+          "favorites": 2,
+          "reportDate": "2026-08-31",
+          "source": "Homes.com weekly performance-update email"
         }
       },
       "listTrac": {
@@ -5444,16 +5479,23 @@
         "dateListed": "2025-01-10",
         "agreementForm": "Vacant Land Listing Agreement - 1224",
         "listTrac": {
-          "last30": 20,
-          "views": 301,
-          "newPct": 100,
-          "shares": 11,
+          "last30": 19,
+          "views": 307,
+          "newPct": 90,
+          "shares": 12,
           "inquiries": 0,
           "since": "Since going live Jan 17, 2025",
           "note": "Vacant-land listing - not comparable to the residential book; land traffic runs an order of magnitude lower by nature. 100% new visitors. Land listing - low but steady traffic.",
-          "reportDate": "2026-08-23",
+          "reportDate": "2026-08-30",
           "source": "ListTrac - MetroList weekly report",
           "favorites": 1
+        },
+        "homesCom": {
+          "totalViews": 75952,
+          "detailPageViews": 372,
+          "favorites": 2,
+          "reportDate": "2026-08-31",
+          "source": "Homes.com weekly performance-update email"
         }
       },
       "listTrac": {
@@ -5571,15 +5613,22 @@
         "dateListed": "2025-01-10",
         "agreementForm": "Vacant Land Listing Agreement - 1224",
         "listTrac": {
-          "last30": 18,
-          "views": 221,
-          "newPct": 94,
+          "last30": 13,
+          "views": 223,
+          "newPct": 92,
           "shares": 3,
           "inquiries": 0,
           "since": "Since going live Jan 17, 2025",
           "note": "Vacant-land listing - not comparable to the residential book; land traffic runs an order of magnitude lower by nature. Steady low-volume commercial traffic; Homes.com is the top source.",
-          "reportDate": "2026-08-23",
+          "reportDate": "2026-08-30",
           "source": "ListTrac - MetroList weekly report"
+        },
+        "homesCom": {
+          "totalViews": 108554,
+          "detailPageViews": 670,
+          "favorites": 1,
+          "reportDate": "2026-08-31",
+          "source": "Homes.com weekly performance-update email"
         }
       },
       "listTrac": {
@@ -5681,15 +5730,22 @@
         "expiration": "2027-01-18",
         "agreementForm": "Vacant Land Listing Agreement - 1224",
         "listTrac": {
-          "last30": 165,
-          "views": 1992,
-          "newPct": 97,
+          "last30": 166,
+          "views": 2031,
+          "newPct": 96,
           "shares": 17,
           "inquiries": 0,
           "since": "Since going live Jun 20, 2025",
           "note": "Vacant-land listing - not comparable to the residential book; land traffic runs an order of magnitude lower by nature. Beating its zip code for views.",
-          "reportDate": "2026-08-23",
+          "reportDate": "2026-08-30",
           "source": "ListTrac - MetroList weekly report"
+        },
+        "homesCom": {
+          "totalViews": 170331,
+          "detailPageViews": 7654,
+          "favorites": 67,
+          "reportDate": "2026-08-31",
+          "source": "Homes.com weekly performance-update email"
         }
       },
       "listTrac": {
