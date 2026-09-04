@@ -3004,6 +3004,7 @@ body.lp-restyle {
             <button class="ds-fpill" data-people-tab="clients">Active clients <b data-cnt="clients">—</b></button>
             <button class="ds-fpill" data-people-tab="past">Past clients <b data-cnt="past">—</b></button>
             <button class="ds-fpill" data-people-tab="sphere">Sphere <b data-cnt="sphere">—</b></button>
+            <button type="button" data-open-tagging style="display:none;margin-left:auto;border:1px solid var(--brass);background:transparent;color:var(--brass);border-radius:14px;padding:5px 13px;cursor:pointer;font-family:var(--mono);font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;white-space:nowrap;"></button>
           </div>
           <div class="ds-cbody">
             <div class="ds-ctbl">
@@ -3029,8 +3030,29 @@ body.lp-restyle {
       function fmtLast(iso){ if(!iso) return {t:'—',bad:false}; var days=Math.floor((Date.now()-new Date(iso).getTime())/86400000); var d=new Date(iso).toLocaleDateString('en-US',{month:'short',day:'numeric'}); return {t:d,bad:days>30}; }
       function initials(n){ var p=(n||'?').trim().split(/\s+/); return ((p[0]||'?')[0]+(p[1]?p[1][0]:'')).toUpperCase(); }
 
+      // Untyped contacts fall into "Leads" by default, so this list looks full
+      // while almost none of it is really typed. The prompt to fix that belongs
+      // here, next to the counts, with the number on it.
+      function paintTagBtn(){
+        var btn=view.querySelector('[data-open-tagging]');
+        if(!btn) return;
+        fetch('/api/crm/tagging?limit=1',{credentials:'include'})
+          .then(function(r){return r.ok?r.json():null;})
+          .then(function(j){
+            var n=(j&&j.remaining)||0;
+            if(!n){ btn.style.display='none'; return; }
+            btn.style.display='block';
+            btn.textContent=n.toLocaleString()+' untyped — sort them';
+            btn.onclick=function(){
+              if(window.Legacy&&window.Legacy.openTagging) window.Legacy.openTagging();
+            };
+          })
+          .catch(function(){});
+      }
+
       var seq=0;
       function load(){
+        paintTagBtn();
         var want=st.bucket, my=++seq;
         var list=view.querySelector('[data-people-list]');
         list.innerHTML='<div class="ds-ctbl-empty">Loading…</div>';

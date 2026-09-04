@@ -705,10 +705,6 @@
       "schedule": "0 * * * *"
     },
     {
-      "path": "/api/idx/sync",
-      "schedule": "0 */3 * * *"
-    },
-    {
       "path": "/api/cron/flag-matches.js",
       "schedule": "15 */3 * * *"
     },

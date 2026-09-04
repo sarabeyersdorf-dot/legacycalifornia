@@ -1,6 +1,19 @@
 // api/_lib/handlers/idx-sync.js
 // GET /api/idx/sync
 //
+// NOT SCHEDULED. Its cron was removed from vercel.json on 2026-09-04. The
+// heartbeat added the day before showed it failing on every run — "iHomefinder
+// 404" returning their marketing site's HTML rather than data, eight times a day
+// — because a key is configured but the endpoint it points at does not exist.
+// It never can: iHomefinder confirmed in writing (case 00896993) that they "do
+// not provide a data feed for all listing from the MLS", and there is no
+// MetroList RESO licence. A job that can only 404 forever buries any real
+// failure in the run log.
+//
+// The code is kept, and the endpoint stays callable by hand. If a listing feed
+// is ever licensed, set the IHOMEFINDER_API_* vars and put the cron back — one
+// line in vercel.json — rather than rebuilding this.
+//
 // Vercel cron (every 4 hours). Fetches Sara's listings from the iHomefinder
 // Client API and upserts them into public.properties keyed by mls_number.
 //

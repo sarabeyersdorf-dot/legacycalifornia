@@ -1793,6 +1793,10 @@ window.LGPortal = window.LGPortal || {
   // archived/closed clients, because selectLeadId→loadLead fetches by id.
   window.Legacy = {
     api, openModal, submitLead, toast,
+    // Exported so the Contacts screen in crm.html — a separate IIFE — can open
+    // the sorting tool. That screen is where the untyped contacts are actually
+    // looked at; the roster sidebar this file renders is a different surface.
+    openTagging: function () { openTagging(); },
     openLead: function (id) {
       if (!id) return;
       if (typeof window.showView === 'function') window.showView(null, 'inbox');
@@ -2721,24 +2725,10 @@ window.LGPortal = window.LGPortal || {
       <div class="lead-seg">
         <input type="text" class="lead-seg-input" data-roster-search placeholder="Search ${escHtml(segName)} by name, email, area…" value="${escHtml(state.rosterSearch || '')}" autocomplete="off">
         <div class="lead-seg-hint">${segLeads.length} ${escHtml(segName)} · type a name to open one</div>
-        <button type="button" data-open-tagging style="display:none;margin-top:9px;width:100%;border:1px solid var(--brass);background:transparent;color:var(--brass);border-radius:6px;padding:7px 10px;cursor:pointer;font-family:var(--mono);font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;"></button>
       </div>
       <div class="lead-seg-results" data-roster-results></div>`;
     wireLeadList(container);
     renderSegmentResults(container);
-    // Untyped contacts are invisible to every one of these browse buckets, so
-    // the prompt to fix that belongs right here, with the count on it.
-    (function () {
-      const btn = container.querySelector('[data-open-tagging]');
-      if (!btn) return;
-      window.Legacy.api('/api/crm/tagging?limit=1', { method: 'GET' }).then((r) => {
-        const n = (r.ok && r.json && r.json.remaining) || 0;
-        if (!n) return;
-        btn.style.display = 'block';
-        btn.textContent = `${n.toLocaleString()} contacts untyped — sort them`;
-        btn.addEventListener('click', () => openTagging());
-      });
-    })();
     const inp = container.querySelector('[data-roster-search]');
     if (inp) { const v = inp.value; inp.focus(); inp.setSelectionRange(v.length, v.length); }
   }
