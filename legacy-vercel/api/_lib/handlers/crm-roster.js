@@ -51,7 +51,11 @@ const shape = (l) => ({
   email: l.email, phone: l.phone,
   temperature: l.temperature, score: l.score,
   side: l.contact_type || '',   // buyer/seller/both/past_client/sphere/do_not_contact — for the inline roster side picker
-  stage: l.pipeline_stage, journey: l.journey_stage, type: l.lead_type,
+  stage: l.pipeline_stage, type: l.lead_type,
+  // Both sides, so a list can show what a person actually holds instead of one
+  // collapsed pill. Guy Castle bought 7230 Latigo (closed) and is selling 1143
+  // Echo (preparing); a single summary has to lie about one of them.
+  buyer_stage: l.buyer_stage, seller_stage: l.seller_stage,
   last_contact_at: l.last_contact_at, source: l.source
 });
 
