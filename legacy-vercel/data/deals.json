@@ -1,7 +1,7 @@
 {
-  "version": 12.4,
-  "lastUpdated": "2026-09-03",
-  "updatedBy": "cowork 2026-09-01 (179 Elams seller page built)",
+  "version": 12.5,
+  "lastUpdated": "2026-09-04",
+  "updatedBy": "morning-briefing-2026-09-04",
   "tasks": [
     {
       "agent": "sara",
@@ -1435,7 +1435,9 @@
       "key": "fub-hotsheet-read",
       "title": "Tuesday 8/11 FUB Hot Sheet still unread — 1 appointment, 2 tasks, latest activity Donald Rester",
       "due": "2026-08-12",
-      "done": false
+      "done": true,
+      "doneDate": "2026-09-04",
+      "doneNote": "Closed — CRM briefing-feedback (Step 0) reports this task done."
     },
     {
       "agent": "james",
@@ -1467,7 +1469,9 @@
       "key": "fub-joe-garnica",
       "title": "NEW LEAD: Joe Garnica (209) 815-3309 — Realtor.com 8/12 on 609 Dolores Way, Copperopolis $519,000. Unworked",
       "due": "2026-08-13",
-      "done": false
+      "done": true,
+      "doneDate": "2026-09-04",
+      "doneNote": "Closed — CRM briefing-feedback (Step 0) reports this task done."
     },
     {
       "agent": "james",
@@ -1494,7 +1498,9 @@
       "key": "433-dead-milestones-2",
       "title": "433: three dead-escrow milestones unchanged in deals.json — ticked 8/12 but the file was not edited",
       "due": "2026-08-16",
-      "done": false
+      "done": true,
+      "doneDate": "2026-09-04",
+      "doneNote": "Closed — CRM briefing-feedback (Step 0) reports this task done."
     },
     {
       "agent": "sara",
@@ -1502,7 +1508,9 @@
       "key": "contacts-completeness-2",
       "title": "Contacts gaps unchanged: 324 Augusta lender unnamed, 695 Feather title null — ticked 8/12 but the file was not edited",
       "due": "2026-08-16",
-      "done": false
+      "done": true,
+      "doneDate": "2026-09-04",
+      "doneNote": "Closed — CRM briefing-feedback (Step 0) reports this task done."
     },
     {
       "agent": "sara",
@@ -1528,7 +1536,9 @@
       "key": "dorrington-devon-prep",
       "title": "Showing for Devon in Dorrington — Sunday 8/16 11 AM; realtor.com flagged 1 new listing + 1 price drop in that market",
       "due": "2026-08-16",
-      "done": false
+      "done": true,
+      "doneDate": "2026-09-04",
+      "doneNote": "Closed — CRM briefing-feedback (Step 0) reports this task done."
     },
     {
       "agent": "sara",
@@ -1536,7 +1546,9 @@
       "key": "433-marketing-push",
       "title": "433: pest work done, four silent days, relisted to ~11/18 — good week for a marketing push",
       "due": "2026-08-16",
-      "done": false
+      "done": true,
+      "doneDate": "2026-09-04",
+      "doneNote": "Closed — CRM briefing-feedback (Step 0) reports this task done."
     },
     {
       "agent": "sara",
@@ -2170,7 +2182,9 @@
       "key": "feather-mh-holdback-agreement",
       "title": "695 Feather: if you close Friday, get the HCD holdback in writing FIRST - Orange Coast Title will not administer it, so it has to be a private buyer/seller agreement",
       "due": "2026-08-27",
-      "done": false
+      "done": true,
+      "doneDate": "2026-09-04",
+      "doneNote": "Closed — CRM briefing-feedback (Step 0) reports this task done."
     },
     {
       "agent": "sara",
@@ -2178,7 +2192,9 @@
       "key": "echo-mot-crm-stage",
       "title": "1143 Echo: CRM still shows stage 'preparing' while the master file says 'listing' - stale stage_override, flagged by drift-check 8/23 and client-visible",
       "due": "this week",
-      "done": false
+      "done": true,
+      "doneDate": "2026-09-04",
+      "doneNote": "Closed — CRM briefing-feedback (Step 0) reports this task done."
     },
     {
       "agent": "sara",
@@ -2186,7 +2202,9 @@
       "key": "augusta-relist-push",
       "title": "324 Augusta: second-heaviest residential traffic in the book since the escrow cancelled - 1,477 views in 30 days, 4 inquiries, beat its zip. Push it while the interest is live",
       "due": "this week",
-      "done": false
+      "done": true,
+      "doneDate": "2026-09-04",
+      "doneNote": "Closed — CRM briefing-feedback (Step 0) reports this task done."
     },
     {
       "agent": "sara",
@@ -2194,7 +2212,9 @@
       "key": "land-syndication-check",
       "title": "Check the MetroList feed on 2000 Gun Club, 590 S Main and 635 S Main - 5-6 views each in 30 days with Homes.com the only source. 1350 Love St and 701 Mark Twain are the same property type and do get Zillow/Realtor.com",
       "due": "this week",
-      "done": false
+      "done": true,
+      "doneDate": "2026-09-04",
+      "doneNote": "Closed — CRM briefing-feedback (Step 0) reports this task done."
     },
     {
       "agent": "sara",
@@ -2202,7 +2222,9 @@
       "key": "quillen-collection-followup",
       "title": "Roger & Kim Quillen: Kim opened 'Roger and Kim' AGAIN this morning at 8:58 AM and viewed three properties - the 8th open since the 8/25 push, now confirmed by the CRM as genuine client viewing, and still no reply from us. Call her today.",
       "due": "2026-08-31",
-      "done": false
+      "done": true,
+      "doneDate": "2026-09-04",
+      "doneNote": "Closed — CRM briefing-feedback (Step 0) reports this task done."
     },
     {
       "agent": "sara",
@@ -2210,7 +2232,9 @@
       "key": "elams-placer-title-guidance",
       "title": "🔴 179 Elams Ranch: the listing is now LIVE on MetroList (226110167, $330,000) while title is still not cleared - the deceased father is on title and Amanda Boitano at Placer has not come back. It can take an offer any day now, so the title answer has gone from a pre-listing step to the thing that could hold up an escrow. Chase her: 209.736.9553 / aboitano@placertitle.com.",
       "due": "2026-09-01",
-      "done": false
+      "done": true,
+      "doneDate": "2026-09-04",
+      "doneNote": "Closed — CRM briefing-feedback (Step 0) reports this task done."
     },
     {
       "agent": "james",
@@ -2228,7 +2252,9 @@
       "key": "fub-facebook-reconnect",
       "title": "Facebook has come unlinked from Follow Up Boss (FUB emailed 8/26 4:03 AM). Any Facebook lead forms are not arriving. Reconnect in FUB settings.",
       "due": "this week",
-      "done": false
+      "done": true,
+      "doneDate": "2026-09-04",
+      "doneNote": "Closed — CRM briefing-feedback (Step 0) reports this task done."
     },
     {
       "agent": "sara",
@@ -2236,7 +2262,9 @@
       "key": "greiner-radio-silence",
       "title": "Scot Greiner (925) 565-4090 is flagged HOT and has had no contact since 8/13 — 14 days. Longest silence on any hot lead.",
       "due": "this week",
-      "done": false
+      "done": true,
+      "doneDate": "2026-09-04",
+      "doneNote": "Closed — CRM briefing-feedback (Step 0) reports this task done."
     },
     {
       "agent": "james",
@@ -2317,7 +2345,9 @@
       "key": "land-listing-fields",
       "title": "Listing book: seller name missing on all five land listings (701 Mark Twain, 635 S Main, 590 S Main, 2000 Gun Club, 1350 Love St) and RLA expiration missing on the four Angels Camp parcels, 9568 Sheep Ranch and 2841 Fowler. Fill from the RLAs.",
       "due": "this week",
-      "done": false
+      "done": true,
+      "doneDate": "2026-09-04",
+      "doneNote": "Closed — CRM briefing-feedback (Step 0) reports this task done."
     },
     {
       "agent": "james",
@@ -2341,7 +2371,9 @@
       "key": "feather-sara-hcd-memo-reply",
       "due": "Today",
       "title": "695 Feather: James's 8/27 HCD options memo is still unread in your inbox. The extension has been signed since — he needs your answer on the deposit-protection addendum, not the extension.",
-      "done": false
+      "done": true,
+      "doneDate": "2026-09-04",
+      "doneNote": "Closed — CRM briefing-feedback (Step 0) reports this task done."
     },
     {
       "agent": "sara",
@@ -2349,7 +2381,9 @@
       "key": "fub-mariah-higgins",
       "due": "Today",
       "title": "NEW LEAD: Mariah Higgins (209) 217-2387, super.sassy.b_tch@icloud.com — Property Organizer sign-up on the website 8/29 7:19 AM, flagged hot. One lead, relayed twice (website + Follow Up Boss). Unworked.",
-      "done": false
+      "done": true,
+      "doneDate": "2026-09-04",
+      "doneNote": "Closed — CRM briefing-feedback (Step 0) reports this task done."
     },
     {
       "agent": "sara",
@@ -2376,7 +2410,9 @@
       "key": "butte-mountain-bustillos",
       "title": "NEW LEAD: Michael Bustillos Jr (341) 262-3115, boomjr08@aol.com - realtor.com inquiry 8/29 9:34 PM on 2463 Butte Mountain Rd, Murphys. Not a Legacy listing, so this is a buyer to qualify.",
       "due": "Today",
-      "done": false
+      "done": true,
+      "doneDate": "2026-09-04",
+      "doneNote": "Closed — CRM briefing-feedback (Step 0) reports this task done."
     },
     {
       "agent": "sara",
@@ -2384,7 +2420,9 @@
       "key": "baldwin-monday-fallback",
       "title": "8235 Baldwin: the fallback conversation is now overdue - the close date passed yesterday. Agree with James today whether you are asking for a fourth extension or accepting the risk to Shomari's deposit.",
       "due": "2026-08-31",
-      "done": false
+      "done": true,
+      "doneDate": "2026-09-04",
+      "doneNote": "Closed — CRM briefing-feedback (Step 0) reports this task done."
     },
     {
       "agent": "james",
@@ -2410,7 +2448,9 @@
       "key": "fub-ron-morris",
       "due": "2026-08-31",
       "title": "NEW LEAD: Ron Morris, ronmorr19@gmail.com, (209) 728-9888 - requested the 433 E Highway 4 INVESTOR PACKET from the buyer-briefs page on legacycalifornia.com, Sunday 8/30 11:01 PM. Your own listing, your own website, unworked. Auto-enrolled in buyer_nurture.",
-      "done": false
+      "done": true,
+      "doneDate": "2026-09-04",
+      "doneNote": "Closed — CRM briefing-feedback (Step 0) reports this task done."
     },
     {
       "agent": "sara",
@@ -2436,7 +2476,9 @@
       "key": "sheep-ranch-homescom-missing",
       "title": "9568 Sheep Ranch: no Homes.com weekly performance email arrived 8/31, though eight other listings got one. Its stored figures are from 8/20 and are going stale - check the recurring report is still switched on for this listing.",
       "due": "This week",
-      "done": false
+      "done": true,
+      "doneDate": "2026-09-04",
+      "doneNote": "Closed — CRM briefing-feedback (Step 0) reports this task done."
     },
     {
       "agent": "sara",
@@ -2444,7 +2486,9 @@
       "key": "echo-appointment-outcome",
       "title": "1143 Echo: the Sunday 3:30 appointment with Guy and Adrianna happened, but no Echo paperwork was filed - the package that came back Sunday evening was the McEvoys' Elams Ranch RLA. Record what came of the Echo meeting.",
       "due": "Today",
-      "done": false
+      "done": true,
+      "doneDate": "2026-09-04",
+      "doneNote": "Closed — CRM briefing-feedback (Step 0) reports this task done."
     },
     {
       "agent": "sara",
@@ -2452,7 +2496,9 @@
       "key": "stevie-slaughter-call",
       "title": "🔴 NEW HOT LEAD: Stevie Slaughter (669) 222-0159, stevie@paigefiduciary.com - realtor.com inquiry 8/31 10:49 AM on 1138 Heather Dr asking whether the HOA allows short-term rental, and saying 'in town till 3'. The only thing that went back was the generic 'caught your eye on Facebook?' auto-email, which names the wrong source and does not answer her question. Call her.",
       "due": "2026-09-01",
-      "done": false
+      "done": true,
+      "doneDate": "2026-09-04",
+      "doneNote": "Closed — CRM briefing-feedback (Step 0) reports this task done."
     },
     {
       "agent": "sara",
@@ -2460,7 +2506,9 @@
       "key": "crm-gmail-reconnect-sara",
       "title": "🔴 Your Google sign-in for the CRM expired again this morning (error logged 10:00 AM). While it is down the CRM ingests none of your email - which is how realtor.com and Follow Up Boss leads arrive. Reconnect Google in CRM settings; it takes seconds. James's connection is fine.",
       "due": "2026-09-01",
-      "done": false
+      "done": true,
+      "doneDate": "2026-09-04",
+      "doneNote": "Closed — CRM briefing-feedback (Step 0) reports this task done."
     },
     {
       "agent": "sara",
@@ -2468,7 +2516,9 @@
       "key": "feather-coe-proposal-dismiss",
       "title": "695 Feather: dismiss the timeline card asking you to confirm the 8/28 close of escrow 'happened'. It was generated off the superseded date - ETA No. 3 moved COE to 9/29 and is fully executed. Approving it would tell Ashley her purchase closed.",
       "due": "2026-09-01",
-      "done": false
+      "done": true,
+      "doneDate": "2026-09-04",
+      "doneNote": "Closed — CRM briefing-feedback (Step 0) reports this task done."
     },
     {
       "agent": "sara",
@@ -2476,7 +2526,9 @@
       "key": "ron-morris-send-discovery",
       "title": "Ron Morris: he replied 8/31 3:09 PM asking for the 433 discovery info and what insurance would look like. You told him you would send the link once you were off the road - it has not gone yet.",
       "due": "2026-09-01",
-      "done": false
+      "done": true,
+      "doneDate": "2026-09-04",
+      "doneNote": "Closed — CRM briefing-feedback (Step 0) reports this task done."
     },
     {
       "agent": "sara",
@@ -2484,7 +2536,9 @@
       "key": "433-signs-order-approve",
       "title": "433 E Hwy 4: Walt at Gateway Press needs your approval on order 76907 (new signs + install), sent 8/31 11:41 AM and unanswered. He can install before the weekend if you confirm today - this is the marketing push already on your list.",
       "due": "2026-09-01",
-      "done": false
+      "done": true,
+      "doneDate": "2026-09-04",
+      "doneNote": "Closed — CRM briefing-feedback (Step 0) reports this task done."
     },
     {
       "agent": "sara",
@@ -2492,7 +2546,9 @@
       "key": "metrolist-invoice-q",
       "title": "MetroList quarterly invoice is out - $231.00 as of 9/1. Pay it before it affects the feed on eleven listings.",
       "due": "this week",
-      "done": false
+      "done": true,
+      "doneDate": "2026-09-04",
+      "doneNote": "Closed — CRM briefing-feedback (Step 0) reports this task done."
     },
     {
       "agent": "james",
@@ -2511,6 +2567,27 @@
       "done": true,
       "doneDate": "2026-09-01",
       "doneNote": "No discrepancy. Sara confirmed 2026-09-01 that she meant 2/28/27; the MLS entry and the executed RLA agree. Raised and closed the same day - nothing to action."
+    },
+    {
+      "agent": "sara",
+      "client": "Admin",
+      "title": "🔴 Reconnect Google for your CRM email sync — sign-in expired again this morning (error logged ~10:00 AM). While disconnected the CRM ingests none of your email, including realtor.com/FUB leads.",
+      "done": false,
+      "key": "crm-gmail-reconnect-sara-0904"
+    },
+    {
+      "agent": "james",
+      "client": "Admin",
+      "title": "🔴 Reconnect Google for your CRM email sync — sign-in expired again this morning (error logged ~10:00 AM). While disconnected the CRM ingests none of your email.",
+      "done": false,
+      "key": "crm-gmail-reconnect-james-0904"
+    },
+    {
+      "agent": "sara",
+      "client": "Listing book",
+      "title": "📄 8 listing-stage deals still render blank seller portal pages (no milestones/goodToKnow/clientTasks/agent note): 1111 Dunbar, 467 Skyline, 9568 Sheep Ranch, Fowler, 701 Mark Twain, 635 S Main, 2000 Gun Club, 590-598 S Main, 1350 Love St. Needs the same document-by-document build 179 Elams Ranch got 9/1.",
+      "done": false,
+      "key": "listings-seller-pages-empty"
     }
   ],
   "deals": [
@@ -3760,7 +3837,8 @@
           "note": "Mixed-use, so it carries on BOTH the commercial channels and the residential portals - Zillow leads at 226 views in 30 days. Beating its zip code for views. A separate ListTrac report on the earlier MLS number covers 2025-12-05 onward: 4,027 views / 6 shares / 97% new / 54 in the last 30 days.",
           "reportDate": "2026-08-23",
           "source": "ListTrac - MetroList weekly report"
-        }
+        },
+        "agreementForm": "Residential Listing Agreement - Exclusive - 625"
       },
       "timeline": {
         "acceptance": "2026-06-19",
@@ -3801,7 +3879,8 @@
         "ETA2_appraisal": "NEW 7/17: Second Extension of Time Amendment executed — extends the APPRAISAL contingency to 7/17/2026 (today), signed by sellers James R Heryford (8:40 AM PDT) and Yvonne Heryford (8:38 AM PDT) via Authentisign; sent by Sara 7/17 8:37 AM after lender (Clayton, Atlas Mortgage) requested one more day 7/16. Per Sara's cover message: \"the appraisal is back, the lender has not informed on if it came in at value or not.\" Filed in Ex 7/17. Only seller signatures appear on this envelope — buyer-side execution not visible in this document.",
         "contingencyRemoval2_CRB": "[CR-B] Buyer Contingency Removal No. 2 — all parties signed via Glide 7/17 (Glide notification 7:19 PM); filed in Ex 7/17 10:05 PM. Scope NOT yet visually verified — likely addresses the remaining appraisal/loan contingencies given the same-day ETA2 appraisal extension to 7/17, but this has not been confirmed by opening the document. Sara to confirm scope before treating those contingencies as resolved.",
         "Add3_ETA3": "Authentisign 'Add3, ETA3' signing complete 7/27 9:20 PM — James R Heryford accepted/signed 9:19 PM. File in Ex. (Separate from ETA No. 3 executed 7/24 via Glide for loan contingency extension.)",
-        "promissoryNote": "Seller carry-back note: Herfords carrying promissory note for buyer Elizabeth Dawson. Yvonne sent unsigned note 7/28 4:24 AM. VESTING CONFIRMED 7/28: Elizabeth Tara Dawson, an unmarried woman (per Ashley Cuslidge/escrow) — fill into promissory note before COE 8/10. NOTE: Heryford signature on promissory note still pending Yvonne's approval. DO NOT notify Neriah or escrow of the ADD3 price reduction ($1.3M → $1.2M) until Heryford(s) sign the $100K note and Yvonne approves — holding notification as of 7/28."
+        "promissoryNote": "Seller carry-back note: Herfords carrying promissory note for buyer Elizabeth Dawson. Yvonne sent unsigned note 7/28 4:24 AM. VESTING CONFIRMED 7/28: Elizabeth Tara Dawson, an unmarried woman (per Ashley Cuslidge/escrow) — fill into promissory note before COE 8/10. NOTE: Heryford signature on promissory note still pending Yvonne's approval. DO NOT notify Neriah or escrow of the ADD3 price reduction ($1.3M → $1.2M) until Heryford(s) sign the $100K note and Yvonne approves — holding notification as of 7/28.",
+        "pestSection1Completion": "COMPLETED — Notice of Work Completed (Structural Pest Control Board form), Section 1A item completed by Lawson Home Services, Report #12417-1 (corrected report), completion date 08/11/2026, cost $850.00. Filed to _Listings\\433 E Highway 4\\Ex\\pest section1 completed_Lawson.pdf on 2026-09-04 (caught by the daily 48h document sweep)."
       },
       "clientDocuments": [
         {
@@ -4798,7 +4877,8 @@
           "note": "Beating its zip code for views. NOTE ON INQUIRIES: ListTrac 'inquiries' are clicks on a portal contact link and route to agents who buy leads in this zip code - they do NOT reach Sara. Treat as an interest signal only, never as a lead to work.",
           "reportDate": "2026-08-23",
           "source": "ListTrac - MetroList weekly report"
-        }
+        },
+        "agreementForm": "Residential Listing Agreement - Exclusive - 626"
       },
       "listPrice": 495000,
       "salePrice": null,
