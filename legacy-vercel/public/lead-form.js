@@ -70,7 +70,7 @@
   style.textContent = CSS;
   document.head.appendChild(style);
 
-  var TOWNS = ['Murphys', 'Arnold', 'Angels Camp', 'Copperopolis', 'Sutter Creek', 'Valley Springs', 'Somewhere else'];
+  var TOWNS = ['Murphys', 'Arnold', 'Angels Camp', 'Copperopolis', 'Sutter Creek', 'Shenandoah Valley', 'Valley Springs', 'Somewhere else'];
 
   function esc(s) {
     return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) {
