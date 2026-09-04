@@ -1793,6 +1793,10 @@ window.LGPortal = window.LGPortal || {
   // archived/closed clients, because selectLeadId→loadLead fetches by id.
   window.Legacy = {
     api, openModal, submitLead, toast,
+    // Exported so the Contacts screen in crm.html — a separate IIFE — can open
+    // the sorting tool. That screen is where the untyped contacts are actually
+    // looked at; the roster sidebar this file renders is a different surface.
+    openTagging: function () { openTagging(); },
     openLead: function (id) {
       if (!id) return;
       if (typeof window.showView === 'function') window.showView(null, 'inbox');
