@@ -33,6 +33,7 @@ import { scoreLead }    from '../_lib/handlers/ai-score-lead.js';
 import { syncLeadToFUB } from '../fub/sync.js';
 import { alertAgents, deskUrl } from '../_lib/agent-alert.js';
 import { sendSpeedToLead } from '../_lib/handlers/speed-to-lead.js';
+import { pushLeadToIdx, marketIdForAreas } from '../_lib/ihomefinder.js';
 import { enrollLeads } from '../_lib/handlers/sequences-enroll.js';
 import { sendEmail as sendEmailResend, resendConfigured } from '../_lib/resend.js';
 import { sendEmail as sendEmailSendgrid, sendgridConfigured } from '../_lib/sendgrid.js';
@@ -330,6 +331,24 @@ export default async function handler(req, res) {
         + `\nOpen this lead in the CRM: ${desk}`;
       sideEffects.agent_alert = await alertAgents(supa, { subject: `New website lead — ${name}`, sms, text });
     } catch (e) { sideEffects.agent_alert_error = e.message; }
+
+    // Register them with iHomefinder on their behalf, from the ONE form they
+    // already filled in. Without this a lead had to sign up a second time, in a
+    // second place, before any listing alert could reach them — Sara: "first it
+    // comes to us and then the lead gets another email to set it up in
+    // ihomefinder". Most people never did the second step, so the search they
+    // asked for never existed.
+    //
+    // Where they told us they're looking, they're also subscribed to that town's
+    // market report — the closest thing to a working saved search that
+    // iHomefinder's API exposes. Fail-soft and a clean no-op until the Client API
+    // credentials are set: a visitor must never see the form fail over this.
+    try {
+      sideEffects.ihomefinder = await pushLeadToIdx(supa, lead, {
+        marketId: marketIdForAreas(fields.areas),
+        source: 'legacycalifornia.com'
+      });
+    } catch (e) { sideEffects.ihomefinder_error = e.message; }
 
     // Speed to Lead: instant, human-sounding auto-reply to the lead themselves so
     // no inquiry sits unanswered while Sara or James follows up personally. Once
