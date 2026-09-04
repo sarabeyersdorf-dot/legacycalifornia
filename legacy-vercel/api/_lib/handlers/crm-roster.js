@@ -31,7 +31,13 @@ function classify(l) {
   // A title rep or another agent is a working contact, not a lead and not
   // sphere — before 'vendor' existed they could only be filed as sphere, which
   // put them in marketing lists. Shown in none of the four browse buckets.
-  if (ct === 'vendor') return '';
+  //
+  // 'counterparty' is the same idea for the OTHER SIDE of a transaction: the
+  // buyer on our listing, the seller of the house our buyer is purchasing.
+  // Denis Listengourt was filed 'client / under_contract' and read as Sara's own
+  // client purely because no such category existed. They belong in the file and
+  // on the deal, never in the pipeline and never in a marketing send.
+  if (ct === 'vendor' || ct === 'counterparty') return '';
   if (ct === 'past_client') return 'past';
   if (ct === 'sphere' || ps === 'sphere') return 'sphere';
   if (ct === 'closed' || CLIENT_STAGES.has(ps) || CLIENT_SIDE.has(l.buyer_stage) || CLIENT_SIDE.has(l.seller_stage)) return 'clients';

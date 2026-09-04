@@ -17,6 +17,7 @@ import { adminClient } from '../_lib/supabase.js';
 const require = createRequire(import.meta.url);
 import { handleOptions, ok, fail } from '../_lib/cors.js';
 import { checkSyncKey } from '../_lib/sync-key.js';
+import { reconcileContactsToDeals } from '../_lib/contact-consistency.js';
 
 // Read a JSON file FRESH from the repo (GitHub Contents API) so a just-published
 // deals.json / portal-docs manifest is picked up IMMEDIATELY, without waiting for
@@ -1598,6 +1599,12 @@ export default async function handler(req, res) {
     } catch (_) { /* pre-089 schema or transient — non-fatal */ }
 
     const ranAt = new Date().toISOString();
+    let contactFix = { checked: 0, changed: 0 };
+    try {
+      const r = await reconcileContactsToDeals(supa);
+      contactFix = { checked: r.checked, changed: r.changed, ...(r.errors ? { errors: r.errors } : {}) };
+    } catch (e) { contactFix = { error: e.message }; }
+
     const summary = {
       synced: true,
       source_version: data.version || null,
@@ -1628,6 +1635,13 @@ export default async function handler(req, res) {
       // and how many the sync auto-reconciled this run (deals.json now covers them).
       party_edits: partyEdits,
       party_reconciled: partyReconciled,
+      // A contact who is a party on a deal takes their side and stage FROM that
+      // deal — see api/_lib/contact-consistency.js for the rule and why. Run
+      // here because this is the job that already knows a deal's stage just
+      // changed, so a closed sale turns its buyers into past clients in the same
+      // pass rather than waiting for someone to notice. Fail-soft: a bad row
+      // must never take down an otherwise-good sync.
+      contacts_reconciled: contactFix,
       ran_at: ranAt
     };
 

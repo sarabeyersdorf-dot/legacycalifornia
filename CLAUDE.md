@@ -83,6 +83,30 @@ never an overwrite. Naming: `YYYYMMDD_CCtoCW_<topic>.md`.
 The full contract (message format, what each agent can/can't see) lives in
 `/_LEGACY/Legacy Cowork/_to_ClaudeCode/PROTOCOL.md`.
 
+## Contacts vs deals — who wins (added 2026-09-04)
+
+**A contact who is a party on a deal takes their side and stage FROM that deal.**
+The deal is the fact; the contact record is the projection. A person is a seller because
+they have a listing with us, not because someone chose "seller" in a dropdown.
+
+- A deal's authoritative stage is `coalesce(stage_override, stage)` (db/091).
+- `api/_lib/contact-consistency.js` maps that to the party's `buyer_stage` /
+  `seller_stage` / `deal_side` / `contact_type`, and `sync-deals` runs it every hour, so
+  a sale closing turns its buyers into past clients without anyone noticing.
+- On a contact who is on a deal, the CRM shows the status as a stated fact with the deal
+  named, not as a free dropdown. The dropdown still exists to correct a mistake, but the
+  next sync sets it back from the deal — so fix the DEAL, not the contact.
+- Never overwritten by a deal: `do_not_contact`, `do_not_call`, `vendor`, `counterparty`.
+  Those describe the relationship, not the transaction, and a deal must never silently
+  un-suppress someone who asked not to be contacted.
+
+**Two contact types exist for people who are neither leads nor clients.** Both are shown in
+none of the four roster buckets and never prospected or marketed to:
+- `vendor` — title reps, escrow officers, other agents, trades.
+- `counterparty` — the other side of one of our transactions (the buyer on our listing).
+  Denis Listengourt read as Sara's own client, `under_contract`, purely because this
+  category did not exist and whoever entered him picked the closest thing.
+
 ## Data-flow facts worth keeping straight
 
 - `deals.json` is **Cowork's** file in Dropbox. An hourly `publish-from-dropbox` cron

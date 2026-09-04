@@ -3081,7 +3081,7 @@ body.lp-restyle {
           .catch(function(){ if(my===seq) list.innerHTML='<div class="ds-ctbl-empty">Could not load — try again.</div>'; });
       }
 
-      var SIDE_OPTS=[['','— side —'],['buyer','Buyer'],['seller','Seller'],['both','Both'],['past_client','Past client'],['sphere','Sphere'],['do_not_contact','Do not contact']];
+      var SIDE_OPTS=[['','— side —'],['buyer','Buyer'],['seller','Seller'],['both','Both'],['past_client','Past client'],['sphere','Sphere'],['vendor','Vendor'],['counterparty','Other side of a deal'],['do_not_contact','Do not contact']];
       function paintDetail(pp){
         var host=view.querySelector('[data-people-detail]');
         if(!pp){ host.innerHTML='<div class="cd-empty">Select a contact to see their details.</div>'; return; }

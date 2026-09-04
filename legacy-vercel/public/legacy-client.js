@@ -2605,6 +2605,7 @@ window.LGPortal = window.LGPortal || {
     ['both',           'Both',         ''],
     ['past_client',    'Past client',  ''],
     ['vendor',         'Vendor',       'Title, escrow, other agents'],
+    ['counterparty',   'Other side',   'The buyer or seller across the table from you'],
     ['do_not_contact', 'Do not contact', ''],
     ['archive',        'Not a contact', 'Archives it — junk rows from the import']
   ];
@@ -2955,9 +2956,14 @@ window.LGPortal = window.LGPortal || {
         <div style="display:flex;align-items:center;gap:8px;margin:2px 0 8px;">
           <span style="${cap}">Side</span>
           <select data-lead-side style="${fld}">
-            ${(() => { const opts = [['', '— not set —'], ['buyer', 'Buyer'], ['seller', 'Seller'], ['both', 'Buyer and Seller'], ['past_client', 'Past Client'], ['sphere', 'Sphere'], ['do_not_contact', 'Do Not Contact'], ['__trash__', '🗑 Trash — delete permanently']]; return opts.map((o) => `<option value="${o[0]}"${side === o[0] ? ' selected' : ''}>${escHtml(o[1])}</option>`).join(''); })()}
+            ${(() => { const opts = [['', '— not set —'], ['buyer', 'Buyer'], ['seller', 'Seller'], ['both', 'Buyer and Seller'], ['past_client', 'Past Client'], ['sphere', 'Sphere'], ['vendor', 'Vendor — title, escrow, other agents'], ['counterparty', 'Other side of a deal'], ['do_not_contact', 'Do Not Contact'], ['__trash__', '🗑 Trash — delete permanently']]; return opts.map((o) => `<option value="${o[0]}"${side === o[0] ? ' selected' : ''}>${escHtml(o[1])}</option>`).join(''); })()}
           </select>
         </div>
+        ${deals.length ? `<div style="margin:10px 0 4px;padding:11px 13px;background:var(--shell);border-left:3px solid var(--brass);font-size:13px;line-height:1.55;color:var(--ink-soft);">
+          <b style="color:var(--ink);font-weight:600;">Status comes from ${deals.length === 1 ? 'this deal' : 'these deals'}.</b>
+          ${deals.map((dl) => `<div style="margin-top:4px;">${escHtml(dl.address || dl.source_key)} — ${escHtml(dl.role || 'party')} · ${escHtml(dl.status_label || dl.stage || '')}</div>`).join('')}
+          <div style="margin-top:7px;color:var(--ink-mute);">Move the deal and the status follows. Change it here only to correct a mistake — the next sync will set it back from the deal.</div>
+        </div>` : ''}
         <div data-buy-status style="display:${showBuy ? 'flex' : 'none'};align-items:center;gap:8px;margin:6px 0;">
           <span style="${cap}">Buy status</span>
           <select data-buyer-stage style="${fld}">${optTags(BUYER_STAGE_LABEL, lead.buyer_stage || '')}</select>
