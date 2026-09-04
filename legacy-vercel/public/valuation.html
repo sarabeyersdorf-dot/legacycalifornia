@@ -290,8 +290,20 @@
   <h2 class="lg-display lg-h2 lg-rv lg-d1" style="margin:14px 0 10px">Start with the <em>number.</em></h2>
   <div class="lg-note lg-rv lg-d2" style="max-width:660px">Enter your address for an automated valuation pulled from current market data. It's a starting point &mdash; a real listing price comes from a walk-through and the comps only a local broker knows to weigh.</div>
 
-  <article class="val-panel lg-rv lg-d1" style="margin-top:26px">
-    <div class="val-panel-h"><span class="val-name">Your home's estimate</span><span class="val-area">Calaveras &middot; Amador &middot; Tuolumne</span></div>
+  <!-- Direct capture FIRST. The widget below is iHomefinder's, so an address
+       typed into it makes an iHomefinder lead and never reaches the CRM — which
+       is why valuation_requests held zero rows while this page has been live.
+       This form reaches the CRM and registers them with iHomefinder in the same
+       submit, so the seller fills in one thing and both systems know them. -->
+  <div data-lead-form
+       data-lead-kind="seller"
+       data-lead-title="Get a real valuation from Sara"
+       data-lead-note="An automated number is a starting point. Tell us where the home is and Sara will send you a proper valuation — usually the same day."
+       data-lead-cta="Send me my valuation"
+       class="lg-rv lg-d1" style="margin-top:26px"></div>
+
+  <article class="val-panel lg-rv lg-d2" style="margin-top:26px">
+    <div class="val-panel-h"><span class="val-name">Or start with the instant estimate</span><span class="val-area">Calaveras &middot; Amador &middot; Tuolumne</span></div>
     <div class="idx-embed">
 <script>
   document.currentScript.replaceWith(ihfKestrel.render());
@@ -357,5 +369,6 @@
 </div></footer>
 
 <script src="legacy-ui.js" defer></script>
+<script src="/lead-form.js" defer></script>
 </body>
 </html>
