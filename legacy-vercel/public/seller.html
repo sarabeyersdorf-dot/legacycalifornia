@@ -278,6 +278,13 @@ body.lp-restyle {
 .ins-card--interest { background: #e9f2ec; }
 .ins-card--showings { background: #eef2f7; }
 .ins-src { font-family: var(--mono, monospace); font-size: 12.5px; letter-spacing: .06em; color: var(--muted, #8a7b60); text-transform: uppercase; margin-top: auto; }
+/* Date stamp on the stats. These numbers come from a weekly report, so without a
+   date a seller reads whatever is on screen as today's — and a missed week is
+   invisible. The stamp is always shown; when the report is more than a fortnight
+   old it also says so in words, because "Aug 23" means nothing to a seller
+   unless they happen to know what today's date is. */
+.lt-asof { font-family: var(--mono, monospace); font-size: 12px; letter-spacing: .06em; color: var(--muted, #8a7b60); text-transform: uppercase; margin-top: 10px; }
+.lt-stale { display: block; margin-top: 6px; font-family: var(--sans, system-ui); font-size: 13px; letter-spacing: 0; text-transform: none; color: #8a5a1e; line-height: 1.45; }
 .sh-total b { font-family: var(--serif, 'Cormorant Garamond', serif); font-size: 34px; line-height: 1; color: var(--ink, #1a1714); }
 .sh-total span { font-size: 12.5px; color: var(--muted, #8a7b60); margin-left: 8px; }
 .sh-list { display: flex; flex-direction: column; gap: 8px; }
@@ -602,6 +609,7 @@ setTimeout(function(){var p=document.getElementById('portal-loading');if(p&&p.pa
               '<span class="lt-hero-sub">' + headSub + '</span></div>' +
             (statsHtml ? '<div class="lt-grid">' + statsHtml + '</div>' : '') +
             note +
+            asOfHtml(lt.report_date) +
             '<div class="ins-src">📈 ' + src + '</div>' +
           '</div>';
       }
@@ -690,6 +698,28 @@ setTimeout(function(){var p=document.getElementById('portal-loading');if(p&&p.pa
     wrap.style.display = '';
   }
 
+  // "As of <date>" for anything drawn from the weekly ListTrac report.
+  // Sara's stats had not refreshed for 12 days (two missed Mondays) and the
+  // portal showed them as though they were current — a seller has no way to
+  // tell a quiet week from a report that never arrived. Past a fortnight the
+  // stamp says so in plain words rather than leaving them to do the date
+  // arithmetic. Returns '' when there is no date, so nothing is invented.
+  function asOfHtml(reportDate) {
+    if (!reportDate) return '';
+    var d = new Date(String(reportDate).slice(0, 10) + 'T12:00:00');
+    if (isNaN(d.getTime())) return '';
+    var esc = function (x) { return String(x).replace(/[&<>]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]; }); };
+    var label = d.toLocaleDateString('en-US', { month: 'long', day: 'numeric' });
+    var days = Math.floor((Date.now() - d.getTime()) / 86400000);
+    // 10 days, not 14: the report is weekly, so anything past ~10 days means a
+    // Monday was missed. Sara's live data was 12 days old — the exact case that
+    // prompted this — and a fortnight threshold would have said nothing.
+    var stale = days > 10
+      ? '<span class="lt-stale">This is the most recent weekly report we have — ' + days + ' days old. Newer figures should arrive with the next one.</span>'
+      : '';
+    return '<div class="lt-asof">As of ' + esc(label) + stale + '</div>';
+  }
+
   // Render the weekly ListTrac marketing digest into the "Marketing activity"
   // panel. Hides the whole panel when there's no report yet (or it was removed
   // for a buy-side deal). Pure data → HTML, so it always reflects the latest sync.
@@ -728,7 +758,8 @@ setTimeout(function(){var p=document.getElementById('portal-loading');if(p&&p.pa
         '</div></div>';
     }
     if (cols) html += '<div class="ds-camp-cols" data-painted>' + cols + '</div>';
-    html += '<div class="ds-mkt-foot">Source: ListTrac / MLS' + (mk.report_date ? ' · report dated ' + e(mk.report_date) : '') + '</div>';
+    html += asOfHtml(mk.report_date);
+    html += '<div class="ds-mkt-foot">Source: ListTrac / MLS</div>';
     box.innerHTML = html;
     wrap.hidden = false;
   }
