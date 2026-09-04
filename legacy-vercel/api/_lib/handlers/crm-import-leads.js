@@ -193,7 +193,6 @@ function shapeLead(rawRow) {
     email:          (r.email || '').toLowerCase().trim() || null,
     phone:          r.phone      || null,
     source:         r.source     || 'import',
-    journey_stage:  null,
     lead_type:      lt,
     deal_side:      ALLOWED_SIDES.has(r.deal_side) ? r.deal_side
                       : (lt === 'seller' ? 'seller' : ['buyer','investor','land'].includes(lt) ? 'buyer' : null),

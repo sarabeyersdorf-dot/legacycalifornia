@@ -26,8 +26,8 @@ export default async function handler(req, res) {
     const supa = adminClient();
     // Prefer the side-aware columns (db/023); fall back gracefully if that
     // migration hasn't been run yet so the board still loads.
-    const FULL = 'id, first_name, last_name, email, pipeline_stage, deal_side, buyer_stage, seller_stage, contact_type, score, temperature, price_min, price_max, journey_stage, lead_type, areas, updated_at';
-    const BASE = 'id, first_name, last_name, email, pipeline_stage, deal_side, score, temperature, price_min, price_max, journey_stage, lead_type, areas, updated_at';
+    const FULL = 'id, first_name, last_name, email, pipeline_stage, deal_side, buyer_stage, seller_stage, contact_type, score, temperature, price_min, price_max, lead_type, areas, updated_at';
+    const BASE = 'id, first_name, last_name, email, pipeline_stage, deal_side, score, temperature, price_min, price_max, lead_type, areas, updated_at';
 
     // Fetch EVERY active lead via range pagination. A plain .select() is capped by
     // PostgREST's max-rows (1000 by default), which silently hid the tail of a

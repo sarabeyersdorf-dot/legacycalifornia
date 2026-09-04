@@ -55,7 +55,9 @@ these are the columns the UI depends on.
 
 **leads**
 - `id`, `first_name`, `last_name`, `email`, `phone`
-- `lead_type` (`buyer` | `seller`), `journey_stage`
+- `lead_type` (`buyer` | `seller`), `buyer_stage` / `seller_stage`
+  (`journey_stage` is accepted on the wire for the older cached forms and
+  translated to `buyer_stage`; it is no longer stored — see db/101)
   (`discovering` | `narrowing` | `touring` | `ready_to_offer`)
 - `temperature` (`hot` | `warm` | `cold` | `new`)
 - `score` (int), `source`, `owner_agent` (which agent)
@@ -119,7 +121,7 @@ Called by every marketing-page form and modal. Full payload shape:
   "first_name": "Renee", "last_name": "Dawson",
   "email": "renee@...", "phone": "209...",
   "lead_type": "buyer",
-  "journey_stage": "touring",
+  "journey_stage": "touring",          // wire only -> stored as buyer_stage "showing_homes"
   "areas": ["Murphys", "Arnold"],
   "price_max": 625000,
   "message": "free text or null",

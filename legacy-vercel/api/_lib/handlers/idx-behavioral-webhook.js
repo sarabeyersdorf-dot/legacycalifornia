@@ -24,6 +24,7 @@ import { scoreLead }         from './ai-score-lead.js';
 import { anthropicJSON }     from '../anthropic.js';
 import { handleOptions, readJson, ok, fail } from '../cors.js';
 import { alertAgents, deskUrl } from '../agent-alert.js';
+import { describeStage } from '../lead-stage.js';
 
 // Events worth pinging both agents about the instant they happen. Passive
 // property views are throttled to first-touch per window (see below).
@@ -168,7 +169,12 @@ export default async function handler(req, res) {
         email,
         phone:         phone || null,
         source:        'ihomefinder_idx',
-        journey_stage: 'discovering',
+        // An IDX visitor browsing homes is a buyer at the very start of the
+        // ladder. buyer_stage is the column the CRM reads; journey_stage was
+        // retired (see _lib/lead-stage.js). contact_type makes db/100 derive
+        // deal_side and roles without anyone setting them by hand.
+        buyer_stage:   'new',
+        contact_type:  'buyer',
         lead_type:     'buyer',
         temperature:   'new',
         score:         0,
@@ -224,7 +230,7 @@ Lead:
   name:        ${[lead.first_name, lead.last_name].filter(Boolean).join(' ') || '(unknown name)'}
   email:       ${lead.email}
   phone:       ${lead.phone || '(none on file)'}
-  journey:     ${lead.journey_stage || 'unknown'}
+  stage:       ${describeStage(lead)}
   areas:       ${(lead.areas || []).join(', ') || 'unspecified'}
   price_range: ${lead.price_min || '?'}-${lead.price_max || '?'}
   what triggered the change: ${event_type}${property ? ` on ${property.address || property.mls_number}` : ''}

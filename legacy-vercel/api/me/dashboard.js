@@ -23,6 +23,7 @@ import { adminClient } from '../_lib/supabase.js';
 import { getCallerProfile } from '../_lib/auth.js';
 import { anthropicMessage } from '../_lib/anthropic.js';
 import { handleOptions, ok, fail } from '../_lib/cors.js';
+import { describeStage } from '../_lib/lead-stage.js';
 
 // ---------------------------------------------------------------------------
 // Formatting helpers — keep payload "paint-ready"
@@ -512,7 +513,7 @@ Hard rules:
     : '  (none today)';
 
   const prompt = `Write the buyer's daily digest letter from ${A.first}.
-Recipient: ${lead.first_name || 'the buyer'} (lead type: ${lead.lead_type || 'buyer'}, journey: ${lead.journey_stage || 'unspecified'}).
+Recipient: ${lead.first_name || 'the buyer'} (${describeStage(lead)}).
 Today's top matches I picked for them:
 ${matchLines}
 The note should reference that you (${A.first}) handpicked these, invite one specific reply (yes / no / not sure), and stay under 90 words.`;

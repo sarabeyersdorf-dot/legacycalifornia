@@ -32,7 +32,7 @@ export default async function handler(req, res) {
         id, lead_id, direction, channel, subject, body, status, ai_generated,
         ai_draft_reasoning, approved_by, approved_at, created_at,
         leads (id, first_name, last_name, email, phone, temperature, score,
-               journey_stage, lead_type, pipeline_stage)
+               buyer_stage, seller_stage, lead_type, pipeline_stage)
       `)
       .order('created_at', { ascending: false })
       .limit(limit);
