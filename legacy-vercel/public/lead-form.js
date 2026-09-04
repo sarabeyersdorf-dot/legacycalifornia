@@ -11,10 +11,16 @@
  *     entering their address there becomes an iHomefinder lead and never reaches
  *     the CRM at all — which is why valuation_requests has zero rows.
  *
- * Both halves are now fixed at the server: /api/leads/intake creates the CRM
- * lead AND registers them with iHomefinder AND subscribes them to their town's
- * market report, from one submit. This form is the front end of that — the only
- * thing a visitor has to fill in.
+ * There is NO Client API credential for iHomefinder, so our server cannot
+ * register anyone with them programmatically — confirmed by Sara. The only route
+ * to their listing alerts is the visitor signing up themselves through the
+ * Property Organizer, which already runs on legacycalifornia.com.
+ *
+ * So this form does the half we control — one submit, straight into the CRM,
+ * which alerts both agents, sends the auto-reply and starts the nurture — and
+ * then hands the visitor STRAIGHT to that signup, in the same sitting, instead
+ * of mailing them a link hours later and hoping they come back. That is the
+ * whole fix available without an API: keep it one journey.
  *
  * USAGE — drop the script on a page and mark a container:
  *   <div data-lead-form data-lead-kind="seller" data-lead-title="…"></div>
@@ -80,14 +86,17 @@
     var note  = host.getAttribute('data-lead-note')
       || (isSeller
           ? 'Sara will send you a real valuation — not an automated guess — usually the same day.'
-          : 'We’ll set up a search for you and send new listings as they come on the market.');
+          // Don't promise a search we can't create — without a Client API
+          // credential the alerts are switched on by the visitor, one tap after
+          // this. Promise the call, which is the part we control.
+          : 'Tell us what you’re after and Sara will come back to you personally — usually the same day.');
     var cta   = host.getAttribute('data-lead-cta') || (isSeller ? 'Send me my valuation' : 'Set up my search');
     var area  = host.getAttribute('data-lead-area') || '';
     var uid   = 'lgf' + i;
 
     // The third field earns its place differently on each side: a seller's
-    // address is the thing being valued, a buyer's town is what the search and
-    // their iHomefinder market subscription key off.
+    // address is the thing being valued; a buyer's town tells the agent where to
+    // look and lands in the alert, so the follow-up call already knows.
     var thirdField = isSeller
       ? '<label class="lgf-full" for="' + uid + 'addr">Property address'
         + '<input id="' + uid + 'addr" name="address" autocomplete="street-address" placeholder="1350 Love St, Angels Camp"></label>'
@@ -144,8 +153,9 @@
         phone: (f.phone.value || '').trim() || null,
         source: 'website_form',
         lead_type: isSeller ? 'seller' : (kind === 'buyer' ? 'buyer' : null),
-        // areas drives the iHomefinder market-report subscription server-side, so
-        // a buyer who names a town is signed up to that town's report on submit.
+        // The town is recorded on the CRM lead so the agent alert and the
+        // follow-up say where they are looking. It cannot drive an iHomefinder
+        // subscription — that needs a Client API credential we do not have.
         areas: areaVal && areaVal !== 'Somewhere else' ? [areaVal] : (area ? [area] : null),
         message: f.address && f.address.value.trim()
           ? 'Valuation request for ' + f.address.value.trim()
@@ -162,11 +172,19 @@
         });
         var json = null; try { json = await res.json(); } catch (e) {}
         if (!res.ok || (json && json.success === false)) throw new Error((json && json.error) || 'failed');
+        // A buyer's alerts live at iHomefinder and only they can switch them on,
+        // so offer that as the next tap while they are still here. Framed as
+        // finishing, not as a second sign-up — and skippable, because their
+        // details are already with Sara either way.
+        var next = isSeller
+          ? 'Sara will be in touch about your valuation, usually the same day. If it’s urgent, call (209) 559-4966.'
+          : 'Sara will follow up personally. To get new listings the moment they hit the market, switch on alerts — it takes about twenty seconds.';
+        var cta2 = isSeller ? ''
+          : '<p style="margin:16px 0 0;"><a class="lgf-btn" style="display:inline-block;text-decoration:none;"'
+            + ' href="/property-organizer.html">Turn on new-listing alerts</a></p>'
+            + '<p class="lgf-fine">Already covered? Nothing else needed — we have your details.</p>';
         host.innerHTML = '<div class="lgf"><div class="lgf-done"><b>Got it, ' + esc(parts[0]) + '.</b>'
-          + (isSeller
-              ? 'Sara will be in touch about your valuation, usually the same day. If it’s urgent, call (209) 559-4966.'
-              : 'Your search is set up — new listings will come straight to you. Sara will follow up personally too.')
-          + '</div></div>';
+          + next + '</div>' + cta2 + '</div>';
       } catch (err) {
         // Never a dead end: the phone number always works, even if we don't.
         btn.disabled = false; btn.textContent = cta;
