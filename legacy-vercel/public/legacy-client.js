@@ -2590,6 +2590,127 @@ window.LGPortal = window.LGPortal || {
     });
   }
 
+  // ── Sort contacts ─────────────────────────────────────────────────────────
+  // 96% of the book has no contact_type, so every filter that reads it — the
+  // roster's buckets, "my sellers", the sphere list — sees almost nothing.
+  // Typing 2,000 people one at a time is a month nobody has, so this leads with
+  // the bulk action (everything left becomes sphere, the right default for
+  // "someone in my phone I market to") and keeps the per-contact queue for the
+  // ones worth a real decision. Contacts that have replied, sit on a deal, or
+  // appear in a collection are flagged so they aren't swept up by reflex.
+  const TAG_BUTTONS = [
+    ['sphere',         'Sphere',       'People you market to'],
+    ['buyer',          'Buyer',        ''],
+    ['seller',         'Seller',       ''],
+    ['both',           'Both',         ''],
+    ['past_client',    'Past client',  ''],
+    ['vendor',         'Vendor',       'Title, escrow, other agents'],
+    ['do_not_contact', 'Do not contact', ''],
+    ['archive',        'Not a contact', 'Archives it — junk rows from the import']
+  ];
+
+  function openTagging() {
+    let el = document.querySelector('[data-tagging-overlay]');
+    if (el) el.remove();
+    el = document.createElement('div');
+    el.setAttribute('data-tagging-overlay', '1');
+    el.style.cssText = 'position:fixed;inset:0;z-index:400;background:rgba(27,24,19,.55);display:flex;align-items:flex-start;justify-content:center;padding:5vh 16px;overflow:auto;';
+    el.innerHTML = `<div style="background:var(--paper,#FAF6EC);border:1px solid var(--rule);max-width:760px;width:100%;padding:22px 24px 24px;">
+      <div style="display:flex;align-items:baseline;gap:12px;">
+        <h3 style="margin:0;font-family:var(--serif);font-size:22px;">Sort contacts</h3>
+        <span data-tag-remaining style="font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-mute);"></span>
+        <button type="button" data-tag-close style="margin-left:auto;border:none;background:none;cursor:pointer;font-size:22px;line-height:1;color:var(--ink-mute);">&times;</button>
+      </div>
+      <p style="margin:9px 0 0;font-size:13.5px;color:var(--ink-soft);line-height:1.55;max-width:64ch;">
+        Until a contact has a type, it doesn't appear under Leads, Clients, Past or Sphere, and no filter can find it.
+        Listed below are the ones carrying a signal — they replied, they're on a deal, they're in a collection, or they came from your website.
+        Those deserve a real answer. Everything else is a phone book, and the button below files it in one go.</p>
+      <div data-tag-bulk style="border:1px solid var(--rule);background:var(--shell);padding:12px 14px;margin:14px 0 18px;font-size:13px;"></div>
+      <div data-tag-list></div>
+      <div data-tag-msg style="margin-top:14px;font-size:12.5px;min-height:18px;"></div>
+    </div>`;
+    document.body.appendChild(el);
+    const close = () => el.remove();
+    el.querySelector('[data-tag-close]').addEventListener('click', close);
+    el.addEventListener('click', (e) => { if (e.target === el) close(); });
+
+    const listEl = el.querySelector('[data-tag-list]');
+    const bulkEl = el.querySelector('[data-tag-bulk]');
+    const msgEl  = el.querySelector('[data-tag-msg]');
+    const remEl  = el.querySelector('[data-tag-remaining]');
+
+    const say = (text, good) => { msgEl.style.color = good ? '#2E5C3D' : '#9B2C2C'; msgEl.textContent = text; };
+
+    async function load() {
+      listEl.innerHTML = '<div style="padding:18px 0;color:var(--ink-mute);font-size:13px;">Loading…</div>';
+      const r = await window.Legacy.api('/api/crm/tagging?limit=25', { method: 'GET' });
+      if (!(r.ok && r.json)) { listEl.innerHTML = '<div style="padding:18px 0;color:#9B2C2C;font-size:13px;">Could not load the queue.</div>'; return; }
+      const { remaining, people } = r.json;
+      const needs = r.json.needs_decision || 0;
+      remEl.textContent = remaining
+        ? `${remaining.toLocaleString()} untyped${needs ? ` · ${needs} need a decision` : ''}`
+        : 'all sorted';
+
+      bulkEl.innerHTML = remaining
+        ? `<b style="font-weight:600;">File the remaining ${remaining.toLocaleString()} as sphere?</b>
+           <span style="color:var(--ink-mute);"> Right for a phone book you market to. You can retype anyone afterwards.</span>
+           <div style="margin-top:9px;"><button type="button" data-tag-all class="btn btn-ink btn-sm">Mark all ${remaining.toLocaleString()} as sphere</button></div>`
+        : '<b style="font-weight:600;">Every contact has a type. Nothing left to sort.</b>';
+      const allBtn = bulkEl.querySelector('[data-tag-all]');
+      if (allBtn) allBtn.addEventListener('click', async () => {
+        if (!confirm(`Mark all ${remaining.toLocaleString()} untyped contacts as sphere?\n\nAnyone already typed is untouched, and you can change any of them afterwards.`)) return;
+        allBtn.disabled = true; allBtn.textContent = 'Filing…';
+        const rr = await window.Legacy.api('/api/crm/tagging', { method: 'POST', body: { scope: 'all', contact_type: 'sphere' } });
+        if (rr.ok && rr.json) { say(`Filed ${(rr.json.updated || 0).toLocaleString()} contacts as sphere.`, true); load(); }
+        else { allBtn.disabled = false; allBtn.textContent = 'Mark all as sphere'; say((rr.json && rr.json.error) || 'Could not file them.', false); }
+      });
+
+      if (!people.length) {
+        listEl.innerHTML = remaining
+          ? '<div style="border-top:1px solid var(--rule);padding:16px 0;font-size:13px;color:var(--ink-mute);">Nothing left that carries a signal — everyone still untyped is a plain contact. The button above files them.</div>'
+          : '';
+        return;
+      }
+      listEl.innerHTML = people.map((p) => {
+        const sig = [];
+        if (p.signals.replied)       sig.push('<span style="color:#2E5C3D;">has replied</span>');
+        if (p.signals.on_deal)       sig.push('<span style="color:#2E5C3D;">on a deal</span>');
+        if (p.signals.in_collection) sig.push('<span style="color:#2E5C3D;">in a collection</span>');
+        if (p.signals.saved_property) sig.push('<span style="color:#2E5C3D;">saved a home</span>');
+        const reach = [p.email, p.phone].filter(Boolean).join(' · ');
+        return `<div data-tag-row="${escHtml(p.id)}" style="border-top:1px solid var(--rule);padding:11px 0;">
+          <div style="display:flex;gap:10px;align-items:baseline;flex-wrap:wrap;">
+            <b style="font-weight:600;font-size:14.5px;">${escHtml(p.name)}</b>
+            <span style="font-size:12px;color:var(--ink-mute);">${escHtml(reach || 'no email or phone')}</span>
+            ${sig.length ? `<span style="font-size:11.5px;">${sig.join(' · ')}</span>` : ''}
+          </div>
+          <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:7px;">
+            ${TAG_BUTTONS.map(([v, label, hint]) => `<button type="button" data-tag-set="${v}" title="${escHtml(hint)}" style="border:1px solid ${v === p.suggestion ? 'var(--brass)' : 'var(--rule)'};background:${v === p.suggestion ? 'rgba(140,110,61,.10)' : 'transparent'};color:var(--ink);border-radius:12px;padding:3px 10px;cursor:pointer;font:inherit;font-size:12px;">${escHtml(label)}</button>`).join('')}
+          </div>
+        </div>`;
+      }).join('');
+
+      listEl.querySelectorAll('[data-tag-row]').forEach((row) => {
+        row.querySelectorAll('[data-tag-set]').forEach((btn) => {
+          btn.addEventListener('click', async () => {
+            const id = row.getAttribute('data-tag-row');
+            const type = btn.getAttribute('data-tag-set');
+            row.style.opacity = '.45';
+            row.querySelectorAll('button').forEach((b) => { b.disabled = true; });
+            const rr = await window.Legacy.api('/api/crm/tagging', { method: 'POST', body: { lead_ids: [id], contact_type: type } });
+            if (rr.ok && rr.json && rr.json.updated) { row.remove(); say('Saved.', true); if (!listEl.querySelector('[data-tag-row]')) load(); }
+            else {
+              row.style.opacity = '';
+              row.querySelectorAll('button').forEach((b) => { b.disabled = false; });
+              say((rr.json && rr.json.error) || 'Could not save that one.', false);
+            }
+          });
+        });
+      });
+    }
+    load();
+  }
+
   // Segment-browse mode: clicking a roster eyebrow (Leads / Clients / Past /
   // Sphere) opens a search-first pane rather than dumping every contact. The
   // list stays empty until Sara types, then shows matches she can open.
@@ -2600,10 +2721,24 @@ window.LGPortal = window.LGPortal || {
       <div class="lead-seg">
         <input type="text" class="lead-seg-input" data-roster-search placeholder="Search ${escHtml(segName)} by name, email, area…" value="${escHtml(state.rosterSearch || '')}" autocomplete="off">
         <div class="lead-seg-hint">${segLeads.length} ${escHtml(segName)} · type a name to open one</div>
+        <button type="button" data-open-tagging style="display:none;margin-top:9px;width:100%;border:1px solid var(--brass);background:transparent;color:var(--brass);border-radius:6px;padding:7px 10px;cursor:pointer;font-family:var(--mono);font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;"></button>
       </div>
       <div class="lead-seg-results" data-roster-results></div>`;
     wireLeadList(container);
     renderSegmentResults(container);
+    // Untyped contacts are invisible to every one of these browse buckets, so
+    // the prompt to fix that belongs right here, with the count on it.
+    (function () {
+      const btn = container.querySelector('[data-open-tagging]');
+      if (!btn) return;
+      window.Legacy.api('/api/crm/tagging?limit=1', { method: 'GET' }).then((r) => {
+        const n = (r.ok && r.json && r.json.remaining) || 0;
+        if (!n) return;
+        btn.style.display = 'block';
+        btn.textContent = `${n.toLocaleString()} contacts untyped — sort them`;
+        btn.addEventListener('click', () => openTagging());
+      });
+    })();
     const inp = container.querySelector('[data-roster-search]');
     if (inp) { const v = inp.value; inp.focus(); inp.setSelectionRange(v.length, v.length); }
   }
