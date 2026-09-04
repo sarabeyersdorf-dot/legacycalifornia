@@ -6412,7 +6412,12 @@ function selectLead(el) {
       + '    <label style="' + LB + '">Email<input name="email" type="email" placeholder="name@example.com" style="' + IN + '"></label>'
       + '    <label style="' + LB + '">Phone<input name="phone" placeholder="(209) 555-0123" style="' + IN + '"></label>'
       + '    <div style="display:flex;gap:10px;">'
-      + '      <label style="flex:1;' + LB + '">Type<select name="lead_type" style="' + IN + '"><option value="">—</option><option value="buyer">Buyer</option><option value="seller">Seller</option><option value="land">Land</option><option value="investor">Investor</option></select></label>'
+      // ONE field for "who is this person to us". It used to say lead_type and
+      // offer Land and Investor — neither was a legal value, so choosing
+      // Investor failed the insert and the lead was silently lost. The options
+      // now match the side picker on the Contacts list, so the same person
+      // can't read as two different things depending on where you set them.
+      + '      <label style="flex:1;' + LB + '">Type<select name="contact_type" style="' + IN + '"><option value="">— side —</option><option value="buyer">Buyer</option><option value="seller">Seller</option><option value="both">Both</option><option value="past_client">Past client</option><option value="sphere">Sphere</option><option value="vendor">Vendor</option><option value="counterparty">Other side of a deal</option><option value="do_not_contact">Do not contact</option></select></label>'
       + '      <label style="flex:1;' + LB + '">Temperature<select name="temperature" style="' + IN + '"><option value="new">New</option><option value="warm">Warm</option><option value="hot">Hot</option><option value="cold">Cold</option></select></label>'
       + '    </div>'
       + '    <label style="' + LB + '">Assign to<select name="assigned_agent" id="nl-agent" style="' + IN + '"><option value="sara">Sara</option><option value="james">James</option></select></label>'
@@ -6454,7 +6459,7 @@ function selectLead(el) {
         last_name:  (fd.get('last_name') || '').trim(),
         email:      (fd.get('email') || '').trim(),
         phone:      (fd.get('phone') || '').trim(),
-        lead_type:  fd.get('lead_type') || undefined,
+        contact_type: fd.get('contact_type') || undefined,
         temperature: fd.get('temperature') || 'new',
         assigned_agent: fd.get('assigned_agent') || undefined,
         notes:      (fd.get('notes') || '').trim()

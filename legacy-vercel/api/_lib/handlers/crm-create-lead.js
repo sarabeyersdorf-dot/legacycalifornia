@@ -5,8 +5,12 @@
 // (server-side check) — matches the RLS on public.leads.
 //
 // Body (all optional except one of first_name / last_name / email):
-//   { first_name, last_name, email, phone, lead_type, temperature,
+//   { first_name, last_name, email, phone, contact_type, temperature,
 //     assigned_agent, pipeline_stage, price_min, price_max, notes }
+//
+// contact_type is THE field for "who is this person to us" — buyer, seller,
+// both, sphere, vendor, past_client, do_not_contact. deal_side, roles and
+// lead_type are derived from it by db/100 + db/102 and must not be sent.
 //
 // Defaults:
 //   - source:         'manual'
@@ -23,10 +27,12 @@ import { getCallerProfile, isAgent } from '../auth.js';
 import { handleOptions, readJson, ok, fail } from '../cors.js';
 
 const ALLOWED_AGENTS = new Set(['sara', 'james', 'unassigned']);
-const ALLOWED_TYPES  = new Set(['buyer', 'seller', 'land', 'investor']);
+// The contact_type values the form offers. 'investor' used to be on this list
+// and in the form's dropdown, and was never a legal value — leads_lead_type_check
+// rejects it, so choosing Investor failed the insert with a 500 and no lead.
+const ALLOWED_TYPES  = new Set(['buyer', 'seller', 'both', 'past_client', 'sphere', 'vendor', 'counterparty', 'do_not_contact']);
 const ALLOWED_TEMPS  = new Set(['new', 'warm', 'hot', 'cold']);
 const ALLOWED_STAGES = new Set(['new', 'nurture', 'consult', 'signed', 'active', 'under_contract', 'closed', 'sphere']);
-const ALLOWED_SIDES  = new Set(['buyer', 'seller', 'both']);
 
 function agentKeyForRole(role) {
   if (role === 'agent_james') return 'james';
@@ -78,10 +84,11 @@ export default async function handler(req, res) {
       email,
       phone,
       source:         'manual',
-      lead_type:      ALLOWED_TYPES.has(body?.lead_type)   ? body.lead_type   : null,
-      deal_side:      ALLOWED_SIDES.has(body?.deal_side)   ? body.deal_side
-                        : (body?.lead_type === 'seller' ? 'seller'
-                          : ['buyer', 'investor', 'land'].includes(body?.lead_type) ? 'buyer' : null),
+      // One field in, three derived. `lead_type` is still accepted as the old
+      // spelling so an older cached copy of the CRM keeps working.
+      contact_type:   ALLOWED_TYPES.has(body?.contact_type) ? body.contact_type
+                        : ALLOWED_TYPES.has(body?.lead_type) ? body.lead_type
+                        : null,
       temperature:    ALLOWED_TEMPS.has(body?.temperature) ? body.temperature : 'new',
       assigned_agent: assigned,
       pipeline_stage: ALLOWED_STAGES.has(body?.pipeline_stage) ? body.pipeline_stage : 'new',

@@ -45,7 +45,7 @@ function leadToFUBContact(lead) {
     assignedUserId: null, // map in production once Sara's FUB user id is known
     customScore: lead.score,
     tags: [
-      lead.lead_type        ? `type:${lead.lead_type}`            : null,
+      lead.contact_type     ? `type:${lead.contact_type}`         : null,
       lead.buyer_stage      ? `buyer:${lead.buyer_stage}`         : null,
       lead.seller_stage     ? `seller:${lead.seller_stage}`       : null,
       lead.temperature      ? `temp:${lead.temperature}`          : null

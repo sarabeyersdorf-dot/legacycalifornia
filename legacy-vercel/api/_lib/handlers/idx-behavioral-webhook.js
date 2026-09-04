@@ -175,7 +175,6 @@ export default async function handler(req, res) {
         // deal_side and roles without anyone setting them by hand.
         buyer_stage:   'new',
         contact_type:  'buyer',
-        lead_type:     'buyer',
         temperature:   'new',
         score:         0,
         assigned_agent:'sara',
