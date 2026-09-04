@@ -504,7 +504,7 @@ async function createOrInvite(req, res, supa, agent) {
         last_name: typeof body?.last_name === 'string' ? body.last_name.trim() : null,
         // Booking a tour IS the buyer stage; deal_side and roles are derived
         // from these by db/100, so setting them here would be a second opinion.
-        source: 'manual', lead_type: 'buyer', contact_type: 'buyer',
+        source: 'manual', contact_type: 'buyer',
         assigned_agent: agent, buyer_stage: 'showing_homes', pipeline_stage: 'active'
       }).select('id, email').single();
       if (insErr) return fail(res, 500, `lead create: ${insErr.message}`);

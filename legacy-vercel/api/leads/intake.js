@@ -103,14 +103,18 @@ function sanitize(body) {
     out.sms_consent_source = ((body.source || 'website') + ' form').slice(0, 120);
   }
   out.source        = ALLOWED_SOURCE.has(body.source)         ? body.source        : 'website_form';
-  out.lead_type     = ALLOWED_TYPE.has(body.lead_type)        ? body.lead_type     : null;
+  // lead_type is a WIRE field too now: it is what the form says the person
+  // wants, and sidesFromIntake turns it into contact_type. The COLUMN of the
+  // same name is derived from that by db/102, so writing it here would be the
+  // second opinion this whole exercise removes.
+  out._leadType     = ALLOWED_TYPE.has(body.lead_type)        ? body.lead_type     : null;
   // journey_stage is a WIRE field only. The forms on the site still send it and
   // their JavaScript is cached in visitors' browsers, so the name has to keep
   // working — but nothing stores it any more. It is translated into buyer_stage
   // (and contact_type) here, which is where the CRM actually looks. See
   // _lib/lead-stage.js and db/101.
   out._journey      = ALLOWED_JOURNEY.has(body.journey_stage) ? body.journey_stage : null;
-  Object.assign(out, sidesFromIntake({ journey_stage: out._journey, lead_type: out.lead_type }));
+  Object.assign(out, sidesFromIntake({ journey_stage: out._journey, lead_type: out._leadType }));
   out.areas         = Array.isArray(body.areas) ? body.areas.filter(s => typeof s === 'string').slice(0, 20) : null;
   out.price_min     = Number.isFinite(+body.price_min) ? Math.max(0, +body.price_min) : null;
   out.price_max     = Number.isFinite(+body.price_max) ? Math.max(0, +body.price_max) : null;
@@ -133,7 +137,8 @@ export default async function handler(req, res) {
     const fields = sanitize(body);
     // Everything below writes `fields` straight into `leads`, so the wire-only
     // key travels separately and never reaches a column.
-    const journeyIn = fields._journey; delete fields._journey;
+    const journeyIn  = fields._journey;  delete fields._journey;
+    const leadTypeIn = fields._leadType; delete fields._leadType;
 
     if (!fields.email || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(fields.email)) {
       return fail(res, 400, 'valid email required');
@@ -184,8 +189,7 @@ export default async function handler(req, res) {
       // counterparty on our own listing) is left alone, a stage only ever moves
       // FORWARD so a form can't demote someone the CRM advanced, and
       // contact_type is only filled in when it currently says nothing specific.
-      Object.assign(patch, mergeSidesInto(existing, { journey_stage: journeyIn, lead_type: fields.lead_type }));
-      if (fields.lead_type && !existing.lead_type) patch.lead_type = fields.lead_type;
+      Object.assign(patch, mergeSidesInto(existing, { journey_stage: journeyIn, lead_type: leadTypeIn }));
       patch.last_contact_at = new Date().toISOString();
 
       const { data, error } = await supa
@@ -333,7 +337,7 @@ export default async function handler(req, res) {
         : (journeyIn === 'ready_to_offer') ? 'is ready to make an offer'
         : 'submitted a form / set up a search';
       const bits = [];
-      if (fields.lead_type) bits.push(fields.lead_type);
+      if (leadTypeIn) bits.push(leadTypeIn);
       if (fields.areas && fields.areas.length) bits.push('areas: ' + fields.areas.join(', '));
       if (fields.price_min || fields.price_max) bits.push('budget: ' + (fields.price_min ? '$' + fields.price_min : '?') + '–' + (fields.price_max ? '$' + fields.price_max : '?'));
       if (fields.phone) bits.push(fields.phone);
@@ -348,7 +352,7 @@ export default async function handler(req, res) {
       const sms = `New ${is_new ? '' : 'returning '}lead: ${name} ${action}${bits.length ? ' — ' + bits.join(' · ') : ''}. Open lead: ${desk}`;
       const text = `${name} ${action} on legacycalifornia.com.\n\n`
         + `Email: ${fields.email}\nPhone: ${fields.phone || '(none)'}\n`
-        + `Type: ${fields.lead_type || '—'}\nStage: ${describeStage(fields)}\n`
+        + `Type: ${fields.contact_type || leadTypeIn || '—'}\nStage: ${describeStage(fields)}\n`
         + `Areas: ${(fields.areas || []).join(', ') || '—'}\nBudget: ${fields.price_min || '?'}–${fields.price_max || '?'}\n`
         + (fields.notes ? `Message: ${fields.notes}\n` : '')
         + `\nOpen this lead in the CRM: ${desk}`;
@@ -367,9 +371,12 @@ export default async function handler(req, res) {
     // drafts and waits for approval; 2-4 auto-send and stop on any reply.
     if (is_new && !lead.email_opt_out && !lead.sequence_id) {
       try {
-        const seqName = fields.lead_type === 'buyer'  ? 'buyer_nurture'
-                      : fields.lead_type === 'seller' ? 'seller_nurture'
-                      : 'new_lead_nurture';   // both / land / relocation / unknown
+        // Read the side off the SAVED lead, not off the submission. The
+        // trigger has settled it by now, and on a returning contact the saved
+        // record may be more specific than what this form said.
+        const seqName = lead.contact_type === 'buyer'  ? 'buyer_nurture'
+                      : lead.contact_type === 'seller' ? 'seller_nurture'
+                      : 'new_lead_nurture';   // both / sphere / unknown
         sideEffects.nurture_enroll = await enrollLeads(supa, { leadIds: [lead.id], sequence_name: seqName });
       } catch (e) { sideEffects.nurture_enroll_error = e.message; }
     }

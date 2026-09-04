@@ -107,6 +107,38 @@ none of the four roster buckets and never prospected or marketed to:
   Denis Listengourt read as Sara's own client, `under_contract`, purely because this
   category did not exist and whoever entered him picked the closest thing.
 
+## The contact model — two fields in, everything else derived (2026-09-04)
+
+Sara chose this shape ("A then B") after four columns all claimed to answer *which side
+is this person on* and disagreed with each other on 1,028 of 2,281 contacts.
+
+**Set these two. Nothing else.**
+
+| Field | Means | Values |
+|---|---|---|
+| `contact_type` | who this person is to us | `buyer` `seller` `both` `past_client` `sphere` `vendor` `counterparty` `do_not_contact` |
+| `buyer_stage` / `seller_stage` | where they are, per side | `new` `nurture` `showing_homes` `preparing` `on_market` `writing_offers` `reviewing_offers` `in_escrow` `closed` |
+
+**Derived — never write these; a BEFORE trigger on `leads` overwrites whatever you set:**
+`deal_side`, `roles[]`, `lead_type` (db/100, db/102). `pipeline_stage` is recomputed from
+the side stages by `contact-consistency.js` on the hourly sync.
+
+**Retired:** `journey_stage` (db/101). The site's cached forms still POST it; `intake`
+translates it to `buyer_stage` and stores nothing. Don't add readers.
+
+**The rules live in `api/_lib/lead-stage.js`** — one definition each, imported everywhere:
+- `PROTECTED_TYPES` — `do_not_contact`, `do_not_call`, `vendor`, `counterparty`. No form,
+  webhook or deal ever changes these.
+- `bestLiveStage(stages)` — the most advanced **unfinished** side. Guy Castle closed on
+  7230 Latigo and is preparing 1143 Echo; plain "furthest along" files him Closed and
+  buries a live listing.
+- `sidesFromIntake` / `mergeSidesInto` — a lead capture may fill a blank and may move a
+  stage FORWARD; it may never demote, and never touches a protected type.
+
+`db/102` moved 1,018 imported contacts from `sphere` to the `buyer`/`seller` their
+`lead_type` had recorded since the 2026-06-24 import. Snapshot for reversal:
+`public.leads_type_backup_20260904`.
+
 ## Data-flow facts worth keeping straight
 
 - `deals.json` is **Cowork's** file in Dropbox. An hourly `publish-from-dropbox` cron
