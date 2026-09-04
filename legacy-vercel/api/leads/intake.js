@@ -173,8 +173,12 @@ export default async function handler(req, res) {
       if (error) return fail(res, 500, `leads update: ${error.message}`);
       lead = data; is_new = false;
     } else {
+      // Sara: "send to both of us always." The alert already reached both, but
+      // the follow-up lanes filter a non-broker to their own assigned leads, and
+      // nothing here set the column — so every website lead defaulted to Sara and
+      // James's day never showed one. 'both' (db/099) puts it on each list.
       const { data, error } = await supa
-        .from('leads').insert({ ...fields, last_contact_at: new Date().toISOString() })
+        .from('leads').insert({ ...fields, assigned_agent: 'both', last_contact_at: new Date().toISOString() })
         .select().single();
       if (error) return fail(res, 500, `leads insert: ${error.message}`);
       lead = data; is_new = true;

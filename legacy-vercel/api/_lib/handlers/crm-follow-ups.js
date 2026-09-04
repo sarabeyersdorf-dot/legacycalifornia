@@ -53,6 +53,10 @@ const DAY = 24 * 3600 * 1000;
 // under the genuinely-urgent lanes without pushing them off the visible list.
 const NEVER_WORKED_PER_DAY = 10;
 const agentKey = (profile) => (profile.role === 'agent_james' ? 'james' : 'sara');
+// A lead assigned 'both' (db/099) belongs on EVERY agent's list, so a non-broker
+// matches their own key or 'both'. Website leads are all 'both' by Sara's rule —
+// "send to both of us always" — which is what finally gives James a day's work
+// rather than the 49 contacts he had when everything defaulted to Sara.
 const fullName = (l) => [l?.first_name, l?.last_name].filter(Boolean).join(' ').trim();
 const digits = (p) => String(p || '').replace(/[^\d]/g, '');
 
@@ -123,7 +127,7 @@ async function list(supa, profile, res) {
       .gte('created_at', sinceLeads)
       .order('created_at', { ascending: false })
       .limit(30);
-    if (!broker) q = q.eq('assigned_agent', me);
+    if (!broker) q = q.in('assigned_agent', [me, 'both']);
     const { data } = await q;
     for (const l of (data || [])) {
       const ageDays = (Date.now() - new Date(l.created_at).getTime()) / DAY;
@@ -224,7 +228,7 @@ async function list(supa, profile, res) {
     let latestOutByLead = new Map();                                // newest non-blast outbound touch, any channel
     if (ids.length) {
       let lq = supa.from('leads').select('id, first_name, last_name, email, phone, status, assigned_agent').in('id', ids).eq('status', 'active');
-      if (!broker) lq = lq.eq('assigned_agent', me);
+      if (!broker) lq = lq.in('assigned_agent', [me, 'both']);
       const [{ data: ls }, { data: outs }] = await Promise.all([
         lq,
         supa.from('messages').select('lead_id, created_at, channel')
@@ -334,7 +338,7 @@ async function list(supa, profile, res) {
       .gte('created_at', sinceLeads)            // same window as lane 1 — see the header note
       .order('created_at', { ascending: false })
       .limit(120);                              // headroom to filter down to the slice
-    if (!broker) q = q.eq('assigned_agent', me);
+    if (!broker) q = q.in('assigned_agent', [me, 'both']);
     const { data } = await q;
     let slice = (data || []).filter((l) => {
       if (l.email_opt_out || l.sms_opt_out || l.not_interested) return false;
