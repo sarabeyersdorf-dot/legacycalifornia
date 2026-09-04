@@ -33,10 +33,13 @@ import { adminClient } from '../supabase.js';
 import { getCallerProfile, isAgent } from '../auth.js';
 import { handleOptions, readJson, ok, fail } from '../cors.js';
 
-// The types the roster and the follow-up lanes actually read. 'vendor' is new:
-// there was nowhere to file a title rep or another agent, so they could only be
-// mislabelled as sphere and then get marketed to like a client.
-const TYPES = ['sphere', 'buyer', 'seller', 'both', 'past_client', 'vendor', 'do_not_contact'];
+// The types the roster and the follow-up lanes actually read. Two exist because
+// there was nowhere to file the people who are neither leads nor clients:
+// 'vendor' for a title rep or another agent, and 'counterparty' for the other
+// side of one of our transactions. Both used to be filed as sphere or client
+// and then marketed to — Denis Listengourt, the buyer on our own Augusta
+// listing, read as Sara's client for exactly that reason.
+const TYPES = ['sphere', 'buyer', 'seller', 'both', 'past_client', 'vendor', 'counterparty', 'do_not_contact'];
 const MAX_PAGE = 100;
 
 export default async function handler(req, res) {
