@@ -56,6 +56,33 @@ export default async function handler(req, res) {
     const lead = msg.leads;
     if (!lead) return fail(res, 404, 'lead not found for message');
 
+    // An approved draft is still an automated message — it was written by the
+    // AI and is going out under a sequence — so an opt-out blocks it. Approving
+    // a queued draft is a one-click action on a busy day and nothing else on
+    // this path checks. Portal messages are exempt: that thread is the client's
+    // own page in their transaction, not a channel they unsubscribed from.
+    if (msg.channel !== 'portal') {
+      const blocked = lead.not_interested                       ? 'marked not interested'
+                    : (lead.status && lead.status !== 'active') ? `status is ${lead.status}`
+                    : (msg.channel === 'email' && lead.email_opt_out) ? 'unsubscribed from email'
+                    : (msg.channel === 'sms'   && lead.sms_opt_out)   ? 'opted out of texts'
+                    : null;
+      if (blocked) {
+        const who = [lead.first_name, lead.last_name].filter(Boolean).join(' ') || lead.email || 'This contact';
+        // Mark the draft so it stops sitting in the approval queue waiting to
+        // be clicked again. `messages` has no error column and its status check
+        // admits only draft/pending_approval/approved/sent/delivered/failed —
+        // so the reason goes in the reasoning field, where the card shows it.
+        await supa.from('messages')
+          .update({
+            status: 'failed',
+            ai_draft_reasoning: `Not sent: ${blocked}. ${msg.ai_draft_reasoning || ''}`.trim().slice(0, 2000)
+          })
+          .eq('id', message_id).then(() => {}, () => {});
+        return fail(res, 409, `${who} is ${blocked} — nothing sent. The draft is marked failed so it stops waiting for approval.`);
+      }
+    }
+
     // Cold-sequence context: a message tied to a sequence (messages.sequence_id)
     // whose send_mode is auto_after_first is COLD outreach — it must carry the
     // CAN-SPAM footer (unsubscribe + business + physical address), and approving
@@ -134,8 +161,12 @@ export default async function handler(req, res) {
           providerResult.via = 'twilio';
           sentPatch = { status: 'sent', twilio_sid: providerResult.sid || null };
         } catch (smsErr) {
-          // SMS unavailable — fall back to email when we can.
-          if (!lead.email) throw smsErr;
+          // SMS unavailable — fall back to email when we can. The guard above
+          // cleared them for SMS, which says nothing about email: someone can
+          // be textable and unsubscribed at the same time, and silently
+          // rerouting to the channel they opted out of is the one way this
+          // fallback could do harm.
+          if (!lead.email || lead.email_opt_out) throw smsErr;
           providerResult = await sendEmailNow();
           providerResult.fell_back_from = 'sms';
           providerResult.fallback_reason = smsErr.message;

@@ -67,12 +67,21 @@ export async function autoDeliver(supa, s, freshIds) {
 
   // 3. Build the client email of just the NEW listings (link shows the full set).
   const { data: coll } = await supa.from('curated_collections')
-    .select('*, leads(id,first_name,last_name,email)').eq('id', collId).maybeSingle();
+    .select('*, leads(id,first_name,last_name,email,email_opt_out,not_interested,status)').eq('id', collId).maybeSingle();
   if (!coll) throw new Error('collection vanished mid-run');
   const clientEmail = coll.leads?.email || null;
   if (coll.status !== 'active') await supa.from('curated_collections').update({ status: 'active' }).eq('id', collId);
 
   if (!clientEmail) return { added: freshIds.length, emailed: false, reason: 'no client email on file' };
+
+  // An unsubscribe has to hold on EVERY path, not just the bulk sender. This
+  // one is a cron: nobody is watching it, and an auto-push to someone who asked
+  // to be taken off is the worst version of the mistake. The listings still go
+  // into their collection — that page is theirs to open, and stays useful if
+  // they come back — but nothing is mailed.
+  if (coll.leads?.email_opt_out || coll.leads?.not_interested || (coll.leads?.status && coll.leads.status !== 'active')) {
+    return { added: freshIds.length, emailed: false, reason: 'client is opted out — collection updated, no email sent' };
+  }
 
   const agent = await agentIdentity(supa, s.agent);
   const payload = await buildClientPayload(supa, coll);

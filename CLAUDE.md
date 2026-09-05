@@ -139,6 +139,38 @@ translates it to `buyer_stage` and stores nothing. Don't add readers.
 `lead_type` had recorded since the 2026-06-24 import. Snapshot for reversal:
 `public.leads_type_backup_20260904`.
 
+## Opt-outs — every send path honours them (2026-09-05)
+
+Ronald Jones replied **"Stop"** to the debut Ledger. Nothing acted on it: the SMS side has
+caught STOP since day one (`api/twilio/inbound.js`), email had no equivalent, and it sat in
+the inbox until Sara noticed and clicked the unsubscribe link herself two hours later.
+
+**A stop request must never depend on someone reading their inbox.**
+
+- `api/_lib/optout-keywords.js` — `detectEmailOptOut({subject, body})`. Deliberately
+  narrower than the SMS keyword list: no CANCEL/END/QUIT, because those are ordinary words
+  in a reply ("Cancel" to *shall I book the inspection?*). Only fires when the reply, with
+  the quoted original stripped, is **essentially nothing but** the phrase — "Stop by the
+  house at three" is not an opt-out.
+- `api/cron/email-sync.js` applies it to every matched inbound email, sets `email_opt_out`,
+  writes an `email_opt_out` lead_event and texts the agent.
+- **Email only.** They replied to an email, so that is what they asked to stop; a seller
+  mid-transaction stays reachable by phone. The alert lets Sara widen it herself.
+
+**Who blocks and who doesn't:**
+
+| Path | On an opt-out |
+|---|---|
+| bulk send, email queue, ledger cron, sequences, buyer-matches, speed-to-lead | blocked (already) |
+| `flag-matches` saved-search auto-push | blocked — collection still updates, no email |
+| `curate-push` | refuses with the reason and the contact's name |
+| `crm-approve` (AI draft) | refuses, marks the draft failed; portal messages exempt |
+| `crm-message-send` (Sara types one message to one person) | **allowed** — a deliberate human act that may be transactional; the contact card disables the button |
+
+The `email_opt_out` lead_event is the compliance record — date, route, and the words they
+used. `updated_at` alone proves nothing later. `lead_events` constrains `event_type` and
+`source`, so a new value needs a migration first (db/103) or the insert fails silently.
+
 ## Data-flow facts worth keeping straight
 
 - `deals.json` is **Cowork's** file in Dropbox. An hourly `publish-from-dropbox` cron

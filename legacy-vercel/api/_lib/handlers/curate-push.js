@@ -44,7 +44,7 @@ export default async function handler(req, res) {
     // Collection must belong to this agent
     const { data: coll, error: cErr } = await supa
       .from('curated_collections')
-      .select('*, leads(id,first_name,last_name,email,phone)')
+      .select('*, leads(id,first_name,last_name,email,phone,email_opt_out,sms_opt_out,not_interested,status)')
       .eq('id', b.collection_id).eq('agent', agent).maybeSingle();
     if (cErr)  return fail(res, 500, cErr.message);
     if (!coll) return fail(res, 404, 'collection not found');
@@ -70,11 +70,30 @@ export default async function handler(req, res) {
     let clientLead = lead;
     if (!coll.client_lead_id && channel === 'email' && /@/.test(String(to))) {
       const { data: m } = await supa.from('leads')
-        .select('id, first_name, last_name, email, phone')
+        .select('id, first_name, last_name, email, phone, email_opt_out, sms_opt_out, not_interested, status')
         .eq('email', String(to).trim().toLowerCase()).maybeSingle();
       if (m) {
         clientLead = m;
         await supa.from('curated_collections').update({ client_lead_id: m.id }).eq('id', coll.id).then(() => {}, () => {});
+      }
+    }
+
+    // Refuse to push to someone who has opted out — checked against whoever we
+    // are ACTUALLY mailing, which may be an address typed into `to` rather than
+    // the contact on the collection. An opt-out only means anything if every
+    // send path honours it, and this one is a button an agent can press on a
+    // busy day. Says which contact and which switch, so it can be corrected on
+    // their card if it was set by mistake (an unsubscribe link followed by the
+    // wrong person, say) rather than leaving a dead button.
+    if (clientLead) {
+      const blockedBy = clientLead.not_interested                       ? 'marked not interested'
+                      : (clientLead.status && clientLead.status !== 'active') ? `status is ${clientLead.status}`
+                      : (channel === 'email' && clientLead.email_opt_out)     ? 'unsubscribed from email'
+                      : (channel === 'sms'   && clientLead.sms_opt_out)       ? 'opted out of texts'
+                      : null;
+      if (blockedBy) {
+        const who = [clientLead.first_name, clientLead.last_name].filter(Boolean).join(' ') || String(to);
+        return fail(res, 409, `${who} is ${blockedBy} — nothing sent. Open their contact card to change that if it's wrong.`);
       }
     }
 

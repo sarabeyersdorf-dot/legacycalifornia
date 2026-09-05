@@ -44,6 +44,17 @@ export default async function handler(req, res) {
     const { data: lead } = await supa.from('leads').select('id').eq('unsubscribe_token', token).maybeSingle();
     if (!lead) return done(404, 'Not found', 'We couldn’t find that subscription — you may already be off the list.');
     await supa.from('leads').update({ email_opt_out: true, updated_at: new Date().toISOString() }).eq('id', lead.id);
+    // Record it. updated_at alone cannot say WHY a contact went quiet, and an
+    // opt-out is the one thing we may later have to prove we honoured — so the
+    // event carries the date, the route and whether it was the person's own
+    // one-click or a link followed in a browser. Best-effort: an audit write
+    // must never make an unsubscribe appear to fail.
+    await supa.from('lead_events').insert({
+      lead_id:    lead.id,
+      event_type: 'email_opt_out',
+      source:     'unsubscribe_link',
+      event_data: { via: isPost ? 'one-click (mail client)' : 'unsubscribe link' }
+    }).then(() => {}, () => {});
     return done(200, 'You’re unsubscribed', 'You won’t receive any more emails from Legacy Properties. Changed your mind? Reply to any past email and we’ll add you back.');
   } catch (_) {
     return done(500, 'Something went wrong', 'Please try again, or email SaraSellsCalifornia@gmail.com to be removed.');
