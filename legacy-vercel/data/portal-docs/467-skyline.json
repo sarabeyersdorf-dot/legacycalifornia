@@ -3,49 +3,49 @@
     "name": "[AS] Seller's Affidavit of Non foreign Status (FIRPTA) – 1 (1)",
     "url": "/docs/467-skyline/as-seller-s-affidavit-of-non-foreign-status-firpta-1-1-.pdf",
     "scope": "property",
-    "visibility": "seller",
+    "visibility": "both",
     "key": "467-skyline-as-seller-s-affidavit-of-non-foreign-status-firpta-1-1-",
-    "rev": "01653d54a05f150000000029e854303"
+    "rev": "0165aaebc2ff25a000000029e854303"
   },
   {
     "name": "Disclosure Information Advisory 1225",
     "url": "/docs/467-skyline/disclosure-information-advisory-1225.pdf",
     "scope": "transaction",
-    "visibility": "seller",
+    "visibility": "both",
     "key": "467-skyline-disclosure-information-advisory-1225",
-    "rev": "01653d4b4e6dec8000000029e854303"
+    "rev": "0165aaebc2ff251000000029e854303"
   },
   {
     "name": "[FHDS] Fire Hardening and Defensible Space Disclosure and Addendum",
     "url": "/docs/467-skyline/fhds-fire-hardening-and-defensible-space-disclosure-and-addendum.pdf",
     "scope": "property",
-    "visibility": "seller",
+    "visibility": "both",
     "key": "467-skyline-fhds-fire-hardening-and-defensible-space-disclosure-and-addendum",
-    "rev": "01653d549f55a92000000029e854303"
+    "rev": "0165aaebc2ff256000000029e854303"
   },
   {
     "name": "Glide Signatures Certificate d2467b7e f59f 48e9 b1ef 73d05f29dc10",
     "url": "/docs/467-skyline/glide-signatures-certificate-d2467b7e-f59f-48e9-b1ef-73d05f29dc10.pdf",
     "scope": "transaction",
-    "visibility": "seller",
+    "visibility": "both",
     "key": "467-skyline-glide-signatures-certificate-d2467b7e-f59f-48e9-b1ef-73d05f29dc10",
-    "rev": "01653d54a05f14f000000029e854303"
+    "rev": "0165aaebc2ff259000000029e854303"
   },
   {
     "name": "Market Conditions Advisory 624",
     "url": "/docs/467-skyline/market-conditions-advisory-624.pdf",
     "scope": "transaction",
-    "visibility": "seller",
+    "visibility": "both",
     "key": "467-skyline-market-conditions-advisory-624",
-    "rev": "01653d4b4e6deca000000029e854303"
+    "rev": "0165aaebc2ff253000000029e854303"
   },
   {
     "name": "[MCA] Market Conditions Advisory",
     "url": "/docs/467-skyline/mca-market-conditions-advisory.pdf",
     "scope": "property",
-    "visibility": "seller",
+    "visibility": "both",
     "key": "467-skyline-mca-market-conditions-advisory",
-    "rev": "01653d54a05f151000000029e854303"
+    "rev": "0165aaebc2ff25b000000029e854303"
   },
   {
     "name": "Modification of Terms, Listing Agreement 1 625pdf",
@@ -53,7 +53,7 @@
     "scope": "property",
     "visibility": "seller",
     "key": "467-skyline-modification-of-terms-listing-agreement-1-625pdf",
-    "rev": "016560b1148a9e4000000029e854303"
+    "rev": "0165aaebc2ff260000000029e854303"
   },
   {
     "name": "Residential Listing Agreement Exclusive 1225",
@@ -61,78 +61,78 @@
     "scope": "property",
     "visibility": "seller",
     "key": "467-skyline-residential-listing-agreement-exclusive-1225",
-    "rev": "01653d4b4e6dec9000000029e854303"
+    "rev": "0165aaebc2ff252000000029e854303"
   },
   {
     "name": "[SBSA] Statewide Buyer and Seller Advisory",
     "url": "/docs/467-skyline/sbsa-statewide-buyer-and-seller-advisory.pdf",
     "scope": "property",
-    "visibility": "seller",
+    "visibility": "both",
     "key": "467-skyline-sbsa-statewide-buyer-and-seller-advisory",
-    "rev": "01653d549e678b0000000029e854303"
+    "rev": "0165aaebc2ff254000000029e854303"
   },
   {
     "name": "[SFLS] Square Footage and Lot Size Disclosure and Advisory",
     "url": "/docs/467-skyline/sfls-square-footage-and-lot-size-disclosure-and-advisory.pdf",
     "scope": "property",
-    "visibility": "seller",
+    "visibility": "both",
     "key": "467-skyline-sfls-square-footage-and-lot-size-disclosure-and-advisory",
-    "rev": "01653d549f55a93000000029e854303"
+    "rev": "0165aaebc2ff257000000029e854303"
   },
   {
     "name": "[SOLAR] Solar Advisory and Questionnaire",
     "url": "/docs/467-skyline/solar-solar-advisory-and-questionnaire.pdf",
     "scope": "transaction",
-    "visibility": "seller",
+    "visibility": "both",
     "key": "467-skyline-solar-solar-advisory-and-questionnaire",
-    "rev": "01653d54a05f152000000029e854303"
+    "rev": "0165aaebc2ff25c000000029e854303"
   },
   {
     "name": "[SPQ] Seller Property Questionnaire (1)",
     "url": "/docs/467-skyline/spq-seller-property-questionnaire-1-.pdf",
     "scope": "property",
-    "visibility": "seller",
+    "visibility": "both",
     "key": "467-skyline-spq-seller-property-questionnaire-1-",
-    "rev": "01653d54a05f153000000029e854303"
+    "rev": "0165aaebc2ff25d000000029e854303"
   },
   {
     "name": "Statewide Buyer and Seller Advisory 624",
     "url": "/docs/467-skyline/statewide-buyer-and-seller-advisory-624.pdf",
     "scope": "transaction",
-    "visibility": "seller",
+    "visibility": "both",
     "key": "467-skyline-statewide-buyer-and-seller-advisory-624",
-    "rev": "01653d4b4e6dec7000000029e854303"
+    "rev": "0165aaebc2ff250000000029e854303"
   },
   {
     "name": "[TDS] Real Estate Transfer Disclosure Statement (1)",
     "url": "/docs/467-skyline/tds-real-estate-transfer-disclosure-statement-1-.pdf",
     "scope": "property",
-    "visibility": "seller",
+    "visibility": "both",
     "key": "467-skyline-tds-real-estate-transfer-disclosure-statement-1-",
-    "rev": "01653d54a05f154000000029e854303"
+    "rev": "0165aaebc2ff25e000000029e854303"
   },
   {
     "name": "[WBSA] Wooden Balconies and Stairs Addendum",
     "url": "/docs/467-skyline/wbsa-wooden-balconies-and-stairs-addendum.pdf",
     "scope": "transaction",
-    "visibility": "seller",
+    "visibility": "both",
     "key": "467-skyline-wbsa-wooden-balconies-and-stairs-addendum",
-    "rev": "01653d549f55a94000000029e854303"
+    "rev": "0165aaebc2ff258000000029e854303"
   },
   {
     "name": "[WCMD] Water Conserving Plumbing Fixtures and Carbon Monoxide Detector notice",
     "url": "/docs/467-skyline/wcmd-water-conserving-plumbing-fixtures-and-carbon-monoxide-detector-notice.pdf",
     "scope": "property",
-    "visibility": "seller",
+    "visibility": "both",
     "key": "467-skyline-wcmd-water-conserving-plumbing-fixtures-and-carbon-monoxide-detector-notice",
-    "rev": "01653d549e678b1000000029e854303"
+    "rev": "0165aaebc2ff255000000029e854303"
   },
   {
     "name": "[WHSD] Water Heater and Smoke Detector Statement of Compliance",
     "url": "/docs/467-skyline/whsd-water-heater-and-smoke-detector-statement-of-compliance.pdf",
     "scope": "property",
-    "visibility": "seller",
+    "visibility": "both",
     "key": "467-skyline-whsd-water-heater-and-smoke-detector-statement-of-compliance",
-    "rev": "01653d54a05f155000000029e854303"
+    "rev": "0165aaebc2ff25f000000029e854303"
   }
 ]
