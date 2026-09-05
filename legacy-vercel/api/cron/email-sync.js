@@ -40,7 +40,7 @@ import { detectLeadSource, parseLead } from '../_lib/lead-intake.js';
 import { alertAgents } from '../_lib/agent-alert.js';
 import { getCallerProfile, isAgent } from '../_lib/auth.js';
 import { isBulkSender, isSignatureService } from '../_lib/email-bulk.js';
-import { detectEmailOptOut } from '../_lib/optout-keywords.js';
+import { applyEmailOptOut } from '../_lib/optout-keywords.js';
 
 const GMAIL_METADATA_HEADERS = ['From', 'To', 'Subject', 'Date', 'Message-ID'];
 const MAX_MESSAGES_PER_MAILBOX = 50; // keep each 15-minute run bounded
@@ -486,50 +486,21 @@ async function syncMailbox(supa, account, clientId, clientSecret) {
           //
           // Email ONLY. They replied to an email, so that is what they asked to
           // stop — a seller mid-transaction must still be reachable by phone.
-          // The alert lets Sara widen it in one click if she reads it otherwise.
-          let alertedOptOut = false;
-          if (contactId) {
-            const optOut = detectEmailOptOut({ subject, body: content });
-            if (optOut) {
-              try {
-                const { data: before } = await supa.from('leads')
-                  .select('first_name, last_name, email, email_opt_out')
-                  .eq('id', contactId).maybeSingle();
-                if (before && !before.email_opt_out) {
-                  await supa.from('leads')
-                    .update({ email_opt_out: true, updated_at: new Date().toISOString() })
-                    .eq('id', contactId);
-                  // The event IS the compliance record — who, when, and the
-                  // words they used. updated_at alone proves nothing later.
-                  await supa.from('lead_events').insert({
-                    lead_id:    contactId,
-                    event_type: 'email_opt_out',
-                    source:     'inbound_email',
-                    event_data: {
-                      via:     'reply keyword',
-                      phrase:  optOut.phrase,
-                      where:   optOut.where,
-                      subject: subject || null,
-                      from:    senderEmail
-                    }
-                  }).then(() => {}, () => {});
-                  optedOut += 1;
-                  const who = [before.first_name, before.last_name].filter(Boolean).join(' ')
-                            || before.email || senderEmail;
-                  await alertAgents(supa, {
-                    sms: `✋ ${who} replied "${optOut.phrase}" — unsubscribed from email automatically. They can still be called or texted; open their card to change that.`
-                  }).catch(() => {});
-                  alertedOptOut = true;
-                }
-              } catch (_) { /* never break the sync over this */ }
-            }
-          }
+          // The alert lets Sara widen it herself if she reads it otherwise.
+          //
+          // The work is in _lib/optout-keywords.js so the code that runs here is
+          // the code a test can run. It never throws.
+          const optOutResult = await applyEmailOptOut(supa,
+            { contactId, subject, content, senderEmail },
+            { alert: (text) => alertAgents(supa, { sms: text }) });
+          if (optOutResult.applied) optedOut += 1;
+
           // Text the agent the moment a lead in a cold sequence replies — that's
           // a live conversation. Only on FIRST sight (not when the other mailbox's
           // copy dedupes in), so a reply alerts once. SMS-only: passing just `sms`.
           // Skipped when the opt-out alert just fired: "they replied, go and
           // reply back" is the wrong instruction for someone who said stop.
-          if (contactId && !alertedOptOut) {
+          if (contactId && !optOutResult.applied) {
             try {
               const { data: ld } = await supa.from('leads')
                 .select('first_name, last_name, email, sequence_id, property_address')
