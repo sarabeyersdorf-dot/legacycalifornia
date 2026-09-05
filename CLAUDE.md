@@ -196,4 +196,11 @@ used. `updated_at` alone proves nothing later. `lead_events` constrains `event_t
   **buyer fails closed** — sees only docs explicitly granted buyer/both. Folder-published
   docs come via `publish-docs-from-dropbox` → `data/portal-docs/<id>.json` → the table.
 - DB migrations apply via `.github/workflows/db-migrate.yml` on push to `main` touching
-  `legacy-vercel/db/*.sql`.
+  `legacy-vercel/db/*.sql`. **Each file runs ONCE** — `public.schema_migrations` records
+  what has been applied and the workflow skips anything listed (db/104, 2026-09-05).
+  Before that it re-ran every file on every push, which silently re-executed one-shot
+  data repairs. `db/063_clear_false_import_dnc.sql` cleared **every** opt-out in `leads`
+  on every deploy from 2026-08-09 — Ronald Jones was re-subscribed 13 minutes after Sara
+  honoured his "Stop", and the table held zero opt-outs of any kind when it was found.
+  A failed migration is NOT recorded, so it retries next run. When writing a migration,
+  still make it idempotent — the ledger is the safety net, not the excuse.

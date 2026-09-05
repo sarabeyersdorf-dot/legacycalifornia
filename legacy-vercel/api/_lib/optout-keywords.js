@@ -91,3 +91,72 @@ export function detectEmailOptOut(msg) {
   }
   return null;
 }
+
+/**
+ * Honour an opt-out found in an inbound email: flip the flag, write the
+ * compliance record, tell the agent.
+ *
+ * Lives here rather than inline in the cron so the thing that runs in
+ * production is the thing that can be run in a test. It is called from
+ * api/cron/email-sync.js for every matched inbound message.
+ *
+ * Returns {applied:false, reason} when there is nothing to do — no keyword, no
+ * matched contact, or already opted out — so the caller can count applications
+ * and suppress its own "they replied, go and reply back" alert, which is the
+ * wrong instruction for someone who just said stop.
+ *
+ * NEVER THROWS. This runs inside the mailbox sync; an opt-out that cannot be
+ * recorded must not take the sync down with it.
+ *
+ * @param supa admin client
+ * @param {{contactId: string, subject?: string, content?: string, senderEmail?: string}} msg
+ * @param {{alert?: (text: string) => Promise<any>}} [opts] alert hook; omit to stay silent
+ */
+export async function applyEmailOptOut(supa, msg, opts = {}) {
+  const { contactId, subject, content, senderEmail } = msg || {};
+  if (!contactId) return { applied: false, reason: 'no matched contact' };
+
+  const optOut = detectEmailOptOut({ subject, body: content });
+  if (!optOut) return { applied: false, reason: 'no opt-out keyword' };
+
+  try {
+    const { data: before } = await supa.from('leads')
+      .select('first_name, last_name, email, email_opt_out')
+      .eq('id', contactId).maybeSingle();
+    if (!before) return { applied: false, reason: 'contact vanished' };
+    if (before.email_opt_out) return { applied: false, reason: 'already opted out', match: optOut };
+
+    const { error: updErr } = await supa.from('leads')
+      .update({ email_opt_out: true, updated_at: new Date().toISOString() })
+      .eq('id', contactId);
+    if (updErr) return { applied: false, reason: `update failed: ${updErr.message}` };
+
+    // The event IS the compliance record — who, when, and the words they used.
+    // updated_at alone proves nothing later. Best-effort so a failure here can
+    // never make the opt-out itself fail, but the reason is returned rather
+    // than swallowed, so a rejected insert is visible instead of silent.
+    const event = {
+      lead_id:    contactId,
+      event_type: 'email_opt_out',
+      source:     'inbound_email',
+      event_data: {
+        via:     'reply keyword',
+        phrase:  optOut.phrase,
+        where:   optOut.where,
+        subject: subject || null,
+        from:    senderEmail || null
+      }
+    };
+    const { error: evtErr } = await supa.from('lead_events').insert(event);
+
+    const who = [before.first_name, before.last_name].filter(Boolean).join(' ')
+              || before.email || senderEmail || 'A contact';
+    const text = `\u270B ${who} replied "${optOut.phrase}" — unsubscribed from email automatically. `
+               + 'They can still be called or texted; open their card to change that.';
+    if (typeof opts.alert === 'function') { try { await opts.alert(text); } catch (_) {} }
+
+    return { applied: true, match: optOut, who, alert: text, event, event_error: evtErr ? evtErr.message : null };
+  } catch (e) {
+    return { applied: false, reason: `threw: ${e && e.message}` };
+  }
+}
