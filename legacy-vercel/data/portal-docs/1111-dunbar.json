@@ -5,15 +5,15 @@
     "scope": "property",
     "visibility": "seller",
     "key": "1111-dunbar-commercial-and-residential-income-listing-agreement-1225",
-    "rev": "0164a03cd2b2cac000000029e854303"
+    "rev": "0165aaebcb40e0e000000029e854303"
   },
   {
     "name": "[ESD] Exempt Seller Disclosure",
     "url": "/docs/1111-dunbar/esd-exempt-seller-disclosure.pdf",
     "scope": "transaction",
-    "visibility": "seller",
+    "visibility": "both",
     "key": "1111-dunbar-esd-exempt-seller-disclosure",
-    "rev": "0164a55dc28abbc000000029e854303"
+    "rev": "0165aaebcb40e11000000029e854303"
   },
   {
     "name": "Modification of Terms, Listing Agreement 1 625",
@@ -21,22 +21,22 @@
     "scope": "property",
     "visibility": "seller",
     "key": "1111-dunbar-modification-of-terms-listing-agreement-1-625",
-    "rev": "0164a7aaa6c0526000000029e854303"
+    "rev": "0165aaebcb40e12000000029e854303"
   },
   {
     "name": "[TDS] Real Estate Transfer Disclosure Statement",
     "url": "/docs/1111-dunbar/tds-real-estate-transfer-disclosure-statement.pdf",
     "scope": "property",
-    "visibility": "seller",
+    "visibility": "both",
     "key": "1111-dunbar-tds-real-estate-transfer-disclosure-statement",
-    "rev": "0164a54a3d2d9f2000000029e854303"
+    "rev": "0165aaebcb40e10000000029e854303"
   },
   {
     "name": "Trust Advisory 625",
     "url": "/docs/1111-dunbar/trust-advisory-625.pdf",
     "scope": "transaction",
-    "visibility": "seller",
+    "visibility": "both",
     "key": "1111-dunbar-trust-advisory-625",
-    "rev": "0164a03cd2b2cad000000029e854303"
+    "rev": "0165aaebcb40e0f000000029e854303"
   }
 ]
